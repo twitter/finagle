@@ -232,18 +232,6 @@
       </span>
       </h4>
       <p class="shortcomment cmt">Add a cookie</p><div class="fullcomment"><div class="comment cmt"><p>Add a cookie</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.Message" class="extype" href="Message.html">Message</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#addHeader" data-isabs="false">
-      <a id="addHeader(String,AnyRef):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">addHeader</span><span class="params">(<span name="name">name: String</span>, <span name="value">value: AnyRef</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.Message#allow" data-isabs="false">
       <a id="allow:Option[String]"></a>
       <h4 class="signature">
@@ -388,18 +376,6 @@
       </span>
       </h4>
       <p class="shortcomment cmt">Clear content (set to &quot;&quot;).</p><div class="fullcomment"><div class="comment cmt"><p>Clear content (set to &quot;&quot;).</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.Message" class="extype" href="Message.html">Message</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#clearHeaders" data-isabs="false">
-      <a id="clearHeaders():Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">clearHeaders</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
@@ -415,18 +391,18 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#containsHeader" data-isabs="false">
-      <a id="containsHeader(String):Boolean"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.http.Message#close" data-isabs="false">
+      <a id="close():Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">containsHeader</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">close</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
+      <p class="shortcomment cmt">End the response stream.</p><div class="fullcomment"><div class="comment cmt"><p>End the response stream.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.Message" class="extype" href="Message.html">Message</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.Request#containsParam" data-isabs="false">
       <a id="containsParam(String):Boolean"></a>
       <h4 class="signature">
@@ -772,54 +748,6 @@ In a response, it uses the Set-Cookie headers.
       </span>
       </h4>
       <p class="shortcomment cmt">Get iterator over Cookies</p><div class="fullcomment"><div class="comment cmt"><p>Get iterator over Cookies</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.Message" class="extype" href="Message.html">Message</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeader" data-isabs="false">
-      <a id="getHeader(String):String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">getHeader</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: String</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeaderNames" data-isabs="false">
-      <a id="getHeaderNames():Set[String]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">getHeaderNames</span><span class="params">()</span><span class="result">: <span name="java.util.Set" class="extype">Set</span>[String]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeaders" data-isabs="false">
-      <a id="getHeaders():List[Entry[String, String]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">getHeaders</span><span class="params">()</span><span class="result">: <span name="java.util.List" class="extype">List</span>[<span name="java.util.Map.Entry" class="extype">Entry</span>[String, String]]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeaders" data-isabs="false">
-      <a id="getHeaders(String):List[String]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">getHeaders</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: <span name="java.util.List" class="extype">List</span>[String]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHttpMessage" data-isabs="false">
       <a id="getHttpMessage():HttpMessage"></a>
       <h4 class="signature">
@@ -1074,18 +1002,30 @@ users should use withInputStream.)
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Proxy → AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.Message#headers" data-isabs="false">
-      <a id="headers:HeaderMap"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.http.Message#headerMap" data-isabs="false">
+      <a id="headerMap:HeaderMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">headers</span><span class="result">: <a name="com.twitter.finagle.http.HeaderMap" class="extype" href="HeaderMap.html">HeaderMap</a></span>
+        <span class="name">headerMap</span><span class="result">: <a name="com.twitter.finagle.http.HeaderMap" class="extype" href="HeaderMap.html">HeaderMap</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.Message" class="extype" href="Message.html">Message</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#headers" data-isabs="false">
+      <a id="headers():HttpHeaders"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">headers</span><span class="params">()</span><span class="result">: <span name="org.jboss.netty.handler.codec.http.HttpHeaders" class="extype">HttpHeaders</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.Message#host" data-isabs="false">
       <a id="host:Option[String]"></a>
       <h4 class="signature">
@@ -1372,6 +1312,21 @@ preserved, though may not be appropriate for the new media type.
                 <span class="name">@BeanProperty</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.Message#reader" data-isabs="false">
+      <a id="reader:Reader"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">reader</span><span class="result">: <span name="com.twitter.io.Reader" class="extype">Reader</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">A read-only handle to the internal stream of bytes, representing the
+message body.</p><div class="fullcomment"><div class="comment cmt"><p>A read-only handle to the internal stream of bytes, representing the
+message body. See com.twitter.util.Reader for more information.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.Message" class="extype" href="Message.html">Message</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.Message#referer" data-isabs="false">
       <a id="referer:Option[String]"></a>
       <h4 class="signature">
@@ -1453,18 +1408,6 @@ preserved, though may not be appropriate for the new media type.
       </span>
       </h4>
       <p class="shortcomment cmt">Remove a cookie</p><div class="fullcomment"><div class="comment cmt"><p>Remove a cookie</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.Message" class="extype" href="Message.html">Message</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#removeHeader" data-isabs="false">
-      <a id="removeHeader(String):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">removeHeader</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.Request#response" data-isabs="false">
       <a id="response:Response"></a>
       <h4 class="signature">
@@ -1609,30 +1552,6 @@ preserved, though may not be appropriate for the new media type.
       </span>
       </h4>
       <p class="shortcomment cmt">Set Content-Type header to application/json;charset=utf-8</p><div class="fullcomment"><div class="comment cmt"><p>Set Content-Type header to application/json;charset=utf-8</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.Message" class="extype" href="Message.html">Message</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#setHeader" data-isabs="false">
-      <a id="setHeader(String,java.lang.Iterable[_]):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">setHeader</span><span class="params">(<span name="name">name: String</span>, <span name="values">values: java.lang.Iterable[_]</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#setHeader" data-isabs="false">
-      <a id="setHeader(String,AnyRef):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">setHeader</span><span class="params">(<span name="name">name: String</span>, <span name="value">value: AnyRef</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpRequestProxy#setMethod" data-isabs="false">
       <a id="setMethod(HttpMethod):Unit"></a>
       <h4 class="signature">
@@ -1874,7 +1793,21 @@ and then call setContent() with the underlying buffer.)
         <span class="name">write</span><span class="params">(<span name="buffer">buffer: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Append ChannelBuffer to content.</p><div class="fullcomment"><div class="comment cmt"><p>Append ChannelBuffer to content.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.Message" class="extype" href="Message.html">Message</a></dd></dl></div>
+      <p class="shortcomment cmt">Append ChannelBuffer to content.</p><div class="fullcomment"><div class="comment cmt"><p>Append ChannelBuffer to content.</p><p>If <code>isChunked</code> then multiple writes must be composed using <code>writer</code> and
+<code>flatMap</code> to have the appropriate backpressure semantics.</p><p>Attempting to <code>write</code> after calling <code>close</code> will result in a thrown
+com.twitter.util.Reader.ReaderDiscarded.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.Message" class="extype" href="Message.html">Message</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[BufReader.ReaderDiscarded]</span>
+    </span>)</span>
+              
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[IllegalStateException]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.Message#write" data-isabs="false">
       <a id="write(Array[Byte]):Unit"></a>
       <h4 class="signature">
@@ -1899,6 +1832,21 @@ and then call setContent() with the underlying buffer.)
       </span>
       </h4>
       <p class="shortcomment cmt">Append string to content.</p><div class="fullcomment"><div class="comment cmt"><p>Append string to content.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.Message" class="extype" href="Message.html">Message</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.Message#writer" data-isabs="false">
+      <a id="writer:Writer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">writer</span><span class="result">: <span name="com.twitter.io.Writer" class="extype">Writer</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">A write-only handle to the internal stream of bytes, representing the
+message body.</p><div class="fullcomment"><div class="comment cmt"><p>A write-only handle to the internal stream of bytes, representing the
+message body. See com.twitter.util.Writer for more information.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.Message" class="extype" href="Message.html">Message</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.Message#wwwAuthenticate" data-isabs="false">
       <a id="wwwAuthenticate:Option[String]"></a>
       <h4 class="signature">
@@ -1952,51 +1900,156 @@ and then call setContent() with the underlying buffer.)
 
         <div class="values members" id="values">
               <h3>Deprecated Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getContentLength" data-isabs="false">
-      <a id="getContentLength(Long):Long"></a>
+              <ol><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#addHeader" data-isabs="false">
+      <a id="addHeader(String,AnyRef):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.1.5) deprecated in netty">getContentLength</span><span class="params">(<span name="defaultValue">defaultValue: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="scala.Long" class="extype">Long</span></span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">addHeader</span><span class="params">(<span name="name">name: String</span>, <span name="value">value: AnyRef</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.1.5)</i> deprecated in netty</p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getContentLength" data-isabs="false">
-      <a id="getContentLength():Long"></a>
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#clearHeaders" data-isabs="false">
+      <a id="clearHeaders():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.1.5) deprecated in netty">getContentLength</span><span class="params">()</span><span class="result">: <span name="scala.Long" class="extype">Long</span></span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">clearHeaders</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.1.5)</i> deprecated in netty</p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#isKeepAlive" data-isabs="false">
-      <a id="isKeepAlive():Boolean"></a>
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#containsHeader" data-isabs="false">
+      <a id="containsHeader(String):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.1.5) deprecated in netty">isKeepAlive</span><span class="params">()</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">containsHeader</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.1.5)</i> deprecated in netty</p></dd></dl></div>
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeader" data-isabs="false">
+      <a id="getHeader(String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">getHeader</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeaderNames" data-isabs="false">
+      <a id="getHeaderNames():Set[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">getHeaderNames</span><span class="params">()</span><span class="result">: <span name="java.util.Set" class="extype">Set</span>[String]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeaders" data-isabs="false">
+      <a id="getHeaders():List[Entry[String, String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">getHeaders</span><span class="params">()</span><span class="result">: <span name="java.util.List" class="extype">List</span>[<span name="java.util.Map.Entry" class="extype">Entry</span>[String, String]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeaders" data-isabs="false">
+      <a id="getHeaders(String):List[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">getHeaders</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: <span name="java.util.List" class="extype">List</span>[String]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#removeHeader" data-isabs="false">
+      <a id="removeHeader(String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">removeHeader</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#setHeader" data-isabs="false">
+      <a id="setHeader(String,java.lang.Iterable[_]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">setHeader</span><span class="params">(<span name="name">name: String</span>, <span name="values">values: java.lang.Iterable[_]</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#setHeader" data-isabs="false">
+      <a id="setHeader(String,AnyRef):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">setHeader</span><span class="params">(<span name="name">name: String</span>, <span name="value">value: AnyRef</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
     </li></ol>
             </div>
         </div>

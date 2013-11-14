@@ -194,6 +194,21 @@ argument is passed in.</p><p>Eval throws exceptions upon failure to parse the na
 on failure to scheme lookup. Since names are late bound,
 binding failures are deferred.
 </p></div></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Resolver#evalLabeled" data-isabs="false">
+      <a id="evalLabeled(String):(Name, String)"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">evalLabeled</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="result">: (<a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a>, String)</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Parse and evaluate the argument into a (Name, label: String) tuple.</p><div class="fullcomment"><div class="comment cmt"><p>Parse and evaluate the argument into a (Name, label: String) tuple.
+Arguments are parsed with the same grammar as in <code>eval</code>. If a label is not
+provided (i.e. no &quot;label=<address>"), then the empty string is returned.
+</p></div></div>
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
       <h4 class="signature">
@@ -387,12 +402,12 @@ precedes the name of the address to be resolved, separated by
 an exclamation mark (&quot;bang&quot;). For example: inet!twitter.com:80
 resolves the name &quot;twitter.com:80&quot; using the &quot;inet&quot; resolver. If no
 resolver name is present, the inet resolver is used.</p><p>Names resolved by this mechanism are also a
-<a name="com.twitter.finagle.NamedGroup" class="extype" href="NamedGroup.html">NamedGroup</a>. By default, this name is
+<a name="com.twitter.finagle.LabelledGroup" class="extype" href="LabelledGroup.html">LabelledGroup</a>. By default, this name is
 simply the <code>addr</code> string, but it can be overriden by prefixing
 a name separated by an equals sign from the rest of the addr.
 For example, the addr &quot;www=inet!google.com:80&quot; resolves
 &quot;google.com:80&quot; with the inet resolver, but the returned group's
-<a name="com.twitter.finagle.NamedGroup" class="extype" href="NamedGroup.html">NamedGroup</a> name is &quot;www&quot;.
+<a name="com.twitter.finagle.LabelledGroup" class="extype" href="LabelledGroup.html">LabelledGroup</a> name is &quot;www&quot;.
 </p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               

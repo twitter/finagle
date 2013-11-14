@@ -138,7 +138,7 @@
       </span>
       </h4>
       <p class="shortcomment cmt">Appends value at the given key.</p><div class="fullcomment"><div class="comment cmt"><p>Appends value at the given key. If key doesn't exist,
-behavior is similar to SET command</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>length of string after append operation
+behavior is similar to SET command</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">value</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>length of string after append operation
 </p></dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
@@ -223,7 +223,7 @@ values) and store the result in the destination key.
       </span>
       </h4>
       <p class="shortcomment cmt">Decrements number stored at key by given amount.</p><div class="fullcomment"><div class="comment cmt"><p>Decrements number stored at key by given amount. If key doesn't
-exist, value is set to 0 before the operation</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>value after decrement. Error if key contains value
+exist, value is set to 0 before the operation</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">amount</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>value after decrement. Error if key contains value
 of the wrong type
 </p></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
@@ -315,7 +315,7 @@ of the wrong type
         <span class="name">getRange</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="start">start: <span name="scala.Long" class="extype">Long</span></span>, <span name="end">end: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Gets the substring of the value associated with given key</p><div class="fullcomment"><div class="comment cmt"><p>Gets the substring of the value associated with given key</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>substring, or none if key doesn't exist
+      <p class="shortcomment cmt">Gets the substring of the value associated with given key</p><div class="fullcomment"><div class="comment cmt"><p>Gets the substring of the value associated with given key</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">start</dt><dd class="cmt"></dd><dt class="param">end</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>substring, or none if key doesn't exist
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#getSet" data-isabs="false">
       <a id="getSet(ChannelBuffer,ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
@@ -493,7 +493,8 @@ time is specified in milliseconds instead of seconds.
       </span>
       </h4>
       <p class="shortcomment cmt">Sets the given value to key.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the given value to key. If a value already exists for the key,
-the value is overwritten with the new value</p></div></div>
+the value is overwritten with the new value</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">value</dt><dd class="cmt"><p>
+</p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#setBit" data-isabs="false">
       <a id="setBit(ChannelBuffer,Int,Int):Future[Long]"></a>
       <h4 class="signature">

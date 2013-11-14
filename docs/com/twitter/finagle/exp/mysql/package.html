@@ -61,18 +61,6 @@
       </h4>
       <p class="comment cmt">Defines a Row where the data is presumed to be encoded with the
 mysql binary protocol.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.BooleanValue" data-isabs="false">
-      <a id="BooleanValue:BooleanValue"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="BooleanValue.html"><span class="name">BooleanValue</span></a><span class="params">(<span name="b">b: Boolean</span>)</span><span class="result"> extends Value with Product with Serializable</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ByteValue" data-isabs="false">
       <a id="ByteValue:ByteValue"></a>
       <h4 class="signature">
@@ -158,18 +146,6 @@ mysql binary protocol.</p>
       </h4>
       <p class="comment cmt">A command request is a request initiated by the client
 and has a cmd byte associated with it.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.DateValue" data-isabs="false">
-      <a id="DateValue:DateValue"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="DateValue.html"><span class="name">DateValue</span></a><span class="params">(<span name="d">d: Date</span>)</span><span class="result"> extends Value with Product with Serializable</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Decoder" data-isabs="true">
       <a id="Decoder:Decoder[T]"></a>
       <h4 class="signature">
@@ -239,7 +215,7 @@ a prepared statement.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Field.html"><span class="name">Field</span></a><span class="params">(<span name="catalog">catalog: String</span>, <span name="db">db: String</span>, <span name="table">table: String</span>, <span name="origTable">origTable: String</span>, <span name="name">name: String</span>, <span name="origName">origName: String</span>, <span name="charset">charset: Short</span>, <span name="displayLength">displayLength: Int</span>, <span name="fieldType">fieldType: Int</span>, <span name="flags">flags: Short</span>, <span name="decimals">decimals: Byte</span>)</span><span class="result"> extends Result with Product with Serializable</span>
+        <a href="Field.html"><span class="name">Field</span></a><span class="params">(<span name="catalog">catalog: String</span>, <span name="db">db: String</span>, <span name="table">table: String</span>, <span name="origTable">origTable: String</span>, <span name="name">name: String</span>, <span name="origName">origName: String</span>, <span name="charset">charset: Short</span>, <span name="displayLength">displayLength: Int</span>, <span name="fieldType">fieldType: Short</span>, <span name="flags">flags: Short</span>, <span name="decimals">decimals: Byte</span>)</span><span class="result"> extends Result with Product with Serializable</span>
       </span>
       </h4>
       
@@ -337,7 +313,7 @@ parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="LostSyncException.html"><span class="name">LostSyncException</span></a><span class="params">(<span name="underlying">underlying: Throwable</span>)</span><span class="result"> extends Exception with Product with Serializable</span>
+        <a href="LostSyncException.html"><span class="name">LostSyncException</span></a><span class="params">(<span name="underlying">underlying: Throwable</span>)</span><span class="result"> extends RuntimeException with Product with Serializable</span>
       </span>
       </h4>
       
@@ -403,31 +379,20 @@ passed in query string.</p>
       </h4>
       <p class="comment cmt">A QueryRequest is used to send the server a text-based query that
 is executed immediately.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.RawBinaryValue" data-isabs="false">
-      <a id="RawBinaryValue:RawBinaryValue"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.RawValue" data-isabs="false">
+      <a id="RawValue:RawValue"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="RawBinaryValue.html"><span class="name">RawBinaryValue</span></a><span class="params">(<span name="bytes">bytes: Array[Byte]</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+        <a href="RawValue.html"><span class="name">RawValue</span></a><span class="params">(<span name="typ">typ: Short</span>, <span name="charset">charset: Short</span>, <span name="isBinary">isBinary: Boolean</span>, <span name="bytes">bytes: Array[Byte]</span>)</span><span class="result"> extends Value with Product with Serializable</span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.RawStringValue" data-isabs="false">
-      <a id="RawStringValue:RawStringValue"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="RawStringValue.html"><span class="name">RawStringValue</span></a><span class="params">(<span name="s">s: String</span>)</span><span class="result"> extends Value with Product with Serializable</span>
-      </span>
-      </h4>
-      <p class="comment cmt">Raw values are returned when the value is not supported, that is,
-the decode method for the type is not implemented.</p>
+      <p class="comment cmt">A RawValue contains the raw bytes that represent
+a value and enough meta data to decode the
+bytes.</p>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Request" data-isabs="true">
       <a id="Request:Request"></a>
       <h4 class="signature">
@@ -476,7 +441,7 @@ the decode method for the type is not implemented.</p>
       </span>
       </h4>
       <p class="comment cmt">Defines an interface that allows for easily
-reading the values in a row.</p>
+reading the values in a mysql row.</p>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ServerError" data-isabs="false">
       <a id="ServerError:ServerError"></a>
       <h4 class="signature">
@@ -539,18 +504,6 @@ text-based protocol.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.TimestampValue" data-isabs="false">
-      <a id="TimestampValue:TimestampValue"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="TimestampValue.html"><span class="name">TimestampValue</span></a><span class="params">(<span name="t">t: Timestamp</span>)</span><span class="result"> extends Value with Product with Serializable</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.UseRequest" data-isabs="false">
       <a id="UseRequest:UseRequest"></a>
       <h4 class="signature">
@@ -574,8 +527,8 @@ text-based protocol.</p>
         <a href="Value.html"><span class="name">Value</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
-      <p class="comment cmt">Defines a Value ADT that represents values
-contained in a mysql Row.</p>
+      <p class="comment cmt">Defines a Value ADT that represents the domain of values
+received from a mysql server.</p>
     </li></ol>
             </div>
 
@@ -583,7 +536,19 @@ contained in a mysql Row.</p>
 
         <div class="values members" id="values">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.exp.mysql.Capability" data-isabs="false">
+              <ol><li visbl="pub" name="com.twitter.finagle.exp.mysql.BigDecimalValue" data-isabs="false">
+      <a id="BigDecimalValue:BigDecimalValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="BigDecimalValue$.html"><span class="name">BigDecimalValue</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Capability" data-isabs="false">
       <a id="Capability:Capability"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -678,7 +643,7 @@ CloseRequest
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="DateValue$.html"><span class="name">DateValue</span></a><span class="result"> extends Serializable</span>
+        <a href="DateValue$.html"><span class="name">DateValue</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       
@@ -706,9 +671,7 @@ contains any warnings and the server status.</p>
         <a href="EmptyValue$.html"><span class="name">EmptyValue</span></a><span class="result"> extends Value with Product with Serializable</span>
       </span>
       </h4>
-      <p class="comment cmt">&quot;&quot; -&gt; EmptyValue
-SQL NULL -&gt; NullValue
-</p>
+      
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Error" data-isabs="false">
       <a id="Error:Error"></a>
       <h4 class="signature">
@@ -832,32 +795,6 @@ COM_STMT_PREPARE.</p>
       </h4>
       <p class="comment cmt">Resultset returned from the server containing field definitions and
 rows.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.SQLZeroDate" data-isabs="false">
-      <a id="SQLZeroDate:SQLZeroDate"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="SQLZeroDate$.html"><span class="name">SQLZeroDate</span></a><span class="result"> extends Date with Product with Serializable</span>
-      </span>
-      </h4>
-      <p class="comment cmt">Date object that can appropriately
-represent MySQL zero Date.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.SQLZeroTimestamp" data-isabs="false">
-      <a id="SQLZeroTimestamp:SQLZeroTimestamp"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="SQLZeroTimestamp$.html"><span class="name">SQLZeroTimestamp</span></a><span class="result"> extends Timestamp with Product with Serializable</span>
-      </span>
-      </h4>
-      <p class="comment cmt">Timestamp object that can appropriately
-represent MySQL zero Timestamp.</p>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.TimestampValue" data-isabs="false">
       <a id="TimestampValue:TimestampValue"></a>
       <h4 class="signature">
@@ -866,7 +803,7 @@ represent MySQL zero Timestamp.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="TimestampValue$.html"><span class="name">TimestampValue</span></a><span class="result"> extends Serializable</span>
+        <a href="TimestampValue$.html"><span class="name">TimestampValue</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       
@@ -882,19 +819,6 @@ represent MySQL zero Timestamp.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Value" data-isabs="false">
-      <a id="Value:Value"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Value$.html"><span class="name">Value</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      <p class="comment cmt">Defines convenient methods for decoding bytes
-based on type and wrapping them in their appropriate Value.</p>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport" data-isabs="false">
       <a id="transport:transport"></a>
       <h4 class="signature">

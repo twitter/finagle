@@ -344,7 +344,7 @@
         <span class="name">zAdd</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="score">score: <span name="java.lang.Double" class="extype">Double</span></span>, <span name="member">member: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Add a member with score to a sorted set</p><div class="fullcomment"><div class="comment cmt"><p>Add a member with score to a sorted set</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of elements added to sorted set
+      <p class="shortcomment cmt">Add a member with score to a sorted set</p><div class="fullcomment"><div class="comment cmt"><p>Add a member with score to a sorted set</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">score</dt><dd class="cmt"></dd><dt class="param">member</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>Number of elements added to sorted set
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zAddMulti" data-isabs="false">
       <a id="zAddMulti(ChannelBuffer,Seq[(Double, ChannelBuffer)]):Future[Long]"></a>
@@ -357,7 +357,7 @@
         <span class="name">zAddMulti</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="members">members: Seq[(<span name="java.lang.Double" class="extype">Double</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>)]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Adds member, score pairs to sorted set</p><div class="fullcomment"><div class="comment cmt"><p>Adds member, score pairs to sorted set</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of elements added to sorted set</p></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Adding multiple elements only works with redis 2.4 or later.
+      <p class="shortcomment cmt">Adds member, score pairs to sorted set</p><div class="fullcomment"><div class="comment cmt"><p>Adds member, score pairs to sorted set</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">members</dt><dd class="cmt"><p>sequence of (score, member) tuples</p></dd><dt>returns</dt><dd class="cmt"><p>Number of elements added to sorted set</p></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Adding multiple elements only works with redis 2.4 or later.
 </p></span></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zCard" data-isabs="false">
       <a id="zCard(ChannelBuffer):Future[Long]"></a>
@@ -384,7 +384,7 @@ or 0 if key does not exist
         <span class="name">zCount</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="min">min: <a name="com.twitter.finagle.redis.protocol.ZInterval" class="extype" href="protocol/ZInterval.html">ZInterval</a></span>, <span name="max">max: <a name="com.twitter.finagle.redis.protocol.ZInterval" class="extype" href="protocol/ZInterval.html">ZInterval</a></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Gets number of elements in sorted set with score between min and max</p><div class="fullcomment"><div class="comment cmt"><p>Gets number of elements in sorted set with score between min and max</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of elements between min and max in sorted set
+      <p class="shortcomment cmt">Gets number of elements in sorted set with score between min and max</p><div class="fullcomment"><div class="comment cmt"><p>Gets number of elements in sorted set with score between min and max</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">min</dt><dd class="cmt"></dd><dt class="param">max</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>Number of elements between min and max in sorted set
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zIncrBy" data-isabs="false">
       <a id="zIncrBy(ChannelBuffer,Double,ChannelBuffer):Future[Option[Double]]"></a>
@@ -399,7 +399,7 @@ or 0 if key does not exist
       </h4>
       <p class="shortcomment cmt">Increment the member in sorted set key by amount.</p><div class="fullcomment"><div class="comment cmt"><p>Increment the member in sorted set key by amount.
 Returns an option, None if the member is not found, or the set is empty, or the new value.
-Throws an exception if the key refers to a structure that is not a sorted set.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the new value of the incremented member
+Throws an exception if the key refers to a structure that is not a sorted set.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">amount</dt><dd class="cmt"></dd><dt class="param">member</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the new value of the incremented member
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRange" data-isabs="false">
       <a id="zRange(ChannelBuffer,Long,Long,Boolean):Future[Either[ZRangeResults, Seq[ChannelBuffer]]]"></a>
@@ -441,7 +441,7 @@ Results are limited by offset and count</p></div><dl class="paramcmts block"><dt
         <span class="name">zRank</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="member">member: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Long" class="extype">Long</span>]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Gets the rank of the member in the sorted set, or None if it doesn't exist, from low to high.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the rank of the member in the sorted set, or None if it doesn't exist, from low to high.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the rank of the member
+      <p class="shortcomment cmt">Gets the rank of the member in the sorted set, or None if it doesn't exist, from low to high.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the rank of the member in the sorted set, or None if it doesn't exist, from low to high.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">member</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the rank of the member
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRem" data-isabs="false">
       <a id="zRem(ChannelBuffer,Seq[ChannelBuffer]):Future[Long]"></a>
@@ -454,7 +454,7 @@ Results are limited by offset and count</p></div><dl class="paramcmts block"><dt
         <span class="name">zRem</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="members">members: Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Removes specified member(s) from sorted set at key</p><div class="fullcomment"><div class="comment cmt"><p>Removes specified member(s) from sorted set at key</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of members removed from sorted set
+      <p class="shortcomment cmt">Removes specified member(s) from sorted set at key</p><div class="fullcomment"><div class="comment cmt"><p>Removes specified member(s) from sorted set at key</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">members</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>Number of members removed from sorted set
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRemRangeByRank" data-isabs="false">
       <a id="zRemRangeByRank(ChannelBuffer,Long,Long):Future[Long]"></a>
@@ -467,7 +467,7 @@ Results are limited by offset and count</p></div><dl class="paramcmts block"><dt
         <span class="name">zRemRangeByRank</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="start">start: <span name="java.lang.Long" class="extype">Long</span></span>, <span name="stop">stop: <span name="java.lang.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Removes members from sorted set by sort order, from start to stop, inclusive.</p><div class="fullcomment"><div class="comment cmt"><p>Removes members from sorted set by sort order, from start to stop, inclusive.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of members removed from sorted set.
+      <p class="shortcomment cmt">Removes members from sorted set by sort order, from start to stop, inclusive.</p><div class="fullcomment"><div class="comment cmt"><p>Removes members from sorted set by sort order, from start to stop, inclusive.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">start</dt><dd class="cmt"></dd><dt class="param">stop</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>Number of members removed from sorted set.
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRemRangeByScore" data-isabs="false">
       <a id="zRemRangeByScore(ChannelBuffer,ZInterval,ZInterval):Future[Long]"></a>
@@ -480,7 +480,7 @@ Results are limited by offset and count</p></div><dl class="paramcmts block"><dt
         <span class="name">zRemRangeByScore</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="min">min: <a name="com.twitter.finagle.redis.protocol.ZInterval" class="extype" href="protocol/ZInterval.html">ZInterval</a></span>, <span name="max">max: <a name="com.twitter.finagle.redis.protocol.ZInterval" class="extype" href="protocol/ZInterval.html">ZInterval</a></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Removes members from sorted set by score, from min to max, inclusive.</p><div class="fullcomment"><div class="comment cmt"><p>Removes members from sorted set by score, from min to max, inclusive.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of members removed from sorted set.
+      <p class="shortcomment cmt">Removes members from sorted set by score, from min to max, inclusive.</p><div class="fullcomment"><div class="comment cmt"><p>Removes members from sorted set by score, from min to max, inclusive.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">min</dt><dd class="cmt"></dd><dt class="param">max</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>Number of members removed from sorted set.
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRevRange" data-isabs="false">
       <a id="zRevRange(ChannelBuffer,Long,Long,Boolean):Future[Either[ZRangeResults, Seq[ChannelBuffer]]]"></a>
@@ -525,7 +525,7 @@ Results are limited by offset and count</p></div><dl class="paramcmts block"><dt
         <span class="name">zRevRank</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="member">member: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Long" class="extype">Long</span>]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Gets the rank of member in the sorted set, or None if it doesn't exist, from high to low.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the rank of member in the sorted set, or None if it doesn't exist, from high to low.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the rank of the member
+      <p class="shortcomment cmt">Gets the rank of member in the sorted set, or None if it doesn't exist, from high to low.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the rank of member in the sorted set, or None if it doesn't exist, from high to low.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">member</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the rank of the member
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zScore" data-isabs="false">
       <a id="zScore(ChannelBuffer,ChannelBuffer):Future[Option[Double]]"></a>

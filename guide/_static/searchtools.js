@@ -550,7 +550,7 @@ var Search = {
     for (i = 0; i < searchterms.length; i++) {
       var word = searchterms[i];
       // no match but word was a required one
-      if (!(files = terms[word]))
+      if ((files = terms[word]) === undefined)
         break;
       if (files.length === undefined) {
         files = [files];

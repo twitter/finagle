@@ -383,7 +383,7 @@ been updated.
       </span>
       </h4>
       <p class="shortcomment cmt">Name the group <code>n</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Name the group <code>n</code>.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><code>this</code> mixed in with <code>NamedGroup</code>, named <code>n</code>
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><code>this</code> mixed in with <code>LabelledGroup</code>, named <code>n</code>
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Group" class="extype" href="../Group.html">Group</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
@@ -449,14 +449,14 @@ node data watcher previously registered got dropped, hence re-attache the data w
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>] </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Group" class="extype" href="../Group.html">Group</a></dd></dl></div>
     </li><li visbl="prt" name="com.twitter.finagle.memcached.ZookeeperCacheNodeGroup#set" data-isabs="false">
-      <a id="set:Var[Set[CacheNode]] with Updatable[Set[CacheNode]]"></a>
+      <a id="set:Var[Set[CacheNode]] with Updatable[Set[CacheNode]] with Extractable[Set[CacheNode]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">set</span><span class="result">: <span name="com.twitter.util.Var" class="extype">Var</span>[<span name="scala.collection.immutable.Set" class="extype">Set</span>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]] with <span name="com.twitter.util.Updatable" class="extype">Updatable</span>[<span name="scala.collection.immutable.Set" class="extype">Set</span>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]]</span>
+        <span class="name">set</span><span class="result">: <span name="com.twitter.util.Var" class="extype">Var</span>[<span name="scala.collection.immutable.Set" class="extype">Set</span>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]] with <span name="com.twitter.util.Updatable" class="extype">Updatable</span>[<span name="scala.collection.immutable.Set" class="extype">Set</span>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]] with <span name="com.twitter.util.Extractable" class="extype">Extractable</span>[<span name="scala.collection.immutable.Set" class="extype">Set</span>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>] </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ZookeeperCacheNodeGroup" class="extype" href="">ZookeeperCacheNodeGroup</a> → <a name="com.twitter.finagle.Group" class="extype" href="../Group.html">Group</a></dd></dl></div>

@@ -205,26 +205,26 @@
       </h4>
       
     </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.ReplyCodec#decodeMBulkLines" data-isabs="false">
-      <a id="decodeMBulkLines[T&lt;:AnyRef](Long,List[Reply],(List[Reply]) ⇒ T):NextStep"></a>
+      <a id="decodeMBulkLines(Long,List[(Long, List[Reply])],List[Reply]):NextStep"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">decodeMBulkLines</span><span class="tparams">[<span name="T">T &lt;: AnyRef</span>]</span><span class="params">(<span name="i">i: <span name="scala.Long" class="extype">Long</span></span>, <span name="lines">lines: List[<a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="Reply.html">Reply</a>]</span>, <span name="doneFn">doneFn: (List[<a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="Reply.html">Reply</a>]) ⇒ T</span>)</span><span class="result">: <a name="com.twitter.finagle.redis.naggati.NextStep" class="extype" href="../naggati/NextStep.html">NextStep</a></span>
+        <span class="name">decodeMBulkLines</span><span class="params">(<span name="i">i: <span name="scala.Long" class="extype">Long</span></span>, <span name="stack">stack: List[(<span name="scala.Long" class="extype">Long</span>, List[<a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="Reply.html">Reply</a>])]</span>, <span name="lines">lines: List[<a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="Reply.html">Reply</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.redis.naggati.NextStep" class="extype" href="../naggati/NextStep.html">NextStep</a></span>
       </span>
       </h4>
       
     </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.ReplyCodec#decodeMBulkReply" data-isabs="false">
-      <a id="decodeMBulkReply[T&lt;:AnyRef](Long,(List[Reply]) ⇒ T):NextStep"></a>
+      <a id="decodeMBulkReply(Long):NextStep"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">decodeMBulkReply</span><span class="tparams">[<span name="T">T &lt;: AnyRef</span>]</span><span class="params">(<span name="argCount">argCount: <span name="scala.Long" class="extype">Long</span></span>, <span name="doneFn">doneFn: (List[<a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="Reply.html">Reply</a>]) ⇒ T</span>)</span><span class="result">: <a name="com.twitter.finagle.redis.naggati.NextStep" class="extype" href="../naggati/NextStep.html">NextStep</a></span>
+        <span class="name">decodeMBulkReply</span><span class="params">(<span name="argCount">argCount: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <a name="com.twitter.finagle.redis.naggati.NextStep" class="extype" href="../naggati/NextStep.html">NextStep</a></span>
       </span>
       </h4>
       

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Finagle! &mdash; Finagle 6.7.2 documentation</title>
+    <title>Finagle! &mdash; Finagle 6.8.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.7.2',
+        VERSION:     '6.8.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.7.2 documentation" href="#" />
+    <link rel="top" title="Finagle 6.8.0 documentation" href="#" />
     <link rel="next" title="Quickstart" href="Quickstart.html" />
    
   
@@ -128,16 +128,69 @@ their behavior.</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ClientStack.html">Client Stack</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ClientStack.html#load-balancing">Load Balancing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ClientStack.html#connection-pooling">Connection Pooling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ClientStack.html#load-balancing">Load Balancing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ClientStack.html#minimumsetcluster">MinimumSetCluster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ClientStack.html#heapbalancer">HeapBalancer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ClientStack.html#connection-pooling">Connection Pooling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ClientStack.html#cachingpool">CachingPool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ClientStack.html#watermarkpool">WatermarkPool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ClientStack.html#reusingpool">ReusingPool</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="ClientStack.html#fail-fast">Fail Fast</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ClientStack.html#timeouts">Timeouts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ClientStack.html#retries">Retries</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Metrics.html">Metrics</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Metrics.html#connection-pool-stats">Connection Pool Stats</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Metrics.html#load-balancer-stats">Load Balancer Stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Metrics.html#public">Public</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#statsfilter">StatsFilter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#statsfactorywrapper">StatsFactoryWrapper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#handletimefilter">HandletimeFilter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#defaultserver">DefaultServer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Metrics.html#construction">Construction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#clientbuilder">ClientBuilder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#statsservicefactory">StatsServiceFactory</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Metrics.html#load-balancing">Load Balancing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#minimumsetcluster">MinimumSetCluster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#heapbalancer">HeapBalancer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Metrics.html#fail-fast">Fail Fast</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#failfastfactory">FailFastFactory</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Metrics.html#idle-apoptosis">Idle Apoptosis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#expiringservice">ExpiringService</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Metrics.html#rate-limiting">Rate Limiting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#ratelimitingfilter">RateLimitingFilter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#retryingfilter">RetryingFilter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Metrics.html#pooling">Pooling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#cachingpool">CachingPool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#watermarkpool">WatermarkPool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#reusingpool">ReusingPool</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Metrics.html#transport">Transport</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#clientchanneltransport">ClientChannelTransport</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#channelconnector">ChannelConnector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#serverbridge">ServerBridge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#channelrequeststatshandler">ChannelRequestStatsHandler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#channelstatshandler">ChannelStatsHandler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#idlechannelhandler">IdleChannelHandler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Metrics.html#idleconnectionfilter">IdleConnectionFilter</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a><ul>
@@ -153,11 +206,11 @@ their behavior.</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Finagle changelog</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#x">6.x</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id23">5.x</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id42">4.x</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id44">3.x</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id46">2.x</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id49">1.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id29">5.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id48">4.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id50">3.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id52">2.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id55">1.x</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a><ul>

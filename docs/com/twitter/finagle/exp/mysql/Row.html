@@ -30,7 +30,7 @@
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Defines an interface that allows for easily
-reading the values in a row.
+reading the values in a mysql row.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
@@ -67,18 +67,22 @@ reading the values in a row.
         <div class="values members" id="values">
               <h3>Abstract Value Members</h3>
               <ol><li visbl="pub" name="com.twitter.finagle.exp.mysql.Row#fields" data-isabs="true">
-      <a id="fields:Seq[Field]"></a>
+      <a id="fields:IndexedSeq[Field]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">fields</span><span class="result">: Seq[<a name="com.twitter.finagle.exp.mysql.Field" class="extype" href="Field.html">Field</a>]</span>
+        <span class="name">fields</span><span class="result">: IndexedSeq[<a name="com.twitter.finagle.exp.mysql.Field" class="extype" href="Field.html">Field</a>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Contains a Field object for each
-Column in the Row.</p>
+Column in the Row.</p><div class="fullcomment"><div class="comment cmt"><p>Contains a Field object for each
+Column in the Row. The data is 0-indexed
+so fields(0) contains the column meta-data
+for the first column in the Row.
+</p></div></div>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Row#indexOf" data-isabs="true">
       <a id="indexOf(String):Option[Int]"></a>
       <h4 class="signature">

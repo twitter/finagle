@@ -1,0 +1,134 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MinimumSetCluster &mdash; Finagle 6.8.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '6.8.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Finagle 6.8.0 documentation" href="../index.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="../_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">Finagle</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="minimumsetcluster">
+<h1>MinimumSetCluster<a class="headerlink" href="#minimumsetcluster" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt><strong>censored_add</strong></dt>
+<dd>a counter of the number of times there is an attempt to add a server that is already in the
+minimum set to the cluster</dd>
+<dt><strong>censored_rem</strong></dt>
+<dd>a counter of the number of times there is an attempt to remove a server that is guaranteed to be
+in the minimum set to the cluster</dd>
+<dt><strong>missing</strong></dt>
+<dd>a gauge of the number of servers in the bag-difference between the supplementary cluster and the minimum set.
+this should be the number of servers that would be missing if we only used the supplementary cluster</dd>
+<dt><strong>additional</strong></dt>
+<dd>a gauge of the number of servers in the bag-difference between the minimum set and the supplementary cluster.
+this should be the number of servers that would be missing if we only used the minimum set</dd>
+</dl>
+</div>
+<div class="section" id="heapbalancer">
+<h1>HeapBalancer<a class="headerlink" href="#heapbalancer" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt><strong>size</strong></dt>
+<dd>a gauge of the number of nodes in the heap</dd>
+<dt><strong>adds</strong></dt>
+<dd>a counter of the number of adds to the heap</dd>
+<dt><strong>removes</strong></dt>
+<dd>a counter of the number of removes to the heap</dd>
+<dt><strong>available</strong></dt>
+<dd>a gauge of the number of available nodes in the heap</dd>
+<dt><strong>load</strong></dt>
+<dd>a gauge of the total load over all nodes in the heap</dd>
+</dl>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="../index.html">
+  <img class="logo" src="../_static/governorlogo.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">MinimumSetCluster</a></li>
+<li><a class="reference internal" href="#heapbalancer">HeapBalancer</a></li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2013 Twitter, Inc.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  
+  </body>
+</html>

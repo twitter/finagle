@@ -31,8 +31,8 @@
       
       <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A service that dispatches incoming requests to registered handlers.
 In order to choose which handler to dispatch the request to, we take the path of the request and match it with
-the patterns of the pre-registered handlers. The pattern matching follows these rules:</p><ul><li>Patterns ending with &quot;/&quot; use prefix matching. Eg: the pattern &quot;foo/bar/&quot; matches these paths:
-           &quot;foo/bar&quot;, &quot;foo/bar/&quot;, &quot;foo/bar/baz&quot;, etc.
+the patterns of the pre-registered handlers. The pattern matching follows these rules:</p><ul><li>Patterns ending with &quot;/&quot; use exclusive prefix matching. Eg: the pattern &quot;foo/bar/&quot; matches these paths:
+           &quot;foo/bar/&quot;, &quot;foo/bar/baz&quot;, etc but NOT &quot;foo/bar&quot;
    Similarly, the pattern &quot;/&quot; matches all paths</li><li>Patterns not ending with &quot;/&quot; use exact matching. Eg: the pattern &quot;foo/bar&quot; ONLY matches this path:
            &quot;foo/bar&quot;</li><li>Special case:
      The pattern &quot;&quot; matches only &quot;/&quot; and &quot;&quot;</li></ul><p> NOTE: When multiple pattern matches exist, the longest pattern wins.
@@ -224,6 +224,18 @@ HttpRequest to the registered service; otherwise create a NOT_FOUND response
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a> → Closable</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
+      <a id="close(Duration):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">(<span name="after">after: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
       <a id="close():Future[Unit]"></a>
       <h4 class="signature">

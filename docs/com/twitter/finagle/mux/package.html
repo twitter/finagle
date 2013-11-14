@@ -151,6 +151,30 @@ Treq.</p></div></div>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.mux.package#NewSession" data-isabs="false">
+      <a id="NewSession:(Session) ⇒ Session"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">NewSession</span><span class="result"> = (<a name="com.twitter.finagle.mux.Session" class="extype" href="Session.html">Session</a>) ⇒ <a name="com.twitter.finagle.mux.Session" class="extype" href="Session.html">Session</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.mux.package" class="extype" href="package$.html">package</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.mux.SenderSession" data-isabs="false">
+      <a id="SenderSession:SenderSession"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SenderSession.html"><span class="name">SenderSession</span></a><span class="result"> extends Service[Buf, Buf] with Session with Closable</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.mux.ServerApplicationError" data-isabs="false">
       <a id="ServerApplicationError:ServerApplicationError"></a>
       <h4 class="signature">
@@ -175,6 +199,32 @@ Treq.</p></div></div>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.mux.Session" data-isabs="true">
+      <a id="Session:Session"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Session.html"><span class="name">Session</span></a><span class="result"> extends Service[Buf, Buf] with Closable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">An interface representing the RPC, message-passing, pinging, and
+draining facilities provided by a mux session.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.mux.SessionDispatcher" data-isabs="false">
+      <a id="SessionDispatcher:SessionDispatcher"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SessionDispatcher.html"><span class="name">SessionDispatcher</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">SessionDispatcher repeatedly calls recv() on transort, and dispatches the messages
+to the appropriate Session instance.</p>
     </li></ol>
             </div>
 
@@ -182,7 +232,19 @@ Treq.</p></div></div>
 
         <div class="values members" id="values">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.mux.RequestNackedException" data-isabs="false">
+              <ol><li visbl="pub" name="com.twitter.finagle.mux.ExhaustedTagsException" data-isabs="false">
+      <a id="ExhaustedTagsException:ExhaustedTagsException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ExhaustedTagsException$.html"><span class="name">ExhaustedTagsException</span></a><span class="result"> extends Exception with WriteException with NoStacktrace</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.mux.RequestNackedException" data-isabs="false">
       <a id="RequestNackedException:RequestNackedException"></a>
       <h4 class="signature">
       <span class="modifier_kind">

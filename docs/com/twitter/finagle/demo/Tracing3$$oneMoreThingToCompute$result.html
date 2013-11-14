@@ -64,7 +64,19 @@
 
         <div class="values members" id="values">
               <h3>Abstract Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result#success" data-isabs="true">
+              <ol><li visbl="pub" name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result#_passthroughFields" data-isabs="true">
+      <a id="_passthroughFields:Map[Short, TFieldBlob]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_passthroughFields</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[<span name="scala.Short" class="extype">Short</span>, <span name="com.twitter.scrooge.TFieldBlob" class="extype">TFieldBlob</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result#success" data-isabs="true">
       <a id="success:Option[String]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -193,14 +205,14 @@
               
         </dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result#copy" data-isabs="false">
-      <a id="copy(Option[String]):oneMoreThingToCompute$result"></a>
+      <a id="copy(Option[String],Map[Short, TFieldBlob]):oneMoreThingToCompute$result"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">copy</span><span class="params">(<span name="success">success: <span name="scala.Option" class="extype">Option</span>[String] = <span class="symbol"><span class="name"><a href="#success:Option[String]">this.success</a></span></span></span>)</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result" class="extype" href="">oneMoreThingToCompute$result</a></span>
+        <span class="name">copy</span><span class="params">(<span name="success">success: <span name="scala.Option" class="extype">Option</span>[String] = <span class="symbol"><span class="name"><a href="#success:Option[String]">this.success</a></span></span></span>, <span name="_passthroughFields">_passthroughFields: <span name="scala.collection.immutable.Map" class="extype">Map</span>[<span name="scala.Short" class="extype">Short</span>, <span name="com.twitter.scrooge.TFieldBlob" class="extype">TFieldBlob</span>] = <span class="symbol"><span class="name"><a href="#_passthroughFields:Map[Short, TFieldBlob]">this._passthroughFields</a></span></span></span>)</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result" class="extype" href="">oneMoreThingToCompute$result</a></span>
       </span>
       </h4>
       
@@ -255,6 +267,33 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result#getFieldBlob" data-isabs="false">
+      <a id="getFieldBlob(Short):Option[TFieldBlob]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getFieldBlob</span><span class="params">(<span name="_fieldId">_fieldId: <span name="scala.Short" class="extype">Short</span></span>)</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[<span name="com.twitter.scrooge.TFieldBlob" class="extype">TFieldBlob</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets a field value encoded as a binary blob using TCompactProtocol.</p><div class="fullcomment"><div class="comment cmt"><p>Gets a field value encoded as a binary blob using TCompactProtocol.  If the specified field
+is present in the passthrough map, that value is returend.  Otherwise, if the specified field
+is known and not optional and set to None, then the field is serialized and returned.
+</p></div></div>
+    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result#getFieldBlobs" data-isabs="false">
+      <a id="getFieldBlobs(TraversableOnce[Short]):Map[Short, TFieldBlob]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getFieldBlobs</span><span class="params">(<span name="ids">ids: TraversableOnce[<span name="scala.Short" class="extype">Short</span>]</span>)</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[<span name="scala.Short" class="extype">Short</span>, <span name="com.twitter.scrooge.TFieldBlob" class="extype">TFieldBlob</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Collects TCompactProtocol-encoded field values according to <code>getFieldBlob</code> into a map.</p>
     </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
@@ -363,6 +402,22 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result" class="extype" href="">oneMoreThingToCompute$result</a> → Product</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result#setField" data-isabs="false">
+      <a id="setField(TFieldBlob):oneMoreThingToCompute$result"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setField</span><span class="params">(<span name="_blob">_blob: <span name="com.twitter.scrooge.TFieldBlob" class="extype">TFieldBlob</span></span>)</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result" class="extype" href="">oneMoreThingToCompute$result</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets a field using a TCompactProtocol-encoded binary blob.</p><div class="fullcomment"><div class="comment cmt"><p>Sets a field using a TCompactProtocol-encoded binary blob.  If the field is a known
+field, the blob is decoded and the field is set to the decoded value.  If the field
+is unknown and passthrough fields are enabled, then the blob will be stored in
+_passthroughFields.
+</p></div></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -387,6 +442,36 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result" class="extype" href="">oneMoreThingToCompute$result</a> → AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result#unsetField" data-isabs="false">
+      <a id="unsetField(Short):oneMoreThingToCompute$result"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unsetField</span><span class="params">(<span name="_fieldId">_fieldId: <span name="scala.Short" class="extype">Short</span></span>)</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result" class="extype" href="">oneMoreThingToCompute$result</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">If the specified field is optional, it is set to None.</p><div class="fullcomment"><div class="comment cmt"><p>If the specified field is optional, it is set to None.  Otherwise, if the field is
+known, it is reverted to its default value; if the field is unknown, it is subtracked
+from the passthroughFields map, if present.
+</p></div></div>
+    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result#unsetSuccess" data-isabs="false">
+      <a id="unsetSuccess:oneMoreThingToCompute$result"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unsetSuccess</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result" class="extype" href="">oneMoreThingToCompute$result</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">If the specified field is optional, it is set to None.</p><div class="fullcomment"><div class="comment cmt"><p>If the specified field is optional, it is set to None.  Otherwise, if the field is
+known, it is reverted to its default value; if the field is unknown, it is subtracked
+from the passthroughFields map, if present.
+</p></div></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -432,30 +517,6 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result#withPassthroughs" data-isabs="false">
-      <a id="withPassthroughs(TraversableOnce[(TField, TTransport)]):oneMoreThingToCompute$result"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">withPassthroughs</span><span class="params">(<span name="pts">pts: TraversableOnce[(<span name="org.apache.thrift.protocol.TField" class="extype">TField</span>, <span name="org.apache.thrift.transport.TTransport" class="extype">TTransport</span>)]</span>)</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result" class="extype" href="">oneMoreThingToCompute$result</a></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result#withoutPassthroughs" data-isabs="false">
-      <a id="withoutPassthroughs((TField) ⇒ Boolean):oneMoreThingToCompute$result"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">withoutPassthroughs</span><span class="params">(<span name="f">f: (<span name="org.apache.thrift.protocol.TField" class="extype">TField</span>) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result" class="extype" href="">oneMoreThingToCompute$result</a></span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$result#write" data-isabs="false">
       <a id="write(TProtocol):Unit"></a>
       <h4 class="signature">

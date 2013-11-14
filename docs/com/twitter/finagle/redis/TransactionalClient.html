@@ -155,7 +155,7 @@ The order of the commands queued on the Redis server is not guaranteed</p></div>
       </span>
       </h4>
       <p class="shortcomment cmt">Appends value at the given key.</p><div class="fullcomment"><div class="comment cmt"><p>Appends value at the given key. If key doesn't exist,
-behavior is similar to SET command</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>length of string after append operation
+behavior is similar to SET command</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">value</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>length of string after append operation
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
@@ -319,7 +319,7 @@ values) and store the result in the destination key.
       </span>
       </h4>
       <p class="shortcomment cmt">Decrements number stored at key by given amount.</p><div class="fullcomment"><div class="comment cmt"><p>Decrements number stored at key by given amount. If key doesn't
-exist, value is set to 0 before the operation</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>value after decrement. Error if key contains value
+exist, value is set to 0 before the operation</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">amount</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>value after decrement. Error if key contains value
 of the wrong type
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#del" data-isabs="false">
@@ -333,7 +333,7 @@ of the wrong type
         <span class="name">del</span><span class="params">(<span name="keys">keys: Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Removes keys</p><div class="fullcomment"><div class="comment cmt"><p>Removes keys</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of keys removed
+      <p class="shortcomment cmt">Removes keys</p><div class="fullcomment"><div class="comment cmt"><p>Removes keys</p></div><dl class="paramcmts block"><dt class="param">keys</dt><dd class="cmt"><p>list of keys to remove</p></dd><dt>returns</dt><dd class="cmt"><p>Number of keys removed
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Keys" class="extype" href="Keys.html">Keys</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
@@ -383,7 +383,7 @@ of the wrong type
         <span class="name">expire</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="ttl">ttl: <span name="java.lang.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Sets how long it will take the key to expire</p><div class="fullcomment"><div class="comment cmt"><p>Sets how long it will take the key to expire</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>boolean, true if it successfully set the ttl (time to live) on a valid key,
+      <p class="shortcomment cmt">Sets how long it will take the key to expire</p><div class="fullcomment"><div class="comment cmt"><p>Sets how long it will take the key to expire</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">ttl</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>boolean, true if it successfully set the ttl (time to live) on a valid key,
 false otherwise.
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Keys" class="extype" href="Keys.html">Keys</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#expireAt" data-isabs="false">
@@ -397,7 +397,7 @@ false otherwise.
         <span class="name">expireAt</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="ttl">ttl: <span name="java.lang.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Same effect and semantic as &quot;expire&quot;, but takes an absolute Unix timestamp</p><div class="fullcomment"><div class="comment cmt"><p>Same effect and semantic as &quot;expire&quot;, but takes an absolute Unix timestamp</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>boolean, true if it successfully set the ttl (time to live) on a valid key,
+      <p class="shortcomment cmt">Same effect and semantic as &quot;expire&quot;, but takes an absolute Unix timestamp</p><div class="fullcomment"><div class="comment cmt"><p>Same effect and semantic as &quot;expire&quot;, but takes an absolute Unix timestamp</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">ttl</dt><dd class="cmt"><p>time-to-live as unix timestamp</p></dd><dt>returns</dt><dd class="cmt"><p>boolean, true if it successfully set the ttl (time to live) on a valid key,
 false otherwise.
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Keys" class="extype" href="Keys.html">Keys</a></dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
@@ -479,7 +479,7 @@ false otherwise.
         <span class="name">getRange</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="start">start: <span name="scala.Long" class="extype">Long</span></span>, <span name="end">end: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Gets the substring of the value associated with given key</p><div class="fullcomment"><div class="comment cmt"><p>Gets the substring of the value associated with given key</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>substring, or none if key doesn't exist
+      <p class="shortcomment cmt">Gets the substring of the value associated with given key</p><div class="fullcomment"><div class="comment cmt"><p>Gets the substring of the value associated with given key</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">start</dt><dd class="cmt"></dd><dt class="param">end</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>substring, or none if key doesn't exist
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#getSet" data-isabs="false">
       <a id="getSet(ChannelBuffer,ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
@@ -743,7 +743,7 @@ Returns an error when key exists but does not hold a string value.
       </span>
       </h4>
       <p class="shortcomment cmt">Gets the value of the element at the indexth position in the list.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the value of the element at the indexth position in the list.
-If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>an option of the value of the element at the indexth position in the list.
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">index</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>an option of the value of the element at the indexth position in the list.
 Nothing if the index is out of range.
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lInsertAfter" data-isabs="false">
@@ -759,7 +759,7 @@ Nothing if the index is out of range.
       </h4>
       <p class="shortcomment cmt">Inserts a value after another pivot value in the list.</p><div class="fullcomment"><div class="comment cmt"><p>Inserts a value after another pivot value in the list.
 If the key is a non-list element,
-an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>an option of the new length of the list, or nothing if the pivot is not found, or
+an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">pivot</dt><dd class="cmt"></dd><dt class="param">value</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>an option of the new length of the list, or nothing if the pivot is not found, or
 the list is empty.
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lInsertBefore" data-isabs="false">
@@ -775,7 +775,7 @@ the list is empty.
       </h4>
       <p class="shortcomment cmt">Inserts a value before another pivot value in the list.</p><div class="fullcomment"><div class="comment cmt"><p>Inserts a value before another pivot value in the list.
 If the key is a non-list element,
-an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>an option of the new length of the list, or nothing if the pivot is not found, or the
+an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">pivot</dt><dd class="cmt"></dd><dt class="param">value</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>an option of the new length of the list, or nothing if the pivot is not found, or the
 list is empty.
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lLen" data-isabs="false">
@@ -819,7 +819,7 @@ If the key is a non-list element, an exception will be thrown.</p></div><dl clas
       </span>
       </h4>
       <p class="shortcomment cmt">Pushes a value onto the front of the list.</p><div class="fullcomment"><div class="comment cmt"><p>Pushes a value onto the front of the list.
-If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the length of the list
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">value</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the length of the list
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lRange" data-isabs="false">
       <a id="lRange(ChannelBuffer,Long,Long):Future[List[ChannelBuffer]]"></a>
@@ -833,7 +833,7 @@ If the key is a non-list element, an exception will be thrown.</p></div><dl clas
       </span>
       </h4>
       <p class="shortcomment cmt">Gets the values in the range supplied.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the values in the range supplied.
-If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a list of the value
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">start</dt><dd class="cmt"><p>(inclusive)</p></dd><dt class="param">end</dt><dd class="cmt"><p>(inclusive)</p></dd><dt>returns</dt><dd class="cmt"><p>a list of the value
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lRem" data-isabs="false">
       <a id="lRem(ChannelBuffer,Long,ChannelBuffer):Future[Long]"></a>
@@ -847,8 +847,9 @@ If the key is a non-list element, an exception will be thrown.</p></div><dl clas
       </span>
       </h4>
       <p class="shortcomment cmt">Removes count elements matching value from the list.</p><div class="fullcomment"><div class="comment cmt"><p>Removes count elements matching value from the list.
-If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the number of removed elements.
-</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">count</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the number of removed elements.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd><dt>Note</dt><dd><span class="cmt"><p>The sign of <code>count</code> describes whether it will remove them from the
+back or the front of the list.  If count is 0, it will remove all instances, value</p></span></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lSet" data-isabs="false">
       <a id="lSet(ChannelBuffer,Long,ChannelBuffer):Future[Unit]"></a>
       <h4 class="signature">
@@ -861,7 +862,8 @@ If the key is a non-list element, an exception will be thrown.</p></div><dl clas
       </span>
       </h4>
       <p class="shortcomment cmt">Sets the indexth element to be value.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the indexth element to be value.
-If the key is a non-list element, an exception will be thrown.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">index</dt><dd class="cmt"></dd><dt class="param">value</dt><dd class="cmt"><p>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lTrim" data-isabs="false">
       <a id="lTrim(ChannelBuffer,Long,Long):Future[Unit]"></a>
       <h4 class="signature">
@@ -873,7 +875,8 @@ If the key is a non-list element, an exception will be thrown.</p></div><dl clas
         <span class="name">lTrim</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="start">start: <span name="java.lang.Long" class="extype">Long</span></span>, <span name="end">end: <span name="java.lang.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Removes all of the elements from the list except for those in the range.</p><div class="fullcomment"><div class="comment cmt"><p>Removes all of the elements from the list except for those in the range.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
+      <p class="shortcomment cmt">Removes all of the elements from the list except for those in the range.</p><div class="fullcomment"><div class="comment cmt"><p>Removes all of the elements from the list except for those in the range.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">start</dt><dd class="cmt"><p>(inclusive)</p></dd><dt class="param">end</dt><dd class="cmt"><p>(exclusive)
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#mGet" data-isabs="false">
       <a id="mGet(Seq[ChannelBuffer]):Future[Seq[Option[ChannelBuffer]]]"></a>
       <h4 class="signature">
@@ -1057,7 +1060,7 @@ If the key is a non-list element, an exception will be thrown.</p></div><dl clas
       </span>
       </h4>
       <p class="shortcomment cmt">Pushes a value onto the end of the list.</p><div class="fullcomment"><div class="comment cmt"><p>Pushes a value onto the end of the list.
-If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the length of the list
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">value</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the length of the list
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.BaseClient#release" data-isabs="false">
       <a id="release():Future[Unit]"></a>
@@ -1085,7 +1088,7 @@ If the key is a non-list element, an exception will be thrown.</p></div><dl clas
       </span>
       </h4>
       <p class="shortcomment cmt">Adds elements to the set, according to the set property.</p><div class="fullcomment"><div class="comment cmt"><p>Adds elements to the set, according to the set property.
-Throws an exception if the key does not refer to a set.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the number of new members added to the set.
+Throws an exception if the key does not refer to a set.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">members</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the number of new members added to the set.
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Sets" class="extype" href="Sets.html">Sets</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Sets#sCard" data-isabs="false">
       <a id="sCard(ChannelBuffer):Future[Long]"></a>
@@ -1116,7 +1119,7 @@ empty sets.
       </h4>
       <p class="shortcomment cmt">Is the member in the set?
 Throws an exception if the key does not refer to a set.</p><div class="fullcomment"><div class="comment cmt"><p>Is the member in the set?
-Throws an exception if the key does not refer to a set.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a boolean, true if it is in the set, false otherwise.  Unassigned
+Throws an exception if the key does not refer to a set.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>a boolean, true if it is in the set, false otherwise.  Unassigned
 keys are considered empty sets.
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Sets" class="extype" href="Sets.html">Sets</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Sets#sMembers" data-isabs="false">
@@ -1174,7 +1177,7 @@ duplicates is returned.</p></div><dl class="paramcmts block"><dt>returns</dt><dd
       </span>
       </h4>
       <p class="shortcomment cmt">Removes the element from the set if it is in the set.</p><div class="fullcomment"><div class="comment cmt"><p>Removes the element from the set if it is in the set.
-Throws an exception if the key does not refer to a set.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>an integer, the number of elements removed from the set, can be
+Throws an exception if the key does not refer to a set.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>an integer, the number of elements removed from the set, can be
 0 if the key is unassigned.
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Sets" class="extype" href="Sets.html">Sets</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#scan" data-isabs="false">
@@ -1215,7 +1218,8 @@ Throws an exception if the key does not refer to a set.</p></div><dl class="para
       </span>
       </h4>
       <p class="shortcomment cmt">Sets the given value to key.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the given value to key. If a value already exists for the key,
-the value is overwritten with the new value</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd></dl></div>
+the value is overwritten with the new value</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">value</dt><dd class="cmt"><p>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#setBit" data-isabs="false">
       <a id="setBit(ChannelBuffer,Int,Int):Future[Long]"></a>
       <h4 class="signature">
@@ -1503,7 +1507,7 @@ and has a timeout, or else nothing.
         <span class="name">zAdd</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="score">score: <span name="java.lang.Double" class="extype">Double</span></span>, <span name="member">member: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Add a member with score to a sorted set</p><div class="fullcomment"><div class="comment cmt"><p>Add a member with score to a sorted set</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of elements added to sorted set
+      <p class="shortcomment cmt">Add a member with score to a sorted set</p><div class="fullcomment"><div class="comment cmt"><p>Add a member with score to a sorted set</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">score</dt><dd class="cmt"></dd><dt class="param">member</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>Number of elements added to sorted set
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zAddMulti" data-isabs="false">
       <a id="zAddMulti(ChannelBuffer,Seq[(Double, ChannelBuffer)]):Future[Long]"></a>
@@ -1516,7 +1520,7 @@ and has a timeout, or else nothing.
         <span class="name">zAddMulti</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="members">members: Seq[(<span name="java.lang.Double" class="extype">Double</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>)]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Adds member, score pairs to sorted set</p><div class="fullcomment"><div class="comment cmt"><p>Adds member, score pairs to sorted set</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of elements added to sorted set</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd><dt>Note</dt><dd><span class="cmt"><p>Adding multiple elements only works with redis 2.4 or later.
+      <p class="shortcomment cmt">Adds member, score pairs to sorted set</p><div class="fullcomment"><div class="comment cmt"><p>Adds member, score pairs to sorted set</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">members</dt><dd class="cmt"><p>sequence of (score, member) tuples</p></dd><dt>returns</dt><dd class="cmt"><p>Number of elements added to sorted set</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd><dt>Note</dt><dd><span class="cmt"><p>Adding multiple elements only works with redis 2.4 or later.
 </p></span></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zCard" data-isabs="false">
       <a id="zCard(ChannelBuffer):Future[Long]"></a>
@@ -1543,7 +1547,7 @@ or 0 if key does not exist
         <span class="name">zCount</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="min">min: <a name="com.twitter.finagle.redis.protocol.ZInterval" class="extype" href="protocol/ZInterval.html">ZInterval</a></span>, <span name="max">max: <a name="com.twitter.finagle.redis.protocol.ZInterval" class="extype" href="protocol/ZInterval.html">ZInterval</a></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Gets number of elements in sorted set with score between min and max</p><div class="fullcomment"><div class="comment cmt"><p>Gets number of elements in sorted set with score between min and max</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of elements between min and max in sorted set
+      <p class="shortcomment cmt">Gets number of elements in sorted set with score between min and max</p><div class="fullcomment"><div class="comment cmt"><p>Gets number of elements in sorted set with score between min and max</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">min</dt><dd class="cmt"></dd><dt class="param">max</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>Number of elements between min and max in sorted set
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zIncrBy" data-isabs="false">
       <a id="zIncrBy(ChannelBuffer,Double,ChannelBuffer):Future[Option[Double]]"></a>
@@ -1558,7 +1562,7 @@ or 0 if key does not exist
       </h4>
       <p class="shortcomment cmt">Increment the member in sorted set key by amount.</p><div class="fullcomment"><div class="comment cmt"><p>Increment the member in sorted set key by amount.
 Returns an option, None if the member is not found, or the set is empty, or the new value.
-Throws an exception if the key refers to a structure that is not a sorted set.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the new value of the incremented member
+Throws an exception if the key refers to a structure that is not a sorted set.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">amount</dt><dd class="cmt"></dd><dt class="param">member</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the new value of the incremented member
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRange" data-isabs="false">
       <a id="zRange(ChannelBuffer,Long,Long,Boolean):Future[Either[ZRangeResults, Seq[ChannelBuffer]]]"></a>
@@ -1600,7 +1604,7 @@ Results are limited by offset and count</p></div><dl class="paramcmts block"><dt
         <span class="name">zRank</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="member">member: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Long" class="extype">Long</span>]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Gets the rank of the member in the sorted set, or None if it doesn't exist, from low to high.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the rank of the member in the sorted set, or None if it doesn't exist, from low to high.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the rank of the member
+      <p class="shortcomment cmt">Gets the rank of the member in the sorted set, or None if it doesn't exist, from low to high.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the rank of the member in the sorted set, or None if it doesn't exist, from low to high.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">member</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the rank of the member
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRem" data-isabs="false">
       <a id="zRem(ChannelBuffer,Seq[ChannelBuffer]):Future[Long]"></a>
@@ -1613,7 +1617,7 @@ Results are limited by offset and count</p></div><dl class="paramcmts block"><dt
         <span class="name">zRem</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="members">members: Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Removes specified member(s) from sorted set at key</p><div class="fullcomment"><div class="comment cmt"><p>Removes specified member(s) from sorted set at key</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of members removed from sorted set
+      <p class="shortcomment cmt">Removes specified member(s) from sorted set at key</p><div class="fullcomment"><div class="comment cmt"><p>Removes specified member(s) from sorted set at key</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">members</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>Number of members removed from sorted set
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRemRangeByRank" data-isabs="false">
       <a id="zRemRangeByRank(ChannelBuffer,Long,Long):Future[Long]"></a>
@@ -1626,7 +1630,7 @@ Results are limited by offset and count</p></div><dl class="paramcmts block"><dt
         <span class="name">zRemRangeByRank</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="start">start: <span name="java.lang.Long" class="extype">Long</span></span>, <span name="stop">stop: <span name="java.lang.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Removes members from sorted set by sort order, from start to stop, inclusive.</p><div class="fullcomment"><div class="comment cmt"><p>Removes members from sorted set by sort order, from start to stop, inclusive.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of members removed from sorted set.
+      <p class="shortcomment cmt">Removes members from sorted set by sort order, from start to stop, inclusive.</p><div class="fullcomment"><div class="comment cmt"><p>Removes members from sorted set by sort order, from start to stop, inclusive.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">start</dt><dd class="cmt"></dd><dt class="param">stop</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>Number of members removed from sorted set.
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRemRangeByScore" data-isabs="false">
       <a id="zRemRangeByScore(ChannelBuffer,ZInterval,ZInterval):Future[Long]"></a>
@@ -1639,7 +1643,7 @@ Results are limited by offset and count</p></div><dl class="paramcmts block"><dt
         <span class="name">zRemRangeByScore</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="min">min: <a name="com.twitter.finagle.redis.protocol.ZInterval" class="extype" href="protocol/ZInterval.html">ZInterval</a></span>, <span name="max">max: <a name="com.twitter.finagle.redis.protocol.ZInterval" class="extype" href="protocol/ZInterval.html">ZInterval</a></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Removes members from sorted set by score, from min to max, inclusive.</p><div class="fullcomment"><div class="comment cmt"><p>Removes members from sorted set by score, from min to max, inclusive.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of members removed from sorted set.
+      <p class="shortcomment cmt">Removes members from sorted set by score, from min to max, inclusive.</p><div class="fullcomment"><div class="comment cmt"><p>Removes members from sorted set by score, from min to max, inclusive.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">min</dt><dd class="cmt"></dd><dt class="param">max</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>Number of members removed from sorted set.
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRevRange" data-isabs="false">
       <a id="zRevRange(ChannelBuffer,Long,Long,Boolean):Future[Either[ZRangeResults, Seq[ChannelBuffer]]]"></a>
@@ -1684,7 +1688,7 @@ Results are limited by offset and count</p></div><dl class="paramcmts block"><dt
         <span class="name">zRevRank</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="member">member: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Long" class="extype">Long</span>]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Gets the rank of member in the sorted set, or None if it doesn't exist, from high to low.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the rank of member in the sorted set, or None if it doesn't exist, from high to low.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the rank of the member
+      <p class="shortcomment cmt">Gets the rank of member in the sorted set, or None if it doesn't exist, from high to low.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the rank of member in the sorted set, or None if it doesn't exist, from high to low.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">member</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the rank of the member
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zScore" data-isabs="false">
       <a id="zScore(ChannelBuffer,ChannelBuffer):Future[Option[Double]]"></a>

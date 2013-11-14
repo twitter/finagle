@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>StatsFilter &mdash; Finagle 6.8.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '6.8.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Finagle 6.8.0 documentation" href="../index.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="../_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">Finagle</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="statsfilter">
+<h1>StatsFilter<a class="headerlink" href="#statsfilter" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt><strong>requests</strong></dt>
+<dd>a counter of the total number of successes + failures</dd>
+<dt><strong>success</strong></dt>
+<dd>a counter of the total number of successes</dd>
+<dt><strong>request_latency_ms</strong></dt>
+<dd>a histogram of the latency of requests in milliseconds</dd>
+<dt><strong>load</strong></dt>
+<dd>a gauge of the current total number of outstanding requests</dd>
+<dt><strong>pending</strong></dt>
+<dd>a gauge of the current total number of outstanding requests</dd>
+<dt><strong>failures/&lt;exception_name&gt;+</strong></dt>
+<dd>a counter of the number of times a specific exception has been thrown</dd>
+<dt><strong>failures</strong></dt>
+<dd>a counter of the number of times any exception has been thrown</dd>
+<dt><strong>sourcedfailures/&lt;source_service_name&gt;{/&lt;exception_name&gt;}+</strong></dt>
+<dd>a counter of the number of times a specific SourcedException has been thrown</dd>
+<dt><strong>sourcedfailures/&lt;source_service_name&gt;</strong></dt>
+<dd>a counter of the number of times any SourcedException has been thrown from this service</dd>
+<dt><strong>sourcedfailures</strong></dt>
+<dd>a counter of the number of times any SourcedException has been thrown</dd>
+</dl>
+</div>
+<div class="section" id="statsfactorywrapper">
+<h1>StatsFactoryWrapper<a class="headerlink" href="#statsfactorywrapper" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt><strong>failures/&lt;exception_class_name&gt;</strong></dt>
+<dd>a counter of the number of times a service factory has failed with this specific exception</dd>
+<dt><strong>failures</strong></dt>
+<dd>a counter of the number of times a service factory has failed</dd>
+</dl>
+</div>
+<div class="section" id="handletimefilter">
+<h1>HandletimeFilter<a class="headerlink" href="#handletimefilter" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt><strong>handletime_us</strong></dt>
+<dd>a histogram of the time it takes to handle the request in microseconds.
+NB: does not include the time to respond</dd>
+</dl>
+</div>
+<div class="section" id="defaultserver">
+<h1>DefaultServer<a class="headerlink" href="#defaultserver" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt><strong>request_concurrency</strong></dt>
+<dd>a gauge of the total number of current concurrent requests</dd>
+<dt><strong>request_queue_size</strong></dt>
+<dd>a gauge of the total number of requests which are waiting because of the limit
+on simultaneous requests</dd>
+</dl>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="../index.html">
+  <img class="logo" src="../_static/governorlogo.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">StatsFilter</a></li>
+<li><a class="reference internal" href="#statsfactorywrapper">StatsFactoryWrapper</a></li>
+<li><a class="reference internal" href="#handletimefilter">HandletimeFilter</a></li>
+<li><a class="reference internal" href="#defaultserver">DefaultServer</a></li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2013 Twitter, Inc.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  
+  </body>
+</html>

@@ -405,6 +405,18 @@ factories in one (when available).</p>
       </span>
       </h4>
       <p class="comment cmt">A ContextHandler is responsible for maintaining a context.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.DtabBuilder" data-isabs="false">
+      <a id="DtabBuilder:DtabBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="DtabBuilder.html"><span class="name">DtabBuilder</span></a><span class="result"> extends Builder[Dentry, Dtab]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.FactoryToService" data-isabs="false">
       <a id="FactoryToService:FactoryToService[Req, Rep]"></a>
       <h4 class="signature">
@@ -513,6 +525,18 @@ factories in one (when available).</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.LabelledGroup" data-isabs="false">
+      <a id="LabelledGroup:LabelledGroup[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="LabelledGroup.html"><span class="name">LabelledGroup</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="underlying">underlying: Group[T]</span>, <span name="name">name: String</span>)</span><span class="result"> extends Group[T] with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A mixin trait to assign a <code><code>name</code></code> to the group.</p>
     </li><li visbl="pub" name="com.twitter.finagle.ListeningServer" data-isabs="true">
       <a id="ListeningServer:ListeningServer"></a>
       <h4 class="signature">
@@ -610,18 +634,6 @@ server.</p>
       </span>
       </h4>
       <p class="comment cmt">A name identifies an object.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.NamedGroup" data-isabs="true">
-      <a id="NamedGroup:NamedGroup"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="NamedGroup.html"><span class="name">NamedGroup</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      <p class="comment cmt">A mixin trait to assign a <code><code>name</code></code> to the group.</p>
     </li><li visbl="pub" name="com.twitter.finagle.NoBrokersAvailableException" data-isabs="false">
       <a id="NoBrokersAvailableException:NoBrokersAvailableException"></a>
       <h4 class="signature">
@@ -691,18 +703,6 @@ server.</p>
       </span>
       <span class="symbol">
         <a href="ProxyAnnouncement.html"><span class="name">ProxyAnnouncement</span></a><span class="result"> extends Announcement with Proxy</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.ProxyServiceFactory" data-isabs="true">
-      <a id="ProxyServiceFactory:ProxyServiceFactory[Req, Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="ProxyServiceFactory.html"><span class="name">ProxyServiceFactory</span></a><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends ServiceFactory[Req, Rep] with Proxy</span>
       </span>
       </h4>
       
@@ -1203,6 +1203,21 @@ into <code>serveIface</code>:</p>
       </span>
       </h4>
       <p class="comment cmt">A group is a dynamic set of <code>T</code>-typed values.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.ProxyServiceFactory" data-isabs="true">
+      <a id="ProxyServiceFactory:ProxyServiceFactory[Req, Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ProxyServiceFactory.html"><span class="name deprecated" title="Deprecated: (Since version 6.7.5) use ServiceFactoryProxy instead">ProxyServiceFactory</span></a><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends ServiceFactory[Req, Rep] with Proxy</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.5)</i> use ServiceFactoryProxy instead</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -1520,18 +1535,6 @@ registered handler.</p>
       </span>
       <span class="symbol">
         <a href="Name$.html"><span class="name">Name</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.NamedGroup" data-isabs="false">
-      <a id="NamedGroup:NamedGroup"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="NamedGroup$.html"><span class="name">NamedGroup</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       

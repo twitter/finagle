@@ -134,6 +134,19 @@
         <span class="name">DIGITS</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
+      <p class="shortcomment cmt">Prefer using <code>isDigits(ChannelBuffer)</code> or <code>DigitsPattern.matcher(input).matches()</code>
+</p>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.util.ParserUtils#DigitsPattern" data-isabs="false">
+      <a id="DigitsPattern:Pattern"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DigitsPattern</span><span class="result">: <span name="java.util.regex.Pattern" class="extype">Pattern</span></span>
+      </span>
+      </h4>
       
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
@@ -225,6 +238,22 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.util.ParserUtils#isDigits" data-isabs="false">
+      <a id="isDigits(ChannelBuffer):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isDigits</span><span class="params">(<span name="cb">cb: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns true if every readable byte in the ChannelBuffer is a digit,
+false otherwise.</p><div class="fullcomment"><div class="comment cmt"><p>Returns true if every readable byte in the ChannelBuffer is a digit,
+false otherwise.</p><p>See caliper test in finagle-benchmark, about 15x faster and does 0 allocations
+versus using ChannelBufferUtils.matches(DIGITS)
+</p></div></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">

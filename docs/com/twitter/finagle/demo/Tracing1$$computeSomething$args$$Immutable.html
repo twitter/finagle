@@ -68,7 +68,7 @@ new instances.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Immutable</span><span class="params">()</span>
+        <span class="name">Immutable</span><span class="params">(<span name="_passthroughFields">_passthroughFields: <span name="scala.collection.immutable.Map" class="extype">Map</span>[<span name="scala.Short" class="extype">Short</span>, <span name="com.twitter.scrooge.TFieldBlob" class="extype">TFieldBlob</span>] = <span name="scala.collection.immutable.immutable$Map.empty[Short, Nothing]" class="defval">...</span></span>)</span>
       </span>
       </h4>
       
@@ -141,6 +141,18 @@ new instances.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args.Immutable#_passthroughFields" data-isabs="false">
+      <a id="_passthroughFields:Map[Short, TFieldBlob]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_passthroughFields</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[<span name="scala.Short" class="extype">Short</span>, <span name="com.twitter.scrooge.TFieldBlob" class="extype">TFieldBlob</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args.Immutable" class="extype" href="">Immutable</a> → <a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -181,14 +193,14 @@ new instances.
               
         </dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#copy" data-isabs="false">
-      <a id="copy():computeSomething$args"></a>
+      <a id="copy(Map[Short, TFieldBlob]):computeSomething$args"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">copy</span><span class="params">()</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></span>
+        <span class="name">copy</span><span class="params">(<span name="_passthroughFields">_passthroughFields: <span name="scala.collection.immutable.Map" class="extype">Map</span>[<span name="scala.Short" class="extype">Short</span>, <span name="com.twitter.scrooge.TFieldBlob" class="extype">TFieldBlob</span>] = <span class="symbol"><span class="name"><a href="Tracing1$$computeSomething$args.html#_passthroughFields:Map[Short, TFieldBlob]">this._passthroughFields</a></span></span></span>)</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></dd></dl></div>
@@ -243,6 +255,34 @@ new instances.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#getFieldBlob" data-isabs="false">
+      <a id="getFieldBlob(Short):Option[TFieldBlob]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getFieldBlob</span><span class="params">(<span name="_fieldId">_fieldId: <span name="scala.Short" class="extype">Short</span></span>)</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[<span name="com.twitter.scrooge.TFieldBlob" class="extype">TFieldBlob</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets a field value encoded as a binary blob using TCompactProtocol.</p><div class="fullcomment"><div class="comment cmt"><p>Gets a field value encoded as a binary blob using TCompactProtocol.  If the specified field
+is present in the passthrough map, that value is returend.  Otherwise, if the specified field
+is known and not optional and set to None, then the field is serialized and returned.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#getFieldBlobs" data-isabs="false">
+      <a id="getFieldBlobs(TraversableOnce[Short]):Map[Short, TFieldBlob]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getFieldBlobs</span><span class="params">(<span name="ids">ids: TraversableOnce[<span name="scala.Short" class="extype">Short</span>]</span>)</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[<span name="scala.Short" class="extype">Short</span>, <span name="com.twitter.scrooge.TFieldBlob" class="extype">TFieldBlob</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Collects TCompactProtocol-encoded field values according to <code>getFieldBlob</code> into a map.</p><div class="fullcomment"><div class="comment cmt"><p>Collects TCompactProtocol-encoded field values according to <code>getFieldBlob</code> into a map.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
@@ -351,6 +391,22 @@ new instances.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a> → Product</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#setField" data-isabs="false">
+      <a id="setField(TFieldBlob):computeSomething$args"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setField</span><span class="params">(<span name="_blob">_blob: <span name="com.twitter.scrooge.TFieldBlob" class="extype">TFieldBlob</span></span>)</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets a field using a TCompactProtocol-encoded binary blob.</p><div class="fullcomment"><div class="comment cmt"><p>Sets a field using a TCompactProtocol-encoded binary blob.  If the field is a known
+field, the blob is decoded and the field is set to the decoded value.  If the field
+is unknown and passthrough fields are enabled, then the blob will be stored in
+_passthroughFields.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -375,6 +431,21 @@ new instances.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a> → AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#unsetField" data-isabs="false">
+      <a id="unsetField(Short):computeSomething$args"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unsetField</span><span class="params">(<span name="_fieldId">_fieldId: <span name="scala.Short" class="extype">Short</span></span>)</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">If the specified field is optional, it is set to None.</p><div class="fullcomment"><div class="comment cmt"><p>If the specified field is optional, it is set to None.  Otherwise, if the field is
+known, it is reverted to its default value; if the field is unknown, it is subtracked
+from the passthroughFields map, if present.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -420,30 +491,6 @@ new instances.
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#withPassthroughs" data-isabs="false">
-      <a id="withPassthroughs(TraversableOnce[(TField, TTransport)]):computeSomething$args"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">withPassthroughs</span><span class="params">(<span name="pts">pts: TraversableOnce[(<span name="org.apache.thrift.protocol.TField" class="extype">TField</span>, <span name="org.apache.thrift.transport.TTransport" class="extype">TTransport</span>)]</span>)</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#withoutPassthroughs" data-isabs="false">
-      <a id="withoutPassthroughs((TField) ⇒ Boolean):computeSomething$args"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">withoutPassthroughs</span><span class="params">(<span name="f">f: (<span name="org.apache.thrift.protocol.TField" class="extype">TField</span>) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#write" data-isabs="false">
       <a id="write(TProtocol):Unit"></a>
       <h4 class="signature">
@@ -455,7 +502,10 @@ new instances.
         <span class="name">write</span><span class="params">(<span name="_oprot">_oprot: <span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a> → ThriftStruct</dd></dl></div>
+      <p class="shortcomment cmt">If the specified field is optional, it is set to None.</p><div class="fullcomment"><div class="comment cmt"><p>If the specified field is optional, it is set to None.  Otherwise, if the field is
+known, it is reverted to its default value; if the field is unknown, it is subtracked
+from the passthroughFields map, if present.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a> → ThriftStruct</dd></dl></div>
     </li></ol>
             </div>
 

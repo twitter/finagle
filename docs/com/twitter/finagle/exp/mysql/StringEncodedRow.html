@@ -68,7 +68,7 @@ text-based protocol.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">StringEncodedRow</span><span class="params">(<span name="rawRow">rawRow: <a name="com.twitter.finagle.exp.mysql.transport.Buffer" class="extype" href="transport/Buffer.html">Buffer</a></span>, <span name="fields">fields: Seq[<a name="com.twitter.finagle.exp.mysql.Field" class="extype" href="Field.html">Field</a>]</span>, <span name="indexMap">indexMap: Map[String, <span name="scala.Int" class="extype">Int</span>]</span>)</span>
+        <span class="name">StringEncodedRow</span><span class="params">(<span name="rawRow">rawRow: <a name="com.twitter.finagle.exp.mysql.transport.Buffer" class="extype" href="transport/Buffer.html">Buffer</a></span>, <span name="fields">fields: IndexedSeq[<a name="com.twitter.finagle.exp.mysql.Field" class="extype" href="Field.html">Field</a>]</span>, <span name="indexMap">indexMap: Map[String, <span name="scala.Int" class="extype">Int</span>]</span>)</span>
       </span>
       </h4>
       
@@ -181,15 +181,15 @@ exists with the given name. Otherwise, None.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.StringEncodedRow#br" data-isabs="false">
-      <a id="br:BufferReader"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.StringEncodedRow#buffer" data-isabs="false">
+      <a id="buffer:BufferReader"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">br</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferReader" class="extype" href="transport/BufferReader.html">BufferReader</a></span>
+        <span class="name">buffer</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferReader" class="extype" href="transport/BufferReader.html">BufferReader</a></span>
       </span>
       </h4>
       
@@ -233,19 +233,21 @@ exists with the given name. Otherwise, None.
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.StringEncodedRow#fields" data-isabs="false">
-      <a id="fields:Seq[Field]"></a>
+      <a id="fields:IndexedSeq[Field]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">fields</span><span class="result">: Seq[<a name="com.twitter.finagle.exp.mysql.Field" class="extype" href="Field.html">Field</a>]</span>
+        <span class="name">fields</span><span class="result">: IndexedSeq[<a name="com.twitter.finagle.exp.mysql.Field" class="extype" href="Field.html">Field</a>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Contains a Field object for each
 Column in the Row.</p><div class="fullcomment"><div class="comment cmt"><p>Contains a Field object for each
-Column in the Row.
+Column in the Row. The data is 0-indexed
+so fields(0) contains the column meta-data
+for the first column in the Row.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.StringEncodedRow" class="extype" href="">StringEncodedRow</a> → <a name="com.twitter.finagle.exp.mysql.Row" class="extype" href="Row.html">Row</a></dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
@@ -379,7 +381,7 @@ exists with the given name. Otherwise, None.
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
         <span class="name">values</span><span class="result">: IndexedSeq[<a name="com.twitter.finagle.exp.mysql.Value" class="extype" href="Value.html">Value</a>]</span>
@@ -388,6 +390,7 @@ exists with the given name. Otherwise, None.
       <p class="shortcomment cmt">Convert the string representation of each value
 into an appropriate Value object.</p><div class="fullcomment"><div class="comment cmt"><p>Convert the string representation of each value
 into an appropriate Value object.
+<a href="http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::ResultsetRow">http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::ResultsetRow</a>
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.StringEncodedRow" class="extype" href="">StringEncodedRow</a> → <a name="com.twitter.finagle.exp.mysql.Row" class="extype" href="Row.html">Row</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>

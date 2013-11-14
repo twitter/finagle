@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ClientChannelTransport &mdash; Finagle 6.8.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '6.8.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Finagle 6.8.0 documentation" href="../index.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="../_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">Finagle</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="clientchanneltransport">
+<h1>ClientChannelTransport<a class="headerlink" href="#clientchanneltransport" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt><strong>concurrent_request</strong></dt>
+<dd>a counter of the total number of requests which are written concurrently to the client
+channel transport.  if this stat is incremented, the request is failed, because
+ClientChannelTransport is serial.</dd>
+<dt><strong>orphan_response</strong></dt>
+<dd>a counter of the number of responses which get orphaned. if this stat is incremented, your
+transport has already closed.  you should never see this stat.</dd>
+</dl>
+</div>
+<div class="section" id="channelconnector">
+<h1>ChannelConnector<a class="headerlink" href="#channelconnector" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt><strong>connect_latency_ms</strong></dt>
+<dd>a histogram of the length of time it takes for a connection to succeed, in milliseconds</dd>
+<dt><strong>failed_connect_latency_ms</strong></dt>
+<dd>a histogram of the length of time it takes for a connection to fail, in milliseconds</dd>
+<dt><strong>cancelled_connects</strong></dt>
+<dd>a counter of the number of attempts to connect that were cancelled before they succeeded</dd>
+</dl>
+</div>
+<div class="section" id="serverbridge">
+<h1>ServerBridge<a class="headerlink" href="#serverbridge" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt><strong>read_timeout</strong></dt>
+<dd>a counter of the number of times the netty channel has caught a ReadTimeoutException.
+this should be the number of timeouts when reading</dd>
+<dt><strong>write_timeout</strong></dt>
+<dd>a counter of the number of times the netty channel has caught a WriteTimeoutException.
+this should be the number of timeouts when writing</dd>
+</dl>
+</div>
+<div class="section" id="channelrequeststatshandler">
+<h1>ChannelRequestStatsHandler<a class="headerlink" href="#channelrequeststatshandler" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt><strong>connection_requests</strong></dt>
+<dd>a histogram of the number of requests received over the lifetime of a connection</dd>
+</dl>
+</div>
+<div class="section" id="channelstatshandler">
+<h1>ChannelStatsHandler<a class="headerlink" href="#channelstatshandler" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt><strong>connects</strong></dt>
+<dd>a counter of the total number of successful connections made</dd>
+<dt><strong>connection_duration</strong></dt>
+<dd>a histogram of the duration of the lifetime of a connection</dd>
+<dt><strong>connection_received_bytes</strong></dt>
+<dd>a histogram of the number of bytes received over the lifetime of a connection</dd>
+<dt><strong>connection_sent_bytes</strong></dt>
+<dd>a histogram of the number of bytes sent over the lifetime of a connection</dd>
+<dt><strong>received_bytes</strong></dt>
+<dd>a counter of the total number of received bytes</dd>
+<dt><strong>sent_bytes</strong></dt>
+<dd>a counter of the total number of sent bytes</dd>
+<dt><strong>closechans</strong></dt>
+<dd>a counter of the total number of connections closed</dd>
+<dt><strong>writableDuration</strong></dt>
+<dd>a gauge of the length of time the socket has been writable in the channel</dd>
+<dt><strong>unwritableDuration</strong></dt>
+<dd>a gauge of the length of time the socket has been unwritable in the channel</dd>
+<dt><strong>connections</strong></dt>
+<dd>a gauge of the total number of connections that are currently open in the channel</dd>
+</dl>
+</div>
+<div class="section" id="idlechannelhandler">
+<h1>IdleChannelHandler<a class="headerlink" href="#idlechannelhandler" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt><strong>disconnects/{READER_IDLE,WRITER_IDLE}</strong></dt>
+<dd>a counter of the number of times a connection was disconnected because of a given idle state</dd>
+</dl>
+</div>
+<div class="section" id="idleconnectionfilter">
+<h1>IdleConnectionFilter<a class="headerlink" href="#idleconnectionfilter" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt><strong>refused</strong></dt>
+<dd>a counter of the number of connections that have been refused because we have hit the high
+watermark of connections full and no connections are idle.</dd>
+<dt><strong>idle</strong></dt>
+<dd>a gauge of the number of connections that are &#8220;idle&#8221; at this moment</dd>
+<dt><strong>closed</strong></dt>
+<dd>a counter of the number of connections that have been closed for being idle</dd>
+</dl>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="../index.html">
+  <img class="logo" src="../_static/governorlogo.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ClientChannelTransport</a></li>
+<li><a class="reference internal" href="#channelconnector">ChannelConnector</a></li>
+<li><a class="reference internal" href="#serverbridge">ServerBridge</a></li>
+<li><a class="reference internal" href="#channelrequeststatshandler">ChannelRequestStatsHandler</a></li>
+<li><a class="reference internal" href="#channelstatshandler">ChannelStatsHandler</a></li>
+<li><a class="reference internal" href="#idlechannelhandler">IdleChannelHandler</a></li>
+<li><a class="reference internal" href="#idleconnectionfilter">IdleConnectionFilter</a></li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2013 Twitter, Inc.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  
+  </body>
+</html>

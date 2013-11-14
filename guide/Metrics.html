@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.7.2 documentation</title>
+    <title>Metrics &mdash; Finagle 6.8.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.7.2',
+        VERSION:     '6.8.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.7.2 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.8.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Client Stack" href="ClientStack.html" />
    
@@ -58,77 +58,295 @@
             
   <div class="section" id="metrics">
 <h1>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h1>
-<p>Here are some of the metrics reported by finagle. All times are in milliseconds. A metric is either
-a count (C) or a statistic (S).</p>
-<table border="1" class="docutils">
-<colgroup>
-<col width="26%" />
-<col width="1%" />
-<col width="73%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td>closechan</td>
-<td>C</td>
-<td>This counter is incremented every time a connection is closed. Timed
-out connections are closed. By default an idle connection times out in
-5 seconds (hostConnectionIdleTime).</td>
-</tr>
-<tr class="row-even"><td>connection_duration</td>
-<td>S</td>
-<td>A stat representing the distribution of the duration
-of a connection. closechan` and <cite>connection_duration.count</cite> must be
-equal.</td>
-</tr>
-<tr class="row-odd"><td>connection_received_bytes</td>
-<td>S</td>
-<td>bytes received per connection</td>
-</tr>
-<tr class="row-even"><td>connection_requests</td>
-<td>S</td>
-<td>Number of requests per connection, observed after it closes.</td>
-</tr>
-<tr class="row-odd"><td>connection_sent_bytes</td>
-<td>S</td>
-<td>Bytes sent per connection</td>
-</tr>
-<tr class="row-even"><td>connections</td>
-<td>C</td>
-<td>The current number of connections between client and server.</td>
-</tr>
-<tr class="row-odd"><td>handletime_us</td>
-<td>S</td>
-<td>The walltime elapsed while handling a request.</td>
-</tr>
-<tr class="row-even"><td>requests</td>
-<td>S</td>
-<td>The number of requests dispatched.</td>
-</tr>
-<tr class="row-odd"><td>pending</td>
-<td>C</td>
-<td>Number of pending requests (i.e. requests without responses).</td>
-</tr>
-<tr class="row-even"><td>request_latency_ms</td>
-<td>S</td>
-<td>The time from the beginning of a request until the response is
-received</td>
-</tr>
-</tbody>
-</table>
-<div class="section" id="connection-pool-stats">
-<h2>Connection Pool Stats<a class="headerlink" href="#connection-pool-stats" title="Permalink to this headline">¶</a></h2>
-<p id="pool-counts">A finagle client pools tcp connections via a <a class="reference internal" href="ClientStack.html#watermark-pool"><em>WatermarkPool</em></a>
-and <a class="reference internal" href="ClientStack.html#caching-pool"><em>CachingPool</em></a>. The following metrics expose the state
-of the pools in your application.</p>
-<p><strong>pool_cached</strong> - represents the number of cached tcp connections to a particular host. This caching behavior is helpful to eliminate unnecessary connection churn as exposed by the default behavior of the watermark pool.</p>
-<p><strong>pool_size</strong> - represents the number of connections open to the host. It should be between the lower and upper bounds of your client&#8217;s watermark pool configuration.</p>
-<p><strong>pool_waiters</strong> - the number of requests that are queued while waiting for a connection. Note, if you observe that &#8220;pool_waiters&#8221; is exactly zero, then there is no queueing waiting to get a connection from the pool. This means your pool is not under-sized with respect to the current workload. That&#8217;s a good thing!</p>
+<p>This section aims to be a comprehensive list of all of the stats that finagle
+exposes.  The stats are organized by layer and then by class.</p>
+<p>Some of the stats are only for clients, some only for servers, and some are for both.
+Some stats are only visible when certain optional classes are used.</p>
+<p>NB: Finagle uses RollupStatsReceiver internally, which will take stats like
+&#8220;failures/twitter/TimeoutException&#8221; and roll them up, aggregating into &#8220;failures/twitter&#8221;
+and also &#8220;failures&#8221;.  For example, if there are 3 &#8220;failures/twitter/TimeoutException&#8221; counted,
+and 4 &#8220;failures/twitter/ConnectTimeoutException&#8221;, then it will cound 7 &#8220;failures/twitter&#8221;.</p>
+<div class="section" id="public">
+<h2>Public<a class="headerlink" href="#public" title="Permalink to this headline">¶</a></h2>
+<p id="public-stats">These stats come from the public interface, and are the ones that you should look at first
+to figure out whether a client is abusing you, or you are misusing a downstream service.
+They are also useful in diagnosing what contributes to request latency.</p>
+<div class="section" id="statsfilter">
+<h3>StatsFilter<a class="headerlink" href="#statsfilter" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>requests</strong></dt>
+<dd>a counter of the total number of successes + failures</dd>
+<dt><strong>success</strong></dt>
+<dd>a counter of the total number of successes</dd>
+<dt><strong>request_latency_ms</strong></dt>
+<dd>a histogram of the latency of requests in milliseconds</dd>
+<dt><strong>load</strong></dt>
+<dd>a gauge of the current total number of outstanding requests</dd>
+<dt><strong>pending</strong></dt>
+<dd>a gauge of the current total number of outstanding requests</dd>
+<dt><strong>failures/&lt;exception_name&gt;+</strong></dt>
+<dd>a counter of the number of times a specific exception has been thrown</dd>
+<dt><strong>failures</strong></dt>
+<dd>a counter of the number of times any exception has been thrown</dd>
+<dt><strong>sourcedfailures/&lt;source_service_name&gt;{/&lt;exception_name&gt;}+</strong></dt>
+<dd>a counter of the number of times a specific SourcedException has been thrown</dd>
+<dt><strong>sourcedfailures/&lt;source_service_name&gt;</strong></dt>
+<dd>a counter of the number of times any SourcedException has been thrown from this service</dd>
+<dt><strong>sourcedfailures</strong></dt>
+<dd>a counter of the number of times any SourcedException has been thrown</dd>
+</dl>
 </div>
-<div class="section" id="load-balancer-stats">
-<h2>Load Balancer Stats<a class="headerlink" href="#load-balancer-stats" title="Permalink to this headline">¶</a></h2>
-<p id="load-balancer-counts">A finagle client connected to multiple hosts load balances requests via a <a class="reference internal" href="ClientStack.html#heap-balancer"><em>HeapBalancer</em></a>. The following metrics expose the state of the heap balancer.</p>
-<p><strong>size</strong> - represents the current number of nodes used by the balancer.</p>
-<p><strong>adds</strong> - the cumulative node additions over the life time of the client.</p>
-<p><strong>removes</strong> - the cumulative node removals over the life time of the client.</p>
+<div class="section" id="statsfactorywrapper">
+<h3>StatsFactoryWrapper<a class="headerlink" href="#statsfactorywrapper" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>failures/&lt;exception_class_name&gt;</strong></dt>
+<dd>a counter of the number of times a service factory has failed with this specific exception</dd>
+<dt><strong>failures</strong></dt>
+<dd>a counter of the number of times a service factory has failed</dd>
+</dl>
+</div>
+<div class="section" id="handletimefilter">
+<h3>HandletimeFilter<a class="headerlink" href="#handletimefilter" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>handletime_us</strong></dt>
+<dd>a histogram of the time it takes to handle the request in microseconds.
+NB: does not include the time to respond</dd>
+</dl>
+</div>
+<div class="section" id="defaultserver">
+<h3>DefaultServer<a class="headerlink" href="#defaultserver" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>request_concurrency</strong></dt>
+<dd>a gauge of the total number of current concurrent requests</dd>
+<dt><strong>request_queue_size</strong></dt>
+<dd>a gauge of the total number of requests which are waiting because of the limit
+on simultaneous requests</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="construction">
+<h2>Construction<a class="headerlink" href="#construction" title="Permalink to this headline">¶</a></h2>
+<p id="construction-stats">These stats are about setting up services in finagle, and expose whether you are
+having trouble making services.</p>
+<div class="section" id="clientbuilder">
+<h3>ClientBuilder<a class="headerlink" href="#clientbuilder" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>codec_connection_preparation_latency_ms</strong></dt>
+<dd>a histogram of the length of time it takes to prepare a connection and get back a service,
+regardless of success or failure</dd>
+</dl>
+</div>
+<div class="section" id="statsservicefactory">
+<h3>StatsServiceFactory<a class="headerlink" href="#statsservicefactory" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>available</strong></dt>
+<dd>a gauge of whether the underlying factory is available (1) or not (0).  finagle uses this
+primarily to decide whether a host is available to make new connections to in the load balancer.</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="load-balancing">
+<h2>Load Balancing<a class="headerlink" href="#load-balancing" title="Permalink to this headline">¶</a></h2>
+<p id="loadbalancer-stats">These client stats expose the innards of what&#8217;s going on with load balancing, and the management
+of equivalent groups of hosts.</p>
+<div class="section" id="minimumsetcluster">
+<h3>MinimumSetCluster<a class="headerlink" href="#minimumsetcluster" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>censored_add</strong></dt>
+<dd>a counter of the number of times there is an attempt to add a server that is already in the
+minimum set to the cluster</dd>
+<dt><strong>censored_rem</strong></dt>
+<dd>a counter of the number of times there is an attempt to remove a server that is guaranteed to be
+in the minimum set to the cluster</dd>
+<dt><strong>missing</strong></dt>
+<dd>a gauge of the number of servers in the bag-difference between the supplementary cluster and the minimum set.
+this should be the number of servers that would be missing if we only used the supplementary cluster</dd>
+<dt><strong>additional</strong></dt>
+<dd>a gauge of the number of servers in the bag-difference between the minimum set and the supplementary cluster.
+this should be the number of servers that would be missing if we only used the minimum set</dd>
+</dl>
+</div>
+<div class="section" id="heapbalancer">
+<h3>HeapBalancer<a class="headerlink" href="#heapbalancer" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>size</strong></dt>
+<dd>a gauge of the number of nodes in the heap</dd>
+<dt><strong>adds</strong></dt>
+<dd>a counter of the number of adds to the heap</dd>
+<dt><strong>removes</strong></dt>
+<dd>a counter of the number of removes to the heap</dd>
+<dt><strong>available</strong></dt>
+<dd>a gauge of the number of available nodes in the heap</dd>
+<dt><strong>load</strong></dt>
+<dd>a gauge of the total load over all nodes in the heap</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="fail-fast">
+<h2>Fail Fast<a class="headerlink" href="#fail-fast" title="Permalink to this headline">¶</a></h2>
+<p id="fail-fast-stats">These client stats give insight into how finagle handles services where it can&#8217;t make a connection.</p>
+<div class="section" id="failfastfactory">
+<h3>FailFastFactory<a class="headerlink" href="#failfastfactory" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>unhealthy_for_ms</strong></dt>
+<dd>a gauge of how long the FailFastFactory has been retrying for this failure</dd>
+<dt><strong>unhealthy_num_tries</strong></dt>
+<dd>a gauge of the number of times the FailFastFactory has retried for this failure</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="idle-apoptosis">
+<h2>Idle Apoptosis<a class="headerlink" href="#idle-apoptosis" title="Permalink to this headline">¶</a></h2>
+<p id="idle-apoptosis-stats">These client stats keep track of how frequently services&#8211;thin wrappers around connections&#8211;
+die from being idle for too long.</p>
+<div class="section" id="expiringservice">
+<h3>ExpiringService<a class="headerlink" href="#expiringservice" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>idle</strong></dt>
+<dd>a counter of the number of times the service has expired from staying idle for too long
+in between requests</dd>
+<dt><strong>lifetime</strong></dt>
+<dd>a counter of the number of times the service has exceeded its lifetime expiration duration</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="rate-limiting">
+<h2>Rate Limiting<a class="headerlink" href="#rate-limiting" title="Permalink to this headline">¶</a></h2>
+<p id="rate-limiting-stats">These client stats show how much you&#8217;re hitting your rate limit if you&#8217;re using rate limiting.</p>
+<div class="section" id="ratelimitingfilter">
+<h3>RateLimitingFilter<a class="headerlink" href="#ratelimitingfilter" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>refused</strong></dt>
+<dd>a counter of the number of refused connections by the rate limiting filter</dd>
+</dl>
+</div>
+<div class="section" id="retryingfilter">
+<h3>RetryingFilter<a class="headerlink" href="#retryingfilter" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>retries</strong></dt>
+<dd>a histogram of the number of times the service had to retry</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="pooling">
+<h2>Pooling<a class="headerlink" href="#pooling" title="Permalink to this headline">¶</a></h2>
+<p id="pool-stats">These client stats help you keep track of connection churn.</p>
+<div class="section" id="cachingpool">
+<h3>CachingPool<a class="headerlink" href="#cachingpool" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>pool_cached</strong></dt>
+<dd>a gauge of the number of connections cached in the idle Cache</dd>
+</dl>
+</div>
+<div class="section" id="watermarkpool">
+<h3>WatermarkPool<a class="headerlink" href="#watermarkpool" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>pool_waiters</strong></dt>
+<dd>a gauge of the number of clients waiting on connections</dd>
+<dt><strong>pool_size</strong></dt>
+<dd>a gauge of the number of connections that are currently alive, either in use or not</dd>
+</dl>
+</div>
+<div class="section" id="reusingpool">
+<h3>ReusingPool<a class="headerlink" href="#reusingpool" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>conn/fail</strong></dt>
+<dd>a counter of the number of times the connection could not be established and must be retried</dd>
+<dt><strong>conn/dead</strong></dt>
+<dd>a counter of the number of times the connection succeeded once, but later died and must be retried</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="transport">
+<h2>Transport<a class="headerlink" href="#transport" title="Permalink to this headline">¶</a></h2>
+<p id="transport-stats">These metrics pertain to where the finagle abstraction ends and the bytes are sent over the wire.
+Understanding these stats often requires deep knowledge of the protocol, or individual transport
+(e.g. Netty) internals.</p>
+<div class="section" id="clientchanneltransport">
+<h3>ClientChannelTransport<a class="headerlink" href="#clientchanneltransport" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>concurrent_request</strong></dt>
+<dd>a counter of the total number of requests which are written concurrently to the client
+channel transport.  if this stat is incremented, the request is failed, because
+ClientChannelTransport is serial.</dd>
+<dt><strong>orphan_response</strong></dt>
+<dd>a counter of the number of responses which get orphaned. if this stat is incremented, your
+transport has already closed.  you should never see this stat.</dd>
+</dl>
+</div>
+<div class="section" id="channelconnector">
+<h3>ChannelConnector<a class="headerlink" href="#channelconnector" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>connect_latency_ms</strong></dt>
+<dd>a histogram of the length of time it takes for a connection to succeed, in milliseconds</dd>
+<dt><strong>failed_connect_latency_ms</strong></dt>
+<dd>a histogram of the length of time it takes for a connection to fail, in milliseconds</dd>
+<dt><strong>cancelled_connects</strong></dt>
+<dd>a counter of the number of attempts to connect that were cancelled before they succeeded</dd>
+</dl>
+</div>
+<div class="section" id="serverbridge">
+<h3>ServerBridge<a class="headerlink" href="#serverbridge" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>read_timeout</strong></dt>
+<dd>a counter of the number of times the netty channel has caught a ReadTimeoutException.
+this should be the number of timeouts when reading</dd>
+<dt><strong>write_timeout</strong></dt>
+<dd>a counter of the number of times the netty channel has caught a WriteTimeoutException.
+this should be the number of timeouts when writing</dd>
+</dl>
+</div>
+<div class="section" id="channelrequeststatshandler">
+<h3>ChannelRequestStatsHandler<a class="headerlink" href="#channelrequeststatshandler" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>connection_requests</strong></dt>
+<dd>a histogram of the number of requests received over the lifetime of a connection</dd>
+</dl>
+</div>
+<div class="section" id="channelstatshandler">
+<h3>ChannelStatsHandler<a class="headerlink" href="#channelstatshandler" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>connects</strong></dt>
+<dd>a counter of the total number of successful connections made</dd>
+<dt><strong>connection_duration</strong></dt>
+<dd>a histogram of the duration of the lifetime of a connection</dd>
+<dt><strong>connection_received_bytes</strong></dt>
+<dd>a histogram of the number of bytes received over the lifetime of a connection</dd>
+<dt><strong>connection_sent_bytes</strong></dt>
+<dd>a histogram of the number of bytes sent over the lifetime of a connection</dd>
+<dt><strong>received_bytes</strong></dt>
+<dd>a counter of the total number of received bytes</dd>
+<dt><strong>sent_bytes</strong></dt>
+<dd>a counter of the total number of sent bytes</dd>
+<dt><strong>closechans</strong></dt>
+<dd>a counter of the total number of connections closed</dd>
+<dt><strong>writableDuration</strong></dt>
+<dd>a gauge of the length of time the socket has been writable in the channel</dd>
+<dt><strong>unwritableDuration</strong></dt>
+<dd>a gauge of the length of time the socket has been unwritable in the channel</dd>
+<dt><strong>connections</strong></dt>
+<dd>a gauge of the total number of connections that are currently open in the channel</dd>
+</dl>
+</div>
+<div class="section" id="idlechannelhandler">
+<h3>IdleChannelHandler<a class="headerlink" href="#idlechannelhandler" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>disconnects/{READER_IDLE,WRITER_IDLE}</strong></dt>
+<dd>a counter of the number of times a connection was disconnected because of a given idle state</dd>
+</dl>
+</div>
+<div class="section" id="idleconnectionfilter">
+<h3>IdleConnectionFilter<a class="headerlink" href="#idleconnectionfilter" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>refused</strong></dt>
+<dd>a counter of the number of connections that have been refused because we have hit the high
+watermark of connections full and no connections are idle.</dd>
+<dt><strong>idle</strong></dt>
+<dd>a gauge of the number of connections that are &#8220;idle&#8221; at this moment</dd>
+<dt><strong>closed</strong></dt>
+<dd>a counter of the number of connections that have been closed for being idle</dd>
+</dl>
+</div>
 </div>
 </div>
 
@@ -152,8 +370,52 @@ of the pools in your application.</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Metrics</a><ul>
-<li><a class="reference internal" href="#connection-pool-stats">Connection Pool Stats</a></li>
-<li><a class="reference internal" href="#load-balancer-stats">Load Balancer Stats</a></li>
+<li><a class="reference internal" href="#public">Public</a><ul>
+<li><a class="reference internal" href="#statsfilter">StatsFilter</a></li>
+<li><a class="reference internal" href="#statsfactorywrapper">StatsFactoryWrapper</a></li>
+<li><a class="reference internal" href="#handletimefilter">HandletimeFilter</a></li>
+<li><a class="reference internal" href="#defaultserver">DefaultServer</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#construction">Construction</a><ul>
+<li><a class="reference internal" href="#clientbuilder">ClientBuilder</a></li>
+<li><a class="reference internal" href="#statsservicefactory">StatsServiceFactory</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#load-balancing">Load Balancing</a><ul>
+<li><a class="reference internal" href="#minimumsetcluster">MinimumSetCluster</a></li>
+<li><a class="reference internal" href="#heapbalancer">HeapBalancer</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#fail-fast">Fail Fast</a><ul>
+<li><a class="reference internal" href="#failfastfactory">FailFastFactory</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#idle-apoptosis">Idle Apoptosis</a><ul>
+<li><a class="reference internal" href="#expiringservice">ExpiringService</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rate-limiting">Rate Limiting</a><ul>
+<li><a class="reference internal" href="#ratelimitingfilter">RateLimitingFilter</a></li>
+<li><a class="reference internal" href="#retryingfilter">RetryingFilter</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pooling">Pooling</a><ul>
+<li><a class="reference internal" href="#cachingpool">CachingPool</a></li>
+<li><a class="reference internal" href="#watermarkpool">WatermarkPool</a></li>
+<li><a class="reference internal" href="#reusingpool">ReusingPool</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#transport">Transport</a><ul>
+<li><a class="reference internal" href="#clientchanneltransport">ClientChannelTransport</a></li>
+<li><a class="reference internal" href="#channelconnector">ChannelConnector</a></li>
+<li><a class="reference internal" href="#serverbridge">ServerBridge</a></li>
+<li><a class="reference internal" href="#channelrequeststatshandler">ChannelRequestStatsHandler</a></li>
+<li><a class="reference internal" href="#channelstatshandler">ChannelStatsHandler</a></li>
+<li><a class="reference internal" href="#idlechannelhandler">IdleChannelHandler</a></li>
+<li><a class="reference internal" href="#idleconnectionfilter">IdleConnectionFilter</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

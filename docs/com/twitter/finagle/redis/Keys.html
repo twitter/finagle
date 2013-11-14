@@ -164,7 +164,7 @@
         <span class="name">del</span><span class="params">(<span name="keys">keys: Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Removes keys</p><div class="fullcomment"><div class="comment cmt"><p>Removes keys</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of keys removed
+      <p class="shortcomment cmt">Removes keys</p><div class="fullcomment"><div class="comment cmt"><p>Removes keys</p></div><dl class="paramcmts block"><dt class="param">keys</dt><dd class="cmt"><p>list of keys to remove</p></dd><dt>returns</dt><dd class="cmt"><p>Number of keys removed
 </p></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
@@ -214,7 +214,7 @@
         <span class="name">expire</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="ttl">ttl: <span name="java.lang.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Sets how long it will take the key to expire</p><div class="fullcomment"><div class="comment cmt"><p>Sets how long it will take the key to expire</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>boolean, true if it successfully set the ttl (time to live) on a valid key,
+      <p class="shortcomment cmt">Sets how long it will take the key to expire</p><div class="fullcomment"><div class="comment cmt"><p>Sets how long it will take the key to expire</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">ttl</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>boolean, true if it successfully set the ttl (time to live) on a valid key,
 false otherwise.
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#expireAt" data-isabs="false">
@@ -228,7 +228,7 @@ false otherwise.
         <span class="name">expireAt</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="ttl">ttl: <span name="java.lang.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Same effect and semantic as &quot;expire&quot;, but takes an absolute Unix timestamp</p><div class="fullcomment"><div class="comment cmt"><p>Same effect and semantic as &quot;expire&quot;, but takes an absolute Unix timestamp</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>boolean, true if it successfully set the ttl (time to live) on a valid key,
+      <p class="shortcomment cmt">Same effect and semantic as &quot;expire&quot;, but takes an absolute Unix timestamp</p><div class="fullcomment"><div class="comment cmt"><p>Same effect and semantic as &quot;expire&quot;, but takes an absolute Unix timestamp</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">ttl</dt><dd class="cmt"><p>time-to-live as unix timestamp</p></dd><dt>returns</dt><dd class="cmt"><p>boolean, true if it successfully set the ttl (time to live) on a valid key,
 false otherwise.
 </p></dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">

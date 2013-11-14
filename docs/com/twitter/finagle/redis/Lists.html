@@ -240,7 +240,7 @@
       </span>
       </h4>
       <p class="shortcomment cmt">Gets the value of the element at the indexth position in the list.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the value of the element at the indexth position in the list.
-If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>an option of the value of the element at the indexth position in the list.
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">index</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>an option of the value of the element at the indexth position in the list.
 Nothing if the index is out of range.
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lInsertAfter" data-isabs="false">
@@ -256,7 +256,7 @@ Nothing if the index is out of range.
       </h4>
       <p class="shortcomment cmt">Inserts a value after another pivot value in the list.</p><div class="fullcomment"><div class="comment cmt"><p>Inserts a value after another pivot value in the list.
 If the key is a non-list element,
-an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>an option of the new length of the list, or nothing if the pivot is not found, or
+an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">pivot</dt><dd class="cmt"></dd><dt class="param">value</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>an option of the new length of the list, or nothing if the pivot is not found, or
 the list is empty.
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lInsertBefore" data-isabs="false">
@@ -272,7 +272,7 @@ the list is empty.
       </h4>
       <p class="shortcomment cmt">Inserts a value before another pivot value in the list.</p><div class="fullcomment"><div class="comment cmt"><p>Inserts a value before another pivot value in the list.
 If the key is a non-list element,
-an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>an option of the new length of the list, or nothing if the pivot is not found, or the
+an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">pivot</dt><dd class="cmt"></dd><dt class="param">value</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>an option of the new length of the list, or nothing if the pivot is not found, or the
 list is empty.
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lLen" data-isabs="false">
@@ -316,7 +316,7 @@ If the key is a non-list element, an exception will be thrown.</p></div><dl clas
       </span>
       </h4>
       <p class="shortcomment cmt">Pushes a value onto the front of the list.</p><div class="fullcomment"><div class="comment cmt"><p>Pushes a value onto the front of the list.
-If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the length of the list
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">value</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the length of the list
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lRange" data-isabs="false">
       <a id="lRange(ChannelBuffer,Long,Long):Future[List[ChannelBuffer]]"></a>
@@ -330,7 +330,7 @@ If the key is a non-list element, an exception will be thrown.</p></div><dl clas
       </span>
       </h4>
       <p class="shortcomment cmt">Gets the values in the range supplied.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the values in the range supplied.
-If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a list of the value
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">start</dt><dd class="cmt"><p>(inclusive)</p></dd><dt class="param">end</dt><dd class="cmt"><p>(inclusive)</p></dd><dt>returns</dt><dd class="cmt"><p>a list of the value
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lRem" data-isabs="false">
       <a id="lRem(ChannelBuffer,Long,ChannelBuffer):Future[Long]"></a>
@@ -344,8 +344,9 @@ If the key is a non-list element, an exception will be thrown.</p></div><dl clas
       </span>
       </h4>
       <p class="shortcomment cmt">Removes count elements matching value from the list.</p><div class="fullcomment"><div class="comment cmt"><p>Removes count elements matching value from the list.
-If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the number of removed elements.
-</p></dd></dl></div>
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">count</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the number of removed elements.
+</p></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The sign of <code>count</code> describes whether it will remove them from the
+back or the front of the list.  If count is 0, it will remove all instances, value</p></span></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lSet" data-isabs="false">
       <a id="lSet(ChannelBuffer,Long,ChannelBuffer):Future[Unit]"></a>
       <h4 class="signature">
@@ -358,7 +359,8 @@ If the key is a non-list element, an exception will be thrown.</p></div><dl clas
       </span>
       </h4>
       <p class="shortcomment cmt">Sets the indexth element to be value.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the indexth element to be value.
-If the key is a non-list element, an exception will be thrown.</p></div></div>
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">index</dt><dd class="cmt"></dd><dt class="param">value</dt><dd class="cmt"><p>
+</p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lTrim" data-isabs="false">
       <a id="lTrim(ChannelBuffer,Long,Long):Future[Unit]"></a>
       <h4 class="signature">
@@ -370,7 +372,8 @@ If the key is a non-list element, an exception will be thrown.</p></div></div>
         <span class="name">lTrim</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="start">start: <span name="java.lang.Long" class="extype">Long</span></span>, <span name="end">end: <span name="java.lang.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Removes all of the elements from the list except for those in the range.</p>
+      <p class="shortcomment cmt">Removes all of the elements from the list except for those in the range.</p><div class="fullcomment"><div class="comment cmt"><p>Removes all of the elements from the list except for those in the range.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">start</dt><dd class="cmt"><p>(inclusive)</p></dd><dt class="param">end</dt><dd class="cmt"><p>(exclusive)
+</p></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -433,7 +436,7 @@ If the key is a non-list element, an exception will be thrown.</p></div><dl clas
       </span>
       </h4>
       <p class="shortcomment cmt">Pushes a value onto the end of the list.</p><div class="fullcomment"><div class="comment cmt"><p>Pushes a value onto the end of the list.
-If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the length of the list
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">value</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the length of the list
 </p></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>

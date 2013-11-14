@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Client Stack &mdash; Finagle 6.7.2 documentation</title>
+    <title>Client Stack &mdash; Finagle 6.8.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.7.2',
+        VERSION:     '6.8.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.7.2 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.8.0 documentation" href="index.html" />
     <link rel="next" title="Metrics" href="Metrics.html" />
     <link rel="prev" title="Anatomy of a Client" href="ClientAnatomy.html" />
    
@@ -73,6 +73,38 @@ balancing strategy is to pick the host with the least number of outstanding requ
 which is similar to a least connections strategy in other load balancers. Additionally,
 the load balancer deliberately introduces jitter to avoid synchronicity (and thundering herds)
 in a distributed system and to ensure even balancing when request concurrency is low.</p>
+<div class="section" id="minimumsetcluster">
+<h3>MinimumSetCluster<a class="headerlink" href="#minimumsetcluster" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>censored_add</strong></dt>
+<dd>a counter of the number of times there is an attempt to add a server that is already in the
+minimum set to the cluster</dd>
+<dt><strong>censored_rem</strong></dt>
+<dd>a counter of the number of times there is an attempt to remove a server that is guaranteed to be
+in the minimum set to the cluster</dd>
+<dt><strong>missing</strong></dt>
+<dd>a gauge of the number of servers in the bag-difference between the supplementary cluster and the minimum set.
+this should be the number of servers that would be missing if we only used the supplementary cluster</dd>
+<dt><strong>additional</strong></dt>
+<dd>a gauge of the number of servers in the bag-difference between the minimum set and the supplementary cluster.
+this should be the number of servers that would be missing if we only used the minimum set</dd>
+</dl>
+</div>
+<div class="section" id="heapbalancer">
+<h3>HeapBalancer<a class="headerlink" href="#heapbalancer" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>size</strong></dt>
+<dd>a gauge of the number of nodes in the heap</dd>
+<dt><strong>adds</strong></dt>
+<dd>a counter of the number of adds to the heap</dd>
+<dt><strong>removes</strong></dt>
+<dd>a counter of the number of removes to the heap</dd>
+<dt><strong>available</strong></dt>
+<dd>a gauge of the number of available nodes in the heap</dd>
+<dt><strong>load</strong></dt>
+<dd>a gauge of the total load over all nodes in the heap</dd>
+</dl>
+</div>
 </div>
 <div class="section" id="connection-pooling">
 <h2>Connection Pooling<a class="headerlink" href="#connection-pooling" title="Permalink to this headline">¶</a></h2>
@@ -94,7 +126,31 @@ and then slowly decays, based on the TTL.</p>
 maintaining the low watermark (as long as request concurrency exists),
 queueing requests above the high watermark, and applying a TTL for
 services that are between [low, high].</p>
-<p>Note, finagle exposes <a class="reference internal" href="Metrics.html#pool-counts"><em>pool counts</em></a> to observe the pool behavior.</p>
+<div class="section" id="cachingpool">
+<h3>CachingPool<a class="headerlink" href="#cachingpool" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>pool_cached</strong></dt>
+<dd>a gauge of the number of connections cached in the idle Cache</dd>
+</dl>
+</div>
+<div class="section" id="watermarkpool">
+<h3>WatermarkPool<a class="headerlink" href="#watermarkpool" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>pool_waiters</strong></dt>
+<dd>a gauge of the number of clients waiting on connections</dd>
+<dt><strong>pool_size</strong></dt>
+<dd>a gauge of the number of connections that are currently alive, either in use or not</dd>
+</dl>
+</div>
+<div class="section" id="reusingpool">
+<h3>ReusingPool<a class="headerlink" href="#reusingpool" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>conn/fail</strong></dt>
+<dd>a counter of the number of times the connection could not be established and must be retried</dd>
+<dt><strong>conn/dead</strong></dt>
+<dd>a counter of the number of times the connection succeeded once, but later died and must be retried</dd>
+</dl>
+</div>
 </div>
 <div class="section" id="fail-fast">
 <h2>Fail Fast<a class="headerlink" href="#fail-fast" title="Permalink to this headline">¶</a></h2>
@@ -162,8 +218,17 @@ server.</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Client Stack</a><ul>
-<li><a class="reference internal" href="#load-balancing">Load Balancing</a></li>
-<li><a class="reference internal" href="#connection-pooling">Connection Pooling</a></li>
+<li><a class="reference internal" href="#load-balancing">Load Balancing</a><ul>
+<li><a class="reference internal" href="#minimumsetcluster">MinimumSetCluster</a></li>
+<li><a class="reference internal" href="#heapbalancer">HeapBalancer</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#connection-pooling">Connection Pooling</a><ul>
+<li><a class="reference internal" href="#cachingpool">CachingPool</a></li>
+<li><a class="reference internal" href="#watermarkpool">WatermarkPool</a></li>
+<li><a class="reference internal" href="#reusingpool">ReusingPool</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#fail-fast">Fail Fast</a></li>
 <li><a class="reference internal" href="#timeouts">Timeouts</a></li>
 <li><a class="reference internal" href="#retries">Retries</a></li>
