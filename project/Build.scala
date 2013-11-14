@@ -136,7 +136,7 @@ object Finagle extends Build {
     finagleCore, finagleTest, finagleOstrich4, finagleStats,
     finagleZipkin, finagleServersets,
     finagleException, finagleCommonsStats,
-    finagleExp, finagleMdns,
+    finagleExp, finagleMdns, finagleTesters,
 
     // Protocols
     finagleHttp, finagleStream, finagleNative, finagleThrift,
