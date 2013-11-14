@@ -30,6 +30,8 @@ class ThriftClientFinagleServerSpec extends SpecificationWithJUnit {
         somewayPromise() = Return(())
         Future.Void
       }
+      
+      def show_me_your_dtab() = Future.value("")
     }
 
     val server = ServerBuilder()

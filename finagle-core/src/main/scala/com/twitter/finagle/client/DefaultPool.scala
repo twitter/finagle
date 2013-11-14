@@ -41,6 +41,9 @@ case class DefaultPool[Req, Rep](
       if (idleTime <= 0.seconds || high <= low) inputFactory else
         new CachingPool(inputFactory, high - low, idleTime, timer, statsReceiver)
 
+    // NB: WatermarkPool conceals the first "low" closes from CachingPool, so that
+    // CachingPool only caches the last "high - low", and WatermarkPool caches the first
+    // "low".
     val pool = new WatermarkPool(factory, low, high, statsReceiver, maxWaiters)
     if (bufferSize <= 0) pool else new BufferingPool(pool, bufferSize)
   }

@@ -21,6 +21,8 @@ which is similar to a least connections strategy in other load balancers. Additi
 the load balancer deliberately introduces jitter to avoid synchronicity (and thundering herds)
 in a distributed system and to ensure even balancing when request concurrency is low.
 
+.. include:: metrics/LoadBalancing.rst
+
 Connection Pooling
 ^^^^^^^^^^^^^^^^^^
 
@@ -49,7 +51,7 @@ maintaining the low watermark (as long as request concurrency exists),
 queueing requests above the high watermark, and applying a TTL for
 services that are between [low, high].
 
-Note, finagle exposes :ref:`pool counts <pool_counts>` to observe the pool behavior.
+.. include:: metrics/Pooling.rst
 
 Fail Fast
 ^^^^^^^^^

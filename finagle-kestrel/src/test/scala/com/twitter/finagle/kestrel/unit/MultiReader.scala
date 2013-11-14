@@ -55,18 +55,20 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
 
       // We use frozen time for deterministic randomness.
       // The message output order was simply determined empirically.
-      "round robin from multiple available queues" in Time.withTimeAt(Time.epoch + 1.seconds) { _ =>
-        // stuff the queues beforehand
-        val ms = handles map { h =>
-          val m = mock[ReadMessage]
-          h._messages ! m
-          m
-        }
+      if (!sys.props.contains("SKIP_FLAKY")) {
+        "round robin from multiple available queues" in Time.withTimeAt(Time.epoch + 1.seconds) { _ =>
+          // stuff the queues beforehand
+          val ms = handles map { h =>
+            val m = mock[ReadMessage]
+            h._messages ! m
+            m
+          }
 
-        val handle = MultiReader.merge(cluster)
-        (handle.messages??) must be_==(ms(0))
-        (handle.messages??) must be_==(ms(2))
-        (handle.messages??) must be_==(ms(1))
+          val handle = MultiReader.merge(cluster)
+          (handle.messages??) must be_==(ms(0))
+          (handle.messages??) must be_==(ms(2))
+          (handle.messages??) must be_==(ms(1))
+        }
       }
 
       "propagate closes" in {

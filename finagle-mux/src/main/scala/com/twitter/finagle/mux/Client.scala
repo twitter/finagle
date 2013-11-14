@@ -3,7 +3,7 @@ package com.twitter.finagle.mux
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.Context
-import com.twitter.finagle.{WriteException, NoStacktrace}
+import com.twitter.finagle.{WriteException, NoStacktrace, Dtab}
 import com.twitter.util.{Future, Promise, Time}
 import com.twitter.io.Buf
 import java.util.logging.Logger
@@ -137,7 +137,7 @@ private[finagle] class ClientDispatcher(trans: Transport[ChannelBuffer, ChannelB
     val couldDispatch = canDispatch
     val msg = if (couldDispatch == Cap.No) Treq(tag, Some(Trace.id), req) else {
       val contexts = Context.emit() map { case (k, v) => (toCB(k), toCB(v)) }
-      Tdispatch(tag, contexts.toSeq, req)
+      Tdispatch(tag, contexts.toSeq, "", Dtab.baseDiff(), req)
     }
 
     if (traceWrite)

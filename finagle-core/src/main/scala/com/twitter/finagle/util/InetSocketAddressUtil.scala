@@ -1,17 +1,23 @@
 package com.twitter.finagle.util
 
-import java.net.{InetAddress, InetSocketAddress}
+import com.twitter.finagle.core.util.InetAddressUtil
+import java.net.{SocketAddress, UnknownHostException, InetAddress, InetSocketAddress}
 
 object InetSocketAddressUtil {
 
-  val InaddrAny = InetAddress.getByAddress(Array[Byte](0,0,0,0))
-
   /** converts 0.0.0.0 -> public ip in bound ip */
-  def toPublic(bound: InetSocketAddress): InetSocketAddress = {
-    if (bound.getAddress() == InaddrAny)
-      new InetSocketAddress(InetAddress.getLocalHost(), bound.getPort())
-    else
-      bound
+  def toPublic(bound: SocketAddress): SocketAddress = {
+    bound match {
+      case addr: InetSocketAddress =>
+        if (addr.getAddress() == InetAddressUtil.InaddrAny) {
+          val host = try InetAddress.getLocalHost() catch {
+            case _: UnknownHostException => InetAddressUtil.Loopback
+          }
+          new InetSocketAddress(host, addr.getPort())
+        }
+        else bound
+      case _ => bound
+    }
   }
 
   /**

@@ -22,7 +22,8 @@ trait Lists { self: BaseClient =>
   /**
    * Gets the value of the element at the indexth position in the list.
    * If the key is a non-list element, an exception will be thrown.
-   * @params key, index
+   * @param key
+   * @param index
    * @return an option of the value of the element at the indexth position in the list.
    * Nothing if the index is out of range.
    */
@@ -36,7 +37,9 @@ trait Lists { self: BaseClient =>
    * Inserts a value after another pivot value in the list.
    * If the key is a non-list element,
    * an exception will be thrown.
-   * @params key, pivot, value
+   * @param key
+   * @param pivot
+   * @param value
    * @return an option of the new length of the list, or nothing if the pivot is not found, or
    * the list is empty.
    */
@@ -53,7 +56,9 @@ trait Lists { self: BaseClient =>
    * Inserts a value before another pivot value in the list.
    * If the key is a non-list element,
    * an exception will be thrown.
-   * @params key, pivot, value
+   * @param key
+   * @param pivot
+   * @param value
    * @return an option of the new length of the list, or nothing if the pivot is not found, or the
    * list is empty.
    */
@@ -81,7 +86,8 @@ trait Lists { self: BaseClient =>
   /**
    * Pushes a value onto the front of the list.
    * If the key is a non-list element, an exception will be thrown.
-   * @params key, value
+   * @param key
+   * @param value
    * @return the length of the list
    */
   def lPush(key: ChannelBuffer, value: List[ChannelBuffer]): Future[JLong] =
@@ -92,7 +98,9 @@ trait Lists { self: BaseClient =>
   /**
    * Removes count elements matching value from the list.
    * If the key is a non-list element, an exception will be thrown.
-   * @params key, count: The sgn of count describes whether it will remove them from the
+   * @param key
+   * @param count
+   * @note The sign of `count` describes whether it will remove them from the
    * back or the front of the list.  If count is 0, it will remove all instances, value
    * @return the number of removed elements.
    */
@@ -104,7 +112,9 @@ trait Lists { self: BaseClient =>
   /**
    * Sets the indexth element to be value.
    * If the key is a non-list element, an exception will be thrown.
-   * @params key, index, value
+   * @param key
+   * @param index
+   * @param value
    */
   def lSet(key: ChannelBuffer, index: JLong, value: ChannelBuffer): Future[Unit] =
     doRequest(LSet(key, index, value)) {
@@ -114,7 +124,9 @@ trait Lists { self: BaseClient =>
   /**
    * Gets the values in the range supplied.
    * If the key is a non-list element, an exception will be thrown.
-   * @params key, start (inclusive), end (inclusive)
+   * @param key
+   * @param start (inclusive)
+   * @param end (inclusive)
    * @return a list of the value
    */
   def lRange(key: ChannelBuffer, start: JLong, end: JLong): Future[List[ChannelBuffer]] =
@@ -138,7 +150,8 @@ trait Lists { self: BaseClient =>
   /**
    * Pushes a value onto the end of the list.
    * If the key is a non-list element, an exception will be thrown.
-   * @params key, value
+   * @param key
+   * @param value
    * @return the length of the list
    */
   def rPush(key: ChannelBuffer, value: List[ChannelBuffer]): Future[JLong] =
@@ -148,7 +161,9 @@ trait Lists { self: BaseClient =>
 
   /**
    * Removes all of the elements from the list except for those in the range.
-   * @params key, start (inclusive), end (exclusive)
+   * @param key
+   * @param start (inclusive)
+   * @param end (exclusive)
    */
   def lTrim(key: ChannelBuffer, start: JLong, end: JLong): Future[Unit] =
     doRequest(LTrim(key, start, end)) {

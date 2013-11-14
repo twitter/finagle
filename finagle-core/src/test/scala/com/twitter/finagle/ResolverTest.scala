@@ -33,7 +33,7 @@ class ResolverTest extends FunSuite {
 
   test("resolve ServiceLoaded resolvers") {
     val binding = Resolver.eval("test!xyz").bind()
-    binding() match {
+    Var.sample(binding) match {
       case Addr.Bound(addrs) if addrs.size == 1 =>
         assert(addrs.head === TestAddr("xyz"))
       case _ => fail()
@@ -43,13 +43,13 @@ class ResolverTest extends FunSuite {
   test("get a resolver instance") {
     val Some(resolver) = Resolver.get(classOf[TestResolver])
     val binding = resolver.bind("xyz")
-    binding() match {
+    Var.sample(binding) match {
       case Addr.Bound(addrs) if addrs.size == 1 =>
         assert(addrs.head === TestAddr("xyz"))
       case _ => fail()
     }
   }
-  
+
   test("Resolver.resolve (backwards compat.)") {
     val exc = new Exception
     ConstResolver(Addr.Failed(exc)).resolve("blah") match {
@@ -62,5 +62,16 @@ class ResolverTest extends FunSuite {
       case Return(g) => assert(g() === Set(sockaddr))
       case _ => fail()
     }
+  }
+
+  test("Resolver.evalLabeled: Resolve labels of labeled addresses") {
+    val label = "foo"
+    val binding = Resolver.evalLabeled(label + "=test!xyz")
+    assert(binding._2 === label)
+  }
+
+  test("Resolver.evalLabeled: Resolve empty string as label for unlabeled addresses") {
+    val binding = Resolver.evalLabeled("test!xyz")
+    assert(binding._2 === "test!xyz")
   }
 }

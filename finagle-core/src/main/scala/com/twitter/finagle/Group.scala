@@ -6,6 +6,7 @@ import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Closable, Future, Duration, Timer, Var}
 import java.net.SocketAddress
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * A group is a dynamic set of `T`-typed values. It is used to
@@ -39,11 +40,15 @@ trait Group[T] { outer =>
   // The following are semi-internal, to be accessed only by Finagle
   // itself.
 
-  // Note: only use this is you really know what you are doing.
-  protected val _set: Var[Set[T]]
-  // We memoize 'set' to provide Group semantics: this guarantees
-  // that object identity changes only when the underlying value does.
-  final protected[finagle] lazy val set = _set.memo()
+  protected[finagle] val set: Var[Set[T]]
+
+  // We use the ref here to preserve group semantics.  IE: retain object
+  // identity to repeated calls to Group.members
+  final protected[finagle] lazy val ref = {
+    val r = new AtomicReference[Set[T]]()
+    set.observeTo(r)
+    r
+  }
 
   /**
    * Create a new group by mapping each element of this group
@@ -60,7 +65,7 @@ trait Group[T] { outer =>
   def collect[U](f: PartialFunction[T, U]): Group[U] = new Group[U] {
     var mapped = Map[T, U]()
     var last = Set[T]()
-    protected val _set = outer.set map { set =>
+    protected[finagle] val set = outer.set map { set =>
       synchronized {
         mapped ++= (set &~ last) collect {
           case el if f.isDefinedAt(el) => el -> f(el)
@@ -79,29 +84,35 @@ trait Group[T] { outer =>
    * object identity check to be performed to see if the Group has
    * been updated.
    */
-  final def members: Set[T] = set()
+  final def members: Set[T] = ref.get
   final def apply(): Set[T] = members
 
   /**
    * Name the group `n`.
    *
-   * @return `this` mixed in with `NamedGroup`, named `n`
+   * @return `this` mixed in with `LabelledGroup`, named `n`
    */
-  def named(n: String): Group[T] =
-    new Group[T]
-      with Proxy
-      with NamedGroup
-    {
-      val self = outer
-      val _set = self.set
-      val name = n
-    }
+  def named(n: String): Group[T] = LabelledGroup(this, n)
 
   def +(other: Group[T]): Group[T] = new Group[T] {
-    protected val _set = for { a <- outer.set; b <- other.set } yield a++b
+    protected[finagle] val set = for { a <- outer.set; b <- other.set } yield a++b
   }
 
   override def toString = "Group(%s)".format(this() mkString ", ")
+}
+
+/**
+ * A group that simply contains a name. Getting at the set binds the
+ * name, but mostly this is to ship names under the cover of old
+ * APIs. (And hopefully will be deprecated soon enough.)
+ */
+private[finagle] case class NameGroup(name: Name) 
+    extends Group[SocketAddress] {
+
+  protected[finagle] lazy val set: Var[Set[SocketAddress]] = name.bind() map {
+    case Addr.Bound(set) => set
+    case _ => Set()
+  }
 }
 
 trait MutableGroup[T] extends Group[T] {
@@ -112,15 +123,8 @@ trait MutableGroup[T] extends Group[T] {
  * A mixin trait to assign a ``name`` to the group. This is used
  * to assign labels to groups that ascribe meaning to them.
  */
-trait NamedGroup {
-  def name: String
-}
-
-object NamedGroup {
-  def unapply(g: Group[_]): Option[String] = g match {
-    case n: NamedGroup => Some(n.name)
-    case _ => None
-  }
+case class LabelledGroup[T](underlying: Group[T], name: String) extends Group[T] {
+  protected[finagle] lazy val set: Var[Set[T]] = underlying.set
 }
 
 object Group {
@@ -130,11 +134,11 @@ object Group {
    * @param staticMembers the members of the returned static group
    */
   def apply[T](staticMembers: T*): Group[T] = new Group[T] {
-    protected val _set = Var(Set(staticMembers:_*))
+    protected[finagle] val set = Var(Set(staticMembers:_*))
   }
   
   def fromVarAddr(va: Var[Addr]): Group[SocketAddress] = new Group[SocketAddress] {
-    protected val _set = va map {
+    protected[finagle] val set = va map {
       case Addr.Bound(sockaddrs) => sockaddrs
       case _ => Set[SocketAddress]()
     }
@@ -151,8 +155,8 @@ object Group {
    * @param initial the initial elements of the group
    */
   def mutable[T](initial: T*): MutableGroup[T] = new MutableGroup[T] {
-    protected val _set = Var(Set(initial:_*))
-    def update(newMembers: Set[T]) { _set() = newMembers }
+    protected[finagle] val set = Var(Set(initial:_*))
+    def update(newMembers: Set[T]) { set() = newMembers }
   }
 
   /**
@@ -164,12 +168,12 @@ object Group {
   def fromCluster[T](underlying: Cluster[T]): Group[T] = {
     val (snap, edits) = underlying.snap
     new Group[T] {
-      protected val _set = Var(snap.toSet)
+      protected[finagle] val set = Var(snap.toSet)
 
       edits foreach { spool =>
         spool foreach {
-          case Cluster.Add(t) => _set() += t
-          case Cluster.Rem(t) => _set() -= t
+          case Cluster.Add(t) => set() += t
+          case Cluster.Rem(t) => set() -= t
         }
       }
     }

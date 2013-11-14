@@ -20,7 +20,7 @@ trait Resolver {
   @deprecated("Use Resolver.bind", "6.7.x")
   final def resolve(name: String): Try[Group[SocketAddress]] =
     bind(name) match {
-      case Var(Addr.Failed(e)) => Throw(e)
+      case Var.Sampled(Addr.Failed(e)) => Throw(e)
       case va => Return(Group.fromVarAddr(va))
     }
 }
@@ -104,60 +104,62 @@ object Resolver {
    * resolver name is present, the inet resolver is used.
    *
    * Names resolved by this mechanism are also a
-   * [[com.twitter.finagle.NamedGroup]]. By default, this name is
+   * [[com.twitter.finagle.LabelledGroup]]. By default, this name is
    * simply the `addr` string, but it can be overriden by prefixing
    * a name separated by an equals sign from the rest of the addr.
    * For example, the addr "www=inet!google.com:80" resolves
    * "google.com:80" with the inet resolver, but the returned group's
-   * [[com.twitter.finagle.NamedGroup]] name is "www".
+   * [[com.twitter.finagle.LabelledGroup]] name is "www".
    */
   @deprecated("Use Resolver.eval", "6.7.x")
   def resolve(addr: String): Try[Group[SocketAddress]] =
-    Try { eval(addr) } flatMap { n =>
-      n.bind() match {
-        case Var(Addr.Failed(e)) => Throw(e)
-        case va => Return(Group.fromVarAddr(va))
-      }
-    }
-  
+    Try { eval(addr) } map { n => NameGroup(n) }
+
   /**
    * Parse and evaluate the argument into a Name. Eval parses
-   * a simple grammar: a scheme is followed by a bang, followed 
+   * a simple grammar: a scheme is followed by a bang, followed
    * by an argument:
    * 	name := scheme ! arg
    * The scheme is looked up from registered Resolvers, and the
    * argument is passed in.
    *
-   * Eval throws exceptions upon failure to parse the name, or 
-   * on failure to scheme lookup. Since names are late bound, 
+   * Eval throws exceptions upon failure to parse the name, or
+   * on failure to scheme lookup. Since names are late bound,
    * binding failures are deferred.
    */
   def eval(name: String): Name =
-    if (name startsWith "/") Name(name) 
+    if (name startsWith "/") Name(name)
     else new Name {
       val (resolver, arg) = lex(name) match {
         case (Eq :: _) | (Bang :: _) =>
           throw new ResolverAddressInvalid(name)
-  
+
         case El(scheme) :: Bang :: name =>
           resolvers.find(_.scheme == scheme) match {
             case Some(resolver) =>  (resolver, delex(name))
             case None => throw new ResolverNotFoundException(scheme)
           }
-  
+
         case ts => (InetResolver, delex(ts))
       }
-  
+
       def bind() = resolver.bind(arg)
+
+      val reified = name
     }
 
-  private[finagle] def evalLabeled(addr: String): (Name, String) = {
+  /**
+   * Parse and evaluate the argument into a (Name, label: String) tuple.
+   * Arguments are parsed with the same grammar as in `eval`. If a label is not
+   * provided (i.e. no "label=<address>"), then the empty string is returned.
+   */
+   def evalLabeled(addr: String): (Name, String) = {
     val (label, rest) = lex(addr) match {
       case El(n) :: Eq :: rest => (n, rest)
       case Eq :: rest => ("", rest)
       case rest => (addr, rest)
     }
-    
+
     (eval(delex(rest)), label)
   }
 }

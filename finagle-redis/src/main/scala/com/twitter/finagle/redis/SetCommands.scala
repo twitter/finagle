@@ -11,7 +11,8 @@ trait Sets { self: BaseClient =>
   /**
    * Adds elements to the set, according to the set property.
    * Throws an exception if the key does not refer to a set.
-   * @params key, members
+   * @param key
+   * @param members
    * @return the number of new members added to the set.
    */
   def sAdd(key: ChannelBuffer, members: List[ChannelBuffer]): Future[JLong] =
@@ -34,7 +35,8 @@ trait Sets { self: BaseClient =>
   /**
    * Is the member in the set?
    * Throws an exception if the key does not refer to a set.
-   * @params key, members
+   * @param key
+   * @param members
    * @return a boolean, true if it is in the set, false otherwise.  Unassigned
    * keys are considered empty sets.
    */
@@ -58,7 +60,8 @@ trait Sets { self: BaseClient =>
   /**
    * Removes the element from the set if it is in the set.
    * Throws an exception if the key does not refer to a set.
-   * @params key, member
+   * @param key
+   * @param member
    * @return an integer, the number of elements removed from the set, can be
    * 0 if the key is unassigned.
    */

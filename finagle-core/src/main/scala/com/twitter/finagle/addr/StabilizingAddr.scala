@@ -1,0 +1,136 @@
+package com.twitter.finagle.addr
+
+import com.twitter.concurrent.{Offer, Broker}
+import com.twitter.finagle.builder.Cluster
+import com.twitter.finagle.Addr
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.util.DefaultTimer
+import com.twitter.util.{Future, Time, Timer, Duration, Var}
+import scala.collection.immutable.Queue
+import java.net.SocketAddress
+
+private[finagle] object StabilizingAddr {
+  private[finagle/*(testing*/] object State extends Enumeration {
+    type Health = Value
+    // explicitly define intuitive ids as they
+    // are exported for stats.
+    val Healthy = Value(1)
+    val Unknown = Value(0)
+    val Unhealthy = Value(-1)
+  }
+
+  private def qcontains[T](q: Queue[(T, _)], elem: T): Boolean = 
+    q exists { case (e, _) => e == elem }
+
+  /**
+   * A StabilizingAddr conservatively removes elements from a bound
+   * Addr depending on the source health (exposed through `pulse`).
+   * More specifically, removes are delayed until the source is in a
+   * healthy state for at least `grace` period.
+   *
+   * @param addr An offer for underlying address updates.
+   * @param pulse An offer for communicating group health.
+   *        Invariant: The offer should communicate Health in FIFO order
+   *        with respect to time.
+   * @param grace The duration that must elapse before an element
+   *        is removed from the group.
+   */
+  def apply(
+    addr: Offer[Addr],
+    pulse: Offer[State.Health],
+    grace: Duration,
+    statsReceiver: StatsReceiver = NullStatsReceiver,
+    timer: Timer = DefaultTimer.twitter
+  ): Offer[Addr] = new Offer[Addr] {
+    import State._
+
+    implicit val injectTimer = timer
+
+    @volatile var nq = 0
+    @volatile var healthStat = Healthy.id
+    @volatile var set: Set[SocketAddress] = Set.empty
+
+    val health = statsReceiver.addGauge("health") { healthStat }
+    val limbo = statsReceiver.addGauge("limbo") { nq }
+    val stabilized = new Broker[Addr]
+
+    /**
+     * Exclusively maintains the elements in current
+     * based on adds, removes, and health transitions.
+     * Removes are delayed for grace period and each health
+     * transition resets the grace period.
+     */
+    def loop(
+        remq: Queue[(SocketAddress, Time)], 
+        h: Health, 
+        newAddr: Option[Addr]): Future[Unit] = {
+      nq = remq.size
+      Offer.select(
+        pulse map { newh =>
+          healthStat = newh.id
+  
+          // If our health transitions into healthy, reset removal
+          // times foreach elem in remq.
+          newh match {
+            case newh if h == newh =>
+              loop(remq, newh, newAddr)
+            case Healthy =>
+              // Transitioned to healthy: push back
+              val newTime = Time.now + grace
+              val newq = remq map { case (elem, _) => (elem, newTime) }
+              loop(newq, Healthy, newAddr)
+            case newh =>
+              loop(remq, newh, newAddr)
+          }
+        },
+
+        addr map {
+          case Addr.Bound(newSet) =>
+            // Add new addresses and update our downstream.
+            val rem = set &~ newSet
+            set ++= newSet
+
+            // Update our pending queue so that newly added 
+            // entries aren't later removed.
+            var q = remq filter { case (e, _) => !(newSet contains e) }
+  
+            // Add newly removed elements to the remove queue.
+            val until = Time.now + grace
+            for (el <- rem if !qcontains(q, el))
+              q = q enqueue (el, until)
+
+            loop(q, h, Some(Addr.Bound(set)))
+
+          case addr =>
+            // A nonbound address will enqueue all active members
+            // for removal, so that if we become bound again, we can
+            // continue on merrily.
+            val until = Time.now + grace
+            val q = remq enqueue (set map(el => (el, until)))
+            loop(q, h, Some(addr))
+        },
+
+        if (h != Healthy || remq.isEmpty) Offer.never
+        else {
+          // Note: remq is ordered by 'until' time.
+          val ((elem, until), nextq) = remq.dequeue
+          Offer.timeout(until - Time.now) map { _ =>
+            set -= elem
+            loop(nextq, h, Some(Addr.Bound(set)))
+          }
+        },
+
+        newAddr match {
+          case None => Offer.never
+          case Some(newAddr) =>
+            stabilized.send(newAddr) map { _ => loop(remq, h, None) }
+        }
+      )
+    }
+
+    loop(Queue.empty, Healthy, None)
+    
+    // Defer to the underlying Offer.
+    def prepare() = stabilized.recv.prepare()
+  }
+}

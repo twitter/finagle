@@ -4,11 +4,11 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-thriftmux</artifactId>
   <packaging>jar</packaging>
-  <version>6.7.1</version>
+  <version>6.8.1-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
-    <version>0.1.2</version>
+    <version>0.1.6</version>
     <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
   </parent>
   <properties>
@@ -49,33 +49,33 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.7.1</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-mux</artifactId>
-      <version>6.7.1</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift</artifactId>
-      <version>6.7.1</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4</artifactId>
-      <version>6.7.1</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-test</artifactId>
       <scope>test</scope>
-      <version>6.7.1</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>scrooge-runtime</artifactId>
-      <version>3.9.1</version>
+      <version>3.11.1-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -84,6 +84,8 @@
       <plugin>
         <groupId>com.twitter</groupId>
         <artifactId>scrooge-maven-plugin</artifactId>
+        <!-- this version must match the version from scrooge-gen.ivy.xml -->
+        <version>3.11.0</version>
         <configuration>
           <thriftNamespaceMappings>
             <thriftNamespaceMapping>
@@ -93,6 +95,15 @@
           </thriftNamespaceMappings>
           <outputDirectory>target/generated-test-sources</outputDirectory>
         </configuration>
+        <executions combine.children="append">
+          <execution>
+            <id>thrift-test-sources</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>com.twitter</groupId>
@@ -113,6 +124,15 @@
           </thriftOpts>
         </configuration>
         <version>0.0.13</version>
+        <executions combine.children="append">
+          <execution>
+            <id>thrift-test-sources</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

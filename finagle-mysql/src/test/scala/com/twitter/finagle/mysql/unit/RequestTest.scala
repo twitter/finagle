@@ -1,57 +1,90 @@
 package com.twitter.finagle.exp.mysql
 
-import com.twitter.finagle.exp.mysql.protocol.{BufferReader, Buffer, Command, Type}
 import java.sql.{Timestamp, Date => SQLDate}
 import java.util.Calendar
 import java.util.Date
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
+import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader}
 
 @RunWith(classOf[JUnitRunner])
-class RequestTest extends FunSuite with ShouldMatchers {
-
-  test("encode simple request") {
-    val seq = 3
-    val bytes = Array[Byte](0x01, 0x02, 0x03, 0x04)
-    val cb = Buffer.toChannelBuffer(bytes)
-
-    val req = new Request(seq.toShort) {
-      val data = cb
-    }
-
-    val br = BufferReader(req.toChannelBuffer)
-
-    br.readInt24() should be === bytes.size
-    br.readByte() should be === seq
-    br.take(bytes.size) should be === bytes
-  }
-
-  test("encode simple command request") {
+class SimpleCommandRequestTest extends FunSuite {
+  test("encode") {
     val bytes = "table".getBytes
     val cmd = 0x00
     val req = new SimpleCommandRequest(cmd.toByte, bytes)
+    val buf = Buffer.fromChannelBuffer(req.toPacket.toChannelBuffer)
+    val br = BufferReader(buf)
+    assert(br.readInt24() === bytes.size + 1) // cmd byte
+    assert(br.readByte() === 0x00)
+    assert(br.readByte() === cmd)
+    assert(br.take(bytes.size) === bytes)
+  }
+}
 
-    val br = BufferReader(req.toChannelBuffer)
-    br.readInt24() should be === bytes.size + 1 // cmd byte
-    br.readByte() should be === 0x00
-    br.readByte() should be === cmd
-    br.take(bytes.size) should be === bytes
+@RunWith(classOf[JUnitRunner])
+class HandshakeResponseTest extends FunSuite {
+  val username = Some("username")
+  val password = Some("password")
+  val salt = Array[Byte](70,38,43,66,74,48,79,126,76,66,
+                          70,118,67,40,63,68,120,80,103,54)
+  val req = HandshakeResponse(
+    username,
+    password,
+    Some("test"),
+    Capability(0xfffff6ff),
+    salt,
+    Capability(0xf7ff),
+    Charset.Utf8_general_ci,
+    16777216
+  )
+  val br = BufferReader(req.toPacket.body)
+
+  test("encode capabilities") {
+    val mask = br.readInt()
+    assert(mask === 0xfffff6ff)
   }
 
-  test("# of null bytes for all null values") {
+  test("maxPacketSize") {
+    val max = br.readInt()
+    assert(max === 16777216)
+  }
+
+  test("charset") {
+    val charset = br.readByte()
+    assert(charset === 33.toByte)
+  }
+
+  test("reserved bytes") {
+    val rbytes = br.take(23)
+    assert(rbytes.forall(_ == 0))
+  }
+
+  test("username") {
+    assert(br.readNullTerminatedString() === username.get)
+  }
+
+  test("password") {
+    assert(br.readLengthCodedBytes() === req.hashPassword)
+  }
+}
+
+@RunWith(classOf[JUnitRunner])
+class ExecuteRequestTest extends FunSuite {
+  test("null values") {
     val numOfParams = 18
     val nullParams: Array[Any] = Array.fill(numOfParams)(null)
-    val p = PreparedStatement(0, numOfParams)
+    val ok = PrepareOK(0, 0, numOfParams, 0, Nil, Nil)
+    val p = PreparedStatement(ok)
     p.parameters = nullParams
     p.bindParameters() // set no new parameters
     val e = ExecuteRequest(p)
-    val br = BufferReader(e.toChannelBuffer)
-    br.skip(14) // packet header (4bytes) + payload header (10bytes)
+    val br = BufferReader(e.toPacket.body)
+    br.skip(10) // payload header (10bytes)
     br.skip(1) // new params bound flag
     val restSize = br.takeRest().size
-    restSize should be === ((numOfParams+7)/8)
+    assert(restSize === ((numOfParams+7)/8))
   }
 
   // supported types
@@ -86,102 +119,114 @@ class RequestTest extends FunSuite with ShouldMatchers {
     datetime,
     null
   )
+  // create a prepared statement
   val stmtId = 1
-  val ps = PreparedStatement(stmtId, params.size)
+  val ok = PrepareOK(1, 0, params.size, 0, Nil, Nil)
+  val ps = PreparedStatement(ok)
   ps.parameters = params
   val flags, iteration = 0
   val req = ExecuteRequest(ps, flags.toByte, iteration)
+  val br = BufferReader(req.toPacket.body)
 
-  val br = BufferReader(req.toChannelBuffer)
-  br.skip(4) // header
+  // Note, this invariant can change if we decide to
+  // make PreparedStatements persistent data structures.
+  test("ExecuteRequest properly handles recycled PreparedStatements") {
+    val execute1 = ExecuteRequest(ps)
+    ps.parameters = (1 to params.size).map(_ => "new param").toArray
+    val execute2 = ExecuteRequest(ps)
+    val cb1 = execute1.toPacket.toChannelBuffer
+    val cb2 = execute2.toPacket.toChannelBuffer
+    assert(!cb1.equals(cb2))
+  }
 
   val cmd = br.readByte()
   val id = br.readInt()
   val flg = br.readByte()
   val iter = br.readInt()
-
   test("statement Id, flags, and iteration count") {
-    cmd should be === Command.COM_STMT_EXECUTE
-    id should be === stmtId
-    flg should be === flags
-    iter should be === iteration
+    assert(cmd === Command.COM_STMT_EXECUTE)
+    assert(id === stmtId)
+    assert(flg === flags)
+    assert(iter === iteration)
   }
 
-  // null bit map
   val len = ((params.size + 7) / 8).toInt
   val bytes = br.take(len)
-  val bytesAsBigEndian = bytes.reverse
-  val bits = BigInt(bytesAsBigEndian)
 
   test("null bits") {
+    val bytesAsBigEndian = bytes.reverse
+    val bits = BigInt(bytesAsBigEndian)
     for (i <- 0 until params.size) {
       if (params(i) == null)
-        bits.testBit(i) should be === true
+        assert(bits.testBit(i) === true)
       else
-        bits.testBit(i) should be === false
+        assert(bits.testBit(i) === false)
     }
   }
 
   val hasNewParams = br.readByte() == 1
   test("has new parameters") {
-    hasNewParams should be === ps.hasNewParameters
+    assert(hasNewParams === ps.hasNewParameters)
   }
 
   if (hasNewParams) {
     test("type codes") {
       for (p <- params)
-        br.readShort() should be === Type.getCode(p)
+        assert(br.readShort() === Type.getCode(p))
     }
 
     test("String") {
-      br.readLengthCodedString() should be === strVal
+      assert(br.readLengthCodedString() === strVal)
     }
 
     test("Non-Ascii String") {
-      br.readLengthCodedString() should be === nonAsciiStrVal
+      assert(br.readLengthCodedString() === nonAsciiStrVal)
     }
 
     test("Boolean") {
-      br.readByte() should be === (if (boolVal) 1 else 0)
+      assert(br.readByte() === (if (boolVal) 1 else 0))
     }
 
     test("Byte") {
-      br.readByte() should be === byteVal
+      assert(br.readByte() === byteVal)
     }
 
     test("Short") {
-      br.readShort() should be === shortVal
+      assert(br.readShort() === shortVal)
     }
 
     test("Int") {
-      br.readInt() should be === intVal
+      assert(br.readInt() === intVal)
     }
 
     test("Long") {
-      br.readLong() should be === longVal
+      assert(br.readLong() === longVal)
     }
 
     test("Float") {
-      br.readFloat() should be === floatVal
+      assert(br.readFloat() === floatVal)
     }
 
     test("Double") {
-      br.readDouble() should be === doubleVal
+      assert(br.readDouble() === doubleVal)
     }
 
     test("java.sql.Timestamp") {
-      val TimestampValue(ts) = TimestampValue(br.readLengthCodedBytes())
-      ts  should be === timestamp
+      val raw = RawValue(Type.Timestamp, Charset.Binary, true, br.readLengthCodedBytes())
+      val TimestampValue(ts) = raw
+      assert(ts === timestamp)
     }
 
     test("java.sql.Date") {
-      val DateValue(d) = DateValue(br.readLengthCodedBytes())
-      d.toString should be === sqlDate.toString
+      val raw = RawValue(Type.Date, Charset.Binary, true, br.readLengthCodedBytes())
+      val DateValue(d) = raw
+      assert(d.toString === sqlDate.toString)
     }
 
     test("java.util.Date") {
-      val TimestampValue(dt) = TimestampValue(br.readLengthCodedBytes())
-      dt.getTime should be === datetime.getTime
+      val raw = RawValue(Type.DateTime, Charset.Binary, true, br.readLengthCodedBytes())
+      val TimestampValue(dt) = raw
+      assert(dt.getTime === datetime.getTime)
     }
   }
 }

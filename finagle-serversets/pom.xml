@@ -4,11 +4,11 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-serversets</artifactId>
   <packaging>jar</packaging>
-  <version>6.7.1</version>
+  <version>6.8.1-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
-    <version>0.1.2</version>
+    <version>0.1.6</version>
     <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
   </parent>
   <properties>
@@ -19,7 +19,7 @@
     <dependency>
       <groupId>com.twitter.common.zookeeper</groupId>
       <artifactId>server-set</artifactId>
-      <version>1.0.42</version>
+      <version>1.0.56</version>
       <exclusions>
         <exclusion>
           <groupId>javax.mail</groupId>
@@ -82,12 +82,12 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.7.1</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-zk-common</artifactId>
-      <version>6.6.0</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

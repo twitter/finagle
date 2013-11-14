@@ -49,10 +49,10 @@ case class AggregateHttpChunks(
           new HttpFailure(ctx, HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE)
         } else if (chunk.isLast) {
           // Remove traces of request chunking.
-          val encodings = request.getHeaders(HttpHeaders.Names.TRANSFER_ENCODING)
+          val encodings = request.headers.getAll(HttpHeaders.Names.TRANSFER_ENCODING)
           encodings.remove(HttpHeaders.Values.CHUNKED)
           if (encodings.isEmpty)
-            request.removeHeader(HttpHeaders.Names.TRANSFER_ENCODING)
+            request.headers.remove(HttpHeaders.Names.TRANSFER_ENCODING)
 
           request.setChunked(false)
 
@@ -88,7 +88,7 @@ class AggregateHttpRequest(maxBufferSize: Int)
 
           // Remove the the ``Expect:'' header and continue with
           // collecting chunks.
-          request.removeHeader(HttpHeaders.Names.EXPECT)
+          request.headers.remove(HttpHeaders.Names.EXPECT)
           AggregateHttpChunks(this, request, maxBufferSize)
         }
 

@@ -17,7 +17,6 @@ object Decoder {
 
 class Decoder extends AbstractDecoder with StateMachine {
   import Decoder._
-  import ParserUtils._
 
   case class AwaitingResponse()                                                  extends State
   case class AwaitingResponseOrEnd(valuesSoFar: Seq[TokensWithData])             extends State
@@ -99,18 +98,17 @@ class Decoder extends AbstractDecoder with StateMachine {
 
   private[this] def needsData(tokens: Seq[ChannelBuffer]) = {
     val responseName = tokens.head
-    val args = tokens.tail
     if (responseName == VALUE) {
-      validateValueResponse(args)
-      Some(args(2).toInt)
+      validateValueResponse(tokens)
+      Some(tokens(3).toInt)
     } else None
   }
 
 
   private[this] def validateValueResponse(args: Seq[ChannelBuffer]) {
-    if (args.length < 3) throw new ServerError("Too few arguments")
-    if (args.length > 4) throw new ServerError("Too many arguments")
-    if (args.length == 4 && !args(3).matches(DIGITS)) throw new ServerError("CAS must be a number")
-    if (!args(2).matches(DIGITS)) throw new ServerError("Bytes must be number")
+    if (args.length < 4) throw new ServerError("Too few arguments")
+    if (args.length > 5) throw new ServerError("Too many arguments")
+    if (args.length == 5 && !ParserUtils.isDigits(args(4))) throw new ServerError("CAS must be a number")
+    if (!ParserUtils.isDigits(args(3))) throw new ServerError("Bytes must be number")
   }
 }

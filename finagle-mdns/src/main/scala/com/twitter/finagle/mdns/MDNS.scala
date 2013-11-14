@@ -28,7 +28,7 @@ private trait MDNSResolverIface {
   def resolve(regType: String, domain: String): Var[Addr]
 }
 
-private object MDNS {
+private[mdns] object MDNS {
   lazy val pid = ManagementFactory.getRuntimeMXBean.getName.split("@") match {
     case Array(pid, _) => pid
     case _ => "unknown"
@@ -36,9 +36,11 @@ private object MDNS {
 
   def mkName(ps: Any*) = ps.mkString("/")
 
-  def parse(addr: String) = addr.split("\\.") match {
-    case Array(name, app, prot, domain) => (name, app + "." + prot, domain)
-    case _ => throw new MDNSAddressException(addr)
+  def parse(addr: String) = {
+    addr.split("\\.").toList.reverse match {
+      case domain :: prot :: app :: name => (name.reverse.mkString("."), app + "." + prot, domain)
+      case _ => throw new MDNSAddressException(addr)
+    }
   }
 }
 
@@ -91,7 +93,7 @@ class MDNSResolver extends Resolver {
     resolver.resolve(regType, domain) map {
       case Addr.Bound(sockaddrs) =>
         val filtered = sockaddrs collect {
-          case MdnsRecord(n, _, _, a) if n startsWith name => 
+          case MdnsRecord(n, _, _, a) if n startsWith name =>
             a: SocketAddress
         }
         Addr.Bound(filtered)

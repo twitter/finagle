@@ -2,6 +2,7 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.Dtab
 import com.twitter.util.Future
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
@@ -19,6 +20,10 @@ private[finagle] class HttpClientDispatcher[Req <: HttpRequest, Rep <: HttpRespo
   // shouldn't be counted against the retry budget.)
 
   override def apply(req: Req) = {
+    // It's kind of nasty to modify the request inline like this, but it's
+    // in-line with what we already do in finagle-http. For example:
+    // the body buf gets read without slicing.
+    HttpDtab.write(Dtab.baseDiff(), req)
     manager.observeMessage(req)
     super.apply(req) flatMap { rep =>
       manager.observeMessage(rep)

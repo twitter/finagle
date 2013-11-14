@@ -24,14 +24,6 @@ import scala.collection.mutable
  */
 trait Server extends Closable {
   /**
-   * Close the underlying server gracefully with the given grace
-   * period. close() will drain the current channels, waiting up to
-   * ``timeout'', after which channels are forcibly closed.
-   */
-  def close(timeout: Duration = Duration.Top): Future[Unit] =
-    close(timeout.fromNow)
-
-  /**
    * When a server is bound to an ephemeral port, gets back the address
    * with concrete listening port picked.
    */
@@ -412,8 +404,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     val statsReceiver = config.statsReceiver map(_.scope(config.name)) getOrElse NullStatsReceiver
     val logger = config.logger getOrElse Logger.getLogger(config.name)
 
-    val serverAddr = new InetSocketAddress(InetAddress.getLocalHost, 0) //don't care about multi-homed, or port
-    val monitor = config.monitor map(_( config.name, serverAddr)) getOrElse NullMonitor
+    val monitor = config.monitor map(_( config.name, InetSocketAddressUtil.toPublic(config.bindTo))) getOrElse NullMonitor
 
     val tracer = config.tracer
     val timer = DefaultTimer.twitter

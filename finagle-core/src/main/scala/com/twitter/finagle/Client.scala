@@ -42,7 +42,7 @@ trait Client[Req, Rep] {
   /** $newService */
   final def newService(dest: Group[SocketAddress]): Service[Req, Rep] = 
     dest match {
-      case NamedGroup(label) => newService(Name.fromGroup(dest), label)
+      case LabelledGroup(g, label) => newService(Name.fromGroup(g), label)
       case _ => newService(Name.fromGroup(dest), "")
      }
 
@@ -69,7 +69,7 @@ trait Client[Req, Rep] {
   /** $newClient */
   final def newClient(dest: Group[SocketAddress]): ServiceFactory[Req, Rep] = 
     dest match {
-      case NamedGroup(label) => newClient(Name.fromGroup(dest), label)
+      case LabelledGroup(g, label) => newClient(Name.fromGroup(g), label)
       case _ => newClient(Name.fromGroup(dest), "")
     }
 }

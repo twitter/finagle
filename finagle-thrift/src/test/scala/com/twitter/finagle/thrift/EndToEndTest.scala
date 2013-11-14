@@ -6,10 +6,10 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Span, Millis, Seconds}
-import com.twitter.finagle.Service
+import com.twitter.finagle._
 import com.twitter.finagle.tracing.{Record, Trace, Annotation}
 import com.twitter.test._
-import org.apache.thrift.protocol.TProtocolFactory
+import java.io.{StringWriter, PrintWriter}
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite with ThriftTest with Eventually {
@@ -25,6 +25,12 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
       new SomeStruct(123, Trace.id.parentId.toString)
     }
     def someway() = Future.Void
+    def show_me_your_dtab() = Future {
+      val stringer = new StringWriter
+      val printer = new PrintWriter(stringer)
+      Dtab.baseDiff().print(printer)
+      stringer.toString
+    }
   }
 
   val ifaceToService = new B.Service(_, _)
@@ -52,18 +58,27 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
       assert(idSet1 != idSet2)
     }
   }
-  
+
+  testThrift("propagate Dtab") { (client, tracer) =>
+    Dtab.unwind {
+      Dtab.delegate("/a", "/b")
+      Dtab.delegate("/b", "inet!google.com:80")
+      val clientDtab = Await.result(client.show_me_your_dtab())
+      assert(clientDtab === "Dtab(2)\n\t/a -> /b\n\t/b -> inet!google.com:80\n")
+    }
+  }
+
   test("JSON is broken (before we upgrade)") {
-    // We test for the presence of a JSON encoding 
+    // We test for the presence of a JSON encoding
     // bug in thrift 0.5.0[1]. See THRIFT-1375.
     //  When we upgrade, this test will fail and helpfully
     // remind us to add JSON back.
     import org.apache.thrift.protocol._
     import org.apache.thrift.transport._
     import java.nio.ByteBuffer
-    
-    val bytes = Array[Byte](102, 100, 125, -96, 57, -55, -72, 18, 
-      -21, 15, -91, -36, 104, 111, 111, -127, -21, 15, -91, -36, 
+
+    val bytes = Array[Byte](102, 100, 125, -96, 57, -55, -72, 18,
+      -21, 15, -91, -36, 104, 111, 111, -127, -21, 15, -91, -36,
       104, 111, 111, -127, 0, 0, 0, 0, 0, 0, 0, 0)
     val pf = new TJSONProtocol.Factory()
 
@@ -72,7 +87,7 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
       pf.getProtocol(buf).writeBinary(ByteBuffer.wrap(bytes))
       java.util.Arrays.copyOfRange(buf.getArray(), 0, buf.length())
     }
-    
+
     val decoded = {
       val trans = new TMemoryInputTransport(json)
       val bin = pf.getProtocol(trans).readBinary()
@@ -144,7 +159,7 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
 @@ -313,7 +313,7 @@
    // Temporary buffer used by several methods
    private byte[] tmpbuf_ = new byte[4];
- 
+
 -  // Read a byte that must match b[0]; otherwise an excpetion is thrown.
 +  // Read a byte that must match b[0]; otherwise an exception is thrown.
    // Marked protected to avoid synthetic accessor in JSONListContext.read

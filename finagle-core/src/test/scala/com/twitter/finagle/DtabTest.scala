@@ -16,12 +16,14 @@ class DtabTestResolver extends Resolver {
   def bind(arg: String) = {
     val v = Var[Addr](Addr.Neg)
     v() = Addr.Bound(DtabAddr(arg, v))
-    v.memo
+    v
   }
 }
 
 @RunWith(classOf[JUnitRunner])
 class DtabTest extends FunSuite {
+
+  def assertEquiv(d1: Dtab, d2: Dtab) = assert(Dtab.equiv(d1, d2))
 
   test("Dynamically resolve changes") {
     val d = Dtab.empty
@@ -112,15 +114,15 @@ class DtabTest extends FunSuite {
       .delegated("/bar", "/foo")
 
     val va = d.bind("/foo")
-    val Addr.Failed(exc) = va()
+    val Addr.Failed(exc) = Var.sample(va)
     assert(exc.getMessage() === "Resolution reached maximum depth")
   }
   
   test("Handles unknown") {
     val d = Dtab.empty
       .delegated("/foo", "/bar")
-    
-    assert(d.bind("/blah").apply() === Addr.Neg)
+
+    assert(Var.sample(d.bind("/blah")) === Addr.Neg)
   }
 
   test("Dtab.bind nonexistent") {
@@ -129,7 +131,7 @@ class DtabTest extends FunSuite {
       
     
     d.bind("/blah") match {
-      case Var(Addr.Neg) =>
+      case Var.Sampled(Addr.Neg) =>
       case _ => fail()
     }
   }
@@ -144,15 +146,54 @@ class DtabTest extends FunSuite {
       .delegated("/bar", "inet!:9090")
 
     (d1 delegated d2).bind("/foo") match {
-      case Var(Addr.Bound(s)) if s.size == 1 =>
+      case Var.Sampled(Addr.Bound(s)) if s.size == 1 =>
         assert(s.head === new InetSocketAddress(8080))
       case _ => fail()
     }
     
     (d2 delegated d1).bind("/foo") match {
-      case Var(Addr.Bound(s)) if s.size == 1 =>
+      case Var.Sampled(Addr.Bound(s)) if s.size == 1 =>
         assert(s.head === new InetSocketAddress(9090))
       case _ => fail()
+    }
+  }
+  
+  test("Dtab.stripPrefix") {
+    val d1 = Dtab.empty
+      .delegated("/foo", "/bar")
+      .delegated("/baz", "/xxx/yyy")
+
+    val d2 = Dtab.empty
+      .delegated("/foo", "/bar")
+      .delegated("/baz", "/xxx/yyy")
+
+    assert(d1.stripPrefix(d1).isEmpty)
+    assert(d1.stripPrefix(d2).isEmpty)
+
+    assertEquiv(
+      d1.delegated("/foo", "/123").stripPrefix(d1),
+      Dtab.empty.delegated("/foo", "/123"))
+      
+    assertEquiv(d1.stripPrefix(d1.delegated("/a", "/b")), d1)
+    assert(Dtab.empty.stripPrefix(d1).isEmpty)
+  }
+
+  // These are mostly just compilation tests.
+  test("Dtab is a Scala collection") {
+    val b = Dtab.newBuilder
+    b += Dentry("/a", "/b")
+    b += Dentry("/c", "/d")
+    val dtab = b.result
+    
+    val dtab1: Dtab = dtab map { case Dentry(a, b) => 
+      Dentry(a.toUpperCase, b.reified.toUpperCase)
+    }
+    
+    assert(dtab1.size === 2)
+    dtab1(0) match {
+      case Dentry(a, b) =>
+        assert(a === "/A")
+        assert(b.reified === "/B")
     }
   }
 }

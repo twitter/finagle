@@ -44,13 +44,13 @@ class CookieMap(message: Message)
 
   protected def rewriteCookieHeaders() {
     // Clear all cookies - there may be more than one with this name.
-    message.removeHeader(cookieHeaderName)
+    message.headers.remove(cookieHeaderName)
 
     // Add cookies back again
     foreach { case (_, cookie) =>
       val encoder = new NettyCookieEncoder(message.isResponse)
       encoder.addCookie(cookie.underlying)
-      message.addHeader(cookieHeaderName, encoder.encode())
+      message.headers.add(cookieHeaderName, encoder.encode())
     }
   }
 
@@ -98,7 +98,7 @@ class CookieMap(message: Message)
   }
 
   for {
-    cookieHeader <- message.getHeaders(cookieHeaderName).asScala
+    cookieHeader <- message.headers.getAll(cookieHeaderName).asScala
     cookie <- decodeCookies(cookieHeader)
   } {
     add(cookie)

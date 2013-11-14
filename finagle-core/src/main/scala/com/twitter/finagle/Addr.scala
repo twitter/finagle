@@ -11,24 +11,24 @@ import java.net.SocketAddress
  */
 sealed trait Addr
 object Addr {
-  /** 
-   * A bound name. The object is replicated 
+  /**
+   * A bound name. The object is replicated
    * at each of the given socket addresses.
    *
    * Note: This currently protects the underlying addresses
    * from access since we want to add partially resolved addresses
    * in the future. At this point, the API will be fixed.
    */
-  case class Bound private[finagle](addrs: immutable.Set[SocketAddress]) 
+  case class Bound private[finagle](addrs: immutable.Set[SocketAddress])
     extends Addr
-  
-  /** 
+
+  /**
    * The address is failed: binding failed with
    * the given cause.
    */
   case class Failed(cause: Throwable) extends Addr
-  
-  /** 
+
+  /**
    * Binding was delegated to `where`.
    */
   case class Delegated(where: String) extends Addr
@@ -47,7 +47,7 @@ object Addr {
     def apply(addrs: SocketAddress*): Bound =
       Bound(immutable.Set(addrs:_*))
   }
-  
+
   object Failed {
     def apply(why: String): Failed = Failed(new Exception(why))
   }

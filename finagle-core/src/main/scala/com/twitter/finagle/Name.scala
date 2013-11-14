@@ -7,16 +7,16 @@ import com.twitter.finagle.util.Path
 
 /**
  * A name identifies an object. Names may be resolved from strings
- * via [[com.twitter.finagle.Resolver Resolver]]s. Names are late
+ * via [[com.twitter.finagle.Resolver]]s. Names are late
  * bound via `bind`.
  *
  * Names are typically used to identify service endpoints, and are
- * used in trait [[com.twitter.finagle.Client Client]] to name
+ * used in trait [[com.twitter.finagle.Client]] to name
  * destinations-- i.e. where client traffic terminates.
  */
 trait Name {
   /**
-   * Bind the name. The bound name is returned as a 
+   * Bind the name. The bound name is returned as a
    * variable representation -- it is subject to change at
    * any time.
    */
@@ -25,8 +25,15 @@ trait Name {
   /**
    * Scope the name by the given path.
    */
-  def enter(path: String): Name = 
+  def enter(path: String): Name =
     if (path.isEmpty) this else PartialName(this, path)
+
+  /**
+   * The reified version of the Name -- a resolvable string.
+   */
+  def reified: String
+  
+  override def toString = "Name("+reified+")"
 }
 
 object Name {
@@ -35,6 +42,7 @@ object Name {
    */
   def bound(addrs: SocketAddress*): Name = new Name {
     def bind() = Var.value(Addr.Bound(addrs:_*))
+    val reified = "inet!"+(addrs mkString ",")
   }
 
   /**
@@ -45,8 +53,13 @@ object Name {
    * addresses. Empty sets could indicate either pending or negative
    * resolutions.
    */
-  def fromGroup(g: Group[SocketAddress]): Name = new Name {
-    def bind() = g.set map { newSet => Addr.Bound(newSet) }
+  def fromGroup(g: Group[SocketAddress]): Name = g match {
+    case NameGroup(n) => n
+    case g =>
+      new Name {
+        def bind() = g.set map { newSet => Addr.Bound(newSet) }
+        val reified = "fail!"
+      }
   }
 
   /**
@@ -56,21 +69,22 @@ object Name {
     def bind() = Var.value(Addr.Delegated(path))
     override def enter(suffix: String) =
       Name(Path.join(path, suffix))
+    val reified = path
   }
 }
 
-/** 
+/**
  * Represents a socket address that is partially resolved. The
  * residual path is stored in `path`, and must be passed along with
  * the client request.
  */
 private case class PartialSocketAddress(
-  sa: SocketAddress, 
+  sa: SocketAddress,
   path: String
 ) extends SocketAddress
 
 /**
- * Represents a name that is partial: bound addresses are 
+ * Represents a name that is partial: bound addresses are
  * mapped to partial addresses storing the residual path.
  */
 private case class PartialName(
@@ -78,12 +92,14 @@ private case class PartialName(
 ) extends Name {
   def bind(): Var[Addr] = parent.bind() map {
     case Addr.Bound(sockaddrs) =>
-      val partial: Set[SocketAddress] = 
+      val partial: Set[SocketAddress] =
         sockaddrs map { sa => PartialSocketAddress(sa, path) }
       Addr.Bound(partial)
     case a => a
   }
 
-  override def enter(path: String): Name = 
+  override def enter(path: String): Name =
     PartialName(parent, Path.join(this.path, path))
+  
+  val reified = "fail!"
 }

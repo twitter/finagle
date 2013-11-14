@@ -35,8 +35,6 @@ html_style = 'finagle.css'
 
 project = u'Finagle'
 copyright = u'2013 Twitter, Inc'
-version = ''
-release = ''
 htmlhelp_basename = "finagle"
 
 # e.g. :issue:`36` :ticket:`8`

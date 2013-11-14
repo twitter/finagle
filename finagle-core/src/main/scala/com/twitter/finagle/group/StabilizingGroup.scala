@@ -8,6 +8,7 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Future, Time, Timer, Duration, Var}
 import scala.collection.immutable.Queue
 
+@deprecated("Use StabilizingAddr instead", "6.7.5")
 object StabilizingGroup {
   object State extends Enumeration {
     type Health = Value
@@ -18,6 +19,7 @@ object StabilizingGroup {
     val Unhealthy = Value(-1)
   }
 
+  @deprecated("Use StabilizingAddr instead", "6.7.5")
   def apply[T](
     underlying: Group[T],
     pulse: Offer[State.Health],
@@ -59,7 +61,7 @@ object StabilizingGroup {
       members.size - underlying.members.size
     }
 
-    protected val _set = Var(underlying.members)
+    protected[finagle] val set = Var(underlying.members)
 
     /**
      * Exclusively maintains the elements in current
@@ -92,7 +94,7 @@ object StabilizingGroup {
         // Remove pending removes that are present
         // in this update.
         q = q filter { case (e, _) => !(newSet contains e) }
-        _set() ++= newSet &~ snap
+        set() ++= newSet &~ snap
 
         def inQ(elem: T) = q exists { case (e, _) => e == elem }
         for (el <- snap &~ newSet if !inQ(el)) {
@@ -106,7 +108,7 @@ object StabilizingGroup {
       else {
         val ((elem, until), nextq) = remq.dequeue
         Offer.timeout(until - Time.now) map { _ =>
-          _set() -= elem
+          set() -= elem
           loop(nextq, h)
         }
       }

@@ -22,6 +22,8 @@ class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
   private[this] val outstandingRequestCount = new AtomicInteger(0)
   private[this] val dispatchCount = statsReceiver.counter("requests")
   private[this] val successCount = statsReceiver.counter("success")
+  private[this] val failureReceiver = statsReceiver.scope("failures")
+  private[this] val sourcedFailuresReceiver = statsReceiver.scope("sourcedfailures")
   private[this] val latencyStat = statsReceiver.stat("request_latency_ms")
   private[this] val loadGauge = statsReceiver.addGauge("load") { outstandingRequestCount.get }
   private[this] val outstandingRequestCountGauge =
@@ -47,11 +49,10 @@ class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
           latencyStat.add(elapsed().inMilliseconds)
           def flatten(ex: Throwable): Seq[String] =
             if (ex eq null) Seq[String]() else ex.getClass.getName +: flatten(ex.getCause)
-          statsReceiver.scope("failures").counter(flatten(e): _*).incr()
+          failureReceiver.counter(flatten(e): _*).incr()
           e match {
             case sourced: SourcedException if sourced.serviceName != "unspecified" =>
-              statsReceiver
-                .scope("sourcedfailures")
+              sourcedFailuresReceiver
                 .counter(sourced.serviceName +: flatten(sourced): _*)
                 .incr()
             case _ =>

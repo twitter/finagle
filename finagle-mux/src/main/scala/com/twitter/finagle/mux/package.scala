@@ -116,4 +116,6 @@ string describing why the request was discarded. Note that it does
 Treq.
 
  */
-package object mux
+package object mux {
+  type NewSession = Session => Session
+}

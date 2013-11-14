@@ -173,8 +173,9 @@ object ServiceFactory {
     }
 }
 
+@deprecated("use ServiceFactoryProxy instead", "6.7.5")
 trait ProxyServiceFactory[-Req, +Rep] extends ServiceFactory[Req, Rep] with Proxy {
-  val self: ServiceFactory[Req, Rep]
+  def self: ServiceFactory[Req, Rep]
   def apply(conn: ClientConnection) = self(conn)
   def close(deadline: Time) = self.close(deadline)
   override def isAvailable = self.isAvailable
@@ -185,8 +186,10 @@ trait ProxyServiceFactory[-Req, +Rep] extends ServiceFactory[Req, Rep] with Prox
  * ServiceFactory.  This is is useful if you to wrap-but-modify an
  * existing service factory.
  */
-abstract class ServiceFactoryProxy[-Req, +Rep](val self: ServiceFactory[Req, Rep])
-  extends ProxyServiceFactory[Req, Rep]
+abstract class ServiceFactoryProxy[-Req, +Rep](_self: ServiceFactory[Req, Rep])
+  extends ProxyServiceFactory[Req, Rep] {
+  def self: ServiceFactory[Req, Rep] = _self
+}
 
 class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
   extends Service[Req, Rep]

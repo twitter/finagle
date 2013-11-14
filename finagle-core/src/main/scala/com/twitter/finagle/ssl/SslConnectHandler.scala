@@ -16,10 +16,10 @@ import sun.security.util.HostnameChecker
 /**
  * Handle client-side SSL connections:
  *
- *	1.  by delaying the upstream connect until the SSL handshake
- *	is complete (so that we don't send data through a connection
- *	we may later deem invalid), and
- *	2.  optionally performing hostname validation
+ * 1. by delaying the upstream connect until the SSL handshake
+ *    is complete (so that we don't send data through a connection
+ *    we may later deem invalid), and
+ * 2. optionally performing hostname validation
  */
 class SslConnectHandler(
   sslHandler: SslHandler,
@@ -105,11 +105,10 @@ class SslConnectHandler(
 object SslConnectHandler {
   /**
    * Run hostname verification on the session.  This will fail with a
-   * {{SslHostVerificationException}} if the certificate is invalid
-   * for the given session.
+   * [[com.twitter.finagle.SslHostVerificationException]] if the certificate is invalid for the
+   * given session.
    *
-   * This uses {{sun.security.util.HostnameChecker}}.  Any bugs are
-   * theirs.
+   * This uses [[sun.security.util.HostnameChecker]].  Any bugs are theirs.
    */
   def sessionHostnameVerifier(hostname: String)(session: SSLSession): Option[Throwable] = {
     val checker = HostnameChecker.getInstance(HostnameChecker.TYPE_TLS)

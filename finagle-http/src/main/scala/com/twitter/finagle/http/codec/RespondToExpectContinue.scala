@@ -21,7 +21,7 @@ class RespondToExpectContinue extends SimpleChannelUpstreamHandler {
 
         // Remove the the ``Expect:'' header, and let the upstream
         // continue receiving chunks after this.
-        request.removeHeader(HttpHeaders.Names.EXPECT)
+        request.headers.remove(HttpHeaders.Names.EXPECT)
 
       case _ => ()
     }

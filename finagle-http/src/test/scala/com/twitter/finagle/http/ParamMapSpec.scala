@@ -1,6 +1,7 @@
 package com.twitter.finagle.http
 
 import org.specs.SpecificationWithJUnit
+import org.jboss.netty.handler.codec.http.HttpMethod
 
 
 class ParamMapSpec extends SpecificationWithJUnit {
@@ -142,18 +143,28 @@ class ParamMapSpec extends SpecificationWithJUnit {
 
 
     "get, POST params" in {
-      val request = Request(Method.Post, "/search.json")
-      request.contentType = "application/x-www-form-urlencoded"
-      request.contentString = "q=twitter"
-      request.params.get("q") must_== Some("twitter")
+      testPostParams(Method.Post)
+      testPostParams(Method.Put)
+
+      def testPostParams(method: HttpMethod): Unit = {
+        val request = Request(method, "/search.json")
+        request.contentType = "application/x-www-form-urlencoded"
+        request.contentString = "q=twitter"
+        request.params.get("q") must_== Some("twitter")
+      }
     }
 
     "getAll, POST params" in {
-      val request = Request(Method.Post, "/search.json?q=twitter2")
-      request.contentType = "application/x-www-form-urlencoded"
-      request.contentString = "q=twitter"
-      request.params.get("q") must_== Some("twitter") // favor POST param
-      request.params.getAll("q").toList.sorted must_== "twitter" :: "twitter2" :: Nil
+      testPostParams(Method.Post)
+      testPostParams(Method.Put)
+
+      def testPostParams(method: HttpMethod): Unit = {
+        val request = Request(method, "/search.json?q=twitter2")
+        request.contentType = "application/x-www-form-urlencoded"
+        request.contentString = "q=twitter"
+        request.params.get("q") must_== Some("twitter") // favor POST param
+        request.params.getAll("q").toList.sorted must_== "twitter" :: "twitter2" :: Nil
+      }
     }
 
     "ignore body when not a POST" in {

@@ -88,15 +88,15 @@ object MapHeaderMap {
 class MessageHeaderMap(httpMessage: HttpMessage) extends HeaderMap {
 
   def get(key: String): Option[String] =
-    Option(httpMessage.getHeader(key))
+    Option(httpMessage.headers.get(key))
 
   def iterator: Iterator[(String, String)] =
-    httpMessage.getHeaders.asScala.toIterator map { entry =>
+    httpMessage.headers.iterator.asScala map { entry =>
       (entry.getKey, entry.getValue)
     }
 
   override def keys: Iterable[String] =
-    httpMessage.getHeaderNames.asScala
+    httpMessage.headers.names.asScala
 
   override def keySet: Set[String] =
     keys.toSet
@@ -105,23 +105,23 @@ class MessageHeaderMap(httpMessage: HttpMessage) extends HeaderMap {
     keySet.iterator
 
   override def contains(key: String): Boolean =
-    httpMessage.containsHeader(key)
+    httpMessage.headers.contains(key)
 
   def += (kv: (String, String)) = {
-    httpMessage.setHeader(kv._1, kv._2)
+    httpMessage.headers.set(kv._1, kv._2)
     this
   }
 
   def -= (key: String) = {
-    httpMessage.removeHeader(key)
+    httpMessage.headers.remove(key)
     this
   }
 
   def getAll(key: String): Iterable[String] =
-    httpMessage.getHeaders(key).asScala
+    httpMessage.headers.getAll(key).asScala
 
   def add(k: String, v: String) = {
-    httpMessage.addHeader(k, v)
+    httpMessage.headers.add(k, v)
     this
   }
 }

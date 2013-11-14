@@ -362,12 +362,12 @@ class RequestBuilder[HasUrl, HasForm] private[http](
     val encodedReq = encoder.finalizeRequest()
 
     if (encodedReq.isChunked) {
-      val encodings = encodedReq.getHeaders(HttpHeaders.Names.TRANSFER_ENCODING)
+      val encodings = encodedReq.headers.getAll(HttpHeaders.Names.TRANSFER_ENCODING)
       encodings.remove(HttpHeaders.Values.CHUNKED)
       if (encodings.isEmpty)
-        encodedReq.removeHeader(HttpHeaders.Names.TRANSFER_ENCODING)
+        encodedReq.headers.remove(HttpHeaders.Names.TRANSFER_ENCODING)
       else
-        encodedReq.setHeader(HttpHeaders.Names.TRANSFER_ENCODING, encodings)
+        encodedReq.headers.set(HttpHeaders.Names.TRANSFER_ENCODING, encodings)
 
       val chunks = new ListBuffer[ChannelBuffer]
       while (encoder.hasNextChunk) {
@@ -405,7 +405,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
     val req = new DefaultHttpRequest(config.version, method, resource)
     config.headers.foreach { case (k,vs) =>
       vs.foreach { v =>
-        req.addHeader(k, v)
+        req.headers.add(k, v)
       }
     }
     req
@@ -415,7 +415,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
     require(content != null)
     val req = withoutContent(method)
     req.setContent(content)
-    req.setHeader(HttpHeaders.Names.CONTENT_LENGTH, content.readableBytes.toString)
+    req.headers.set(HttpHeaders.Names.CONTENT_LENGTH, content.readableBytes.toString)
     req
   }
 }

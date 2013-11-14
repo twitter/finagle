@@ -181,8 +181,14 @@ module Trace
       DOUBLE = "DOUBLE"
       STRING = "STRING"
 
-      def self.to_thrift(v)
-        FinagleThrift::AnnotationType::VALUE_MAP.index(v)
+      if {}.respond_to?(:key)
+        def self.to_thrift(v)
+          FinagleThrift::AnnotationType::VALUE_MAP.key(v)
+        end
+      else
+        def self.to_thrift(v)
+          FinagleThrift::AnnotationType::VALUE_MAP.index(v)
+        end
       end
     end
 

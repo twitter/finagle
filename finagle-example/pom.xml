@@ -4,11 +4,11 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-example</artifactId>
   <packaging>jar</packaging>
-  <version>6.7.1</version>
+  <version>6.8.1-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
-    <version>0.1.2</version>
+    <version>0.1.6</version>
     <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
   </parent>
   <properties>
@@ -78,62 +78,62 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.7.1</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-http</artifactId>
-      <version>6.7.1</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-kestrel</artifactId>
-      <version>6.7.1</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-memcached</artifactId>
-      <version>6.7.1</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-mysql</artifactId>
-      <version>6.7.1</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4</artifactId>
-      <version>6.7.1</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-redis</artifactId>
-      <version>6.7.1</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-stats</artifactId>
-      <version>6.7.1</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-stream</artifactId>
-      <version>6.7.1</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift</artifactId>
-      <version>6.7.1</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-codec</artifactId>
-      <version>6.6.0</version>
+      <version>6.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>scrooge-core</artifactId>
-      <version>3.9.1</version>
+      <version>3.11.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
@@ -141,6 +141,8 @@
       <plugin>
         <groupId>com.twitter</groupId>
         <artifactId>scrooge-maven-plugin</artifactId>
+        <!-- this version must match the version from scrooge-gen.ivy.xml -->
+        <version>3.11.0</version>
       </plugin>
     </plugins>
   </build>

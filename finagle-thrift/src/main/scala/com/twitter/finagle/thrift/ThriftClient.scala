@@ -5,7 +5,7 @@ import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Group, NamedGroup, Name}
+import com.twitter.finagle.{Group, Name}
 import com.twitter.util.Future
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory

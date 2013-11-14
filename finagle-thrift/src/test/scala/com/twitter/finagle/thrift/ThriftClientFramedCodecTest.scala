@@ -23,7 +23,7 @@ class ThriftClientFramedCodecTest extends FunSuite with MockitoSugar {
 
     Trace.clear()
 
-    val filter = new ThriftClientTracingFilter("service", true, None, protocolFactory)
+    val filter = new TTwitterFilter("service", true, None, protocolFactory)
     val buffer = new OutputBuffer(protocolFactory)
     buffer().writeMessageBegin(
       new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.CALL, 0))
@@ -50,7 +50,7 @@ class ThriftClientFramedCodecTest extends FunSuite with MockitoSugar {
       val traceId = TraceId(Some(SpanId(1L)), None, SpanId(2L), Some(true), Flags().setDebug)
       Trace.setId(traceId)
 
-      val filter = new ThriftClientTracingFilter("service", true, None, protocolFactory)
+      val filter = new TTwitterFilter("service", true, None, protocolFactory)
       val buffer = new OutputBuffer(protocolFactory)
       buffer().writeMessageBegin(new TMessage("method", TMessageType.CALL, 0))
 

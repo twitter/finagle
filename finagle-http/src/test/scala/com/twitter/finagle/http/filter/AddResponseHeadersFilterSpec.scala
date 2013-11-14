@@ -13,7 +13,7 @@ class AddResponseHeadersFilterSpec extends SpecificationWithJUnit with Mockito {
       val request = Request("/object")
       val service = new AddResponseHeadersFilter(Map("X-Money" -> "cash")) andThen mocked
       mocked(request) returns Future(request.response)
-      Await.result(service(request)).headers.toMap mustEqual Map("X-Money" -> "cash")
+      Await.result(service(request)).headerMap.toMap mustEqual Map("X-Money" -> "cash")
       there was one(mocked)(request)
     }
   }

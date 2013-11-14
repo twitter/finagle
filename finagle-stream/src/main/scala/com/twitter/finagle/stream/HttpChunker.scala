@@ -46,35 +46,35 @@ class HttpChunker extends BrokerChannelHandler {
             val writeFuture = Channels.future(ctx.getChannel)
             Channels.write(ctx, writeFuture, chunk)
             write(ctx, res, Some(writeFuture.toTwitterFuture.toOffer))
-         }
-     },
+        }
+      },
 
-     res.error { _ =>
-       val future = Channels.future(ctx.getChannel)
-       val trailer =
-         new DefaultHttpChunkTrailer {
-           override def isLast(): Boolean = res.httpResponse.isChunked
-         }
-       Channels.write(ctx, future, trailer)
-       future {
-         // Close only after we sucesfully write the trailer.
-         // todo: can this be a source of resource leaks?
-         case _ => close()
-       }
-     },
+      res.error { _ =>
+        val future = Channels.future(ctx.getChannel)
+        val trailer =
+          new DefaultHttpChunkTrailer {
+            override def isLast(): Boolean = res.httpResponse.isChunked
+          }
+        Channels.write(ctx, future, trailer)
+        future {
+          // Close only after we sucesfully write the trailer.
+          // todo: can this be a source of resource leaks?
+          case _ => close()
+        }
+      },
 
-     upstreamEvent {
-       case Message(_, _) =>
-         // A pipelined request. We don't support this,
-         // and will just drop it.
-         write(ctx, res)
-       case e@(Closed(_, _) | Disconnected(_, _)) =>
-         e.sendUpstream()
-         close()
-       case e =>
-         e.sendUpstream()
-         write(ctx, res)
-     }
+      upstreamEvent {
+        case Message(_, _) =>
+          // A pipelined request. We don't support this,
+          // and will just drop it.
+          write(ctx, res)
+        case e@(Closed(_, _) | Disconnected(_, _)) =>
+          e.sendUpstream()
+          close()
+        case e =>
+          e.sendUpstream()
+          write(ctx, res)
+      }
     )
   }
 

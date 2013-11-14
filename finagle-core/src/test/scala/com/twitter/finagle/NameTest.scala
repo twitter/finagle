@@ -26,15 +26,15 @@ class NameTest extends FunSuite {
     val sa = new SocketAddress{}
     val n = Name.bound(sa)
     val n1 = n.enter("my/path")
-    val Addr.Bound(sockaddrs) = n1.bind().apply()
+    val Addr.Bound(sockaddrs) = Var.sample(n1.bind())
     assert(sockaddrs === Set(PartialSocketAddress(sa, "my/path")))
   }
 
   test("Name()") {
     val n = Name("/my/path")
-    assert(n.bind().apply() === Addr.Delegated("/my/path"))
+    assert(Var.sample(n.bind()) === Addr.Delegated("/my/path"))
     
-    assert(n.enter("my/subpath").bind().apply() === 
+    assert(Var.sample(n.enter("my/subpath").bind()) === 
       Addr.Delegated("/my/path/my/subpath"))
   }
 }

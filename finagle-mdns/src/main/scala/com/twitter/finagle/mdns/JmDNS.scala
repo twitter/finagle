@@ -86,7 +86,7 @@ private class JmDNSResolver extends MDNSResolverIface {
 
 private class JmDNSGroup(regType: String) extends Group[MdnsRecord] {
   private[this] val services = new mutable.HashMap[String, MdnsRecord]()
-  protected val _set = Var(Set[MdnsRecord]())
+  protected[finagle] val set = Var(Set[MdnsRecord]())
 
   DNS.addServiceListener(regType, new ServiceListener {
     def serviceResolved(event: ServiceEvent) {}
@@ -102,7 +102,7 @@ private class JmDNSGroup(regType: String) extends Group[MdnsRecord] {
 
         synchronized {
           services.put(info.getName, mdnsRecord)
-          _set() = services.values.toSet
+          set() = services.values.toSet
         }
       }
     }
@@ -110,7 +110,7 @@ private class JmDNSGroup(regType: String) extends Group[MdnsRecord] {
     def serviceRemoved(event: ServiceEvent) {
       synchronized {
         if (services.remove(event.getName).isDefined)
-          _set() = services.values.toSet
+          set() = services.values.toSet
       }
     }
   })
