@@ -5,6 +5,13 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.8.1
+~~~~~
+
+- `finagle`: Upgrade ostrich to 9.2.1
+- `finagle`: Upgarde util to 6.8.1
+- `finagle`: Upgarde scrooge to 3.11.1
+
 6.8.0
 ~~~~~
 
