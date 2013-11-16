@@ -6,10 +6,10 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
-  val libVersion = "6.8.0"
+  val libVersion = "6.8.1"
   val zkVersion = "3.3.4"
-  val utilVersion = "6.8.0"
-  val ostrichVersion = "9.2.0"
+  val utilVersion = "6.8.1"
+  val ostrichVersion = "9.2.1"
   val jacksonVersion = "2.2.2"
   val nettyLib = "io.netty" % "netty" % "3.8.0.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
@@ -136,7 +136,7 @@ object Finagle extends Build {
     finagleCore, finagleTest, finagleOstrich4, finagleStats,
     finagleZipkin, finagleServersets,
     finagleException, finagleCommonsStats,
-    finagleExp, finagleMdns,
+    finagleExp, finagleMdns, finagleTesters,
 
     // Protocols
     finagleHttp, finagleStream, finagleNative, finagleThrift,
