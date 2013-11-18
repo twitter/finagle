@@ -27,7 +27,7 @@ class HttpDtabTest extends FunSuite {
       val m = newMsg()
       HttpDtab.write(dtab, m)
       val dtab1 = HttpDtab.read(m)
-      assert(Dtab.equiv(dtab, dtab1))
+      assert(Equiv[Dtab].equiv(dtab, dtab1))
     }
   }
   

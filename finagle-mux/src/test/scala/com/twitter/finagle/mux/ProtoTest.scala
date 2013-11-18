@@ -85,7 +85,7 @@ class ProtoTest extends FunSuite {
           Tdispatch(tag2, ctxs2, dst2, dtab2, req2)) =>
         assert(
           tag1 == tag2 && ctxs1 == ctxs2 && dst1 == dst2 && 
-          Dtab.equiv(dtab1, dtab2) && req1 == req2)
+          Equiv[Dtab].equiv(dtab1, dtab2) && req1 == req2)
       case (a, b) => assert(a === b)
     }
 

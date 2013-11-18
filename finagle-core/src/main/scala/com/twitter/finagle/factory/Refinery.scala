@@ -9,27 +9,42 @@ import java.net.SocketAddress
  * ServiceFactory) based on the current refined name. Refinery caches
  * a default destination; subsequent destinations are instantiated on
  * a one-off basis.
- *
- * @todo Maintain a cache of non-default factories.
  */
 private[finagle] class Refinery[Req, Rep](
   dest: Name, 
   newFactory: Name => ServiceFactory[Req, Rep],
-  baseDtab: => Dtab = Dtab.base
+  ctx: DtabCtx = Dtab
 ) extends ServiceFactory[Req, Rep] {
-  private[this] lazy val self = newFactory(baseDtab.refine(dest))
+  @volatile private[this] var base: Dtab = ctx.base
+  @volatile private[this] var self: ServiceFactory[Req, Rep] =
+    newFactory(base.refine(dest))
+
+  private[this] def newBase(): Unit = synchronized {
+    if (ctx.base eq base) return
+    
+    // Note that his can possibly disrupt outstanding requests when
+    // the base closes. However, dynamically changing bases should
+    // basically never happen, and if it does, only on startup.
+    //
+    // This is a temporary hack: once we do proper caching of dtabs,
+    // we won't need to make handling "base" a special case.
+    self.close()
+    val newBase = ctx.base
+    self = newFactory(newBase.refine(dest))
+    base = newBase
+  }
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-    if (Dtab() == baseDtab) {
-      self(conn)
-    } else {
-      // TODO: cache empty groups here.
-      val factory = newFactory(Dtab.refine(dest))
+    if (ctx.base ne base)
+      newBase()
+
+    if (ctx() eq base) self(conn) else {
+      val factory = newFactory(ctx.refine(dest))
       factory(conn) map { service =>
         new ServiceProxy(service) {
           override def close(deadline: Time) =
             super.close(deadline) transform { case _ =>
-              factory.close(deadline) 
+              factory.close(deadline)
             }
         }
       }

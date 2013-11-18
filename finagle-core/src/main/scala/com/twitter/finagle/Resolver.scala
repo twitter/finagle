@@ -35,6 +35,21 @@ object InetResolver extends Resolver {
   }
 }
 
+object NegResolver extends Resolver {
+  val scheme = "neg"
+  def bind(arg: String) = Var.value(Addr.Neg)
+}
+
+object NilResolver extends Resolver {
+  val scheme = "nil"
+  def bind(arg: String) = Var.value(Addr.Bound())
+}
+
+object FailResolver extends Resolver {
+  val scheme = "fail"
+  def bind(arg: String) = Var.value(Addr.Failed(new Exception(arg)))
+}
+
 class ResolverNotFoundException(scheme: String)
   extends Exception("Resolver not found for scheme \"%s\"".format(scheme))
 
@@ -56,7 +71,7 @@ object Resolver {
   private[this] lazy val resolvers = {
     val rs = LoadService[Resolver]()
     val log = Logger.getLogger(getClass.getName)
-    val resolvers = Seq(InetResolver) ++ rs
+    val resolvers = Seq(InetResolver, NegResolver, NilResolver, FailResolver) ++ rs
 
     val dups = resolvers groupBy(_.scheme) filter { case (_, rs) => rs.size > 1 }
     if (dups.size > 0) throw new MultipleResolversPerSchemeException(dups)
