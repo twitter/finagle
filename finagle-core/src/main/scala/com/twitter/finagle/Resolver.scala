@@ -166,7 +166,7 @@ object Resolver {
   /**
    * Parse and evaluate the argument into a (Name, label: String) tuple.
    * Arguments are parsed with the same grammar as in `eval`. If a label is not
-   * provided (i.e. no "label=<address>"), then the empty string is returned.
+   * provided (i.e. no "label=<addr>"), then the empty string is returned.
    */
    def evalLabeled(addr: String): (Name, String) = {
     val (label, rest) = lex(addr) match {
