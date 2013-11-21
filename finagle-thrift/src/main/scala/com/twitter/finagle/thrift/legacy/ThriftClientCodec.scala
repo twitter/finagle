@@ -26,7 +26,7 @@ private[thrift] class ThriftClientEncoder(protocolFactory: TProtocolFactory)
         call.writeRequest(seqid, protocol)
         Channels.write(ctx, Channels.succeededFuture(e.getChannel()),
                        buffer, e.getRemoteAddress)
-      case _ =>
+      case _: Throwable =>
         Channels.fireExceptionCaught(ctx, new IllegalArgumentException)
         null
     }

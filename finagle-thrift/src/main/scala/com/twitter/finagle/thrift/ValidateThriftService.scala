@@ -52,7 +52,7 @@ class ValidateThriftService(
         exc.getType == TApplicationException.UNKNOWN_METHOD
     }
   } catch {
-    case exc =>
+    case exc: Throwable =>
       Logger.getLogger("finagle-thrift").log(Level.WARNING,
         "Exception while validating connection", exc)
       false
