@@ -34,7 +34,7 @@ as it is included in Finagle's user's guide.
 - `finagle-stats`: adds a cautious registration to HttpMuxer / adds a default metrics endpoint to twitter-server
 - `finagle-core`: verifies that statsfilter has the correct behavior
 - `finagle-serversets`: Add support for parsing a !shardId on the end of a serverset address
-finahle-http`: Use Reader for streaming
+- `finagle-http`: Use Reader for streaming
 - `finagle-core`: no longer makes an anonymous exception in DefaultClient
 - `finagle-core`: Using system class loader does not work when run inside sbt
 - `finagle-core`: add pool_num_waited counter to WatermarkPool
