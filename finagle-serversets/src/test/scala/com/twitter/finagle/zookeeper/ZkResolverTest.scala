@@ -113,7 +113,7 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
         Map[String, InetSocketAddress]("blah" -> blahAddr).asJava, ALIVE)
       eventually { assert(Var.sample(va) === Addr.Bound(addr)) }
       status8080.leave()
-      eventually { assert(Var.sample(va) === Addr.Bound()) }
+      eventually { assert(Var.sample(va) === Addr.Neg) }
       serverSet.join(
         addr,
         Map[String, InetSocketAddress]("blah" -> blahAddr).asJava, ALIVE)

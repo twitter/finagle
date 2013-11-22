@@ -109,8 +109,8 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
 
     Await.ready(anm1.unannounce())
 
-    eventually { assert(Var.sample(va1) === Addr.Bound()) }
-    eventually { assert(Var.sample(va2) === Addr.Bound()) }
+    eventually { assert(Var.sample(va1) === Addr.Neg) }
+    eventually { assert(Var.sample(va2) === Addr.Neg) }
   }
 
   test("announces from the main announcer") {
