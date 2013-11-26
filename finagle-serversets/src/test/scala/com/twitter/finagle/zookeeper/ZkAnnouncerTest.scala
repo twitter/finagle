@@ -117,4 +117,5 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
     val addr = new InetSocketAddress(8080)
     Await.result(Announcer.announce(addr, "zk!%s!0".format(hostPath)))
   }
+
 }
