@@ -12,6 +12,7 @@ Gem::Specification.new do |s|
   s.email       = ["arya@twitter.com"]
   s.summary     = ""
   s.description = "A Ruby client library for integrating into finagle's thrift tracing protocol"
+  s.license     = 'Apache License Version 2.0'
 
   s.required_rubygems_version = ">= 1.3.5"
 
