@@ -5,6 +5,19 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.9.0
+~~~~~
+
+- `finagle-core`: Avoid creating a new 'NoStacktrace' array for each exception.
+- `finagle-core`: Better support for negative Addr resolution in StabilizingAddr.
+- `finagle-core`: Make Dtab.base changeable.
+- `finagle-core`: Move mask cancel filter over to Future#mask.
+- `finagle-exp`: New warmup filter.
+- `finagle-ostrich4`: Deprecate Netty methods.
+- `finagle-serversets`: Better handling of permission exceptions in ZkResolver.
+- `finagle-testers`: Small latency evaluation framework.
+- `finagle`: Adhere to scala 2.10 pattern matching strictness.
+
 6.8.1
 ~~~~~
 
@@ -34,7 +47,7 @@ as it is included in Finagle's user's guide.
 - `finagle-stats`: adds a cautious registration to HttpMuxer / adds a default metrics endpoint to twitter-server
 - `finagle-core`: verifies that statsfilter has the correct behavior
 - `finagle-serversets`: Add support for parsing a !shardId on the end of a serverset address
-finahle-http`: Use Reader for streaming
+- `finagle-http`: Use Reader for streaming
 - `finagle-core`: no longer makes an anonymous exception in DefaultClient
 - `finagle-core`: Using system class loader does not work when run inside sbt
 - `finagle-core`: add pool_num_waited counter to WatermarkPool

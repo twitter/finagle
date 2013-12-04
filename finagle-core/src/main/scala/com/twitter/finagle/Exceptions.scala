@@ -10,7 +10,11 @@ trait SourcedException extends Exception {
 trait NoStacktrace extends Exception {
   override def fillInStackTrace = this
   // specs expects non-empty stacktrace array
-  this.setStackTrace(Array(new StackTraceElement("com.twitter.finagle", "NoStacktrace", null, -1)))
+  this.setStackTrace(NoStacktrace.NoStacktraceArray)
+}
+
+object NoStacktrace {
+  val NoStacktraceArray = Array(new StackTraceElement("com.twitter.finagle", "NoStacktrace", null, -1))
 }
 
 /** Request failures (eg. for request behavior changing brokers.) */

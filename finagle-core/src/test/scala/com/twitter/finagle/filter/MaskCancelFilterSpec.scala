@@ -2,13 +2,18 @@ package com.twitter.finagle.filter
 
 import com.twitter.finagle.Service
 import com.twitter.util.{Future, Promise, Return}
-import org.specs.SpecificationWithJUnit
-import org.specs.mock.Mockito
+import org.junit.runner.RunWith
+import org.mockito.Matchers.anyObject
+import org.mockito.Mockito.{when, verify}
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 
-class MaskCancelFilterSpec extends SpecificationWithJUnit with Mockito {
-  "MaskCancelFilter" should {
+@RunWith(classOf[JUnitRunner])
+class MaskCancelFilterTest extends FunSuite with MockitoSugar {
+  trait MaskHelper {
     val service = mock[Service[Int, Int]]
-    service.close(any) returns Future.Done
+    when(service.close(anyObject)).thenReturn(Future.Done)
     val filter = new MaskCancelFilter[Int, Int]
 
     val filtered = filter andThen service
@@ -16,21 +21,25 @@ class MaskCancelFilterSpec extends SpecificationWithJUnit with Mockito {
       @volatile var interrupted: Option[Throwable] = None
       setInterruptHandler { case exc => interrupted = Some(exc) }
     }
-    service(1) returns p
+    when(service(1)).thenReturn(p)
 
     val f = filtered(1)
-    there was one(service).apply(1)
+    verify(service).apply(1)
+  }
 
-    "mask interrupts" in {
-      p.interrupted must beNone
+  test("MaskCancelFilter should mask interrupts") {
+    new MaskHelper {
+      assert(p.interrupted === None)
       f.raise(new Exception)
-      p.interrupted must beNone
+      assert(p.interrupted === None)
     }
+  }
 
-    "propagate results" in {
-      f.poll must beNone
+  test("MaskCancelFilter should propagate results") {
+    new MaskHelper {
+      assert(f.poll === None)
       p.setValue(123)
-      p.poll must beSome(Return(123))
+      assert(p.poll === Some(Return(123)))
     }
   }
 }

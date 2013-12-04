@@ -46,7 +46,7 @@ object SpanId {
     try {
       Some(this(new RichU64String(spanId).toU64Long))
     } catch {
-      case _ => None
+      case _: Throwable => None
     }
 }
 

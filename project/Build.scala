@@ -6,9 +6,9 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
-  val libVersion = "6.8.1"
+  val libVersion = "6.9.0"
   val zkVersion = "3.3.4"
-  val utilVersion = "6.8.1"
+  val utilVersion = "6.9.0"
   val ostrichVersion = "9.2.1"
   val jacksonVersion = "2.2.2"
   val nettyLib = "io.netty" % "netty" % "3.8.0.Final"
@@ -410,7 +410,7 @@ object Finagle extends Build {
         "com.google.caliper" % "caliper" % "0.5-rc1",
         "com.twitter" % "jsr166e" % "1.0.0"
       )
-    ).dependsOn(finagleCore, finagleTest % "test")
+    ).dependsOn(finagleCore, finagleThrift, finagleTest % "test")
 
   // Uses
 

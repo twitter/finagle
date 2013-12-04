@@ -48,12 +48,11 @@ private[finagle] object StabilizingAddr {
 
     @volatile var nq = 0
     @volatile var healthStat = Healthy.id
-    @volatile var set: Set[SocketAddress] = Set.empty
 
     val health = statsReceiver.addGauge("health") { healthStat }
     val limbo = statsReceiver.addGauge("limbo") { nq }
     val stabilized = new Broker[Addr]
-
+    
     /**
      * Exclusively maintains the elements in current
      * based on adds, removes, and health transitions.
@@ -63,7 +62,9 @@ private[finagle] object StabilizingAddr {
     def loop(
         remq: Queue[(SocketAddress, Time)], 
         h: Health, 
-        newAddr: Option[Addr]): Future[Unit] = {
+        active: Set[SocketAddress],
+        needPush: Boolean,
+        srcAddr: Addr): Future[Unit] = {
       nq = remq.size
       Offer.select(
         pulse map { newh =>
@@ -73,41 +74,38 @@ private[finagle] object StabilizingAddr {
           // times foreach elem in remq.
           newh match {
             case newh if h == newh =>
-              loop(remq, newh, newAddr)
+              loop(remq, newh, active, needPush, srcAddr)
             case Healthy =>
               // Transitioned to healthy: push back
               val newTime = Time.now + grace
               val newq = remq map { case (elem, _) => (elem, newTime) }
-              loop(newq, Healthy, newAddr)
+              loop(newq, Healthy, active, needPush, srcAddr)
             case newh =>
-              loop(remq, newh, newAddr)
+              loop(remq, newh, active, needPush, srcAddr)
           }
         },
 
         addr map {
-          case Addr.Bound(newSet) =>
-            // Add new addresses and update our downstream.
-            val rem = set &~ newSet
-            set ++= newSet
-
+          case addr@Addr.Bound(newSet) =>
             // Update our pending queue so that newly added 
-            // entries aren't later removed.
+            // entries aren't later removed. 
             var q = remq filter { case (e, _) => !(newSet contains e) }
-  
+
             // Add newly removed elements to the remove queue.
             val until = Time.now + grace
-            for (el <- rem if !qcontains(q, el))
+            for (el <- active &~ newSet if !qcontains(q, el))
               q = q enqueue (el, until)
 
-            loop(q, h, Some(Addr.Bound(set)))
+            loop(q, h, active ++ newSet, true, addr)
 
           case addr =>
             // A nonbound address will enqueue all active members
             // for removal, so that if we become bound again, we can
             // continue on merrily.
             val until = Time.now + grace
-            val q = remq enqueue (set map(el => (el, until)))
-            loop(q, h, Some(addr))
+            val q = remq enqueue (active map(el => (el, until)))
+
+            loop(q, h, active, true, addr)
         },
 
         if (h != Healthy || remq.isEmpty) Offer.never
@@ -115,21 +113,25 @@ private[finagle] object StabilizingAddr {
           // Note: remq is ordered by 'until' time.
           val ((elem, until), nextq) = remq.dequeue
           Offer.timeout(until - Time.now) map { _ =>
-            set -= elem
-            loop(nextq, h, Some(Addr.Bound(set)))
+            loop(nextq, h, active - elem, true, srcAddr)
           }
         },
 
-        newAddr match {
-          case None => Offer.never
-          case Some(newAddr) =>
-            stabilized.send(newAddr) map { _ => loop(remq, h, None) }
-        }
+        if (!needPush) Offer.never else {
+          // We always bind if active is nonempty. Otherwise we
+          // pass through the current active address.
+          val addr = 
+            if (active.nonEmpty) Addr.Bound(active)
+            else srcAddr
+          stabilized.send(addr) map { _ =>
+            loop(remq, h, active, false, srcAddr)
+          }
+        } 
       )
     }
 
-    loop(Queue.empty, Healthy, None)
-    
+    loop(Queue.empty, Healthy, Set.empty, false, Addr.Pending)
+
     // Defer to the underlying Offer.
     def prepare() = stabilized.recv.prepare()
   }

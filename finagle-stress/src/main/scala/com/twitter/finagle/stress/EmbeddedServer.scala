@@ -103,7 +103,7 @@ class EmbeddedServer(val addr: SocketAddress) {
         override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
           val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
           response.setContent(ChannelBuffers.wrappedBuffer("..........".getBytes))
-          response.setHeader("Content-Length", "10")
+          response.headers.set("Content-Length", "10")
           if (!isApplicationNonresponsive)
             ctx.getChannel.write(response)
         }

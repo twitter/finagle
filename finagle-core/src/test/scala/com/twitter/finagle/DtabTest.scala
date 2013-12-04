@@ -23,7 +23,7 @@ class DtabTestResolver extends Resolver {
 @RunWith(classOf[JUnitRunner])
 class DtabTest extends FunSuite {
 
-  def assertEquiv(d1: Dtab, d2: Dtab) = assert(Dtab.equiv(d1, d2))
+  def assertEquiv(d1: Dtab, d2: Dtab) = assert(Equiv[Dtab].equiv(d1, d2))
 
   test("Dynamically resolve changes") {
     val d = Dtab.empty

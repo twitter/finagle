@@ -32,7 +32,7 @@ trait Proc[-T] extends Chan[T] {
         // unbounded queue growth.
         if (!closed) {
           try receiver(elem) catch {
-             case exc =>
+             case exc: Throwable =>
                Logger.getLogger("").log(Level.WARNING, "Exception thrown in proc", exc)
            }
         }

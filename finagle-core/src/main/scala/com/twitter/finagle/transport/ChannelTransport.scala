@@ -94,12 +94,14 @@ class ClientChannelTransport[In, Out](ch: Channel, statsReceiver: StatsReceiver)
 {
   ch.getPipeline.addLast("finagleTransportBridge", this)
 
+  private[this] val concurrentRequestCounter = statsReceiver.counter("concurrent_request")
+  private[this] val orphanResponseCounter = statsReceiver.counter("orphan_response")
   private[this] val pending = new AtomicBoolean(false)
 
   private[this] val readq = new AsyncQueue[Out]
   private[this] val writer = Proc[(In, Promise[Unit])] { case (msg, p) =>
     if (!pending.compareAndSet(false, true)) {
-      statsReceiver.counter("concurrent_request").incr()
+      concurrentRequestCounter.incr()
       p.setException(new Exception("write while request pending"))
     } else {
       Channels.write(ch, msg).addListener(new ChannelFutureListener {
@@ -129,7 +131,7 @@ class ClientChannelTransport[In, Out](ch: Channel, statsReceiver: StatsReceiver)
     e match {
       case msg: MessageEvent =>
         if (!pending.compareAndSet(true, false)) {
-          statsReceiver.counter("orphan_response").incr()
+          orphanResponseCounter.incr()
           close()
         } else {
           readq.offer(msg.getMessage.asInstanceOf[Out])

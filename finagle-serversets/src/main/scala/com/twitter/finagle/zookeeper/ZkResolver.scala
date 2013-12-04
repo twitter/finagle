@@ -2,19 +2,19 @@ package com.twitter.finagle.zookeeper
 
 import com.google.common.collect.ImmutableSet
 import com.twitter.common.net.pool.DynamicHostSet
-import com.twitter.common.zookeeper.ServerSet
-import com.twitter.common.zookeeper.ServerSetImpl
+import com.twitter.common.net.pool.DynamicHostSet.MonitorException
+import com.twitter.common.zookeeper.{ServerSet, ServerSetImpl}
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.finagle.addr.StabilizingAddr
 import com.twitter.finagle.stats.DefaultStatsReceiver
 import com.twitter.finagle.{Group, Resolver, InetResolver, Addr}
+import com.twitter.thrift.Endpoint
 import com.twitter.thrift.ServiceInstance
 import com.twitter.thrift.Status.ALIVE
 import com.twitter.util.{Future, Return, Throw, Try, Var}
 import java.net.{InetSocketAddress, SocketAddress}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-import com.twitter.thrift.Endpoint
 
 class ZkResolverException(msg: String) extends Exception(msg)
 
@@ -46,11 +46,24 @@ private class ZkOffer(serverSet: ServerSet, path: String)
   private val inbound = new Broker[Set[ServiceInstance]]
 
   override def run() {
-    serverSet.monitor(new DynamicHostSet.HostChangeMonitor[ServiceInstance] {
-      def onChange(newSet: ImmutableSet[ServiceInstance]) {
-        inbound !! newSet.asScala.toSet
+    var ok = false
+    while (!ok) {
+      try {
+        serverSet.monitor(new DynamicHostSet.HostChangeMonitor[ServiceInstance] {
+          def onChange(newSet: ImmutableSet[ServiceInstance]) {
+            inbound !! newSet.asScala.toSet
+          }
+        })
+        ok = true
+      } catch {
+        case exc: MonitorException =>
+          // There are certain path permission checks in the serverset library
+          // that can cause exceptions here. We'll send an empty set (which 
+          // becomes a negative resolution), but keep on trying.
+          inbound !! Set.empty
+          Thread.sleep(5000)
       }
-    })
+    }
   }
 
   def prepare() = inbound.recv.prepare()
@@ -125,6 +138,7 @@ class ZkResolver(factory: ZkClientFactory) extends Resolver {
     stable foreach { newAddr =>
       v() = newAddr
     }
+
     v
   }
 

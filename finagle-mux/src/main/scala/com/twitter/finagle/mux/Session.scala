@@ -23,6 +23,14 @@ private case object Closed extends TransportState
  * draining facilities provided by a mux session.
  */
 trait Session extends Service[Buf, Buf] with Closable {
+  private[mux] val transState = Var[TransportState](Open)
+  private[this] val pClosed = new Promise[Unit]
+
+  transState observe {
+    case Closed => pClosed.setDone()
+    case _ => ()
+  }
+
   def message(buf: Buf): Future[Unit]
   def ping(): Future[Unit]
   def drain(): Future[Unit]
@@ -31,12 +39,7 @@ trait Session extends Service[Buf, Buf] with Closable {
     pClosed
   }
 
-  private[mux] val transState = Var[TransportState](Open)
-  private[this] val pClosed = new Promise[Unit]
-  transState observe {
-    case Closed => pClosed.setDone()
-    case _ => ()
-  }
+  val onClose: Future[Unit] = pClosed
 }
 
 object ExhaustedTagsException

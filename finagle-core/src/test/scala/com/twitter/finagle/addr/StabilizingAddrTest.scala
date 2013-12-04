@@ -156,21 +156,42 @@ class StabilizingAddrTest extends FunSuite {
       assertStable()
     }
   }
-  
-  test("pass through nonbound addresses, carrying over adds from last seen bound addr") {
+
+  test("Qualify Addr.Neg like an empty group") {
     Time.withCurrentTimeFrozen { tc =>
       val ctx = new Context
       import ctx._
-      
+
       healthStatus.mkHealthy()
 
       assertStable()
       addrs.broker !! Addr.Neg
-      assert(stabilized === Addr.Neg)
-      addrs() = Set(s1,s2)
       assert(stabilized === Addr.Bound(allAddrs))
       tc.advance(grace)
       timer.tick()
+      assert(stabilized === Addr.Neg)
+    }
+  }
+
+  test("Pass through nonbound addresses after grace") {
+    Time.withCurrentTimeFrozen { tc =>
+      val ctx = new Context
+      import ctx._
+
+      healthStatus.mkHealthy()
+
+      assertStable()
+      addrs() = Set(s1,s2)
+      tc.advance(grace/2); timer.tick()
+      assert(stabilized === Addr.Bound(allAddrs))
+      addrs.broker !! Addr.Neg
+      assert(stabilized === Addr.Bound(allAddrs))
+      tc.advance(grace/2); timer.tick()
+      assert(stabilized === Addr.Bound(Set(s1,s2)))
+      tc.advance(grace/2); timer.tick()
+      assert(stabilized === Addr.Neg)
+      
+      addrs() = Set(s1,s2)
       assertStable()
     }
   }
