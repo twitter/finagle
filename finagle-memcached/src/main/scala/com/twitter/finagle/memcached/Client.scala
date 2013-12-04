@@ -35,6 +35,7 @@ object Client {
       .hosts(host)
       .hostConnectionLimit(1)
       .codec(Memcached())
+      .daemon(true)
       .build())
 
   /**
@@ -46,6 +47,7 @@ object Client {
       .cluster(cluster)
       .hostConnectionLimit(1)
       .codec(new Memcached)
+      .daemon(true)
       .build())
 
   /**
@@ -53,10 +55,11 @@ object Client {
    */
   def apply(group: Group[SocketAddress]) : Client = Client(
     ClientBuilder()
-        .group(group)
-        .hostConnectionLimit(1)
-        .codec(new Memcached)
-        .build())
+      .group(group)
+      .hostConnectionLimit(1)
+      .codec(new Memcached)
+      .daemon(true)
+      .build())
 
   /**
    * Construct a client from a single Service.
@@ -854,7 +857,8 @@ case class KetamaClientBuilder private[memcached] (
 
   def build(): Client = {
     val builder =
-      (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)).codec(Memcached())
+      (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1).daemon(true))
+        .codec(Memcached())
 
     def legacyFAClientBuilder(
       node: CacheNode, key: KetamaClientKey, broker: Broker[NodeHealth], faParams: (Int, Duration)
@@ -937,7 +941,7 @@ case class RubyMemCacheClientBuilder(
     copy(_clientBuilder = Some(clientBuilder))
 
   def build(): PartitionedClient = {
-    val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)
+    val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1).daemon(true)
     val clients = _nodes.map { case (hostname, port, weight) =>
       require(weight == 1, "Ruby memcache node weight must be 1")
       Client(builder.hosts(hostname + ":" + port).codec(Memcached()).build())
@@ -986,7 +990,7 @@ case class PHPMemCacheClientBuilder(
     copy(_clientBuilder = Some(clientBuilder))
 
   def build(): PartitionedClient = {
-    val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)
+    val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1).daemon(true)
     val keyHasher = KeyHasher.byName(_hashName.getOrElse("crc32-itu"))
     val clients = _nodes.map { case (hostname, port, weight) =>
       val client = Client(builder.hosts(hostname + ":" + port).codec(Memcached()).build())

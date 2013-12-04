@@ -170,6 +170,7 @@ class ClusterMultiReaderBuilder private[kestrel](config: ClusterMultiReaderConfi
           .connectTimeout(1.minute)
           .requestTimeout(1.minute)
           .hostConnectionLimit(1)
+          .daemon(true)
     }
 
     config.cluster map { socketAddr =>

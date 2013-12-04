@@ -154,6 +154,7 @@ object Client {
       .codec(Kestrel())
       .hosts(hosts)
       .hostConnectionLimit(1)
+      .daemon(true)
       .buildFactory()
     apply(service)
   }
