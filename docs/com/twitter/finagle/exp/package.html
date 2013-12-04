@@ -63,6 +63,18 @@ stabilized (moved elsewhere) at any time.
       </h4>
       <p class="comment cmt">Issue a backup request after a threshold time has elapsed, useful
 for curtailing tail latencies in distributed systems.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.ForwardingWarmUpFilter" data-isabs="true">
+      <a id="ForwardingWarmUpFilter:ForwardingWarmUpFilter[Req, Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ForwardingWarmUpFilter.html"><span class="name">ForwardingWarmUpFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A filter that forwards thrift requests to a specified service.</p>
     </li><li visbl="pub" name="com.twitter.finagle.exp.MysqlClient" data-isabs="false">
       <a id="MysqlClient:MysqlClient"></a>
       <h4 class="signature">
@@ -89,6 +101,18 @@ a mysql client in terms of a finagle DefaultClient.</p>
       </h4>
       <p class="comment cmt">A rich mysql client supplements a Client[Request, Result]
 with convenient mysql specific builder methods.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.ThriftForwardingWarmUpFilter" data-isabs="false">
+      <a id="ThriftForwardingWarmUpFilter:ThriftForwardingWarmUpFilter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftForwardingWarmUpFilter.html"><span class="name">ThriftForwardingWarmUpFilter</span></a><span class="result"> extends ForwardingWarmUpFilter[Array[Byte], Array[Byte]]</span>
+      </span>
+      </h4>
+      
     </li></ol>
             </div>
 
@@ -132,6 +156,18 @@ with convenient mysql specific builder methods.</p>
       </span>
       </h4>
       <p class="comment cmt">Tracing filter for mysql client requests.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.ThriftForwardingWarmUpFilter" data-isabs="false">
+      <a id="ThriftForwardingWarmUpFilter:ThriftForwardingWarmUpFilter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftForwardingWarmUpFilter$.html"><span class="name">ThriftForwardingWarmUpFilter</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql" data-isabs="false">
       <a id="mysql:mysql"></a>
       <h4 class="signature">

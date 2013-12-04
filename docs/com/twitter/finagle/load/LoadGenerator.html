@@ -2,36 +2,36 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.DtabBuilder</title>
+          <title>com.twitter.finagle.load.LoadGenerator</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../lib/template.css" />
-      <script type="text/javascript" src="../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
     
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
-        <img src="../../../lib/class_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../package.html">com</a>.<a name="com.twitter" class="extype" href="../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="package.html">finagle</a></p>
-        <h1>DtabBuilder</h1>
+        <a title="Go to companion" href="LoadGenerator$.html"><img src="../../../../lib/class_to_object_big.png" /></a>
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.load" class="extype" href="package.html">load</a></p>
+        <h1><a title="Go to companion" href="LoadGenerator$.html">LoadGenerator</a></h1>
       </div>
 
       <h4 class="signature" id="signature">
       <span class="modifier_kind">
-        <span class="modifier">final </span>
+        <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">DtabBuilder</span><span class="result"> extends <span name="scala.collection.mutable.Builder" class="extype">Builder</span>[<span name="com.twitter.finagle.Dentry" class="extype">Dentry</span>, <span name="com.twitter.finagle.Dtab" class="extype">Dtab</span>]</span>
+        <span class="name">LoadGenerator</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="scala.collection.mutable.Builder" class="extype">Builder</span>[<span name="com.twitter.finagle.Dentry" class="extype">Dentry</span>, <span name="com.twitter.finagle.Dtab" class="extype">Dtab</span>], <span name="scala.collection.generic.Growable" class="extype">Growable</span>[<span name="com.twitter.finagle.Dentry" class="extype">Dentry</span>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.DtabBuilder" class="in"><span>DtabBuilder</span></li><li name="scala.collection.mutable.Builder" class="in"><span>Builder</span></li><li name="scala.collection.generic.Growable" class="in"><span>Growable</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.load.LoadGenerator" class="in"><span>LoadGenerator</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -57,15 +57,15 @@
         <div id="allMembers">
         <div class="members" id="constructors">
               <h3>Instance Constructors</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.DtabBuilder#this" data-isabs="false">
-      <a id="this:DtabBuilder"></a>
+              <ol><li visbl="pub" name="com.twitter.finagle.load.LoadGenerator#this" data-isabs="false">
+      <a id="this:LoadGenerator[Req, Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">DtabBuilder</span><span class="params">()</span>
+        <span class="name">LoadGenerator</span><span class="params">(<span name="history">history: TraversableOnce[<a name="com.twitter.finagle.load.Event" class="extype" href="Event.html">Event</a>[Req, Rep]]</span>, <span name="recorder">recorder: (<span name="com.twitter.util.Duration" class="extype">Duration</span>, <span name="com.twitter.util.Future" class="extype">Future</span>[Rep]) ⇒ <span name="scala.Unit" class="extype">Unit</span></span>, <span name="filter">filter: <a name="com.twitter.finagle.SimpleFilter" class="extype" href="../SimpleFilter.html">SimpleFilter</a>[<a name="com.twitter.finagle.load.Event" class="extype" href="Event.html">Event</a>[Req, Rep], Rep]</span>, <span name="timer">timer: <span name="com.twitter.util.MockTimer" class="extype">MockTimer</span> = <span class="symbol">new com.twitter.util.MockTimer()</span></span>)</span>
       </span>
       </h4>
       
@@ -114,42 +114,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.collection.generic.Growable#++=" data-isabs="false">
-      <a id="++=(TraversableOnce[Dentry]):DtabBuilder.this.type"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name" title="gt4s: $plus$plus$eq">++=</span><span class="params">(<span name="xs">xs: <span name="scala.collection.TraversableOnce" class="extype">TraversableOnce</span>[<span name="com.twitter.finagle.Dentry" class="extype">Dentry</span>]</span>)</span><span class="result">: DtabBuilder.this.type</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Growable</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.DtabBuilder#+=" data-isabs="false">
-      <a id="+=(Dentry):DtabBuilder.this.type"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name" title="gt4s: $plus$eq">+=</span><span class="params">(<span name="d">d: <span name="com.twitter.finagle.Dentry" class="extype">Dentry</span></span>)</span><span class="result">: DtabBuilder.this.type</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.DtabBuilder" class="extype" href="">DtabBuilder</a> → Builder → Growable</dd></dl></div>
-    </li><li visbl="pub" name="scala.collection.generic.Growable#+=" data-isabs="false">
-      <a id="+=(Dentry,Dentry,Dentry*):DtabBuilder.this.type"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name" title="gt4s: $plus$eq">+=</span><span class="params">(<span name="elem1">elem1: <span name="com.twitter.finagle.Dentry" class="extype">Dentry</span></span>, <span name="elem2">elem2: <span name="com.twitter.finagle.Dentry" class="extype">Dentry</span></span>, <span name="elems">elems: <span name="com.twitter.finagle.Dentry" class="extype">Dentry</span>*</span>)</span><span class="result">: DtabBuilder.this.type</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Growable</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
       <a id="==(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -186,18 +150,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.DtabBuilder#clear" data-isabs="false">
-      <a id="clear():Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">clear</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.DtabBuilder" class="extype" href="">DtabBuilder</a> → Builder → Growable</dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
@@ -209,7 +161,7 @@
         <span class="name">clone</span><span class="params">()</span><span class="result">: AnyRef</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
@@ -237,6 +189,20 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.load.LoadGenerator#execute" data-isabs="false">
+      <a id="execute():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">execute</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Makes a request to a filtered service that starts at Event.</p><div class="fullcomment"><div class="comment cmt"><p>Makes a request to a filtered service that starts at Event.start and lasts for Event.length,
+and at the end, fulfils the response with the result of Event.fn(Event.length).</p><p>Every time a request is made, it is recorded with the latency and passed to recorder.
+</p></div></div>
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
       <h4 class="signature">
@@ -248,10 +214,22 @@
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.load.LoadGenerator#forward" data-isabs="false">
+      <a id="forward(Duration,TimeControl):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">forward</span><span class="params">(<span name="dur">dur: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>, <span name="ctl">ctl: <span name="com.twitter.util.TimeControl" class="extype">TimeControl</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
       <a id="getClass():java.lang.Class[_]"></a>
       <h4 class="signature">
@@ -288,18 +266,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.collection.mutable.Builder#mapResult" data-isabs="false">
-      <a id="mapResult[NewTo]((Dtab) ⇒ NewTo):Builder[Dentry, NewTo]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">mapResult</span><span class="tparams">[<span name="NewTo">NewTo</span>]</span><span class="params">(<span name="f">f: (<span name="com.twitter.finagle.Dtab" class="extype">Dtab</span>) ⇒ NewTo</span>)</span><span class="result">: <span name="scala.collection.mutable.Builder" class="extype">Builder</span>[<span name="com.twitter.finagle.Dentry" class="extype">Dentry</span>, NewTo]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Builder</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -336,54 +302,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.DtabBuilder#result" data-isabs="false">
-      <a id="result():Dtab"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.load.LoadGenerator#svc" data-isabs="false">
+      <a id="svc:Service[Event[Req, Rep], Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">result</span><span class="params">()</span><span class="result">: <span name="com.twitter.finagle.Dtab" class="extype">Dtab</span></span>
+        <span class="name">svc</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<a name="com.twitter.finagle.load.Event" class="extype" href="Event.html">Event</a>[Req, Rep], Rep]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.DtabBuilder" class="extype" href="">DtabBuilder</a> → Builder</dd></dl></div>
-    </li><li visbl="pub" name="scala.collection.mutable.Builder#sizeHint" data-isabs="false">
-      <a id="sizeHint(scala.collection.TraversableLike[_, _],Int):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">sizeHint</span><span class="params">(<span name="coll">coll: scala.collection.TraversableLike[_, _]</span>, <span name="delta">delta: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Builder</dd></dl></div>
-    </li><li visbl="pub" name="scala.collection.mutable.Builder#sizeHint" data-isabs="false">
-      <a id="sizeHint(Int):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">sizeHint</span><span class="params">(<span name="size">size: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Builder</dd></dl></div>
-    </li><li visbl="pub" name="scala.collection.mutable.Builder#sizeHintBounded" data-isabs="false">
-      <a id="sizeHintBounded(Int,scala.collection.TraversableLike[_, _]):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">sizeHintBounded</span><span class="params">(<span name="size">size: <span name="scala.Int" class="extype">Int</span></span>, <span name="boundingColl">boundingColl: scala.collection.TraversableLike[_, _]</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Builder</dd></dl></div>
+      
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -460,11 +390,7 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.collection.mutable.Builder" class="parent">
-              <h3>Inherited from <span name="scala.collection.mutable.Builder" class="extype">Builder</span>[<span name="com.twitter.finagle.Dentry" class="extype">Dentry</span>, <span name="com.twitter.finagle.Dtab" class="extype">Dtab</span>]</h3>
-            </div><div name="scala.collection.generic.Growable" class="parent">
-              <h3>Inherited from <span name="scala.collection.generic.Growable" class="extype">Growable</span>[<span name="com.twitter.finagle.Dentry" class="extype">Dentry</span>]</h3>
-            </div><div name="scala.AnyRef" class="parent">
+        <div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">
               <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>
