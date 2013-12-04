@@ -129,7 +129,7 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     assert(waitForEventualResult(() => Await.result(client2.get("foo")), None))
   }
 
-  test("sending dark traffic") {
+  if (!sys.props.contains("SKIP_FLAKY")) test("sending dark traffic") {
     val migrationConfig = MigrationConstants.MigrationConfig("Warming", false, false)
     val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
     zookeeperClient.get().setData(basePath, migrationDataArray, -1)
