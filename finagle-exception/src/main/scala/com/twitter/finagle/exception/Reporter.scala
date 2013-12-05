@@ -97,7 +97,6 @@ object Reporter {
       .hosts(new InetSocketAddress(scribeHost, scribePort))
       .codec(ThriftClientFramedCodec())
       .hostConnectionLimit(5)
-      .daemon(true)
       .build()
 
     new Scribe$FinagleClient(service, new TBinaryProtocol.Factory())
