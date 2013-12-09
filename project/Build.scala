@@ -141,7 +141,7 @@ object Finagle extends Build {
     // Protocols
     finagleHttp, finagleStream, finagleNative, finagleThrift,
     finagleMemcached, finagleKestrel, finagleRedis,
-    finagleMux, finagleThriftMux, finagleMySQL,
+    finagleMux, finagleThriftMux, finagleMySQL, finagleSpdy,
 
     // Use and integration
     // removing benchmark because swift can't build outside of twitter for now
@@ -475,6 +475,15 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-testers"
+  ).dependsOn(finagleCore)
+
+  lazy val finagleSpdy = Project(
+    id = "finagle-spdy",
+    base = file("finagle-spdy"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-spdy"
   ).dependsOn(finagleCore)
 
   /*
