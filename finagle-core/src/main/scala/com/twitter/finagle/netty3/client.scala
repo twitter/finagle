@@ -223,6 +223,7 @@ object Netty3Transporter {
   }
   val defaultChannelOptions: Map[String, Object] = Map(
     "tcpNoDelay" -> java.lang.Boolean.TRUE,
-    "reuseAddress" -> java.lang.Boolean.TRUE
+    "reuseAddress" -> java.lang.Boolean.TRUE,
+    "connectTimeoutMillis" -> (1000L: java.lang.Long)
   )
 }
