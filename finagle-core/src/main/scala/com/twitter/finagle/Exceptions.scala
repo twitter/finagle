@@ -52,7 +52,9 @@ class NoBrokersAvailableException(
 class RetryFailureException(cause: Throwable)        extends RequestException(cause)
 class CancelledRequestException                      extends RequestException
 class TooManyWaitersException                        extends RequestException
-class CancelledConnectionException                   extends RequestException
+class CancelledConnectionException(cause: Throwable) extends RequestException(cause) {
+  def this() = this(null)
+}
 class ReplyCastException                             extends RequestException
 class FailedFastException                            extends RequestException
 
@@ -163,7 +165,7 @@ class TransportException extends Exception with SourcedException
 class CancelledReadException extends TransportException
 class CancelledWriteException extends TransportException
 
-// Service layer errors.
+// Service layer errors
 trait ServiceException                                         extends Exception with SourcedException
 class ServiceClosedException                                   extends ServiceException
 class ServiceNotAvailableException                             extends ServiceException
