@@ -25,7 +25,7 @@ class RequestException(cause: Throwable) extends Exception(cause) with NoStacktr
 
 trait TimeoutException extends SourcedException { self: Exception =>
   protected val timeout: Duration
-  protected val explanation: String
+  protected def explanation: String
 
   override def getMessage = "exceeded %s to %s while %s".format(timeout, serviceName, explanation)
 }
@@ -180,7 +180,7 @@ class ServiceTimeoutException(
   with ServiceException
   with TimeoutException
 {
-  override protected val explanation =
+  override protected def explanation =
     "creating a service/connection or reserving a service/connection from the service/connection pool " + serviceName
 }
 
