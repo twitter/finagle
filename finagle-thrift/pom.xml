@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-thrift</artifactId>
   <packaging>jar</packaging>
-  <version>6.9.1-SNAPSHOT</version>
+  <version>6.10.1-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -67,13 +67,13 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.9.1-SNAPSHOT</version>
+      <version>6.10.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-test</artifactId>
       <scope>test</scope>
-      <version>6.9.1-SNAPSHOT</version>
+      <version>6.10.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
