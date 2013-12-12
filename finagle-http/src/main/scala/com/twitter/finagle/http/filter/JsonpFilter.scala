@@ -18,21 +18,26 @@ class JsonpFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response] {
   def apply(request: REQUEST, service: Service[REQUEST, Response]): Future[Response] = {
     getCallback(request) match {
       case Some(callback) =>
-        service(request) onSuccess { response =>
-          if (response.mediaType == Some(MediaType.Json)) {
-            response.content =
-              ChannelBuffers.wrappedBuffer(
-                ChannelBuffers.wrappedBuffer(callback.getBytes("UTF-8")),
-                ChannelBuffers.wrappedBuffer(JsonpFilter.LeftParen),
-                response.getContent,
-                ChannelBuffers.wrappedBuffer(JsonpFilter.RightParenSemicolon))
-            response.mediaType = MediaType.Javascript
-          }
-        }
+        addCallback(callback, request, service)
       case None =>
         service(request)
     }
   }
+
+  def addCallback(callback: String, request: REQUEST, service: Service[REQUEST, Response]): Future[Response] =
+    service(request) map { response =>
+      if (response.mediaType == Some(MediaType.Json)) {
+        response.content =
+          ChannelBuffers.wrappedBuffer(
+            ChannelBuffers.wrappedBuffer(callback.getBytes("UTF-8")),
+            ChannelBuffers.wrappedBuffer(JsonpFilter.LeftParen),
+            response.getContent,
+            ChannelBuffers.wrappedBuffer(JsonpFilter.RightParenSemicolon))
+        response.mediaType = MediaType.Javascript
+      }
+      response
+    }
+
 
   def getCallback(request: Request): Option[String] = {
     // Ignore HEAD, though in practice this should be behind the HeadFilter
