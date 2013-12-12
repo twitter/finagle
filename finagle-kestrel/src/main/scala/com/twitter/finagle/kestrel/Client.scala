@@ -41,7 +41,7 @@ case class ReadMessage(bytes: ChannelBuffer, ack: Offer[Unit])
  * readHandle.error foreach { System.error.println("zomg! got an error " + _.getMessage) }
  * }}}
  */
-trait ReadHandle {
+abstract class ReadHandle {
   /**
    * An offer to synchronize on the next message.  A new message is
    * available only when the previous one has been acknowledged
