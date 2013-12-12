@@ -4,11 +4,10 @@ import com.twitter.finagle.{CancelledConnectionException, ClientConnection, Serv
 import com.twitter.util.{Await, Future, Promise, Time}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.concurrent.Eventually
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class DelayedFactoryTest extends FunSuite with Eventually {
+class DelayedFactoryTest extends FunSuite {
   trait DelayedHelper {
     val service = Service.mk[Int, Int] { int: Int =>
       Future.value(int)
@@ -68,9 +67,8 @@ class DelayedFactoryTest extends FunSuite with Eventually {
       assert(!factory.isAvailable)
       val f = factory.close()
       assert(!factory.isAvailable)
-      assert(!f.isDone)
       completeFuture()
-      eventually { assert(f.isDefined) }
+      assert(f.isDefined)
       assert(!factory.isAvailable)
     }
   }
@@ -81,8 +79,30 @@ class DelayedFactoryTest extends FunSuite with Eventually {
       completeFuture()
       assert(factory.isAvailable)
       val f = factory.close()
-      eventually { assert(f.isDefined) }
+      assert(f.isDefined)
       assert(!factory.isAvailable)
+    }
+  }
+
+  test("a factory that's closed prematurely should still close") {
+    new ClosingDelayedHelper {
+      assert(!factory.isAvailable)
+      val f = factory.close()
+      assert(f.isDefined)
+      assert(Await.result(f) === ())
+      assert(underlying.isAvailable)
+      completeFuture()
+      assert(!underlying.isAvailable)
+    }
+  }
+
+  test("a factory that's closed prematurely should close the underlying on satisfaction") {
+    new ClosingDelayedHelper {
+      assert(!factory.isAvailable)
+      val f = factory.close()
+      assert(f.isDefined)
+      assert(Await.result(f) === ())
+      completeFuture()
     }
   }
 
