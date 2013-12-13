@@ -14,7 +14,7 @@ import org.scalatest.concurrent.Eventually._
 import org.scalatest.concurrent.Timeouts._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.time._
-import org.scalatest.{FunSuite, BeforeAndAfter}
+import org.scalatest.{FunSuite, BeforeAndAfter, Tag}
 
 @RunWith(classOf[JUnitRunner])
 class ZkResolverTest extends FunSuite with BeforeAndAfter {
@@ -27,7 +27,6 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
     timeout = toSpan(1.second),
     interval = toSpan(zkTimeout))
 
-
   before {
     inst = new ZkInstance
     inst.start()
@@ -36,7 +35,12 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
   after {
     inst.stop()
   }
-  
+
+  override def test(testName: String, testTags: Tag*)(f: => Unit) {
+    if (!sys.props.contains("SKIP_FLAKY"))
+      super.test(testName, testTags:_*)(f)
+  }
+
   test("end-to-end: service endpoint") {
     val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar")
     
