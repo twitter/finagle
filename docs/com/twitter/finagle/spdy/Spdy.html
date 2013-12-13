@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.memcached.KetamaClientBuilder</title>
+          <title>com.twitter.finagle.spdy.Spdy</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
@@ -14,9 +14,9 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
-        <a title="Go to companion" href="KetamaClientBuilder$.html"><img src="../../../../lib/class_to_object_big.png" /></a>
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.memcached" class="extype" href="package.html">memcached</a></p>
-        <h1><a title="Go to companion" href="KetamaClientBuilder$.html">KetamaClientBuilder</a></h1>
+        <a title="Go to companion" href="Spdy$.html"><img src="../../../../lib/class_to_object_big.png" /></a>
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.spdy" class="extype" href="package.html">spdy</a></p>
+        <h1><a title="Go to companion" href="Spdy$.html">Spdy</a></h1>
       </div>
 
       <h4 class="signature" id="signature">
@@ -25,13 +25,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">KetamaClientBuilder</span><span class="params">(<span name="_group">_group: <a name="com.twitter.finagle.Group" class="extype" href="../Group.html">Group</a>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]</span>, <span name="_hashName">_hashName: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="_clientBuilder">_clientBuilder: <span name="scala.Option" class="extype">Option</span>[com.twitter.finagle.builder.ClientBuilder[_, _, _, _, com.twitter.finagle.builder.ClientConfig.Yes]]</span>, <span name="_failureAccrualParams">_failureAccrualParams: (<span name="scala.Int" class="extype">Int</span>, <span name="com.twitter.util.Duration" class="extype">Duration</span>)</span>, <span name="oldLibMemcachedVersionComplianceMode">oldLibMemcachedVersionComplianceMode: <span name="scala.Boolean" class="extype">Boolean</span></span>, <span name="numReps">numReps: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">Spdy</span><span class="params">(<span name="_version">_version: <span name="org.jboss.netty.handler.codec.spdy.SpdyVersion" class="extype">SpdyVersion</span></span>, <span name="_compressionLevel">_compressionLevel: <span name="scala.Int" class="extype">Int</span></span>, <span name="_maxHeaderSize">_maxHeaderSize: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span></span>, <span name="_maxRequestSize">_maxRequestSize: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span></span>, <span name="_maxResponseSize">_maxResponseSize: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span></span>)</span><span class="result"> extends <a name="com.twitter.finagle.CodecFactory" class="extype" href="../CodecFactory.html">CodecFactory</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>] with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <a name="com.twitter.finagle.CodecFactory" class="extype" href="../CodecFactory.html">CodecFactory</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.memcached.KetamaClientBuilder" class="in"><span>KetamaClientBuilder</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.spdy.Spdy" class="in"><span>Spdy</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="com.twitter.finagle.CodecFactory" class="in"><span>CodecFactory</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -55,9 +55,51 @@
 
       <div id="template">
         <div id="allMembers">
-        
+        <div class="members" id="constructors">
+              <h3>Instance Constructors</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#this" data-isabs="false">
+      <a id="this:Spdy"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Spdy</span><span class="params">(<span name="_version">_version: <span name="org.jboss.netty.handler.codec.spdy.SpdyVersion" class="extype">SpdyVersion</span> = <span name="org.jboss.netty.handler.codec.spdy.SpdyVersion.SPDY_3" class="defval">...</span></span>, <span name="_compressionLevel">_compressionLevel: <span name="scala.Int" class="extype">Int</span> = <span class="symbol">6</span></span>, <span name="_maxHeaderSize">_maxHeaderSize: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span> = <span name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(16384).bytes" class="defval">...</span></span>, <span name="_maxRequestSize">_maxRequestSize: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span> = <span name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes" class="defval">...</span></span>, <span name="_maxResponseSize">_maxResponseSize: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span> = <span name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes" class="defval">...</span></span>)</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
 
-        
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.CodecFactory#Client" data-isabs="false">
+      <a id="Client:(ClientCodecConfig) ⇒ Codec[HttpRequest, HttpResponse]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Client</span><span class="result"> = (<a name="com.twitter.finagle.ClientCodecConfig" class="extype" href="../ClientCodecConfig.html">ClientCodecConfig</a>) ⇒ <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.CodecFactory" class="extype" href="../CodecFactory.html">CodecFactory</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.CodecFactory#Server" data-isabs="false">
+      <a id="Server:(ServerCodecConfig) ⇒ Codec[HttpRequest, HttpResponse]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Server</span><span class="result"> = (<a name="com.twitter.finagle.ServerCodecConfig" class="extype" href="../ServerCodecConfig.html">ServerCodecConfig</a>) ⇒ <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.CodecFactory" class="extype" href="../CodecFactory.html">CodecFactory</a></dd></dl></div>
+    </li></ol>
+            </div>
 
         
 
@@ -123,51 +165,63 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#_clientBuilder" data-isabs="false">
-      <a id="_clientBuilder:Option[com.twitter.finagle.builder.ClientBuilder[_, _, _, _, com.twitter.finagle.builder.ClientConfig.Yes]]"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#_compressionLevel" data-isabs="false">
+      <a id="_compressionLevel:Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">_clientBuilder</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[com.twitter.finagle.builder.ClientBuilder[_, _, _, _, com.twitter.finagle.builder.ClientConfig.Yes]]</span>
+        <span class="name">_compressionLevel</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#_failureAccrualParams" data-isabs="false">
-      <a id="_failureAccrualParams:(Int, Duration)"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#_maxHeaderSize" data-isabs="false">
+      <a id="_maxHeaderSize:StorageUnit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">_failureAccrualParams</span><span class="result">: (<span name="scala.Int" class="extype">Int</span>, <span name="com.twitter.util.Duration" class="extype">Duration</span>)</span>
+        <span class="name">_maxHeaderSize</span><span class="result">: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#_group" data-isabs="false">
-      <a id="_group:Group[CacheNode]"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#_maxRequestSize" data-isabs="false">
+      <a id="_maxRequestSize:StorageUnit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">_group</span><span class="result">: <a name="com.twitter.finagle.Group" class="extype" href="../Group.html">Group</a>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]</span>
+        <span class="name">_maxRequestSize</span><span class="result">: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#_hashName" data-isabs="false">
-      <a id="_hashName:Option[String]"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#_maxResponseSize" data-isabs="false">
+      <a id="_maxResponseSize:StorageUnit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">_hashName</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[String]</span>
+        <span class="name">_maxResponseSize</span><span class="result">: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#_version" data-isabs="false">
+      <a id="_version:SpdyVersion"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_version</span><span class="result">: <span name="org.jboss.netty.handler.codec.spdy.SpdyVersion" class="extype">SpdyVersion</span></span>
       </span>
       </h4>
       
@@ -183,19 +237,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#build" data-isabs="false">
-      <a id="build():Client"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">build</span><span class="params">()</span><span class="result">: <a name="com.twitter.finagle.memcached.Client" class="extype" href="Client.html">Client</a></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#canEqual" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#canEqual" data-isabs="false">
       <a id="canEqual(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -206,19 +248,19 @@
         <span class="name">canEqual</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a> → Equals</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#clientBuilder" data-isabs="false">
-      <a id="clientBuilder(com.twitter.finagle.builder.ClientBuilder[_, _, _, _, com.twitter.finagle.builder.ClientConfig.Yes]):KetamaClientBuilder"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.spdy.Spdy" class="extype" href="">Spdy</a> → Equals</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#client" data-isabs="false">
+      <a id="client:(ClientCodecConfig) ⇒ Codec[HttpRequest, HttpResponse] { def newClientDispatcher(transport: com.twitter.finagle.transport.Transport[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]): com.twitter.finagle.spdy.SpdyClientDispatcher }"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clientBuilder</span><span class="params">(<span name="clientBuilder">clientBuilder: com.twitter.finagle.builder.ClientBuilder[_, _, _, _, com.twitter.finagle.builder.ClientConfig.Yes]</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a></span>
+        <span class="name">client</span><span class="result">: (<a name="com.twitter.finagle.ClientCodecConfig" class="extype" href="../ClientCodecConfig.html">ClientCodecConfig</a>) ⇒ <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>] { def newClientDispatcher(transport: com.twitter.finagle.transport.Transport[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]): com.twitter.finagle.spdy.SpdyClientDispatcher }</span>
       </span>
       </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.spdy.Spdy" class="extype" href="">Spdy</a> → <a name="com.twitter.finagle.CodecFactory" class="extype" href="../CodecFactory.html">CodecFactory</a></dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
@@ -234,27 +276,15 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#dest" data-isabs="false">
-      <a id="dest(Name):KetamaClientBuilder"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#compressionLevel" data-isabs="false">
+      <a id="compressionLevel(Int):Spdy"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">dest</span><span class="params">(<span name="name">name: <a name="com.twitter.finagle.Name" class="extype" href="../Name.html">Name</a></span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#enableOldLibMemcachedVersionComplianceMode" data-isabs="false">
-      <a id="enableOldLibMemcachedVersionComplianceMode():KetamaClientBuilder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">enableOldLibMemcachedVersionComplianceMode</span><span class="params">()</span><span class="result">: <a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a></span>
+        <span class="name">compressionLevel</span><span class="params">(<span name="level">level: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <a name="com.twitter.finagle.spdy.Spdy" class="extype" href="">Spdy</a></span>
       </span>
       </h4>
       
@@ -270,7 +300,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#equals" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#equals" data-isabs="false">
       <a id="equals(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -281,19 +311,7 @@
         <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a> → Equals → AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#failureAccrualParams" data-isabs="false">
-      <a id="failureAccrualParams(Int,Duration):KetamaClientBuilder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">failureAccrualParams</span><span class="params">(<span name="numFailures">numFailures: <span name="scala.Int" class="extype">Int</span></span>, <span name="markDeadFor">markDeadFor: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a></span>
-      </span>
-      </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.spdy.Spdy" class="extype" href="">Spdy</a> → Equals → AnyRef → Any</dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
       <h4 class="signature">
@@ -321,7 +339,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#hashCode" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -332,19 +350,7 @@
         <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a> → AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#hashName" data-isabs="false">
-      <a id="hashName(String):KetamaClientBuilder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">hashName</span><span class="params">(<span name="hashName">hashName: String</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a></span>
-      </span>
-      </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.spdy.Spdy" class="extype" href="">Spdy</a> → AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -357,6 +363,42 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#maxHeaderSize" data-isabs="false">
+      <a id="maxHeaderSize(StorageUnit):Spdy"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">maxHeaderSize</span><span class="params">(<span name="size">size: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span></span>)</span><span class="result">: <a name="com.twitter.finagle.spdy.Spdy" class="extype" href="">Spdy</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#maxRequestSize" data-isabs="false">
+      <a id="maxRequestSize(StorageUnit):Spdy"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">maxRequestSize</span><span class="params">(<span name="size">size: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span></span>)</span><span class="result">: <a name="com.twitter.finagle.spdy.Spdy" class="extype" href="">Spdy</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#maxResponseSize" data-isabs="false">
+      <a id="maxResponseSize(StorageUnit):Spdy"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">maxResponseSize</span><span class="params">(<span name="size">size: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span></span>)</span><span class="result">: <a name="com.twitter.finagle.spdy.Spdy" class="extype" href="">Spdy</a></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -369,42 +411,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#noFailureAccrual" data-isabs="false">
-      <a id="noFailureAccrual:KetamaClientBuilder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">noFailureAccrual</span><span class="result">: <a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#nodes" data-isabs="false">
-      <a id="nodes(String):KetamaClientBuilder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">nodes</span><span class="params">(<span name="hostPortWeights">hostPortWeights: String</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#nodes" data-isabs="false">
-      <a id="nodes(Seq[(String, Int, Int)]):KetamaClientBuilder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">nodes</span><span class="params">(<span name="nodes">nodes: Seq[(String, <span name="scala.Int" class="extype">Int</span>, <span name="scala.Int" class="extype">Int</span>)]</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a></span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
       <a id="notify():Unit"></a>
       <h4 class="signature">
@@ -429,43 +435,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#numReps" data-isabs="false">
-      <a id="numReps(Int):KetamaClientBuilder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">numReps</span><span class="params">(<span name="numReps">numReps: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#numReps" data-isabs="false">
-      <a id="numReps:Int"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">numReps</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#oldLibMemcachedVersionComplianceMode" data-isabs="false">
-      <a id="oldLibMemcachedVersionComplianceMode:Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">oldLibMemcachedVersionComplianceMode</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#productArity" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#productArity" data-isabs="false">
       <a id="productArity:Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -476,8 +446,8 @@
         <span class="name">productArity</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a> → Product</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#productElement" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.spdy.Spdy" class="extype" href="">Spdy</a> → Product</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#productElement" data-isabs="false">
       <a id="productElement(Int):Any"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -488,7 +458,7 @@
         <span class="name">productElement</span><span class="params">(<span name="arg0">arg0: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Any" class="extype">Any</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a> → Product</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.spdy.Spdy" class="extype" href="">Spdy</a> → Product</dd></dl></div>
     </li><li visbl="pub" name="scala.Product#productIterator" data-isabs="false">
       <a id="productIterator:Iterator[Any]"></a>
       <h4 class="signature">
@@ -501,7 +471,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Product</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#productPrefix" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#productPrefix" data-isabs="false">
       <a id="productPrefix:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -512,7 +482,19 @@
         <span class="name">productPrefix</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a> → Product</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.spdy.Spdy" class="extype" href="">Spdy</a> → Product</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#server" data-isabs="false">
+      <a id="server:(ServerCodecConfig) ⇒ Codec[HttpRequest, HttpResponse]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">server</span><span class="result">: (<a name="com.twitter.finagle.ServerCodecConfig" class="extype" href="../ServerCodecConfig.html">ServerCodecConfig</a>) ⇒ <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.spdy.Spdy" class="extype" href="">Spdy</a> → <a name="com.twitter.finagle.CodecFactory" class="extype" href="../CodecFactory.html">CodecFactory</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -525,7 +507,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#toString" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -536,7 +518,19 @@
         <span class="name">toString</span><span class="params">()</span><span class="result">: String</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a> → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.spdy.Spdy" class="extype" href="">Spdy</a> → AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy#version" data-isabs="false">
+      <a id="version(SpdyVersion):Spdy"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">version</span><span class="params">(<span name="version">version: <span name="org.jboss.netty.handler.codec.spdy.SpdyVersion" class="extype">SpdyVersion</span></span>)</span><span class="result">: <a name="com.twitter.finagle.spdy.Spdy" class="extype" href="">Spdy</a></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -587,52 +581,7 @@
 
         <div class="values members" id="values">
               <h3>Deprecated Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#cachePoolCluster" data-isabs="false">
-      <a id="cachePoolCluster(Cluster[CacheNode]):KetamaClientBuilder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use KetamaClientBuilder.dest(name: Name) instead">cachePoolCluster</span><span class="params">(<span name="cluster">cluster: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use <code>KetamaClientBuilder.dest(name: Name)</code> instead</p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#cluster" data-isabs="false">
-      <a id="cluster(Cluster[InetSocketAddress]):KetamaClientBuilder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use KetamaClientBuilder.dest(name: Name) instead">cluster</span><span class="params">(<span name="cluster">cluster: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<span name="java.net.InetSocketAddress" class="extype">InetSocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use <code>KetamaClientBuilder.dest(name: Name)</code> instead</p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#group" data-isabs="false">
-      <a id="group(Group[CacheNode]):KetamaClientBuilder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use KetamaClientBuilder.dest(name: Name) instead">group</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="../Group.html">Group</a>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use <code>KetamaClientBuilder.dest(name: Name)</code> instead</p></dd></dl></div>
-    </li><li visbl="pub" name="scala.Product#productElements" data-isabs="false">
+              <ol><li visbl="pub" name="scala.Product#productElements" data-isabs="false">
       <a id="productElements:Iterator[Any]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -660,6 +609,8 @@
               <h3>Inherited from <span name="scala.Product" class="extype">Product</span></h3>
             </div><div name="scala.Equals" class="parent">
               <h3>Inherited from <span name="scala.Equals" class="extype">Equals</span></h3>
+            </div><div name="com.twitter.finagle.CodecFactory" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.CodecFactory" class="extype" href="../CodecFactory.html">CodecFactory</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

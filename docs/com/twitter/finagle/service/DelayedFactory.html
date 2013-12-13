@@ -32,7 +32,9 @@
       <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A factory that won't satisfy the service future until an underlying service factory
 is ready.</p><p>Close closes the underlying service factory, which means that it won't be
 satisfied until after the underlying future has been satisfied.
-</p></div><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Implicitly masks the underlying future from interrupts.  Manually manages promises
+so that they will be detached on interruption.
+</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep], <span name="com.twitter.util.Closable" class="extype">Closable</span>, (<a name="com.twitter.finagle.ClientConnection" class="extype" href="../ClientConnection.html">ClientConnection</a>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
@@ -76,7 +78,70 @@ satisfied until after the underlying future has been satisfied.
     </li></ol>
             </div>
 
-        
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.service.DelayedFactory.AwaitingFactory" data-isabs="false">
+      <a id="AwaitingFactory:AwaitingFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="DelayedFactory$AwaitingFactory.html"><span class="name">AwaitingFactory</span></a><span class="params">(<span name="q">q: ArrayDeque[(ClientConnection, Promise[Service[Req, Rep]])]</span>)</span><span class="result"> extends State with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.service.DelayedFactory.AwaitingRelease" data-isabs="false">
+      <a id="AwaitingRelease:AwaitingRelease"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="DelayedFactory$AwaitingRelease.html"><span class="name">AwaitingRelease</span></a><span class="params">(<span name="p">p: Promise[Unit]</span>, <span name="deadline">deadline: Time</span>, <span name="cause">cause: Throwable</span>)</span><span class="result"> extends State with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.service.DelayedFactory.Failed" data-isabs="false">
+      <a id="Failed:Failed"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="DelayedFactory$Failed.html"><span class="name">Failed</span></a><span class="params">(<span name="exc">exc: Throwable</span>)</span><span class="result"> extends State with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.service.DelayedFactory.State" data-isabs="true">
+      <a id="State:State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="DelayedFactory$State.html"><span class="name">State</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.service.DelayedFactory.Succeeded" data-isabs="false">
+      <a id="Succeeded:Succeeded"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="DelayedFactory$Succeeded.html"><span class="name">Succeeded</span></a><span class="params">(<span name="f">f: ServiceFactory[Req, Rep]</span>)</span><span class="result"> extends State with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
 
         
 
