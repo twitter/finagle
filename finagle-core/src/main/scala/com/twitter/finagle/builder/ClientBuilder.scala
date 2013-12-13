@@ -135,7 +135,7 @@ private[builder] final case class StatsReceiverConfig(
 )
 
 private[builder] final case class ClientTimeoutConfig(
-  private val _tcpConnectTimeout: Duration         = 10.milliseconds,
+  private val _tcpConnectTimeout: Duration         = 1.second,
   private val _connectTimeout   : Duration         = Duration.Top,
   private val _requestTimeout   : Duration         = Duration.Top,
   private val _timeout          : Duration         = Duration.Top,

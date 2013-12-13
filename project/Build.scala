@@ -6,9 +6,9 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
-  val libVersion = "6.9.0"
+  val libVersion = "6.10.0"
   val zkVersion = "3.3.4"
-  val utilVersion = "6.9.0"
+  val utilVersion = "6.10.0"
   val ostrichVersion = "9.2.1"
   val jacksonVersion = "2.2.2"
   val nettyLib = "io.netty" % "netty" % "3.8.0.Final"
@@ -34,7 +34,7 @@ object Finagle extends Build {
     scalaVersion := "2.9.2",
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" %"1.9.1" % "test",
-      "org.scala-tools.testing" %% "specs" % "1.6.9" % "test" withSources() cross CrossVersion.binaryMapped {
+      "org.scala-tools.testing" %% "specs" % "1.6.9" % "test" cross CrossVersion.binaryMapped {
         case "2.9.2" => "2.9.1"
         case "2.10.0" => "2.10"
         case x => x
@@ -141,7 +141,7 @@ object Finagle extends Build {
     // Protocols
     finagleHttp, finagleStream, finagleNative, finagleThrift,
     finagleMemcached, finagleKestrel, finagleRedis,
-    finagleMux, finagleThriftMux, finagleMySQL,
+    finagleMux, finagleThriftMux, finagleMySQL, finagleSpdy,
 
     // Use and integration
     // removing benchmark because swift can't build outside of twitter for now
@@ -475,6 +475,15 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-testers"
+  ).dependsOn(finagleCore)
+
+  lazy val finagleSpdy = Project(
+    id = "finagle-spdy",
+    base = file("finagle-spdy"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-spdy"
   ).dependsOn(finagleCore)
 
   /*

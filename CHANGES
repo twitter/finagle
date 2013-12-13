@@ -5,6 +5,15 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.10.0
+~~~~~
+
+`finagle-core`: Fix ServiceTimeoutException naming.
+`finagle-core`: Increase default tcpConnectTimeout to 350ms.
+`finagle-core`: Remove memory leak for never satisfied promises in DelayedFactory.
+`finagle-memcached`: Add ClientBuilder APIs that use Name instead of Group.
+`finagle`: Daemonize threads in ClientBuilders used in finagle.
+
 6.9.0
 ~~~~~
 

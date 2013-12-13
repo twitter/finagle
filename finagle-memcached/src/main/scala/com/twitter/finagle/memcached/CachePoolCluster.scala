@@ -55,6 +55,7 @@ class TwitterCacheResolver extends Resolver {
   }
 }
 
+// TODO: Rewrite Memcache cluster representation in terms of Var[Addr].
 object CacheNodeGroup {
   // <host1>:<port>:<weight>:<key>,<host2>:<port>:<weight>:<key>,<host3>:<port>:<weight>:<key>
   def apply(hosts: String) = {

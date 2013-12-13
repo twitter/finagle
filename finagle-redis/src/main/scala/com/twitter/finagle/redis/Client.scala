@@ -17,6 +17,7 @@ object Client {
       .hosts(host)
       .hostConnectionLimit(1)
       .codec(Redis())
+      .daemon(true)
       .build())
 
   /**
@@ -157,6 +158,7 @@ object TransactionalClient {
       .hosts(host)
       .hostConnectionLimit(1)
       .codec(Redis())
+      .daemon(true)
       .buildFactory())
 
   /**

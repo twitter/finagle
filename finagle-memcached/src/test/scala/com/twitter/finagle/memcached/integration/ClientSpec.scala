@@ -4,13 +4,13 @@ import _root_.java.io.ByteArrayOutputStream
 import _root_.java.lang.{Boolean => JBoolean}
 import java.net.{SocketAddress, InetSocketAddress}
 import com.twitter.common.application.ShutdownRegistry.ShutdownRegistryImpl
-import com.twitter.common.zookeeper.ServerSet.EndpointStatus
 import com.twitter.common.zookeeper.{ZooKeeperUtils, ServerSets, ZooKeeperClient}
+import com.twitter.common.zookeeper.ServerSet.EndpointStatus
 import com.twitter.common.zookeeper.testing.ZooKeeperTestServer
 import com.twitter.concurrent.Spool
 import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
-import com.twitter.finagle.Group
+import com.twitter.finagle.{Group, MemcachedClient, Name, WriteException}
 import com.twitter.finagle.builder.{Cluster, ClientBuilder}
 import com.twitter.finagle.memcached.{CacheNode, CacheNodeGroup, CachePoolCluster, CachePoolConfig,
   Client, KetamaClientBuilder, PartitionedClient}
@@ -20,7 +20,6 @@ import com.twitter.finagle.memcached.replication._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
-import com.twitter.finagle.{MemcachedClient, WriteException}
 import com.twitter.util.{Await, Duration, Future, Return, Throw}
 import org.jboss.netty.util.CharsetUtil
 import org.specs.SpecificationWithJUnit
@@ -200,6 +199,16 @@ class ClientSpec extends SpecificationWithJUnit {
         val client = KetamaClientBuilder()
           .nodes("localhost:%d,localhost:%d".format(address1.getPort, address2.getPort))
           .build()
+
+        Await.result(client.delete("foo"))
+        Await.result(client.get("foo")) mustEqual None
+        Await.result(client.set("foo", "bar"))
+        Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+      }
+
+      "using Name doesn't blow up" in {
+        val name = Name.bound(address1, address2)
+        val client = KetamaClientBuilder().dest(name).build()
 
         Await.result(client.delete("foo"))
         Await.result(client.get("foo")) mustEqual None

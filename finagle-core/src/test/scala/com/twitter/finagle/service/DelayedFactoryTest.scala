@@ -1,13 +1,14 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
+import com.twitter.finagle.{CancelledConnectionException, ClientConnection, Service, ServiceFactory}
 import com.twitter.util.{Await, Future, Promise, Time}
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
+import org.scalatest.concurrent.Eventually
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class DelayedFactoryTest extends FunSuite {
+class DelayedFactoryTest extends FunSuite with Eventually {
   trait DelayedHelper {
     val service = Service.mk[Int, Int] { int: Int =>
       Future.value(int)
@@ -16,6 +17,10 @@ class DelayedFactoryTest extends FunSuite {
     val future = Promise[ServiceFactory[Int, Int]]()
     def completeFuture() {
       future.setValue(underlying)
+    }
+    val failed = new Exception("failed")
+    def throwFuture() {
+      future.setException(failed)
     }
     val factory = new DelayedFactory(future)
   }
@@ -41,14 +46,17 @@ class DelayedFactoryTest extends FunSuite {
     def completeFuture() {
       future.setValue(underlying)
     }
+
     val factory = new DelayedFactory(future)
   }
 
   test("buffered factories' proxy services should buffer until the factory is ready") {
     new DelayedHelper {
+      assert(factory.numWaiters === 0)
       val bufferF = factory()
       val num = 3
       assert(!bufferF.isDefined)
+      assert(factory.numWaiters === 1)
       completeFuture()
       assert(bufferF.isDefined)
       assert(Await.result(bufferF) === service)
@@ -62,7 +70,7 @@ class DelayedFactoryTest extends FunSuite {
       assert(!factory.isAvailable)
       assert(!f.isDone)
       completeFuture()
-      Await.result(f)
+      eventually { assert(f.isDefined) }
       assert(!factory.isAvailable)
     }
   }
@@ -72,8 +80,79 @@ class DelayedFactoryTest extends FunSuite {
       assert(!factory.isAvailable)
       completeFuture()
       assert(factory.isAvailable)
-      Await.result(factory.close())
+      val f = factory.close()
+      eventually { assert(f.isDefined) }
       assert(!factory.isAvailable)
+    }
+  }
+
+  test("an incomplete buffered factory should satisfy closures with exceptions if they're interrupted") {
+    new DelayedHelper {
+      assert(!factory.isAvailable)
+      val bufferF = factory()
+      assert(!bufferF.isDefined)
+      val exc = new Exception("FAIL")
+      bufferF.raise(exc)
+      assert(bufferF.isDefined)
+      val actual = intercept[CancelledConnectionException] {
+        Await.result(bufferF)
+      }
+      assert(actual.getCause === exc)
+    }
+  }
+
+  test("an incomplete buffered factory should detach closures if they're interrupted") {
+    new DelayedHelper {
+      assert(!factory.isAvailable)
+      val bufferF = factory()
+      assert(!bufferF.isDefined)
+      assert(factory.numWaiters === 1)
+      val exc = new Exception("FAIL")
+      bufferF.raise(exc)
+      assert(bufferF.isDefined)
+      assert(factory.numWaiters === 0)
+      completeFuture()
+      assert(factory.isAvailable)
+    }
+  }
+
+  test("an incomplete buffered factory should be OK with exceptions if they're interrupted") {
+    new DelayedHelper {
+      assert(!factory.isAvailable)
+      val bufferF = factory()
+      assert(!bufferF.isDefined)
+      val exc = new Exception("FAIL")
+      bufferF.raise(exc)
+      assert(bufferF.isDefined)
+      completeFuture()
+      assert(factory.isAvailable)
+    }
+  }
+
+  test("a buffered factory that's completed with an exception should finish with an exception") {
+    new DelayedHelper {
+      assert(!factory.isAvailable)
+      val bufferF = factory()
+      assert(!bufferF.isDefined)
+      throwFuture()
+      assert(bufferF.isDefined)
+      val actual = intercept[Exception] {
+        Await.result(bufferF)
+      }
+      assert(actual === failed)
+    }
+  }
+
+  test("a factory that's completed with an exception should finish with an exception") {
+    new DelayedHelper {
+      assert(!factory.isAvailable)
+      throwFuture()
+      val bufferF = factory()
+      assert(bufferF.isDefined)
+      val actual = intercept[Exception] {
+        Await.result(bufferF)
+      }
+      assert(actual === failed)
     }
   }
 }

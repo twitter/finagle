@@ -25,7 +25,7 @@ class RequestException(cause: Throwable) extends Exception(cause) with NoStacktr
 
 trait TimeoutException extends SourcedException { self: Exception =>
   protected val timeout: Duration
-  protected val explanation: String
+  protected def explanation: String
 
   override def getMessage = "exceeded %s to %s while %s".format(timeout, serviceName, explanation)
 }
@@ -52,7 +52,9 @@ class NoBrokersAvailableException(
 class RetryFailureException(cause: Throwable)        extends RequestException(cause)
 class CancelledRequestException                      extends RequestException
 class TooManyWaitersException                        extends RequestException
-class CancelledConnectionException                   extends RequestException
+class CancelledConnectionException(cause: Throwable) extends RequestException(cause) {
+  def this() = this(null)
+}
 class ReplyCastException                             extends RequestException
 class FailedFastException                            extends RequestException
 
@@ -163,7 +165,7 @@ class TransportException extends Exception with SourcedException
 class CancelledReadException extends TransportException
 class CancelledWriteException extends TransportException
 
-// Service layer errors.
+// Service layer errors
 trait ServiceException                                         extends Exception with SourcedException
 class ServiceClosedException                                   extends ServiceException
 class ServiceNotAvailableException                             extends ServiceException
@@ -178,7 +180,7 @@ class ServiceTimeoutException(
   with ServiceException
   with TimeoutException
 {
-  override protected val explanation =
+  override protected def explanation =
     "creating a service/connection or reserving a service/connection from the service/connection pool " + serviceName
 }
 
