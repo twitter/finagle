@@ -1,10 +1,112 @@
 .. Author notes: this file is formatted with restructured text
-
 (http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
 as it is included in Finagle's user's guide.
 
 6.x
 -----
+
+6.8.1
+~~~~~
+
+- `finagle`: Upgrade ostrich to 9.2.1
+- `finagle`: Upgarde util to 6.8.1
+- `finagle`: Upgarde scrooge to 3.11.1
+
+6.8.0
+~~~~~
+
+- `finagle-serversets`: Higher fidelity addrs from ZK We do the best we can with the current server set implementation.
+- `finagle-mysql`: better type support
+- `finagle-http`: Allow Integer to extract negative number
+- `finagle-redis`: Decode nested multi-bulk replies
+- `finagle-redis`: Allow expirations in the past
+- `finagle-core`: bump Netty to 3.8.0.Final
+- `finagle`: Return empty string when resolving an unlabeled address
+- `finagle`: Don't re-scope StatsReceivers per request failure
+- `finagle-thrift`: Unconditionally set TraceId and ClientId on servers
+- `finagle-core`: Take -com.twitter.server.serversetZkHosts flag (for tunnelling)
+- `finagle-native`: tomcat-native-1.1.27
+- `finagle-mysql`: fix readLengthCodedBinary to read longs
+- `finagle-testers`: library for integration testing of - `finagle services
+- `finagle`: scaladoc warning cleanup
+- `finagle-doc`: documented all of the stats in - `finagle-core
+- `finagle-serversets`: bump server-set dependency to 1.0.56
+- `finagle-stats`: adds a cautious registration to HttpMuxer / adds a default metrics endpoint to twitter-server
+- `finagle-core`: verifies that statsfilter has the correct behavior
+- `finagle-serversets`: Add support for parsing a !shardId on the end of a serverset address
+finahle-http`: Use Reader for streaming
+- `finagle-core`: no longer makes an anonymous exception in DefaultClient
+- `finagle-core`: Using system class loader does not work when run inside sbt
+- `finagle-core`: add pool_num_waited counter to WatermarkPool
+- `finagle-core`: Protocol support for Wily: HTTP, thrift, mux (& thus thriftmux).
+- `finagle-core`: respect standard socksProxyHost / socksProxyPort properties in ClientBuilder and Netty3Transporter default args
+- `finagle-core`: buffers requests until Var[Addr] is in a ready state
+- `finagle-core`: Add putLong and getLong functions to util.ByteArrays
+- `finagle-core`: don't blow up if we don't have a resolvable host name
+- `finagle-core`: rm allocation in RichChannelFuture.apply's operationComplete
+- `finagle-core`: remove Var.apply; introduce Var.sample
+- `finagle-thriftmux`: Support ClientIds at the protocol level
+- `finagle-kestrel`: memory allocation improvements
+- `finagle-http`: allow PUT requests to use RequestParamMap.postParams
+- `finagle-memcached`: more performance and less allocations in Decoder
+
+6.7.4
+~~~~~
+
+- `finagle-core`: Fail ChannelTransport read queue before closing the connection
+- `finagle-mux`: Add session for mux message passing and bidirectional RPC
+- `finagle-zipkin`: Depend on scrooge-core instead of scrooge-runtime
+
+6.7.2
+~~~~~
+
+- `finagle-core`: LoadService: skip empty lines
+- `finagle-core`: Improve GC profile of Var and Group
+- `finagle-core`: added a simple defaultpool test to show how it works + more docs
+- `finagle-core`: removes commented out casting filter
+- `finagle-mysql`: move protocol into a dispatcher and port to new style apis.
+
+6.7.1
+~~~~~
+
+- `finagle-*`: Tagging various tests as flaky
+- `finagle-*`: Fix and reenable some formerly-flaky tests Now that Time.withXXXX is threadsafe
+- `finagle-*`: Move Var to util
+- `finagle-*`: Provide generic request contexts
+- `finagle-*`: Use scrooge3 and up-to-date scrooge-maven-plugin settings
+- `finagle-*`: upgrade Netty to 3.7.0.Final
+- `finagle-core`: Add UnwritableChannel stat to ChannelStatsHandler
+- `finagle-core`: Add a test for Proc exception-swallowing
+- `finagle-core`: Better interface for RetryPolicy
+- `finagle-core`: Ensure FIFO ordering when delivering updates to StabilizingGroup
+- `finagle-core`: Export a health stat in StabilizingGroup
+- `finagle-core`: Fix a race condition in ListeningSever.announce and don't announce 0.0.0.0
+- `finagle-core`: Fix sourcing for SourcedExceptions
+- `finagle-core`: Group: communicate via Var[Set[T]]
+- `finagle-core`: Improve HeapBalancer req distribution when N=2
+- `finagle-core`: Introduce staged names
+- `finagle-core`: Let the number of cores be specified on the command line
+- `finagle-core`: Make socket writable duration stats more useful
+- `finagle-core`: Migrate RetryingFilter tests from specs to scalatest
+- `finagle-core`: Move the connections gauge into ChannelStatsHandler for GC
+- `finagle-core`: Reuse a single exception instance in ServerDispatcher
+- `finagle-core`: Update com.twitter.finagle package documentation
+- `finagle-doc`: Add Client/Server Anatomy to docs
+- `finagle-doc`: Link to "Your Server as a Function"
+- `finagle-http`: Proper CORS implementation on Finagle
+- `finagle-http`: SPNEGO http auth (for Kerberos) with an example implementation for internal services
+- `finagle-memcached`: Exclude CancelledRequestException and CancelledConectionException or cache client failure accrual
+- `finagle-memcached`: Read key remapping config from ZooKeeper
+- `finagle-memcached`: ZK based cache node group implementation
+- `finagle-redis`: SRandMember, send command without count when None
+- `finagle-serversets`: Mark ZookeeperServerSetCluster as deprecated
+- `finagle-thrift`: Add a request context for ClientId
+- `finagle-thrift`: Set the client id in thriftmux
+
+6.7.0
+~~~~~
+
+Release process failed. Rolled forward to 6.7.1.
 
 6.6.2
 ~~~~~

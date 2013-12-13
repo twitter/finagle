@@ -29,8 +29,12 @@ class ChannelTransport[In, Out](ch: Channel)
       }
     })
   }
+  private[this] val failed = new AtomicBoolean(false)
 
   private[this] def fail(exc: Throwable) {
+    if (! failed.compareAndSet(false, true))
+      return
+
     close()
     closep.updateIfEmpty(Return(exc))
     readq.fail(exc)
@@ -110,8 +114,12 @@ class ClientChannelTransport[In, Out](ch: Channel, statsReceiver: StatsReceiver)
       })
     }
   }
+  private[this] val failed = new AtomicBoolean(false)
 
   private[this] def fail(exc: Throwable) {
+    if (! failed.compareAndSet(false, true))
+      return
+
     close()
     closep.updateIfEmpty(Return(exc))
     readq.fail(exc)

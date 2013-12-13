@@ -3,6 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.SerialServerDispatcher
 import com.twitter.finagle.http.codec.HttpClientDispatcher
+import com.twitter.finagle.http.filter.DtabFilter
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.server._
 import com.twitter.util.Future
@@ -45,15 +46,20 @@ object HttpListener extends Netty3Listener[HttpResponse, HttpRequest](
     .server(ServerCodecConfig("httpserver", new SocketAddress{})).pipelineFactory
 )
 
-object HttpServer extends DefaultServer[HttpRequest, HttpResponse, HttpResponse, HttpRequest](
-  "http", HttpListener, new SerialServerDispatcher(_, _)
+object HttpServer 
+extends DefaultServer[HttpRequest, HttpResponse, HttpResponse, HttpRequest](
+  "http", HttpListener, 
+  {
+    val dtab = new DtabFilter[HttpRequest, HttpResponse]
+    (t, s) => new SerialServerDispatcher(t, dtab andThen s)
+  }
 )
 
 object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
     with Server[HttpRequest, HttpResponse]
 {
-  def newClient(group: Group[SocketAddress]): ServiceFactory[HttpRequest, HttpResponse] =
-    HttpClient.newClient(group)
+  def newClient(name: Name, label: String): ServiceFactory[HttpRequest, HttpResponse] =
+    HttpClient.newClient(name, label)
 
   def serve(addr: SocketAddress, service: ServiceFactory[HttpRequest, HttpResponse]): ListeningServer =
     HttpServer.serve(addr, service)

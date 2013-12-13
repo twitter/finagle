@@ -755,19 +755,36 @@ class ClientSpec extends SpecificationWithJUnit {
       testServers = List()
     }
 
-    "with static servers list" in {
-      val client = MemcachedClient.newKetamaClient(
-        group = "twcache!localhost:%d,localhost:%d".format(testServers(0).address.getPort, testServers(1).address.getPort))
+    if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
+      "with unmanaged regular zk serverset" in {
+        val client = MemcachedClient.newKetamaClient(
+          "zk!localhost:"+zookeeperServerPort+"!"+zkPath).asInstanceOf[PartitionedClient]
 
-      Await.result(client.delete("foo"))
-      Await.result(client.get("foo")) mustEqual None
-      Await.result(client.set("foo", "bar"))
-      Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+        // Wait for group to contain members
+        Thread.sleep(5000)
+
+        val count = 100
+        (0 until count).foreach{
+          n => {
+            client.set("foo"+n, "bar"+n)()
+          }
+        }
+
+        (0 until count).foreach {
+          n => {
+            val c = client.clientOf("foo"+n)
+            c.get("foo"+n)().get.toString(CharsetUtil.UTF_8) mustEqual "bar"+n
+          }
+        }
+      }
     }
 
-    "with managed cache pool" in {
+    if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) "with managed cache pool" in {
       val client = MemcachedClient.newKetamaClient(
-        group = "twcache!localhost:"+zookeeperServerPort+"!"+zkPath).asInstanceOf[PartitionedClient]
+        "twcache!localhost:"+zookeeperServerPort+"!"+zkPath).asInstanceOf[PartitionedClient]
+
+      // Wait for group to contain members
+      Thread.sleep(5000)
 
       client.delete("foo")()
       client.get("foo")() mustEqual None
@@ -789,26 +806,14 @@ class ClientSpec extends SpecificationWithJUnit {
       }
     }
 
-    "with unmanaged regular zk serverset" in {
+    "with static servers list" in {
       val client = MemcachedClient.newKetamaClient(
-        group = "zk!localhost:"+zookeeperServerPort+"!"+zkPath).asInstanceOf[PartitionedClient]
+        "twcache!localhost:%d,localhost:%d".format(testServers(0).address.getPort, testServers(1).address.getPort))
 
-      // Wait for group to contain members
-      Thread.sleep(5000)
-
-      val count = 100
-      (0 until count).foreach{
-        n => {
-          client.set("foo"+n, "bar"+n)()
-        }
-      }
-
-      (0 until count).foreach {
-        n => {
-          val c = client.clientOf("foo"+n)
-          c.get("foo"+n)().get.toString(CharsetUtil.UTF_8) mustEqual "bar"+n
-        }
-      }
+      Await.result(client.delete("foo"))
+      Await.result(client.get("foo")) mustEqual None
+      Await.result(client.set("foo", "bar"))
+      Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"
     }
   }
 }

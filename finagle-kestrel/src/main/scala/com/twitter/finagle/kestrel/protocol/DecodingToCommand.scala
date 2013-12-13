@@ -3,8 +3,11 @@ package com.twitter.finagle.kestrel.protocol
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.memcached.protocol.{ClientError, NonexistentCommand}
 import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
+import java.nio.charset.Charset
+import com.twitter.conversions.time._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.protocol.text.server.AbstractDecodingToCommand
+import com.twitter.util.Duration
 
 private[kestrel] class DecodingToCommand extends AbstractDecodingToCommand[Command] {
   private[this] val GET         = copiedBuffer("get"        .getBytes)
@@ -55,16 +58,26 @@ private[kestrel] class DecodingToCommand extends AbstractDecodingToCommand[Comma
     if (tokens.size < 1) throw new ClientError("Key missing")
     if (tokens.size > 1) throw new ClientError("Too many arguments")
 
-    val split = tokens.head.split("/")
+    val splitAll = tokens.head.split("/")
+    val split = splitAll.filterNot({
+      value => value.toString(Charset.defaultCharset).startsWith("t=")
+    })
     val queueName = split.head
 
+    val splitTimeout = splitAll.filter({
+      value => value.toString(Charset.defaultCharset).startsWith("t=")
+    })
+    val timeout = splitTimeout.lastOption map {
+      t => t.toString(Charset.defaultCharset).drop(2).toInt.milliseconds
+    }
+
     split.tail match {
-      case Seq()           => Get(queueName)
-      case Seq(OPEN)       => Open(queueName)
-      case Seq(CLOSE)      => Close(queueName)
-      case Seq(CLOSE,OPEN) => CloseAndOpen(queueName)
-      case Seq(ABORT)      => Abort(queueName)
-      case Seq(PEEK)       => Peek(queueName)
+      case Seq()           => Get(queueName, timeout)
+      case Seq(OPEN)       => Open(queueName, timeout)
+      case Seq(CLOSE)      => Close(queueName, timeout)
+      case Seq(CLOSE,OPEN) => CloseAndOpen(queueName, timeout)
+      case Seq(ABORT)      => Abort(queueName, timeout)
+      case Seq(PEEK)       => Peek(queueName, timeout)
       case _               => throw new NonexistentCommand(tokens.toString)
     }
   }

@@ -102,7 +102,7 @@ class Interpreter(map: AtomicMap[ChannelBuffer, Entry]) {
           existing match {
             case Some(entry) if entry.valid =>
               val existingString = entry.value.toString(CharsetUtil.US_ASCII)
-              if (!existingString.isEmpty && !existingString.matches(DIGITS))
+              if (!existingString.isEmpty && !DigitsPattern.matcher(existingString).matches())
                 throw new ClientError("cannot increment or decrement non-numeric value")
 
               val existingValue =

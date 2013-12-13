@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle</artifactId>
   <packaging>pom</packaging>
-  <version>6.6.3-SNAPSHOT</version>
+  <version>6.8.2-SNAPSHOT</version>
   <distributionManagement>
     <repository>
       <id>artifactory-release</id>
@@ -40,6 +40,7 @@
     <module>finagle-stress</module>
     <module>finagle-swift</module>
     <module>finagle-test</module>
+    <module>finagle-testers</module>
     <module>finagle-thrift</module>
     <module>finagle-thriftmux</module>
     <module>finagle-zipkin</module>

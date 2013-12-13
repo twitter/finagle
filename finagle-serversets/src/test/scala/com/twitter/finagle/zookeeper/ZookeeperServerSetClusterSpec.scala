@@ -108,17 +108,19 @@ class ZookeeperServerSetClusterSpec extends SpecificationWithJUnit {
       }
     }
 
-    "Be able to use an additional endpoint" in {
-      val serverSet = new ServerSetImpl(zookeeperClient, "/twitter/services/silly")
-      val cluster = new ZookeeperServerSetCluster(serverSet, "other-endpoint")
+    if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
+      "Be able to use an additional endpoint" in {
+        val serverSet = new ServerSetImpl(zookeeperClient, "/twitter/services/silly")
+        val cluster = new ZookeeperServerSetCluster(serverSet, "other-endpoint")
 
-      withServer { server =>
-        cluster.join(new InetSocketAddress(8000),
-                     Map("other-endpoint" -> server.localAddress.asInstanceOf[InetSocketAddress]))
+        withServer { server =>
+          cluster.join(new InetSocketAddress(8000),
+                       Map("other-endpoint" -> server.localAddress.asInstanceOf[InetSocketAddress]))
 
-        withClient(cluster) { client =>
-          cluster.thread.join()
-          Await.result(client("hello\n"), 1.seconds) mustEqual "olleh"
+          withClient(cluster) { client =>
+            cluster.thread.join()
+            Await.result(client("hello\n"), 1.seconds) mustEqual "olleh"
+          }
         }
       }
     }

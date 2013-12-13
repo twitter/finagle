@@ -6,12 +6,13 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
-  val libVersion = "6.6.2"
+  val libVersion = "6.8.1"
   val zkVersion = "3.3.4"
-  val utilVersion = "6.5.0"
+  val utilVersion = "6.8.1"
+  val ostrichVersion = "9.2.1"
   val jacksonVersion = "2.2.2"
-  val nettyLib = "io.netty" % "netty" % "3.6.6.Final"
-  val ostrichVersion = "com.twitter" %% "ostrich" % "9.1.3"
+  val nettyLib = "io.netty" % "netty" % "3.8.0.Final"
+  val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonLibs = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
     "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
@@ -22,7 +23,7 @@ object Finagle extends Build {
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
   )
   val scroogeLibs = thriftLibs ++ Seq(
-    "com.twitter" %% "scrooge-runtime" % "3.1.5")
+    "com.twitter" %% "scrooge-core" % "3.11.0")
 
   def util(which: String) = "com.twitter" %% ("util-"+which) % utilVersion
 
@@ -38,8 +39,8 @@ object Finagle extends Build {
         case "2.10.0" => "2.10"
         case x => x
       },
-      "junit" % "junit" % "4.8.1" % "test",
-      "org.mockito" % "mockito-all" % "1.8.5" % "test"
+      "junit" % "junit" % "4.10" % "test",
+      "org.mockito" % "mockito-all" % "1.9.5" % "test"
     ),
     resolvers += "twitter-repo" at "http://maven.twttr.com",
 
@@ -135,7 +136,7 @@ object Finagle extends Build {
     finagleCore, finagleTest, finagleOstrich4, finagleStats,
     finagleZipkin, finagleServersets,
     finagleException, finagleCommonsStats,
-    finagleExp, finagleMdns,
+    finagleExp, finagleMdns, finagleTesters,
 
     // Protocols
     finagleHttp, finagleStream, finagleNative, finagleThrift,
@@ -176,7 +177,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-ostrich4",
-    libraryDependencies ++= Seq(ostrichVersion)
+    libraryDependencies ++= Seq(ostrichLib)
   ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleStats = Project(
@@ -195,7 +196,7 @@ object Finagle extends Build {
     id = "finagle-zipkin",
     base = file("finagle-zipkin"),
     settings = Project.defaultSettings ++
-      Scrooge.newSettings ++
+      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-zipkin",
@@ -206,7 +207,7 @@ object Finagle extends Build {
     id = "finagle-exception",
     base = file("finagle-exception"),
     settings = Project.defaultSettings ++
-      Scrooge.newSettings ++
+      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-exception",
@@ -417,11 +418,11 @@ object Finagle extends Build {
     id = "finagle-stress",
     base = file("finagle-stress"),
     settings = Project.defaultSettings ++
-      Scrooge.newSettings ++
+      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-stress",
-    libraryDependencies ++= Seq(ostrichVersion, util("logging")) ++ thriftLibs,
+    libraryDependencies ++= Seq(ostrichLib, util("logging")) ++ thriftLibs,
     libraryDependencies += "com.google.caliper" % "caliper" % "0.5-rc1"
   ).dependsOn(finagleCore, finagleOstrich4, finagleThrift, finagleHttp, finagleThriftMux)
 
@@ -457,7 +458,7 @@ object Finagle extends Build {
     id = "finagle-benchmark",
     base = file("finagle-benchmark"),
     settings = Project.defaultSettings ++
-      Scrooge.newSettings ++
+      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-benchmark",
@@ -466,6 +467,15 @@ object Finagle extends Build {
       "com.google.caliper" % "caliper" % "0.5-rc1"
     )
   ).dependsOn(finagleCore, finagleStats, finagleOstrich4, finagleZipkin)
+
+  lazy val finagleTesters = Project(
+    id = "finagle-testers",
+    base = file("finagle-testers"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-testers"
+  ).dependsOn(finagleCore)
 
   /*
   lazy val finagleSwift = Project(
@@ -484,7 +494,7 @@ object Finagle extends Build {
   lazy val finagleDoc = Project(
     id = "finagle-doc",
     base = file("doc"),
-    settings = Project.defaultSettings ++ site.settings ++ site.sphinxSupport() /*++ site.includeScaladoc() */ ++ Seq(
+    settings = Project.defaultSettings ++ site.settings ++ site.sphinxSupport() ++ sharedSettings ++ Seq(
       scalacOptions in doc <++= (version).map(v => Seq("-doc-title", "Finagle", "-doc-version", v)),
       includeFilter in Sphinx := ("*.html" | "*.png" | "*.js" | "*.css" | "*.gif" | "*.txt"),
 

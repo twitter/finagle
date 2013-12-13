@@ -51,9 +51,9 @@ abstract class AbstractDecodingToCommand[C <: AnyRef] extends OneToOneDecoder {
     (tokens(0), tokens(1).toInt, expiry, data)
   }
 
-  protected def validateDeleteCommand(tokens: Seq[ChannelBuffer]) = {
+  protected def validateDeleteCommand(tokens: Seq[ChannelBuffer]): ChannelBuffer = {
     if (tokens.size < 1) throw new ClientError("No key")
-    if (tokens.size == 2 && !tokens.last.matches(DIGITS)) throw new ClientError("Timestamp is poorly formed")
+    if (tokens.size == 2 && !isDigits(tokens.last)) throw new ClientError("Timestamp is poorly formed")
     if (tokens.size > 2) throw new ClientError("Too many arguments")
 
     tokens.head
@@ -67,7 +67,7 @@ class DecodingToCommand extends AbstractDecodingToCommand[Command] {
   private[this] def validateArithmeticCommand(tokens: Seq[ChannelBuffer]) = {
     if (tokens.size < 2) throw new ClientError("Too few arguments")
     if (tokens.size == 3 && tokens.last != NOREPLY) throw new ClientError("Too many arguments")
-    if (!tokens(1).matches(DIGITS)) throw new ClientError("Delta is not a number")
+    if (!isDigits(tokens(1))) throw new ClientError("Delta is not a number")
 
     (tokens.head, tokens(1).toLong)
   }

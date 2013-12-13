@@ -78,7 +78,7 @@ class EndToEndTest extends FunSuite {
       "mux", ThriftMuxListener,
       (trans, service) => Trace.unwind {
         Trace.pushTracer(tracer)
-        new mux.ServerDispatcher(trans, service)
+        new mux.ServerDispatcher(trans, service, true)
       }
     )
     object TestThriftMuxServer extends ThriftMuxServerImpl(TestThriftMuxer)

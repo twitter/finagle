@@ -8,7 +8,7 @@ import sys, os
 sys.path.append(os.path.abspath('exts'))
 # highlight_language = 'scala'
 highlight_language = 'text'  # this way we don't get ugly syntax coloring
-extensions = ['sphinx.ext.extlinks', 'includecode']
+extensions = ['sphinx.ext.extlinks', 'includecode', 'sphinx.ext.graphviz']
 templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
@@ -35,15 +35,14 @@ html_style = 'finagle.css'
 
 project = u'Finagle'
 copyright = u'2013 Twitter, Inc'
-version = ''
-release = ''
 htmlhelp_basename = "finagle"
 
 # e.g. :issue:`36` :ticket:`8`
 extlinks = {
   'issue': ('https://github.com/twitter/finagle/issues/%s', 'issue #'),
   'ex': ('https://github.com/twitter/finagle/blob/finagle-example/src/main/scala/%s', 'Finagle example '),
-  'api': ('http://twitter.github.com/finagle/docs/#%s', 'Finagle API doc')
+  'api': ('http://twitter.github.com/finagle/docs/#%s', 'Finagle API doc'),
+  'src':("https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/%s", 'finagle-core github repo')
 }
 
 rst_epilog = '''

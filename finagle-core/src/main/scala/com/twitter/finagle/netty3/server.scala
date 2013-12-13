@@ -179,13 +179,9 @@ case class Netty3Listener[In, Out](
 
   private[this] val statsHandlers = new IdentityHashMap[StatsReceiver, ChannelHandler]
 
-  // TODO: These gauges will stay around forever. It's
-  // fine, but it would be nice to clean them up.
   def channelStatsHandler(statsReceiver: StatsReceiver) = synchronized {
     if (!(statsHandlers containsKey statsReceiver)) {
-      val nconn = new AtomicLong(0)
-      statsReceiver.provideGauge("connections") { nconn.get() }
-      statsHandlers.put(statsReceiver, new ChannelStatsHandler(statsReceiver, nconn))
+      statsHandlers.put(statsReceiver, new ChannelStatsHandler(statsReceiver))
     }
 
     statsHandlers.get(statsReceiver)

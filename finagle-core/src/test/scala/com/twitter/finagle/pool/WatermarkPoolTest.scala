@@ -2,6 +2,7 @@ package com.twitter.finagle.pool
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
@@ -197,14 +198,16 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
     when(factory.close(any[Time])).thenReturn(Future.Done)
     val service0 = mock[Service[Int, Int]]
     when(service0.close(any[Time])).thenReturn(Future.Done)
-    val promise = new Promise[Service[Int, Int]]
 
     when(factory()).thenReturn(Future.value(service0))
     when(service0.isAvailable).thenReturn(true)
 
-    val pool = new WatermarkPool(factory, 1, 1, maxWaiters = 2)
+    val statsRecv = new InMemoryStatsReceiver
+    val pool = new WatermarkPool(factory, 1, 1, statsRecv, maxWaiters = 2)
+    def numWaited() = statsRecv.counter("pool_num_waited")()
 
     it("should throw TooManyWaitersException when the number of waiters exceeds 2") {
+      assert(0 === numWaited())
       val f0 = pool()
       assert(f0.isDefined)
       verify(factory)()
@@ -212,15 +215,18 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
       // one waiter. this is cool.
       val f1 = pool()
       assert(!f1.isDefined)
+      assert(1 === numWaited())
 
       // two waiters. this is *still* cool.
       val f2 = pool()
       assert(!f2.isDefined)
+      assert(2 === numWaited())
 
       // three waiters and i freak out.
       val f3 = pool()
       assert(f3.isDefined)
       intercept[TooManyWaitersException] { Await.result(f3) }
+      assert(2 === numWaited())
 
       // give back my original item, and f1 should still get something.
       Await.result(f0).close()
@@ -379,7 +385,7 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
         when(factory()).thenReturn(s)
         pool()
       }
-      val waiters = 0 until maxWaiters map { _=> pool() }
+      0 until maxWaiters map { _ => pool() }
       val f = pool()
       assert(f.isDefined)
       intercept[TooManyWaitersException] { Await.result(f) }

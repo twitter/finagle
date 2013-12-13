@@ -29,6 +29,7 @@ class FinagleClientThriftServerSpec extends SpecificationWithJUnit {
             somewayPromise() = Return(())
             Future.Void
           }
+          def show_me_your_dtab() = ""
         }
 
         val (thriftServerAddr, thriftServer) = {

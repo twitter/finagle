@@ -2,7 +2,7 @@ package com.twitter.finagle.builder
 
 import com.twitter.finagle._
 import com.twitter.finagle.integration.IntegrationBase
-import com.twitter.util.{Promise, Return, Future}
+import com.twitter.util.{Promise, Return, Future, Time}
 import org.mockito.Matchers
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
@@ -13,7 +13,7 @@ class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with
       val preparedFactory = mock[ServiceFactory[String, String]]
       val preparedServicePromise = new Promise[Service[String, String]]
       preparedFactory() returns preparedServicePromise
-      preparedFactory.close(any) returns Future.Done
+      preparedFactory.close(any[Time]) returns Future.Done
       preparedFactory.map(Matchers.any()) returns
         preparedFactory.asInstanceOf[ServiceFactory[Any, Nothing]]
 
@@ -30,7 +30,7 @@ class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with
       requestFuture.isDefined must beFalse
       val service = mock[Service[String, String]]
       service("123") returns Future.value("321")
-      service.close(any) returns Future.Done
+      service.close(any[Time]) returns Future.Done
       preparedServicePromise() = Return(service)
       there was one(service)("123")
       requestFuture.poll must beSome(Return("321"))

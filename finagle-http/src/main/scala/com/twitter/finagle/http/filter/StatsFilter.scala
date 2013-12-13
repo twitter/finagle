@@ -6,15 +6,17 @@ import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.util.{Duration, Future, Return, Stopwatch, Throw}
 
 
-/** Statistic filter.
-  * Add counters:
-  *    status.<code>
-  *    status.<class>
-  *    response_size (deprecated?)
-  * And metrics:
-  *    time.<code>
-  *    time.<class>
-  */
+/**
+ * Statistic filter.
+ *
+ * Add counters:
+ *    status.[code]
+ *    status.[class]
+ *    response_size (deprecated?)
+ * And metrics:
+ *    time.[code]
+ *    time.[class]
+ */
 class StatsFilter[REQUEST <: Request](stats: StatsReceiver)
   extends SimpleFilter[REQUEST, Response] {
 

@@ -23,7 +23,7 @@ class ResponseSpec extends SpecificationWithJUnit {
 
     "encode" in {
       val response = Response()
-      response.headers("Server") = "macaw"
+      response.headers.set("Server", "macaw")
 
       val expected = "HTTP/1.1 200 OK\r\nServer: macaw\r\n\r\n"
 
@@ -35,8 +35,8 @@ class ResponseSpec extends SpecificationWithJUnit {
       val response = Response.decodeString(
         "HTTP/1.1 200 OK\r\nServer: macaw\r\nContent-Length: 0\r\n\r\n")
 
-      response.status            must_== HttpResponseStatus.OK
-      response.headers("Server") must_== "macaw"
+      response.status                must_== HttpResponseStatus.OK
+      response.headers.get("Server") must_== "macaw"
     }
   }
 }

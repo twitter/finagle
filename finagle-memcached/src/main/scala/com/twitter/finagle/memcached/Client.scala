@@ -18,7 +18,7 @@ import com.twitter.finagle.service.{FailureAccrualFactory, FailedService}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{Service, ShardNotAvailableException}
 import com.twitter.hashing._
-import com.twitter.util.{Time, Future, Bijection, Duration, Timer}
+import com.twitter.util.{Command => _, _}
 
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers
@@ -647,6 +647,16 @@ class KetamaFailureAccrualFactory[Req, Rep](
   key: KetamaClientKey,
   healthBroker: Broker[NodeHealth]
 ) extends FailureAccrualFactory[Req, Rep](underlying, numFailures, markDeadFor, timer) {
+
+  // exclude CancelledRequestException and CancelledConnectionException for cache client failure accrual
+  override def isSuccess(response: Try[Rep]): Boolean = response match {
+    case Return(_) => true
+    case Throw(WriteException(_: CancelledRequestException)) => true
+    case Throw(_: CancelledRequestException) => true
+    case Throw(WriteException(_: CancelledConnectionException)) => true
+    case Throw(_: CancelledConnectionException) => true
+    case Throw(e) => false
+  }
 
   override def markDead() = {
     super.markDead()

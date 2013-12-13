@@ -4,11 +4,11 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-benchmark</artifactId>
   <packaging>jar</packaging>
-  <version>6.6.3-SNAPSHOT</version>
+  <version>6.8.2-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
-    <version>0.0.4</version>
+    <version>0.1.6</version>
     <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
   </parent>
   <properties>
@@ -32,49 +32,51 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.6.3-SNAPSHOT</version>
+      <version>6.8.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-stats</artifactId>
-      <version>6.6.3-SNAPSHOT</version>
+      <version>6.8.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4</artifactId>
-      <version>6.6.3-SNAPSHOT</version>
+      <version>6.8.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-zipkin</artifactId>
-      <version>6.6.3-SNAPSHOT</version>
+      <version>6.8.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-swift</artifactId>
-      <version>6.6.3-SNAPSHOT</version>
+      <version>6.8.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift</artifactId>
-      <version>6.6.3-SNAPSHOT</version>
+      <version>6.8.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>finagle-memcached</artifactId>
+      <version>6.8.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>scrooge-runtime</artifactId>
-      <version>3.8.1-SNAPSHOT</version>
+      <version>3.11.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
     <plugins>
       <plugin>
         <groupId>com.twitter</groupId>
-        <artifactId>maven-finagle-thrift-plugin</artifactId>
-        <configuration>
-          <thriftGenerators>
-            <thriftGenerator>scrooge</thriftGenerator>
-          </thriftGenerators>
-        </configuration>
+        <artifactId>scrooge-maven-plugin</artifactId>
+        <!-- this version must match the version from scrooge-gen.ivy.xml -->
+        <version>3.11.0</version>
       </plugin>
     </plugins>
   </build>

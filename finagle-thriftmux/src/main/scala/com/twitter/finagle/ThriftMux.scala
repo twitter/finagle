@@ -33,8 +33,8 @@ object ThriftMux
   protected val protocolFactory = new TBinaryProtocol.Factory()
   protected val defaultClientName = "mux"
 
-  def newClient(group: Group[SocketAddress]): ServiceFactory[ThriftClientRequest, Array[Byte]] =
-    ThriftMuxClient.newClient(group)
+  def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
+    ThriftMuxClient.newClient(dest, label)
 
   def serve(addr: SocketAddress, service: ServiceFactory[Array[Byte], Array[Byte]]) =
     ThriftMuxServer.serve(addr, service)

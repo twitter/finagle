@@ -40,7 +40,6 @@ class EndToEndSpec extends SpecificationWithJUnit {
       Await.result(response) must be_==("foo")
     }
 
-
     "queue requests while waiting for cluster to initialize" in {
       val echo = new Service[String, String] {
         def apply(request: String) = Future.value(request)
@@ -66,12 +65,6 @@ class EndToEndSpec extends SpecificationWithJUnit {
         responses(i) = client(i.toString)
         responses(i).isDefined must beFalse
       }
-
-      // more than 5 requests will result in MaxQueuedRequestsExceededException
-      val r = client("123")
-      r.isDefined must beTrue
-      Await.ready(r).poll.get.isThrow must beTrue
-      Await.result(r) must throwA(new TooManyConcurrentRequestsException)
 
       // make cluster available, now queued requests should be processed
       val thread = new Thread {

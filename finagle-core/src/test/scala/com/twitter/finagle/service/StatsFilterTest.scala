@@ -1,6 +1,6 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, RollupStatsReceiver}
 import com.twitter.finagle.{BackupRequestLost, RequestException, Service, WriteException}
 import com.twitter.util.{Await, Promise}
 import org.junit.runner.RunWith
@@ -78,5 +78,55 @@ class StatsFilterTest extends FunSuite {
     assert(receiver.gauges(Seq("pending"))() == 1.0)
     promise.setException(new Exception)
     assert(receiver.gauges(Seq("pending"))() == 0.0)
+  }
+
+  trait StatsFilterHelper {
+    val promise = Promise[String]()
+    val underlying = new InMemoryStatsReceiver()
+    val receiver = new RollupStatsReceiver(underlying)
+    val service = new StatsFilter(receiver) andThen Service.mk { string: String =>
+      promise
+    }
+  }
+
+  test("should count failure requests only after they are finished") {
+    new StatsFilterHelper {
+      intercept[java.util.NoSuchElementException] {
+        underlying.counters(Seq("requests"))
+      }
+      intercept[java.util.NoSuchElementException] {
+        underlying.counters(Seq("failures"))
+      }
+      val f = service("foo")
+      intercept[java.util.NoSuchElementException] {
+        underlying.counters(Seq("requests"))
+      }
+      intercept[java.util.NoSuchElementException] {
+        underlying.counters(Seq("failures"))
+      }
+      promise.setException(new Exception)
+      assert(underlying.counters(Seq("requests")) === 1)
+      assert(underlying.counters(Seq("failures")) === 1)
+    }
+  }
+
+  test("should count successful requests only after they are finished") {
+    val (promise, receiver, statsService) = getService
+    intercept[java.util.NoSuchElementException] {
+      receiver.counters(Seq("requests"))
+    }
+    intercept[java.util.NoSuchElementException] {
+      receiver.counters(Seq("success"))
+    }
+    val f = statsService("foo")
+    intercept[java.util.NoSuchElementException] {
+      receiver.counters(Seq("requests"))
+    }
+    intercept[java.util.NoSuchElementException] {
+      receiver.counters(Seq("success"))
+    }
+    promise.setValue("whatever")
+    assert(receiver.counters(Seq("requests")) === 1)
+    assert(receiver.counters(Seq("success")) === 1)
   }
 }

@@ -5,13 +5,16 @@ import _root_.java.net.{SocketAddress, InetSocketAddress}
 import com.google.gson.GsonBuilder
 import com.twitter.common.io.{Codec,JsonCodec}
 import com.twitter.common.zookeeper._
+import com.twitter.concurrent.Spool
 import com.twitter.concurrent.Spool.*::
-import com.twitter.concurrent.{Broker, Spool}
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Group, Resolver}
+import com.twitter.finagle.{Group, Resolver, Addr}
 import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.zookeeper.{DefaultZkClientFactory, ZookeeperServerSetCluster}
+import com.twitter.finagle.zookeeper.{ZkGroup, DefaultZkClientFactory, ZookeeperServerSetCluster}
+import com.twitter.finagle.{Group, Resolver}
+import com.twitter.thrift.ServiceInstance
+import com.twitter.thrift.Status.ALIVE
 import com.twitter.util._
 import scala.collection.mutable
 
@@ -28,29 +31,26 @@ class TwitterCacheResolverException(msg: String) extends Exception(msg)
 class TwitterCacheResolver extends Resolver {
   val scheme = "twcache"
 
-  def resolve(addr: String) = {
-    addr.split("!") match {
+  def bind(arg: String) = {
+    arg.split("!") match {
       // twcache!<host1>:<port>:<weight>:<key>,<host2>:<port>:<weight>:<key>,<host3>:<port>:<weight>:<key>
       case Array(hosts) =>
         val group = CacheNodeGroup(hosts) map {
           case node: CacheNode => node: SocketAddress
         }
-        Return(group)
+        group.set map { newSet => Addr.Bound(newSet) }
 
       // twcache!zkhost:2181!/twitter/service/cache/<stage>/<name>
       case Array(zkHosts, path) =>
         val zkClient = DefaultZkClientFactory.get(DefaultZkClientFactory.hostSet(zkHosts))._1
-        val cluster = new ZookeeperCachePoolCluster(
-          zkPath = path,
-          zkClient = zkClient,
-          backupPool = None,
-          statsReceiver = ClientStatsReceiver.scope(scheme).scope(path))
-        Await.result(cluster.ready)
-        val group = Group.fromCluster(cluster) map { case c: CacheNode => c: SocketAddress }
-        Return(group)
+        val group = CacheNodeGroup.newZkCacheNodeGroup(
+          path, zkClient, ClientStatsReceiver.scope(scheme).scope(path)
+        ) map { case c: CacheNode => c: SocketAddress }
+        group.set map { newSet => Addr.Bound(newSet) }
 
       case _ =>
-        Throw(new TwitterCacheResolverException("Invalid twcache format \"%s\"".format(addr)))
+        throw new TwitterCacheResolverException(
+          "Invalid twcache format \"%s\"".format(arg))
     }
   }
 }
@@ -84,6 +84,10 @@ object CacheNodeGroup {
   }
 
   def newStaticGroup(cacheNodeSet: Set[CacheNode]) = Group(cacheNodeSet toSeq:_*)
+
+  def newZkCacheNodeGroup(
+    path: String, zkClient: ZooKeeperClient, statsReceiver: StatsReceiver = NullStatsReceiver
+  ) = new ZookeeperCacheNodeGroup(zkPath = path, zkClient = zkClient, statsReceiver = statsReceiver)
 }
 
 /**
@@ -195,7 +199,7 @@ object CachePoolConfig {
  * we need for now. In the future this can be extended for other config attributes like cache
  * pool migrating state, backup cache servers list, or replication role, etc
  */
-case class CachePoolConfig(cachePoolSize: Int)
+case class CachePoolConfig(cachePoolSize: Int, detectKeyRemapping: Boolean = false)
 
 /**
  *  Cache pool based on a static list
@@ -274,21 +278,23 @@ class ZookeeperCachePoolCluster private[memcached](
   }
 
   override def applyZKData(data: Array[Byte]): Unit = {
-    val cachePoolConfig = CachePoolConfig.jsonCodec.deserialize(new ByteArrayInputStream(data))
+    if(data != null) {
+      val cachePoolConfig = CachePoolConfig.jsonCodec.deserialize(new ByteArrayInputStream(data))
 
-    // apply the cache pool config to the cluster
-    val expectedClusterSize = cachePoolConfig.cachePoolSize
-    val (snapshotSeq, snapshotChanges) = zkServerSetCluster.snap
+      // apply the cache pool config to the cluster
+      val expectedClusterSize = cachePoolConfig.cachePoolSize
+      val (snapshotSeq, snapshotChanges) = zkServerSetCluster.snap
 
-    // TODO: this can be blocking or non-blocking, depending on the protocol
-    // for now I'm making it blocking call as the current known scenario is that cache config data
-    // should be always exactly matching existing memberships, controlled by cache-team operator.
-    // It will only block for 10 seconds after which it should trigger alerting metrics and schedule
-    // another try
-    val newSet = Await.result(waitForClusterComplete(snapshotSeq.toSet, expectedClusterSize, snapshotChanges),
-      CachePoolWaitCompleteTimeout)
+      // TODO: this can be blocking or non-blocking, depending on the protocol
+      // for now I'm making it blocking call as the current known scenario is that cache config data
+      // should be always exactly matching existing memberships, controlled by cache-team operator.
+      // It will only block for 10 seconds after which it should trigger alerting metrics and schedule
+      // another try
+      val newSet = Await.result(waitForClusterComplete(snapshotSeq.toSet, expectedClusterSize, snapshotChanges),
+        CachePoolWaitCompleteTimeout)
 
-    updatePool(newSet)
+      updatePool(newSet)
+    }
   }
 
   /**
@@ -314,6 +320,73 @@ class ZookeeperCachePoolCluster private[memcached](
           // this should not happen in general as this code generally is only for first time pool
           // manager initialization
           waitForClusterComplete(currentSet - node, expectedSize, tail)
+      }
+    }
+  }
+}
+
+/**
+ * Zookeeper based cache node group with a serverset as the underlying pool.
+ * It will monitor the underlying serverset changes and report the detected underlying pool size.
+ * It will monitor the serverset parent node for cache pool config data, cache node group
+ * update will be triggered whenever cache config data change event happens.
+ *
+ * @param zkPath the zookeeper path representing the cache pool
+ * @param zkClient zookeeper client talking to the zookeeper, it will only be used to read zookeeper
+ * @param statsReceiver Optional, the destination to report the stats to
+ */
+class ZookeeperCacheNodeGroup(
+  protected val zkPath: String,
+  protected val zkClient: ZooKeeperClient,
+  protected val statsReceiver: StatsReceiver = NullStatsReceiver
+) extends Group[CacheNode] with ZookeeperStateMonitor {
+
+  protected[finagle] val set = Var(Set[CacheNode]())
+
+  @volatile private var detectKeyRemapping = false
+
+  private val zkGroup =
+    new ZkGroup(new ServerSetImpl(zkClient, zkPath), zkPath) collect {
+      case inst if inst.getStatus == ALIVE =>
+        val ep = inst.getServiceEndpoint
+        val shardInfo = if (inst.isSetShard) Some(inst.getShard.toString) else None
+        CacheNode(ep.getHost, ep.getPort, 1, shardInfo)
+    }
+
+  private[this] val underlyingSizeGauge = statsReceiver.addGauge("underlyingPoolSize") {
+    zkGroup.members.size
+  }
+
+  def applyZKData(data: Array[Byte]) {
+    if(data != null) {
+      val cachePoolConfig = CachePoolConfig.jsonCodec.deserialize(new ByteArrayInputStream(data))
+
+      detectKeyRemapping = cachePoolConfig.detectKeyRemapping
+
+      // apply the cache pool config to the cluster
+      val expectedGroupSize = cachePoolConfig.cachePoolSize
+      if (expectedGroupSize != zkGroup.members.size)
+        throw new IllegalStateException("Underlying group size not equal to expected size")
+
+      set() = zkGroup.members
+    }
+  }
+
+  // when enabled, monitor and apply new members in case of pure cache node key remapping
+  override def applyZKChildren(children: List[String]) = if (detectKeyRemapping) {
+    val newMembers = zkGroup.members
+    if (newMembers.size != children.size)
+      throw new IllegalStateException("Underlying children size not equal to expected children size")
+
+    if (newMembers.size == members.size) {
+      val removed = (members &~ newMembers)
+      val added = (newMembers &~ members)
+
+      // pick up the diff only if new members contains exactly the same set of cache node keys,
+      // e.g. certain cache node key is re-assigned to another host
+      if (removed.forall(_.key.isDefined) && added.forall(_.key.isDefined) &&
+          removed.size == added.size && removed.map(_.key.get) == added.map(_.key.get)) {
+        set() = newMembers
       }
     }
   }

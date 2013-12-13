@@ -28,7 +28,6 @@ object Exists {
 
 case class Expire(key: ChannelBuffer, seconds: Long) extends StrictKeyCommand {
   def command = Commands.EXPIRE
-  RequireClientProtocol(seconds > 0, "Seconds must be greater than 0")
   def toChannelBuffer =
     RedisCodec.toUnifiedFormat(Seq(CommandBytes.EXPIRE, key,
       StringToChannelBuffer(seconds.toString)))
@@ -45,9 +44,6 @@ object Expire {
 
 case class ExpireAt(key: ChannelBuffer, timestamp: Time) extends StrictKeyCommand {
   def command = Commands.EXPIREAT
-  RequireClientProtocol(
-    timestamp != null && timestamp > Time.now,
-    "Timestamp must be in the future")
 
   val seconds = timestamp.inSeconds
 
@@ -88,7 +84,6 @@ object Persist {
 
 case class PExpire(key: ChannelBuffer, milliseconds: Long) extends StrictKeyCommand {
   def command = Commands.PEXPIRE
-  RequireClientProtocol(milliseconds > 0, "Milliseconds must be greater than 0")
   def toChannelBuffer =
     RedisCodec.toUnifiedFormat(Seq(CommandBytes.PEXPIRE, key,
       StringToChannelBuffer(milliseconds.toString)))
@@ -105,9 +100,6 @@ object PExpire {
 
 case class PExpireAt(key: ChannelBuffer, timestamp: Time) extends StrictKeyCommand {
   def command = Commands.PEXPIREAT
-  RequireClientProtocol(
-    timestamp != null && timestamp > Time.now,
-    "Timestamp must be in the future")
 
   val milliseconds = timestamp.inMilliseconds
 

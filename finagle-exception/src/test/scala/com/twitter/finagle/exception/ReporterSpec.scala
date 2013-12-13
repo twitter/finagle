@@ -3,7 +3,7 @@ package com.twitter.finagle.exception
 import com.twitter.util._
 import com.twitter.finagle.util.LoadedReporterFactory
 import java.net.{InetAddress, InetSocketAddress}
-import com.twitter.finagle.exception.thrift.{ResultCode, LogEntry, scribe}
+import com.twitter.finagle.exception.thrift.{ResultCode, LogEntry, Scribe}
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.anyObject
@@ -14,7 +14,7 @@ import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class DefaultReporterTest extends FunSuite with MockitoSugar {
-  val logger = mock[scribe.FinagledClient]
+  val logger = mock[Scribe.FutureIface]
   when(logger.log(anyObject())) thenReturn(Future.value(ResultCode.Ok))
 
   val captor = ArgumentCaptor.forClass(classOf[Seq[LogEntry]])
@@ -38,7 +38,7 @@ class DefaultReporterTest extends FunSuite with MockitoSugar {
 
 @RunWith(classOf[JUnitRunner])
 class ClientReporterTest extends FunSuite with MockitoSugar {
-  val logger = mock[scribe.FinagledClient]
+  val logger = mock[Scribe.FutureIface]
   when(logger.log(anyObject())) thenReturn(Future.value(ResultCode.Ok))
 
   val captor = ArgumentCaptor.forClass(classOf[Seq[LogEntry]])
@@ -63,7 +63,7 @@ class ClientReporterTest extends FunSuite with MockitoSugar {
 
 @RunWith(classOf[JUnitRunner])
 class SourceClientReporterTest extends FunSuite with MockitoSugar {
-  val logger = mock[scribe.FinagledClient]
+  val logger = mock[Scribe.FutureIface]
   when(logger.log(anyObject())) thenReturn(Future.value(ResultCode.Ok))
 
   val captor = ArgumentCaptor.forClass(classOf[Seq[LogEntry]])
@@ -93,7 +93,7 @@ class SourceClientReporterTest extends FunSuite with MockitoSugar {
 class ExceptionReporterTest extends FunSuite with MockitoSugar {
 
   test("logs an exception through the loaded reporter") {
-    val logger = mock[scribe.FinagledClient]
+    val logger = mock[Scribe.FutureIface]
     when(logger.log(anyObject())) thenReturn(Future.value(ResultCode.Ok))
     val captor = ArgumentCaptor.forClass(classOf[Seq[LogEntry]])
     val tse = new TestServiceException("service", "my cool message")
@@ -104,7 +104,7 @@ class ExceptionReporterTest extends FunSuite with MockitoSugar {
   }
 
   test("logs a client exception through the loaded reporter") {
-    val logger = mock[scribe.FinagledClient]
+    val logger = mock[Scribe.FutureIface]
     when(logger.log(anyObject())) thenReturn(Future.value(ResultCode.Ok))
     val captor = ArgumentCaptor.forClass(classOf[Seq[LogEntry]])
     val socket = new InetSocketAddress("localhost", 5871)

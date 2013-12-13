@@ -4,14 +4,16 @@ import com.twitter.finagle._
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.ByteArrays
 import com.twitter.util.Future
+import com.twitter.io.Buf
 import java.net.InetSocketAddress
-import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocolFactory, TBinaryProtocol}
+import java.util.Arrays
+import org.apache.thrift.protocol.{
+  TMessage, TMessageType, TProtocolFactory, TBinaryProtocol}
 import org.apache.thrift.{TApplicationException, TException}
-import org.jboss.netty.channel.{
-  ChannelHandlerContext,
-  SimpleChannelDownstreamHandler, MessageEvent, Channels,
-  ChannelPipelineFactory}
 import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.channel.{
+  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent,
+  SimpleChannelDownstreamHandler}
 
 object ThriftServerFramedCodec {
   def apply() = new ThriftServerFramedCodecFactory
@@ -57,11 +59,11 @@ class ThriftServerFramedCodec(
 }
 
 private case class ThriftServerPreparer(
-  protocolFactory: TProtocolFactory, 
-  serviceName: String, 
+  protocolFactory: TProtocolFactory,
+  serviceName: String,
   boundAddress: InetSocketAddress) {
 
-  private[this] val uncaughtExceptionsFilter = 
+  private[this] val uncaughtExceptionsFilter =
     new HandleUncaughtApplicationExceptions(protocolFactory)
 
   def prepare(
@@ -149,34 +151,66 @@ private[thrift] class ThriftServerTracingFilter(
       val header = new thrift.RequestHeader
       val request_ = InputBuffer.peelMessage(request, header, protocolFactory)
 
-      val msg = new InputBuffer(request_, protocolFactory)().readMessageBegin()
+      // Set the TraceId. This will be overwritten by TraceContext, if it is
+      // loaded, but it should never be the case that the ids from the two
+      // paths won't match.
       val sampled = if (header.isSetSampled) Some(header.isSampled) else None
       // if true, we trace this request. if None client does not trace, we get to decide
 
       val traceId = TraceId(
-        if (header.isSetTrace_id) Some(SpanId(header.getTrace_id)) else None,
-        if (header.isSetParent_span_id) Some(SpanId(header.getParent_span_id)) else None,
+        if (header.isSetTrace_id)
+          Some(SpanId(header.getTrace_id)) else None,
+        if (header.isSetParent_span_id)
+          Some(SpanId(header.getParent_span_id)) else None,
         SpanId(header.getSpan_id),
         sampled,
-        if (header.isSetFlags) Flags(header.getFlags) else Flags())
+        if (header.isSetFlags) Flags(header.getFlags) else Flags()
+      )
 
       Trace.setId(traceId)
+
+      // Destination is ignored for now,
+      // as it really requires a dispatcher.
+      if (header.getDelegationsSize() > 0) {
+        val ds = header.getDelegationsIterator()
+        while (ds.hasNext()) {
+          val d = ds.next()
+          if (d.src != null && d.dst != null)
+            Dtab.delegate(d.src, d.dst)
+        }
+      }
+
+      val msg = new InputBuffer(request_, protocolFactory)().readMessageBegin()
       Trace.recordRpcname(serviceName, msg.name)
       Trace.record(Annotation.ServerRecv())
 
+      // Ditto for the ClientId: it'll be overwritten by ClientIdContext, if it
+      // is loaded, but it should never be the case that the ids from the two
+      // pathes won't match.
+      ClientId.set(extractClientId(header))
+
+      if (header.contexts != null) {
+        val iter = header.contexts.iterator()
+        while (iter.hasNext) {
+          val c = iter.next()
+          Context.handle(Buf.ByteArray(c.getKey()), Buf.ByteArray(c.getValue()))
+        }
+      }
+
       try {
-        ClientId.set(extractClientId(header))
         service(request_) map {
           case response if response.isEmpty => response
           case response =>
             Trace.record(Annotation.ServerSend())
             val responseHeader = new thrift.ResponseHeader
-            ByteArrays.concat(OutputBuffer.messageToArray(responseHeader, protocolFactory), response)
+            ByteArrays.concat(
+              OutputBuffer.messageToArray(responseHeader, protocolFactory),
+              response)
         }
       } finally {
         ClientId.clear()
+        Dtab.clear()
       }
-
     } else {
       val buffer = new InputBuffer(request, protocolFactory)
       val msg = buffer().readMessageBegin()
@@ -211,4 +245,3 @@ private[thrift] class ThriftServerTracingFilter(
     Option(header.client_id) map { clientId => ClientId(clientId.name) }
   }
 }
-

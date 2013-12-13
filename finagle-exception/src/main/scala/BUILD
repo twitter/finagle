@@ -10,7 +10,7 @@ scala_library(name='scala',
     pants('util/util-core'),
     compiled_idl(
       idl_deps=pants('finagle/finagle-exception/src/main/thrift'),
-      compiler='scrooge-legacy',
+      compiler='scrooge',
       language='scala',
       rpc_style='finagle',
     )

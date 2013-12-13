@@ -5,6 +5,7 @@ import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.netty3.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.ByteArrays
+import com.twitter.io.Buf
 import org.apache.thrift.protocol.{
   TBinaryProtocol, TMessage, TMessageType, TProtocolFactory}
 import org.apache.thrift.transport.TMemoryInputTransport
@@ -12,6 +13,7 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{
   ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent,
   SimpleChannelDownstreamHandler}
+import java.util.ArrayList
 
 /**
  * ThriftClientFramedCodec implements a framed thrift transport that
@@ -36,6 +38,8 @@ class ThriftClientFramedCodecFactory(
   extends CodecFactory[ThriftClientRequest, Array[Byte]]#Client
 {
   def this(clientId: Option[ClientId]) = this(clientId, false, new TBinaryProtocol.Factory())
+
+  def this(clientId: ClientId) = this(Some(clientId))
 
   // Fix this after the API/ABI freeze (use case class builder)
   def useCallerSeqIds(x: Boolean): ThriftClientFramedCodecFactory =
@@ -98,13 +102,17 @@ private case class ThriftClientPreparer(
         val memoryTransport = new TMemoryInputTransport(bytes)
         val iprot = protocolFactory.getProtocol(memoryTransport)
         val reply = iprot.readMessageBegin()
-        val tracingFilter = new ThriftClientTracingFilter(
+        val ttwitter = new TTwitterFilter(
           serviceName,
           reply.`type` != TMessageType.EXCEPTION,
           clientId, protocolFactory)
-        val seqIdFilter = if (protocolFactory.isInstanceOf[TBinaryProtocol.Factory] && !useCallerSeqIds)
-          new SeqIdFilter else Filter.identity[ThriftClientRequest, Array[Byte]]
-        val filtered = seqIdFilter andThen tracingFilter andThen service
+        val seqIdFilter = 
+          if (protocolFactory.isInstanceOf[TBinaryProtocol.Factory] && !useCallerSeqIds)
+            new SeqIdFilter 
+          else
+            Filter.identity[ThriftClientRequest, Array[Byte]]
+
+        val filtered = seqIdFilter andThen ttwitter andThen service
         new ValidateThriftService(filtered, protocolFactory)
       }
     }
@@ -140,14 +148,18 @@ private[thrift] class ThriftClientChannelBufferEncoder
 }
 
 /**
- * ThriftClientTracingFilter implements Trace support for thrift. This
- * is applied *after* the Channel has been upgraded (via
- * negotiation). It serializes the current Trace into a header
- * on the wire. It is applied after all framing.
+ * TTwitterFilter implements the upnegotiated TTwitter transport, which
+ * has some additional features beyond TFramed:
  *
- * @param isUpgraded Whether this connection is with a server that has tracing enabled
+ * - Dapper-style RPC tracing
+ * - Passing client IDs
+ * - Request contexts
+ * - Name delegation
+ *
+ * @param isUpgraded Whether this connection is with a server that
+ * has been upgraded to TTwitter
  */
-private[thrift] class ThriftClientTracingFilter(
+private[thrift] class TTwitterFilter(
     serviceName: String, isUpgraded: Boolean, clientId: Option[ClientId], 
     protocolFactory: TProtocolFactory) 
   extends SimpleFilter[ThriftClientRequest, Array[Byte]] {
@@ -175,9 +187,35 @@ private[thrift] class ThriftClientTracingFilter(
         case None => header.unsetSampled()
       }
       header.setFlags(Trace.id.flags.toLong)
+      
+      val contexts = Context.emit().iterator
+      if (contexts.hasNext) {
+        val ctxs = new ArrayList[thrift.RequestContext]()
+        var i = 0
+        while (contexts.hasNext) {
+          val (k, buf) = contexts.next()
+          val c = new thrift.RequestContext(
+            Buf.toByteBuffer(k), Buf.toByteBuffer(buf))
+          ctxs.add(i, c)
+          i += 1
+        }
+
+        header.setContexts(ctxs)
+      }
+      
+      val dtab = Dtab.baseDiff()
+      if (dtab.nonEmpty) {
+        val delegations = new ArrayList[thrift.Delegation](dtab.size)
+        for (Dentry(src, dst) <- dtab)
+          delegations.add(new thrift.Delegation(src, dst.reified))
+
+        header.setDelegations(delegations)
+      }
 
       new ThriftClientRequest(
-        ByteArrays.concat(OutputBuffer.messageToArray(header, protocolFactory), request.message),
+        ByteArrays.concat(
+          OutputBuffer.messageToArray(header, protocolFactory), 
+          request.message),
         request.oneway)
     } else {
       request

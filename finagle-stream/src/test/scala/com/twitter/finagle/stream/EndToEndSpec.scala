@@ -44,27 +44,29 @@ class EndToEndSpec extends SpecificationWithJUnit {
         val (client, address) = mkClient
         doAfter { client.close() }
 
-        "writes from the server arrive on the client's channel" in {
-          val clientRes = Await.result(client(httpRequest), 1.second)
-          var result = ""
-          val latch = new CountDownLatch(1)
-          (clientRes.error?) ensure {
-            Future { latch.countDown() }
-          }
-
-          clientRes.messages foreach { channelBuffer =>
-            Future {
-              result += channelBuffer.toString(Charset.defaultCharset)
+        if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
+          "writes from the server arrive on the client's channel" in {
+            val clientRes = Await.result(client(httpRequest), 1.second)
+            var result = ""
+            val latch = new CountDownLatch(1)
+            (clientRes.error?) ensure {
+              Future { latch.countDown() }
             }
+
+            clientRes.messages foreach { channelBuffer =>
+              Future {
+                result += channelBuffer.toString(Charset.defaultCharset)
+              }
+            }
+
+            messages !! ChannelBuffers.wrappedBuffer("1".getBytes)
+            messages !! ChannelBuffers.wrappedBuffer("2".getBytes)
+            messages !! ChannelBuffers.wrappedBuffer("3".getBytes)
+            error !! EOF
+
+            latch.within(1.second)
+            result mustEqual "123"
           }
-
-          messages !! ChannelBuffers.wrappedBuffer("1".getBytes)
-          messages !! ChannelBuffers.wrappedBuffer("2".getBytes)
-          messages !! ChannelBuffers.wrappedBuffer("3".getBytes)
-          error !! EOF
-
-          latch.within(1.second)
-          result mustEqual "123"
         }
 
         "writes from the server are queued before the client responds" in {
