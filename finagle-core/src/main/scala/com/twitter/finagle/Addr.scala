@@ -19,7 +19,7 @@ object Addr {
    * from access since we want to add partially resolved addresses
    * in the future. At this point, the API will be fixed.
    */
-  case class Bound private[finagle](addrs: immutable.Set[SocketAddress])
+  case class Bound(addrs: immutable.Set[SocketAddress])
     extends Addr
 
   /**
@@ -45,7 +45,7 @@ object Addr {
 
   object Bound {
     def apply(addrs: SocketAddress*): Bound =
-      Bound(immutable.Set(addrs:_*))
+      Bound(Set(addrs:_*))
   }
 
   object Failed {
