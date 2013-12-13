@@ -24,12 +24,8 @@ object Finagle extends Build {
   )
   val scroogeLibs = thriftLibs ++ Seq(
     "com.twitter" %% "scrooge-core" % "3.11.0")
-    
-  def util(which: String) = 
-    "com.twitter" %% ("util-"+which) % utilVersion excludeAll(
-      ExclusionRule(organization = "junit"),
-      ExclusionRule(organization = "org.scala-tools.testing"),
-      ExclusionRule(organization = "org.mockito"))
+
+  def util(which: String) = "com.twitter" %% ("util-"+which) % utilVersion
 
   val sharedSettings = Seq(
     version := libVersion,
@@ -243,7 +239,7 @@ object Finagle extends Build {
       "commons-codec" % "commons-codec" % "1.5",
       "com.twitter.common.zookeeper" % "server-set" % "1.0.42",
       util("zk-common")
-    ) ++ jacksonLibs,
+    ),
     ivyXML :=
       <dependencies>
         <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.42">

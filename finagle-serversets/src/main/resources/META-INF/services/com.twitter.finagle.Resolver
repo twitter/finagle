@@ -1,2 +1,1 @@
 com.twitter.finagle.zookeeper.ZkResolver
-com.twitter.finagle.serverset2.Zk2Resolver

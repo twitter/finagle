@@ -10,7 +10,6 @@ junit_tests(name='scala',
     pants('3rdparty/jvm/com/twitter/common/zookeeper:client'),
     pants('3rdparty/jvm/com/twitter/common/zookeeper:server-set'),
     pants('finagle/finagle-core'),
-    pants('finagle/finagle-test'),
     pants('finagle/finagle-serversets'),
     pants('util/util-core')
   ],
