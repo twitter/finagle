@@ -1,7 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.finagle.{ClientConnection, Group, Service, ServiceFactory, Addr}
-import com.twitter.util.{Await, Future, Stopwatch, Time, Var}
+import com.twitter.finagle.{ClientConnection, Group, Service, ServiceFactory}
+import com.twitter.util.{Await, Future, Stopwatch, Time}
 
 object Benchmark {
   // todo: simulate distributions of loads.
@@ -18,8 +18,7 @@ object Benchmark {
     def apply(conn: ClientConnection) = { loads(i) += 1; Future.value(service) }
     def close(deadline: Time) = Future.Done
   }
-  private[this] val factories: Seq[ServiceFactory[Int, Int]] = 
-    0 until F map { i => new LoadedServiceFactory(i) }
+  private[this] val factories = 0 until F map { i => new LoadedServiceFactory(i) }
 
   def reset() {
     0 until loads.size foreach { i => loads(i) = 0 }
@@ -56,13 +55,9 @@ object Benchmark {
   }
 
   def main(args: Array[String]) {
-    val heap = new HeapBalancer(Group(factories:_*))
-    go(heap, "Heap")
-    
-    reset()
+    val group = Group[ServiceFactory[Int, Int]](factories:_*)
+    val heap = new HeapBalancer(group)
 
-    val weighted = factories map { f => f -> 1D }
-    val p2c = new P2CBalancer(Var.value(weighted))
-    go(p2c, "P2C")
+    go(heap, "Heap")
   }
 }
