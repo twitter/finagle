@@ -35,35 +35,36 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
 
   def toSpan(d: Duration): Span = Span(d.inNanoseconds, Nanoseconds)
 
-  test("represent the underlying ServerSet") {
-    val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar/baz")
-    val clust = new ZkGroup(serverSet, "/foo/bar/baz")
-    assert(clust().isEmpty)
+  // Flaky test - see COORD-335 for details.
+  if (!sys.props.contains("SKIP_FLAKY")) {
+    test("represent the underlying ServerSet") {
+      val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar/baz")
+      val clust = new ZkGroup(serverSet, "/foo/bar/baz")
+      assert(clust().isEmpty)
 
-    val status8080 = serverSet.join(
-      new InetSocketAddress(8080),
-      Map[String, InetSocketAddress]().asJava, ALIVE)
+      val status8080 = serverSet.join(
+        new InetSocketAddress(8080),
+        Map[String, InetSocketAddress]().asJava, ALIVE)
 
-    eventually { assert(clust().size == 1) }
-    val ep = clust().head.getServiceEndpoint
-    assert(ep.getHost == "0.0.0.0")
-    assert(ep.getPort == 8080)
+      eventually { assert(clust().size == 1) }
+      val ep = clust().head.getServiceEndpoint
+      assert(ep.getHost == "0.0.0.0")
+      assert(ep.getPort == 8080)
 
-    assert(clust() === clust())
-    val snap = clust()
+      assert(clust() === clust())
+      val snap = clust()
 
-    val status8081 = serverSet.join(
-      new InetSocketAddress(8081),
-      Map[String, InetSocketAddress]().asJava, ALIVE)
+      val status8081 = serverSet.join(
+        new InetSocketAddress(8081),
+        Map[String, InetSocketAddress]().asJava, ALIVE)
 
-    eventually { assert(clust().size == 2) }
-    assert {
-      val Seq(fst) = (clust() &~ snap).toSeq
-      fst.getServiceEndpoint.getPort == 8081
+      eventually { assert(clust().size == 2) }
+      assert {
+        val Seq(fst) = (clust() &~ snap).toSeq
+        fst.getServiceEndpoint.getPort == 8081
+      }
     }
-  }
 
-  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
     test("filter by shardid") {
       val path = "/bar/foo/baz"
       val serverSet = new ServerSetImpl(inst.zookeeperClient, path)
