@@ -42,14 +42,14 @@ class ZooKeeperZkTest extends FunSuite with BeforeAndAfter {
   after {
     inst.stop()
   }
-  
+
   class Recorder(prefix: String) extends Watcher {
     def process(e: WatchedEvent) {
       println(prefix+": "+e)
     }
   }
 
-  test("Session expiration 2") {
+  if (!sys.props.contains("SKIP_FLAKY")) test("Session expiration 2") {
     val connected: (WatchState => Boolean) = {
       case WatchState.SessionState(KeeperState.SyncConnected) => true
       case _ => false
@@ -73,8 +73,8 @@ class ZooKeeperZkTest extends FunSuite with BeforeAndAfter {
       z.sessionPasswd.write(p, 0)
 
       new ZooKeeperZk(w => new ZooKeeper(
-        inst.zookeeperConnectstring, 
-        zkTimeout.inMilliseconds.toInt, 
+        inst.zookeeperConnectstring,
+        zkTimeout.inMilliseconds.toInt,
         w, z.sessionId, p))
     }
     Await.result(zk2.state.observeUntil(connected))
@@ -84,13 +84,13 @@ class ZooKeeperZkTest extends FunSuite with BeforeAndAfter {
     Await.result(state.observeUntil(connected))
 
     assert(states === Seq(
-      KeeperState.SyncConnected, KeeperState.Expired, 
+      KeeperState.SyncConnected, KeeperState.Expired,
       KeeperState.Disconnected, KeeperState.SyncConnected))
   }
 
   test("Zk.retrying") {
     val watch = Stopwatch.start()
-    
+
     val zk = Zk.retrying(zkTimeout, () => Zk(inst.zookeeperConnectstring))
 
     val zkState = for (zk <- zk; state <- zk.state) yield state
@@ -106,20 +106,20 @@ class ZooKeeperZkTest extends FunSuite with BeforeAndAfter {
 
     // Wait for the initial connect.
     eventually {
-      assert(Var.sample(zkState) === 
+      assert(Var.sample(zkState) ===
         WatchState.SessionState(KeeperState.SyncConnected))
       assert(zks.size === 1)
     }
 
     val zk1 = Var.sample(zk)
-    
+
     // Hijack the session by reusing its id and password.
     val zk2 = {
       val p = new Array[Byte](zk1.sessionPasswd.length)
       zk1.sessionPasswd.write(p, 0)
       new ZooKeeperZk(w => new ZooKeeper(
-        inst.zookeeperConnectstring, 
-        zkTimeout.inMilliseconds.toInt, 
+        inst.zookeeperConnectstring,
+        zkTimeout.inMilliseconds.toInt,
         w, zk1.sessionId, p))
     }
 
@@ -148,7 +148,7 @@ class ZooKeeperZkTest extends FunSuite with BeforeAndAfter {
 
     eventually {
       assert((zkStates map { case (s, _) => s }).reverse ===
-        Seq(KeeperState.SyncConnected, KeeperState.Disconnected, 
+        Seq(KeeperState.SyncConnected, KeeperState.Disconnected,
           KeeperState.Expired, KeeperState.SyncConnected))
     }
     assert(zks.size === 2)
