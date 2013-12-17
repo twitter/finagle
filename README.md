@@ -1,3 +1,7 @@
+# This README is out of date
+We've got plans to update this README, but in the mean time, check out [the updated documentation here](http://twitter.github.io/finagle/).
+
+# Project setup
 Finagle is built using [sbt](https://github.com/sbt/sbt). We've included a bootstrap script to ensure the correct version of sbt is used. To build:
 
 	$ ./sbt test
