@@ -10,7 +10,7 @@ import org.junit.runner.RunWith
 import org.scalatest.concurrent.Eventually._
 import org.scalatest.concurrent.Timeouts._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
 import org.scalatest.time._
 import com.twitter.util.{Await, Duration, Promise, Stopwatch, Var}
 import org.apache.zookeeper.data.Stat
@@ -43,13 +43,19 @@ class ZooKeeperZkTest extends FunSuite with BeforeAndAfter {
     inst.stop()
   }
 
+  // Tagging tests as flaky until https://jira.twitter.biz/browse/COORD-339 is resolved
+  override def test(testName: String, testTags: Tag*)(f: => Unit) {
+    if (!sys.props.contains("SKIP_FLAKY"))
+      super.test(testName, testTags:_*)(f)
+  }
+
   class Recorder(prefix: String) extends Watcher {
     def process(e: WatchedEvent) {
       println(prefix+": "+e)
     }
   }
 
-  if (!sys.props.contains("SKIP_FLAKY")) test("Session expiration 2") {
+  test("Session expiration 2") {
     val connected: (WatchState => Boolean) = {
       case WatchState.SessionState(KeeperState.SyncConnected) => true
       case _ => false
