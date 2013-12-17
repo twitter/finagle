@@ -391,7 +391,7 @@ object Finagle extends Build {
     ),
     Scrooge.scrooge2ThriftOutputFolder <<= (sourceManaged) { x => x / "scrooge2" },
     libraryDependencies ++= scroogeLibs
-  ).dependsOn(finagleCore, finagleMux, finagleThrift, finagleOstrich4)
+  ).dependsOn(finagleCore, finagleMux, finagleThrift)
 
   lazy val finagleMySQL = Project(
     id = "finagle-mysql",
