@@ -15,7 +15,7 @@ class EndToEndTest extends FunSuite {
   type HttpService = Service[HttpRequest, HttpResponse]
 
   def go(name: String)(connect: HttpService => HttpService) {
-    test(name+": echo") {
+    test(name + ": echo") {
       val service = new HttpService {
         def apply(request: HttpRequest) = {
           val response = Response(request)
@@ -26,11 +26,11 @@ class EndToEndTest extends FunSuite {
 
       val client = connect(service)
       val response = client(Request("123"))
-      assert(Response(Await.result(response)).contentString === "123")   
+      assert(Response(Await.result(response)).contentString === "123")
       client.close()
     }
-    
-    test(name+": dtab") {
+
+    test(name + ": dtab") {
       val service = new HttpService {
         def apply(request: HttpRequest) = {
           val stringer = new StringWriter
@@ -55,35 +55,41 @@ class EndToEndTest extends FunSuite {
       client.close()
     }
   }
-  
-  go("ClientBuilder") { service =>
-    val server = ServerBuilder()
-      .codec(Http())
-      .bindTo(new InetSocketAddress(0))
-      .name("server")
-      .build(service)
 
-    val client = ClientBuilder()
-      .codec(Http())
-      .hosts(Seq(server.localAddress))
-      .hostConnectionLimit(1)
-      .name("client")
-      .build()
+  if (!sys.props.contains("SKIP_FLAKY")) {
 
-    new ServiceProxy(client) {
-      override def close(deadline: Time) = 
-        Closable.all(client, server).close(deadline)
+    go("ClientBuilder") {
+      service =>
+        val server = ServerBuilder()
+          .codec(Http())
+          .bindTo(new InetSocketAddress(0))
+          .name("server")
+          .build(service)
+
+        val client = ClientBuilder()
+          .codec(Http())
+          .hosts(Seq(server.localAddress))
+          .hostConnectionLimit(1)
+          .name("client")
+          .build()
+
+        new ServiceProxy(client) {
+          override def close(deadline: Time) =
+            Closable.all(client, server).close(deadline)
+        }
+    }
+
+    go("Client/Server") {
+      service =>
+        import com.twitter.finagle.Http
+        val server = Http.serve(":*", service)
+        val client = Http.newService(server)
+
+        new ServiceProxy(client) {
+          override def close(deadline: Time) =
+            Closable.all(client, server).close(deadline)
+        }
     }
   }
 
-  if (!sys.props.contains("SKIP_FLAKY")) go("Client/Server") { service =>
-    import com.twitter.finagle.Http
-    val server = Http.serve(":*", service)
-    val client = Http.newService(server)
-
-    new ServiceProxy(client) {
-      override def close(deadline: Time) = 
-        Closable.all(client, server).close(deadline)
-    }
-  }
 }
