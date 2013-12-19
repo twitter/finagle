@@ -104,6 +104,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.9.5</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.scala-tools.testing</groupId>
       <artifactId>specs_2.9.2</artifactId>
       <version>1.6.9</version>
