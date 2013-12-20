@@ -106,7 +106,7 @@ The following server, which is shown in both Scala and Java, responds to a clien
     };
 
     ServerBuilder.safeBuild(service, ServerBuilder.get()                                       // 4
-      .codec(Http())
+      .codec(Http.get())
       .name("HttpServer")
       .bindTo(new InetSocketAddress("localhost", 10000)));                                     // 3
 
@@ -149,7 +149,7 @@ The client, which is shown in both Scala and Java, connects to the server, and i
 ##### Java HTTP Client Implementation
 
     Service<HttpRequest, HttpResponse> client = ClientBuilder.safeBuild(ClientBuilder.get()    // 1
-      .codec(Http())
+      .codec(Http.get())
       .hosts("localhost:10000")
       .hostConnectionLimit(1));
 
@@ -1568,7 +1568,7 @@ The following example shows the instantiation and invocation of the server. Call
       public static void main(String[] args) {
         ServerBuilder.safeBuild(new HTTPServer(),
                                 ServerBuilder.get()
-                                             .codec(Http())
+                                             .codec(Http.get())
                                              .name("HTTPServer")
                                              .bindTo(new InetSocketAddress("localhost", 8080)));
 
@@ -1630,7 +1630,7 @@ The following example shows the instantiation and invocation of a client. Callin
         Service<HttpRequest, HttpResponse> httpClient =
           ClientBuilder.safeBuild(
             ClientBuilder.get()
-                         .codec(Http())
+                         .codec(Http.get())
                          .hosts(new InetSocketAddress(8080))
                          .hostConnectionLimit(1));
 
