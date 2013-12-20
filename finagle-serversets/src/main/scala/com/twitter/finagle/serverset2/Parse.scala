@@ -1,0 +1,53 @@
+package com.twitter.finagle.serverset2
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.twitter.util.NonFatal
+import scala.collection.JavaConverters._
+
+private object IntObj {
+  def unapply(o: Object): Option[Int] = o match {
+    case i: java.lang.Integer => Some(i)
+    case _ => None
+  }
+}
+
+private object DoubleObj {
+  def unapply(o: Object): Option[Double] = o match {
+    case d: java.lang.Double => Some(d)
+    case _ => None
+  }
+}
+
+private object StringObj {
+  def unapply(o: Object): Option[String] = o match {
+    case s: String => Some(s)
+    case _ => None
+  }
+}
+
+private object SeqObj {
+  def unapply(o: Object): Option[Seq[Object]] = o match {
+    case l: java.util.List[_] => Some(l.asScala.toSeq.asInstanceOf[Seq[Object]])
+    case _=> None
+  }
+}
+
+private object DictObj {
+  def unapply(o: Object): Option[Object => Option[Object]] = o match {
+    case m: java.util.Map[_, _] => 
+      val mm = m.asInstanceOf[java.util.Map[Object, Object]]
+      Some(key => Option(mm.get(key)))
+    case _ => None
+  }
+}
+
+private object JsonDict {
+  def apply(json: String): (Object => Option[Object]) = {
+    val m = new ObjectMapper
+    val o = try m.readValue(json, classOf[java.util.Map[Object, Object]]) catch { 
+      case NonFatal(_) => return Function.const(None)
+    }
+
+    key => Option(o.get(key))
+  }
+}

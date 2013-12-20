@@ -11,7 +11,7 @@ import java.nio.charset.Charset
 import org.apache.zookeeper.KeeperException
 import org.apache.zookeeper.Watcher.Event.KeeperState
 import org.apache.zookeeper.data.Stat
-import scala.collection.immutable
+import scala.collection.{immutable, mutable}
 
 /**
  * The actual, public zk2 resolver. Provides Addrs from serverset
@@ -60,6 +60,17 @@ class Zk2Resolver extends Resolver {
 
 private trait ServerSet2 {
   def entriesOf(path: String): Var[Op[Set[Entry]]]
+  def vectorsOf(path: String): Var[Op[Set[Vector]]]
+
+  def weightedOf(path: String): Var[Op[Set[(Entry, Double)]]] =
+    (entriesOf(path) join vectorsOf(path)) map {
+      case (Op.Pending, _) => Op.Pending
+      case (op@Op.Fail(exc), _) => op
+      case (Op.Ok(ents), Op.Ok(vecs)) =>
+        Op.Ok(ServerSet2.weighted(ents, vecs))
+      case (Op.Ok(ents), _) =>
+        Op.Ok(ents map (_ -> 1D))
+    }
 }
 
 private object ServerSet2 {
@@ -71,59 +82,84 @@ private object ServerSet2 {
     new CachedServerSet2(
       new LatchedServerSet2(
         new VarServerSet2(zk map (new ZkServerSet2(_)))))
+   
+  def weighted(ents: Set[Entry], vecs: Set[Vector]): Set[(Entry, Double)] = {
+    ents map { ent =>
+      val w = vecs.foldLeft(1.0) { case (w, vec) => w*vec.weightOf(ent) }
+      ent -> w
+    }
+  }
 }
 
 private class VarServerSet2(v: Var[ServerSet2]) extends ServerSet2 {
   def entriesOf(path: String): Var[Op[Set[Entry]]] = v flatMap (_.entriesOf(path))
+  def vectorsOf(path: String): Var[Op[Set[Vector]]] = v flatMap (_.vectorsOf(path))
 }
 
 private class CachedServerSet2(self: ServerSet2) extends ServerSet2 {
-  @volatile private[this] var cache = Map.empty[String, Var[Op[Set[Entry]]]]
-  
-  private[this] def fill(path: String) = synchronized {
-    if (!(cache contains path))
-      cache += path -> self.entriesOf(path)
-    cache(path)
-  }
+  private[this] val entryCache = mutable.Map[String, Var[Op[Set[Entry]]]]()
+  private[this] val vectorCache = mutable.Map[String, Var[Op[Set[Vector]]]]()
 
-  def entriesOf(path: String): Var[Op[Set[Entry]]] =
-    cache.getOrElse(path, fill(path))
+  def entriesOf(path: String): Var[Op[Set[Entry]]] = synchronized {
+    entryCache.getOrElseUpdate(path, self.entriesOf(path))
+  }
+  
+  def vectorsOf(path: String): Var[Op[Set[Vector]]] = synchronized {
+    vectorCache.getOrElseUpdate(path, self.vectorsOf(path))
+  }
 }
 
 private class LatchedServerSet2(self: ServerSet2) extends ServerSet2 {
-  // TODO: when com.twitter.util.Event lands, use it here.
-  def entriesOf(path: String): Var[Op[Set[Entry]]] = {
-    @volatile var lastOk: Op[Set[Entry]] = Op.Pending
-    self.entriesOf(path) map {
-      case op@Op.Ok(_) =>
+  private[this] def latched[T](op: Var[Op[T]]): Var[Op[T]] = {
+    @volatile var lastOk: Op[T] = Op.Pending
+    op map {
+      case op@Op.Ok(x) =>
         lastOk = op
         op
       case Op.Pending => lastOk
       case op@Op.Fail(_) => op
     }
   }
+
+  // TODO: when com.twitter.util.Event lands, use it here.
+  def entriesOf(path: String): Var[Op[Set[Entry]]] =
+    latched(self.entriesOf(path))
+    
+  def vectorsOf(path: String): Var[Op[Set[Vector]]] =
+    latched(self.vectorsOf(path))
 }
 
 private object ZkServerSet2 {
   private val Utf8 = Charset.forName("UTF-8")
   private val EndpointPrefix = "member_"
+  private val VectorPrefix = "vector_"
 }
 
 private case class ZkServerSet2(zk: Zk) extends ServerSet2 {
   import ZkServerSet2._
 
-  def entriesOf(path: String): Var[Op[Set[Entry]]] = {
-    val op = Op.flatMap(zk.childrenOf(path)) { paths =>
-      val epPaths = paths filter (_ startsWith EndpointPrefix) map (path+"/"+_)
-      zk.collectImmutableDataOf(epPaths)
-    }
-
-    Op.map(op) { pathmap =>
-      val parsed = pathmap flatMap {
-        case (path, Buf.Utf8(data)) => Entry.parseJson(path, data)
-        case _ => None  // Invalid encoding
-      }
-      parsed.toSet
+  private[this] def dataOf(path: String, p: String => Boolean) = {
+    Op.flatMap(zk.childrenOf(path)) { paths =>
+      zk.collectImmutableDataOf(paths filter p map (path+"/"+_))
     }
   }
+
+  def entriesOf(path: String): Var[Op[Set[Entry]]] = {
+    Op.map(dataOf(path, _ startsWith EndpointPrefix)) { pathmap =>
+      val endpoints = pathmap flatMap {
+        case (path, Buf.Utf8(data)) =>  Entry.parseJson(path, data)
+        case _ => None  // Invalid encoding
+      }
+      endpoints.toSet
+    }
+  }
+  
+  def vectorsOf(path: String): Var[Op[Set[Vector]]] =
+    Op.map(dataOf(path, _ startsWith VectorPrefix)) { pathmap =>
+      val vectors = pathmap flatMap {
+        case (_, Buf.Utf8(data)) => Vector.parseJson(data)
+        case _ => None  // Invalid encoding
+      }
+      vectors.toSet
+    }
 }

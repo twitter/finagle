@@ -85,30 +85,25 @@ object Endpoint {
     }
 
   def parseJson(json: String): Seq[Endpoint] = {
+    val d = JsonDict(json)
     val m = new ObjectMapper
-    val o = try {
-      m.readValue(json, classOf[java.util.Map[Object, Object]])
-    } catch {
-      case NonFatal(_) => return Seq.empty
-    }
 
-    val shard = Option(o.get("shard")) collect {
-      case shard: java.lang.Integer  => shard.toInt
-    } 
-
-    val status = Option(o.get("status")) match {
-      case Some(s: String) => Status.ofString(s) getOrElse Endpoint.Status.Unknown
-      case _ => Endpoint.Status.Unknown
-    }
+    val shard = for { IntObj(s) <- d("shard") } yield s
+    val status = {
+      for { 
+        StringObj(s) <- d("status")
+        status <- Status.ofString(s) 
+      } yield status
+    } getOrElse Endpoint.Status.Unknown
 
     val tmpl = Endpoint.Empty.copy(shard=shard, status=status)
     val eps = new ArrayBuffer[Endpoint]
 
-    for (map <- Option(o.get("serviceEndpoint")); addr <- parseEndpoint(map))
+    for (map <- d("serviceEndpoint"); addr <- parseEndpoint(map))
       eps += tmpl.copy(addr=addr)
 
     for {
-      map <- Option(o.get("additionalEndpoints")) collect {
+      map <- d("additionalEndpoints") collect {
         case m: java.util.Map[_, _] => m
       }
       key <- map.keySet().asScala collect { case k: String => k }

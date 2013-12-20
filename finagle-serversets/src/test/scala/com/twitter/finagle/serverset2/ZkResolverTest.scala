@@ -24,7 +24,7 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
   def toSpan(d: Duration): Span = Span(d.inNanoseconds, Nanoseconds)
 
   implicit val patienceConfig = PatienceConfig(
-    timeout = toSpan(1.second),
+    timeout = toSpan(5.seconds),
     interval = toSpan(zkTimeout))
 
   before {
@@ -59,7 +59,7 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
       
     o.close()
   }
-  
+
   test("end-to-end: additional endpoints") {
     val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar")
     
