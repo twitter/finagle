@@ -39,8 +39,8 @@ class AppService(clients: Seq[thrift.Backend.FutureIface], responseSample: Seq[(
       val response = new DefaultHttpResponse(req.getProtocolVersion, HttpResponseStatus.OK)
       val bytes = (bodies mkString "").getBytes
       response.setContent(ChannelBuffers.wrappedBuffer(bytes))
-      response.setHeader("Content-Lenth", "%d".format(bytes.size))
-      response.setHeader("X-Finagle-Latency-Ms", "%d".format(elapsed().inMilliseconds))
+      response.headers.set("Content-Lenth", "%d".format(bytes.size))
+      response.headers.set("X-Finagle-Latency-Ms", "%d".format(elapsed().inMilliseconds))
       response
     }
   }

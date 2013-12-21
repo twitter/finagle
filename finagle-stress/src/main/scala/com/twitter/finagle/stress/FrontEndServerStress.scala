@@ -22,7 +22,7 @@ object FrontEndServerStress {
     def apply(request: HttpRequest) = Future {
       val response = new DefaultHttpResponse(
         request.getProtocolVersion, HttpResponseStatus.OK)
-      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, 1)
+      response.headers.set(HttpHeaders.Names.CONTENT_LENGTH, 1)
       val content = List.range(1,1000).map(_.toByte).toArray
       response.setContent(ChannelBuffers.wrappedBuffer(content))
       response

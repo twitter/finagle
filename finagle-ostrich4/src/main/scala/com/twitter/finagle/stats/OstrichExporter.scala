@@ -11,7 +11,7 @@ class OstrichExporter extends HttpMuxHandler {
   val pattern = "/stats.json"
 
   def apply(request: HttpRequest): Future[HttpResponse] = {
-    def getParam(name: String): Option[String] = Option(request.getHeader(name))
+    def getParam(name: String): Option[String] = Option(request.headers.get(name))
 
     val content = json(getParam("period"), getParam("namespace"))
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)

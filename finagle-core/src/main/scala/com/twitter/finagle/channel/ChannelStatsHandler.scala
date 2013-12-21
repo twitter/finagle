@@ -28,6 +28,7 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
   private[this] val closeChans              = statsReceiver.counter("closechans")
   private[this] val writable                = statsReceiver.counter("socket_writable_ms")
   private[this] val unwritable              = statsReceiver.counter("socket_unwritable_ms")
+  private[this] val exceptions              = statsReceiver.scope("exn")
   private[this] val connections             = statsReceiver.addGauge("connections") {
     connectionCount.get()
   }
@@ -96,7 +97,7 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
     val m = if (e.getCause != null) e.getCause.getClass.getName else "unknown"
-    statsReceiver.scope("exn").counter(m).incr()
+    exceptions.counter(m).incr()
     super.exceptionCaught(ctx, e)
   }
 

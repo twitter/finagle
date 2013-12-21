@@ -2,38 +2,49 @@ package com.twitter.finagle.builder
 
 import com.twitter.finagle._
 import com.twitter.finagle.integration.IntegrationBase
-import com.twitter.util.{Promise, Return, Future, Time}
+import com.twitter.util.{Await, Promise, Return, Future, Time}
 import org.mockito.Matchers
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with Mockito {
+  trait ClientBuilderHelper {
+    val preparedFactory = mock[ServiceFactory[String, String]]
+    val preparedServicePromise = new Promise[Service[String, String]]
+    preparedFactory() returns preparedServicePromise
+    preparedFactory.close(any[Time]) returns Future.Done
+    preparedFactory.map(Matchers.any()) returns
+    preparedFactory.asInstanceOf[ServiceFactory[Any, Nothing]]
+
+    val m = new MockChannel
+    m.codec.prepareConnFactory(any) returns preparedFactory
+  }
+
   "ClientBuilder" should {
     "invoke prepareConnFactory on connection" in {
-      val preparedFactory = mock[ServiceFactory[String, String]]
-      val preparedServicePromise = new Promise[Service[String, String]]
-      preparedFactory() returns preparedServicePromise
-      preparedFactory.close(any[Time]) returns Future.Done
-      preparedFactory.map(Matchers.any()) returns
-        preparedFactory.asInstanceOf[ServiceFactory[Any, Nothing]]
+      new ClientBuilderHelper {
+        val client = m.build()
+        val requestFuture = client("123")
 
-      val m = new MockChannel
-      m.codec.prepareConnFactory(any) returns preparedFactory
+        there was one(m.codec).prepareConnFactory(any)
+        there was one(preparedFactory)()
 
-      // Client
-      val client = m.build()
-      val requestFuture = client("123")
+        requestFuture.isDefined must beFalse
+        val service = mock[Service[String, String]]
+        service("123") returns Future.value("321")
+        service.close(any[Time]) returns Future.Done
+        preparedServicePromise() = Return(service)
+        there was one(service)("123")
+        requestFuture.poll must beSome(Return("321"))
+      }
+    }
 
-      there was one(m.codec).prepareConnFactory(any)
-      there was one(preparedFactory)()
-
-      requestFuture.isDefined must beFalse
-      val service = mock[Service[String, String]]
-      service("123") returns Future.value("321")
-      service.close(any[Time]) returns Future.Done
-      preparedServicePromise() = Return(service)
-      there was one(service)("123")
-      requestFuture.poll must beSome(Return("321"))
+    "close properly" in {
+      new ClientBuilderHelper {
+        val svc = ClientBuilder().hostConnectionLimit(1).codec(m.codec).hosts("").build()
+        val f = svc.close()
+        f.isDefined must eventually(beTrue)
+      }
     }
 
 /* TODO: Stopwatches eliminated mocking.

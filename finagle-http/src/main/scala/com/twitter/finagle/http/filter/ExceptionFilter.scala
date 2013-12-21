@@ -46,7 +46,7 @@ class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response
         } catch {
           // logging or internals are broken.  Write static string to console -
           // don't attempt to include request or exception.
-          case e =>
+          case e: Throwable =>
             Console.err.println("ExceptionFilter failed")
             throw e
         }

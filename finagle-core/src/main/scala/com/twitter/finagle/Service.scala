@@ -13,7 +13,7 @@ object Service {
       try {
         service(request)
       } catch {
-        case e => Future.exception(e)
+        case e: Throwable => Future.exception(e)
       }
     }
   }

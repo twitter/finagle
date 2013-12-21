@@ -192,17 +192,12 @@ case class DefaultClient[Req, Rep](
         noBrokersException
       )
 
-      // observeUntil throws exceptions on interrupts, but onReady should not interruptible
-      val ready = v.observeUntil(_ != Addr.Pending).masked
+      // observeUntil fails the future on interrupts, but ready should not interruptible
+      // DelayedFactory implicitly masks this future--interrupts will not be propagated to it
+      val ready = v.observeUntil(_ != Addr.Pending)
       val f = ready map (_ => balanced)
 
-      // using ServiceFactoryRef here means we have one fewer closure allocation later
-      val ref = new ServiceFactoryRef(new DelayedFactory(f))
-      f respond {
-        case Throw(exc) => ref() = new FailingFactory(exc)
-        case Return(_) => ref() = balanced
-      }
-      ref
+      new DelayedFactory(f)
     }
 
     traced compose

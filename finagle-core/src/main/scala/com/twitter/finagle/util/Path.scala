@@ -13,6 +13,6 @@ object Path {
   def clean(path: String): String =
     mk(split(path))
 
-  def join(a: String, b: String): String =
-    clean(a+"/"+b)
+  def join(cs: String*): String = 
+    clean(cs mkString "/")
 }

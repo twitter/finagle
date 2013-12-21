@@ -323,7 +323,7 @@ class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String, boun
     try {
       Flags(Option(request.headers.get(Header.Flags)).map(_.toLong).getOrElse(0L))
     } catch {
-      case _ => Flags()
+      case _: Throwable => Flags()
     }
   }
 }

@@ -117,7 +117,7 @@ private[twitter] case class Dtab(dentries0: IndexedSeq[Dentry])
     while (i < prefix.size) {
       val d1 = this(i)
       val d2 = prefix(i)
-      if (!Dentry.equiv(d1, d2))
+      if (!Equiv[Dentry].equiv(d1, d2))
         return this
       i += 1
     }
@@ -154,75 +154,47 @@ private[twitter] object Dentry {
     if (dst.startsWith("/")) Dentry(prefix, Name(dst))
     else Dentry(prefix, Resolver.eval(dst))
 
-  /**
-   * Computes functional equivalence (not necessarily 
-   * object equivalence) of `d1` and `d2`.
-   */
-  def equiv(d1: Dentry, d2: Dentry): Boolean =
-    d1.prefix == d2.prefix && d1.dst.reified == d2.dst.reified
+  implicit val equiv: Equiv[Dentry] = new Equiv[Dentry] {
+    def equiv(d1: Dentry, d2: Dentry) =
+      (d1 eq d2) || (d1.prefix == d2.prefix && d1.dst.reified == d2.dst.reified)
+  }
 }
 
-private[twitter] object Dtab {
-  /** Scala collection plumbing required to build new dtabs */
-  def newBuilder: DtabBuilder = new DtabBuilder
-
-  implicit val canBuildFrom: CanBuildFrom[TraversableOnce[Dentry], Dentry, Dtab] =
-    new CanBuildFrom[TraversableOnce[Dentry], Dentry, Dtab] {
-      def apply(_ign: TraversableOnce[Dentry]): DtabBuilder = newBuilder
-      def apply(): DtabBuilder = newBuilder
-    }
-
-  private[this] val baseDtab = new AtomicReference[Dtab](null)
+/**
+ * A context comprising a local current dtab 
+ * and a global base dtab.
+ */
+private[twitter] trait DtabCtx {
+  def base: Dtab
 
   /**
-   * Set the base Dtab. This may only be called once, and
-   * then only before the first use of Dtab.base.
+   * Set the base Dtab. 
    */
-  def setBase(dtab: Dtab) { 
-    if (!baseDtab.compareAndSet(null, dtab))
-      throw new IllegalStateException("dtab is already set")
-  }
+  def base_=(newBase: Dtab)
 
-  private[this] val l = new Local[Dtab]
+  def isBase: Boolean = apply() eq base
+
+  /**
+   * Retrieve the difference between the base dtab
+   * and the current local dtab.
+   */
+  def baseDiff(): Dtab = this().stripPrefix(base)
 
   /**
    * Retrieve the current local dtab. When there
    * is no local Dtab, the base dtab is returned.
    */
-  def apply(): Dtab = l() getOrElse base
+  def apply(): Dtab
 
   /**
    * Set the local dtab.
    */
-  def update(dtab: Dtab) { l() = dtab }
-  
+  def update(dtab: Dtab)
+
   /**
    * Clear the local dtab.
    */
-  def clear() { l.clear() }
-  
-  /**
-   * Retrieve the difference between the base dtab
-   * and the current local dtab.
-   */
-  def baseDiff(): Dtab = Dtab().stripPrefix(base)
-
-  /**
-   * Refine the given name vis-à-vis the current Dtab. The
-   * refined name will not resolve to a delegated name.
-   *
-   * @return Refined name, whose binding is relative to the
-   * current Dtab.
-   */
-  def refine(name: Name): Name = this().refine(name)
-
-  val empty = Dtab(Vector.empty)
-
-  lazy val base =  {
-    if (baseDtab.get() == null)
-      baseDtab.compareAndSet(null, empty)
-    baseDtab.get()
-  }
+  def clear()
 
   def delegate(src: String, dst: String) {
     delegate(Dentry(src, dst))
@@ -240,21 +212,62 @@ private[twitter] object Dtab {
     this() = this() delegated dtab
   }
 
-  def unwind[T](f: => T): T = {
-    val save = l()
-    try f finally l.set(save)
-  }
+  /**
+   * Refine the given name vis-à-vis the current Dtab. The
+   * refined name will not resolve to a delegated name.
+   *
+   * @return Refined name, whose binding is relative to the
+   * current Dtab.
+   */
+  def refine(name: Name): Name = this().refine(name)
+}
+
+private[twitter] object Dtab extends DtabCtx {
+  /** Scala collection plumbing required to build new dtabs */
+  def newBuilder: DtabBuilder = new DtabBuilder
+
+  implicit val canBuildFrom: CanBuildFrom[TraversableOnce[Dentry], Dentry, Dtab] =
+    new CanBuildFrom[TraversableOnce[Dentry], Dentry, Dtab] {
+      def apply(_ign: TraversableOnce[Dentry]): DtabBuilder = newBuilder
+      def apply(): DtabBuilder = newBuilder
+    }
+    
+  val empty = Dtab(Vector.empty)
 
   /**
    * Computes functional equivalence (not necessarily 
    * object equivalence) of `d1` and `d2`.
    */
-  def equiv(d1: Dtab, d2: Dtab): Boolean =
-    if (d1.size != d2.size) false
-    else (d1 zip d2) forall { case (e1, e2) => Dentry.equiv(e1, e2) }
+  implicit val equiv: Equiv[Dtab] = new Equiv[Dtab] {
+    def equiv(d1: Dtab, d2: Dtab): Boolean = {
+      if (d1 eq d2) return true
+      if (d1.size != d2.size) return false
+      val n = d1.size
+      var i = 0
+      while (i < n) {
+        if (!Equiv[Dentry].equiv(d1(i), d2(i)))
+          return false
+        i += 1
+      }
+      true
+    }
+  }
+
+  // DtabCtx:
+  @volatile var base: Dtab = Dtab.empty
+
+  private[this] val l = new Local[Dtab]
+  def apply(): Dtab = l() getOrElse base
+  def update(dtab: Dtab) { l() = dtab }
+  def clear() { l.clear() }
+ 
+  def unwind[T](f: => T): T = {
+    val save = l()
+    try f finally l.set(save)
+  }
 }
 
-final class DtabBuilder extends Builder[Dentry, Dtab] {
+private[twitter] final class DtabBuilder extends Builder[Dentry, Dtab] {
   private var builder = new VectorBuilder[Dentry]
 
   def +=(d: Dentry): this.type = {

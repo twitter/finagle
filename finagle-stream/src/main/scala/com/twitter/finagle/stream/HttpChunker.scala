@@ -83,7 +83,9 @@ class HttpChunker extends BrokerChannelHandler {
       downstreamEvent {
         case e@WriteValue(res: StreamResponse, ctx) if !dead =>
           val httpRes = res.httpResponse
-          val chunked = httpRes.getProtocolVersion == HttpVersion.HTTP_1_1 && httpRes.getHeader(HttpHeaders.Names.CONTENT_LENGTH) == null
+          val chunked = (
+            httpRes.getProtocolVersion == HttpVersion.HTTP_1_1 &&
+            httpRes.headers.get(HttpHeaders.Names.CONTENT_LENGTH) == null)
           httpRes.setChunked(chunked)
           if (chunked)
             HttpHeaders.setHeader(httpRes, HttpHeaders.Names.TRANSFER_ENCODING, HttpHeaders.Values.CHUNKED)

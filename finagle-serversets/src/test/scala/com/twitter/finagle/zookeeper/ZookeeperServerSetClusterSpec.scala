@@ -78,7 +78,7 @@ class ZookeeperServerSetClusterSpec extends SpecificationWithJUnit {
       }
     }
 
-    "Be able to block till server set is ready" in {
+    if (!sys.props.contains("SKIP_FLAKY")) "Be able to block till server set is ready" in {
       val serverSet = new ServerSetImpl(zookeeperClient, "/twitter/services/silly")
       val cluster = new ZookeeperServerSetCluster(serverSet)
 

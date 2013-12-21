@@ -294,7 +294,7 @@ abstract class Message extends HttpMessage {
     val encoding = try {
       Charset.forName(charset getOrElse "UTF-8")
     } catch {
-      case _ => Message.Utf8
+      case _: Throwable => Message.Utf8
     }
     getContent.toString(encoding)
   }
