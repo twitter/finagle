@@ -27,9 +27,9 @@ trait IntegrationBase extends SpecificationWithJUnit with Mockito {
      answers { f => f.asInstanceOf[ServiceFactory[String, String]] })
     (codec.newClientTransport(Matchers.any[Channel], Matchers.any[StatsReceiver])
      answers { case args: Array[Any] =>
-      new ClientChannelTransport[String, String](args(0).asInstanceOf[Channel], args(1).asInstanceOf[StatsReceiver])
+      new ClientChannelTransport(args(0).asInstanceOf[Channel], args(1).asInstanceOf[StatsReceiver])
      })
-    (codec.newClientDispatcher(Matchers.any[Transport[String, String]])
+    (codec.newClientDispatcher(Matchers.any[Transport[Any, Any]])
      answers { t => new SerialClientDispatcher[String, String](t.asInstanceOf[Transport[String, String]]) })
 
     val clientAddress = new SocketAddress{}

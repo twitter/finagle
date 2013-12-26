@@ -69,11 +69,11 @@ case class Spdy(
         new GenerateSpdyStreamId andThen super.prepareConnFactory(underlying)
       }
 
-      override def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[HttpRequest, HttpResponse] =
-        new ChannelTransport[HttpRequest, HttpResponse](ch)
+      override def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any, Any] =
+        new ChannelTransport(ch)
 
-      override def newClientDispatcher(transport: Transport[HttpRequest, HttpResponse]) =
-        new SpdyClientDispatcher(transport)
+      override def newClientDispatcher(transport: Transport[Any, Any]) =
+        new SpdyClientDispatcher(transport.cast[HttpRequest, HttpResponse])
     }
   }
 
@@ -99,9 +99,10 @@ case class Spdy(
       }
 
       override def newServerDispatcher(
-          transport: Transport[HttpResponse, HttpRequest],
+          transport: Transport[Any, Any],
           service: Service[HttpRequest, HttpResponse]
-      ): Closable = new SpdyServerDispatcher(transport, service)
+      ): Closable = new SpdyServerDispatcher(
+        transport.cast[HttpResponse, HttpRequest], service)
     }
   }
 }

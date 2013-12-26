@@ -23,6 +23,7 @@ private[finagle] class HttpClientDispatcher[Req <: HttpRequest, Rep <: HttpRespo
     // It's kind of nasty to modify the request inline like this, but it's
     // in-line with what we already do in finagle-http. For example:
     // the body buf gets read without slicing.
+
     HttpDtab.write(Dtab.baseDiff(), req)
     manager.observeMessage(req)
     super.apply(req) flatMap { rep =>

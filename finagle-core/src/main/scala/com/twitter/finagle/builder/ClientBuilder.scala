@@ -752,9 +752,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       factory.newChannel(_)
     }
 
-    // The transporter connects to actual endpoints, providing a typed
+    // The transporter connects to actual endpoints, providing an untyped
     // session transport.
-    val transporter = Netty3Transporter[Req, Rep](
+    val transporter = Netty3Transporter[Any, Any](
       name = config.nameOrDefault,
       pipelineFactory = codec.pipelineFactory,
       newChannel = newChannel,
@@ -795,7 +795,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       measureConn compose (codec.prepareConnFactory _)
 
     val endpointer: (SocketAddress, StatsReceiver) => ServiceFactory[Req, Rep] = {
-      val bridged = Bridge[Req, Rep, Req, Rep](transporter, codec.newClientDispatcher(_))
+      val bridged = Bridge[Any, Any, Req, Rep](transporter, codec.newClientDispatcher(_))
       (addr, statsReceiver) => prepareConn(bridged(addr, statsReceiver))
     }
 

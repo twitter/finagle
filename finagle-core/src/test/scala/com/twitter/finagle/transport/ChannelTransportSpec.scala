@@ -19,7 +19,7 @@ class ChannelTransportSpec extends SpecificationWithJUnit with Mockito {
     val sink = mock[ChannelSink]
     ch.getPipeline returns pipeline
     pipeline.attach(ch, sink)
-    val trans = new ChannelTransport[String, String](ch)
+    val trans = new ChannelTransport(ch).cast[String, String]
 
     def sendUpstream(e: ChannelEvent) {
       val handler = pipeline.getLast.asInstanceOf[ChannelUpstreamHandler]

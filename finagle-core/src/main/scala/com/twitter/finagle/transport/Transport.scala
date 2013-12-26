@@ -13,7 +13,7 @@ import java.net.SocketAddress
  * to some endpoint, typically via a channel pipeline that performs
  * encoding and decoding.
  */
-trait Transport[In, Out] extends Closable {
+trait Transport[In, Out] extends Closable { self =>
   /**
    * Write {{req}} to this transport; the returned future
    * acknowledges write completion.
@@ -44,6 +44,21 @@ trait Transport[In, Out] extends Closable {
    * The remote address to which the transport is connected.
    */
   def remoteAddress: SocketAddress
+
+  /**
+   * Cast this transport to `Transport[In1, Out1]`. Note that this is
+   * generally unsafe: only do this when you know the cast is
+   * guaranteed safe.
+   */
+  def cast[In1, Out1]: Transport[In1, Out1] = new Transport[In1, Out1] {
+    def write(req: In1) = self.write(req.asInstanceOf[In])
+    def read(): Future[Out1] = self.read().asInstanceOf[Future[Out1]]
+    def isOpen = self.isOpen
+    val onClose = self.onClose
+    def localAddress = self.localAddress
+    def remoteAddress = self.remoteAddress
+    def close(deadline: Time) = self.close(deadline)
+  }
 }
 
 /**

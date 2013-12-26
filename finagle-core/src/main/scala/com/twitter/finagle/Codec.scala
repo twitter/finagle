@@ -30,14 +30,16 @@ trait Codec[Req, Rep] {
    * Prepare a factory for usage with the codec. Used to allow codec
    * modifications to the service at the top of the network stack.
    */
-  def prepareServiceFactory(underlying: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
+  def prepareServiceFactory(
+      underlying: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
     underlying
 
   /**
    * Prepare a connection factory. Used to allow codec modifications
    * to the service at the bottom of the stack (connection level).
    */
-  def prepareConnFactory(underlying: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
+  def prepareConnFactory(
+      underlying: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
     underlying
 
   /**
@@ -46,14 +48,16 @@ trait Codec[Req, Rep] {
    * Proceed with care.
    */
 
-  def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Req, Rep] =
-    new ClientChannelTransport[Req, Rep](ch, statsReceiver)
+  def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any, Any] =
+    new ClientChannelTransport(ch, statsReceiver)
 
-  def newClientDispatcher(transport: Transport[Req, Rep]): Service[Req, Rep] =
-    new SerialClientDispatcher(transport)
+  def newClientDispatcher(transport: Transport[Any, Any]): Service[Req, Rep] =
+    new SerialClientDispatcher(transport.cast[Req, Rep])
 
-  def newServerDispatcher(transport: Transport[Rep, Req], service: Service[Req, Rep]): Closable =
-    new SerialServerDispatcher[Req, Rep](transport, service)
+  def newServerDispatcher(
+      transport: Transport[Any, Any], 
+      service: Service[Req, Rep]): Closable =
+    new SerialServerDispatcher[Req, Rep](transport.cast[Rep, Req], service)
 
   /**
    * Is this Codec OK for failfast? This is a temporary hack to
@@ -68,11 +72,12 @@ trait Codec[Req, Rep] {
 abstract class AbstractCodec[Req, Rep] extends Codec[Req, Rep]
 
 object Codec {
-  def ofPipelineFactory[Req, Rep](makePipeline: => ChannelPipeline) = new Codec[Req, Rep] {
-    def pipelineFactory = new ChannelPipelineFactory {
-      def getPipeline = makePipeline
+  def ofPipelineFactory[Req, Rep](makePipeline: => ChannelPipeline) = 
+    new Codec[Req, Rep] {
+      def pipelineFactory = new ChannelPipelineFactory {
+        def getPipeline = makePipeline
+      }
     }
-  }
 
   def ofPipeline[Req, Rep](p: ChannelPipeline) = new Codec[Req, Rep] {
     def pipelineFactory = new ChannelPipelineFactory {

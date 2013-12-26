@@ -11,13 +11,13 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import com.twitter.finagle.stats.StatsReceiver
 
-class ChannelTransport[In, Out](ch: Channel)
-  extends Transport[In, Out] with ChannelUpstreamHandler
+class ChannelTransport(ch: Channel)
+  extends Transport[Any, Any] with ChannelUpstreamHandler
 {
   ch.getPipeline.addLast("finagleTransportBridge", this)
 
-  private[this] val readq = new AsyncQueue[Out]
-  private[this] val writer = Proc[(In, Promise[Unit])] { case (msg, p) =>
+  private[this] val readq = new AsyncQueue[Any]
+  private[this] val writer = Proc[(Any, Promise[Unit])] { case (msg, p) =>
     Channels.write(ch, msg).addListener(new ChannelFutureListener {
       def operationComplete(f: ChannelFuture) {
         if (f.isSuccess)
@@ -43,7 +43,7 @@ class ChannelTransport[In, Out](ch: Channel)
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
     e match {
       case msg: MessageEvent =>
-        readq.offer(msg.getMessage.asInstanceOf[Out])
+        readq.offer(msg.getMessage.asInstanceOf[Any])
 
       case e: ChannelStateEvent
       if e.getState == ChannelState.OPEN && e.getValue != java.lang.Boolean.TRUE =>
@@ -59,13 +59,13 @@ class ChannelTransport[In, Out](ch: Channel)
     // be the last handler.
   }
 
-  def write(msg: In): Future[Unit] = {
+  def write(msg: Any): Future[Unit] = {
     val p = new Promise[Unit]
     writer ! (msg, p)
     p
   }
 
-  def read(): Future[Out] = readq.poll()
+  def read(): Future[Any] = readq.poll()
 
   def isOpen = ch.isOpen
 
@@ -89,17 +89,19 @@ class ChannelTransport[In, Out](ch: Channel)
  * Implements a {{Transport}} based on a Netty channel. It is a
  * {{ChannelHandler}} and must be the last in the pipeline.
  */
-class ClientChannelTransport[In, Out](ch: Channel, statsReceiver: StatsReceiver)
-  extends Transport[In, Out] with ChannelUpstreamHandler
+class ClientChannelTransport(ch: Channel, statsReceiver: StatsReceiver)
+  extends Transport[Any, Any] with ChannelUpstreamHandler
 {
   ch.getPipeline.addLast("finagleTransportBridge", this)
 
-  private[this] val concurrentRequestCounter = statsReceiver.counter("concurrent_request")
-  private[this] val orphanResponseCounter = statsReceiver.counter("orphan_response")
+  private[this] val concurrentRequestCounter = 
+    statsReceiver.counter("concurrent_request")
+  private[this] val orphanResponseCounter = 
+    statsReceiver.counter("orphan_response")
   private[this] val pending = new AtomicBoolean(false)
 
-  private[this] val readq = new AsyncQueue[Out]
-  private[this] val writer = Proc[(In, Promise[Unit])] { case (msg, p) =>
+  private[this] val readq = new AsyncQueue[Any]
+  private[this] val writer = Proc[(Any, Promise[Unit])] { case (msg, p) =>
     if (!pending.compareAndSet(false, true)) {
       concurrentRequestCounter.incr()
       p.setException(new Exception("write while request pending"))
@@ -134,7 +136,7 @@ class ClientChannelTransport[In, Out](ch: Channel, statsReceiver: StatsReceiver)
           orphanResponseCounter.incr()
           close()
         } else {
-          readq.offer(msg.getMessage.asInstanceOf[Out])
+          readq.offer(msg.getMessage.asInstanceOf[Any])
         }
 
       case e: ChannelStateEvent
@@ -151,13 +153,13 @@ class ClientChannelTransport[In, Out](ch: Channel, statsReceiver: StatsReceiver)
     // be the last handler.
   }
 
-  def write(msg: In): Future[Unit] = {
+  def write(msg: Any): Future[Unit] = {
     val p = new Promise[Unit]
     writer ! (msg, p)
     p
   }
 
-  def read(): Future[Out] = readq.poll()
+  def read(): Future[Any] = readq.poll()
 
   def isOpen = ch.isOpen
 
