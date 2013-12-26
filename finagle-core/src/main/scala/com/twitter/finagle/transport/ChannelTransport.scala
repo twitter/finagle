@@ -21,7 +21,7 @@ class ChannelTransport[In, Out](ch: Channel)
     Channels.write(ch, msg).addListener(new ChannelFutureListener {
       def operationComplete(f: ChannelFuture) {
         if (f.isSuccess)
-          p.setValue(())
+          p.setDone()
         else if (f.isCancelled)
           p.setException(new CancelledWriteException)
         else
@@ -107,7 +107,7 @@ class ClientChannelTransport[In, Out](ch: Channel, statsReceiver: StatsReceiver)
       Channels.write(ch, msg).addListener(new ChannelFutureListener {
         def operationComplete(f: ChannelFuture) {
           if (f.isSuccess)
-            p.setValue(())
+            p.setDone()
           else if (f.isCancelled)
             p.setException(new CancelledWriteException)
           else

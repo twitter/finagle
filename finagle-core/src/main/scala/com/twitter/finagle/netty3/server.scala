@@ -88,7 +88,7 @@ object Netty3Listener {
       val p = new Promise[Unit]
       closing.addListener(new ChannelGroupFutureListener {
         def operationComplete(f: ChannelGroupFuture) {
-          p.setValue(())
+          p.setDone()
         }
       })
 

@@ -20,7 +20,7 @@ class IdleConnectionFilterSpec extends SpecificationWithJUnit with Mockito {
       val closeFuture = new Promise[Unit]
       c.onClose returns closeFuture
       c.close() answers { _ =>
-        closeFuture.setValue(())
+        closeFuture.setDone()
         closeFuture
       }
       filter(c)
@@ -31,7 +31,7 @@ class IdleConnectionFilterSpec extends SpecificationWithJUnit with Mockito {
       filter.openConnections mustEqual 0
       val (_,closeFuture) = open(filter)
       filter.openConnections mustEqual 1
-      closeFuture.setValue(())
+      closeFuture.setDone()
       filter.openConnections mustEqual 0
     }
 
@@ -45,7 +45,7 @@ class IdleConnectionFilterSpec extends SpecificationWithJUnit with Mockito {
       open(filter)
       filter.openConnections mustEqual threshold.highWaterMark
 
-      closeFutures foreach { _.setValue(()) }
+      closeFutures foreach { _.setDone() }
       filter.openConnections mustEqual 0
     }
 
@@ -83,7 +83,7 @@ class IdleConnectionFilterSpec extends SpecificationWithJUnit with Mockito {
         val closeFuture = new Promise[Unit]
         c.onClose returns closeFuture
         c.close() answers { _ =>
-          closeFuture.setValue(())
+          closeFuture.setDone()
           closeFuture
         }
         spyFilter(c)

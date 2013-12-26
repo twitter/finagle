@@ -55,7 +55,7 @@ class ConnectionManagerSpec extends SpecificationWithJUnit with Mockito {
       there was no(trans).read()
       val rp = new Promise[HttpResponse]
       trans.read() returns rp
-      wp.setValue(())
+      wp.setDone()
       there was one(trans).read()
       f.isDefined must beFalse
       rp.setValue(response)

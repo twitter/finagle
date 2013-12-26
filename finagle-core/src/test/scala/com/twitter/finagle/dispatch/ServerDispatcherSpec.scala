@@ -37,7 +37,7 @@ class ServerDispatcherSpec extends SpecificationWithJUnit with Mockito {
 
       there was one(trans).read()
       trans.read() returns new Promise[String] // to short circuit
-      writep.setValue(())
+      writep.setDone()
       there were two(trans).read()
     }
 
@@ -121,7 +121,7 @@ class ServerDispatcherSpec extends SpecificationWithJUnit with Mockito {
         there was no(service).close(any[Time])
         there was no(trans).close()
 
-        writep.setValue(())
+        writep.setDone()
         there was one(trans).close()
         onClose.setValue(new Exception("closed!"))
         there was one(service).close(any[Time])

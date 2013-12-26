@@ -30,11 +30,11 @@ private[stream] class DelayedReleaseService(self: Service[HttpRequest, StreamRes
           def messages = res.messages
           def error = res.error
           def release() {
-            p.setValue(())
+            p.setDone()
             res.release()
           }
         }
-      } onFailure { _ => p.setValue(()) }
+      } onFailure { _ => p.setDone() }
     }
   }
 
