@@ -1,13 +1,12 @@
 package com.twitter.finagle.stream
 
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.transport.{Transport, ChannelTransport}
 import com.twitter.finagle.{
-  Codec, CodecFactory, Service, ServiceFactory, ServiceProxy, TooManyConcurrentRequestsException
-}
-import com.twitter.util.{Future, Promise, Time}
-import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
-import org.jboss.netty.handler.codec.http.{
-  HttpClientCodec, HttpRequest, HttpServerCodec
-}
+  Codec, CodecFactory, Service, ServiceFactory, ServiceProxy, TooManyConcurrentRequestsException}
+import com.twitter.util.{Future, Promise, Time, Closable}
+import org.jboss.netty.channel.{ChannelPipelineFactory, Channels, Channel}
+import org.jboss.netty.handler.codec.http.{  HttpClientCodec, HttpRequest, HttpServerCodec}
 
 /**
  * Don't release the underlying service until the response has
@@ -54,10 +53,14 @@ class Stream extends CodecFactory[HttpRequest, StreamResponse] {
         def getPipeline = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("httpCodec", new HttpServerCodec)
-          pipeline.addLast("httpChunker", new HttpChunker)
           pipeline
         }
       }
+
+      override def newServerDispatcher(
+          transport: Transport[Any, Any], 
+          service: Service[HttpRequest, StreamResponse]): Closable =
+        new StreamServerDispatcher(transport, service)
     }
   }
 
@@ -67,15 +70,24 @@ class Stream extends CodecFactory[HttpRequest, StreamResponse] {
         def getPipeline = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("httpCodec", new HttpClientCodec)
-          pipeline.addLast("httpDechunker", new HttpDechunker)
           pipeline
         }
       }
 
+     override def newClientDispatcher(trans: Transport[Any, Any])
+       : Service[HttpRequest, StreamResponse] = new StreamClientDispatcher(trans)
+
+      // TODO: remove when the Meta[_] patch lands.
       override def prepareServiceFactory(
         underlying: ServiceFactory[HttpRequest, StreamResponse]
       ): ServiceFactory[HttpRequest, StreamResponse] =
         underlying map(new DelayedReleaseService(_))
+      
+      // TODO: remove when ChannelTransport is the default for clients.
+      override def newClientTransport(
+          ch: Channel, statsReceiver: StatsReceiver): Transport[Any, Any] =
+        new ChannelTransport(ch)
+
     }
   }
 }

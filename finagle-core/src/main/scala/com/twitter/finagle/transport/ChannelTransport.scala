@@ -72,6 +72,7 @@ class ChannelTransport(ch: Channel)
   def close(deadline: Time) = {
     if (ch.isOpen)
       Channels.close(ch)
+
     closep map { _ => () }
   }
 

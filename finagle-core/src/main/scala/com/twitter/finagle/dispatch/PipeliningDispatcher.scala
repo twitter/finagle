@@ -1,15 +1,15 @@
 package com.twitter.finagle.dispatch
 
 import com.twitter.finagle.transport.Transport
-import com.twitter.concurrent.AsyncQueue
-import com.twitter.util.{Future, Promise}
+import com.twitter.concurrent.{AsyncQueue, Permit}
+import com.twitter.util.{Future, Promise, Throw, Return}
+import com.twitter.finagle.WriteException
 
 class PipeliningDispatcher[Req, Rep](trans: Transport[Req, Rep])
-  extends SerialClientDispatcher[Req, Rep](trans)
-{
-  val q = new AsyncQueue[Promise[Rep]]
+    extends GenSerialClientDispatcher[Req, Rep, Req, Rep](trans) {
+  private[this] val q = new AsyncQueue[Promise[Rep]]
 
-  def loop() {
+  private[this] def loop() {
     q.poll() onSuccess { p =>
       trans.read() onSuccess { rep =>
         p.setValue(rep)
@@ -22,6 +22,6 @@ class PipeliningDispatcher[Req, Rep](trans: Transport[Req, Rep])
   }
   loop()
 
-  override protected def dispatch(req: Req, p: Promise[Rep]): Future[_] =
+  protected def dispatch(req: Req, p: Promise[Rep]): Future[Unit] =
     trans.write(req) onSuccess { _ => q.offer(p) }
 }
