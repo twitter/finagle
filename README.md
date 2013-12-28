@@ -1,3 +1,5 @@
+![Finagle logo](https://raw.github.com/twitter/finagle/master/doc/src/sphinx/_static/logo_medium.png)
+
 Finagle is built using [sbt](https://github.com/sbt/sbt). We've included a bootstrap script to ensure the correct version of sbt is used. To build:
 
 	$ ./sbt test
