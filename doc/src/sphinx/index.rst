@@ -1,7 +1,7 @@
 Finagle!
 ========
 
-.. image:: _static/governor.png
+.. image:: _static/logo_medium.png
    :class: floatingflask
 
 Finagle is an extensible RPC system for the JVM, used to construct
