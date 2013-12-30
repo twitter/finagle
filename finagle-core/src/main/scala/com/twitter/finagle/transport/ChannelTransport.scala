@@ -1,38 +1,33 @@
 package com.twitter.finagle.transport
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.util.Proc
 import com.twitter.finagle.{
   CancelledWriteException, ChannelClosedException, ChannelException}
 import com.twitter.util.{Future, Return, Promise, Time}
 import java.net.SocketAddress
-import org.jboss.netty.channel._
 import java.util.concurrent.atomic.AtomicBoolean
+import org.jboss.netty.channel._
 
-import com.twitter.finagle.stats.StatsReceiver
-
-class ChannelTransport(ch: Channel)
-  extends Transport[Any, Any] with ChannelUpstreamHandler
+class ChannelTransport[In, Out](ch: Channel)
+  extends Transport[In, Out] with ChannelUpstreamHandler
 {
+  private[this] var nneed = 0
+  private[this] def need(n: Int) = synchronized {
+    nneed += n
+    // Note: we buffer 1 message here so that we receive socket
+    // closes proactively.
+    val r = nneed >= 0
+    if (ch.isReadable != r && ch.isOpen)
+      ch.setReadable(r)
+  }
+
   ch.getPipeline.addLast("finagleTransportBridge", this)
 
-  private[this] val readq = new AsyncQueue[Any]
-  private[this] val writer = Proc[(Any, Promise[Unit])] { case (msg, p) =>
-    Channels.write(ch, msg).addListener(new ChannelFutureListener {
-      def operationComplete(f: ChannelFuture) {
-        if (f.isSuccess)
-          p.setDone()
-        else if (f.isCancelled)
-          p.setException(new CancelledWriteException)
-        else
-          p.setException(ChannelException(f.getCause, ch.getRemoteAddress))
-      }
-    })
-  }
+  private[this] val readq = new AsyncQueue[Out]
   private[this] val failed = new AtomicBoolean(false)
 
   private[this] def fail(exc: Throwable) {
-    if (! failed.compareAndSet(false, true))
+    if (!failed.compareAndSet(false, true))
       return
 
     close()
@@ -43,11 +38,33 @@ class ChannelTransport(ch: Channel)
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
     e match {
       case msg: MessageEvent =>
-        readq.offer(msg.getMessage.asInstanceOf[Any])
+        readq.offer(msg.getMessage.asInstanceOf[Out])
+        need(-1)
 
       case e: ChannelStateEvent
       if e.getState == ChannelState.OPEN && e.getValue != java.lang.Boolean.TRUE =>
         fail(new ChannelClosedException(ch.getRemoteAddress))
+
+      case e: ChannelStateEvent
+      if e.getState == ChannelState.INTEREST_OPS =>
+        // Make sure we have the right interest ops. This allows us to fix
+        // up any races that may occur when setting interest ops without
+        // having to explicitly serialize them -- it guarantees convergence
+        // of interest ops.
+        //
+        // This can't deadlock, because:
+        //    #1 Updates from other threads are enqueued onto a pending 
+        //    operations queue for the owner thread, and they never wait
+        //    for completion.
+        //    #2 Within the context of this thread, Channel.isReadable cannot
+        //    change while we're invoking setReadable(): subsequent channel
+        //    state events will be terminated early by need()'s check.
+        need(0)
+        
+      case e: ChannelStateEvent
+      if e.getState == ChannelState.CONNECTED
+          && e.getValue == java.lang.Boolean.TRUE =>
+        need(0)
 
       case e: ExceptionEvent =>
         fail(ChannelException(e.getCause, ch.getRemoteAddress))
@@ -59,108 +76,27 @@ class ChannelTransport(ch: Channel)
     // be the last handler.
   }
 
-  def write(msg: Any): Future[Unit] = {
+  def write(msg: In): Future[Unit] = {
     val p = new Promise[Unit]
-    writer ! (msg, p)
+
+    Channels.write(ch, msg).addListener(new ChannelFutureListener {
+      def operationComplete(f: ChannelFuture) {
+        if (f.isSuccess)
+          p.setDone()
+        else if (f.isCancelled)
+          p.setException(new CancelledWriteException)
+        else
+          p.setException(ChannelException(f.getCause, ch.getRemoteAddress))
+      }
+    })
+
     p
   }
 
-  def read(): Future[Any] = readq.poll()
-
-  def isOpen = ch.isOpen
-
-  def close(deadline: Time) = {
-    if (ch.isOpen)
-      Channels.close(ch)
-
-    closep map { _ => () }
+  def read(): Future[Out] = {
+    need(1)
+    readq.poll()
   }
-
-  def localAddress: SocketAddress = ch.getLocalAddress()
-  def remoteAddress: SocketAddress = ch.getRemoteAddress()
-
-  private[this] val closep = new Promise[Throwable]
-  val onClose: Future[Throwable] = closep
-
-  override def toString = "Transport<%s>".format(ch)
-}
-
-
-/**
- * Implements a {{Transport}} based on a Netty channel. It is a
- * {{ChannelHandler}} and must be the last in the pipeline.
- */
-class ClientChannelTransport(ch: Channel, statsReceiver: StatsReceiver)
-  extends Transport[Any, Any] with ChannelUpstreamHandler
-{
-  ch.getPipeline.addLast("finagleTransportBridge", this)
-
-  private[this] val concurrentRequestCounter = 
-    statsReceiver.counter("concurrent_request")
-  private[this] val orphanResponseCounter = 
-    statsReceiver.counter("orphan_response")
-  private[this] val pending = new AtomicBoolean(false)
-
-  private[this] val readq = new AsyncQueue[Any]
-  private[this] val writer = Proc[(Any, Promise[Unit])] { case (msg, p) =>
-    if (!pending.compareAndSet(false, true)) {
-      concurrentRequestCounter.incr()
-      p.setException(new Exception("write while request pending"))
-    } else {
-      Channels.write(ch, msg).addListener(new ChannelFutureListener {
-        def operationComplete(f: ChannelFuture) {
-          if (f.isSuccess)
-            p.setDone()
-          else if (f.isCancelled)
-            p.setException(new CancelledWriteException)
-          else
-            p.setException(ChannelException(f.getCause, ch.getRemoteAddress))
-        }
-      })
-    }
-  }
-  private[this] val failed = new AtomicBoolean(false)
-
-  private[this] def fail(exc: Throwable) {
-    if (! failed.compareAndSet(false, true))
-      return
-
-    close()
-    closep.updateIfEmpty(Return(exc))
-    readq.fail(exc)
-  }
-
-  override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
-    e match {
-      case msg: MessageEvent =>
-        if (!pending.compareAndSet(true, false)) {
-          orphanResponseCounter.incr()
-          close()
-        } else {
-          readq.offer(msg.getMessage.asInstanceOf[Any])
-        }
-
-      case e: ChannelStateEvent
-      if e.getState == ChannelState.OPEN && e.getValue != java.lang.Boolean.TRUE =>
-        fail(new ChannelClosedException(ch.getRemoteAddress))
-
-      case e: ExceptionEvent =>
-        fail(ChannelException(e.getCause, ch.getRemoteAddress))
-
-      case _ => ()
-    }
-
-    // We terminate the upstream here on purpose: this must always
-    // be the last handler.
-  }
-
-  def write(msg: Any): Future[Unit] = {
-    val p = new Promise[Unit]
-    writer ! (msg, p)
-    p
-  }
-
-  def read(): Future[Any] = readq.poll()
 
   def isOpen = ch.isOpen
 

@@ -8,7 +8,7 @@ package com.twitter.finagle
 
 import com.twitter.finagle.dispatch.{SerialClientDispatcher, SerialServerDispatcher}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.transport.{ClientChannelTransport, Transport}
+import com.twitter.finagle.transport.{ChannelTransport, Transport}
 import com.twitter.util.Closable
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.channel.{Channel, ChannelPipeline, ChannelPipelineFactory}
@@ -49,7 +49,7 @@ trait Codec[Req, Rep] {
    */
 
   def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any, Any] =
-    new ClientChannelTransport(ch, statsReceiver)
+    new ChannelTransport(ch)
 
   def newClientDispatcher(transport: Transport[Any, Any]): Service[Req, Rep] =
     new SerialClientDispatcher(transport.cast[Req, Rep])

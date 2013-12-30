@@ -1,15 +1,3 @@
-ClientChannelTransport
-<<<<<<<<<<<<<<<<<<<<<<
-
-**concurrent_request**
-  a counter of the total number of requests which are written concurrently to the client
-  channel transport.  if this stat is incremented, the request is failed, because
-  ClientChannelTransport is serial.
-
-**orphan_response**
-  a counter of the number of responses which get orphaned. if this stat is incremented, your
-  transport has already closed.  you should never see this stat.
-
 ChannelConnector
 <<<<<<<<<<<<<<<<
 
