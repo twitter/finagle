@@ -12,7 +12,7 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class MdnsTest extends FunSuite {
-  test("bind locally") {
+  if (!sys.props.contains("SKIP_FLAKY")) test("bind locally") {
     val ia = RandomSocket()
     val resolver = new MDNSResolver
     val announcer = new MDNSAnnouncer
