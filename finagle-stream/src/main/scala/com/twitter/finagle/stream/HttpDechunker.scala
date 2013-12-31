@@ -4,6 +4,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 import com.twitter.finagle.channel.BrokerChannelHandler
+import com.twitter.finagle.ChannelClosedException
 import com.twitter.concurrent.{Offer, Broker}
 
 /**
@@ -54,7 +55,7 @@ class HttpDechunker extends BrokerChannelHandler {
 
         case e@(Closed(_, _) | Disconnected(_, _)) =>
           e.sendUpstream()
-          error(err, EOF)
+          error(err, new ChannelClosedException(ch.getRemoteAddress))
 
         case e@Exception(exc, ctx) =>
           e.sendUpstream()
