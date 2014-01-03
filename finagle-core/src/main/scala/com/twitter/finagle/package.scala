@@ -56,7 +56,7 @@ import org.jboss.netty.handler.codec.http.{
   HttpRequest, HttpResponse, DefaultHttpRequest}
 import org.jboss.netty.handler.codec.http.HttpVersion._
 import org.jboss.netty.handler.codec.http.HttpMethod._
-import com.twitter.util.{Future, Await, Future, Return, Throw}
+import com.twitter.util.{Future, Return, Throw}
 
 val client: Service[HttpRequest, HttpResponse] =
   Http.newService("localhost:8080")
