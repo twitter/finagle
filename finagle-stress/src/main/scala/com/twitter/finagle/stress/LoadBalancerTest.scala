@@ -1,25 +1,25 @@
 package com.twitter.finagle.stress
 
+import com.google.caliper.{Param, SimpleBenchmark}
 import com.twitter.app.App
+import com.twitter.concurrent.{Scheduler, ThreadPoolScheduler, BridgedThreadPoolScheduler}
 import com.twitter.conversions.time._
+import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.Http
-import com.twitter.finagle.Service
 import com.twitter.finagle.stats.OstrichStatsReceiver
-import com.twitter.ostrich.stats.{Stats => OstrichStats}
 import com.twitter.ostrich.stats.StatsCollection
+import com.twitter.ostrich.stats.{Stats => OstrichStats}
 import com.twitter.util.{Duration, CountDownLatch, Return, Throw, Stopwatch}
-
-import com.google.caliper.{Param, SimpleBenchmark}
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.{ThreadFactory, ThreadPoolExecutor, TimeUnit}
 import org.jboss.netty.handler.codec.http._
-
 import scala.collection.mutable.ArrayBuffer
 
 object LoadBalancerTest extends App {
   val nreqsFlag = flag("n", 100000, "Number of reqs sent from each client")
   val latencyFlag = flag("l", 0.seconds, "req latency forced at the server")
-  val tpschedFlag = flag("tpsched", false, "use threadpool scheduler")
+  val schedFlag = flag("sched", "local", "Use the specified scheduler")
 
   val totalRequests = new AtomicInteger(0)
   val clientBuilder = ClientBuilder()
@@ -27,11 +27,19 @@ object LoadBalancerTest extends App {
     .retries(10)
 
   def main() {
-    if (tpschedFlag()) {
-      import com.twitter.concurrent.{Scheduler, ThreadPoolScheduler}
-      println("Using threadpool scheduler")
-      Scheduler.setUnsafe(new ThreadPoolScheduler("FINAGLE"))
+    schedFlag() match {
+      case "local" =>
+      case "threadpool" =>
+        println("Using threadpool scheduler")
+        Scheduler.setUnsafe(new ThreadPoolScheduler("FINAGLE"))
+      case "bridged" =>
+        println("Using the bridged threadpool scheduler")
+        Scheduler.setUnsafe(new BridgedThreadPoolScheduler("FINAGLE"))
+      case unknown =>
+        println("Unknown scheduler "+unknown)
+        System.exit(1)
     }
+
     runSuite()
   }
 
