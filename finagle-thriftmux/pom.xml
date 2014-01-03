@@ -82,43 +82,8 @@
         <!-- this version must match the version from scrooge-gen.ivy.xml -->
         <version>3.11.0</version>
         <configuration>
-          <thriftNamespaceMappings>
-            <thriftNamespaceMapping>
-              <from>com.twitter.finagle.thriftmux.thrift</from>
-              <to>com.twitter.finagle.thriftmux.thriftscrooge3</to>
-            </thriftNamespaceMapping>
-          </thriftNamespaceMappings>
           <outputDirectory>target/generated-test-sources</outputDirectory>
         </configuration>
-        <executions combine.children="append">
-          <execution>
-            <id>thrift-test-sources</id>
-            <phase>generate-test-sources</phase>
-            <goals>
-              <goal>testCompile</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>com.twitter</groupId>
-        <artifactId>maven-finagle-thrift-plugin</artifactId>
-        <configuration>
-          <thriftGenerators>
-            <thriftGenerator>finagle</thriftGenerator>
-            <thriftGenerator>scrooge</thriftGenerator>
-          </thriftGenerators>
-          <thriftNamespaceMappings>
-            <thriftNamespaceMapping>
-              <from>com.twitter.finagle.thriftmux.thrift</from>
-              <to>com.twitter.finagle.thriftmux.thriftscrooge2</to>
-            </thriftNamespaceMapping>
-          </thriftNamespaceMappings>
-          <thriftOpts>
-            <thriftOpt>--finagle</thriftOpt>
-          </thriftOpts>
-        </configuration>
-        <version>0.0.13</version>
         <executions combine.children="append">
           <execution>
             <id>thrift-test-sources</id>

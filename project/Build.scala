@@ -24,8 +24,8 @@ object Finagle extends Build {
   )
   val scroogeLibs = thriftLibs ++ Seq(
     "com.twitter" %% "scrooge-core" % "3.11.0")
-    
-  def util(which: String) = 
+
+  def util(which: String) =
     "com.twitter" %% ("util-"+which) % utilVersion excludeAll(
       ExclusionRule(organization = "junit"),
       ExclusionRule(organization = "org.scala-tools.testing"),
@@ -377,19 +377,13 @@ object Finagle extends Build {
     base = file("finagle-thriftmux"),
     settings = Project.defaultSettings ++
       ScroogeSBT.newSettings ++
-      Scrooge.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-thriftmux",
     ScroogeSBT.scroogeThriftNamespaceMap in Test := Map(
-      "com.twitter.finagle.thriftmux.thrift" ->
-        "com.twitter.finagle.thriftmux.thriftscrooge3"
+      "com.twitter.finagle.thriftmux.thriftjava" ->
+        "com.twitter.finagle.thriftmux.thriftscala"
     ),
-    Scrooge.scrooge2ThriftNamespaceMap in Test := Map(
-      "com.twitter.finagle.thriftmux.thrift" ->
-        "com.twitter.finagle.thriftmux.thriftscrooge2"
-    ),
-    Scrooge.scrooge2ThriftOutputFolder <<= (sourceManaged) { x => x / "scrooge2" },
     libraryDependencies ++= scroogeLibs
   ).dependsOn(finagleCore, finagleMux, finagleThrift)
 

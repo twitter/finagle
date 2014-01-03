@@ -5,7 +5,7 @@ import com.twitter.finagle.client.{DefaultClient, Bridge}
 import com.twitter.finagle.dispatch.{PipeliningDispatcher, SerialClientDispatcher}
 import com.twitter.finagle.server.DefaultServer
 import com.twitter.finagle.thrift.{ThriftFramedTransporter, ThriftClientRequest}
-import com.twitter.finagle.thriftmux.thriftscrooge3.TestService
+import com.twitter.finagle.thriftmux.thriftscala.TestService
 import com.twitter.finagle.tracing.Annotation.{ServerRecv, ClientSend}
 import com.twitter.finagle.tracing._
 import com.twitter.util.{Promise, Await, Future}
@@ -17,15 +17,6 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite {
-  test("end-to-end Scrooge2") {
-    val server = ThriftMux.serveIface(":*", new thriftscrooge2.TestService.FutureIface {
-      def query(x: String) = Future.value(x+x)
-    })
-
-    val client = ThriftMux.newIface[thriftscrooge2.TestService.FutureIface](server)
-    assert(Await.result(client.query("ok")) == "okok")
-  }
-
   trait ThriftMuxTestServer {
     val server = ThriftMux.serveIface(":*", new TestService.FutureIface {
       def query(x: String) = Future.value(x+x)
