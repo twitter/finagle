@@ -60,7 +60,7 @@ object HttpClient {
   private[this] def makeAuthorizedRequest(client: Service[HttpRequest, HttpResponse]) = {
     val authorizedRequest = new DefaultHttpRequest(
       HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
-    authorizedRequest.addHeader("Authorization", "open sesame")
+    authorizedRequest.headers().add(HttpHeaders.Names.AUTHORIZATION, "open sesame")
 
     client(authorizedRequest) onSuccess { response =>
       val responseString = response.getContent.toString(CharsetUtil.UTF_8)
