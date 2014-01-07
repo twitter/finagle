@@ -1,6 +1,8 @@
 package com.twitter.finagle.builder
 
 import com.twitter.finagle._
+import com.twitter.finagle.service.StatsFilter
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.integration.IntegrationBase
 import com.twitter.util.{Await, Promise, Return, Future, Time}
 import org.mockito.Matchers
@@ -34,6 +36,7 @@ class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with
         service("123") returns Future.value("321")
         service.close(any[Time]) returns Future.Done
         preparedServicePromise() = Return(service)
+
         there was one(service)("123")
         requestFuture.poll must beSome(Return("321"))
       }
@@ -44,6 +47,31 @@ class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with
         val svc = ClientBuilder().hostConnectionLimit(1).codec(m.codec).hosts("").build()
         val f = svc.close()
         f.isDefined must eventually(beTrue)
+      }
+    }
+
+    "collect stats on 'tries' for retrypolicy" in {
+      new ClientBuilderHelper {
+        val inMemory = new InMemoryStatsReceiver
+        val client = ClientBuilder()
+          .name("test")
+          .hostConnectionLimit(1)
+          .codec(m.codec)
+          .hosts(Seq(m.clientAddress))
+          .retries(2) // retries == total attempts :(
+          .reportTo(inMemory)
+          .build()
+
+        val service = mock[Service[String, String]]
+        service("123") returns Future.exception(WriteException(new Exception()))
+        service.close(any[Time]) returns Future.Done
+        preparedServicePromise() = Return(service)
+
+        val f = client("123")
+
+        f.isDefined must beTrue
+        inMemory.counters(Seq("test", "tries", "requests")) must be(1)
+        inMemory.counters(Seq("test", "requests")) must be(2)
       }
     }
 
