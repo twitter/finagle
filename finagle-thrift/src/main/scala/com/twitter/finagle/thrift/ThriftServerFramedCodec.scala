@@ -1,14 +1,14 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle._
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.ByteArrays
 import com.twitter.util.Future
 import com.twitter.io.Buf
 import java.net.InetSocketAddress
-import java.util.Arrays
 import org.apache.thrift.protocol.{
-  TMessage, TMessageType, TProtocolFactory, TBinaryProtocol}
+  TMessage, TMessageType, TProtocolFactory}
 import org.apache.thrift.{TApplicationException, TException}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{
@@ -16,24 +16,30 @@ import org.jboss.netty.channel.{
   SimpleChannelDownstreamHandler}
 
 object ThriftServerFramedCodec {
-  def apply() = new ThriftServerFramedCodecFactory
+  def apply(statsReceiver: StatsReceiver = NullStatsReceiver) =
+    new ThriftServerFramedCodecFactory(statsReceiver)
+
   def apply(protocolFactory: TProtocolFactory) =
     new ThriftServerFramedCodecFactory(protocolFactory)
 
-  def get()   = apply()
+  def get() = apply()
 }
 
 class ThriftServerFramedCodecFactory(protocolFactory: TProtocolFactory)
     extends CodecFactory[Array[Byte], Array[Byte]]#Server
 {
-  def this() = this(new TBinaryProtocol.Factory())
+  def this(statsReceiver: StatsReceiver) =
+    this(Protocols.binaryFactory(statsReceiver = statsReceiver))
+
+  def this() = this(NullStatsReceiver)
+
   def apply(config: ServerCodecConfig) =
     new ThriftServerFramedCodec(config, protocolFactory)
 }
 
 class ThriftServerFramedCodec(
     config: ServerCodecConfig,
-    protocolFactory: TProtocolFactory = new TBinaryProtocol.Factory()
+    protocolFactory: TProtocolFactory = Protocols.binaryFactory()
 ) extends Codec[Array[Byte], Array[Byte]] {
   def pipelineFactory =
     new ChannelPipelineFactory {
