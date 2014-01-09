@@ -314,7 +314,7 @@ object Finagle extends Build {
     name := "finagle-memcached",
     libraryDependencies ++= Seq(
       util("hashing"),
-      "com.google.guava" % "guava" % "13.0",
+      "com.google.guava" % "guava" % "15.0",
       "com.twitter.common" % "zookeeper-testing" % "0.0.34" % "test"
     ) ++ jacksonLibs
   ).dependsOn(finagleCore, finagleServersets)
