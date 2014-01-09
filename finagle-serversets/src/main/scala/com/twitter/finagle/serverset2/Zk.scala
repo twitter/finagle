@@ -82,7 +82,7 @@ private trait Zk {
       case exc: KeeperException.ConnectionLossException =>
         backoff match {
           case wait #:: rest =>
-            Future.Done.delayed(wait) flatMap { _ => safeRetry(go, rest) }
+            Future.sleep(wait) before safeRetry(go, rest)
           case _ => 
             Future.exception(exc)
         }

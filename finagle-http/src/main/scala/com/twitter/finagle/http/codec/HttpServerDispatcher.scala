@@ -35,7 +35,7 @@ class HttpServerDispatcher[REQUEST <: Request](
     r.read(Int.MaxValue) flatMap { buf =>
       val chunk = chunkOfBuf(buf)
       if (chunk.isLast) trans.write(chunk)
-      else trans.write(chunk) flatMap { _ => streamChunks(r) }
+      else trans.write(chunk) before streamChunks(r)
     }
   }
 
@@ -58,7 +58,7 @@ class HttpServerDispatcher[REQUEST <: Request](
 
   protected def handle(rep: Response): Future[Unit] = 
     if (rep.isChunked) {
-      trans.write(rep) flatMap { _ => streamChunks(rep.reader) }
+      trans.write(rep) before streamChunks(rep.reader)
     } else {
       // Ensure Content-Length is set if not chunked
       if (!rep.headers.contains(HttpHeaders.Names.CONTENT_LENGTH))

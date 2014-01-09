@@ -145,7 +145,7 @@ private[finagle] class ClientDispatcher(trans: Transport[ChannelBuffer, ChannelB
 
     trans.write(encode(msg)) onFailure { case exc =>
       reqs.unmap(tag)
-    } flatMap { _ =>
+    } before {
       p.setInterruptHandler { case cause =>
         for (reqP <- reqs.maybeRemap(tag, new Promise[ChannelBuffer])) {
           trans.write(encode(Tdiscarded(tag, cause.toString)))
