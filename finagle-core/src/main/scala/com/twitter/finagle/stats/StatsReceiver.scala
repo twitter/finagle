@@ -200,6 +200,8 @@ class NullStatsReceiver extends StatsReceiver with JavaSingleton {
   def counter(name: String*) = NullCounter
   def stat(name: String*) = NullStat
   def addGauge(name: String*)(f: => Float) = NullGauge
+  
+  override def toString = "NullStatsReceiver"
 }
 
 object NullStatsReceiver extends NullStatsReceiver

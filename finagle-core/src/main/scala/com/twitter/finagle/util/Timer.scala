@@ -52,4 +52,6 @@ object DefaultTimer extends HashedWheelTimer(
     10, TimeUnit.MILLISECONDS
 ) {
   val twitter = new TimerFromNettyTimer(this)
+
+  override def toString = "DefaultTimer"
 }

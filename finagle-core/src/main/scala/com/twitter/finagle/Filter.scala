@@ -103,6 +103,25 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
 abstract class SimpleFilter[Req, Rep] extends Filter[Req, Rep, Req, Rep]
 
 object Filter {
+  implicit def canStackFromSvc[Req, Rep]
+    : CanStackFrom[Filter[Req, Rep, Req, Rep], Service[Req, Rep]] =
+    new CanStackFrom[Filter[Req, Rep, Req, Rep], Service[Req, Rep]] {
+      def toStackable(id: String, filter: Filter[Req, Rep, Req, Rep]) = 
+        new Stack.Simple[Service[Req, Rep]](id) {
+          def make(params: Params, next: Service[Req, Rep]) = filter andThen next
+        }
+    }
+
+  implicit def canStackFromFac[Req, Rep]
+    : CanStackFrom[Filter[Req, Rep, Req, Rep], ServiceFactory[Req, Rep]] =
+    new CanStackFrom[Filter[Req, Rep, Req, Rep], ServiceFactory[Req, Rep]] {
+      def toStackable(id: String, filter: Filter[Req, Rep, Req, Rep]) = 
+        new Stack.Simple[ServiceFactory[Req, Rep]](id) {
+          def make(params: Params, next: ServiceFactory[Req, Rep]) = filter andThen next
+        }
+    }
+
+
   def identity[Req, Rep] = new SimpleFilter[Req, Rep] {
     override def andThen[Req2, Rep2](next: Filter[Req, Rep, Req2, Rep2]) = next
     override def andThen(service: Service[Req, Rep]) = service

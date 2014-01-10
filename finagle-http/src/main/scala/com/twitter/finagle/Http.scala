@@ -64,3 +64,26 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
   def serve(addr: SocketAddress, service: ServiceFactory[HttpRequest, HttpResponse]): ListeningServer =
     HttpServer.serve(addr, service)
 }
+
+package exp {
+package stack {
+
+object HttpNetty3Stack
+  extends Netty3Stack[HttpRequest, HttpResponse, HttpRequest, HttpResponse](
+  "http", 
+  http.Http()
+    .enableTracing(true)
+    .client(ClientCodecConfig("httpclient")).pipelineFactory,
+  new HttpClientDispatcher(_))
+
+class HttpClient(client: StackClient[HttpRequest, HttpResponse])
+  extends RichStackClient[HttpRequest, HttpResponse, HttpClient](client)
+  with HttpRichClient {
+  protected def newRichClient(client: StackClient[HttpRequest, HttpResponse]) = 
+    new HttpClient(client)
+}
+
+object HttpClient extends HttpClient(new StackClient(HttpNetty3Stack))
+
+}
+}
