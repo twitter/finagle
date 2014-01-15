@@ -6,8 +6,6 @@ import java.net.SocketAddress
 // TODO
 object DefaultMonitor extends Monitor {
   def handle(exc: Throwable) = false
-  
-  override def toString = "DefaultMonitor"
 }
 
 trait ReporterFactory extends ((String, Option[SocketAddress]) => Monitor)
