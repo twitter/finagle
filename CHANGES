@@ -5,14 +5,40 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.11.0
+~~~~~
+
+- `finagle-core`: Add a "tries" scoped StatsFilter to ClientBuilder.
+- `finagle-core`: Allow clean shutdown for insoluble address in DelayedFactory.
+- `finagle-core`: Better exception message for resolver not found issue.
+- `finagle-core`: Introduce P2CLB: O(1), fair-weighted, concurrent load balancer
+- `finagle-core`: Refactor dispatchers.
+- `finagle-core`: Set interest ops when reading in ChannelTransport.
+- `finagle-core`: Skip hostStatsReceiver rollup if it's null in DefaultClient.
+- `finagle-core`: Untyped ChannelTransports.
+- `finagle-example`: Use new `request.headers()` Netty API.
+- `finagle-http`: Proper streaming dispatch.
+- `finagle-kestrel`: Make ReadHandle an abstract class for better Java compatibility.
+- `finagle-serversets`: Fix com.twitter.common.zookeeper.server-set dependency discrepancy.
+- `finagle-serversets`: Introduce ServerSet2.
+- `finagle-serversets`: Weight/priority vectors in ServerSet2.
+- `finagle-stream`: Use dispatch logic.
+- `finagle-stress`: Use BridgedThreadPoolScheduler.
+- `finagle-thrift`: Add TFinagleBinaryProtocol
+- `finagle-thriftmux`: Drop dependency on finagle-ostrich4.
+- `finagle-thriftmux`: Remove scrooge2 dependency.
+- `finagle`: Use Future.before.
+- `finagle`: adds a section to the FAQ explaining the com.twitter.common situation.
+- `finagle`: s/setValue(())/setDone()/g
+
 6.10.0
 ~~~~~
 
-`finagle-core`: Fix ServiceTimeoutException naming.
-`finagle-core`: Increase default tcpConnectTimeout to 350ms.
-`finagle-core`: Remove memory leak for never satisfied promises in DelayedFactory.
-`finagle-memcached`: Add ClientBuilder APIs that use Name instead of Group.
-`finagle`: Daemonize threads in ClientBuilders used in finagle.
+- `finagle-core`: Fix ServiceTimeoutException naming.
+- `finagle-core`: Increase default tcpConnectTimeout to 350ms.
+- `finagle-core`: Remove memory leak for never satisfied promises in DelayedFactory.
+- `finagle-memcached`: Add ClientBuilder APIs that use Name instead of Group.
+- `finagle`: Daemonize threads in ClientBuilders used in finagle.
 
 6.9.0
 ~~~~~
