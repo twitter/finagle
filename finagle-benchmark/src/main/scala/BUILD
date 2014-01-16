@@ -8,12 +8,7 @@ benchmark(name='scala',
     pants('finagle/finagle-stats'),
     pants('finagle/finagle-zipkin'),
     pants('finagle/finagle-swift'),
-    compiled_idl(
-      idl_deps=pants('finagle/finagle-benchmark/src/main/thrift'),
-      compiler='scrooge',
-      language='scala',
-      rpc_style='finagle'
-    )
+    pants('finagle/finagle-benchmark/src/main/thrift:thrift-scala'),
   ],
   sources=rglobs('*.scala')
 )

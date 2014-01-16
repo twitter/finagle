@@ -7,7 +7,7 @@ junit_tests(name='scala',
     pants('finagle/finagle-core'),
     pants('finagle/finagle-thrift'),
     pants('finagle/finagle-thriftmux'),
-    pants('finagle/finagle-thriftmux/src/test/thrift:scrooge3'),
+    pants('finagle/finagle-thriftmux/src/test/thrift:thrift-scala'),
     pants('util/util-core'),
   ],
   sources=rglobs('*.scala')
