@@ -13,8 +13,8 @@ import org.jboss.netty.handler.codec.http._
 
 class HttpServerDispatcher[REQUEST <: Request](
     trans: Transport[Any, Any],
-    service: Service[REQUEST, Response])
-  extends GenSerialServerDispatcher[REQUEST, Response, Any, Any](trans) {
+    service: Service[REQUEST, HttpResponse])
+  extends GenSerialServerDispatcher[REQUEST, HttpResponse, Any, Any](trans) {
 
   trans.onClose ensure {
     service.close()
@@ -56,14 +56,18 @@ class HttpServerDispatcher[REQUEST <: Request](
       Future.exception(new IllegalArgumentException("Invalid message "+invalid))
   }
 
-  protected def handle(rep: Response): Future[Unit] = 
-    if (rep.isChunked) {
-      trans.write(rep) before streamChunks(rep.reader)
-    } else {
-      // Ensure Content-Length is set if not chunked
-      if (!rep.headers.contains(HttpHeaders.Names.CONTENT_LENGTH))
-        rep.contentLength = rep.getContent().readableBytes
+  protected def handle(response: HttpResponse): Future[Unit] = response match {
+    case rep: Response =>
+      if (rep.isChunked) {
+        trans.write(rep) before streamChunks(rep.reader)
+      } else {
+        // Ensure Content-Length is set if not chunked
+        if (!rep.headers.contains(HttpHeaders.Names.CONTENT_LENGTH))
+          rep.contentLength = rep.getContent().readableBytes
 
-      trans.write(rep)
-    }
+        trans.write(rep)
+      }
+    case _: HttpResponse =>
+      trans.write(response)
+  }
 }
