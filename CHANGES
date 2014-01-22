@@ -5,6 +5,14 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.11.1
+~~~~~
+
+- `finagle-core`: Masks cancellation on PipeliningDispatcher
+- `finagle-doc`: Fix finagle-websocket link on Finagle docs website.
+- `finagle-http`: Http client dispatcher
+- `finagle-kestrel`: Add abort command to kestrel client
+
 6.11.0
 ~~~~~
 
