@@ -14,9 +14,9 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
-        <a title="Go to companion" href="SerialServerDispatcher$.html"><img src="../../../../lib/class_to_object_big.png" /></a>
+        <img src="../../../../lib/class_big.png" />
         <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.dispatch" class="extype" href="package.html">dispatch</a></p>
-        <h1><a title="Go to companion" href="SerialServerDispatcher$.html">SerialServerDispatcher</a></h1>
+        <h1>SerialServerDispatcher</h1>
       </div>
 
       <h4 class="signature" id="signature">
@@ -25,7 +25,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">SerialServerDispatcher</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <span name="com.twitter.util.Closable" class="extype">Closable</span></span>
+        <span class="name">SerialServerDispatcher</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a name="com.twitter.finagle.dispatch.GenSerialServerDispatcher" class="extype" href="GenSerialServerDispatcher.html">GenSerialServerDispatcher</a>[Req, Rep, Rep, Req]</span>
       </span>
       </h4>
       
@@ -34,7 +34,7 @@ concurrent requests.</p><p>Transport errors are considered fatal; the service wi
 released after any error.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="com.twitter.util.Closable" class="extype">Closable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.dispatch.GenSerialServerDispatcher" class="extype" href="GenSerialServerDispatcher.html">GenSerialServerDispatcher</a>[Req, Rep, Rep, Req], <span name="com.twitter.util.Closable" class="extype">Closable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -48,7 +48,7 @@ released after any error.
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.dispatch.SerialServerDispatcher" class="in"><span>SerialServerDispatcher</span></li><li name="com.twitter.util.Closable" class="in"><span>Closable</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.dispatch.SerialServerDispatcher" class="in"><span>SerialServerDispatcher</span></li><li name="com.twitter.finagle.dispatch.GenSerialServerDispatcher" class="in"><span>GenSerialServerDispatcher</span></li><li name="com.twitter.util.Closable" class="in"><span>Closable</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -168,7 +168,7 @@ released after any error.
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.dispatch.SerialServerDispatcher#close" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher#close" data-isabs="false">
       <a id="close(Time):Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -179,7 +179,7 @@ released after any error.
         <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span name="com.twitter.util.Time" class="extype">Time</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.dispatch.SerialServerDispatcher" class="extype" href="">SerialServerDispatcher</a> → Closable</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.dispatch.GenSerialServerDispatcher" class="extype" href="GenSerialServerDispatcher.html">GenSerialServerDispatcher</a> → Closable</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
       <a id="close(Duration):Future[Unit]"></a>
       <h4 class="signature">
@@ -204,6 +204,18 @@ released after any error.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.dispatch.SerialServerDispatcher#dispatch" data-isabs="false">
+      <a id="dispatch(Req):Future[Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dispatch</span><span class="params">(<span name="req">req: Req</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Rep]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.dispatch.SerialServerDispatcher" class="extype" href="">SerialServerDispatcher</a> → <a name="com.twitter.finagle.dispatch.GenSerialServerDispatcher" class="extype" href="GenSerialServerDispatcher.html">GenSerialServerDispatcher</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -255,6 +267,18 @@ released after any error.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.dispatch.SerialServerDispatcher#handle" data-isabs="false">
+      <a id="handle(Rep):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">handle</span><span class="params">(<span name="rep">rep: Rep</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.dispatch.SerialServerDispatcher" class="extype" href="">SerialServerDispatcher</a> → <a name="com.twitter.finagle.dispatch.GenSerialServerDispatcher" class="extype" href="GenSerialServerDispatcher.html">GenSerialServerDispatcher</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
@@ -391,7 +415,9 @@ released after any error.
         </div>
 
         <div id="inheritedMembers">
-        <div name="com.twitter.util.Closable" class="parent">
+        <div name="com.twitter.finagle.dispatch.GenSerialServerDispatcher" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.dispatch.GenSerialServerDispatcher" class="extype" href="GenSerialServerDispatcher.html">GenSerialServerDispatcher</a>[Req, Rep, Rep, Req]</h3>
+            </div><div name="com.twitter.util.Closable" class="parent">
               <h3>Inherited from <span name="com.twitter.util.Closable" class="extype">Closable</span></h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>

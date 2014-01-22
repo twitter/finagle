@@ -63,7 +63,7 @@ added for illustration.)</p><pre>
   HttpRequest, HttpResponse, DefaultHttpRequest}
 <span class="kw">import</span> org.jboss.netty.handler.codec.http.HttpVersion._
 <span class="kw">import</span> org.jboss.netty.handler.codec.http.HttpMethod._
-<span class="kw">import</span> com.twitter.util.{Future, Await, Future, Return, Throw}
+<span class="kw">import</span> com.twitter.util.{Future, Return, Throw}
 
 <span class="kw">val</span> client: Service[HttpRequest, HttpResponse] =
   Http.newService(<span class="lit">"localhost:8080"</span>)
@@ -1366,7 +1366,7 @@ registered handler.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="HttpListener$.html"><span class="name">HttpListener</span></a><span class="result"> extends Netty3Listener[HttpResponse, HttpRequest]</span>
+        <a href="HttpListener$.html"><span class="name">HttpListener</span></a><span class="result"> extends Netty3Listener[Any, Any]</span>
       </span>
       </h4>
       
@@ -1378,7 +1378,7 @@ registered handler.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="HttpServer$.html"><span class="name">HttpServer</span></a><span class="result"> extends DefaultServer[HttpRequest, HttpResponse, HttpResponse, HttpRequest]</span>
+        <a href="HttpServer$.html"><span class="name">HttpServer</span></a><span class="result"> extends DefaultServer[HttpRequest, HttpResponse, Any, Any]</span>
       </span>
       </h4>
       
@@ -1390,7 +1390,7 @@ registered handler.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="HttpTransporter$.html"><span class="name">HttpTransporter</span></a><span class="result"> extends Netty3Transporter[HttpRequest, HttpResponse]</span>
+        <a href="HttpTransporter$.html"><span class="name">HttpTransporter</span></a><span class="result"> extends Netty3Transporter[Any, Any]</span>
       </span>
       </h4>
       
@@ -2068,6 +2068,18 @@ registered handler.</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.serverset2" data-isabs="false">
+      <a id="serverset2:serverset2"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="serverset2/package.html"><span class="name">serverset2</span></a>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.service" data-isabs="false">
       <a id="service:service"></a>
       <h4 class="signature">
@@ -2139,7 +2151,8 @@ registered handler.</p>
         <a href="stream/package.html"><span class="name">stream</span></a>
       </span>
       </h4>
-      
+      <p class="comment cmt">Finagle-stream implements a rather peculiar protocol: it streams
+discrete messages delineated by HTTP chunks.</p>
     </li><li visbl="pub" name="com.twitter.finagle.stress" data-isabs="false">
       <a id="stress:stress"></a>
       <h4 class="signature">

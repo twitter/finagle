@@ -268,26 +268,26 @@ disable failFast for codecs for which it isn't well-behaved.
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Codec#newClientDispatcher" data-isabs="false">
-      <a id="newClientDispatcher(Transport[ThriftClientRequest, Array[Byte]]):Service[ThriftClientRequest, Array[Byte]]"></a>
+      <a id="newClientDispatcher(Transport[Any, Any]):Service[ThriftClientRequest, Array[Byte]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newClientDispatcher</span><span class="params">(<span name="transport">transport: <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
+        <span class="name">newClientDispatcher</span><span class="params">(<span name="transport">transport: <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Codec#newClientTransport" data-isabs="false">
-      <a id="newClientTransport(Channel,StatsReceiver):Transport[ThriftClientRequest, Array[Byte]]"></a>
+      <a id="newClientTransport(Channel,StatsReceiver):Transport[Any, Any]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newClientTransport</span><span class="params">(<span name="ch">ch: <span name="org.jboss.netty.channel.Channel" class="extype">Channel</span></span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a></span>)</span><span class="result">: <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
+        <span class="name">newClientTransport</span><span class="params">(<span name="ch">ch: <span name="org.jboss.netty.channel.Channel" class="extype">Channel</span></span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a></span>)</span><span class="result">: <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Note: the below (&quot;raw&quot;) interfaces are low level, and require a
@@ -296,14 +296,14 @@ good understanding of finagle internals to implement correctly.
 Proceed with care.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Codec#newServerDispatcher" data-isabs="false">
-      <a id="newServerDispatcher(Transport[Array[Byte], ThriftClientRequest],Service[ThriftClientRequest, Array[Byte]]):Closable"></a>
+      <a id="newServerDispatcher(Transport[Any, Any],Service[ThriftClientRequest, Array[Byte]]):Closable"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newServerDispatcher</span><span class="params">(<span name="transport">transport: <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="ThriftClientRequest.html">ThriftClientRequest</a>]</span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>)</span><span class="result">: <span name="com.twitter.util.Closable" class="extype">Closable</span></span>
+        <span class="name">newServerDispatcher</span><span class="params">(<span name="transport">transport: <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>)</span><span class="result">: <span name="com.twitter.util.Closable" class="extype">Closable</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a></dd></dl></div>

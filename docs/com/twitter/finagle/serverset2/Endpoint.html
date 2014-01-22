@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.transport.ClientChannelTransport</title>
+          <title>com.twitter.finagle.serverset2.Endpoint</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
@@ -14,26 +14,32 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
-        <img src="../../../../lib/class_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.transport" class="extype" href="package.html">transport</a></p>
-        <h1>ClientChannelTransport</h1>
+        <a title="Go to companion" href="Endpoint$.html"><img src="../../../../lib/class_to_object_big.png" /></a>
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.serverset2" class="extype" href="package.html">serverset2</a></p>
+        <h1><a title="Go to companion" href="Endpoint$.html">Endpoint</a></h1>
       </div>
 
       <h4 class="signature" id="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">ClientChannelTransport</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a name="com.twitter.finagle.transport.Transport" class="extype" href="Transport.html">Transport</a>[In, Out] with <span name="org.jboss.netty.channel.ChannelUpstreamHandler" class="extype">ChannelUpstreamHandler</span></span>
+        <span class="name">Endpoint</span><span class="params">(<span name="name">name: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="addr">addr: <span name="java.net.InetSocketAddress" class="extype">InetSocketAddress</span></span>, <span name="shard">shard: <span name="scala.Option" class="extype">Option</span>[<span name="scala.Int" class="extype">Int</span>]</span>, <span name="status">status: <span name="scala.Enumeration.Value" class="extype">Value</span></span>, <span name="memberId">memberId: String</span>)</span><span class="result"> extends <a name="com.twitter.finagle.serverset2.Entry" class="extype" href="Entry.html">Entry</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Implements a {{Transport}} based on a Netty channel. It is a
-{{ChannelHandler}} and must be the last in the pipeline.
-</p></div><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Endpoints encode a destination announced via serversets.
+</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>The endpoint name. None describes a default service
+endpoint.
+</p></dd><dt class="param">addr</dt><dd class="cmt"><p>The address of the endpoint.
+</p></dd><dt class="param">shard</dt><dd class="cmt"><p>The shard id of the endpoint.
+</p></dd><dt class="param">status</dt><dd class="cmt"><p>The endpoint's status.
+</p></dd><dt class="param">memberId</dt><dd class="cmt"><p>The endpoint's member id,
+used as a foreign key for endpoints.
+</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="org.jboss.netty.channel.ChannelUpstreamHandler" class="extype">ChannelUpstreamHandler</span>, <span name="org.jboss.netty.channel.ChannelHandler" class="extype">ChannelHandler</span>, <a name="com.twitter.finagle.transport.Transport" class="extype" href="Transport.html">Transport</a>[In, Out], <span name="com.twitter.util.Closable" class="extype">Closable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <a name="com.twitter.finagle.serverset2.Entry" class="extype" href="Entry.html">Entry</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -47,7 +53,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.transport.ClientChannelTransport" class="in"><span>ClientChannelTransport</span></li><li name="org.jboss.netty.channel.ChannelUpstreamHandler" class="in"><span>ChannelUpstreamHandler</span></li><li name="org.jboss.netty.channel.ChannelHandler" class="in"><span>ChannelHandler</span></li><li name="com.twitter.finagle.transport.Transport" class="in"><span>Transport</span></li><li name="com.twitter.util.Closable" class="in"><span>Closable</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.serverset2.Endpoint" class="in"><span>Endpoint</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="com.twitter.finagle.serverset2.Entry" class="in"><span>Entry</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -59,18 +65,25 @@
         <div id="allMembers">
         <div class="members" id="constructors">
               <h3>Instance Constructors</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.transport.ClientChannelTransport#this" data-isabs="false">
-      <a id="this:ClientChannelTransport[In, Out]"></a>
+              <ol><li visbl="pub" name="com.twitter.finagle.serverset2.Endpoint#this" data-isabs="false">
+      <a id="this:Endpoint"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ClientChannelTransport</span><span class="params">(<span name="ch">ch: <span name="org.jboss.netty.channel.Channel" class="extype">Channel</span></span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a></span>)</span>
+        <span class="name">Endpoint</span><span class="params">(<span name="name">name: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="addr">addr: <span name="java.net.InetSocketAddress" class="extype">InetSocketAddress</span></span>, <span name="shard">shard: <span name="scala.Option" class="extype">Option</span>[<span name="scala.Int" class="extype">Int</span>]</span>, <span name="status">status: <span name="scala.Enumeration.Value" class="extype">Value</span></span>, <span name="memberId">memberId: String</span>)</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>The endpoint name. None describes a default service
+endpoint.
+</p></dd><dt class="param">addr</dt><dd class="cmt"><p>The address of the endpoint.
+</p></dd><dt class="param">shard</dt><dd class="cmt"><p>The shard id of the endpoint.
+</p></dd><dt class="param">status</dt><dd class="cmt"><p>The endpoint's status.
+</p></dd><dt class="param">memberId</dt><dd class="cmt"><p>The endpoint's member id,
+used as a foreign key for endpoints.
+</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -140,6 +153,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.serverset2.Endpoint#addr" data-isabs="false">
+      <a id="addr:InetSocketAddress"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addr</span><span class="result">: <span name="java.net.InetSocketAddress" class="extype">InetSocketAddress</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The address of the endpoint.</p>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -152,6 +177,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.serverset2.Endpoint#canEqual" data-isabs="false">
+      <a id="canEqual(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">canEqual</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.serverset2.Endpoint" class="extype" href="">Endpoint</a> → Equals</dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
@@ -167,42 +204,6 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.transport.ClientChannelTransport#close" data-isabs="false">
-      <a id="close(Time):Future[Unit]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span name="com.twitter.util.Time" class="extype">Time</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.transport.ClientChannelTransport" class="extype" href="">ClientChannelTransport</a> → Closable</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
-      <a id="close(Duration):Future[Unit]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="after">after: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
-      <a id="close():Future[Unit]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">close</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -215,7 +216,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#equals" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.serverset2.Endpoint#equals" data-isabs="false">
       <a id="equals(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -226,7 +227,7 @@
         <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.serverset2.Endpoint" class="extype" href="">Endpoint</a> → Equals → AnyRef → Any</dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
       <h4 class="signature">
@@ -254,19 +255,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.transport.ClientChannelTransport#handleUpstream" data-isabs="false">
-      <a id="handleUpstream(ChannelHandlerContext,ChannelEvent):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">handleUpstream</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ChannelEvent" class="extype">ChannelEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.transport.ClientChannelTransport" class="extype" href="">ClientChannelTransport</a> → ChannelUpstreamHandler</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.serverset2.Endpoint#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -277,7 +266,7 @@
         <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.serverset2.Endpoint" class="extype" href="">Endpoint</a> → AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -290,31 +279,33 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.transport.ClientChannelTransport#isOpen" data-isabs="false">
-      <a id="isOpen:Boolean"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.serverset2.Endpoint#memberId" data-isabs="false">
+      <a id="memberId:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">isOpen</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">memberId</span><span class="result">: String</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.transport.ClientChannelTransport" class="extype" href="">ClientChannelTransport</a> → <a name="com.twitter.finagle.transport.Transport" class="extype" href="Transport.html">Transport</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.transport.ClientChannelTransport#localAddress" data-isabs="false">
-      <a id="localAddress:SocketAddress"></a>
+      <p class="shortcomment cmt">The endpoint's member id,
+used as a foreign key for endpoints.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.serverset2.Endpoint#name" data-isabs="false">
+      <a id="name:Option[String]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">localAddress</span><span class="result">: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>
+        <span class="name">name</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[String]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">The locally bound address of this transport.</p><div class="fullcomment"><div class="comment cmt"><p>The locally bound address of this transport.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.transport.ClientChannelTransport" class="extype" href="">ClientChannelTransport</a> → <a name="com.twitter.finagle.transport.Transport" class="extype" href="Transport.html">Transport</a></dd></dl></div>
+      <p class="shortcomment cmt">The endpoint name.</p><div class="fullcomment"><div class="comment cmt"><p>The endpoint name. None describes a default service
+endpoint.
+</p></div></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -351,48 +342,78 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.transport.ClientChannelTransport#onClose" data-isabs="false">
-      <a id="onClose:Future[Throwable]"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.serverset2.Endpoint#productArity" data-isabs="false">
+      <a id="productArity:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">productArity</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.serverset2.Endpoint" class="extype" href="">Endpoint</a> → Product</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.serverset2.Endpoint#productElement" data-isabs="false">
+      <a id="productElement(Int):Any"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">productElement</span><span class="params">(<span name="arg0">arg0: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Any" class="extype">Any</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.serverset2.Endpoint" class="extype" href="">Endpoint</a> → Product</dd></dl></div>
+    </li><li visbl="pub" name="scala.Product#productIterator" data-isabs="false">
+      <a id="productIterator:Iterator[Any]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">productIterator</span><span class="result">: Iterator[<span name="scala.Any" class="extype">Any</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Product</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.serverset2.Endpoint#productPrefix" data-isabs="false">
+      <a id="productPrefix:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">productPrefix</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.serverset2.Endpoint" class="extype" href="">Endpoint</a> → Product</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.serverset2.Endpoint#shard" data-isabs="false">
+      <a id="shard:Option[Int]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">onClose</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Throwable]</span>
+        <span class="name">shard</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[<span name="scala.Int" class="extype">Int</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">The channel closed with the given exception.</p><div class="fullcomment"><div class="comment cmt"><p>The channel closed with the given exception. This is the
-same exception you would get if attempting to read or
-write on the Transport, but this allows clients to listen to
-close events.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.transport.ClientChannelTransport" class="extype" href="">ClientChannelTransport</a> → <a name="com.twitter.finagle.transport.Transport" class="extype" href="Transport.html">Transport</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.transport.ClientChannelTransport#read" data-isabs="false">
-      <a id="read():Future[Out]"></a>
+      <p class="shortcomment cmt">The shard id of the endpoint.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.serverset2.Endpoint#status" data-isabs="false">
+      <a id="status:Value"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">read</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Out]</span>
+        <span class="name">status</span><span class="result">: <span name="scala.Enumeration.Value" class="extype">Value</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Read a message from the transport.</p><div class="fullcomment"><div class="comment cmt"><p>Read a message from the transport.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.transport.ClientChannelTransport" class="extype" href="">ClientChannelTransport</a> → <a name="com.twitter.finagle.transport.Transport" class="extype" href="Transport.html">Transport</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.transport.ClientChannelTransport#remoteAddress" data-isabs="false">
-      <a id="remoteAddress:SocketAddress"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">remoteAddress</span><span class="result">: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">The remote address to which the transport is connected.</p><div class="fullcomment"><div class="comment cmt"><p>The remote address to which the transport is connected.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.transport.ClientChannelTransport" class="extype" href="">ClientChannelTransport</a> → <a name="com.twitter.finagle.transport.Transport" class="extype" href="Transport.html">Transport</a></dd></dl></div>
+      <p class="shortcomment cmt">The endpoint's status.</p>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -405,7 +426,7 @@ close events.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.transport.ClientChannelTransport#toString" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.serverset2.Endpoint#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -416,7 +437,7 @@ close events.
         <span class="name">toString</span><span class="params">()</span><span class="result">: String</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.transport.ClientChannelTransport" class="extype" href="">ClientChannelTransport</a> → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.serverset2.Endpoint" class="extype" href="">Endpoint</a> → AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -462,36 +483,41 @@ close events.
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.transport.ClientChannelTransport#write" data-isabs="false">
-      <a id="write(In):Future[Unit]"></a>
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Deprecated Value Members</h3>
+              <ol><li visbl="pub" name="scala.Product#productElements" data-isabs="false">
+      <a id="productElements:Iterator[Any]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">write</span><span class="params">(<span name="msg">msg: In</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+        <span class="name deprecated" title="Deprecated: (Since version 2.8.0) use productIterator instead">productElements</span><span class="result">: Iterator[<span name="scala.Any" class="extype">Any</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Write {{req}} to this transport; the returned future
-acknowledges write completion.</p><div class="fullcomment"><div class="comment cmt"><p>Write {{req}} to this transport; the returned future
-acknowledges write completion.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.transport.ClientChannelTransport" class="extype" href="">ClientChannelTransport</a> → <a name="com.twitter.finagle.transport.Transport" class="extype" href="Transport.html">Transport</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Product</dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2.8.0)</i> use productIterator instead</p></dd></dl></div>
     </li></ol>
             </div>
-
-        
         </div>
 
         <div id="inheritedMembers">
-        <div name="org.jboss.netty.channel.ChannelUpstreamHandler" class="parent">
-              <h3>Inherited from <span name="org.jboss.netty.channel.ChannelUpstreamHandler" class="extype">ChannelUpstreamHandler</span></h3>
-            </div><div name="org.jboss.netty.channel.ChannelHandler" class="parent">
-              <h3>Inherited from <span name="org.jboss.netty.channel.ChannelHandler" class="extype">ChannelHandler</span></h3>
-            </div><div name="com.twitter.finagle.transport.Transport" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.transport.Transport" class="extype" href="Transport.html">Transport</a>[In, Out]</h3>
-            </div><div name="com.twitter.util.Closable" class="parent">
-              <h3>Inherited from <span name="com.twitter.util.Closable" class="extype">Closable</span></h3>
+        <div name="scala.Serializable" class="parent">
+              <h3>Inherited from <span name="scala.Serializable" class="extype">Serializable</span></h3>
+            </div><div name="java.io.Serializable" class="parent">
+              <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
+            </div><div name="scala.Product" class="parent">
+              <h3>Inherited from <span name="scala.Product" class="extype">Product</span></h3>
+            </div><div name="scala.Equals" class="parent">
+              <h3>Inherited from <span name="scala.Equals" class="extype">Equals</span></h3>
+            </div><div name="com.twitter.finagle.serverset2.Entry" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.serverset2.Entry" class="extype" href="Entry.html">Entry</a></h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

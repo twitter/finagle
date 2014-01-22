@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.10.0 documentation</title>
+    <title>Metrics &mdash; Finagle 6.11.1 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.10.0',
+        VERSION:     '6.11.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.10.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.11.1 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Client Stack" href="ClientStack.html" />
    
@@ -262,18 +262,6 @@ in between requests</dd>
 <p id="transport-stats">These metrics pertain to where the finagle abstraction ends and the bytes are sent over the wire.
 Understanding these stats often requires deep knowledge of the protocol, or individual transport
 (e.g. Netty) internals.</p>
-<div class="section" id="clientchanneltransport">
-<h3>ClientChannelTransport<a class="headerlink" href="#clientchanneltransport" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>concurrent_request</strong></dt>
-<dd>a counter of the total number of requests which are written concurrently to the client
-channel transport.  if this stat is incremented, the request is failed, because
-ClientChannelTransport is serial.</dd>
-<dt><strong>orphan_response</strong></dt>
-<dd>a counter of the number of responses which get orphaned. if this stat is incremented, your
-transport has already closed.  you should never see this stat.</dd>
-</dl>
-</div>
 <div class="section" id="channelconnector">
 <h3>ChannelConnector<a class="headerlink" href="#channelconnector" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
@@ -407,7 +395,6 @@ watermark of connections full and no connections are idle.</dd>
 </ul>
 </li>
 <li><a class="reference internal" href="#transport">Transport</a><ul>
-<li><a class="reference internal" href="#clientchanneltransport">ClientChannelTransport</a></li>
 <li><a class="reference internal" href="#channelconnector">ChannelConnector</a></li>
 <li><a class="reference internal" href="#serverbridge">ServerBridge</a></li>
 <li><a class="reference internal" href="#channelrequeststatshandler">ChannelRequestStatsHandler</a></li>

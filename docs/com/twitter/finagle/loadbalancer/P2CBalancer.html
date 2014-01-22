@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.stream.DuplexStreamClientCodecFactory</title>
+          <title>com.twitter.finagle.loadbalancer.P2CBalancer</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
@@ -15,8 +15,8 @@
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
         <img src="../../../../lib/class_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.stream" class="extype" href="package.html">stream</a></p>
-        <h1>DuplexStreamClientCodecFactory</h1>
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.loadbalancer" class="extype" href="package.html">loadbalancer</a></p>
+        <h1>P2CBalancer</h1>
       </div>
 
       <h4 class="signature" id="signature">
@@ -25,13 +25,17 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">DuplexStreamClientCodecFactory</span><span class="result"> extends (<a name="com.twitter.finagle.ClientCodecConfig" class="extype" href="../ClientCodecConfig.html">ClientCodecConfig</a>) ⇒ <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>]</span>
+        <span class="name">P2CBalancer</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep]</span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>An O(1), concurrent, weighted fair load balancer. This uses the
+ideas behind &quot;power of 2 choices&quot; [1] combined with O(1) biased
+coin flipping through the aliasing method, described in
+<a name="com.twitter.finagle.util.Drv" class="extype" href="../util/Drv.html">Drv</a>.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent">(<a name="com.twitter.finagle.ClientCodecConfig" class="extype" href="../ClientCodecConfig.html">ClientCodecConfig</a>) ⇒ <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep], <span name="com.twitter.util.Closable" class="extype">Closable</span>, (<a name="com.twitter.finagle.ClientConnection" class="extype" href="../ClientConnection.html">ClientConnection</a>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +49,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.stream.DuplexStreamClientCodecFactory" class="in"><span>DuplexStreamClientCodecFactory</span></li><li name="scala.Function1" class="in"><span>Function1</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.loadbalancer.P2CBalancer" class="in"><span>P2CBalancer</span></li><li name="com.twitter.finagle.ServiceFactory" class="in"><span>ServiceFactory</span></li><li name="com.twitter.util.Closable" class="in"><span>Closable</span></li><li name="scala.Function1" class="in"><span>Function1</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -57,18 +61,28 @@
         <div id="allMembers">
         <div class="members" id="constructors">
               <h3>Instance Constructors</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.stream.DuplexStreamClientCodecFactory#this" data-isabs="false">
-      <a id="this:DuplexStreamClientCodecFactory"></a>
+              <ol><li visbl="pub" name="com.twitter.finagle.loadbalancer.P2CBalancer#this" data-isabs="false">
+      <a id="this:P2CBalancer[Req, Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">DuplexStreamClientCodecFactory</span><span class="params">()</span>
+        <span class="name">P2CBalancer</span><span class="params">(<span name="underlying">underlying: <span name="com.twitter.util.Var" class="extype">Var</span>[Traversable[(<a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep], <span name="scala.Double" class="extype">Double</span>)]]</span>, <span name="maxEffort">maxEffort: <span name="scala.Int" class="extype">Int</span> = <span class="symbol">5</span></span>, <span name="rng">rng: <a name="com.twitter.finagle.util.Rng" class="extype" href="../util/Rng.html">Rng</a> = <span name="com.twitter.finagle.util.Rng.threadLocal" class="defval">...</span></span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a> = <span name="com.twitter.finagle.stats.NullStatsReceiver" class="defval">...</span></span>)</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">underlying</dt><dd class="cmt"><p>the set of (node, weight) pairs over which we
+distribute load according to the given distribution.
+</p></dd><dt class="param">maxEffort</dt><dd class="cmt"><p>the maximum amount of &quot;effort&quot; we're willing to
+expend on a load balancing decision without reweighing.
+</p></dd><dt class="param">rng</dt><dd class="cmt"><p>The PRNG used for flipping coins. Override for
+deterministic tests.
+</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>The stats receiver to which operational
+statistics are reported.</p><p>[1] Michael Mitzenmacher. 2001. The Power of Two Choices in
+Randomized Load Balancing. IEEE Trans. Parallel Distrib. Syst. 12,
+10 (October 2001), 1094-1104.
+</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -139,29 +153,45 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li visbl="pub" name="scala.Function1#andThen" data-isabs="false">
-      <a id="andThen[A]((Codec[Offer[ChannelBuffer], DuplexStreamHandle]) ⇒ A):(ClientCodecConfig) ⇒ A"></a>
+      <a id="andThen[A]((Future[Service[Req, Rep]]) ⇒ A):(ClientConnection) ⇒ A"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>]) ⇒ A</span>)</span><span class="result">: (<a name="com.twitter.finagle.ClientCodecConfig" class="extype" href="../ClientCodecConfig.html">ClientCodecConfig</a>) ⇒ A</span>
+        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]]) ⇒ A</span>)</span><span class="result">: (<a name="com.twitter.finagle.ClientConnection" class="extype" href="../ClientConnection.html">ClientConnection</a>) ⇒ A</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.stream.DuplexStreamClientCodecFactory#apply" data-isabs="false">
-      <a id="apply(ClientCodecConfig):DuplexStreamClientCodec"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.P2CBalancer#apply" data-isabs="false">
+      <a id="apply(ClientConnection):Future[Service[Req, Rep]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="config">config: <a name="com.twitter.finagle.ClientCodecConfig" class="extype" href="../ClientCodecConfig.html">ClientCodecConfig</a></span>)</span><span class="result">: <a name="com.twitter.finagle.stream.DuplexStreamClientCodec" class="extype" href="DuplexStreamClientCodec.html">DuplexStreamClientCodec</a></span>
+        <span class="name">apply</span><span class="params">(<span name="conn">conn: <a name="com.twitter.finagle.ClientConnection" class="extype" href="../ClientConnection.html">ClientConnection</a></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stream.DuplexStreamClientCodecFactory" class="extype" href="">DuplexStreamClientCodecFactory</a> → Function1</dd></dl></div>
+      <p class="shortcomment cmt">Reserve the use of a given service instance.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve the use of a given service instance. This pins the
+underlying channel and the returned service has exclusive use of
+its underlying connection. To relinquish the use of the reserved
+Service, the user must call Service.close().
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.loadbalancer.P2CBalancer" class="extype" href="">P2CBalancer</a> → <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a> → Function1</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.ServiceFactory#apply" data-isabs="false">
+      <a id="apply():Future[Service[Req, Rep]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a></dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -189,15 +219,51 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.Function1#compose" data-isabs="false">
-      <a id="compose[A]((A) ⇒ ClientCodecConfig):(A) ⇒ Codec[Offer[ChannelBuffer], DuplexStreamHandle]"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.P2CBalancer#close" data-isabs="false">
+      <a id="close(Time):Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (A) ⇒ <a name="com.twitter.finagle.ClientCodecConfig" class="extype" href="../ClientCodecConfig.html">ClientCodecConfig</a></span>)</span><span class="result">: (A) ⇒ <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>]</span>
+        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span name="com.twitter.util.Time" class="extype">Time</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.loadbalancer.P2CBalancer" class="extype" href="">P2CBalancer</a> → Closable</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
+      <a id="close(Duration):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">(<span name="after">after: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
+      <a id="close():Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
+    </li><li visbl="pub" name="scala.Function1#compose" data-isabs="false">
+      <a id="compose[A]((A) ⇒ ClientConnection):(A) ⇒ Future[Service[Req, Rep]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (A) ⇒ <a name="com.twitter.finagle.ClientConnection" class="extype" href="../ClientConnection.html">ClientConnection</a></span>)</span><span class="result">: (A) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd></dl></div>
@@ -240,6 +306,22 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.ServiceFactory#flatMap" data-isabs="false">
+      <a id="flatMap[Req1, Rep1]((Service[Req, Rep]) ⇒ Future[Service[Req1, Rep1]]):ServiceFactory[Req1, Rep1]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">flatMap</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="f">f: (<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req1, Rep1]]</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req1, Rep1]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Apply <code>f</code> on created services, returning the resulting Future in their
+stead.</p><div class="fullcomment"><div class="comment cmt"><p>Apply <code>f</code> on created services, returning the resulting Future in their
+stead. This is useful for implementing common factory wrappers that
+only need to modify or operate on the underlying service.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
       <a id="getClass():java.lang.Class[_]"></a>
       <h4 class="signature">
@@ -264,6 +346,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.ServiceFactory#isAvailable" data-isabs="false">
+      <a id="isAvailable:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isAvailable</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a></dd></dl></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -276,6 +370,20 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.ServiceFactory#map" data-isabs="false">
+      <a id="map[Req1, Rep1]((Service[Req, Rep]) ⇒ Service[Req1, Rep1]):ServiceFactory[Req1, Rep1]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">map</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="f">f: (<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]) ⇒ <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req1, Rep1]</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req1, Rep1]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Map created services.</p><div class="fullcomment"><div class="comment cmt"><p>Map created services. Useful for implementing common
+styles of factory wrappers.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -324,6 +432,21 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.ServiceFactory#toService" data-isabs="false">
+      <a id="toService:Service[Req, Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toService</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Make a service that after dispatching a request on that service,
+releases the service.</p><div class="fullcomment"><div class="comment cmt"><p>Make a service that after dispatching a request on that service,
+releases the service.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a></dd></dl></div>
     </li><li visbl="pub" name="scala.Function1#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
@@ -384,12 +507,34 @@
     </li></ol>
             </div>
 
-        
+        <div class="values members" id="values">
+              <h3>Deprecated Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.ServiceFactory#make" data-isabs="false">
+      <a id="make():Future[Service[Req, Rep]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) use apply() instead">make</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> use apply() instead</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.Function1" class="parent">
-              <h3>Inherited from (<a name="com.twitter.finagle.ClientCodecConfig" class="extype" href="../ClientCodecConfig.html">ClientCodecConfig</a>) ⇒ <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>]</h3>
+        <div name="com.twitter.finagle.ServiceFactory" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep]</h3>
+            </div><div name="com.twitter.util.Closable" class="parent">
+              <h3>Inherited from <span name="com.twitter.util.Closable" class="extype">Closable</span></h3>
+            </div><div name="scala.Function1" class="parent">
+              <h3>Inherited from (<a name="com.twitter.finagle.ClientConnection" class="extype" href="../ClientConnection.html">ClientConnection</a>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]]</h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

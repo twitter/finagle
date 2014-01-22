@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.stream.DuplexStreamServerCodecFactory</title>
+          <title>com.twitter.finagle.util.Rng</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
@@ -14,24 +14,27 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
-        <img src="../../../../lib/class_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.stream" class="extype" href="package.html">stream</a></p>
-        <h1>DuplexStreamServerCodecFactory</h1>
+        <a title="Go to companion" href="Rng$.html"><img src="../../../../lib/trait_to_object_big.png" /></a>
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.util" class="extype" href="package.html">util</a></p>
+        <h1><a title="Go to companion" href="Rng$.html">Rng</a></h1>
       </div>
 
       <h4 class="signature" id="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">DuplexStreamServerCodecFactory</span><span class="result"> extends (<a name="com.twitter.finagle.ServerCodecConfig" class="extype" href="../ServerCodecConfig.html">ServerCodecConfig</a>) ⇒ <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>, <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+        <span class="name">Rng</span><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A random number generator. Java's divergent interfaces
+forces our hand here: ThreadLocalRandom does not conform
+to java.util.Random. We bridge this gap.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent">(<a name="com.twitter.finagle.ServerCodecConfig" class="extype" href="../ServerCodecConfig.html">ServerCodecConfig</a>) ⇒ <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>, <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +48,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.stream.DuplexStreamServerCodecFactory" class="in"><span>DuplexStreamServerCodecFactory</span></li><li name="scala.Function1" class="in"><span>Function1</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.util.Rng" class="in"><span>Rng</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -55,29 +58,41 @@
 
       <div id="template">
         <div id="allMembers">
-        <div class="members" id="constructors">
-              <h3>Instance Constructors</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.stream.DuplexStreamServerCodecFactory#this" data-isabs="false">
-      <a id="this:DuplexStreamServerCodecFactory"></a>
+        
+
+        
+
+        <div class="values members" id="values">
+              <h3>Abstract Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.util.Rng#nextDouble" data-isabs="true">
+      <a id="nextDouble():Double"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">DuplexStreamServerCodecFactory</span><span class="params">()</span>
+        <span class="name">nextDouble</span><span class="params">()</span><span class="result">: <span name="scala.Double" class="extype">Double</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.util.Rng#nextInt" data-isabs="true">
+      <a id="nextInt(Int):Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">nextInt</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
       
     </li></ol>
             </div>
 
-        
-
-        
-
         <div class="values members" id="values">
-              <h3>Value Members</h3>
+              <h3>Concrete Value Members</h3>
               <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
       <a id="!=(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -138,30 +153,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.Function1#andThen" data-isabs="false">
-      <a id="andThen[A]((Codec[DuplexStreamHandle, Offer[ChannelBuffer]]) ⇒ A):(ServerCodecConfig) ⇒ A"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>, <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]) ⇒ A</span>)</span><span class="result">: (<a name="com.twitter.finagle.ServerCodecConfig" class="extype" href="../ServerCodecConfig.html">ServerCodecConfig</a>) ⇒ A</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.stream.DuplexStreamServerCodecFactory#apply" data-isabs="false">
-      <a id="apply(ServerCodecConfig):DuplexStreamServerCodec"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="config">config: <a name="com.twitter.finagle.ServerCodecConfig" class="extype" href="../ServerCodecConfig.html">ServerCodecConfig</a></span>)</span><span class="result">: <a name="com.twitter.finagle.stream.DuplexStreamServerCodec" class="extype" href="DuplexStreamServerCodec.html">DuplexStreamServerCodec</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stream.DuplexStreamServerCodecFactory" class="extype" href="">DuplexStreamServerCodecFactory</a> → Function1</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -189,18 +180,6 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.Function1#compose" data-isabs="false">
-      <a id="compose[A]((A) ⇒ ServerCodecConfig):(A) ⇒ Codec[DuplexStreamHandle, Offer[ChannelBuffer]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (A) ⇒ <a name="com.twitter.finagle.ServerCodecConfig" class="extype" href="../ServerCodecConfig.html">ServerCodecConfig</a></span>)</span><span class="result">: (A) ⇒ <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>, <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -324,7 +303,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.Function1#toString" data-isabs="false">
+    </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -335,7 +314,7 @@
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1 → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -388,9 +367,7 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.Function1" class="parent">
-              <h3>Inherited from (<a name="com.twitter.finagle.ServerCodecConfig" class="extype" href="../ServerCodecConfig.html">ServerCodecConfig</a>) ⇒ <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>, <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</h3>
-            </div><div name="scala.AnyRef" class="parent">
+        <div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">
               <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>

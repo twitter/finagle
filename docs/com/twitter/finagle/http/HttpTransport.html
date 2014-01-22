@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.stream.DuplexStreamServerCodec</title>
+          <title>com.twitter.finagle.http.HttpTransport</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
@@ -14,9 +14,9 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
-        <a title="Go to companion" href="DuplexStreamServerCodec$.html"><img src="../../../../lib/class_to_object_big.png" /></a>
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.stream" class="extype" href="package.html">stream</a></p>
-        <h1><a title="Go to companion" href="DuplexStreamServerCodec$.html">DuplexStreamServerCodec</a></h1>
+        <img src="../../../../lib/class_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.http" class="extype" href="package.html">http</a></p>
+        <h1>HttpTransport</h1>
       </div>
 
       <h4 class="signature" id="signature">
@@ -25,13 +25,14 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">DuplexStreamServerCodec</span><span class="result"> extends <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>, <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+        <span class="name">HttpTransport</span><span class="result"> extends <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A Transport with close behavior managed by ConnectionManager.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>, <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>], <span name="com.twitter.util.Closable" class="extype">Closable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +46,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.stream.DuplexStreamServerCodec" class="in"><span>DuplexStreamServerCodec</span></li><li name="com.twitter.finagle.Codec" class="in"><span>Codec</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.http.HttpTransport" class="in"><span>HttpTransport</span></li><li name="com.twitter.finagle.transport.Transport" class="in"><span>Transport</span></li><li name="com.twitter.util.Closable" class="in"><span>Closable</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -57,15 +58,15 @@
         <div id="allMembers">
         <div class="members" id="constructors">
               <h3>Instance Constructors</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.stream.DuplexStreamServerCodec#this" data-isabs="false">
-      <a id="this:DuplexStreamServerCodec"></a>
+              <ol><li visbl="pub" name="com.twitter.finagle.http.HttpTransport#this" data-isabs="false">
+      <a id="this:HttpTransport"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">DuplexStreamServerCodec</span><span class="params">()</span>
+        <span class="name">HttpTransport</span><span class="params">(<span name="self">self: <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>)</span>
       </span>
       </h4>
       
@@ -150,6 +151,21 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.transport.Transport#cast" data-isabs="false">
+      <a id="cast[In1, Out1]:Transport[In1, Out1]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cast</span><span class="tparams">[<span name="In1">In1</span>, <span name="Out1">Out1</span>]</span><span class="result">: <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[In1, Out1]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Cast this transport to <code>Transport[In1, Out1]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Cast this transport to <code>Transport[In1, Out1]</code>. Note that this is
+generally unsafe: only do this when you know the cast is
+guaranteed safe.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a></dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
@@ -165,6 +181,42 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.HttpTransport#close" data-isabs="false">
+      <a id="close(Time):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span name="com.twitter.util.Time" class="extype">Time</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.HttpTransport" class="extype" href="">HttpTransport</a> → Closable</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
+      <a id="close(Duration):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">(<span name="after">after: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
+      <a id="close():Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -189,21 +241,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Codec#failFastOk" data-isabs="false">
-      <a id="failFastOk:Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">failFastOk</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Is this Codec OK for failfast? This is a temporary hack to
-disable failFast for codecs for which it isn't well-behaved.</p><div class="fullcomment"><div class="comment cmt"><p>Is this Codec OK for failfast? This is a temporary hack to
-disable failFast for codecs for which it isn't well-behaved.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a></dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
       <h4 class="signature">
@@ -255,6 +292,31 @@ disable failFast for codecs for which it isn't well-behaved.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.HttpTransport#isOpen" data-isabs="false">
+      <a id="isOpen:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isOpen</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.HttpTransport" class="extype" href="">HttpTransport</a> → <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.HttpTransport#localAddress" data-isabs="false">
+      <a id="localAddress:SocketAddress"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">localAddress</span><span class="result">: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The locally bound address of this transport.</p><div class="fullcomment"><div class="comment cmt"><p>The locally bound address of this transport.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.HttpTransport" class="extype" href="">HttpTransport</a> → <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -267,46 +329,6 @@ disable failFast for codecs for which it isn't well-behaved.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Codec#newClientDispatcher" data-isabs="false">
-      <a id="newClientDispatcher(Transport[DuplexStreamHandle, Offer[ChannelBuffer]]):Service[DuplexStreamHandle, Offer[ChannelBuffer]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">newClientDispatcher</span><span class="params">(<span name="transport">transport: <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>, <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>, <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Codec#newClientTransport" data-isabs="false">
-      <a id="newClientTransport(Channel,StatsReceiver):Transport[DuplexStreamHandle, Offer[ChannelBuffer]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">newClientTransport</span><span class="params">(<span name="ch">ch: <span name="org.jboss.netty.channel.Channel" class="extype">Channel</span></span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a></span>)</span><span class="result">: <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>, <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Note: the below (&quot;raw&quot;) interfaces are low level, and require a
-good understanding of finagle internals to implement correctly.</p><div class="fullcomment"><div class="comment cmt"><p>Note: the below (&quot;raw&quot;) interfaces are low level, and require a
-good understanding of finagle internals to implement correctly.
-Proceed with care.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Codec#newServerDispatcher" data-isabs="false">
-      <a id="newServerDispatcher(Transport[Offer[ChannelBuffer], DuplexStreamHandle],Service[DuplexStreamHandle, Offer[ChannelBuffer]]):Closable"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">newServerDispatcher</span><span class="params">(<span name="transport">transport: <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>]</span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>, <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>)</span><span class="result">: <span name="com.twitter.util.Closable" class="extype">Closable</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
       <a id="notify():Unit"></a>
       <h4 class="signature">
@@ -331,47 +353,48 @@ Proceed with care.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.stream.DuplexStreamServerCodec#pipelineFactory" data-isabs="false">
-      <a id="pipelineFactory:ChannelPipelineFactory"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.http.HttpTransport#onClose" data-isabs="false">
+      <a id="onClose:Future[Throwable]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onClose</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Throwable]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The channel closed with the given exception.</p><div class="fullcomment"><div class="comment cmt"><p>The channel closed with the given exception. This is the
+same exception you would get if attempting to read or
+write on the Transport, but this allows clients to listen to
+close events.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.HttpTransport" class="extype" href="">HttpTransport</a> → <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.HttpTransport#read" data-isabs="false">
+      <a id="read():Future[Any]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">pipelineFactory</span><span class="result">: <span name="org.jboss.netty.channel.ChannelPipelineFactory" class="extype">ChannelPipelineFactory</span></span>
+        <span class="name">read</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Any" class="extype">Any</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">The pipeline factory that implements the protocol.</p><div class="fullcomment"><div class="comment cmt"><p>The pipeline factory that implements the protocol.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stream.DuplexStreamServerCodec" class="extype" href="">DuplexStreamServerCodec</a> → <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Codec#prepareConnFactory" data-isabs="false">
-      <a id="prepareConnFactory(ServiceFactory[DuplexStreamHandle, Offer[ChannelBuffer]]):ServiceFactory[DuplexStreamHandle, Offer[ChannelBuffer]]"></a>
+      <p class="shortcomment cmt">Read a message from the transport.</p><div class="fullcomment"><div class="comment cmt"><p>Read a message from the transport.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.HttpTransport" class="extype" href="">HttpTransport</a> → <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.HttpTransport#remoteAddress" data-isabs="false">
+      <a id="remoteAddress:SocketAddress"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">prepareConnFactory</span><span class="params">(<span name="underlying">underlying: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>, <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>, <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+        <span class="name">remoteAddress</span><span class="result">: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Prepare a connection factory.</p><div class="fullcomment"><div class="comment cmt"><p>Prepare a connection factory. Used to allow codec modifications
-to the service at the bottom of the stack (connection level).
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Codec#prepareServiceFactory" data-isabs="false">
-      <a id="prepareServiceFactory(ServiceFactory[DuplexStreamHandle, Offer[ChannelBuffer]]):ServiceFactory[DuplexStreamHandle, Offer[ChannelBuffer]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">prepareServiceFactory</span><span class="params">(<span name="underlying">underlying: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>, <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>, <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Prepare a factory for usage with the codec.</p><div class="fullcomment"><div class="comment cmt"><p>Prepare a factory for usage with the codec. Used to allow codec
-modifications to the service at the top of the network stack.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a></dd></dl></div>
+      <p class="shortcomment cmt">The remote address to which the transport is connected.</p><div class="fullcomment"><div class="comment cmt"><p>The remote address to which the transport is connected.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.HttpTransport" class="extype" href="">HttpTransport</a> → <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -441,6 +464,21 @@ modifications to the service at the top of the network stack.
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.HttpTransport#write" data-isabs="false">
+      <a id="write(Any):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">write</span><span class="params">(<span name="m">m: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Write {{req}} to this transport; the returned future
+acknowledges write completion.</p><div class="fullcomment"><div class="comment cmt"><p>Write {{req}} to this transport; the returned future
+acknowledges write completion.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.HttpTransport" class="extype" href="">HttpTransport</a> → <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a></dd></dl></div>
     </li></ol>
             </div>
 
@@ -448,8 +486,10 @@ modifications to the service at the top of the network stack.
         </div>
 
         <div id="inheritedMembers">
-        <div name="com.twitter.finagle.Codec" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>, <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</h3>
+        <div name="com.twitter.finagle.transport.Transport" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</h3>
+            </div><div name="com.twitter.util.Closable" class="parent">
+              <h3>Inherited from <span name="com.twitter.util.Closable" class="extype">Closable</span></h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

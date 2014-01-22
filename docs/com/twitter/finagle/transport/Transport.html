@@ -33,12 +33,12 @@
 read from and written to asynchronously. Transports are connected
 to some endpoint, typically via a channel pipeline that performs
 encoding and decoding.
-</p></div><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a name="com.twitter.finagle.transport.Transport" class="extype" href="">Transport</a>[In, Out]</dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span name="com.twitter.util.Closable" class="extype">Closable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.transport.ChannelTransport" class="extype" href="ChannelTransport.html">ChannelTransport</a>, <a name="com.twitter.finagle.transport.ClientChannelTransport" class="extype" href="ClientChannelTransport.html">ClientChannelTransport</a>, <a name="com.twitter.finagle.transport.QueueTransport" class="extype" href="QueueTransport.html">QueueTransport</a></div>
+          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.transport.ChannelTransport" class="extype" href="ChannelTransport.html">ChannelTransport</a>, <a name="com.twitter.finagle.http.HttpTransport" class="extype" href="../http/HttpTransport.html">HttpTransport</a>, <a name="com.twitter.finagle.transport.QueueTransport" class="extype" href="QueueTransport.html">QueueTransport</a></div>
         </div></div>
     
 
@@ -234,6 +234,21 @@ acknowledges write completion.</p>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.transport.Transport#cast" data-isabs="false">
+      <a id="cast[In1, Out1]:Transport[In1, Out1]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cast</span><span class="tparams">[<span name="In1">In1</span>, <span name="Out1">Out1</span>]</span><span class="result">: <a name="com.twitter.finagle.transport.Transport" class="extype" href="">Transport</a>[In1, Out1]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Cast this transport to <code>Transport[In1, Out1]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Cast this transport to <code>Transport[In1, Out1]</code>. Note that this is
+generally unsafe: only do this when you know the cast is
+guaranteed safe.
+</p></div></div>
     </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">

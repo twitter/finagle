@@ -25,13 +25,13 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">HttpTransporter</span><span class="result"> extends <a name="com.twitter.finagle.netty3.Netty3Transporter" class="extype" href="netty3/Netty3Transporter.html">Netty3Transporter</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>
+        <span class="name">HttpTransporter</span><span class="result"> extends <a name="com.twitter.finagle.netty3.Netty3Transporter" class="extype" href="netty3/Netty3Transporter.html">Netty3Transporter</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.netty3.Netty3Transporter" class="extype" href="netty3/Netty3Transporter.html">Netty3Transporter</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>], <span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, (<span name="java.net.SocketAddress" class="extype">SocketAddress</span>, <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="stats/StatsReceiver.html">StatsReceiver</a>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.netty3.Netty3Transporter" class="extype" href="netty3/Netty3Transporter.html">Netty3Transporter</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>], <span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, (<span name="java.net.SocketAddress" class="extype">SocketAddress</span>, <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="stats/StatsReceiver.html">StatsReceiver</a>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -124,14 +124,14 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.netty3.Netty3Transporter#apply" data-isabs="false">
-      <a id="apply(SocketAddress,StatsReceiver):Future[Transport[HttpRequest, HttpResponse]]"></a>
+      <a id="apply(SocketAddress,StatsReceiver):Future[Transport[Any, Any]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="addr">addr: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="stats/StatsReceiver.html">StatsReceiver</a></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]]</span>
+        <span class="name">apply</span><span class="params">(<span name="addr">addr: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="stats/StatsReceiver.html">StatsReceiver</a></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.netty3.Netty3Transporter" class="extype" href="netty3/Netty3Transporter.html">Netty3Transporter</a> → Function2</dd></dl></div>
@@ -235,14 +235,14 @@
               
         </dd></dl></div>
     </li><li visbl="pub" name="scala.Function2#curried" data-isabs="false">
-      <a id="curried:(SocketAddress) ⇒ (StatsReceiver) ⇒ Future[Transport[HttpRequest, HttpResponse]]"></a>
+      <a id="curried:(SocketAddress) ⇒ (StatsReceiver) ⇒ Future[Transport[Any, Any]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">curried</span><span class="result">: (<span name="java.net.SocketAddress" class="extype">SocketAddress</span>) ⇒ (<a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="stats/StatsReceiver.html">StatsReceiver</a>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]]</span>
+        <span class="name">curried</span><span class="result">: (<span name="java.net.SocketAddress" class="extype">SocketAddress</span>) ⇒ (<a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="stats/StatsReceiver.html">StatsReceiver</a>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2</dd></dl></div>
@@ -370,14 +370,14 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.netty3.Netty3Transporter" class="extype" href="netty3/Netty3Transporter.html">Netty3Transporter</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.netty3.Netty3Transporter#newTransport" data-isabs="false">
-      <a id="newTransport:(Channel) ⇒ Transport[HttpRequest, HttpResponse]"></a>
+      <a id="newTransport:(Channel) ⇒ Transport[Any, Any]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">newTransport</span><span class="result">: (<span name="org.jboss.netty.channel.Channel" class="extype">Channel</span>) ⇒ <a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>
+        <span class="name">newTransport</span><span class="result">: (<span name="org.jboss.netty.channel.Channel" class="extype">Channel</span>) ⇒ <a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.netty3.Netty3Transporter" class="extype" href="netty3/Netty3Transporter.html">Netty3Transporter</a></dd></dl></div>
@@ -526,14 +526,14 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2 → AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="scala.Function2#tupled" data-isabs="false">
-      <a id="tupled:((SocketAddress, StatsReceiver)) ⇒ Future[Transport[HttpRequest, HttpResponse]]"></a>
+      <a id="tupled:((SocketAddress, StatsReceiver)) ⇒ Future[Transport[Any, Any]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tupled</span><span class="result">: ((<span name="java.net.SocketAddress" class="extype">SocketAddress</span>, <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="stats/StatsReceiver.html">StatsReceiver</a>)) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]]</span>
+        <span class="name">tupled</span><span class="result">: ((<span name="java.net.SocketAddress" class="extype">SocketAddress</span>, <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="stats/StatsReceiver.html">StatsReceiver</a>)) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2</dd></dl></div>
@@ -588,14 +588,14 @@
         <div class="values members" id="values">
               <h3>Deprecated Value Members</h3>
               <ol><li visbl="pub" name="scala.Function2#curry" data-isabs="false">
-      <a id="curry:(SocketAddress) ⇒ (StatsReceiver) ⇒ Future[Transport[HttpRequest, HttpResponse]]"></a>
+      <a id="curry:(SocketAddress) ⇒ (StatsReceiver) ⇒ Future[Transport[Any, Any]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2.8.0) Use 'curried' instead">curry</span><span class="result">: (<span name="java.net.SocketAddress" class="extype">SocketAddress</span>) ⇒ (<a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="stats/StatsReceiver.html">StatsReceiver</a>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]]</span>
+        <span class="name deprecated" title="Deprecated: (Since version 2.8.0) Use 'curried' instead">curry</span><span class="result">: (<span name="java.net.SocketAddress" class="extype">SocketAddress</span>) ⇒ (<a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="stats/StatsReceiver.html">StatsReceiver</a>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2</dd><dt>Annotations</dt><dd>
@@ -623,7 +623,7 @@
 
         <div id="inheritedMembers">
         <div name="com.twitter.finagle.netty3.Netty3Transporter" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.netty3.Netty3Transporter" class="extype" href="netty3/Netty3Transporter.html">Netty3Transporter</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</h3>
+              <h3>Inherited from <a name="com.twitter.finagle.netty3.Netty3Transporter" class="extype" href="netty3/Netty3Transporter.html">Netty3Transporter</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</h3>
             </div><div name="scala.Serializable" class="parent">
               <h3>Inherited from <span name="scala.Serializable" class="extype">Serializable</span></h3>
             </div><div name="java.io.Serializable" class="parent">
@@ -633,7 +633,7 @@
             </div><div name="scala.Equals" class="parent">
               <h3>Inherited from <span name="scala.Equals" class="extype">Equals</span></h3>
             </div><div name="scala.Function2" class="parent">
-              <h3>Inherited from (<span name="java.net.SocketAddress" class="extype">SocketAddress</span>, <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="stats/StatsReceiver.html">StatsReceiver</a>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]]</h3>
+              <h3>Inherited from (<span name="java.net.SocketAddress" class="extype">SocketAddress</span>, <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="stats/StatsReceiver.html">StatsReceiver</a>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]]</h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

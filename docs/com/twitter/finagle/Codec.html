@@ -35,7 +35,7 @@
           <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.AbstractCodec" class="extype" href="AbstractCodec.html">AbstractCodec</a>, <a name="com.twitter.finagle.stream.DuplexStreamClientCodec" class="extype" href="stream/DuplexStreamClientCodec.html">DuplexStreamClientCodec</a>, <a name="com.twitter.finagle.stream.DuplexStreamServerCodec" class="extype" href="stream/DuplexStreamServerCodec.html">DuplexStreamServerCodec</a>, <a name="com.twitter.finagle.thrift.ThriftClientBufferedCodec" class="extype" href="thrift/ThriftClientBufferedCodec.html">ThriftClientBufferedCodec</a>, <a name="com.twitter.finagle.thrift.ThriftClientFramedCodec" class="extype" href="thrift/ThriftClientFramedCodec.html">ThriftClientFramedCodec</a>, <a name="com.twitter.finagle.thrift.ThriftServerBufferedCodec" class="extype" href="thrift/ThriftServerBufferedCodec.html">ThriftServerBufferedCodec</a>, <a name="com.twitter.finagle.thrift.ThriftServerFramedCodec" class="extype" href="thrift/ThriftServerFramedCodec.html">ThriftServerFramedCodec</a></div>
+          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.AbstractCodec" class="extype" href="AbstractCodec.html">AbstractCodec</a>, <a name="com.twitter.finagle.thrift.ThriftClientBufferedCodec" class="extype" href="thrift/ThriftClientBufferedCodec.html">ThriftClientBufferedCodec</a>, <a name="com.twitter.finagle.thrift.ThriftClientFramedCodec" class="extype" href="thrift/ThriftClientFramedCodec.html">ThriftClientFramedCodec</a>, <a name="com.twitter.finagle.thrift.ThriftServerBufferedCodec" class="extype" href="thrift/ThriftServerBufferedCodec.html">ThriftServerBufferedCodec</a>, <a name="com.twitter.finagle.thrift.ThriftServerFramedCodec" class="extype" href="thrift/ThriftServerFramedCodec.html">ThriftServerFramedCodec</a></div>
         </div></div>
     
 
@@ -270,26 +270,26 @@ disable failFast for codecs for which it isn't well-behaved.</p>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Codec#newClientDispatcher" data-isabs="false">
-      <a id="newClientDispatcher(Transport[Req, Rep]):Service[Req, Rep]"></a>
+      <a id="newClientDispatcher(Transport[Any, Any]):Service[Req, Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newClientDispatcher</span><span class="params">(<span name="transport">transport: <a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[Req, Rep]</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[Req, Rep]</span>
+        <span class="name">newClientDispatcher</span><span class="params">(<span name="transport">transport: <a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[Req, Rep]</span>
       </span>
       </h4>
       
     </li><li visbl="pub" name="com.twitter.finagle.Codec#newClientTransport" data-isabs="false">
-      <a id="newClientTransport(Channel,StatsReceiver):Transport[Req, Rep]"></a>
+      <a id="newClientTransport(Channel,StatsReceiver):Transport[Any, Any]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newClientTransport</span><span class="params">(<span name="ch">ch: <span name="org.jboss.netty.channel.Channel" class="extype">Channel</span></span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="stats/StatsReceiver.html">StatsReceiver</a></span>)</span><span class="result">: <a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[Req, Rep]</span>
+        <span class="name">newClientTransport</span><span class="params">(<span name="ch">ch: <span name="org.jboss.netty.channel.Channel" class="extype">Channel</span></span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="stats/StatsReceiver.html">StatsReceiver</a></span>)</span><span class="result">: <a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Note: the below (&quot;raw&quot;) interfaces are low level, and require a
@@ -298,14 +298,14 @@ good understanding of finagle internals to implement correctly.
 Proceed with care.
 </p></div></div>
     </li><li visbl="pub" name="com.twitter.finagle.Codec#newServerDispatcher" data-isabs="false">
-      <a id="newServerDispatcher(Transport[Rep, Req],Service[Req, Rep]):Closable"></a>
+      <a id="newServerDispatcher(Transport[Any, Any],Service[Req, Rep]):Closable"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newServerDispatcher</span><span class="params">(<span name="transport">transport: <a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[Rep, Req]</span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[Req, Rep]</span>)</span><span class="result">: <span name="com.twitter.util.Closable" class="extype">Closable</span></span>
+        <span class="name">newServerDispatcher</span><span class="params">(<span name="transport">transport: <a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[Req, Rep]</span>)</span><span class="result">: <span name="com.twitter.util.Closable" class="extype">Closable</span></span>
       </span>
       </h4>
       

@@ -193,6 +193,18 @@ their name.</p>
       </span>
       </h4>
       <p class="comment cmt">Adds tracing annotations for each http request we receive.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.http.HttpTransport" data-isabs="false">
+      <a id="HttpTransport:HttpTransport"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpTransport.html"><span class="name">HttpTransport</span></a><span class="result"> extends Transport[Any, Any]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A Transport with close behavior managed by ConnectionManager.</p>
     </li><li visbl="pub" name="com.twitter.finagle.http.MapHeaderMap" data-isabs="false">
       <a id="MapHeaderMap:MapHeaderMap"></a>
       <h4 class="signature">
@@ -346,7 +358,7 @@ their name.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="RichHttp.html"><span class="name">RichHttp</span></a><span class="tparams">[<span name="REQUEST">REQUEST &lt;: Request</span>]</span><span class="params">(<span name="httpFactory">httpFactory: Http</span>)</span><span class="result"> extends CodecFactory[REQUEST, Response] with Product with Serializable</span>
+        <a href="RichHttp.html"><span class="name">RichHttp</span></a><span class="tparams">[<span name="REQUEST">REQUEST &lt;: Request</span>]</span><span class="params">(<span name="httpFactory">httpFactory: Http</span>, <span name="aggregateChunks">aggregateChunks: Boolean</span>)</span><span class="result"> extends CodecFactory[REQUEST, Response] with Product with Serializable</span>
       </span>
       </h4>
       <p class="comment cmt">Http codec for rich Request/Response objects.</p>

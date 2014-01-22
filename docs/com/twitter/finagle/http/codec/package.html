@@ -121,19 +121,18 @@ request befor sending it upstream.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.codec.RequestDecoder" data-isabs="false">
-      <a id="RequestDecoder:RequestDecoder"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.http.codec.HttpServerDispatcher" data-isabs="false">
+      <a id="HttpServerDispatcher:HttpServerDispatcher[REQUEST]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="RequestDecoder.html"><span class="name">RequestDecoder</span></a><span class="result"> extends SimpleChannelHandler</span>
+        <a href="HttpServerDispatcher.html"><span class="name">HttpServerDispatcher</span></a><span class="tparams">[<span name="REQUEST">REQUEST &lt;: Request</span>]</span><span class="result"> extends GenSerialServerDispatcher[REQUEST, HttpResponse, Any, Any]</span>
       </span>
       </h4>
-      <p class="comment cmt">Convert Netty Requests to Finagle-HTTP Requests
-</p>
+      
     </li><li visbl="pub" name="com.twitter.finagle.http.codec.RequestEncoder" data-isabs="false">
       <a id="RequestEncoder:RequestEncoder"></a>
       <h4 class="signature">
@@ -172,31 +171,6 @@ request befor sending it upstream.</p>
       </h4>
       <p class="comment cmt">Convert Netty responses to a Finagle-HTTP responses
 </p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.codec.ResponseEncoder" data-isabs="false">
-      <a id="ResponseEncoder:ResponseEncoder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ResponseEncoder.html"><span class="name">ResponseEncoder</span></a><span class="result"> extends SimpleChannelDownstreamHandler</span>
-      </span>
-      </h4>
-      <p class="comment cmt">Convert Finagle-HTTP Responses to Netty responses
-</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.codec.ServerConnectionManager" data-isabs="false">
-      <a id="ServerConnectionManager:ServerConnectionManager"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ServerConnectionManager.html"><span class="name">ServerConnectionManager</span></a><span class="result"> extends SimpleChannelHandler</span>
-      </span>
-      </h4>
-      <p class="comment cmt">Deal with Http connection lifecycle wrt.</p>
     </li></ol>
             </div>
 

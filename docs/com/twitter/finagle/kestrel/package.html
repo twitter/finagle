@@ -124,8 +124,8 @@
       <a id="ReadHandle:ReadHandle"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
         <a href="ReadHandle.html"><span class="name">ReadHandle</span></a><span class="result"> extends AnyRef</span>
@@ -140,7 +140,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ReadMessage.html"><span class="name">ReadMessage</span></a><span class="params">(<span name="bytes">bytes: ChannelBuffer</span>, <span name="ack">ack: Offer[Unit]</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="ReadMessage.html"><span class="name">ReadMessage</span></a><span class="params">(<span name="bytes">bytes: ChannelBuffer</span>, <span name="ack">ack: Offer[Unit]</span>, <span name="abort">abort: Offer[Unit]</span>)</span><span class="result"> extends Product with Serializable</span>
       </span>
       </h4>
       <p class="comment cmt">A message that has been read: consists of the message itself, and

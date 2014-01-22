@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ClientChannelTransport &mdash; Finagle 6.10.0 documentation</title>
+    <title>ChannelConnector &mdash; Finagle 6.11.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '6.10.0',
+        VERSION:     '6.11.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.10.0 documentation" href="../index.html" />
+    <link rel="top" title="Finagle 6.11.1 documentation" href="../index.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="../_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -48,19 +48,7 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="clientchanneltransport">
-<h1>ClientChannelTransport<a class="headerlink" href="#clientchanneltransport" title="Permalink to this headline">¶</a></h1>
-<dl class="docutils">
-<dt><strong>concurrent_request</strong></dt>
-<dd>a counter of the total number of requests which are written concurrently to the client
-channel transport.  if this stat is incremented, the request is failed, because
-ClientChannelTransport is serial.</dd>
-<dt><strong>orphan_response</strong></dt>
-<dd>a counter of the number of responses which get orphaned. if this stat is incremented, your
-transport has already closed.  you should never see this stat.</dd>
-</dl>
-</div>
-<div class="section" id="channelconnector">
+  <div class="section" id="channelconnector">
 <h1>ChannelConnector<a class="headerlink" href="#channelconnector" title="Permalink to this headline">¶</a></h1>
 <dl class="docutils">
 <dt><strong>connect_latency_ms</strong></dt>
@@ -153,8 +141,7 @@ watermark of connections full and no connections are idle.</dd>
 </ul>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">ClientChannelTransport</a></li>
-<li><a class="reference internal" href="#channelconnector">ChannelConnector</a></li>
+<li><a class="reference internal" href="#">ChannelConnector</a></li>
 <li><a class="reference internal" href="#serverbridge">ServerBridge</a></li>
 <li><a class="reference internal" href="#channelrequeststatshandler">ChannelRequestStatsHandler</a></li>
 <li><a class="reference internal" href="#channelstatshandler">ChannelStatsHandler</a></li>

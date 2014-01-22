@@ -25,13 +25,16 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">RichHttp</span><span class="tparams">[<span name="REQUEST">REQUEST &lt;: <a name="com.twitter.finagle.http.Request" class="extype" href="Request.html">Request</a></span>]</span><span class="params">(<span name="httpFactory">httpFactory: <a name="com.twitter.finagle.http.Http" class="extype" href="Http.html">Http</a></span>)</span><span class="result"> extends <a name="com.twitter.finagle.CodecFactory" class="extype" href="../CodecFactory.html">CodecFactory</a>[REQUEST, <a name="com.twitter.finagle.http.Response" class="extype" href="Response.html">Response</a>] with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">RichHttp</span><span class="tparams">[<span name="REQUEST">REQUEST &lt;: <a name="com.twitter.finagle.http.Request" class="extype" href="Request.html">Request</a></span>]</span><span class="params">(<span name="httpFactory">httpFactory: <a name="com.twitter.finagle.http.Http" class="extype" href="Http.html">Http</a></span>, <span name="aggregateChunks">aggregateChunks: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result"> extends <a name="com.twitter.finagle.CodecFactory" class="extype" href="../CodecFactory.html">CodecFactory</a>[REQUEST, <a name="com.twitter.finagle.http.Response" class="extype" href="Response.html">Response</a>] with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Http codec for rich Request/Response objects.
-Note the CheckHttpRequestFilter isn't baked in, as in the Http Codec.
-</p></div><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Http codec for rich Request/Response objects. Note the
+CheckHttpRequestFilter isn't baked in, as in the Http Codec.</p><p>Ed. note: I'm not sure how parameterizing on REQUEST &lt;: Request
+works safely, ever. This is a big typesafety bug: the codec is
+blindly casting Requests to REQUEST.
+</p></div><dl class="paramcmts block"><dt class="param">httpFactory</dt><dd class="cmt"><p>the underlying HTTP CodecFactory</p></dd><dt class="param">aggregateChunks</dt><dd class="cmt"><p>if true, the client pipeline collects HttpChunks into the body of each HttpResponse
+</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <a name="com.twitter.finagle.CodecFactory" class="extype" href="../CodecFactory.html">CodecFactory</a>[REQUEST, <a name="com.twitter.finagle.http.Response" class="extype" href="Response.html">Response</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
@@ -67,10 +70,11 @@ Note the CheckHttpRequestFilter isn't baked in, as in the Http Codec.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">RichHttp</span><span class="params">(<span name="httpFactory">httpFactory: <a name="com.twitter.finagle.http.Http" class="extype" href="Http.html">Http</a></span>)</span>
+        <span class="name">RichHttp</span><span class="params">(<span name="httpFactory">httpFactory: <a name="com.twitter.finagle.http.Http" class="extype" href="Http.html">Http</a></span>, <span name="aggregateChunks">aggregateChunks: <span name="scala.Boolean" class="extype">Boolean</span> = <span class="symbol">true</span></span>)</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">httpFactory</dt><dd class="cmt"><p>the underlying HTTP CodecFactory</p></dd><dt class="param">aggregateChunks</dt><dd class="cmt"><p>if true, the client pipeline collects HttpChunks into the body of each HttpResponse
+</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -167,6 +171,19 @@ Note the CheckHttpRequestFilter isn't baked in, as in the Http Codec.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.RichHttp#aggregateChunks" data-isabs="false">
+      <a id="aggregateChunks:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">aggregateChunks</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">if true, the client pipeline collects HttpChunks into the body of each HttpResponse
+</p>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -192,14 +209,14 @@ Note the CheckHttpRequestFilter isn't baked in, as in the Http Codec.
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.RichHttp" class="extype" href="">RichHttp</a> → Equals</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.RichHttp#client" data-isabs="false">
-      <a id="client:(ClientCodecConfig) ⇒ Codec[REQUEST, Response] { def newClientDispatcher(transport: com.twitter.finagle.transport.Transport[REQUEST,com.twitter.finagle.http.Response]): com.twitter.finagle.http.codec.HttpClientDispatcher[REQUEST,com.twitter.finagle.http.Response] }"></a>
+      <a id="client:(ClientCodecConfig) ⇒ Codec[REQUEST, Response] { def newClientDispatcher(transport: com.twitter.finagle.transport.Transport[Any,Any]): com.twitter.finagle.http.codec.HttpClientDispatcher[REQUEST] }"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">client</span><span class="result">: (<a name="com.twitter.finagle.ClientCodecConfig" class="extype" href="../ClientCodecConfig.html">ClientCodecConfig</a>) ⇒ <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[REQUEST, <a name="com.twitter.finagle.http.Response" class="extype" href="Response.html">Response</a>] { def newClientDispatcher(transport: com.twitter.finagle.transport.Transport[REQUEST,com.twitter.finagle.http.Response]): com.twitter.finagle.http.codec.HttpClientDispatcher[REQUEST,com.twitter.finagle.http.Response] }</span>
+        <span class="name">client</span><span class="result">: (<a name="com.twitter.finagle.ClientCodecConfig" class="extype" href="../ClientCodecConfig.html">ClientCodecConfig</a>) ⇒ <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[REQUEST, <a name="com.twitter.finagle.http.Response" class="extype" href="Response.html">Response</a>] { def newClientDispatcher(transport: com.twitter.finagle.transport.Transport[Any,Any]): com.twitter.finagle.http.codec.HttpClientDispatcher[REQUEST] }</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.RichHttp" class="extype" href="">RichHttp</a> → <a name="com.twitter.finagle.CodecFactory" class="extype" href="../CodecFactory.html">CodecFactory</a></dd></dl></div>
@@ -292,7 +309,7 @@ Note the CheckHttpRequestFilter isn't baked in, as in the Http Codec.
         <span class="name">httpFactory</span><span class="result">: <a name="com.twitter.finagle.http.Http" class="extype" href="Http.html">Http</a></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">the underlying HTTP CodecFactory</p>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">

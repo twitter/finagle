@@ -29,7 +29,12 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Finagle-stream implements a rather peculiar protocol: it streams
+discrete messages delineated by HTTP chunks. It isn't how we'd design
+a protocol to stream messages, but we are stuck with it for legacy
+reasons.</p><p>Finagle-stream sessions are also <code><code>one-shot</code></code>: each session handles
+exactly one stream. The session terminates together with the stream.
+</p></div></div>
     
 
       <div id="mbrsel">
@@ -48,140 +53,7 @@
 
         <div class="types members" id="types">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.stream.ClientBufferToChannelCodec" data-isabs="false">
-      <a id="ClientBufferToChannelCodec:ClientBufferToChannelCodec"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ClientBufferToChannelCodec.html"><span class="name">ClientBufferToChannelCodec</span></a><span class="result"> extends BufferToChannelCodec</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.stream.DuplexStreamClientCodec" data-isabs="false">
-      <a id="DuplexStreamClientCodec:DuplexStreamClientCodec"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="DuplexStreamClientCodec.html"><span class="name">DuplexStreamClientCodec</span></a><span class="result"> extends Codec[Offer[ChannelBuffer], DuplexStreamHandle]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.stream.DuplexStreamClientCodecFactory" data-isabs="false">
-      <a id="DuplexStreamClientCodecFactory:DuplexStreamClientCodecFactory"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="DuplexStreamClientCodecFactory.html"><span class="name">DuplexStreamClientCodecFactory</span></a><span class="result"> extends (ClientCodecConfig) ⇒ Codec[Offer[ChannelBuffer], DuplexStreamHandle]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.stream.DuplexStreamHandle" data-isabs="false">
-      <a id="DuplexStreamHandle:DuplexStreamHandle"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="DuplexStreamHandle.html"><span class="name">DuplexStreamHandle</span></a><span class="params">(<span name="messages">messages: Offer[ChannelBuffer]</span>, <span name="onClose">onClose: Future[Unit]</span>, <span name="close">close: () ⇒ Unit</span>)</span><span class="result"> extends Product with Serializable</span>
-      </span>
-      </h4>
-      <p class="comment cmt">DuplexStreamCodec allows you to send and receive messages to server running
-the same codec.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.stream.DuplexStreamServerCodec" data-isabs="false">
-      <a id="DuplexStreamServerCodec:DuplexStreamServerCodec"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="DuplexStreamServerCodec.html"><span class="name">DuplexStreamServerCodec</span></a><span class="result"> extends Codec[DuplexStreamHandle, Offer[ChannelBuffer]]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.stream.DuplexStreamServerCodecFactory" data-isabs="false">
-      <a id="DuplexStreamServerCodecFactory:DuplexStreamServerCodecFactory"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="DuplexStreamServerCodecFactory.html"><span class="name">DuplexStreamServerCodecFactory</span></a><span class="result"> extends (ServerCodecConfig) ⇒ Codec[DuplexStreamHandle, Offer[ChannelBuffer]]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.stream.FramingCodec" data-isabs="false">
-      <a id="FramingCodec:FramingCodec"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="FramingCodec.html"><span class="name">FramingCodec</span></a><span class="result"> extends SimpleChannelHandler</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.stream.HttpChunker" data-isabs="false">
-      <a id="HttpChunker:HttpChunker"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="HttpChunker.html"><span class="name">HttpChunker</span></a><span class="result"> extends BrokerChannelHandler</span>
-      </span>
-      </h4>
-      <p class="comment cmt">Convert a StreamResponse into a chunked (streaming) HTTP response.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.stream.HttpDechunker" data-isabs="false">
-      <a id="HttpDechunker:HttpDechunker"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="HttpDechunker.html"><span class="name">HttpDechunker</span></a><span class="result"> extends BrokerChannelHandler</span>
-      </span>
-      </h4>
-      <p class="comment cmt">Convert a streaming HTTP response into a StreamResponse.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.stream.ServerBufferToChannelCodec" data-isabs="false">
-      <a id="ServerBufferToChannelCodec:ServerBufferToChannelCodec"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ServerBufferToChannelCodec.html"><span class="name">ServerBufferToChannelCodec</span></a><span class="result"> extends BufferToChannelCodec</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.stream.SimpleHttpTrailer" data-isabs="false">
-      <a id="SimpleHttpTrailer:SimpleHttpTrailer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="SimpleHttpTrailer.html"><span class="name">SimpleHttpTrailer</span></a><span class="result"> extends DefaultHttpChunkTrailer</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.stream.Stream" data-isabs="false">
+              <ol><li visbl="pub" name="com.twitter.finagle.stream.Stream" data-isabs="false">
       <a id="Stream:Stream"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -212,31 +84,7 @@ the same codec.</p>
 
         <div class="values members" id="values">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.stream.DuplexStreamClientCodec" data-isabs="false">
-      <a id="DuplexStreamClientCodec:DuplexStreamClientCodec"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="DuplexStreamClientCodec$.html"><span class="name">DuplexStreamClientCodec</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.stream.DuplexStreamServerCodec" data-isabs="false">
-      <a id="DuplexStreamServerCodec:DuplexStreamServerCodec"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="DuplexStreamServerCodec$.html"><span class="name">DuplexStreamServerCodec</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.stream.package.EOF" data-isabs="false">
+              <ol><li visbl="pub" name="com.twitter.finagle.stream.package.EOF" data-isabs="false">
       <a id="EOF:EOF"></a>
       <h4 class="signature">
       <span class="modifier_kind">

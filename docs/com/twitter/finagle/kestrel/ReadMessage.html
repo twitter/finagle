@@ -25,7 +25,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">ReadMessage</span><span class="params">(<span name="bytes">bytes: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="ack">ack: <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">ReadMessage</span><span class="params">(<span name="bytes">bytes: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="ack">ack: <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>, <span name="abort">abort: <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
@@ -67,7 +67,7 @@ an offer to acknowledge.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ReadMessage</span><span class="params">(<span name="bytes">bytes: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="ack">ack: <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>)</span>
+        <span class="name">ReadMessage</span><span class="params">(<span name="bytes">bytes: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="ack">ack: <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>, <span name="abort">abort: <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="scala.Unit" class="extype">Unit</span>] = <span name="com.twitter.concurrent.Offer.const[Unit]({<br></br>&amp;nbsp;&amp;nbsp;  scala.Unit;<br></br>&amp;nbsp;&amp;nbsp;  ()<br></br>&amp;nbsp;&amp;nbsp;})" class="defval">...</span></span>)</span>
       </span>
       </h4>
       
@@ -140,6 +140,18 @@ an offer to acknowledge.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.ReadMessage#abort" data-isabs="false">
+      <a id="abort:Offer[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">abort</span><span class="result">: <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.kestrel.ReadMessage#ack" data-isabs="false">
       <a id="ack:Offer[Unit]"></a>
       <h4 class="signature">

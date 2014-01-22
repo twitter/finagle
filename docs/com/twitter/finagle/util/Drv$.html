@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.stream.DuplexStreamServerCodec</title>
+          <title>com.twitter.finagle.util.Drv</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
@@ -14,9 +14,9 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
       <div id="definition">
-        <a title="Go to companion" href="DuplexStreamServerCodec.html"><img src="../../../../lib/object_to_class_big.png" /></a>
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.stream" class="extype" href="package.html">stream</a></p>
-        <h1><a title="Go to companion" href="DuplexStreamServerCodec.html">DuplexStreamServerCodec</a></h1>
+        <a title="Go to companion" href="Drv.html"><img src="../../../../lib/object_to_trait_big.png" /></a>
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.util" class="extype" href="package.html">util</a></p>
+        <h1><a title="Go to companion" href="Drv.html">Drv</a></h1>
       </div>
 
       <h4 class="signature" id="signature">
@@ -25,11 +25,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">DuplexStreamServerCodec</span><span class="result"> extends AnyRef</span>
+        <span class="name">Drv</span><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Create discrete random variables representing arbitrary distributions.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
@@ -45,7 +46,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.stream.DuplexStreamServerCodec" class="in"><span>DuplexStreamServerCodec</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.util.Drv" class="in"><span>Drv</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -57,7 +58,23 @@
         <div id="allMembers">
         
 
-        
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.util.Drv.Aliased" data-isabs="false">
+      <a id="Aliased:Aliased"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Drv$$Aliased.html"><span class="name">Aliased</span></a><span class="params">(<span name="alias">alias: IndexedSeq[Int]</span>, <span name="prob">prob: IndexedSeq[Double]</span>)</span><span class="result"> extends Drv with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A Drv using the Aliasing method [1]: a distribution is described
+by a set of probabilities and aliases.</p>
+    </li></ol>
+            </div>
 
         
 
@@ -123,18 +140,23 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.stream.DuplexStreamServerCodec#apply" data-isabs="false">
-      <a id="apply():DuplexStreamServerCodecFactory"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.util.Drv#apply" data-isabs="false">
+      <a id="apply(Seq[Double]):Drv"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">()</span><span class="result">: <a name="com.twitter.finagle.stream.DuplexStreamServerCodecFactory" class="extype" href="DuplexStreamServerCodecFactory.html">DuplexStreamServerCodecFactory</a></span>
+        <span class="name">apply</span><span class="params">(<span name="dist">dist: Seq[<span name="scala.Double" class="extype">Double</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.util.Drv" class="extype" href="Drv.html">Drv</a></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Create a new Drv representing the passed in distribution of
+probabilities.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new Drv representing the passed in distribution of
+probabilities. These must add up to 1, however we cannot
+reliably test for this due to numerical stability issues: we're
+operating on the honor's system.
+</p></div></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -201,18 +223,19 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.stream.DuplexStreamServerCodec#get" data-isabs="false">
-      <a id="get():DuplexStreamServerCodecFactory"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.util.Drv#fromWeights" data-isabs="false">
+      <a id="fromWeights(Seq[Double]):Drv"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="params">()</span><span class="result">: <a name="com.twitter.finagle.stream.DuplexStreamServerCodecFactory" class="extype" href="DuplexStreamServerCodecFactory.html">DuplexStreamServerCodecFactory</a></span>
+        <span class="name">fromWeights</span><span class="params">(<span name="weights">weights: Seq[<span name="scala.Double" class="extype">Double</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.util.Drv" class="extype" href="Drv.html">Drv</a></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Create a probability distribution based on a set of weights
+(ratios).</p>
     </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
       <a id="getClass():java.lang.Class[_]"></a>
       <h4 class="signature">
@@ -261,6 +284,26 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.util.Drv#newVose" data-isabs="false">
+      <a id="newVose(Seq[Double]):Aliased"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newVose</span><span class="params">(<span name="dist">dist: Seq[<span name="scala.Double" class="extype">Double</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.util.Drv.Aliased" class="extype" href="Drv$$Aliased.html">Aliased</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Generate probability and alias tables in the manner of to Vose
+[1].</p><div class="fullcomment"><div class="comment cmt"><p>Generate probability and alias tables in the manner of to Vose
+[1]. This algorithm is simple, efficient, and intuitive. Vose's
+algorithm is O(n) in the distribution size. The paper below
+contains correctness and complexity proofs.</p><p>[1] Michael D. Vose. 1991. A Linear Algorithm for Generating Random
+Numbers with a Given Distribution. IEEE Trans. Softw. Eng. 17, 9
+(September 1991), 972-975. DOI=10.1109/32.92917
+http://dx.doi.org/10.1109/32.92917
+</p></div></div>
     </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
       <a id="notify():Unit"></a>
       <h4 class="signature">
