@@ -11,10 +11,10 @@ import com.twitter.finagle.http.codec._
 import com.twitter.finagle.http.filter.DtabFilter
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing._
-import com.twitter.util.{Try, StorageUnit, Future}
+import com.twitter.util.{Try, StorageUnit, Future, Closable}
 import java.net.InetSocketAddress
 import org.jboss.netty.channel.{
-  ChannelPipelineFactory, UpstreamMessageEvent, Channels,
+  ChannelPipelineFactory, UpstreamMessageEvent, Channel, Channels,
   ChannelEvent, ChannelHandlerContext, SimpleChannelDownstreamHandler, MessageEvent}
 import org.jboss.netty.handler.codec.http._
 
@@ -62,7 +62,6 @@ abstract class CheckRequestFilter[Req](
     toHttpRequest(request) match {
       case httpRequest: BadHttpRequest =>
         badRequestCount.incr()
-        // BadRequstResponse will cause ServerConnectionManager to close the channel.
         Future.value(BadRequestResponse)
       case _ =>
         service(request)
@@ -131,8 +130,14 @@ case class Http(
         } else
           super.prepareConnFactory(underlying)
 
-      override def newClientDispatcher(transport: Transport[HttpRequest, HttpResponse]) =
-        new HttpClientDispatcher(transport)
+      override def newClientTransport(
+        channel: Channel,
+        statsReceiver: StatsReceiver
+      ): Transport[Any,Any] =
+        new HttpTransport(super.newClientTransport(channel, statsReceiver))
+
+      override def newClientDispatcher(transport: Transport[Any, Any]) =
+        new DtabHttpDispatcher(transport)
     }
   }
 
@@ -167,13 +172,15 @@ case class Http(
             pipeline.addLast("annotateCipher", new AnnotateCipher(headerName))
           }
 
-          pipeline.addLast(
-            "connectionLifecycleManager",
-            new ServerConnectionManager)
-
           pipeline
         }
       }
+
+      override def newServerDispatcher(
+        transport: Transport[Any, Any],
+        service: Service[HttpRequest, HttpResponse]
+      ): Closable =
+        new HttpServerDispatcher(new HttpTransport(transport), service)
 
       override def prepareConnFactory(
         underlying: ServiceFactory[HttpRequest, HttpResponse]
@@ -329,20 +336,27 @@ class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String, boun
 }
 
 /**
- * Http codec for rich Request/Response objects.
- * Note the CheckHttpRequestFilter isn't baked in, as in the Http Codec.
+ * Http codec for rich Request/Response objects. Note the
+ * CheckHttpRequestFilter isn't baked in, as in the Http Codec.
+ *
+ * Ed. note: I'm not sure how parameterizing on REQUEST <: Request
+ * works safely, ever. This is a big typesafety bug: the codec is
+ * blindly casting Requests to REQUEST.
+ *
+ * @param httpFactory the underlying HTTP CodecFactory
+ * @param aggregateChunks if true, the client pipeline collects HttpChunks into the body of each HttpResponse
  */
 case class RichHttp[REQUEST <: Request](
-     httpFactory: Http)
-  extends CodecFactory[REQUEST, Response] {
+  httpFactory: Http,
+  aggregateChunks: Boolean = true
+) extends CodecFactory[REQUEST, Response] {
 
   def client = { config =>
     new Codec[REQUEST, Response] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
-          val pipeline = httpFactory.client(null).pipelineFactory.getPipeline()
-          pipeline.addLast("requestDecoder", new RequestEncoder)
-          pipeline.addLast("responseEncoder", new ResponseDecoder)
+          val pipeline = httpFactory.client(null).pipelineFactory.getPipeline
+          if (!aggregateChunks) pipeline.remove("httpDechunker")
           pipeline
         }
       }
@@ -352,7 +366,6 @@ case class RichHttp[REQUEST <: Request](
       ): ServiceFactory[REQUEST, Response] =
         underlying map(new DelayedReleaseService(_))
 
-
       override def prepareConnFactory(
         underlying: ServiceFactory[REQUEST, Response]
       ): ServiceFactory[REQUEST, Response] =
@@ -361,27 +374,26 @@ case class RichHttp[REQUEST <: Request](
         else
           underlying
 
-      override def newClientDispatcher(transport: Transport[REQUEST, Response]) =
+      override def newClientDispatcher(transport: Transport[Any, Any]) =
         new HttpClientDispatcher(transport)
     }
   }
 
   def server = { config =>
     new Codec[REQUEST, Response] {
-      def pipelineFactory = new ChannelPipelineFactory {
-        def getPipeline() = {
-          val pipeline = httpFactory.server(null).pipelineFactory.getPipeline()
-          pipeline.addLast("serverRequestDecoder", new RequestDecoder)
-          pipeline.addLast("serverResponseEncoder", new ResponseEncoder)
-          pipeline
-        }
-      }
+      def pipelineFactory = httpFactory.server(config).pipelineFactory
+
+      override def newServerDispatcher(
+          transport: Transport[Any, Any], 
+          service: Service[REQUEST, Response]): Closable =
+        new HttpServerDispatcher(new HttpTransport(transport), service)
 
       override def prepareConnFactory(
         underlying: ServiceFactory[REQUEST, Response]
       ): ServiceFactory[REQUEST, Response] =
         if (httpFactory._enableTracing) {
-          val tracingFilter = new HttpServerTracingFilter[REQUEST, Response](config.serviceName, config.boundInetSocketAddress)
+          val tracingFilter = new HttpServerTracingFilter[REQUEST, Response](
+            config.serviceName, config.boundInetSocketAddress)
           tracingFilter andThen underlying
         } else {
           underlying

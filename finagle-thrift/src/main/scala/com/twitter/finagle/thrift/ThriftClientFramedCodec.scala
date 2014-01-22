@@ -37,7 +37,7 @@ class ThriftClientFramedCodecFactory(
     _protocolFactory: TProtocolFactory)
   extends CodecFactory[ThriftClientRequest, Array[Byte]]#Client
 {
-  def this(clientId: Option[ClientId]) = this(clientId, false, new TBinaryProtocol.Factory())
+  def this(clientId: Option[ClientId]) = this(clientId, false, Protocols.binaryFactory())
 
   def this(clientId: ClientId) = this(Some(clientId))
 
@@ -67,7 +67,7 @@ class ThriftClientFramedCodec(
 ) extends Codec[ThriftClientRequest, Array[Byte]] {
 
   private[this] val preparer = ThriftClientPreparer(
-    protocolFactory, config.serviceName, 
+    protocolFactory, config.serviceName,
     clientId, useCallerSeqIds)
 
   def pipelineFactory: ChannelPipelineFactory =
@@ -106,9 +106,9 @@ private case class ThriftClientPreparer(
           serviceName,
           reply.`type` != TMessageType.EXCEPTION,
           clientId, protocolFactory)
-        val seqIdFilter = 
+        val seqIdFilter =
           if (protocolFactory.isInstanceOf[TBinaryProtocol.Factory] && !useCallerSeqIds)
-            new SeqIdFilter 
+            new SeqIdFilter
           else
             Filter.identity[ThriftClientRequest, Array[Byte]]
 
@@ -160,8 +160,8 @@ private[thrift] class ThriftClientChannelBufferEncoder
  * has been upgraded to TTwitter
  */
 private[thrift] class TTwitterFilter(
-    serviceName: String, isUpgraded: Boolean, clientId: Option[ClientId], 
-    protocolFactory: TProtocolFactory) 
+    serviceName: String, isUpgraded: Boolean, clientId: Option[ClientId],
+    protocolFactory: TProtocolFactory)
   extends SimpleFilter[ThriftClientRequest, Array[Byte]] {
 
   def apply(
@@ -187,7 +187,7 @@ private[thrift] class TTwitterFilter(
         case None => header.unsetSampled()
       }
       header.setFlags(Trace.id.flags.toLong)
-      
+
       val contexts = Context.emit().iterator
       if (contexts.hasNext) {
         val ctxs = new ArrayList[thrift.RequestContext]()
@@ -202,7 +202,7 @@ private[thrift] class TTwitterFilter(
 
         header.setContexts(ctxs)
       }
-      
+
       val dtab = Dtab.baseDiff()
       if (dtab.nonEmpty) {
         val delegations = new ArrayList[thrift.Delegation](dtab.size)
@@ -214,7 +214,7 @@ private[thrift] class TTwitterFilter(
 
       new ThriftClientRequest(
         ByteArrays.concat(
-          OutputBuffer.messageToArray(header, protocolFactory), 
+          OutputBuffer.messageToArray(header, protocolFactory),
           request.message),
         request.oneway)
     } else {

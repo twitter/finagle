@@ -6,9 +6,9 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
-  val libVersion = "6.10.0"
+  val libVersion = "6.11.1"
   val zkVersion = "3.3.4"
-  val utilVersion = "6.10.0"
+  val utilVersion = "6.11.1"
   val ostrichVersion = "9.2.1"
   val jacksonVersion = "2.2.2"
   val nettyLib = "io.netty" % "netty" % "3.8.0.Final"
@@ -25,7 +25,11 @@ object Finagle extends Build {
   val scroogeLibs = thriftLibs ++ Seq(
     "com.twitter" %% "scrooge-core" % "3.11.0")
 
-  def util(which: String) = "com.twitter" %% ("util-"+which) % utilVersion
+  def util(which: String) =
+    "com.twitter" %% ("util-"+which) % utilVersion excludeAll(
+      ExclusionRule(organization = "junit"),
+      ExclusionRule(organization = "org.scala-tools.testing"),
+      ExclusionRule(organization = "org.mockito"))
 
   val sharedSettings = Seq(
     version := libVersion,
@@ -239,7 +243,7 @@ object Finagle extends Build {
       "commons-codec" % "commons-codec" % "1.5",
       "com.twitter.common.zookeeper" % "server-set" % "1.0.42",
       util("zk-common")
-    ),
+    ) ++ jacksonLibs,
     ivyXML :=
       <dependencies>
         <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.42">
@@ -310,7 +314,7 @@ object Finagle extends Build {
     name := "finagle-memcached",
     libraryDependencies ++= Seq(
       util("hashing"),
-      "com.google.guava" % "guava" % "13.0",
+      "com.google.guava" % "guava" % "15.0",
       "com.twitter.common" % "zookeeper-testing" % "0.0.34" % "test"
     ) ++ jacksonLibs
   ).dependsOn(finagleCore, finagleServersets)
@@ -373,21 +377,15 @@ object Finagle extends Build {
     base = file("finagle-thriftmux"),
     settings = Project.defaultSettings ++
       ScroogeSBT.newSettings ++
-      Scrooge.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-thriftmux",
     ScroogeSBT.scroogeThriftNamespaceMap in Test := Map(
-      "com.twitter.finagle.thriftmux.thrift" ->
-        "com.twitter.finagle.thriftmux.thriftscrooge3"
+      "com.twitter.finagle.thriftmux.thriftjava" ->
+        "com.twitter.finagle.thriftmux.thriftscala"
     ),
-    Scrooge.scrooge2ThriftNamespaceMap in Test := Map(
-      "com.twitter.finagle.thriftmux.thrift" ->
-        "com.twitter.finagle.thriftmux.thriftscrooge2"
-    ),
-    Scrooge.scrooge2ThriftOutputFolder <<= (sourceManaged) { x => x / "scrooge2" },
     libraryDependencies ++= scroogeLibs
-  ).dependsOn(finagleCore, finagleMux, finagleThrift, finagleOstrich4)
+  ).dependsOn(finagleCore, finagleMux, finagleThrift)
 
   lazy val finagleMySQL = Project(
     id = "finagle-mysql",

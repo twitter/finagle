@@ -5,7 +5,7 @@ import com.twitter.finagle.stats.{MetricsStatsReceiver, OstrichStatsReceiver, St
 import java.util.Random
 
 // From $BIRDCAGE_HOME run:
-// ./bin/caliper finagle/finagle-benchmark com.twitter.finagle.benchmark.StatsReceiverBenchmark
+// ./pants goal bench finagle/finagle-benchmark --bench-target=com.twitter.finagle.benchmark.StatsReceiverBenchmark
 class StatsReceiverBenchmark extends SimpleBenchmark {
 
   private[this] val rnd = new Random

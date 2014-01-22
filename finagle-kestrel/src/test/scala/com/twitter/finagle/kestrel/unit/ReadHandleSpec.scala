@@ -11,7 +11,8 @@ import org.specs.mock.Mockito
 class ReadHandleSpec extends SpecificationWithJUnit with Mockito {
   def msg_(i: Int) = {
     val ack = new Broker[Unit]
-    (ack.recv, ReadMessage(ChannelBuffers.wrappedBuffer(i.toString.getBytes), ack.send(())))
+    val abort = new Broker[Unit]
+    (ack.recv, ReadMessage(ChannelBuffers.wrappedBuffer(i.toString.getBytes), ack.send(()), abort.send(())))
   }
 
   def msg(i: Int) = { val (_, m) = msg_(i); m }

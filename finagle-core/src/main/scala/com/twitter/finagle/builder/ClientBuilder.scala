@@ -50,7 +50,7 @@ import com.twitter.finagle.filter.ExceptionSourceFilter
 import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, HeapBalancerFactory}
 import com.twitter.finagle.netty3.ChannelSnooper
 import com.twitter.finagle.service.{FailureAccrualFactory, ProxyService,
-  RetryPolicy, RetryingFilter, TimeoutFilter}
+  RetryPolicy, RetryingFilter, StatsFilter, TimeoutFilter}
 import com.twitter.finagle.socks.SocksProxyFlags
 import com.twitter.finagle.ssl.{Engine, Ssl}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
@@ -752,9 +752,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       factory.newChannel(_)
     }
 
-    // The transporter connects to actual endpoints, providing a typed
+    // The transporter connects to actual endpoints, providing an untyped
     // session transport.
-    val transporter = Netty3Transporter[Req, Rep](
+    val transporter = Netty3Transporter[Any, Any](
       name = config.nameOrDefault,
       pipelineFactory = codec.pipelineFactory,
       newChannel = newChannel,
@@ -795,7 +795,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       measureConn compose (codec.prepareConnFactory _)
 
     val endpointer: (SocketAddress, StatsReceiver) => ServiceFactory[Req, Rep] = {
-      val bridged = Bridge[Req, Rep, Req, Rep](transporter, codec.newClientDispatcher(_))
+      val bridged = Bridge[Any, Any, Req, Rep](transporter, codec.newClientDispatcher(_))
       (addr, statsReceiver) => prepareConn(bridged(addr, statsReceiver))
     }
 
@@ -918,7 +918,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   private def retryFilter(timer: Timer) =
     config.retryPolicy map { retryPolicy =>
-      new RetryingFilter[Req, Rep](retryPolicy, timer, statsReceiver)
+      val stats = new StatsFilter[Req, Rep](statsReceiver.scope("tries"))
+      val retries = new RetryingFilter[Req, Rep](retryPolicy, timer, statsReceiver)
+      stats andThen retries
     } getOrElse(identityFilter)
 
   private def globalTimeoutFilter(timer: Timer) =

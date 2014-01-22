@@ -201,7 +201,7 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     assert(waitForEventualResult(() => Await.result(client2.get("foo")), None))
   }
 
-  test("use new pool with fallback to old pool and readrepair") {
+  if (!sys.props.contains("SKIP_FLAKY")) test("use new pool with fallback to old pool and readrepair") {
     val migrationConfig = MigrationConstants.MigrationConfig("Verifying", false, true)
     val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
     zookeeperClient.get().setData(basePath, migrationDataArray, -1)

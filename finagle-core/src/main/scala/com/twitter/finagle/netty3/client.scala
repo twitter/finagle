@@ -124,7 +124,8 @@ case class Netty3Transporter[In, Out](
   name: String,
   pipelineFactory: ChannelPipelineFactory,
   newChannel: ChannelPipeline => Channel = Netty3Transporter.channelFactory.newChannel(_),
-  newTransport: Channel => Transport[In, Out] = new ChannelTransport[In, Out](_),
+  newTransport: Channel => Transport[In, Out] = 
+    (ch: Channel) => new ChannelTransport(ch).cast[In, Out],
   tlsConfig: Option[Netty3TransporterTLSConfig] = None,
   httpProxy: Option[SocketAddress] = None,
   socksProxy: Option[SocketAddress] = SocksProxyFlags.socksProxy,

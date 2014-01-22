@@ -401,20 +401,29 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       serviceName = config.name, boundAddress = config.bindTo)
     val codec = config.codecFactory(codecConfig)
 
-    val statsReceiver = config.statsReceiver map(_.scope(config.name)) getOrElse NullStatsReceiver
+    val statsReceiver = config.statsReceiver match {
+      case Some(sr) => sr.scope(config.name)
+      case None => NullStatsReceiver
+    }
     val logger = config.logger getOrElse Logger.getLogger(config.name)
 
-    val monitor = config.monitor map(_( config.name, InetSocketAddressUtil.toPublic(config.bindTo))) getOrElse NullMonitor
+    val monitor = config.monitor match {
+      case Some(newMonitor) =>
+        newMonitor(config.name, InetSocketAddressUtil.toPublic(config.bindTo))
+      case None => 
+        NullMonitor
+    } 
 
     val tracer = config.tracer
     val timer = DefaultTimer.twitter
     val nettyTimer = DefaultTimer
 
-    val listener = Netty3Listener[Rep, Req](
+    val listener = Netty3Listener[Any, Any](
       name = config.name,
       pipelineFactory = codec.pipelineFactory,
       channelSnooper =
-        if (config.logChannelActivity) Some(ChannelSnooper(config.name)(logger.log(Level.INFO, _, _)))
+        if (config.logChannelActivity) 
+          Some(ChannelSnooper(config.name)(logger.log(Level.INFO, _, _)))
         else None,
       channelFactory = config.channelFactory,
       bootstrapOptions = {
@@ -423,15 +432,20 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         o += "reuseAddress" -> java.lang.Boolean.TRUE
         o += "child.tcpNoDelay" -> java.lang.Boolean.TRUE
 
-        for (v <- config.backlog) o += "backlog" -> (v: java.lang.Integer)
-        for (v <- config.bufferSize.send) o += "child.sendBufferSize" -> (v: java.lang.Integer)
-        for (v <- config.bufferSize.recv) o += "child.receiveBufferSize" -> (v: java.lang.Integer)
-        for (v <- config.keepAlive) o += "child.keepAlive" -> (v: java.lang.Boolean)
+        for (v <- config.backlog) 
+          o += "backlog" -> (v: java.lang.Integer)
+        for (v <- config.bufferSize.send) 
+          o += "child.sendBufferSize" -> (v: java.lang.Integer)
+        for (v <- config.bufferSize.recv) 
+          o += "child.receiveBufferSize" -> (v: java.lang.Integer)
+        for (v <- config.keepAlive) 
+          o += "child.keepAlive" -> (v: java.lang.Boolean)
 
         o.result()
       },
       channelReadTimeout = config.readTimeout getOrElse Duration.Top,
-      channelWriteCompletionTimeout = config.writeCompletionTimeout getOrElse Duration.Top,
+      channelWriteCompletionTimeout = 
+        config.writeCompletionTimeout getOrElse Duration.Top,
       tlsConfig = config.newEngine map(Netty3ListenerTLSConfig),
       timer = timer,
       nettyTimer = nettyTimer,
@@ -440,19 +454,23 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       logger = logger
     )
 
-    val channelMaxIdleTime = config.hostConnectionMaxIdleTime getOrElse Duration.Top
-    val channelMaxLifeTime = config.hostConnectionMaxLifeTime getOrElse Duration.Top
-    val serverDispatcher =
+    val channelMaxIdleTime = 
+      config.hostConnectionMaxIdleTime getOrElse Duration.Top
+    val channelMaxLifeTime = 
+      config.hostConnectionMaxLifeTime getOrElse Duration.Top
+    val serverDispatcher: (Transport[Any, Any], Service[Req, Rep]) => Closable =
       if (channelMaxIdleTime < Duration.Top || channelMaxLifeTime < Duration.Top) {
-        val idleTime = if (channelMaxIdleTime < Duration.Top) Some(channelMaxIdleTime) else None
-        val lifeTime = if (channelMaxLifeTime < Duration.Top) Some(channelMaxLifeTime) else None
-        ExpiringServerDispatcher[Req, Rep](
+        val idleTime = if (channelMaxIdleTime < Duration.Top) 
+          Some(channelMaxIdleTime) else None
+        val lifeTime = if (channelMaxLifeTime < Duration.Top) 
+          Some(channelMaxLifeTime) else None
+        ExpiringServerDispatcher[Req, Rep, Any, Any](
           idleTime, lifeTime, timer,
           statsReceiver.scope("expired"),
           codec.newServerDispatcher)
-      } else  codec.newServerDispatcher _
+      } else codec.newServerDispatcher _
 
-    val server = DefaultServer[Req, Rep, Rep, Req](
+    val server = DefaultServer[Req, Rep, Any, Any](
       name = config.name,
       listener = listener,
       serviceTransport = serverDispatcher,
@@ -468,9 +486,12 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       reporter = NullReporterFactory
     )
 
-    val factory = config.openConnectionsThresholds map { (threshold) =>
-      new IdleConnectionFilter(serviceFactory, threshold, statsReceiver.scope("idle"))
-    } getOrElse serviceFactory
+    val factory = config.openConnectionsThresholds match {
+      case Some(thresh) =>
+        new IdleConnectionFilter(serviceFactory, thresh, statsReceiver.scope("idle"))
+      case None =>
+        serviceFactory
+    }
 
     val listeningServer = server.serve(config.bindTo, factory)
     val closed = new AtomicBoolean(false)

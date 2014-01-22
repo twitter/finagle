@@ -51,7 +51,8 @@ object FailResolver extends Resolver {
 }
 
 class ResolverNotFoundException(scheme: String)
-  extends Exception("Resolver not found for scheme \"%s\"".format(scheme))
+  extends Exception(
+    "Resolver not found for scheme \"%s\". Please add the jar containing this resolver to your classpath".format(scheme))
 
 class ResolverAddressInvalid(addr: String)
   extends Exception("Resolver address \"%s\" is not valid".format(addr))

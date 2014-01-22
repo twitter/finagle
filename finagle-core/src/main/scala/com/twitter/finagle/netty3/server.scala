@@ -88,7 +88,7 @@ object Netty3Listener {
       val p = new Promise[Unit]
       closing.addListener(new ChannelGroupFutureListener {
         def operationComplete(f: ChannelGroupFuture) {
-          p.setValue(())
+          p.setDone()
         }
       })
 
@@ -288,7 +288,7 @@ private[netty3] class ServerBridge[In, Out](
     val channel = e.getChannel
     channels.add(channel)
 
-    val transport = new ChannelTransport[In, Out](channel)
+    val transport = new ChannelTransport(channel).cast[In, Out]
     serveTransport(transport)
 
     super.channelOpen(ctx, e)

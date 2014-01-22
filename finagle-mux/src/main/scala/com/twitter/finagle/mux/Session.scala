@@ -89,7 +89,7 @@ class SenderSession private[finagle](
 
     trans.write(encode(msg)) onFailure { case exc =>
       sent.unmap(tag)
-    } flatMap { _ =>
+    } before {
       p.setInterruptHandler { case cause =>
         for (reqP <- sent.maybeRemap(tag, new Promise[Buf])) {
           trans.write(encode(Tdiscarded(tag, cause.toString)))

@@ -16,7 +16,7 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.service.{FailureAccrualFactory, FailedService}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.hashing._
-import com.twitter.util.{Command => _, _}
+import com.twitter.util.{Command => _, Function => _, _}
 
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers

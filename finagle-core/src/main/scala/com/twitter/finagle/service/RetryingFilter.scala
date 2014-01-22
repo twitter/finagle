@@ -7,7 +7,7 @@ import com.twitter.finagle.{
   CancelledRequestException, ChannelClosedException, Service,
   SimpleFilter, TimeoutException, WriteException
 }
-import com.twitter.util._
+import com.twitter.util.{Function => _, _}
 import java.util.{concurrent => juc}
 import java.{util => ju}
 import scala.collection.JavaConversions._

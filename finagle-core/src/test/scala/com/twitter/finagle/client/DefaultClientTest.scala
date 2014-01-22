@@ -1,20 +1,20 @@
 package com.twitter.finagle.client
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.{
-  Client, Group, Name, IndividualRequestTimeoutException, SourcedException, Service}
+import com.twitter.finagle._
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.transport.{QueueTransport, Transport}
-import com.twitter.util.{Await, Future, MockTimer, Time}
+import com.twitter.util.{Await, Future, MockTimer, Time, Var}
 import com.twitter.util.TimeConversions.intToTimeableNumber
 import com.twitter.finagle.stats.{StatsReceiver, InMemoryStatsReceiver}
 import java.net.{SocketAddress, InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.concurrent.Eventually
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class DefaultClientTest extends FunSuite {
+class DefaultClientTest extends FunSuite with Eventually {
   trait StatsReceiverHelper {
     val statsReceiver = new InMemoryStatsReceiver()
   }
@@ -54,6 +54,10 @@ class DefaultClientTest extends FunSuite {
 
   trait SourcedExceptionHelper extends QueueTransportHelper with
       SourcedExceptionDispatcherHelper with
+      BaseClientHelper
+
+  class DefaultClientHelper extends QueueTransportHelper with
+      SerialDispatcherHelper with
       BaseClientHelper
 
   test("DefaultClient should successfully add sourcedexception") {
@@ -158,6 +162,20 @@ class DefaultClientTest extends FunSuite {
 
       assert(statsReceiver.stats(Seq(name, "request_latency_ms")) ===
         (Seq(dur, dur) map (_.inMillis)))
+    }
+  }
+
+  test("Services should be able to be closed even if they can't be resolved") {
+    new DefaultClientHelper {
+      val dest = new Name {
+        def bind(): Var[Addr] = Var(Addr.Pending)
+
+        def reified: String = "test"
+      }
+      val svc = client.newService(dest, "test")
+      val f = svc.close()
+      eventually { assert(f.isDefined) }
+      assert(Await.result(f) === ())
     }
   }
 }

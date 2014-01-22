@@ -162,7 +162,7 @@ private[finagle] class RichChannelFuture(val self: ChannelFuture) {
   def toTwitterFuture = {
     val result = new Promise[Unit]
     apply {
-      case Ok(_)     => result.setValue(())
+      case Ok(_)     => result.setDone()
       case Cancelled => result.setException(new CancelledException)
       case Error(e)  => result.setException(e)
     }

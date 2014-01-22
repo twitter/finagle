@@ -49,7 +49,7 @@ class ChannelStatsHandlerTest extends FunSpec with MockitoSugar {
       handler.channelConnected(ctx, p)
 
       connectionsIs(1)
-      p.setValue(())
+      p.setDone()
 
       connectionsIs(0)
     }

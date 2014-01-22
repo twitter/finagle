@@ -32,11 +32,11 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]], maxWai
 
               if (didRelease) {
                 service.close()
-                onRelease.setValue(())
+                onRelease.setDone()
               }
 
             case Throw(exc) =>
-              onRelease.setValue(())
+              onRelease.setDone()
               requestBuffer.asScala foreach { case (_, promise) => promise() = Throw(exc) }
               underlying = Some(new FailedService(new ServiceNotAvailableException))
           }

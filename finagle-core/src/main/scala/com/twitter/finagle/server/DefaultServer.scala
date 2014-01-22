@@ -53,7 +53,8 @@ case class DefaultServer[Req, Rep, In, Out](
   requestTimeout: Duration = Duration.Top,
   maxConcurrentRequests: Int = Int.MaxValue,
   cancelOnHangup: Boolean = true,
-  prepare: ServiceFactory[Req, Rep] => ServiceFactory[Req, Rep] = (sf: ServiceFactory[Req, Rep]) => sf,
+  prepare: ServiceFactory[Req, Rep] => ServiceFactory[Req, Rep] = 
+    (sf: ServiceFactory[Req, Rep]) => sf,
   timer: Timer = DefaultTimer.twitter,
   monitor: Monitor = DefaultMonitor,
   logger: java.util.logging.Logger = DefaultLogger,
@@ -127,7 +128,9 @@ case class DefaultServer[Req, Rep, In, Out](
     outer compose prepare compose inner
   }
 
-  def serveTransport(serviceFactory: ServiceFactory[Req, Rep], transport: Transport[In, Out]) {
+  def serveTransport(
+      serviceFactory: ServiceFactory[Req, Rep], 
+      transport: Transport[In, Out]) {
     val clientConn = new ClientConnection {
       val remoteAddress = transport.remoteAddress
       val localAddress = transport.localAddress
@@ -150,7 +153,8 @@ case class DefaultServer[Req, Rep, In, Out](
   def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
     new ListeningServer with CloseAwaitably {
       val scopedStatsReceiver = statsReceiver match {
-        case ServerStatsReceiver => statsReceiver.scope(ServerRegistry.nameOf(addr) getOrElse name)
+        case ServerStatsReceiver => 
+          statsReceiver.scope(ServerRegistry.nameOf(addr) getOrElse name)
         case sr => sr
       }
 

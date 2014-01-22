@@ -78,7 +78,7 @@ case class DefaultClient[Req, Rep](
 
   /** Bind a socket address to a well-formed stack */
   val bindStack: SocketAddress => ServiceFactory[Req, Rep] = sa => {
-    val hostStats = {
+    val hostStats = if (hostStatsReceiver.isNull) globalStatsReceiver else {
       val host = new RollupStatsReceiver(hostStatsReceiver.scope(
         sa match {
          case ia: InetSocketAddress => "%s:%d".format(ia.getHostName, ia.getPort)

@@ -1,11 +1,11 @@
 package com.twitter.finagle
 
 import java.net.SocketAddress
-import org.apache.thrift.protocol.{TProtocolFactory, TBinaryProtocol}
+import org.apache.thrift.protocol.TProtocolFactory
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.server.DefaultServer
-import com.twitter.finagle.thrift.HandleUncaughtApplicationExceptions
+import com.twitter.finagle.thrift.{Protocols, HandleUncaughtApplicationExceptions}
 import com.twitter.util.Future
 
 /**
@@ -15,7 +15,7 @@ import com.twitter.util.Future
   */
 case class ThriftMuxServerImpl(
   muxer: Server[ChannelBuffer, ChannelBuffer],
-  protocolFactory: TProtocolFactory = new TBinaryProtocol.Factory()
+  protocolFactory: TProtocolFactory = Protocols.binaryFactory()
 ) extends Server[Array[Byte], Array[Byte]] with ThriftRichServer {
   def serve(addr: SocketAddress, newService: ServiceFactory[Array[Byte], Array[Byte]]) = {
     muxer.serve(addr, newService map { service =>

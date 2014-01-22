@@ -12,7 +12,7 @@ class ConnectionManager {
   private[this] var isKeepAlive = false
   private[this] var isIdle = true
 
-  def observeMessage(message: AnyRef) = synchronized {
+  def observeMessage(message: Any) = synchronized {
     message match {
       case request: HttpRequest   => observeRequest(request)
       case response: HttpResponse => observeResponse(response)

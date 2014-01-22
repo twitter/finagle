@@ -7,7 +7,7 @@ import com.twitter.finagle.http.codec.HttpDtab
 /**
  * Delegate to the dtab contained inside of the request.
  */
-private[finagle] class DtabFilter[Req <: HttpMessage, Rep <: HttpMessage]
+class DtabFilter[Req <: HttpMessage, Rep <: HttpMessage]
     extends SimpleFilter[Req, Rep] {
 
   def apply(req: Req, service: Service[Req, Rep]) = {

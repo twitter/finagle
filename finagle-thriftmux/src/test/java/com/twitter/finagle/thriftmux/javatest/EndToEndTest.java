@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import com.twitter.finagle.ListeningServer;
 import com.twitter.finagle.ThriftMux;
-import com.twitter.finagle.thriftmux.thriftscrooge3.TestService;
+import com.twitter.finagle.thriftmux.thriftscala.TestService;
 import com.twitter.util.Future;
 
 import static junit.framework.Assert.assertEquals;

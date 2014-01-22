@@ -1,10 +1,12 @@
-thrift_library(name='thrift',
-  sources=rglobs('*.thrift')
-)
-
-compiled_idl(name='compiled',
-  idl_deps=pants(':thrift'),
+java_thrift_library(name='thrift-scala',
+  sources=rglobs('*.thrift'),
   compiler='scrooge',
   language='scala',
-  rpc_style='finagle'
+  rpc_style='finagle',
+)
+
+java_thrift_library(name='thrift-java',
+  sources=rglobs('*.thrift'),
+  compiler='scrooge',
+  language='java',
 )

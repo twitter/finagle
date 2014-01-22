@@ -2,7 +2,7 @@ package com.twitter.finagle.thrift
 
 import org.jboss.netty.channel.ChannelPipelineFactory
 import com.twitter.finagle.{CodecFactory, ServerCodecConfig}
-import org.apache.thrift.protocol.{TBinaryProtocol, TProtocolFactory}
+import org.apache.thrift.protocol.TProtocolFactory
 
 /**
  * ThriftServerBufferedCodec implements a buffered thrift transport.
@@ -26,7 +26,7 @@ object ThriftServerBufferedCodec {
 class ThriftServerBufferedCodecFactory(protocolFactory: TProtocolFactory)
   extends CodecFactory[Array[Byte], Array[Byte]]#Server
 {
-  def this() = this(new TBinaryProtocol.Factory())
+  def this() = this(Protocols.binaryFactory())
   /**
    * Create a [[com.twitter.finagle.thrift.ThriftServerBufferedCodec]]
    * with a default TBinaryProtocol.

@@ -26,7 +26,7 @@ class DelayedFactory[Req, Rep](
   case class AwaitingFactory(
     q: ArrayDeque[(ClientConnection, Promise[Service[Req, Rep]])]
   ) extends State
-  case class AwaitingRelease(p: Promise[Unit], deadline: Time, cause: Throwable) extends State
+  case class AwaitingRelease(deadline: Time, cause: Throwable) extends State
   case class Failed(exc: Throwable) extends State
   case class Succeeded(f: ServiceFactory[Req, Rep]) extends State
 
@@ -39,8 +39,8 @@ class DelayedFactory[Req, Rep](
           throw new IllegalStateException("it should be impossible to get in this state: " +
             state +
             " after a successful future satisfaction")
-        case AwaitingRelease(p, deadline, cause) =>
-          p.become(factory.close(deadline))
+        case AwaitingRelease(deadline, cause) =>
+          factory.close(deadline)
           Failed(cause)
         case AwaitingFactory(q) =>
           for ((conn, p) <- q.asScala)
@@ -54,8 +54,7 @@ class DelayedFactory[Req, Rep](
           throw new IllegalStateException("it should be impossible to get in this state: " +
             state +
             " after a failed future satisfaction")
-        case AwaitingRelease(p, _, _) =>
-          p.setValue(())
+        case AwaitingRelease(_, _) =>
           Failed(new CancelledConnectionException(exc))
         case AwaitingFactory(q) =>
           q.asScala foreach { case (_, p) =>
@@ -69,7 +68,7 @@ class DelayedFactory[Req, Rep](
   // if your future is never satisfied, or takes a long time to satisfy, you can accumulate
   // many closures.  if you interrupt your future, it will detach the closure.
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = state match {
-    case AwaitingRelease(_, _, cause) => Future.exception(cause)
+    case AwaitingRelease(_, cause) => Future.exception(cause)
     case Failed(exc) => Future.exception(exc)
     case Succeeded(factory) => factory(conn)
     case state => applySlow(conn)
@@ -86,11 +85,11 @@ class DelayedFactory[Req, Rep](
             case AwaitingFactory(q) =>
               if (synchronized(q.remove(waiter)))
                 p.setException(new CancelledConnectionException(cause))
-            case Succeeded(_) | Failed(_) | AwaitingRelease(_, _, _) =>
+            case Succeeded(_) | Failed(_) | AwaitingRelease(_, _) =>
           }
         }
         p
-      case AwaitingRelease(_, _, cause) => Future.exception(cause)
+      case AwaitingRelease(_, cause) => Future.exception(cause)
       case Failed(exc) => Future.exception(exc)
       case Succeeded(factory) => factory(conn)
     }
@@ -100,17 +99,16 @@ class DelayedFactory[Req, Rep](
     state match {
       case Succeeded(factory) => factory.close(deadline)
       case Failed(exc) => Future.exception(exc)
-      case AwaitingRelease(p, old, exc) =>
-        state = AwaitingRelease(p, old min deadline, exc)
-        p
+      case AwaitingRelease(old, exc) =>
+        state = AwaitingRelease(old min deadline, exc)
+        Future.Done
       case AwaitingFactory(q) =>
         val exc = new ServiceClosedException
-        val onRelease = Promise[Unit]()
         underlyingF.raise(exc)
         for ((_, p) <- q.asScala)
           p.raise(exc)
-        state = AwaitingRelease(onRelease, deadline, exc)
-        onRelease
+        state = AwaitingRelease(deadline, exc)
+        Future.Done
     }
   }
 

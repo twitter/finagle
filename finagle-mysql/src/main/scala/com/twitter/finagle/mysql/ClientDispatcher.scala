@@ -71,9 +71,7 @@ class ClientDispatcher(
           loop()
         case None =>
           val signal = new Promise[Unit]
-          val result = connPhase flatMap { _ =>
-            dispatch(req, signal)
-          }
+          val result = connPhase.unit before dispatch(req, signal)
           result respond rep.updateIfEmpty
           signal ensure loop()
       }
@@ -106,7 +104,7 @@ class ClientDispatcher(
   private[this] def dispatch(req: Request, signal: Promise[Unit]): Future[Result] =
     trans.write(req.toPacket) rescue {
       wrapWriteException
-    } flatMap { _ =>
+    } before {
       // synthesize COM_STMT_CLOSE response
       if (req.cmd == Command.COM_STMT_CLOSE) {
         signal.setDone()

@@ -4,12 +4,11 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.{DefaultClient, Bridge}
 import com.twitter.finagle.dispatch.{PipeliningDispatcher, SerialClientDispatcher}
 import com.twitter.finagle.server.DefaultServer
-import com.twitter.finagle.thrift.{ThriftFramedTransporter, ThriftClientRequest}
-import com.twitter.finagle.thriftmux.thriftscrooge3.TestService
+import com.twitter.finagle.thrift.{Protocols, ThriftFramedTransporter, ThriftClientRequest}
+import com.twitter.finagle.thriftmux.thriftscala.TestService
 import com.twitter.finagle.tracing.Annotation.{ServerRecv, ClientSend}
 import com.twitter.finagle.tracing._
 import com.twitter.util.{Promise, Await, Future}
-import org.apache.thrift.protocol.TBinaryProtocol
 import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -17,15 +16,6 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite {
-  test("end-to-end Scrooge2") {
-    val server = ThriftMux.serveIface(":*", new thriftscrooge2.TestService.FutureIface {
-      def query(x: String) = Future.value(x+x)
-    })
-
-    val client = ThriftMux.newIface[thriftscrooge2.TestService.FutureIface](server)
-    assert(Await.result(client.query("ok")) == "okok")
-  }
-
   trait ThriftMuxTestServer {
     val server = ThriftMux.serveIface(":*", new TestService.FutureIface {
       def query(x: String) = Future.value(x+x)
@@ -110,7 +100,7 @@ class EndToEndTest extends FunSuite {
     ) with ThriftRichClient
   {
     protected val defaultClientName = "thrift"
-    protected val protocolFactory = new TBinaryProtocol.Factory
+    protected val protocolFactory = Protocols.binaryFactory()
   }
 
   test("thriftmux server + thrift client w/o protocol upgrade") {
@@ -154,7 +144,7 @@ class EndToEndTest extends FunSuite {
           ThriftFramedTransporter, new PipeliningDispatcher(_))
       )
     val service = Await.result(OldPlainThriftClient.newClient(server)())
-    val client = new TestService.FinagledClient(service, new TBinaryProtocol.Factory())
+    val client = new TestService.FinagledClient(service, Protocols.binaryFactory())
     val reqs = 1 to nreqs map { i => client.query("ok" + i) }
     // Although the requests are pipelined in the client, they must be
     // received by the service serially.

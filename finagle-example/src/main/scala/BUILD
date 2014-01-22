@@ -3,7 +3,7 @@ scala_library(name='scala',
     jar(org='com.twitter.common', name='flags', rev='1.0.0')
       .exclude(org='com.twitter'),
     pants('finagle/finagle-core'),
-    pants('finagle/finagle-example/src/main/thrift:compiled'),
+    pants('finagle/finagle-example/src/main/thrift:thrift-scala'),
     pants('finagle/finagle-http'),
     pants('finagle/finagle-kestrel'),
     pants('finagle/finagle-memcached'),

@@ -29,3 +29,14 @@ Note that most protocols do not natively support request cancellations
 do). In practice, this means that for these protocols, we need to disconnect
 the client to signal cancellation, which in turn can cause undue connection
 churn.
+
+Why is "com.twitter.common.zookeeper#server-set" not found?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Some of our libraries still aren't published to maven central.  If you add
+
+::
+	resolvers += "twitter" at "http://maven.twttr.com"
+
+to your sbt configuration, it will be able to pick up the libraries which are
+published externally, but not yet to maven central.
