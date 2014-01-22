@@ -87,8 +87,11 @@ class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
       closep.setValue(exc)
     }
   def isOpen = !closep.isDefined
-  def close(deadline: Time) = Future.exception(
-    new IllegalStateException("close() is undefined on QueueTransport"))
+  def close(deadline: Time) = {
+    val ex = new IllegalStateException("close() is undefined on QueueTransport")
+    closep.setValue(ex)
+    Future.exception(ex)
+  }
 
   val onClose = closep
   val localAddress = new SocketAddress{}

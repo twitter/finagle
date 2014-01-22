@@ -44,7 +44,7 @@ trait ListeningServer
     isClosed = true
     val collected = Future.collect(announcements)
     collected flatMap { list =>
-      Closable.all(list:_*).close(deadline) map { _ => closeServer(deadline) }
+      Closable.all(list:_*).close(deadline) before closeServer(deadline)
     }
   }
 }
