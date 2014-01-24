@@ -169,7 +169,7 @@ object Resolver {
    * Arguments are parsed with the same grammar as in `eval`. If a label is not
    * provided (i.e. no "label=<addr>"), then the empty string is returned.
    */
-   def evalLabeled(addr: String): (Name, String) = {
+  private[finagle] def evalLabeled(addr: String): (Name, String) = {
     val (label, rest) = lex(addr) match {
       case El(n) :: Eq :: rest => (n, rest)
       case Eq :: rest => ("", rest)
