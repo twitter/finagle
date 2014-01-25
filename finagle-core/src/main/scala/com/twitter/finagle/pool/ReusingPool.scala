@@ -72,4 +72,9 @@ extends ServiceFactoryProxy[Req, Rep](underlying) {
         }
     }
   }
+
+  override def isAvailable = current.get.poll match {
+    case Some(Return(svc)) => svc.isAvailable
+    case _ => underlying.isAvailable
+  }
 }

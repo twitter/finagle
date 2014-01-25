@@ -3,6 +3,7 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{ClientConnection, Group, NoBrokersAvailableException, Service, ServiceFactory}
 import com.twitter.util.{Await, Future, Time}
+import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -190,7 +191,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     assert(exc.getMessage.contains(heapBalancerEmptyGroup))
   }
 
-  test("balance evenly between nonhealthy services") {
+  test("balance evenly between unhealthy services") {
     val ctx = new Ctx
     import ctx._
 
@@ -226,7 +227,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     assert(calls.sum === N)
   }
 
-  test("recover nonhealthy services when they become available again") {
+  test("recover unhealthy services when they become available again") {
     val ctx = new Ctx
     import ctx._
 
@@ -242,7 +243,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     for (f <- factories drop 1) assert(f.load === 101)
   }
 
-  test("properly remove a nonhealthy service") {
+  test("properly remove a unhealthy service") {
     val ctx = new Ctx
     import ctx._
 
@@ -281,4 +282,37 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
 
     assertGauge("available", N)
   }
+
+  test("balance evenly between 2 unhealthy services") {
+    val ctx = new Ctx
+    import ctx._
+
+    val factories = Seq(new LoadedFactory("left"), new LoadedFactory("right"))
+    val group = Group.mutable[ServiceFactory[Unit, LoadedFactory]](
+      factories:_*)
+
+    val b = new HeapBalancer[Unit, LoadedFactory](group, statsReceiver)
+
+    b(); b(); b(); b()
+
+    factories(0).setAvailable(false)
+    factories(1).setAvailable(false)
+
+    for (_ <- 0 until 1000) b()
+    assert(factories(0).load === 502)
+    assert(factories(1).load === 502)
+
+    factories(1).setAvailable(true)
+
+    for (_ <- 0 until 1000) b()
+    assert(factories(0).load === 502)
+    assert(factories(1).load === 1502)
+
+    group() -= factories(1)
+
+    for (_ <- 0 until 1000) b()
+    assert(factories(0).load === 1502)
+    assert(factories(1).load === 1502)
+  }
+
 }
