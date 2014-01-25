@@ -69,11 +69,11 @@ private object ClassPath {
     ents
   }
 
-  private def browseUri(uri: URI, loader: ClassLoader, buf: mutable.Buffer[Info]) {
+  private[finagle] def browseUri(uri: URI, loader: ClassLoader, buf: mutable.Buffer[Info]) {
     if (uri.getScheme != "file")
       return
     val f = new File(uri)
-    if (!f.exists())
+    if (!(f.exists() && f.canRead()))
       return
 
    if (f.isDirectory)
@@ -85,7 +85,7 @@ private object ClassPath {
   private def browseDir(
       dir: File, loader: ClassLoader, 
       prefix: String, buf: mutable.Buffer[Info]) {
-    if (ignoredPackages exists (_ == prefix))
+    if (ignoredPackages contains prefix)
       return
 
     for (f <- dir.listFiles)
