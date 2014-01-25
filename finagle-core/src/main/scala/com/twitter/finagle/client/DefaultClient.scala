@@ -181,7 +181,7 @@ case class DefaultClient[Req, Rep](
           log.log(Level.WARNING, "Name resolution is pending")
           g() = Set()
         case Addr.Neg =>
-          log.log(Level.WARNING, "Name resolution is negative")
+          log.log(Level.WARNING, "Name resolution for " + name + " to " + dest + " failed")
           g() = Set()
       }
 
