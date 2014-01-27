@@ -40,22 +40,38 @@ object Trace  {
    * Get the current trace identifier.  If no identifiers have been
    * pushed, a default one is provided.
    */
-  def id: TraceId = idOption getOrElse defaultId
+  def id: TraceId =
+    idOption match {
+      case Some(id) => id
+      case None     => defaultId
+    }
 
   /**
    * Get the current identifier, if it exists.
    */
-  def idOption: Option[TraceId] = local() flatMap { _.id }
+  def idOption: Option[TraceId] =
+    local() match {
+      case Some(state) => state.id
+      case None        => None
+    }
 
   /**
    * @return true if the current trace id is terminal
    */
-  def isTerminal: Boolean = local() exists { _.terminal }
+  def isTerminal: Boolean =
+    local() match {
+      case Some(state) => state.terminal
+      case None        => false
+    }
 
   /**
    * @return the current list of tracers
    */
-  def tracers: List[Tracer] = local() map { _.tracers } getOrElse Nil
+  def tracers: List[Tracer] =
+    local() match {
+      case Some(state) => state.tracers
+      case None        => Nil
+    }
 
   /**
    * Completely clear the trace stack.
@@ -74,7 +90,7 @@ object Trace  {
    */
   def disable() = tracingEnabled = false
 
-    /**
+  /**
    * Create a derivative TraceId. If there isn't a
    * current ID, this becomes the root id.
    */
@@ -153,7 +169,12 @@ object Trace  {
       local() = newState
   }
 
-  def state: TraceState = local() getOrElse NoState
+  def state: TraceState =
+    local() match {
+      case Some(state) => state
+      case None        => NoState
+    }
+
   def state_=(state: TraceState) = state match {
     case NoState =>
     case s: State => local.set(Some(s))

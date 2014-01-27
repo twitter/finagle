@@ -74,6 +74,9 @@ class Sampler {
    * @return true if we should keep it, false for throw away
    */
   def sampleRecord(record: Record): Boolean = {
-    record.traceId.sampled.getOrElse(sampleTrace(record.traceId).get)
+    sampleTrace(record.traceId) match {
+      case Some(sampled) => sampled
+      case None          => false
+    }
   }
 }
