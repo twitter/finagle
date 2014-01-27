@@ -15,7 +15,7 @@ import org.jboss.netty.handler.codec.http.{HttpChunk, HttpRequest, HttpResponse}
  * The dispatcher modifies each request with Dtab encoding and streams chunked
  * responses via `Reader`.
  */
-private[finagle] class HttpClientDispatcher[Req <: HttpRequest](
+class HttpClientDispatcher[Req <: HttpRequest](
   transIn: Transport[Any, Any]
 ) extends GenSerialClientDispatcher[Req, Response, Any, Any](transIn) {
 
