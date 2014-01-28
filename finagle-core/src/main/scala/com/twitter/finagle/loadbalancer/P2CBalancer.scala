@@ -11,6 +11,14 @@ import scala.annotation.tailrec
 import scala.collection.immutable
 import scala.collection.mutable
 
+object P2CBalancerFactory extends WeightedLoadBalancerFactory {
+  def newLoadBalancer[Req, Rep](
+    weighted: Var[Set[(ServiceFactory[Req, Rep], Double)]],
+    statsReceiver: StatsReceiver,
+    emptyException: NoBrokersAvailableException): ServiceFactory[Req, Rep] =
+    new P2CBalancer[Req,Rep](weighted, statsReceiver=statsReceiver)
+}
+
 private object P2CBalancer {
   case class Node[-Req, +Rep](
     factory: ServiceFactory[Req, Rep],

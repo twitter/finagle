@@ -4,7 +4,8 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.factory._
 import com.twitter.finagle.filter.{ExceptionSourceFilter, MonitorFilter}
-import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, HeapBalancerFactory}
+import com.twitter.finagle.loadbalancer.{
+  HeapBalancer, HeapBalancerFactory, WeightedLoadBalancerFactory}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{
   BroadcastStatsReceiver, ClientStatsReceiver, NullStatsReceiver, RollupStatsReceiver, 
@@ -70,7 +71,7 @@ case class DefaultClient[Req, Rep](
   tracer: Tracer  = DefaultTracer,
   monitor: Monitor = DefaultMonitor,
   reporter: ReporterFactory = LoadedReporterFactory,
-  loadBalancerFactory: LoadBalancerFactory = HeapBalancerFactory
+  loadBalancer: WeightedLoadBalancerFactory = HeapBalancerFactory.toWeighted
 ) extends Client[Req, Rep] {
   com.twitter.finagle.Init()
   val globalStatsReceiver = new RollupStatsReceiver(statsReceiver)
@@ -158,7 +159,8 @@ case class DefaultClient[Req, Rep](
 
     val traced: Transformer[Req, Rep] = new TracingFilter[Req, Rep](tracer) andThen _
 
-    val observed: Transformer[Req, Rep] = new StatsFactoryWrapper(_, globalStatsReceiver)
+    val observed: Transformer[Req, Rep] =
+      new StatsFactoryWrapper(_, globalStatsReceiver)
 
     val noBrokersException = new NoBrokersAvailableException(name)
 
@@ -185,15 +187,19 @@ case class DefaultClient[Req, Rep](
           g() = Set()
       }
 
-      val endpoints = g map { bindStack(_) }
-      val balanced = loadBalancerFactory.newLoadBalancer(
-        endpoints,
-        statsReceiver.scope("loadbalancer"),
-        noBrokersException
-      )
+      // TODO: use com.twitter.util.Event here
+      val endpoints = g map {
+        case WeightedSocketAddress(sa, w) => (bindStack(sa), w)
+        case sa => (bindStack(sa), 1D)
+      }
 
-      // observeUntil fails the future on interrupts, but ready should not interruptible
-      // DelayedFactory implicitly masks this future--interrupts will not be propagated to it
+      val balanced = loadBalancer.newLoadBalancer(
+        endpoints.set, statsReceiver.scope("loadbalancer"),
+        noBrokersException)
+
+      // observeUntil fails the future on interrupts, but ready
+      // should not be interruptible DelayedFactory implicitly masks
+      // this future--interrupts will not be propagated to it
       val ready = v.observeUntil(_ != Addr.Pending)
       val f = ready map (_ => balanced)
 
