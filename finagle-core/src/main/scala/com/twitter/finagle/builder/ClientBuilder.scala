@@ -47,18 +47,20 @@ package com.twitter.finagle.builder
 
 import com.twitter.finagle._
 import com.twitter.finagle.filter.ExceptionSourceFilter
-import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, HeapBalancerFactory}
+import com.twitter.finagle.loadbalancer.{
+  DefaultBalancerFactory, LoadBalancerFactory, WeightedLoadBalancerFactory}
 import com.twitter.finagle.netty3.ChannelSnooper
-import com.twitter.finagle.service.{FailureAccrualFactory, ProxyService,
-  RetryPolicy, RetryingFilter, StatsFilter, TimeoutFilter}
+import com.twitter.finagle.service.{
+  FailureAccrualFactory, ProxyService, RetryPolicy, RetryingFilter, TimeoutFilter, StatsFilter}
 import com.twitter.finagle.socks.SocksProxyFlags
 import com.twitter.finagle.ssl.{Engine, Ssl}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, Tracer}
 import com.twitter.finagle.util._
 import com.twitter.util.TimeConversions._
-import com.twitter.util.{Duration, Future, Monitor,
-  NullMonitor, Time, Timer, Try, Promise, Return, Throw, Var}
+import com.twitter.util.{
+  Duration, Future, Monitor, NullMonitor, Promise, Return, Throw, Time,
+  Timer, Try, Var}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.{Logger, Level}
@@ -160,7 +162,7 @@ private[builder] final case class ClientTimeoutConfig(
  */
 private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit](
   private val _dest                      : Option[Name]                  = None,
-  private val _loadBalancer              : Option[LoadBalancerFactory]   = None,
+  private val _loadBalancer              : Option[WeightedLoadBalancerFactory]   = None,
   private val _codecFactory              : Option[CodecFactory[Req, Rep]#Client] = None,
   private val _keepAlive                 : Option[Boolean]               = None,
   private val _statsReceiverConfig       : StatsReceiverConfig           = StatsReceiverConfig(),
@@ -408,6 +410,13 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * a strategy for choosing one from a set of hosts to service a request
    */
   def loadBalancer(loadBalancer: LoadBalancerFactory): This =
+    withConfig(_.copy(_loadBalancer = Some(loadBalancer.toWeighted)))
+
+  /**
+   * Specify a load balancer.  The load balancer implements
+   * a strategy for choosing one from a set of hosts to service a request
+   */
+  def loadBalancer(loadBalancer: WeightedLoadBalancerFactory): This =
     withConfig(_.copy(_loadBalancer = Some(loadBalancer)))
 
   /**
@@ -831,7 +840,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       tracer = tracer,
       monitor = monitor,
       reporter = NullReporterFactory,
-      loadBalancerFactory = config.loadBalancer getOrElse HeapBalancerFactory
+      loadBalancer = config.loadBalancer getOrElse DefaultBalancerFactory
     )
 
     // Note that we use newStack directly here in order to

@@ -10,6 +10,7 @@ import java.net.SocketAddress
  * (Similar to a symbolic link in Unix.)
  */
 sealed trait Addr
+
 object Addr {
   /**
    * A bound name. The object is replicated
@@ -52,4 +53,3 @@ object Addr {
     def apply(why: String): Failed = Failed(new Exception(why))
   }
 }
-

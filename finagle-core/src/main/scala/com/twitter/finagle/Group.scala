@@ -144,6 +144,10 @@ object Group {
     }
   }
 
+  def fromVar[T](v: Var[Set[T]]): Group[T] = new Group[T] {
+    protected[finagle] val set = v
+  }
+
   /**
    * The empty group of type `T`.
    */
