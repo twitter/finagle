@@ -13,22 +13,12 @@ object HeapBalancer {
   val Zero = Int.MinValue + 1
 }
 
-object HeapBalancerFactory
-    extends LoadBalancerFactory
-    with WeightedLoadBalancerFactory {
+object HeapBalancerFactory extends LoadBalancerFactory {
   def newLoadBalancer[Req, Rep](
       group: Group[ServiceFactory[Req, Rep]],
       statsReceiver: StatsReceiver,
       emptyException: NoBrokersAvailableException) =
-    new HeapBalancer[Req, Rep](group.set, statsReceiver, emptyException)
-
-  def newLoadBalancer[Req, Rep](
-      weighted: Var[Set[(ServiceFactory[Req, Rep], Double)]],
-      statsReceiver: StatsReceiver,
-      emptyException: NoBrokersAvailableException) =
-    new HeapBalancer[Req, Rep](
-      weighted map { set => set map { case (f, _) => f } },
-      statsReceiver, emptyException)
+    new HeapBalancer[Req,Rep](group, statsReceiver, emptyException)
 }
 
 
@@ -36,9 +26,9 @@ object HeapBalancerFactory
  * An efficient load balancer that operates on Groups.
  */
 class HeapBalancer[Req, Rep](
-  factories: Var[Set[ServiceFactory[Req, Rep]]],
+  group: Group[ServiceFactory[Req, Rep]],
   statsReceiver: StatsReceiver = NullStatsReceiver,
-  emptyException: Throwable = new NoBrokersAvailableException,
+  emptyException: NoBrokersAvailableException = new NoBrokersAvailableException,
   rng: Random = new Random
 ) extends ServiceFactory[Req, Rep] {
 
@@ -86,7 +76,7 @@ class HeapBalancer[Req, Rep](
     heap
   }
   private[this] var snap = Set[ServiceFactory[Req, Rep]]()
-  factories observe { newSet =>
+  group.set observe { newSet =>
     updateGroup(newSet)
   }
 

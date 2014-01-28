@@ -2,9 +2,9 @@ package com.twitter.finagle.serverset2
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.service.Backoff
-import com.twitter.finagle.util.DefaultTimer
+import com.twitter.finagle.util.DefaultTimer 
 import com.twitter.io.Buf
-import com.twitter.util.{Closable, Var,  Future, Promise, Duration, Return, Throw, Timer, Memoize}
+import com.twitter.util.{Closable, Var,  Future, Promise, Duration, Return, Throw, Timer}
 import org.apache.zookeeper.Watcher.Event.{EventType, KeeperState}
 import org.apache.zookeeper.data.Stat
 import org.apache.zookeeper.{ZooKeeper, KeeperException, WatchedEvent, Watcher}
@@ -95,9 +95,10 @@ private trait Zk {
    * The returned Var is asynchronous: watches aren't reissued
    * when the Var is no longer observed.
    */
-  private def op[T](which: String, arg: String)(go: => Future[Watched[T]]): Var[Op[T]] = 
+  private def op[T](go: => Future[Watched[T]]): Var[Op[T]] = 
     Var.async(Op.Pending: Op[T]) { v =>
       @volatile var closed = false
+
       def loop(): Unit = 
         if (!closed) safeRetry(go, retryBackoffs) respond {
           case Throw(exc) => 
@@ -115,31 +116,22 @@ private trait Zk {
               case WatchState.SessionState(state) =>
                 v() = Op.Fail(new Exception(""+state))
             }
-
         }
 
       loop()
-      
+
       Closable.make { deadline =>
         closed = true
         Future.Done
       }
     }
-   
-   private val existsWatchOp = Memoize { path: String =>
-     op("existsOf", path) { existsWatch(path) }
-   }
-   
-   private val childrenWatchOp = Memoize { path: String =>
-     op("childrenWatchOp", path) { getChildrenWatch(path) }
-   }
 
   /**
    * A persistent version of exists: existsOf returns a Var representing
    * the current (best-effort) Stat for the given path.
    */
-  def existsOf(path: String): Var[Op[Option[Stat]]] =
-    existsWatchOp(path)
+  def existsOf(path: String): Var[Op[Option[Stat]]] = 
+    op { existsWatch(path) }
 
   /**
    * A persistent version of getChildren: childrenOf returns a Var
@@ -150,7 +142,7 @@ private trait Zk {
     Op.flatMap(existsOf(path)) {
       case None => Var.value(Op.Ok(Set.empty))
       case Some(_) =>
-        childrenWatchOp(path) flatMap {
+        op { getChildrenWatch(path) } flatMap {
           case Op.Pending => Var.value(Op.Pending)
           case Op.Ok(children) => Var.value(Op.Ok(children.toSet))
           // This can happen when exists() races with getChildren.
@@ -161,17 +153,6 @@ private trait Zk {
         }
     }
 
-  private val immutableDataOf_ = Memoize { path: String =>
-    Var.async(Op.Pending: Op[Buf]) { v =>
-      safeRetry(getData(path), retryBackoffs) respond {
-        case Throw(exc) => v() = Op.Fail(exc)
-        case Return((_, buf)) => v() = Op.Ok(buf)
-      }
-      
-      Closable.nop
-    }
-  }
-
   /**
    * A persistent version of getData: immutableDataOf returns a Var
    * representing the current (best-effort) contents of the given
@@ -179,7 +160,14 @@ private trait Zk {
    * leave a watch on the node to look for changes.
    */
   def immutableDataOf(path: String): Var[Op[Buf]] =
-    immutableDataOf_(path)
+    Var.async(Op.Pending: Op[Buf]) { v =>
+      safeRetry(getData(path), retryBackoffs) respond {
+        case Throw(exc) => v() = Op.Fail(exc)
+        case Return((_, buf)) => v() = Op.Ok(buf)
+      }
+
+      Closable.nop
+  }
 
   /**
    * Collect immutable data from a number of paths together.
