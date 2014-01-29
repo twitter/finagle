@@ -189,11 +189,7 @@ case class Http(
         val dtab = new DtabFilter[HttpRequest, HttpResponse]
 
         val tracing = if (_enableTracing) {
-          val tracingFilter = new HttpServerTracingFilter[HttpRequest, HttpResponse](
-            config.serviceName,
-            config.boundInetSocketAddress
-          )
-          tracingFilter
+          new HttpServerTracingFilter[HttpRequest, HttpResponse](config.serviceName)
         } else {
           Filter.identity[HttpRequest, HttpResponse]
         }
@@ -276,10 +272,13 @@ class HttpClientTracingFilter[Req <: HttpRequest, Res](serviceName: String)
  * Adds tracing annotations for each http request we receive.
  * Including uri, when request was sent and when it was received.
  */
-class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String, boundAddress: InetSocketAddress)
+class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String)
   extends SimpleFilter[Req, Res]
 {
   import HttpTracing._
+
+  @deprecated("boundAddress is unused", "6.11.1")
+  def this(serviceName: String, boundAddress: InetSocketAddress) = this(serviceName)
 
   def apply(request: Req, service: Service[Req, Res]) = Trace.unwind {
 
@@ -392,9 +391,7 @@ case class RichHttp[REQUEST <: Request](
         underlying: ServiceFactory[REQUEST, Response]
       ): ServiceFactory[REQUEST, Response] =
         if (httpFactory._enableTracing) {
-          val tracingFilter = new HttpServerTracingFilter[REQUEST, Response](
-            config.serviceName, config.boundInetSocketAddress)
-          tracingFilter andThen underlying
+          new HttpServerTracingFilter[REQUEST, Response](config.serviceName) andThen underlying
         } else {
           underlying
         }

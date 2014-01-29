@@ -5,6 +5,7 @@ import com.twitter.finagle.dispatch.SerialServerDispatcher
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.HttpTransport
 import com.twitter.finagle.http.filter.DtabFilter
+import com.twitter.finagle.http.{HttpServerTracingFilter, HttpClientTracingFilter}
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.server._
 import com.twitter.util.Future
@@ -29,9 +30,7 @@ trait HttpRichClient { self: Client[HttpRequest, HttpResponse] =>
 
 object HttpTransporter extends Netty3Transporter[Any, Any](
   "http",
-  http.Http()
-    .enableTracing(true)
-    .client(ClientCodecConfig("httpclient")).pipelineFactory
+  http.Http().client(ClientCodecConfig("httpclient")).pipelineFactory
 )
 
 object HttpClient extends DefaultClient[HttpRequest, HttpResponse](
@@ -42,9 +41,7 @@ object HttpClient extends DefaultClient[HttpRequest, HttpResponse](
 
 object HttpListener extends Netty3Listener[Any, Any](
   "http",
-  http.Http()
-    .enableTracing(true)
-    .server(ServerCodecConfig("httpserver", new SocketAddress{})).pipelineFactory
+  http.Http().server(ServerCodecConfig("httpserver", new SocketAddress{})).pipelineFactory
 )
 
 object HttpServer 
@@ -62,11 +59,15 @@ extends DefaultServer[HttpRequest, HttpResponse, Any, Any](
 object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
     with Server[HttpRequest, HttpResponse]
 {
-  def newClient(name: Name, label: String): ServiceFactory[HttpRequest, HttpResponse] =
-    HttpClient.newClient(name, label)
+  def newClient(name: Name, label: String): ServiceFactory[HttpRequest, HttpResponse] = {
+    val tracingFilter = new HttpClientTracingFilter[HttpRequest, HttpResponse](label)
+    tracingFilter andThen HttpClient.newClient(name, label)
+  }
 
-  def serve(addr: SocketAddress, service: ServiceFactory[HttpRequest, HttpResponse]): ListeningServer =
-    HttpServer.serve(addr, service)
+  def serve(addr: SocketAddress, service: ServiceFactory[HttpRequest, HttpResponse]): ListeningServer = {
+    val tracingFilter = new HttpServerTracingFilter[HttpRequest, HttpResponse](HttpServer.name)
+    HttpServer.serve(addr, tracingFilter andThen service)
+  }
 }
 
 package exp {

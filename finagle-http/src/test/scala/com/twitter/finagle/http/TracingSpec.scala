@@ -54,7 +54,7 @@ class TracingSpec extends SpecificationWithJUnit {
       }
 
       val addr = new InetSocketAddress(0)
-      val filter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("testservice", addr)
+      val filter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("testservice")
       val req = Request("/test.json")
       req.headers.add(Header.TraceId, "0000000000000001")
       req.headers.add(Header.SpanId, "0000000000000002")
@@ -72,7 +72,7 @@ class TracingSpec extends SpecificationWithJUnit {
       }
 
       val addr = new InetSocketAddress(0)
-      val filter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("testservice", addr)
+      val filter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("testservice")
       val req = Request("/test.json")
       // push span id, but no trace id
       req.headers.add(Header.SpanId, "0000000000000002")
@@ -88,7 +88,7 @@ class TracingSpec extends SpecificationWithJUnit {
       }
 
       val addr = new InetSocketAddress(0)
-      val filter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("testservice", addr)
+      val filter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("testservice")
       val req = Request("/test.json")
       req.headers.add(Header.TraceId, "0000000000000001")
       req.headers.add(Header.SpanId, "0000000000000002")
@@ -105,7 +105,7 @@ class TracingSpec extends SpecificationWithJUnit {
       }
 
       val addr = new InetSocketAddress(0)
-      val filter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("testservice", addr)
+      val filter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("testservice")
       val req = Request("/test.json")
       req.headers.add(Header.TraceId, "0000000000000001")
       req.headers.add(Header.SpanId, "0000000000000002")
