@@ -11,9 +11,8 @@ trait LogFormatter[-Req, Rep] {
 }
 
 /**
- *  Logging filter.
- *
- * Logs all requests according to formatter.
+ * A [[com.twitter.finagle.Filter]] that logs all requests according to
+ * formatter.
  */
 trait LoggingFilter[Req, Rep] extends SimpleFilter[Req, Rep] {
   val log: Logger

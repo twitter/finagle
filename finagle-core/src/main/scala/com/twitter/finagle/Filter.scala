@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.util.{Future, Time}
 
 /**
- *  A Filter acts as a decorator/transformer of a service. It may apply
+ * A Filter acts as a decorator/transformer of a service. It may apply
  * transformations to the input and output of that service:
  *
  *           (*  MyService  *)
@@ -70,7 +70,7 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
     override def close(deadline: Time) = service.close(deadline)
     override def isAvailable = service.isAvailable
   }
-  
+
   def andThen(f: ReqOut => Future[RepIn]): ReqIn => Future[RepOut] = {
     val service = Service.mk(f)
     (req) => Filter.this.apply(req, service)
@@ -106,7 +106,7 @@ object Filter {
   implicit def canStackFromSvc[Req, Rep]
     : CanStackFrom[Filter[Req, Rep, Req, Rep], Service[Req, Rep]] =
     new CanStackFrom[Filter[Req, Rep, Req, Rep], Service[Req, Rep]] {
-      def toStackable(id: String, filter: Filter[Req, Rep, Req, Rep]) = 
+      def toStackable(id: String, filter: Filter[Req, Rep, Req, Rep]) =
         new Stack.Simple[Service[Req, Rep]](id) {
           def make(params: Params, next: Service[Req, Rep]) = filter andThen next
         }
@@ -115,7 +115,7 @@ object Filter {
   implicit def canStackFromFac[Req, Rep]
     : CanStackFrom[Filter[Req, Rep, Req, Rep], ServiceFactory[Req, Rep]] =
     new CanStackFrom[Filter[Req, Rep, Req, Rep], ServiceFactory[Req, Rep]] {
-      def toStackable(id: String, filter: Filter[Req, Rep, Req, Rep]) = 
+      def toStackable(id: String, filter: Filter[Req, Rep, Req, Rep]) =
         new Stack.Simple[ServiceFactory[Req, Rep]](id) {
           def make(params: Params, next: ServiceFactory[Req, Rep]) = filter andThen next
         }
@@ -129,11 +129,10 @@ object Filter {
 
     def apply(request: Req, service: Service[Req, Rep]) = service(request)
   }
-  
+
   def mk[ReqIn, RepOut, ReqOut, RepIn](
     f: (ReqIn, ReqOut => Future[RepIn]) => Future[RepOut]
   ): Filter[ReqIn, RepOut, ReqOut, RepIn] = new Filter[ReqIn, RepOut, ReqOut, RepIn] {
     def apply(request: ReqIn, service: Service[ReqOut, RepIn]) = f(request, service)
   }
 }
-

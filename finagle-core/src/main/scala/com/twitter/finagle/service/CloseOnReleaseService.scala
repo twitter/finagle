@@ -4,6 +4,10 @@ import com.twitter.finagle.{Service, ServiceClosedException, ServiceProxy, Write
 import com.twitter.util.{Future, Time}
 import java.util.concurrent.atomic.AtomicBoolean
 
+/**
+ * A [[com.twitter.finagle.Service]] that rejects all requests after its `close`
+ * method has been invoked.
+ */
 private[finagle] class CloseOnReleaseService[Req, Rep](underlying: Service[Req, Rep])
   extends ServiceProxy[Req, Rep](underlying)
 {

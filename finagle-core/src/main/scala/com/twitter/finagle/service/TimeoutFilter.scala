@@ -5,9 +5,16 @@ import com.twitter.finagle.{
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util.{Future, Duration, Timer}
 
+object TimeoutFilter {
+  val TimeoutAnnotation = "finagle.timeout"
+}
+
 /**
- * A filter to apply a global timeout to the request. This allows,
- * e.g., for a server to apply a global request timeout.
+ * A [[com.twitter.finagle.Filter]] that applies a global timeout to requests.
+ *
+ * @param timeout the timeout to apply to requests
+ * @param exception an exception object to return in cases of timeout exceedance
+ * @param timer a `Timer` object used to track elapsed time
  */
 class TimeoutFilter[Req, Rep](
     timeout: Duration,
@@ -27,8 +34,4 @@ class TimeoutFilter[Req, Rep](
         Future.exception(exception)
     }
   }
-}
-
-object TimeoutFilter {
-  val TimeoutAnnotation = "finagle.timeout"
 }
