@@ -1,7 +1,8 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle._
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.util.Throwables
 import com.twitter.util.{Future, Stopwatch, Throw, Return}
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -47,13 +48,11 @@ class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
         case Throw(e) =>
           dispatchCount.incr()
           latencyStat.add(elapsed().inMilliseconds)
-          def flatten(ex: Throwable): Seq[String] =
-            if (ex eq null) Seq[String]() else ex.getClass.getName +: flatten(ex.getCause)
-          failureReceiver.counter(flatten(e): _*).incr()
+          failureReceiver.counter(Throwables.mkString(e): _*).incr()
           e match {
             case sourced: SourcedException if sourced.serviceName != "unspecified" =>
               sourcedFailuresReceiver
-                .counter(sourced.serviceName +: flatten(sourced): _*)
+                .counter(sourced.serviceName +: Throwables.mkString(sourced): _*)
                 .incr()
             case _ =>
           }

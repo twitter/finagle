@@ -8,7 +8,7 @@ import com.twitter.finagle.loadbalancer.{
   HeapBalancer, HeapBalancerFactory, WeightedLoadBalancerFactory}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{
-  BroadcastStatsReceiver, ClientStatsReceiver, NullStatsReceiver, RollupStatsReceiver, 
+  BroadcastStatsReceiver, ClientStatsReceiver, NullStatsReceiver, RollupStatsReceiver,
   StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.{
@@ -160,12 +160,12 @@ case class DefaultClient[Req, Rep](
     val traced: Transformer[Req, Rep] = new TracingFilter[Req, Rep](tracer) andThen _
 
     val observed: Transformer[Req, Rep] =
-      new StatsFactoryWrapper(_, globalStatsReceiver)
+      new StatsFactoryWrapper(_, globalStatsReceiver.scope("service_creation"))
 
     val noBrokersException = new NoBrokersAvailableException(name)
 
     val balanced: Name => ServiceFactory[Req, Rep] = dest => {
-      // TODO: load balancer consumes Var[Addr] directly., 
+      // TODO: load balancer consumes Var[Addr] directly.,
       // or at least Var[SocketAddress]
       val g = Group.mutable[SocketAddress]()
       val v = dest.bind()
@@ -176,7 +176,7 @@ case class DefaultClient[Req, Rep](
           g() = Set()
           log.log(Level.WARNING, "Name binding failure", e)
         case Addr.Delegated(where) =>
-          log.log(Level.WARNING, 
+          log.log(Level.WARNING,
             "Name was delegated to %s, but delegation is not supported".format(where))
           g() = Set()
         case Addr.Pending =>
