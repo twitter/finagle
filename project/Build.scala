@@ -394,7 +394,10 @@ object Finagle extends Build {
       sharedSettings
     ).settings(
       name := "finagle-mysql",
-      libraryDependencies ++= Seq(util("logging"))
+      libraryDependencies ++= Seq(
+        util("logging"),
+        "mysql" % "mysql-connector-mxj" % "5.0.12" % "test"
+      )
     ).dependsOn(finagleCore)
 
   lazy val finagleExp = Project(
