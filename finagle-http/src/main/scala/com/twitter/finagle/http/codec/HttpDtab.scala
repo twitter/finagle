@@ -19,7 +19,7 @@ import java.nio.charset.Charset
  * Header values are base64-encoded ("standard" alphabet)
  * Utf8 strings.
  */
-private[http] object HttpDtab {
+object HttpDtab {
   private val Prefix = "X-Dtab-"
   private val Maxsize = 100
   private val Utf8 = Charset.forName("UTF-8") 
