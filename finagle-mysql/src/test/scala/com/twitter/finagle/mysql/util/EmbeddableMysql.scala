@@ -8,6 +8,7 @@ import java.io.File
 import java.util.UUID
 import java.util.logging.Logger
 import scala.collection.JavaConversions._
+import com.twitter.logging.Level
 
 /**
  * Creates an embeddable instance of MySQL.  By default, the database will be created in a
@@ -66,7 +67,12 @@ class EmbeddableMysql(
 
   def shutdown() {
     log.info("MySql is shutting down...")
-    mysqldRsrc.shutdown()
+    try {
+      mysqldRsrc.shutdown()
+    } catch {
+      case t: Throwable =>
+        log.log(Level.WARNING, "while shutting down", t)
+    }
     log.info("MySql shutdown")
   }
 
