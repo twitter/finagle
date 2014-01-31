@@ -22,6 +22,8 @@ class ClientIdRequiredFilterSpec extends SpecificationWithJUnit with Mockito {
       }
     }
 
+    // Flaky test, see go/jira/CSL-815
+    if (!sys.props.contains("SKIP_FLAKY"))
     "throws NoClientIdSpecifiedException when ClientId does not exist" in {
       Await.result(service(request)) must throwA[NoClientIdSpecifiedException]
       there was no(underlying).apply(any[String])
