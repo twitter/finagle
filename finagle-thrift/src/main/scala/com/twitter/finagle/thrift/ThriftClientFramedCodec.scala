@@ -180,7 +180,6 @@ private[thrift] class TTwitterFilter(
 
       clientId foreach { clientId =>
         header.setClient_id(clientId.toThrift)
-        ClientId.set(Some(clientId))
       }
 
       Trace.id.sampled match {
