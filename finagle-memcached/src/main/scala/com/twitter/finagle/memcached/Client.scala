@@ -399,7 +399,10 @@ protected class ConnectedClient(protected val service: Service[Command, Response
         val misses = keys -- hits.keySet
         GetResult(hits, misses)
       case Error(e) => throw e
-      case _        => throw new IllegalStateException
+      case other    =>
+        throw new IllegalStateException(
+          "Invalid response type from get: %s".format(other.getClass.getSimpleName)
+        )
     } handle {
       case t: RequestException => GetResult(failures = (keys map { (_, t) }).toMap)
       case t: ChannelException => GetResult(failures = (keys map { (_, t) }).toMap)
