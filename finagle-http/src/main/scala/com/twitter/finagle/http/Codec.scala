@@ -389,12 +389,17 @@ case class RichHttp[REQUEST <: Request](
 
       override def prepareConnFactory(
         underlying: ServiceFactory[REQUEST, Response]
-      ): ServiceFactory[REQUEST, Response] =
-        if (httpFactory._enableTracing) {
-          new HttpServerTracingFilter[REQUEST, Response](config.serviceName) andThen underlying
-        } else {
+      ): ServiceFactory[REQUEST, Response] = {
+        val dtab = new DtabFilter[REQUEST, Response]
+        val tracing = if (httpFactory._enableTracing)
+          new HttpClientTracingFilter[REQUEST, Response](config.serviceName)
+        else
+          Filter.identity[REQUEST, Response]
+
+        tracing andThen
+          dtab andThen
           underlying
-        }
+      }
     }
   }
 }
