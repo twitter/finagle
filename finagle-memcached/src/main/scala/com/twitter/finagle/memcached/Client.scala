@@ -824,6 +824,7 @@ case class KetamaClientBuilder private[memcached] (
   _hashName: Option[String],
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
   _failureAccrualParams: (Int, Duration) = (5, 30.seconds),
+  _ejectFailedHost: Boolean = true,
   oldLibMemcachedVersionComplianceMode: Boolean = false,
   numReps: Int = KetamaClient.DefaultNumReps
 ) {
@@ -873,6 +874,9 @@ case class KetamaClientBuilder private[memcached] (
   def enableOldLibMemcachedVersionComplianceMode(): KetamaClientBuilder =
     copy(oldLibMemcachedVersionComplianceMode = true)
 
+  def ejectFailedHost(eject: Boolean): KetamaClientBuilder =
+    copy(_ejectFailedHost = eject)
+
   def build(): Client = {
     val builder =
       (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1).daemon(true))
@@ -882,7 +886,7 @@ case class KetamaClientBuilder private[memcached] (
       node: CacheNode, key: KetamaClientKey, broker: Broker[NodeHealth], faParams: (Int, Duration)
     ) = {
       builder.hosts(new InetSocketAddress(node.host, node.port))
-          .failureAccrualFactory(filter(key, broker, faParams) _)
+          .failureAccrualFactory(filter(key, broker, faParams, _ejectFailedHost) _)
           .build()
     }
 
@@ -901,14 +905,16 @@ case class KetamaClientBuilder private[memcached] (
   }
 
   private[this] def filter(
-    key: KetamaClientKey, broker: Broker[NodeHealth], faParams: (Int, Duration)
+    key: KetamaClientKey, broker: Broker[NodeHealth], faParams: (Int, Duration), ejectFailedHost: Boolean
   )(timer: Timer) = {
     val (_numFailures, _markDeadFor) = faParams
     new ServiceFactoryWrapper {
       def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) = {
-          new KetamaFailureAccrualFactory(
-            factory, _numFailures, _markDeadFor, timer, key, broker
-          )
+          if (ejectFailedHost)
+            new KetamaFailureAccrualFactory(
+              factory, _numFailures, _markDeadFor, timer, key, broker)
+          else
+            new FailureAccrualFactory(factory, _numFailures, _markDeadFor, timer)
         }
     }
   }
