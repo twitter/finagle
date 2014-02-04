@@ -1,8 +1,5 @@
-Finagle!
-========
-
-.. image:: _static/governor.png
-   :class: floatingflask
+.. image:: _static/logo_medium.png
+   :class: logo
 
 Finagle is an extensible RPC system for the JVM, used to construct
 high-concurrency servers. Finagle implements uniform client and
