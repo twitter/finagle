@@ -23,7 +23,7 @@ object Finagle extends Build {
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
   )
   val scroogeLibs = thriftLibs ++ Seq(
-    "com.twitter" %% "scrooge-core" % "3.11.0")
+    "com.twitter" %% "scrooge-core" % "3.12.2")
 
   def util(which: String) =
     "com.twitter" %% ("util-"+which) % utilVersion excludeAll(
@@ -380,10 +380,6 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-thriftmux",
-    ScroogeSBT.scroogeThriftNamespaceMap in Test := Map(
-      "com.twitter.finagle.thriftmux.thriftjava" ->
-        "com.twitter.finagle.thriftmux.thriftscala"
-    ),
     libraryDependencies ++= scroogeLibs
   ).dependsOn(finagleCore, finagleMux, finagleThrift)
 
