@@ -124,6 +124,38 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
         inst.zookeeperAddress.getPort))
       eventually { assert(Var.sample(blahVa) === Addr.Bound(blahAddr)) }
     }
+
+    test("filter by endpoint") {
+      val path = "/bar/foo/baz"
+      val serverSet = new ServerSetImpl(inst.zookeeperClient, path)
+      val clust = new ZkGroup(serverSet, path)
+      assert(clust().isEmpty)
+
+      // assert that 3 hosts show up in an unfiltered cluster
+      Seq(8080, 8081, 8082).foreach { id =>
+        val sockaddr = new InetSocketAddress(id)
+
+        serverSet.join(
+          sockaddr,
+          Map[String, InetSocketAddress](id.toString -> sockaddr).asJava
+        ).update(ALIVE)
+      }
+
+      eventually { assert(clust().size == 3) }
+
+      val filteredAddr =
+        new ZkResolver(factory).resolve(
+          Set(inst.zookeeperAddress),
+          path,
+          endpoint = Some("8080")
+        )
+      eventually {
+        Var.sample(filteredAddr) match {
+          case Addr.Bound(addrs) if addrs.size == 1 => true
+          case _ => fail()
+        }
+      }
+    }
   }
 
   test("resolves from the main resolver") {

@@ -88,11 +88,11 @@ class ZkResolver(factory: ZkClientFactory) extends Resolver {
       shardId: Option[Int] = None): Var[Addr] = 
     synchronized {
       cache.getOrElseUpdate(
-        (zkHosts, path, endpoint, shardId), 
-        newVar(zkHosts, path, newCollector(endpoint, shardId)))
+        (zkHosts, path, endpoint, shardId),
+        newVar(zkHosts, path, newToSocketAddrs(endpoint, shardId)))
     }
 
-  private def newCollector(endpoint: Option[String], shardId: Option[Int]) = {
+  private def newToSocketAddrs(endpoint: Option[String], shardId: Option[Int]) = {
 
     val getEndpoint: PartialFunction[ServiceInstance, Endpoint] = endpoint match {
       case Some(epname) => {
@@ -111,19 +111,21 @@ class ZkResolver(factory: ZkClientFactory) extends Resolver {
       case None => { case x => x }
     }
 
-    filterShardId andThen getEndpoint andThen { case ep =>
-      new InetSocketAddress(ep.getHost, ep.getPort): SocketAddress
-    }
+    val toSocketAddr: Endpoint => SocketAddress = (ep: Endpoint) =>
+      new InetSocketAddress(ep.getHost, ep.getPort)
+
+    (insts: Set[ServiceInstance]) =>
+      insts.collect(filterShardId).collect(getEndpoint).map(toSocketAddr)
   }
 
   private def newVar(
-      zkHosts: Set[InetSocketAddress], 
-      path: String, coll: PartialFunction[ServiceInstance, SocketAddress]) = {
+      zkHosts: Set[InetSocketAddress],
+      path: String, toSocketAddrs: Set[ServiceInstance] => Set[SocketAddress]) = {
 
     val (zkClient, zkHealthHandler) = factory.get(zkHosts)
     val zkOffer = new ZkOffer(new ServerSetImpl(zkClient, path), path)
-    val addrOffer = zkOffer map { newSet => 
-      val sockaddrs = newSet.collect(coll)
+    val addrOffer = zkOffer map { newSet =>
+      val sockaddrs = toSocketAddrs(newSet)
       if (sockaddrs.nonEmpty) Addr.Bound(sockaddrs)
       else Addr.Neg
     }
