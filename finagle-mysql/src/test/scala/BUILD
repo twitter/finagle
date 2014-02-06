@@ -1,27 +1,9 @@
-jar_library(name = 'mysql-connector-mxj',
-  dependencies = [
-    jar(org = 'mysql', name = 'mysql-connector-mxj-gpl', rev = '5.0.11')
-  ]
-)
-
-jar_library(name = 'mysql-connector-mxj-db-files',
-  dependencies = [
-    jar(org = 'mysql', name = 'mysql-connector-mxj-gpl-db-files', rev = '5.0.11')
-  ]
-)
-
-jar_library(name = 'mysql-connector-java',
-  dependencies = [
-    jar(org = 'mysql', name = 'mysql-connector-java', rev = '5.1.25')
-  ]
-)
-
 scala_library(name='testing',
   dependencies=[
-    pants('finagle/finagle-mysql'),
-    pants(':mysql-connector-mxj'),
-    pants(':mysql-connector-mxj-db-files'),
-    pants(':mysql-connector-java')
+    pants('3rdparty/jvm/mysql:mysql-connector-mxj-gpl'),
+    pants('3rdparty/jvm/mysql:mysql-connector-mxj-gpl-db-files'),
+    pants('3rdparty:mysql-connector-java'),
+    pants('finagle/finagle-mysql')
   ],
   sources=rglobs('*.scala')
 )
@@ -33,10 +15,7 @@ junit_tests(name='scala',
     pants('3rdparty:netty'),
     pants('3rdparty:specs'),
     pants('3rdparty:scalatest'),
-    pants('finagle/finagle-mysql'),
-    pants(':mysql-connector-mxj'),
-    pants(':mysql-connector-mxj-db-files'),
-    pants(':mysql-connector-java'),
+    pants(':testing'),
     pants('util/util-core')
   ],
   sources=rglobs('*.scala'),
