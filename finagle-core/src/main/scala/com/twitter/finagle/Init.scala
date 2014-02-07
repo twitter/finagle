@@ -1,9 +1,11 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.exp.FinagleScheduler
 import com.twitter.util.NonFatal
 import java.util.Properties
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.{Level, Logger}
+
 
 /**
  * Global initialization of Finagle.
@@ -15,6 +17,8 @@ private object Init {
   def apply() {
     if (!inited.compareAndSet(false, true))
       return
+
+    FinagleScheduler.init()
 
     val p = new Properties
     try {
