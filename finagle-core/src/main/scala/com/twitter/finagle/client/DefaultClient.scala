@@ -169,7 +169,7 @@ case class DefaultClient[Req, Rep](
       // or at least Var[SocketAddress]
       val g = Group.mutable[SocketAddress]()
       val v = dest.bind()
-      v observe {
+      val observation = v.observe {
         case Addr.Bound(sockaddrs) =>
           g() = sockaddrs
         case Addr.Failed(e) =>
@@ -203,7 +203,10 @@ case class DefaultClient[Req, Rep](
       val ready = v.observeUntil(_ != Addr.Pending)
       val f = ready map (_ => balanced)
 
-      new DelayedFactory(f)
+      new DelayedFactory(f) {
+        override def close(after: Duration) =
+          Future.join(Seq(observation.close(after), super.close(after)))
+      }
     }
 
     traced compose
