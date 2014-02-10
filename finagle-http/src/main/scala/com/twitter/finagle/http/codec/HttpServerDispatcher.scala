@@ -59,7 +59,7 @@ class HttpServerDispatcher[REQUEST <: Request](
   protected def handle(response: HttpResponse): Future[Unit] = response match {
     case rep: Response =>
       if (rep.isChunked) {
-        trans.write(rep) before streamChunks(rep.reader)
+        trans.write(rep) before streamChunks(rep.reader) onFailure { _ => rep.reader.discard }
       } else {
         // Ensure Content-Length is set if not chunked
         if (!rep.headers.contains(HttpHeaders.Names.CONTENT_LENGTH))
