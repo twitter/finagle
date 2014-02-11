@@ -1,6 +1,7 @@
 package com.twitter.finagle.util
 
 import scala.annotation.tailrec
+import scala.collection.mutable.ArrayBuffer
 
 object Throwables {
   /**
@@ -8,13 +9,13 @@ object Throwables {
    * classname strings.
    */
   def mkString(ex: Throwable): Seq[String] = {
-    @tailrec def rec(ex: Throwable, result: Seq[String]): Seq[String] = {
+    @tailrec def rec(ex: Throwable, buf: ArrayBuffer[String]): Seq[String] = {
       if (ex eq null)
-        result
+        buf.result
       else
-        rec(ex.getCause, result :+ ex.getClass.getName)
+        rec(ex.getCause, buf += ex.getClass.getName)
     }
 
-    rec(ex, Seq.empty)
+    rec(ex, ArrayBuffer.empty)
   }
 }
