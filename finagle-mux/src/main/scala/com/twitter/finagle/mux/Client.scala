@@ -1,15 +1,15 @@
 package com.twitter.finagle.mux
 
+import com.twitter.finagle.mux.lease.Acting
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.Context
-import com.twitter.finagle.{WriteException, NoStacktrace, Dtab}
-import com.twitter.util.{Future, Promise, Time}
+import com.twitter.finagle.{Context, Dtab, Service, WriteException, NoStacktrace}
 import com.twitter.io.Buf
+import com.twitter.util.{Future, Promise, Time, Duration}
+import com.twitter.conversions.time._
 import java.util.logging.Logger
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-
-import com.twitter.finagle.Service
 
 object RequestNackedException
   extends Exception("The request was nackd by the server")
@@ -23,6 +23,20 @@ case class ServerApplicationError(what: String)
   extends Exception(what)
   with NoStacktrace
 
+private case class Lease(end: Time) {
+  def remaining: Duration = end.sinceNow
+  def expired: Boolean = end < Time.now
+}
+
+private object Lease {
+  import Message.Tlease
+
+  def parse(unit: Byte, howMuch: Long): Option[Lease] = unit match {
+    case Tlease.MillisDuration => Some(new Lease(howMuch.milliseconds.fromNow))
+    case _ => None
+  }
+}
+
 private object Cap extends Enumeration {
   type State = Value
   val Unknown, Yes, No = Value
@@ -31,16 +45,23 @@ private object Cap extends Enumeration {
 /**
  * A ClientDispatcher for the mux protocol.
  */
-private[finagle] class ClientDispatcher(trans: Transport[ChannelBuffer, ChannelBuffer])
-  extends Service[ChannelBuffer, ChannelBuffer]
-{
+private[finagle] class ClientDispatcher (
+  trans: Transport[ChannelBuffer, ChannelBuffer],
+  sr: StatsReceiver
+) extends Service[ChannelBuffer, ChannelBuffer] with Acting {
   import Message._
-  
+
   @volatile private[this] var canDispatch: Cap.State = Cap.Unknown
 
   private[this] val tags = TagSet()
   private[this] val reqs = TagMap[Promise[ChannelBuffer]](tags)
   private[this] val log = Logger.getLogger(getClass.getName)
+
+  @volatile private[this] var lease = new Lease(Time.Top)
+
+  private[this] val gauge = sr.addGauge("current_lease_ms") {
+    lease.remaining.inMilliseconds
+  }
 
   private[this] val receive: Message => Unit = {
     case RreqOk(tag, rep) =>
@@ -62,7 +83,7 @@ private[finagle] class ClientDispatcher(trans: Transport[ChannelBuffer, ChannelB
     case RdispatchNack(tag, _) =>
       for (p <- reqs.unmap(tag))
         p.setException(RequestNackedException)
-    
+
     case Rerr(tag, error) =>
       for (p <- reqs.unmap(tag))
         p.setException(ServerError(error))
@@ -72,6 +93,10 @@ private[finagle] class ClientDispatcher(trans: Transport[ChannelBuffer, ChannelB
         p.setValue(ChannelBuffers.EMPTY_BUFFER)
     case Tping(tag) =>
       trans.write(encode(Rping(tag)))
+    case Tlease(unit, howMuch) =>
+      Lease.parse(unit, howMuch) foreach { newLease =>
+        lease = newLease
+      }
     case m@Tmessage(tag) =>
       log.warning("Did not understand Tmessage[tag=%d] %s".format(tag, m))
       trans.write(encode(Rerr(tag, "badmessage")))
@@ -114,7 +139,7 @@ private[finagle] class ClientDispatcher(trans: Transport[ChannelBuffer, ChannelB
   }
 
   def apply(req: ChannelBuffer): Future[ChannelBuffer] = dispatch(req, true)
-  
+
   private def toCB(buf: Buf) =
     buf match {
       case Buf.ByteArray(bytes, begin, end) =>
@@ -124,9 +149,9 @@ private[finagle] class ClientDispatcher(trans: Transport[ChannelBuffer, ChannelB
         buf.write(bytes, 0)
         ChannelBuffers.wrappedBuffer(bytes)
     }
-  
+
   private def dispatch(
-    req: ChannelBuffer, 
+    req: ChannelBuffer,
     traceWrite: Boolean
   ): Future[ChannelBuffer] = {
     val p = new Promise[ChannelBuffer]
@@ -169,5 +194,8 @@ private[finagle] class ClientDispatcher(trans: Transport[ChannelBuffer, ChannelB
   }
 
   override def isAvailable = trans.isOpen
+
+  def isActive = !lease.expired
+
   override def close(deadline: Time) = trans.close(deadline)
 }

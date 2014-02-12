@@ -7,14 +7,13 @@ import java.nio.charset.Charset
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class EndToEndTest extends FunSuite with Eventually {
+class EndToEndTest extends FunSuite with Eventually with IntegrationPatience {
 
-  // Tagging as flaky until CSL-794 is fixed.
-  if (!sys.props.contains("SKIP_FLAKY")) test("Discard request properly sent") {
+  test("Discard request properly sent") {
     @volatile var handled = false
     val p = Promise[ChannelBuffer]()
     p.setInterruptHandler { case t: Throwable =>

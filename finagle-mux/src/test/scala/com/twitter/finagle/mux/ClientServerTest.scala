@@ -4,6 +4,7 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.tracing.{
   Annotation, BufferingTracer, Flags, Record, SpanId, Trace, TraceId}
 import com.twitter.finagle.transport.QueueTransport
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.{Service, ContextHandler}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
@@ -48,7 +49,7 @@ class ClientServerTest(canDispatch: Boolean)
   val clientTransport = 
     new QueueTransport(writeq=clientToServer, readq=serverToClient)
   val service = mock[Service[ChannelBuffer, ChannelBuffer]]
-  val client = new ClientDispatcher(clientTransport)
+  val client = new ClientDispatcher(clientTransport, NullStatsReceiver)
   val server = new ServerDispatcher(serverTransport, service, canDispatch)
 
   test("handle concurrent requests, handling out of order replies") {
