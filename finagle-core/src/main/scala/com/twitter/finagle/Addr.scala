@@ -2,6 +2,7 @@ package com.twitter.finagle
 
 import collection.immutable
 import java.net.SocketAddress
+import scala.collection.JavaConverters._
 
 /**
  * An address identifies the location of an object--it is a bound
@@ -45,11 +46,17 @@ object Addr {
   object Neg extends Addr
 
   object Bound {
-    def apply(addrs: SocketAddress*): Bound =
+    def apply(addrs: SocketAddress*): Addr =
       Bound(Set(addrs:_*))
+
+    /**
+     * Provided for Java compatibility.
+     */
+    def apply(addrs: java.util.List[SocketAddress]): Addr =
+      apply(addrs.asScala: _*)
   }
 
   object Failed {
-    def apply(why: String): Failed = Failed(new Exception(why))
+    def apply(why: String): Addr = Failed(new Exception(why))
   }
 }
