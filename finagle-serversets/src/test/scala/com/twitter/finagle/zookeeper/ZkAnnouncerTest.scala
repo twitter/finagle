@@ -9,6 +9,9 @@ import org.scalatest.concurrent.Eventually._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.time._
 import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
+import org.scalatest.exceptions.TestFailedDueToTimeoutException
+import java.net.URL
+import java.io.{InputStreamReader, BufferedReader}
 
 @RunWith(classOf[JUnitRunner])
 class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
@@ -55,22 +58,47 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
   }
 
   test("only announce additional endpoints if a primary endpoint is present") {
-    val ann = new ZkAnnouncer(factory)
-    val res = new ZkResolver(factory)
-    val addr1 = new InetSocketAddress(8080)
-    val addr2 = new InetSocketAddress(8081)
+    var va1: Var[Addr] = null
+    var va2: Var[Addr] = null
+    var failedEventually = 1
 
-    Await.ready(ann.announce(addr2, "%s!0!addr2".format(hostPath)))
-    val va2 = res.bind("%s!addr2".format(hostPath))
-    eventually { assert(Var.sample(va2) != Addr.Pending) }
-    assert(Var.sample(va2) === Addr.Neg)
+    try {
+      val ann = new ZkAnnouncer(factory)
+      val res = new ZkResolver(factory)
+      val addr1 = new InetSocketAddress(8080)
+      val addr2 = new InetSocketAddress(8081)
 
-    Await.ready(ann.announce(addr1, "%s!0".format(hostPath)))
+      Await.ready(ann.announce(addr2, "%s!0!addr2".format(hostPath)))
+      va2 = res.bind("%s!addr2".format(hostPath))
+      eventually { assert(Var.sample(va2) != Addr.Pending) }
+      failedEventually += 1
+      assert(Var.sample(va2) === Addr.Neg)
 
-    val va1 = res.bind(hostPath)
-    
-    eventually { assert(Var.sample(va2) === Addr.Bound(addr2)) }
-    eventually { assert(Var.sample(va1) === Addr.Bound(addr1)) }
+      Await.ready(ann.announce(addr1, "%s!0".format(hostPath)))
+      va1 = res.bind(hostPath)
+      eventually { assert(Var.sample(va2) === Addr.Bound(addr2)) }
+      failedEventually += 1
+      eventually { assert(Var.sample(va1) === Addr.Bound(addr1)) }
+    } catch {
+      case e: TestFailedDueToTimeoutException =>
+        var exceptionString = "#%d eventually failed.\n".format(failedEventually)
+
+        exceptionString += "va1 status: %s\n".format(Var.sample(va1).toString)
+        exceptionString += "va2 status: %s\n".format(Var.sample(va2).toString)
+
+        val endpoint = "/services/ci"
+        val connection = new URL("http", "0.0.0.0", 4860, endpoint).openConnection()
+        val reader = new BufferedReader(new InputStreamReader(connection.getInputStream))
+        var fullOutput = ""
+        var line = reader.readLine()
+        while (line != null) {
+          fullOutput += line
+          line = reader.readLine()
+        }
+        exceptionString += "output from %s -- %s".format(endpoint, fullOutput)
+
+        throw new Exception(exceptionString)
+    }
   }
 
   test("unannounce additional endpoints, but not primary endpoints") {
