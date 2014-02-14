@@ -3,18 +3,17 @@ package com.twitter.finagle.serverset2
 import collection.JavaConverters._
 import com.twitter.common.zookeeper.ServerSetImpl
 import com.twitter.conversions.time._
+import com.twitter.finagle.{Addr, Resolver, WeightedSocketAddress}
 import com.twitter.finagle.zookeeper.ZkInstance
-import com.twitter.finagle.{Addr, Resolver}
 import com.twitter.thrift.Status._
-import com.twitter.util.Duration
+import com.twitter.util.{Duration, RandomSocket, Var}
 import java.net.InetSocketAddress
-import java.util.concurrent.atomic.AtomicReference
 import org.junit.runner.RunWith
+import org.scalatest.{FunSuite, BeforeAndAfter, Tag}
 import org.scalatest.concurrent.Eventually._
 import org.scalatest.concurrent.Timeouts._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.time._
-import org.scalatest.{FunSuite, BeforeAndAfter, Tag}
 
 @RunWith(classOf[JUnitRunner])
 class ZkResolverTest extends FunSuite with BeforeAndAfter {
@@ -37,65 +36,56 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
   }
 
   override def test(testName: String, testTags: Tag*)(f: => Unit) {
+    // COORD-329
     if (!sys.props.contains("SKIP_FLAKY"))
       super.test(testName, testTags:_*)(f)
   }
 
   test("end-to-end: service endpoint") {
     val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar")
-    
-    val ref = new AtomicReference[Addr]
-    val v = Resolver.eval("zk2!"+inst.zookeeperConnectstring+"!/foo/bar").bind()
-    val o = v.observeTo(ref)
+    val va = Resolver.eval("zk2!"+inst.zookeeperConnectstring+"!/foo/bar").bind()
 
-    eventually { assert(ref.get === Addr.Neg) }
+    eventually { assert(Var.sample(va) === Addr.Neg) }
 
-    val joinAddr = new InetSocketAddress(8080)
+    val joinAddr = RandomSocket.nextAddress
     val status = serverSet.join(joinAddr, Map[String, InetSocketAddress]().asJava, ALIVE)
-    eventually { assert(ref.get === Addr.Bound(joinAddr)) }
-    
+
+    eventually { assert(Var.sample(va) === Addr.Bound(WeightedSocketAddress(joinAddr, 1.0))) }
+
     status.leave()
-    eventually { assert(ref.get === Addr.Neg) }
-      
-    o.close()
+
+    eventually { assert(Var.sample(va) === Addr.Neg) }
   }
 
   test("end-to-end: additional endpoints") {
     val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar")
-    
-    val refService, refEpep = new AtomicReference[Addr]
-    val o1 = Resolver
-      .eval("zk2!"+inst.zookeeperConnectstring+"!/foo/bar")
-      .bind()
-      .observeTo(refService)
-    val o2 = Resolver
-      .eval("zk2!"+inst.zookeeperConnectstring+"!/foo/bar!epep")
-      .bind()
-      .observeTo(refEpep)
+    val va1 = Resolver.eval("zk2!"+inst.zookeeperConnectstring+"!/foo/bar").bind()
+    val va2 = Resolver.eval("zk2!"+inst.zookeeperConnectstring+"!/foo/bar!epep").bind()
 
     eventually {
-      assert(refService.get === Addr.Neg)
-      assert(refEpep.get === Addr.Neg)
+      assert(Var.sample(va1) === Addr.Neg)
+      assert(Var.sample(va2) === Addr.Neg)
     }
 
-    val serviceAddr = new InetSocketAddress(8080)
-    val epepAddr = new InetSocketAddress(8989)
+    val serviceAddr = RandomSocket.nextAddress
+    val epepAddr = RandomSocket.nextAddress
 
     val status = serverSet.join(
       serviceAddr, 
       Map[String, InetSocketAddress]("epep" -> epepAddr).asJava, 
-      ALIVE)
+      ALIVE
+    )
+
     eventually {
-      assert(refService.get === Addr.Bound(serviceAddr))
-      assert(refEpep.get === Addr.Bound(epepAddr))
+      assert(Var.sample(va1) === Addr.Bound(serviceAddr))
+      assert(Var.sample(va2) === Addr.Bound(epepAddr))
     }
     
     status.leave()
+
     eventually {
-      assert(refService.get === Addr.Neg)
-      assert(refEpep.get === Addr.Neg)
+      assert(Var.sample(va1) === Addr.Neg)
+      assert(Var.sample(va2) === Addr.Neg)
     }
-     
-    o1.close(); o2.close()
   }
 }
