@@ -13,6 +13,7 @@ package com.twitter.finagle.tracing
  * the transport.
  */
 
+import com.twitter.finagle.Init
 import com.twitter.util.{Future, Duration, Time, Local, Stopwatch}
 import java.net.InetSocketAddress
 import scala.util.Random
@@ -187,6 +188,7 @@ object Trace  {
   def traceService[T](service: String, rpc: String, hostOpt: Option[InetSocketAddress]=None)(f: => T): T = {
     unwind {
       Trace.setId(Trace.nextId)
+      Trace.recordBinary("finagle.version", Init.finagleVersion)
       Trace.recordRpcname(service, rpc)
       hostOpt map { Trace.recordServerAddr(_) }
       Trace.record(Annotation.ServerRecv())
