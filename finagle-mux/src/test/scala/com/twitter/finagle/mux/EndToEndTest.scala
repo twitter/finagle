@@ -13,7 +13,8 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite with Eventually with IntegrationPatience {
 
-  test("Discard request properly sent") {
+  // Flaky test - For details, see https://jira.twitter.biz/browse/AWESOME-7621
+  if (!sys.props.contains("SKIP_FLAKY")) test("Discard request properly sent") {
     @volatile var handled = false
     val p = Promise[ChannelBuffer]()
     p.setInterruptHandler { case t: Throwable =>
