@@ -5,8 +5,45 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.12.0
+~~~~~~
+
+- `finagle-core` : Add a `ServerBuilder.safeBuild(ServiceFactory)` method for Java compatibility
+- `finagle-core` : Add basic Scaladocs for all Filters and Services
+- `finagle-core` : close Name Var observation on service close
+- `finagle-core` : com.twitter.finagle.Stack: initial version
+- `finagle-core` : Fix race condition in server dispatcher draining state machine
+- `finagle-core` : low hanging fruit
+- `finagle-core` : Make `Resolver.evalLabeled` private[finagle]
+- `finagle-core` : Option to enable thread pool scheduler in finagle"
+- `finagle-core` : Record Finagle version in tracing information
+- `finagle-core` : Remove a long-forgotten java file
+- `finagle-core` : Separate stats scopes for service-creation and request failure
+- `finagle-core` : TimeoutFactorySpec => TimeoutFactoryTest
+- `finagle-core` : Users don't get NPE on directories without permissions
+- `finagle-core` : Weights, weighted load balancer, memoization
+- `finagle-core` : Write `Throwables.mkString` in terms of ArrayBuffer instead of Seq
+- `finagle-doc` : How do I change my timeouts in the Finagle 6 APIs?
+- `finagle-example` : Port finagle-example thrift to new style APIs
+- `finagle-http` : Add Dtab filter in RichHttp
+- `finagle-http` : enable tracing on finagle 6 http api
+- `finagle-kestrel` : Fix match-exhaustiveness issue in `DecodingToResponse.parseResponse`
+- `finagle-kestrel` : Use Var[Addr] as underlying cluster representation
+- `finagle-memcache` : Add a parameter to disable host ejection from KetamaFailureAccrualFilter
+- `finagle-memcached` : include response type for IllegalStateException
+- `finagle-mux` : Adds lease support to mux clients
+- `finagle-mysql` : Embeddable MySql support for Unit/Integration Testing in Finagle-MySql
+- `finagle-serversets` : prevent MatchError when resolving zk path + endpoint
+- `finagle-serversets` : Use ephemeral ports and `Var.sample` in tests
+- `finagle-serversets` : Use the watch method instead of the now deprecated monitor method
+- `finagle-tracing` /zipkin: remove some allocations
+- `finagle`: update dependencies com.twitter.common*
+- `finagle`: update ostrich to 9.3.0
+- `finagle`: update util to 6.12.0
+- `finagle`: Use a more descriptive message for when client name resolution is negative
+
 6.11.1
-~~~~~
+~~~~~~
 
 - `finagle-core`: Masks cancellation on PipeliningDispatcher
 - `finagle-doc`: Fix finagle-websocket link on Finagle docs website.
@@ -14,7 +51,7 @@ as it is included in Finagle's user's guide.
 - `finagle-kestrel`: Add abort command to kestrel client
 
 6.11.0
-~~~~~
+~~~~~~
 
 - `finagle-core`: Add a "tries" scoped StatsFilter to ClientBuilder.
 - `finagle-core`: Allow clean shutdown for insoluble address in DelayedFactory.
@@ -40,7 +77,7 @@ as it is included in Finagle's user's guide.
 - `finagle`: s/setValue(())/setDone()/g
 
 6.10.0
-~~~~~
+~~~~~~
 
 - `finagle-core`: Fix ServiceTimeoutException naming.
 - `finagle-core`: Increase default tcpConnectTimeout to 350ms.
