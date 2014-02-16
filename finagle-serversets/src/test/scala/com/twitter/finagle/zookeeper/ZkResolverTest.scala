@@ -62,7 +62,8 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
     }
   }
 
-  test("filter by shardid") {
+  // Flaky test. See https://jira.twitter.biz/browse/COORD-437 for details.
+  if (!sys.props.contains("SKIP_FLAKY")) test("filter by shardid") {
     val path = "/bar/foo/baz"
     val serverSet = new ServerSetImpl(inst.zookeeperClient, path)
     val clust = new ZkGroup(serverSet, path)
