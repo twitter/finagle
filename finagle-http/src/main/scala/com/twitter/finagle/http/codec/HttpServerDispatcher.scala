@@ -6,7 +6,7 @@ import com.twitter.finagle.http._
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Reader, Buf}
-import com.twitter.util.Future
+import com.twitter.util.{Future, Promise}
 import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
@@ -59,7 +59,14 @@ class HttpServerDispatcher[REQUEST <: Request](
   protected def handle(response: HttpResponse): Future[Unit] = response match {
     case rep: Response =>
       if (rep.isChunked) {
-        trans.write(rep) before streamChunks(rep.reader)
+        val p = new Promise[Unit]
+        val f = trans.write(rep) before streamChunks(rep.reader)
+        // This awkwardness is unfortunate but necessary for now as you may be
+        // interrupted in the middle of a write, or when there otherwise isn’t
+        // an outstanding read (e.g. read-write race).
+        p.become(f onFailure { _ => rep.reader.discard() })
+        p setInterruptHandler { case _ => rep.reader.discard() }
+        p
       } else {
         // Ensure Content-Length is set if not chunked
         if (!rep.headers.contains(HttpHeaders.Names.CONTENT_LENGTH))

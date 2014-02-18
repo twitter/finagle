@@ -5,8 +5,8 @@ import com.twitter.finagle.http.{HttpTransport, Response}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.Dtab
-import com.twitter.io.{Buf, Writer}
-import com.twitter.util.{Future, Promise, Return}
+import com.twitter.io.{Buf, Reader}
+import com.twitter.util.{Future, Promise, Return, Throw}
 import org.jboss.netty.handler.codec.http.{HttpChunk, HttpRequest, HttpResponse}
 
 /**
@@ -23,27 +23,47 @@ class HttpClientDispatcher[Req <: HttpRequest](
 
   private[this] val trans = new HttpTransport(transIn)
 
-  private[this] def readChunks(writer: Writer): Future[Unit] =
-    trans.read() flatMap {
-      case chunk: HttpChunk if chunk.isLast =>
-        writer.write(Buf.Eof)
+  private[this] def chunkReader(done: Promise[Unit]) = new Reader {
+    private[this] var buf = Buf.Empty
 
-      case chunk: HttpChunk =>
-        writer.write(ChannelBufferBuf(chunk.getContent)) before
-          readChunks(writer)
+    def read(n: Int): Future[Buf] = synchronized {
+      if (n == 0) {
+        Future.value(Buf.Empty)
+      } else if (buf eq Buf.Eof) {
+        done.setDone()
+        Future.value(Buf.Eof)
+      } else if (buf.length > 0) {
+        val f = Future.value(buf.slice(0, n))
+        buf = buf.slice(n, buf.length)
+        f
+      } else trans.read() flatMap {
+        case chunk: HttpChunk if chunk.isLast =>
+          val f = Future.value(buf)
+          buf = Buf.Eof
+          f
 
-      case invalid =>
-        trans.close()
-        writer.fail(
-          new IllegalArgumentException(
-            "invalid message \"%s\"".format(invalid)))
-        // Because we resolve the promise before this point, a returned
-        // exception will be unused: the caller of dispatch responds by calling
-        // p.updateIfEmpty(..), which is a no-op since we know p to be resolved.
-        // We instead return Future.Done to show that the returned value need
-        // not be meaningful.
-        Future.Done
+        case chunk: HttpChunk =>
+          buf = buf concat ChannelBufferBuf(chunk.getContent)
+          val f = Future.value(buf.slice(0, n))
+          buf = buf.slice(n, Int.MaxValue)
+          f
+
+        case invalid =>
+          val exc = new IllegalArgumentException(
+            "invalid message \"%s\"".format(invalid))
+          trans.close()
+          done.updateIfEmpty(Throw(exc))
+          Future.exception(exc)
+      }
     }
+
+    def discard() {
+      // Any interrupt to `read` will result in transport closure, but we also
+      // call `trans.close` here to handle the case where a discard is called
+      // without interrupting the `read` operation.
+      trans.close()
+    }
+  }
 
   // BUG: if there are multiple requests queued, this will close a connection
   // with pending dispatches.  That is the right thing to do, but they should be
@@ -62,9 +82,14 @@ class HttpClientDispatcher[Req <: HttpRequest](
           Future.Done
 
         case res: HttpResponse =>
-          val response = Response(res)
+          val done = new Promise[Unit]
+          val response = new Response {
+            final val httpResponse = res
+            override val reader = chunkReader(done)
+          }
+
           p.updateIfEmpty(Return(response))
-          readChunks(response.writer)
+          done
 
         case invalid =>
           Future.exception(

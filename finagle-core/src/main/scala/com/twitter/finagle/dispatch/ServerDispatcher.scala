@@ -25,14 +25,10 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
   private[this] val state = new AtomicReference[Future[_]](Idle)
   private[this] val cancelled = new CancelledRequestException
 
-  trans.onClose ensure {
-    state.getAndSet(Closed).raise(cancelled)
-  }
-
   protected def dispatch(req: Out): Future[Rep]
   protected def handle(rep: Rep): Future[Unit]
 
-  private[this] def loop(): Unit = {
+  private[this] def loop(): Future[Unit] = {
     state.set(Idle)
     trans.read() flatMap { req =>
       val p = new Promise[Rep]
@@ -51,7 +47,12 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
     }
   }
 
-  loop()
+  private[this] val looping = loop()
+
+  trans.onClose ensure {
+    looping.raise(cancelled)
+    state.getAndSet(Closed).raise(cancelled)
+  }
 
   // Note: this is racy, but that's inherent in draining (without
   // protocol support). Presumably, half-closing TCP connection is
@@ -59,7 +60,7 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
   def close(deadline: Time) = {
     if (state.getAndSet(Closed) eq Idle)
       trans.close(deadline)
-    trans.onClose map(_ => ())
+    trans.onClose.unit
   }
 }
 

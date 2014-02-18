@@ -88,6 +88,15 @@ class ChannelTransportTest
     sendUpstreamMessage("a reply!")
     assert(Await.result(f) === "a reply!")
   }
+
+  test("closes on interrupted read") {
+    val f = trans.read()
+    assert(!f.isDefined)
+    val closep = trans.onClose
+    assert(!closep.isDefined)
+    f.raise(new Exception("cancel"))
+    assert(closep.isDefined)
+  }
   
   test("maintains interestops") {
     // Not yet connected.
