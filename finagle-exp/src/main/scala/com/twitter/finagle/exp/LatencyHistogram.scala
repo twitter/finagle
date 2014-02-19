@@ -1,6 +1,6 @@
 package com.twitter.finagle.exp
 
-import com.twitter.util.{Duration, Stopwatch}
+import com.twitter.util.Duration
 
 /**
  * A concurrent histogram implementation
@@ -12,13 +12,12 @@ import com.twitter.util.{Duration, Stopwatch}
  * latency histograms.
  */
 private[finagle] class LatencyHistogram(
-    range: Duration, history: Duration, 
-    stopwatch: Stopwatch = Stopwatch) {
+    range: Duration, history: Duration) {
   require(range > Duration.Zero)
 
   private[this] val N = range.inMilliseconds.toInt
-  private[this] val n = new WindowedAdder(history, 5, stopwatch)
-  private[this] val tab = Array.fill(N) { new WindowedAdder(history, 5, stopwatch) }
+  private[this] val n = new WindowedAdder(history, 5)
+  private[this] val tab = Array.fill(N) { new WindowedAdder(history, 5) }
   
   /**
    * Compute the quantile `which` from the underlying

@@ -10,7 +10,7 @@ class TimeoutFactorySpec extends SpecificationWithJUnit with Mockito {
   "TimeoutFactory" should {
     val timer = new MockTimer
     val underlying = mock[ServiceFactory[String, String]]
-    underlying.close(any) returns Future.Done
+    underlying.close(any[Time]) returns Future.Done
     val promise = new Promise[Service[String, String]] {
       @volatile var interrupted: Option[Throwable] = None
       setInterruptHandler { case exc => interrupted = Some(exc) }
@@ -45,7 +45,7 @@ class TimeoutFactorySpec extends SpecificationWithJUnit with Mockito {
         val res = factory()
         res.isDefined must beFalse
         val service = mock[Service[String, String]]
-        service.close(any) returns Future.Done
+        service.close(any[Time]) returns Future.Done
         promise() = Return(service)
         res.isDefined must beTrue
         Await.result(res) must be_==(service)

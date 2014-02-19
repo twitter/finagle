@@ -14,9 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * number of slices means finer granularity but also more memory
  * consumption. Must be at least 1.
  */
-private class WindowedAdder(
-    range: Duration, slices: Int, 
-    stopwatch: Stopwatch = Stopwatch) {
+private class WindowedAdder(range: Duration, slices: Int) {
   require(slices > 1)
   private[this] val window = range/slices
   private[this] val N = slices-1
@@ -30,7 +28,7 @@ private class WindowedAdder(
   // often.
   private[this] val buf = new Array[Long](N)
   @volatile private[this] var i = 0
-  @volatile private[this] var elapsed = stopwatch.start()
+  @volatile private[this] var elapsed = Stopwatch.start()
 
   private[this] def expired() {
     if (!expiredGen.compareAndSet(gen, gen+1))
@@ -52,7 +50,7 @@ private class WindowedAdder(
       i = (i+nskip)%N
     }
 
-    elapsed = stopwatch.start()
+    elapsed = Stopwatch.start()
     gen += 1
   }
 
@@ -60,7 +58,7 @@ private class WindowedAdder(
   def reset() {
     Arrays.fill(buf, 0, N, 0L)
     writer.reset()
-    elapsed = stopwatch.start()
+    elapsed = Stopwatch.start()
   }
  
   /** Increment the adder by 1 */

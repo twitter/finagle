@@ -11,7 +11,7 @@ trait Keys { self: BaseClient =>
 
   /**
    * Removes keys
-   * @param list of keys to remove
+   * @param keys list of keys to remove
    * @return Number of keys removed
    */
   def del(keys: Seq[ChannelBuffer]): Future[JLong] =
@@ -31,7 +31,8 @@ trait Keys { self: BaseClient =>
 
   /**
    * Sets how long it will take the key to expire
-   * @params key, ttl
+   * @param key
+   * @param ttl
    * @return boolean, true if it successfully set the ttl (time to live) on a valid key,
    * false otherwise.
    */
@@ -42,7 +43,8 @@ trait Keys { self: BaseClient =>
 
   /**
    * Same effect and semantic as "expire", but takes an absolute Unix timestamp
-   * @param key, ttl (unix timestamp)
+   * @param key
+   * @param ttl time-to-live as unix timestamp
    * @return boolean, true if it successfully set the ttl (time to live) on a valid key,
    * false otherwise.
    */

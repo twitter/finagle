@@ -47,7 +47,7 @@ object HttpServer {
    */
   class Authorize extends SimpleFilter[HttpRequest, HttpResponse] {
     def apply(request: HttpRequest, continue: Service[HttpRequest, HttpResponse]) = {
-      if ("open sesame" == request.getHeader("Authorization")) {
+      if ("open sesame" == request.headers().get(HttpHeaders.Names.AUTHORIZATION)) {
         continue(request)
       } else {
         Future.exception(new IllegalArgumentException("You don't know the secret"))

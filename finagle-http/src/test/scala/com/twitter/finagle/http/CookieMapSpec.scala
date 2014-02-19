@@ -12,7 +12,7 @@ class CookieMapSpec extends SpecificationWithJUnit {
 
     "request cookie basics" in {
       val request = Request()
-      request.headers("Cookie") = "name=value; name2=value2"
+      request.headers.set("Cookie", "name=value; name2=value2")
       request.cookies("name").value must_== "value"
       request.cookies("name2").value must_== "value2"
       request.cookies.isValid must beTrue
@@ -20,14 +20,14 @@ class CookieMapSpec extends SpecificationWithJUnit {
 
     "response cookie basics" in {
       val response = Response()
-      response.headers("Set-Cookie") = "name=value; name2=value2"
+      response.headers.set("Set-Cookie", "name=value; name2=value2")
       response.cookies("name").value must_== "value"
       response.cookies("name2").value must_== "value2"
     }
 
     "cookie with attributes" in {
       val request = Request()
-      request.headers("Cookie") = "name=value; Max-Age=23; Domain=.example.com; Path=/"
+      request.headers.set("Cookie", "name=value; Max-Age=23; Domain=.example.com; Path=/")
       val cookie = request.cookies("name")
       cookie.value  must_== "value"
       cookie.maxAge must_== 23.seconds
@@ -40,7 +40,7 @@ class CookieMapSpec extends SpecificationWithJUnit {
       val cookie = new Cookie("name", "value")
       request.cookies += cookie
       request.cookies("name").value must_== "value"
-      request.headers("Cookie") must_== "name=value"
+      request.headers.get("Cookie") must_== "name=value"
     }
 
     "add same cookie only once" in {
@@ -49,7 +49,7 @@ class CookieMapSpec extends SpecificationWithJUnit {
       request.cookies += cookie
       request.cookies += cookie
       request.cookies("name").value must_== "value"
-      request.headers("Cookie") must_== "name=value"
+      request.headers.get("Cookie") must_== "name=value"
       request.cookies must haveSize(1)
     }
 
@@ -63,7 +63,7 @@ class CookieMapSpec extends SpecificationWithJUnit {
       request.cookies must haveSize(2)
       request.cookies("name").value must_== "value"
 
-      val cookieHeaders = request.headers.getAll("Cookie")
+      val cookieHeaders = request.headerMap.getAll("Cookie")
       cookieHeaders must haveSize(2)
       cookieHeaders must contain ("name=value")
       cookieHeaders must contain ("name=value2")

@@ -57,7 +57,7 @@ abstract class ExpiringService[Req, Rep](
 
   private[this] def expired(): Unit = {
     if (expireFnCalled.compareAndSet(false, true)) {
-      didExpire.setValue(())
+      didExpire.setDone()
       onExpire()
     }
   }

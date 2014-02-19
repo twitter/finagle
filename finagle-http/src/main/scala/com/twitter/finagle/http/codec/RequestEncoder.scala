@@ -15,7 +15,7 @@ class RequestEncoder extends SimpleChannelDownstreamHandler {
     e.getMessage match {
       case request: Request =>
         assert(!request.isChunked)
-        if (!request.containsHeader(HttpHeaders.Names.CONTENT_LENGTH))
+        if (!request.headers.contains(HttpHeaders.Names.CONTENT_LENGTH))
           request.contentLength = request.getContent().readableBytes
         super.writeRequested(ctx, e)
 

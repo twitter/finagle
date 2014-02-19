@@ -1,14 +1,12 @@
 package com.twitter.finagle.exp.mysql
 
 import com.twitter.finagle.ServiceFactory
-import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.util.{Closable, Future, Time}
 import java.util.logging.{Logger, Level}
+import com.twitter.finagle.exp.Mysql
 
-case class ClientError(msg: String) extends Exception(msg)
-case class ServerError(code: Short, sqlState: String, message: String) extends Exception(message)
-case class IncompatibleServer(msg: String) extends Exception(msg)
+class ClientError(msg: String) extends Exception(msg)
 
 object Client {
   private[this] val logger = Logger.getLogger("finagle-mysql")
@@ -30,6 +28,7 @@ object Client {
    * and the finagle-mysql netty pipeline.
    * @param statsReceiver collects finagle stats scoped to "mysql"
    */
+  @deprecated("Use the com.twitter.finagle.exp.Mysql object to build a client", "6.6.2")
   def apply(
     host: String,
     username: String,
@@ -40,13 +39,10 @@ object Client {
   ): Client = {
     logger.setLevel(logLevel)
 
-    val factory = ClientBuilder()
-      .codec(new MySQL(username, password, Option(dbname)))
-      .logger(logger)
-      .hosts(host)
-      .hostConnectionLimit(1)
-      .reportTo(statsReceiver.scope("mysql"))
-      .buildFactory()
+    val factory = Mysql
+      .withCredentials(username, password)
+      .withDatabase(dbname)
+      .newClient(host)
 
       apply(factory)
   }
@@ -56,41 +52,43 @@ class Client(val factory: ServiceFactory[Request, Result]) extends Closable {
   private[this] val service = factory.toService
 
   /**
-   * Sends a query to the server without using
-   * prepared statements.
-   * @param sql A sql statement to be sent to the server.
-   * @return a Future containing an OK Result or a ResultSet
-   * for queries that return rows.
+   * Sends a query without using prepared statements.
+   *
+   * @param sql the sql string to be sent to the server
+   * @return a Future containing the Result object from the query.
    */
-  def query(sql: String): Future[Result] = send(QueryRequest(sql)) {
-    case rs: ResultSet => Future.value(rs)
-    case ok: OK => Future.value(ok)
-  }
+  def query(sql: String): Future[Result] =
+    service(QueryRequest(sql))
 
   /**
-   * Send a query that presumably returns a ResultSet. For each row
-   * in the ResultSet, call f on the row and return the Seq of results.
-   * If the query result does not contain a ResultSet, the query is executed
-   * and an empty Seq is returned.
+   * Sends a query that presumably returns a ResultSet.
+   * Each row is mapped to f, a function from Row => T.
+   *
    * @param sql A sql statement that returns a result set.
    * @param f A function from Row to any type T.
-   * @return a Future of Seq[T] that contains rows.map(f)
+   * @return a Future of Seq[T] that contains the result
+   * of f applied to each row.
    */
-  def select[T](sql: String)(f: Row => T): Future[Seq[T]] = query(sql) map {
-    case rs: ResultSet => rs.rows.map(f)
-    case ok: OK => Seq()
-  }
+  def select[T](sql: String)(f: Row => T): Future[Seq[T]] =
+    query(sql) map {
+      case rs: ResultSet => rs.rows.map(f)
+      case _ => Seq.empty
+    }
 
   /**
    * Sends a query to server to be prepared for execution.
    * @param sql A query to be prepared on the server.
    * @return a Future[PreparedStatement]
    */
-  def prepare(sql: String): Future[PreparedStatement] = send(PrepareRequest(sql)) {
-    case ps: PreparedStatement =>
-      ps.statement.setValue(sql)
-      Future.value(ps)
-  }
+  def prepare(sql: String): Future[PreparedStatement] =
+    service(PrepareRequest(sql)) flatMap {
+      case ok: PrepareOK =>
+        Future.value(new PreparedStatement(ok))
+      case result =>
+        Future.exception(
+          new ClientError("Unexpected result: %s".format(result))
+        )
+    }
 
   /**
    * Execute a prepared statement on the server. Set the parameters
@@ -99,14 +97,17 @@ class Client(val factory: ServiceFactory[Request, Result]) extends Closable {
    * @return a Future containing an OK Result or a ResultSet
    * for queries that return rows.
    */
-  def execute(ps: PreparedStatement): Future[Result] = send(ExecuteRequest(ps)) {
-    case rs: ResultSet =>
-      ps.bindParameters()
-      Future.value(rs)
-    case ok: OK =>
-      ps.bindParameters()
-      Future.value(ok)
-  }
+  def execute(ps: PreparedStatement): Future[Result] =
+    service(ExecuteRequest(ps)) flatMap {
+      case rs: ResultSet =>
+        ps.bindParameters()
+        Future.value(rs)
+      case ok: OK =>
+        ps.bindParameters()
+        Future.value(ok)
+      case result =>
+        Future.value(result)
+    }
 
   /**
    * Combines the prepare and execute operations.
@@ -129,10 +130,11 @@ class Client(val factory: ServiceFactory[Request, Result]) extends Closable {
    * @param f A function from Row to any type T.
    * @return a Future of Seq[T] that contains rows.map(f)
    */
-  def select[T](ps: PreparedStatement)(f: Row => T): Future[Seq[T]] = execute(ps) map {
-    case rs: ResultSet => rs.rows.map(f)
-    case ok: OK => Seq()
-  }
+  def select[T](ps: PreparedStatement)(f: Row => T): Future[Seq[T]] =
+    execute(ps) map {
+      case rs: ResultSet => rs.rows.map(f)
+      case _ => Seq()
+    }
 
   /**
    * Combines the prepare and select operations.
@@ -148,32 +150,31 @@ class Client(val factory: ServiceFactory[Request, Result]) extends Closable {
 
   /**
    * Close a prepared statement on the server.
-   * @return OK result.
+   * @return a Future with an OK value if successful.
    */
-  def closeStatement(ps: PreparedStatement): Future[Result] = send(CloseRequest(ps)) {
-    case ok: OK => Future.value(ok)
-  }
+  def closeStatement(ps: PreparedStatement): Future[Result] =
+    service(CloseRequest(ps.statementId))
 
-  def selectDB(schema: String): Future[Result] = send(UseRequest(schema)) {
-    case ok: OK => Future.value(ok)
-  }
+  /**
+   * Changes the default schema.
+   *
+   * @param schema The new schema to use.
+   * @return a Future with an OK value if successful.
+   */
+  def selectDB(schema: String): Future[Result] =
+    service(UseRequest(schema))
 
-  def ping: Future[Result] = send(PingRequest) {
-    case ok: OK => Future.value(ok)
-  }
+  /**
+   * Checks if the server is alive.
+   *
+   * @return a Future with an OK value if the
+   * server is alive.
+   */
+  def ping: Future[Result] =
+    service(PingRequest)
 
   /**
    * Close the ServiceFactory and its underlying resources.
    */
   def close(deadline: Time): Future[Unit] = factory.close(deadline)
-
-  /**
-   * Helper function to send requests to the ServiceFactory
-   * and handle Error responses from the server.
-   */
-  private[this] def send[T](r: Request)(handler: PartialFunction[Result, Future[T]]): Future[T] =
-    service(r) flatMap (handler orElse {
-      case Error(c, s, m)       => Future.exception(ServerError(c, s, m))
-      case result               => Future.exception(ClientError("Unhandled result from server: " + result))
-    })
 }

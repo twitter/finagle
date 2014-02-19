@@ -32,7 +32,7 @@ import scala.collection.JavaConverters._
 case class Netty3ListenerTLSConfig(newEngine: () => Engine)
 
 object Netty3Listener {
-  val channelFactory: ServerChannelFactory = 
+  val channelFactory: ServerChannelFactory =
     new NioServerSocketChannelFactory(Executor, WorkerPool) {
       override def releaseExternalResources() = ()  // no-op
     }
@@ -88,7 +88,7 @@ object Netty3Listener {
       val p = new Promise[Unit]
       closing.addListener(new ChannelGroupFutureListener {
         def operationComplete(f: ChannelGroupFuture) {
-          p.setValue(())
+          p.setDone()
         }
       })
 
@@ -179,13 +179,9 @@ case class Netty3Listener[In, Out](
 
   private[this] val statsHandlers = new IdentityHashMap[StatsReceiver, ChannelHandler]
 
-  // TODO: These gauges will stay around forever. It's
-  // fine, but it would be nice to clean them up.
   def channelStatsHandler(statsReceiver: StatsReceiver) = synchronized {
     if (!(statsHandlers containsKey statsReceiver)) {
-      val nconn = new AtomicLong(0)
-      statsReceiver.provideGauge("connections") { nconn.get() }
-      statsHandlers.put(statsReceiver, new ChannelStatsHandler(statsReceiver, nconn))
+      statsHandlers.put(statsReceiver, new ChannelStatsHandler(statsReceiver))
     }
 
     statsHandlers.get(statsReceiver)
@@ -269,6 +265,9 @@ private[netty3] class ServerBridge[In, Out](
   statsReceiver: StatsReceiver,
   channels: ChannelGroup
 ) extends SimpleChannelHandler {
+  private[this] val readTimeoutCounter = statsReceiver.counter("read_timeout")
+  private[this] val writeTimeoutCounter = statsReceiver.counter("write_timeout")
+
   private[this] def severity(exc: Throwable) = exc match {
     case
         _: java.nio.channels.ClosedChannelException
@@ -289,7 +288,7 @@ private[netty3] class ServerBridge[In, Out](
     val channel = e.getChannel
     channels.add(channel)
 
-    val transport = new ChannelTransport[In, Out](channel)
+    val transport = new ChannelTransport(channel).cast[In, Out]
     serveTransport(transport)
 
     super.channelOpen(ctx, e)
@@ -300,12 +299,9 @@ private[netty3] class ServerBridge[In, Out](
     monitor.handle(cause)
 
     cause match {
-      case e: ReadTimeoutException =>
-        statsReceiver.counter("read_timeout").incr()
-      case e: WriteTimedOutException =>
-        statsReceiver.counter("write_timeout").incr()
-      case _ =>
-        ()
+      case e: ReadTimeoutException => readTimeoutCounter.incr()
+      case e: WriteTimedOutException => writeTimeoutCounter.incr()
+      case _ => ()
     }
 
     val msg = "Unhandled exception in connection with " +
@@ -317,4 +313,3 @@ private[netty3] class ServerBridge[In, Out](
       Channels.close(e.getChannel)
   }
 }
-

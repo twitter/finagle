@@ -1,10 +1,10 @@
 package com.twitter.finagle.memcached.unit
 
+import com.twitter.concurrent.Broker
 import com.twitter.finagle.{Group, Service, ShardNotAvailableException}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.hashing.KeyHasher
-import com.twitter.concurrent.Broker
 import com.twitter.util.{Await, Duration, Future}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.specs.mock.Mockito

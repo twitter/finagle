@@ -5,7 +5,7 @@ import com.twitter.finagle.channel.{
   ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler
 }
 import com.twitter.finagle.httpproxy.HttpConnectHandler
-import com.twitter.finagle.socks.SocksConnectHandler
+import com.twitter.finagle.socks.{SocksConnectHandler, SocksProxyFlags}
 import com.twitter.finagle.ssl.{Engine, SslConnectHandler}
 import com.twitter.finagle.stats.{ClientStatsReceiver,   StatsReceiver}
 import com.twitter.finagle.transport.{ChannelTransport,   Transport}
@@ -124,10 +124,11 @@ case class Netty3Transporter[In, Out](
   name: String,
   pipelineFactory: ChannelPipelineFactory,
   newChannel: ChannelPipeline => Channel = Netty3Transporter.channelFactory.newChannel(_),
-  newTransport: Channel => Transport[In, Out] = new ChannelTransport[In, Out](_),
+  newTransport: Channel => Transport[In, Out] = 
+    (ch: Channel) => new ChannelTransport(ch).cast[In, Out],
   tlsConfig: Option[Netty3TransporterTLSConfig] = None,
   httpProxy: Option[SocketAddress] = None,
-  socksProxy: Option[SocketAddress] = None,
+  socksProxy: Option[SocketAddress] = SocksProxyFlags.socksProxy,
   channelReaderTimeout: Duration = Duration.Top,
   channelWriterTimeout: Duration = Duration.Top,
   channelSnooper: Option[ChannelSnooper] = None,
@@ -135,13 +136,9 @@ case class Netty3Transporter[In, Out](
 ) extends ((SocketAddress, StatsReceiver) => Future[Transport[In, Out]]) {
   private[this] val statsHandlers = new IdentityHashMap[StatsReceiver, ChannelHandler]
 
-  // TODO: These gauges will stay around forever. It's
-  // fine, but it would be nice to clean them up.
-  def channelStatsHandler(statsReceiver: StatsReceiver) = synchronized {
+  def channelStatsHandler(statsReceiver: StatsReceiver): ChannelHandler = synchronized {
     if (!(statsHandlers containsKey statsReceiver)) {
-      val nconn = new AtomicLong(0)
-      statsReceiver.provideGauge("connections") { nconn.get() }
-      statsHandlers.put(statsReceiver, new ChannelStatsHandler(statsReceiver, nconn))
+      statsHandlers.put(statsReceiver, new ChannelStatsHandler(statsReceiver))
     }
 
     statsHandlers.get(statsReceiver)
@@ -227,6 +224,7 @@ object Netty3Transporter {
   }
   val defaultChannelOptions: Map[String, Object] = Map(
     "tcpNoDelay" -> java.lang.Boolean.TRUE,
-    "reuseAddress" -> java.lang.Boolean.TRUE
+    "reuseAddress" -> java.lang.Boolean.TRUE,
+    "connectTimeoutMillis" -> (1000L: java.lang.Long)
   )
 }

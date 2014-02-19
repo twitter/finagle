@@ -30,7 +30,7 @@ class MethodRequiredFilterSpec extends SpecificationWithJUnit {
       request.method = Method.Get
       val response = Await.result(filter(request, dummyService))
       response.status must_== Status.MethodNotAllowed
-      response.headers.get("Allow").get must be_==("POST")
+      response.headers.get("Allow") must be_==("POST")
     }
 
     "return 200 when allowed method is used" in {

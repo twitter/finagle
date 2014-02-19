@@ -3,16 +3,12 @@ benchmark(name='scala',
     pants('3rdparty:caliper'),
     pants('3rdparty:scala-library'),
     pants('finagle/finagle-core'),
+    pants('finagle/finagle-memcached'),
     pants('finagle/finagle-ostrich4'),
     pants('finagle/finagle-stats'),
     pants('finagle/finagle-zipkin'),
     pants('finagle/finagle-swift'),
-    compiled_idl(
-      idl_deps=pants('finagle/finagle-benchmark/src/main/thrift'),
-      compiler='scrooge-legacy',
-      language='scala',
-      rpc_style='finagle'
-    )
+    pants('finagle/finagle-benchmark/src/main/thrift:thrift-scala'),
   ],
   sources=rglobs('*.scala')
 )

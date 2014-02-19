@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Promise, Return, Future}
+import com.twitter.util.{Promise, Return, Future, Time}
 import java.nio.charset.Charset
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel._
@@ -24,7 +24,7 @@ class ConnectionManagerSpec extends SpecificationWithJUnit with Mockito {
   def makeRequest(version: HttpVersion, headers: (String, String)*) = {
     val request = new DefaultHttpRequest(version, HttpMethod.GET, "/")
     headers foreach { case (k, v) =>
-      request.setHeader(k, v)
+      request.headers.set(k, v)
     }
 
     request
@@ -33,7 +33,7 @@ class ConnectionManagerSpec extends SpecificationWithJUnit with Mockito {
   def makeResponse(version: HttpVersion, headers: (String, String)*) = {
     val response = new DefaultHttpResponse(version, HttpResponseStatus.OK)
     headers foreach { case (k, v) =>
-      response.setHeader(k, v)
+      response.headers.set(k, v)
     }
 
     response
@@ -41,21 +41,21 @@ class ConnectionManagerSpec extends SpecificationWithJUnit with Mockito {
 
 
   "HttpClientDispatcher" should {
-    val trans = mock[Transport[HttpRequest, HttpResponse]]
-    trans.close(any) returns Future.Done
+    val trans = mock[Transport[Any, Any]]
+    trans.close(any[Time]) returns Future.Done
     trans.close() returns Future.Done
-    val disp = new HttpClientDispatcher(trans)
+    val disp = new HttpClientDispatcher[HttpRequest](trans)
 
     def perform(request: HttpRequest, response: HttpResponse, shouldMarkDead: Boolean) {
       val wp = new Promise[Unit]
-      trans.write(any) returns wp
+      trans.write(any[HttpRequest]) returns wp
       val f = disp(request)
       f.isDefined must beFalse
       there was one(trans).write(request)
       there was no(trans).read()
       val rp = new Promise[HttpResponse]
       trans.read() returns rp
-      wp.setValue(())
+      wp.setDone()
       there was one(trans).read()
       f.isDefined must beFalse
       rp.setValue(response)
@@ -87,148 +87,6 @@ class ConnectionManagerSpec extends SpecificationWithJUnit with Mockito {
         makeResponse(HttpVersion.HTTP_1_1),
         true
       )
-    }
-  }
-
-  "the server HTTP connection manager" should {
-    val handler = new ServerConnectionManager
-    def perform(request: HttpRequest, response: HttpResponse) {
-      me.getMessage returns request
-      handler.messageReceived(ctx, me)
-      me.getMessage returns response
-
-      me.getFuture returns cFuture
-      handler.writeRequested(ctx, me)
-    }
-
-    "terminate http/1.0 requests" in {
-      perform(
-        makeRequest(HttpVersion.HTTP_1_0),
-        makeResponse(
-          HttpVersion.HTTP_1_0,
-          HttpHeaders.Names.CONTENT_LENGTH -> "1"))
-
-      there was no(c).close()
-      cFuture.setSuccess()   // write success
-      there was one(c).close()
-    }
-
-    "terminate http/1.1 with connection: close" in {
-      perform(
-        makeRequest(HttpVersion.HTTP_1_1, HttpHeaders.Names.CONNECTION -> "close"),
-        makeResponse(HttpVersion.HTTP_1_1, HttpHeaders.Names.CONTENT_LENGTH -> "1")
-      )
-
-      there was no(c).close()
-      cFuture.setSuccess()   // write success
-      there was one(c).close()
-    }
-
-    "not terminate regular http/1.1 request" in {
-      perform(
-        makeRequest(HttpVersion.HTTP_1_1),
-        makeResponse(HttpVersion.HTTP_1_1, HttpHeaders.Names.CONTENT_LENGTH -> "1")
-      )
-
-      cFuture.setSuccess()   // write success
-      there was no(c).close()
-    }
-
-    "terminate http/1.1 request with missing content-length (in the response)" in {
-      perform(
-        makeRequest(HttpVersion.HTTP_1_1),
-        makeResponse(HttpVersion.HTTP_1_1)
-      )
-
-      there was no(c).close()
-      cFuture.setSuccess()   // write success
-      there was one(c).close()
-    }
-
-    "normalize header values" in {
-      perform(
-        makeRequest(HttpVersion.HTTP_1_1, "coNNECTion" -> "cloSE"),
-        makeResponse(HttpVersion.HTTP_1_1)
-      )
-
-      there was no(c).close()
-      cFuture.setSuccess()   // write success
-      there was one(c).close()
-    }
-
-    "normalize header values with content length in the response" in {
-      perform(
-        makeRequest(HttpVersion.HTTP_1_1, "coNNECTion" -> "cloSE"),
-        makeResponse(HttpVersion.HTTP_1_1, HttpHeaders.Names.CONTENT_LENGTH -> "1")
-      )
-
-      there was no(c).close()
-      cFuture.setSuccess()   // write success
-      there was one(c).close()
-    }
-
-
-    "respect server-side connection termination" in {
-      perform(
-        makeRequest(HttpVersion.HTTP_1_1),
-        makeResponse(
-          HttpVersion.HTTP_1_1,
-          HttpHeaders.Names.CONTENT_LENGTH -> "1",
-          HttpHeaders.Names.CONNECTION -> "close"))
-
-      there was no(c).close()
-      cFuture.setSuccess()   // write success
-      there was one(c).close()
-    }
-
-    "not terminate chunked HTTP/1.1 responses" in {
-      val request = makeRequest(HttpVersion.HTTP_1_1)
-      val response = makeResponse(HttpVersion.HTTP_1_1)
-      response.setChunked(true)
-
-      perform(request, response)
-      there was no(c).close()
-      cFuture.setSuccess()   // write success
-      there was no(c).close()
-
-      val chunk = new DefaultHttpChunk(
-        ChannelBuffers.copiedBuffer("content", Charset.forName("UTF-8")))
-
-      me.getMessage returns chunk
-      handler.writeRequested(ctx, me)
-      me.getMessage returns chunk
-      handler.writeRequested(ctx, me)
-
-      // The final chunk.
-      me.getMessage returns ChannelBuffers.EMPTY_BUFFER
-      handler.writeRequested(ctx, me)
-
-      there was no(c).close()
-    }
-
-    "terminate chunked HTTP/1.1 responses with connect: close" in {
-      val request = makeRequest(HttpVersion.HTTP_1_1, "connection" -> "close")
-      val response = makeResponse(HttpVersion.HTTP_1_1)
-      response.setChunked(true)
-
-      perform(request, response)
-      there was no(c).close()
-      cFuture.setSuccess()   // write success
-      there was no(c).close()
-
-      val chunk = new DefaultHttpChunk(
-        ChannelBuffers.copiedBuffer("content", Charset.forName("UTF-8")))
-
-      me.getMessage returns chunk
-      handler.writeRequested(ctx, me)
-      me.getMessage returns chunk
-      handler.writeRequested(ctx, me)
-
-      // The final chunk.
-      me.getMessage returns new DefaultHttpChunkTrailer
-      handler.writeRequested(ctx, me)
-
-      there was one(c).close()
     }
   }
 }

@@ -46,7 +46,7 @@ object SpanId {
     try {
       Some(this(new RichU64String(spanId).toU64Long))
     } catch {
-      case _ => None
+      case _: Throwable => None
     }
 }
 
@@ -89,8 +89,7 @@ final case class TraceId(
       (this.spanId equals other.spanId)
     case _ => false
   }
-
-
+  
   override def toString =
     "%s.%s<:%s".format(traceId, spanId, parentId)
 }

@@ -4,15 +4,15 @@ FAQ
 What's a `CancelledRequestException`?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When a client to a Finagle server disconnects, the server raises
+When a client connected to a Finagle server disconnects, the server raises
 a *cancellation* interrupt on the pending Future. This is done to
 conserve resources and avoid unnecessary work: the upstream
 client may have timed the request out, for example. Interrupts on
 futures propagate, and so if that server is in turn waiting for a response
 from a downstream server it will cancel this pending request, and so on.
 
-This is the source of the :api:`CancelledRequestException <com.twitter.finagle.CancelledRequestException>` -- 
-when a Finagle client receives the cancellation interrupt while a request is pending, it 
+This is the source of the :api:`CancelledRequestException <com.twitter.finagle.CancelledRequestException>` --
+when a Finagle client receives the cancellation interrupt while a request is pending, it
 fails that request with this exception.
 
 You can disable this behavior by using the :api:`MaskCancelFilter <com.twitter.finagle.filter.MaskCancelFilter>`:
@@ -29,3 +29,14 @@ Note that most protocols do not natively support request cancellations
 do). In practice, this means that for these protocols, we need to disconnect
 the client to signal cancellation, which in turn can cause undue connection
 churn.
+
+Why is "com.twitter.common.zookeeper#server-set" not found?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Some of our libraries still aren't published to maven central.  If you add
+
+::
+	resolvers += "twitter" at "http://maven.twttr.com"
+
+to your sbt configuration, it will be able to pick up the libraries which are
+published externally, but not yet to maven central.

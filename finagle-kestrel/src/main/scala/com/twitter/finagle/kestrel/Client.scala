@@ -1,7 +1,6 @@
 package com.twitter.finagle.kestrel
 
 import scala.collection.JavaConversions._
-import _root_.java.util.logging.Logger
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.util.{
   Future, Duration, Time,
@@ -23,7 +22,9 @@ object OutOfRetriesException extends Exception
  * A message that has been read: consists of the message itself, and
  * an offer to acknowledge.
  */
-case class ReadMessage(bytes: ChannelBuffer, ack: Offer[Unit])
+case class ReadMessage(
+  bytes: ChannelBuffer, ack: Offer[Unit], abort: Offer[Unit] = Offer.const(Unit)
+)
 
 /**
  * An ongoing transactional read (from {{read}}).
@@ -42,7 +43,7 @@ case class ReadMessage(bytes: ChannelBuffer, ack: Offer[Unit])
  * readHandle.error foreach { System.error.println("zomg! got an error " + _.getMessage) }
  * }}}
  */
-trait ReadHandle {
+abstract class ReadHandle {
   /**
    * An offer to synchronize on the next message.  A new message is
    * available only when the previous one has been acknowledged
@@ -155,9 +156,12 @@ object Client {
       .codec(Kestrel())
       .hosts(hosts)
       .hostConnectionLimit(1)
+      .daemon(true)
       .buildFactory()
     apply(service)
   }
+
+  private val nullTimer = new NullTimer
 }
 
 /**
@@ -260,7 +264,7 @@ trait Client {
    * {{readReliably}} with infinite, 0-second backoff retries.
    */
   def readReliably(queueName: String): ReadHandle =
-    readReliably(queueName, new NullTimer, Stream.continually(0.seconds))
+    readReliably(queueName, Client.nullTimer, Stream.continually(0.seconds))
 
   /*
    * Write indefinitely to the given queue.  The given offer is
@@ -280,6 +284,11 @@ trait Client {
   def close()
 }
 
+object ConnectedClient {
+
+  private val SomeTop = Some(Duration.Top)
+}
+
 /**
  * A Client representing a single TCP connection to a single server.
  *
@@ -288,7 +297,7 @@ trait Client {
 protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Response])
   extends Client
 {
-  private[this] val log = Logger.getLogger(getClass.getName)
+  import ConnectedClient._
 
   def flush(queueName: String) = {
     underlying.toService(Flush(queueName))
@@ -316,10 +325,12 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
     val error = new Broker[Throwable]  // this is sort of like a latch …
     val messages = new Broker[ReadMessage]  // todo: buffer?
     val close = new Broker[Unit]
+    val abort = new Broker[Unit]
 
-    val open = Open(queueName, Some(Duration.Top))
-    val closeAndOpen = CloseAndOpen(queueName, Some(Duration.Top))
-    val abort = Abort(queueName)
+    val queueChannelBuffer: ChannelBuffer = queueName
+    val open = Open(queueChannelBuffer, SomeTop)
+    val closeAndOpen = CloseAndOpen(queueChannelBuffer, SomeTop)
+    val abortMessage = Abort(queueName)
 
     def recv(service: Service[Command, Response], command: GetCommand) {
       val reply = service(command)
@@ -327,11 +338,12 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
         reply.toOffer {
           case Return(Values(Seq(Value(_, item)))) =>
             val ack = new Broker[Unit]
-            messages ! ReadMessage(item, ack.send(()))
+            messages ! ReadMessage(item, ack.send(()), abort.send(()))
 
             Offer.select(
               ack.recv { _ => recv(service, closeAndOpen) },
-              close.recv { t => service.close(); error ! ReadClosedException }
+              close.recv { t => service.close(); error ! ReadClosedException },
+              abort.recv { _ => recv(service, abortMessage) }
             )
 
           case Return(Values(Seq())) =>
@@ -354,7 +366,10 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
       )
     }
 
-    underlying() onSuccess { recv(_, open) } onFailure { error ! _ }
+    underlying() respond {
+      case Return(r) => recv(r, open)
+      case Throw(t) => error ! t
+    }
 
     ReadHandle(messages.recv, error.recv, close.send(()))
   }
@@ -371,10 +386,9 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
     closed: Promise[Throwable]
   ) {
     offer.sync() foreach { item =>
-      set(queueName, item).unit onSuccess { _ =>
-        write(queueName, offer)
-      } onFailure { t =>
-        closed() = Return(t)
+      set(queueName, item).unit respond {
+        case Return(_) => write(queueName, offer)
+        case Throw(t) => closed() = Return(t)
       }
     }
   }

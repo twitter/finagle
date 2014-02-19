@@ -10,7 +10,7 @@ import com.twitter.finagle.tracing.Annotation.{ServerSend, ServerRecv, Message, 
 import java.net.InetSocketAddress
 
 // From $BIRDCAGE_HOME run:
-// ./bin/caliper finagle/finagle-benchmark com.twitter.finagle.benchmark.TracingFilterBenchmark
+// ./pants goal bench finagle/finagle-benchmark --bench-target=com.twitter.finagle.benchmark.TracingFilterBenchmark
 class TracingFilterBenchmark extends SimpleBenchmark {
   val addr = new InetSocketAddress("127.0.0.1", 8080)
 

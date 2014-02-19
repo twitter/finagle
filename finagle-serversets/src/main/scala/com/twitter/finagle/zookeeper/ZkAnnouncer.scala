@@ -63,7 +63,7 @@ class ZkAnnouncer(factory: ZkClientFactory) extends Announcer { self =>
             conf.status = Some(conf.serverSet.join(addr, change.endpoints.asJava, conf.shardId))
           }
 
-          change.onComplete.setValue(())
+          change.onComplete.setDone()
         } catch {
           case NonFatal(e) => change.onComplete.setException(e)
         }

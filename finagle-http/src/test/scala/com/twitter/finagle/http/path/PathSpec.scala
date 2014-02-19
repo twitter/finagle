@@ -123,6 +123,13 @@ class PathSpec extends SpecificationWithJUnit {
       }) must beTrue
     }
 
+    "Integer extractor, negative int" in {
+      (FPath("/user/-123") match {
+        case Root / "user" / Integer(userId) => userId == -123
+        case _                               => false
+      }) must beTrue
+    }
+
     "Integer extractor, invalid int" in {
       (FPath("/user/invalid") match {
         case Root / "user" / Integer(userId) => true

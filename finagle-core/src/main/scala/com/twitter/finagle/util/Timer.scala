@@ -1,7 +1,7 @@
 package com.twitter.finagle.util
 
 import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.util.{Time, Duration, TimerTask, Timer}
+import com.twitter.util.{Time, Duration, TimerTask, Timer => UtilTimer}
 import java.util.Collections
 import java.util.concurrent.TimeUnit
 import org.jboss.netty.util.HashedWheelTimer
@@ -11,7 +11,7 @@ import org.jboss.netty.{util => nu}
  * Implements a [[com.twitter.util.Timer]] in terms of a
  * [[org.jboss.netty.util.Timer]].
  */
-class TimerFromNettyTimer(underlying: nu.Timer) extends Timer {
+class TimerFromNettyTimer(underlying: nu.Timer) extends UtilTimer {
   def schedule(when: Time)(f: => Unit): TimerTask = {
     val timeout = underlying.newTimeout(new nu.TimerTask {
       def run(to: nu.Timeout) {

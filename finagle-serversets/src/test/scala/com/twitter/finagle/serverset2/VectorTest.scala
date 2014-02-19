@@ -1,0 +1,61 @@
+package com.twitter.finagle.serverset2
+
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.FunSuite
+import java.net.InetSocketAddress
+
+@RunWith(classOf[JUnitRunner])
+class VectorTest extends FunSuite {
+  test("Selector.matches") {
+    val ep1 = Endpoint(
+      None, new InetSocketAddress("10.0.0.1", 1234),
+      None, Endpoint.Status.Alive, "1234")
+    val ep2 = Endpoint(
+      None, new InetSocketAddress("1.0.0.2", 1234),
+      Some(3), Endpoint.Status.Alive, "12345")
+
+    val host = Selector.Host(new InetSocketAddress("10.0.01", 1234))
+    assert(host matches ep1)
+    assert(!(host matches ep2))
+
+    val mem = Selector.Member("12345")
+    assert(!(mem matches ep1))
+    assert(mem matches ep2)
+    
+    val shard = Selector.Shard(3)
+    assert(!(mem matches ep1))
+    assert(mem matches ep2)
+  }
+  
+  test("Vector.weightOf") {
+    val vec = Vector(Seq(
+      Descriptor(Selector.Host(new InetSocketAddress("10.0.0.2", 123)), 1.2, 1),
+      Descriptor(Selector.Member("9876"), 1.1, 1),
+      Descriptor(Selector.Member("1111"), 2.1, 1)))
+    
+    val ep1 = Endpoint(
+      None, new InetSocketAddress("10.0.0.2", 123),
+      None, Endpoint.Status.Alive, "1111")
+    assert(vec.weightOf(ep1) === 1.2*2.1)
+    
+    val ep2 = ep1.copy(memberId="9876")
+    assert(vec.weightOf(ep2) === 1.1*1.2)
+    
+    val ep3 = ep2.copy(memberId="blah")
+    assert(vec.weightOf(ep3) === 1.2)
+    
+    val ep4=  ep3.copy(addr = new InetSocketAddress("1.1.1.1", 333))
+    assert(vec.weightOf(ep4) === 1.0)
+    
+    for (ep <- Seq(ep1, ep2, ep3, ep4))
+      assert(Vector(Seq.empty).weightOf(ep) === 1.0)
+  }
+
+  test("Vector.parseJson") {
+    val Some(Vector(vec)) = Vector.parseJson("""{"vector":[{"select":"member=1","weight":1.2,"priority":1},{"select":"inet=10.0.0.3:1234","weight":1.3,"priority":2}]}""")
+    assert(vec === Seq(
+      Descriptor(Selector.Member("1"), 1.2, 1),
+      Descriptor(Selector.Host(new InetSocketAddress("10.0.0.3", 1234)), 1.3, 2)))
+  }
+}

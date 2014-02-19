@@ -5,18 +5,19 @@ package com.twitter.finagle.channel
  * shared as to keep statistics across a number of channels.
  */
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.util.{Future, Stopwatch}
+import com.twitter.util.{Duration, Future, Stopwatch, Time}
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 import java.util.logging.Logger
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{ChannelHandlerContext, ChannelStateEvent,
   ExceptionEvent, MessageEvent, SimpleChannelHandler}
 
-class ChannelStatsHandler(statsReceiver: StatsReceiver, connectionCount: AtomicLong)
+class ChannelStatsHandler(statsReceiver: StatsReceiver)
   extends SimpleChannelHandler
   with ConnectionLifecycleHandler
 {
   private[this] val log = Logger.getLogger(getClass.getName)
+  private[this] val connectionCount: AtomicLong = new AtomicLong()
 
   private[this] val connects                = statsReceiver.counter("connects")
   private[this] val connectionDuration      = statsReceiver.stat("connection_duration")
@@ -24,9 +25,15 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver, connectionCount: AtomicL
   private[this] val connectionSentBytes     = statsReceiver.stat("connection_sent_bytes")
   private[this] val receivedBytes           = statsReceiver.counter("received_bytes")
   private[this] val sentBytes               = statsReceiver.counter("sent_bytes")
-  private[this] val closeChans = statsReceiver.counter("closechans")
+  private[this] val closeChans              = statsReceiver.counter("closechans")
+  private[this] val writable                = statsReceiver.counter("socket_writable_ms")
+  private[this] val unwritable              = statsReceiver.counter("socket_unwritable_ms")
+  private[this] val exceptions              = statsReceiver.scope("exn")
+  private[this] val connections             = statsReceiver.addGauge("connections") {
+    connectionCount.get()
+  }
 
-  protected def channelConnected(ctx: ChannelHandlerContext, onClose: Future[Unit]) {
+  protected[channel] def channelConnected(ctx: ChannelHandlerContext, onClose: Future[Unit]) {
     ctx.setAttachment((new AtomicLong(0), new AtomicLong(0)))
     connects.incr()
     connectionCount.incrementAndGet()
@@ -90,7 +97,25 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver, connectionCount: AtomicL
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
     val m = if (e.getCause != null) e.getCause.getClass.getName else "unknown"
-    statsReceiver.scope("exn").counter(m).incr()
+    exceptions.counter(m).incr()
     super.exceptionCaught(ctx, e)
+  }
+
+  private[this] var hasBeenWritable = true //netty channels start in writable state
+  private[this] var since = Time.now
+
+  private[this] def socketDuration(now: Time): Duration = now - since
+
+  override def channelInterestChanged(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
+    val now = Time.now
+    super.channelInterestChanged(ctx, e)
+    val isWritable = ctx.getChannel.isWritable()
+    if (isWritable != hasBeenWritable) {
+      val stat = if (hasBeenWritable) writable else unwritable
+      stat.incr(socketDuration(now).inMillis.toInt)
+
+      hasBeenWritable = isWritable
+      since = now
+    }
   }
 }

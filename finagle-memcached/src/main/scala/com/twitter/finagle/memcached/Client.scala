@@ -6,19 +6,17 @@ import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 import _root_.java.net.{SocketAddress, InetSocketAddress}
 import _root_.java.util.{Map => JMap}
 
-
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig, StaticCluster}
-import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.protocol._
+import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.service.{FailureAccrualFactory, FailedService}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.{Service, ShardNotAvailableException}
 import com.twitter.hashing._
-import com.twitter.util.{Time, Future, Bijection, Duration, Timer}
+import com.twitter.util.{Command => _, Function => _, _}
 
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers
@@ -35,28 +33,43 @@ object Client {
       .hosts(host)
       .hostConnectionLimit(1)
       .codec(Memcached())
+      .daemon(true)
       .build())
 
   /**
-   * Construct a client from a Cluster
+   * Construct a client from a Name
    */
-  @deprecated("Use group instead", "7.0.0")
-  def apply(cluster: Cluster[SocketAddress]) : Client = Client(
+  def apply(name: Name): Client = Client(
     ClientBuilder()
-      .cluster(cluster)
+      .dest(name)
       .hostConnectionLimit(1)
       .codec(new Memcached)
+      .daemon(true)
       .build())
 
   /**
    * Construct a client from a Group
    */
-  def apply(group: Group[SocketAddress]) : Client = Client(
+  @deprecated("Use `apply(name: Name)` instead", "7.0.0")
+  def apply(group: Group[SocketAddress]): Client = Client(
     ClientBuilder()
-        .group(group)
-        .hostConnectionLimit(1)
-        .codec(new Memcached)
-        .build())
+      .group(group)
+      .hostConnectionLimit(1)
+      .codec(new Memcached)
+      .daemon(true)
+      .build())
+
+  /**
+   * Construct a client from a Cluster
+   */
+  @deprecated("Use `apply(name: Name)` instead", "7.0.0")
+  def apply(cluster: Cluster[SocketAddress]): Client = Client(
+    ClientBuilder()
+      .cluster(cluster)
+      .hostConnectionLimit(1)
+      .codec(new Memcached)
+      .daemon(true)
+      .build())
 
   /**
    * Construct a client from a single Service.
@@ -648,6 +661,16 @@ class KetamaFailureAccrualFactory[Req, Rep](
   healthBroker: Broker[NodeHealth]
 ) extends FailureAccrualFactory[Req, Rep](underlying, numFailures, markDeadFor, timer) {
 
+  // exclude CancelledRequestException and CancelledConnectionException for cache client failure accrual
+  override def isSuccess(response: Try[Rep]): Boolean = response match {
+    case Return(_) => true
+    case Throw(WriteException(_: CancelledRequestException)) => true
+    case Throw(_: CancelledRequestException) => true
+    case Throw(WriteException(_: CancelledConnectionException)) => true
+    case Throw(_: CancelledConnectionException) => true
+    case Throw(e) => false
+  }
+
   override def markDead() = {
     super.markDead()
     healthBroker ! NodeMarkedDead(key)
@@ -802,16 +825,21 @@ case class KetamaClientBuilder private[memcached] (
   numReps: Int = KetamaClient.DefaultNumReps
 ) {
 
-  @deprecated("Use group(Group[CacheNode]) instead", "7.0.0")
-  def cluster(cluster: Cluster[InetSocketAddress]): KetamaClientBuilder = {
-    group(CacheNodeGroup(Group.fromCluster(cluster).map{_.asInstanceOf[SocketAddress]}))
+  def dest(name: Name): KetamaClientBuilder = {
+    copy(_group = CacheNodeGroup(Group.fromVarAddr(name.bind())))
   }
 
+  @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "7.0.0")
   def group(group: Group[CacheNode]): KetamaClientBuilder = {
     copy(_group = group)
   }
 
-  @deprecated("Use group(Group[CacheNode]) instead", "7.0.0")
+  @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "7.0.0")
+  def cluster(cluster: Cluster[InetSocketAddress]): KetamaClientBuilder = {
+    group(CacheNodeGroup(Group.fromCluster(cluster).map{_.asInstanceOf[SocketAddress]}))
+  }
+
+  @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "7.0.0")
   def cachePoolCluster(cluster: Cluster[CacheNode]): KetamaClientBuilder = {
     copy(_group = Group.fromCluster(cluster))
   }
@@ -844,7 +872,8 @@ case class KetamaClientBuilder private[memcached] (
 
   def build(): Client = {
     val builder =
-      (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)).codec(Memcached())
+      (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1).daemon(true))
+        .codec(Memcached())
 
     def legacyFAClientBuilder(
       node: CacheNode, key: KetamaClientKey, broker: Broker[NodeHealth], faParams: (Int, Duration)
@@ -927,7 +956,7 @@ case class RubyMemCacheClientBuilder(
     copy(_clientBuilder = Some(clientBuilder))
 
   def build(): PartitionedClient = {
-    val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)
+    val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1).daemon(true)
     val clients = _nodes.map { case (hostname, port, weight) =>
       require(weight == 1, "Ruby memcache node weight must be 1")
       Client(builder.hosts(hostname + ":" + port).codec(Memcached()).build())
@@ -976,7 +1005,7 @@ case class PHPMemCacheClientBuilder(
     copy(_clientBuilder = Some(clientBuilder))
 
   def build(): PartitionedClient = {
-    val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)
+    val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1).daemon(true)
     val keyHasher = KeyHasher.byName(_hashName.getOrElse("crc32-itu"))
     val clients = _nodes.map { case (hostname, port, weight) =>
       val client = Client(builder.hosts(hostname + ":" + port).codec(Memcached()).build())

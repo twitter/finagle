@@ -1,31 +1,25 @@
 #!/bin/bash
 
-root=$(
-  cd $(dirname $(readlink $0 || echo $0))/..
-  /bin/pwd
-)
-
+sbtver=0.12.4
 sbtjar=sbt-launch.jar
+sbtsha128=701af98879a5c2d89c089d69e96e5d1c3bcfafaa
+
+sbtrepo=http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch
 
 if [ ! -f $sbtjar ]; then
-  echo 'downloading '$sbtjar 1>&2
-  curl -O http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.12.1/$sbtjar
+  echo "downloading $sbtjar" 1>&2
+  if ! curl --silent --fail --remote-name $sbtrepo/$sbtver/$sbtjar; then
+    exit 1
+  fi
 fi
 
-test -f $sbtjar || exit 1
-sbtjar_md5=$(openssl md5 < $sbtjar|cut -f2 -d'='|awk '{print $1}')
-if [ "${sbtjar_md5}" != 9d832c4cfdb889103bd37a8bda3faa0e ]; then
-  echo 'bad sbtjar!' 1>&2
+checksum=`openssl dgst -sha1 $sbtjar | awk '{ print $2 }'`
+if [ "$checksum" != $sbtsha128 ]; then
+  echo "bad $sbtjar.  delete $sbtjar and run $0 again."
   exit 1
 fi
 
-if [ -z "$TRAVIS_CI" ]; then
-  JAVA_OPTS=" -Djava.net.preferIPv4Stack=true "$JAVA_OPTS
-else
-  echo "Travis-ci: Not specifying the ip stack version"
-fi
-
-test -f ~/.sbtconfig && . ~/.sbtconfig
+[ -f ~/.sbtconfig ] && . ~/.sbtconfig
 
 java -ea                          \
   $SBT_OPTS                       \
@@ -38,7 +32,6 @@ java -ea                          \
   -XX:MaxPermSize=1024m           \
   -XX:SurvivorRatio=128           \
   -XX:MaxTenuringThreshold=0      \
-  -XX:ReservedCodeCacheSize=128m  \
   -Xss8M                          \
   -Xms512M                        \
   -Xmx1536M                       \

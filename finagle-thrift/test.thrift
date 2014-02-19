@@ -1,3 +1,14 @@
+/* 
+		CHANGING THIS FILE REQUIRES MANUAL REGENERATION 
+		
+E.g.:
+
+thrift --gen java test.thrift
+cd gen-java
+find . -type f -print0 | cpio -pmud0 ../src/test/java
+
+*/
+
 include "fb303.thrift"
 
 namespace java com.twitter.test
@@ -23,4 +34,6 @@ service B extends A {
   SomeStruct complex_return(1: string some_string);
 
   oneway void someway();
+  
+  string show_me_your_dtab();
 }

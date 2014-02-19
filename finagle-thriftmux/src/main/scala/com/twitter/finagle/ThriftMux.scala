@@ -1,8 +1,7 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.thrift.ThriftClientRequest
+import com.twitter.finagle.thrift.{Protocols, ThriftClientRequest}
 import java.net.SocketAddress
-import org.apache.thrift.protocol.TBinaryProtocol
 
 /**
  * ThriftMux is a client and server for thrift, using
@@ -11,7 +10,7 @@ import org.apache.thrift.protocol.TBinaryProtocol
  * [[http://thrift.apache.org/docs/idl/ thrift IDL]] directly from
  * [[https://github.com/twitter/scrooge Scrooge]] or
  * [[https://github.com/mariusaeriksen/thrift-0.5.0-finagle thrift-finagle]].
- * 
+ *
  * Clients can be created directly from an interface generated via
  * a Thrift IDL:
  *
@@ -26,15 +25,15 @@ import org.apache.thrift.protocol.TBinaryProtocol
  *
  * @define clientExampleObject ThriftMux
  */
-object ThriftMux 
+object ThriftMux
   extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
   with Server[Array[Byte], Array[Byte]] with ThriftRichServer
 {
-  protected val protocolFactory = new TBinaryProtocol.Factory()
+  protected val protocolFactory = Protocols.binaryFactory()
   protected val defaultClientName = "mux"
 
-  def newClient(group: Group[SocketAddress]): ServiceFactory[ThriftClientRequest, Array[Byte]] =
-    ThriftMuxClient.newClient(group)
+  def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
+    ThriftMuxClient.newClient(dest, label)
 
   def serve(addr: SocketAddress, service: ServiceFactory[Array[Byte], Array[Byte]]) =
     ThriftMuxServer.serve(addr, service)

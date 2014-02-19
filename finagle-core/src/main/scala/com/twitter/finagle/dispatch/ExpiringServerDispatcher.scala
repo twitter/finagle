@@ -7,14 +7,14 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Duration, Timer, Time, Closable}
 
 object ExpiringServerDispatcher {
-  def apply[Req, Rep](
+  def apply[Req, Rep, In, Out](
     maxIdleTime: Option[Duration],
     maxLifeTime: Option[Duration],
     timer: Timer,
     statsReceiver: StatsReceiver,
-    newDispatcher: (Transport[Rep, Req], Service[Req, Rep]) => Closable
-  ): (Transport[Rep, Req], Service[Req, Rep]) => Closable =
-    (transport: Transport[Rep, Req], service: Service[Req, Rep]) =>
+    newDispatcher: (Transport[In, Out], Service[Req, Rep]) => Closable
+  ): (Transport[In, Out], Service[Req, Rep]) => Closable =
+    (transport: Transport[In, Out], service: Service[Req, Rep]) =>
         new ExpiringService(service, maxIdleTime, maxLifeTime, timer, statsReceiver) {
           private[this] val dispatcher = newDispatcher(transport, this)
           protected def onExpire() { dispatcher.close(Time.now) }

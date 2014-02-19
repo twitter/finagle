@@ -16,6 +16,7 @@ class DeadlineSpanMap(tracer: RawZipkinTracer,
                       timer: Timer) {
 
   private[this] val spanMap = HashMap[TraceId, (Span, TimerTask)]()
+  private[this] val unfinishedCounter = statsReceiver.scope("log_span").counter("unfinished")
 
   /**
    * Update the span in the map. If none exists create a new span. Synchronized.
@@ -31,7 +32,7 @@ class DeadlineSpanMap(tracer: RawZipkinTracer,
         // send off what we have anyway
         val task = timer.schedule(deadline.fromNow) {
           remove(traceId) foreach {
-            statsReceiver.scope("log_span").counter("unfinished").incr()
+            unfinishedCounter.incr()
             tracer.logSpan(_)
           }
         }

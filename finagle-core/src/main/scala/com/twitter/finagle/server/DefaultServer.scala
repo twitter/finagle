@@ -3,9 +3,7 @@ package com.twitter.finagle.server
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle._
 import com.twitter.finagle.builder.SourceTrackingMonitor
-import com.twitter.finagle.filter.{
-  HandletimeFilter, MaskCancelFilter, MkJvmFilter, MonitorFilter, RequestSemaphoreFilter
-}
+import com.twitter.finagle.filter._
 import com.twitter.finagle.service.{TimeoutFilter, StatsFilter}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, ServerStatsReceiver}
 import com.twitter.finagle.tracing._
@@ -43,9 +41,8 @@ object DefaultServer {
  * @param maxConcurrentRequests The maximum number of concurrent
  * requests the server is willing to handle.
  *
- * @param cancelOnHangup The maximum amount of time the server is
- * allowed to handle a request. If the timeout expires, the server
- * will cancel the future and terminate the client connection.
+ * @param cancelOnHangup Enabled by default. If disabled,
+ * exceptions on the transport do not propagate to the transport.
  *
  * @param prepare Prepare the given `ServiceFactory` before use.
  */
@@ -56,7 +53,8 @@ case class DefaultServer[Req, Rep, In, Out](
   requestTimeout: Duration = Duration.Top,
   maxConcurrentRequests: Int = Int.MaxValue,
   cancelOnHangup: Boolean = true,
-  prepare: ServiceFactory[Req, Rep] => ServiceFactory[Req, Rep] = (sf: ServiceFactory[Req, Rep]) => sf,
+  prepare: ServiceFactory[Req, Rep] => ServiceFactory[Req, Rep] = 
+    (sf: ServiceFactory[Req, Rep]) => sf,
   timer: Timer = DefaultTimer.twitter,
   monitor: Monitor = DefaultMonitor,
   logger: java.util.logging.Logger = DefaultLogger,
@@ -86,6 +84,8 @@ case class DefaultServer[Req, Rep, In, Out](
     }
 
     val inner: Transformer[Req, Rep] = {
+      val exceptionSourceFilter = new ExceptionSourceFilter[Req, Rep](name)
+
       val maskCancelFilter: SimpleFilter[Req, Rep] =
         if (cancelOnHangup) Filter.identity
         else new MaskCancelFilter
@@ -114,7 +114,8 @@ case class DefaultServer[Req, Rep, In, Out](
           }
         }
 
-      val filter = maskCancelFilter andThen
+      val filter = exceptionSourceFilter andThen
+        maskCancelFilter andThen
         requestSemaphoreFilter andThen
         statsFilter andThen
         timeoutFilter
@@ -127,7 +128,9 @@ case class DefaultServer[Req, Rep, In, Out](
     outer compose prepare compose inner
   }
 
-  def serveTransport(serviceFactory: ServiceFactory[Req, Rep], transport: Transport[In, Out]) {
+  def serveTransport(
+      serviceFactory: ServiceFactory[Req, Rep], 
+      transport: Transport[In, Out]) {
     val clientConn = new ClientConnection {
       val remoteAddress = transport.remoteAddress
       val localAddress = transport.localAddress
@@ -150,7 +153,8 @@ case class DefaultServer[Req, Rep, In, Out](
   def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
     new ListeningServer with CloseAwaitably {
       val scopedStatsReceiver = statsReceiver match {
-        case ServerStatsReceiver => statsReceiver.scope(ServerRegistry.nameOf(addr) getOrElse name)
+        case ServerStatsReceiver => 
+          statsReceiver.scope(ServerRegistry.nameOf(addr) getOrElse name)
         case sr => sr
       }
 
@@ -168,7 +172,8 @@ case class DefaultServer[Req, Rep, In, Out](
         // TODO: it would be cleaner to fully represent the draining
         // states: accepting no further connections (requests) then
         // fully drained, then closed.
-        val closable = Closable.sequence(underlying, Closable.all(connections.asScala.toSeq:_*))
+        val closable = Closable.sequence(
+          underlying, Closable.all(connections.asScala.toSeq:_*))
         connections.clear()
         closable.close(deadline)
       }

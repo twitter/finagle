@@ -75,6 +75,11 @@ private[thrift] class RawZipkinTracer(
   private[this] val spanMap: DeadlineSpanMap =
     new DeadlineSpanMap(this, 120.seconds, statsReceiver, DefaultTimer.twitter)
 
+  private[this] val scopedReceiver = statsReceiver.scope("log_span")
+  private[this] val okCounter = scopedReceiver.counter("ok")
+  private[this] val tryLaterCounter = scopedReceiver.counter("try_later")
+  private[this] val errorReceiver = scopedReceiver.scope("error")
+
   protected[thrift] val client = {
     val transport = ClientBuilder()
       .hosts(new InetSocketAddress(scribeHost, scribePort))
@@ -83,7 +88,7 @@ private[thrift] class RawZipkinTracer(
       .daemon(true)
       .build()
 
-    new scribe.FinagledClient(
+    new Scribe.FinagledClient(
       new TracelessFilter andThen transport,
       new TBinaryProtocol.Factory())
   }
@@ -103,7 +108,7 @@ private[thrift] class RawZipkinTracer(
     span.toThrift.write(protocolFactory.getProtocol(buffer))
     val thriftBytes = buffer.getArray.take(buffer.length)
     val serializedBase64Span = Base64StringEncoder.encode(thriftBytes) + '\n'
-    Seq(new LogEntry(category = TraceCategory, message = serializedBase64Span))
+    Seq(LogEntry(category = TraceCategory, message = serializedBase64Span))
   }
 
   /**
@@ -112,11 +117,11 @@ private[thrift] class RawZipkinTracer(
   def logSpan(span: Span): Future[Unit] = {
     val logEntries = createLogEntries(span)
     logEntries.flatMap(client.log) onSuccess {
-      case ResultCode.Ok => statsReceiver.scope("log_span").counter("ok").incr()
-      case ResultCode.TryLater => statsReceiver.scope("log_span").counter("try_later").incr()
+      case ResultCode.Ok => okCounter.incr()
+      case ResultCode.TryLater => tryLaterCounter.incr()
       case _ => () /* ignore */
     } onFailure {
-      case e: Throwable => statsReceiver.counter("log_span", "error", e.getClass.getName).incr()
+      case e: Throwable => errorReceiver.counter(e.getClass.getName).incr()
     } map(_ => ())
   }
 

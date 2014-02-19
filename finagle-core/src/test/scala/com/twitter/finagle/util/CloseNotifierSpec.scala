@@ -14,7 +14,7 @@ class CloseNotifierSpec extends SpecificationWithJUnit {
         notifier.onClose { invocations ::= i }
       }
 
-      closing.setValue(())
+      closing.setDone()
       invocations must be_==((1 to 10).toList)
     }
 
@@ -22,7 +22,7 @@ class CloseNotifierSpec extends SpecificationWithJUnit {
       val closing = new Promise[Unit]
       val notifier = CloseNotifier.makeLifo(closing)
 
-      closing.setValue(())
+      closing.setDone()
       var invoked = false
       notifier.onClose { invoked = true }
 

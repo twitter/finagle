@@ -6,10 +6,10 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Span, Millis, Seconds}
-import com.twitter.finagle.Service
+import com.twitter.finagle._
 import com.twitter.finagle.tracing.{Record, Trace, Annotation}
 import com.twitter.test._
-import org.apache.thrift.protocol.TProtocolFactory
+import java.io.{StringWriter, PrintWriter}
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite with ThriftTest with Eventually {
@@ -25,6 +25,12 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
       new SomeStruct(123, Trace.id.parentId.toString)
     }
     def someway() = Future.Void
+    def show_me_your_dtab() = Future {
+      val stringer = new StringWriter
+      val printer = new PrintWriter(stringer)
+      Dtab.baseDiff().print(printer)
+      stringer.toString
+    }
   }
 
   val ifaceToService = new B.Service(_, _)
@@ -53,52 +59,128 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
     }
   }
 
-  // TODO(John Sirois): Address and un-skip: https://jira.twitter.biz/browse/CSL-549
-  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
-    testThrift("end-to-end tracing potpourri") { (client, tracer) =>
-      Time.withCurrentTimeFrozen { tc =>
-        Trace.unwind {
-          Trace.setId(Trace.nextId)  // set an ID so we don't use the default one
-          assert(Await.result(client.multiply(10, 30)) === 300)
-          assert(!tracer.isEmpty)
-          val idSet = (tracer map(_.traceId)).toSet
-          assert(idSet.size === 1)
-          val theId = idSet.head
-          assert(theId.parentId === Trace.id.spanId)
-          assert(theId.traceId === Trace.id.traceId)
+  testThrift("propagate Dtab") { (client, tracer) =>
+    Dtab.unwind {
+      Dtab.delegate("/a", "/b")
+      Dtab.delegate("/b", "inet!google.com:80")
+      val clientDtab = Await.result(client.show_me_your_dtab())
+      assert(clientDtab === "Dtab(2)\n\t/a -> /b\n\t/b -> inet!google.com:80\n")
+    }
+  }
 
-          // verify the traces.
-          def rec(annot: Annotation) = Record(theId, Time.now, annot)
-          val trace = tracer.toSeq
-          val Seq(clientAddr1, clientAddr2) =
-            trace collect { case Record(_, _, Annotation.ClientAddr(addr), _) => addr }
-          val Seq(serverAddr1, serverAddr2) =
-            trace collect { case Record(_, _, Annotation.ServerAddr(addr), _) => addr }
+  test("JSON is broken (before we upgrade)") {
+    // We test for the presence of a JSON encoding
+    // bug in thrift 0.5.0[1]. See THRIFT-1375.
+    //  When we upgrade, this test will fail and helpfully
+    // remind us to add JSON back.
+    import org.apache.thrift.protocol._
+    import org.apache.thrift.transport._
+    import java.nio.ByteBuffer
 
-          assert(trace.size === 11)
-          assert(trace(0) === rec(Annotation.Rpcname("thriftclient", "multiply")))
-          assert(trace(1) === rec(Annotation.ClientSend()))
-          assert(trace(2) === rec(Annotation.ServerAddr(serverAddr1)))
-          assert(trace(3) === rec(Annotation.ClientAddr(clientAddr1)))
-          assert(trace(4) === rec(Annotation.Rpcname("thriftserver", "multiply")))
-          assert(trace(5) === rec(Annotation.ServerRecv()))
-          assert(trace(6) === rec(Annotation.LocalAddr(serverAddr2)))
-          assert(trace(7) === rec(Annotation.ServerAddr(serverAddr2)))
-          assert(trace(8) === rec(Annotation.ClientAddr(clientAddr2)))
-          assert(trace(9) === rec(Annotation.ServerSend()))
-          assert(trace(10) === rec(Annotation.ClientRecv()))
+    val bytes = Array[Byte](102, 100, 125, -96, 57, -55, -72, 18,
+      -21, 15, -91, -36, 104, 111, 111, -127, -21, 15, -91, -36,
+      104, 111, 111, -127, 0, 0, 0, 0, 0, 0, 0, 0)
+    val pf = new TJSONProtocol.Factory()
 
-          assert(Await.result(client.complex_return("a string")).arg_two
-            === "%s".format(Trace.id.spanId.toString))
+    val json = {
+      val buf = new TMemoryBuffer(512)
+      pf.getProtocol(buf).writeBinary(ByteBuffer.wrap(bytes))
+      java.util.Arrays.copyOfRange(buf.getArray(), 0, buf.length())
+    }
 
-          intercept[AnException] { Await.result(client.add(1, 2)) }
-          Await.result(client.add_one(1, 2))     // don't block!
+    val decoded = {
+      val trans = new TMemoryInputTransport(json)
+      val bin = pf.getProtocol(trans).readBinary()
+      val bytes = new Array[Byte](bin.remaining())
+      bin.get(bytes, 0, bin.remaining())
+      bytes
+    }
 
-          assert(Await.result(client.someway()) === null)  // don't block!
-        }
+    assert(bytes.toSeq != decoded.toSeq, "Add JSON support back")
+  }
+
+  testThrift("end-to-end tracing potpourri") { (client, tracer) =>
+    Trace.unwind {
+      Trace.setId(Trace.nextId)  // set an ID so we don't use the default one
+      assert(Await.result(client.multiply(10, 30)) === 300)
+      assert(!tracer.isEmpty)
+      val idSet = (tracer map(_.traceId)).toSet
+      assert(idSet.size === 1)
+      val theId = idSet.head
+      assert(theId.parentId === Trace.id.spanId)
+      assert(theId.traceId === Trace.id.traceId)
+
+      // Compare two annotation records, ignoring time.
+      // This is simpler than trying to freeze time in the listening threads of
+      // the various servers we are constructing.
+      def annotationMatches(rec: Record, ann: Annotation): Boolean = {
+        rec.traceId == theId && rec.annotation == ann
       }
+
+      val trace = tracer.toSeq
+      val Seq(clientAddr1, clientAddr2) =
+        trace collect { case Record(_, _, Annotation.ClientAddr(addr), _) => addr }
+      val Seq(serverAddr1, serverAddr2) =
+        trace collect { case Record(_, _, Annotation.ServerAddr(addr), _) => addr }
+
+      // verify the count and ordering of the annotations
+      assert(trace.size === 11)
+      assert(annotationMatches(trace(0), Annotation.Rpcname("thriftclient", "multiply")))
+      assert(annotationMatches(trace(1), Annotation.ClientSend()))
+      assert(annotationMatches(trace(2), Annotation.ServerAddr(serverAddr1)))
+      assert(annotationMatches(trace(3), Annotation.ClientAddr(clientAddr1)))
+      assert(annotationMatches(trace(4), Annotation.Rpcname("thriftserver", "multiply")))
+      assert(annotationMatches(trace(5), Annotation.ServerRecv()))
+      assert(annotationMatches(trace(6), Annotation.LocalAddr(serverAddr2)))
+      assert(annotationMatches(trace(7), Annotation.ServerAddr(serverAddr2)))
+      assert(annotationMatches(trace(8), Annotation.ClientAddr(clientAddr2)))
+      assert(annotationMatches(trace(9), Annotation.ServerSend()))
+      assert(annotationMatches(trace(10), Annotation.ClientRecv()))
+
+      assert(Await.result(client.complex_return("a string")).arg_two
+        === "%s".format(Trace.id.spanId.toString))
+
+      intercept[AnException] { Await.result(client.add(1, 2)) }
+      Await.result(client.add_one(1, 2))     // don't block!
+
+      assert(Await.result(client.someway()) === null)  // don't block!
     }
   }
 
   runThriftTests()
 }
+
+/*
+
+[1]
+% diff -u /Users/marius/src/thrift-0.5.0-finagle/lib/java/src/org/apache/thrift/protocol/TJSONProtocol.java /Users/marius/pkg/thrift/lib/java/src/org/apache/thrift/protocol/TJSONProtocol.java
+--- /Users/marius/src/thrift-0.5.0-finagle/lib/java/src/org/apache/thrift/protocol/TJSONProtocol.java	2013-09-16 12:17:53.000000000 -0700
++++ /Users/marius/pkg/thrift/lib/java/src/org/apache/thrift/protocol/TJSONProtocol.java	2013-09-05 20:20:07.000000000 -0700
+@@ -313,7 +313,7 @@
+   // Temporary buffer used by several methods
+   private byte[] tmpbuf_ = new byte[4];
+
+-  // Read a byte that must match b[0]; otherwise an excpetion is thrown.
++  // Read a byte that must match b[0]; otherwise an exception is thrown.
+   // Marked protected to avoid synthetic accessor in JSONListContext.read
+   // and JSONPairContext.read
+   protected void readJSONSyntaxChar(byte[] b) throws TException {
+@@ -331,7 +331,7 @@
+       return (byte)((char)ch - '0');
+     }
+     else if ((ch >= 'a') && (ch <= 'f')) {
+-      return (byte)((char)ch - 'a');
++      return (byte)((char)ch - 'a' + 10);
+     }
+     else {
+       throw new TProtocolException(TProtocolException.INVALID_DATA,
+@@ -346,7 +346,7 @@
+       return (byte)((char)val + '0');
+     }
+     else {
+-      return (byte)((char)val + 'a');
++      return (byte)((char)(val - 10) + 'a');
+     }
+   }
+
+*/

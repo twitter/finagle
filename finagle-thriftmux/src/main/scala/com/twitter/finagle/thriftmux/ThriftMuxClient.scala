@@ -1,10 +1,8 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
-import com.twitter.finagle.thrift.ThriftClientRequest
+import com.twitter.finagle.thrift.{Protocols, ThriftClientRequest}
 import com.twitter.util.{Future, Time}
-import java.net.SocketAddress
-import org.apache.thrift.protocol.{TProtocolFactory, TBinaryProtocol}
+import org.apache.thrift.protocol.TProtocolFactory
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 
@@ -15,12 +13,12 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
  */
 case class ThriftMuxClientImpl(
   muxer: Client[ChannelBuffer, ChannelBuffer],
-  protocolFactory: TProtocolFactory = new TBinaryProtocol.Factory()
+  protocolFactory: TProtocolFactory = Protocols.binaryFactory()
 ) extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient {
   protected val defaultClientName = "mux"
 
-  def newClient(group: Group[SocketAddress]): ServiceFactory[ThriftClientRequest, Array[Byte]] =
-    muxer.newClient(group) map { service =>
+  def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
+    muxer.newClient(dest, label) map { service =>
       new Service[ThriftClientRequest, Array[Byte]] {
         def apply(req: ThriftClientRequest): Future[Array[Byte]] = {
           if (req.oneway) return Future.exception(

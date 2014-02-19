@@ -1,7 +1,7 @@
 package com.twitter.finagle.exp
 
 import com.twitter.conversions.time._
-import com.twitter.util.Duration
+import com.twitter.util.{Duration, Time}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -13,7 +13,7 @@ class LatencyHistogramTest extends FunSuite {
 
   def testRandom(rng: Random, N: Int) {
     val histo = new LatencyHistogram(range, Duration.Top)
-    val input = Array.fill(N) { 
+    val input = Array.fill(N) {
       Duration.fromMilliseconds(rng.nextInt).abs % range
     }
     for (d <- input)
@@ -45,21 +45,21 @@ class LatencyHistogramTest extends FunSuite {
   // So we test these two properties instead of a sliding window
   // directly.
   test("maintains sliding window by time") {
-    val sw = new ManualStopwatch
+    Time.withCurrentTimeFrozen { tc =>
     val histo = new LatencyHistogram(range=40.milliseconds, 
-      history=4.seconds, stopwatch=sw)
+      history=4.seconds)
+      for (_ <- 0 until 100) histo.add(30.milliseconds)
+      tc.advance(1.second)
 
-    for (_ <- 0 until 100) histo.add(30.milliseconds)
-    sw.tick(1.second)
+      for (_ <- 0 until 100) histo.add(10.milliseconds)
+      assert(histo.quantile(99) === 30.milliseconds)
 
-    for (_ <- 0 until 100) histo.add(10.milliseconds)
-    assert(histo.quantile(99) === 30.milliseconds)
-
-    sw.tick(1.second)
-    assert(histo.quantile(99) === 30.milliseconds)
-    sw.tick(1.second)
-    assert(histo.quantile(99) === 30.milliseconds)
-    sw.tick(2.seconds)
-    assert(histo.quantile(99) === 10.milliseconds)
+      tc.advance(1.second)
+      assert(histo.quantile(99) === 30.milliseconds)
+      tc.advance(1.second)
+      assert(histo.quantile(99) === 30.milliseconds)
+      tc.advance(2.seconds)
+      assert(histo.quantile(99) === 10.milliseconds)
+    }
   }
 }

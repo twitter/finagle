@@ -3,7 +3,7 @@ junit_tests(name='java',
     pants('3rdparty:junit'),
     pants('finagle/finagle-core'),
     pants('finagle/finagle-thriftmux'),
-    pants('finagle/finagle-thriftmux/src/test/thrift:scrooge3'),
+    pants('finagle/finagle-thriftmux/src/test/thrift:thrift-scala'),
     pants('util/util-core'),
   ],
   sources=rglobs('*.java')

@@ -21,7 +21,7 @@ class SingletonFactory[Req, Rep](service: Service[Req, Rep])
     val p = new Promise[Unit]
     latch.await { 
       service.close()
-      p.setValue(())
+      p.setDone()
     }
     p
   }

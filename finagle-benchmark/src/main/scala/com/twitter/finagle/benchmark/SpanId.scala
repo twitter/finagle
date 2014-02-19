@@ -5,7 +5,7 @@ import com.twitter.finagle.tracing.SpanId
 import scala.util.Random
 import com.twitter.util.RichU64Long
 
-// Run thus: bin/caliper finagle/finagle-benchmark com.twitter.finagle.benchmark.SpanIdBenchmark
+// Run thus: ./pants goal bench finagle/finagle-benchmark --bench-target=com.twitter.finagle.benchmark.SpanIdBenchmark
 
 class SpanIdBenchmark extends SimpleBenchmark {
   private[this] var ids: Array[SpanId] = _

@@ -13,7 +13,7 @@ class AnnotateCipher(headerName: String) extends SimpleChannelHandler {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     (e.getMessage, ctx.getPipeline.get(classOf[SslHandler])) match {
       case (req: HttpRequest, ssl: SslHandler) =>
-        req.setHeader(headerName, ssl.getEngine().getSession().getCipherSuite())
+        req.headers.set(headerName, ssl.getEngine().getSession().getCipherSuite())
       case _ =>
         ()
     }

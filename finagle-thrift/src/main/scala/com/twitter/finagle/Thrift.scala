@@ -1,8 +1,8 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest}
+import com.twitter.finagle.thrift.{Protocols, ClientId, ThriftClientRequest}
 import java.net.SocketAddress
-import org.apache.thrift.protocol.{TBinaryProtocol, TProtocolFactory}
+import org.apache.thrift.protocol.TProtocolFactory
 
 /**
  * Client and server for [[http://thrift.apache.org Apache Thrift]].
@@ -23,10 +23,10 @@ import org.apache.thrift.protocol.{TBinaryProtocol, TProtocolFactory}
  * $thriftUpgrade
  *
  * == Servers ==
- * 
+ *
  * $serverExample
  *
- * @note This class is not constructed directly: 
+ * @note This class is not constructed directly:
  * use it only through [[com.twitter.finagle.Thrift]]
  *
  * @define clientExampleObject ThriftImpl(..)
@@ -50,7 +50,7 @@ case class ThriftImpl private[finagle](
   protected val defaultClientName = "thrift"
 
   private[this] val client = new thrift.ThriftClient(
-    if (framed) thrift.ThriftFramedTransporter 
+    if (framed) thrift.ThriftFramedTransporter
     else thrift.ThriftBufferedTransporter(protocolFactory),
     protocolFactory,
     clientId = clientId)
@@ -61,17 +61,17 @@ case class ThriftImpl private[finagle](
     protocolFactory)
 
   def newClient(
-    group: Group[SocketAddress]
-  ): ServiceFactory[ThriftClientRequest, Array[Byte]] = client.newClient(group)
+    dest: Name, label: String
+  ): ServiceFactory[ThriftClientRequest, Array[Byte]] = client.newClient(dest, label)
 
   def serve(
-    addr: SocketAddress, 
+    addr: SocketAddress,
     service: ServiceFactory[Array[Byte], Array[Byte]]
   ): ListeningServer = server.serve(addr, service)
 
 
   /**
-   * Produce a [[com.twitter.finagle.ThriftImpl]] using the given 
+   * Produce a [[com.twitter.finagle.ThriftImpl]] using the given
    * `TProtocolFactory` instead of the default binary protocol
    * factory.
    */
@@ -84,14 +84,14 @@ case class ThriftImpl private[finagle](
    *
    * @note Not recommended. Use only if absolutely required
    * for legacy purposes.
-   */  
+   */
   def withBufferedTransport(): ThriftImpl =
     copy(framed = false)
 
   /**
    * Produce a [[com.twitter.finagle.ThriftImpl]] using
    * the provided client ID.
-   */  
+   */
   def withClientId(clientId: ClientId): ThriftImpl =
     copy(clientId = Some(clientId))
 }
@@ -113,7 +113,7 @@ case class ThriftImpl private[finagle](
  * $clientExample
  *
  * $thriftUpgrade
- * 
+ *
  * == Servers ==
  *
  * $serverExample
@@ -121,25 +121,25 @@ case class ThriftImpl private[finagle](
  * @define clientExampleObject Thrift
  * @define serverExampleObject Thrift
  */
-object Thrift 
-  extends Client[ThriftClientRequest, Array[Byte]] 
+object Thrift
+  extends Client[ThriftClientRequest, Array[Byte]]
   with Server[Array[Byte], Array[Byte]]
   with ThriftRichClient with ThriftRichServer {
 
-  val protocolFactory = new TBinaryProtocol.Factory()
+  val protocolFactory = Protocols.binaryFactory()
   protected val defaultClientName = "thrift"
   private[this] val thrift = ThriftImpl(protocolFactory)
 
   def newClient(
-    group: Group[SocketAddress]
-  ): ServiceFactory[ThriftClientRequest, Array[Byte]] = thrift.newClient(group)
+    dest: Name, label: String
+  ): ServiceFactory[ThriftClientRequest, Array[Byte]] = thrift.newClient(dest, label)
 
   def serve(
     addr: SocketAddress, service: ServiceFactory[Array[Byte], Array[Byte]]
   ): ListeningServer = thrift.serve(addr, service)
 
   /**
-   * Produce a [[com.twitter.finagle.ThriftImpl]] using the given 
+   * Produce a [[com.twitter.finagle.ThriftImpl]] using the given
    * `TProtocolFactory` instead of the default binary protocol
    * factory.
    */
@@ -159,7 +159,7 @@ object Thrift
   /**
    * Produce a [[com.twitter.finagle.ThriftImpl]] using
    * the provided client ID.
-   */  
+   */
   def withClientId(clientId: ClientId): ThriftImpl =
     thrift.withClientId(clientId)
 }

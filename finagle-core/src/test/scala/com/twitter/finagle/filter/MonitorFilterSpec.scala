@@ -3,7 +3,7 @@ package com.twitter.finagle.filter
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.integration.{IntegrationBase, StringCodec}
-import com.twitter.util.{Await, Future, Monitor, Promise, Return, Throw}
+import com.twitter.util.{Await, Future, Monitor, Promise, Return, Throw, Time}
 import java.net.InetSocketAddress
 import java.util.logging.{Level, Logger, StreamHandler}
 import org.mockito.Matchers
@@ -19,7 +19,7 @@ class MonitorFilterSpec extends SpecificationWithJUnit with IntegrationBase with
   "MonitorFilter" should {
     val monitor = spy(new MockMonitor)
     val underlying = mock[Service[Int, Int]]
-    underlying.close(any) returns Future.Done
+    underlying.close(any[Time]) returns Future.Done
     val reply = new Promise[Int]
     underlying(any) returns reply
     val service = new MonitorFilter(monitor) andThen underlying
@@ -53,7 +53,7 @@ class MonitorFilterSpec extends SpecificationWithJUnit with IntegrationBase with
 
   "MonitorFilter" should {
     val inner = new MockSourcedException("FakeService1")
-    val outer = new MockSourcedException(inner, "FakeService2")
+    val outer = new MockSourcedException(inner, "unspecified")
 
     val mockLogger = spy(Logger.getLogger("MockServer"))
     // add handler to redirect and mute output, so that it doesn't show up in the console during a test run.
@@ -64,10 +64,10 @@ class MonitorFilterSpec extends SpecificationWithJUnit with IntegrationBase with
     "when attached to a server, report source for sourced exceptions" in {
       val address = new InetSocketAddress(0)
       val service = mock[Service[String, String]]
-      service.close(any) returns Future.Done
+      service.close(any[Time]) returns Future.Done
       val server = ServerBuilder()
         .codec(StringCodec)
-        .name("MockServer")
+        .name("FakeService2")
         .bindTo(address)
         .monitor((_, _) => monitor)
         .logger(mockLogger)
@@ -102,7 +102,7 @@ class MonitorFilterSpec extends SpecificationWithJUnit with IntegrationBase with
       val preparedFactory = mock[ServiceFactory[String, String]]
       val preparedServicePromise = new Promise[Service[String, String]]
       preparedFactory() returns preparedServicePromise
-      preparedFactory.close(any) returns Future.Done
+      preparedFactory.close(any[Time]) returns Future.Done
       preparedFactory.map(Matchers.any()) returns
         preparedFactory.asInstanceOf[ServiceFactory[Any, Nothing]]
 

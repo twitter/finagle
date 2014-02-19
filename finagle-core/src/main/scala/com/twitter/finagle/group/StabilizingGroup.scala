@@ -5,23 +5,29 @@ import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.Group
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Future, Time, Duration}
+import com.twitter.util.{Future, Time, Timer, Duration, Var}
 import scala.collection.immutable.Queue
 
+@deprecated("Use StabilizingAddr instead", "6.7.5")
 object StabilizingGroup {
   object State extends Enumeration {
     type Health = Value
-    val Healthy, Unhealthy, Unknown = Value
+    // explicitly define intuitive ids as they
+    // are exported for stats.
+    val Healthy = Value(1)
+    val Unknown = Value(0)
+    val Unhealthy = Value(-1)
   }
 
+  @deprecated("Use StabilizingAddr instead", "6.7.5")
   def apply[T](
     underlying: Group[T],
     pulse: Offer[State.Health],
     grace: Duration,
     statsReceiver: StatsReceiver = NullStatsReceiver,
-    pollSpan: Duration = Duration.fromMilliseconds(100)
+    timer: Timer = DefaultTimer.twitter
   ): Group[T] = {
-    new StabilizingGroup(underlying, pulse, grace, statsReceiver, pollSpan)
+    new StabilizingGroup(underlying, pulse, grace, statsReceiver, timer)
   }
 
   /**
@@ -31,9 +37,9 @@ object StabilizingGroup {
    * for at least `grace` period.
    *
    * @param underlying The source group to poll for group updates.
-   * @param pollSpan The duration that must elapse in between polls
-   *        to the underlying group.
    * @param pulse An offer for communicating group health.
+   *        Invariant: The offer should communicate Health in FIFO order
+   *        with respect to time.
    * @param grace The duration that must elapse before an element
    *        is removed from the group.
    */
@@ -42,61 +48,78 @@ object StabilizingGroup {
     pulse: Offer[State.Health],
     grace: Duration,
     statsReceiver: StatsReceiver,
-    pollSpan: Duration
+    implicit val timer: Timer
   ) extends Group[T] {
-    @volatile private[this] var current = underlying.members
-    private[this] val adds = new Broker[T]()
-    private[this] val removes = new Broker[T]()
-    private[this] val timer = DefaultTimer.twitter
-    private[this] val limbo = statsReceiver.addGauge("limbo") { current.size - underlying.members.size }
-
-    def members = current
-
     import State._
+
+    private[this] val newSet = new Broker[Set[T]]()
+
+    @volatile private[this] var healthStat = Healthy.id
+    private[this] val health = statsReceiver.addGauge("health") { healthStat }
+
+    private[this] val limbo = statsReceiver.addGauge("limbo") {
+      members.size - underlying.members.size
+    }
+
+    protected[finagle] val set = Var(underlying.members)
+
     /**
      * Exclusively maintains the elements in current
      * based on adds, removes, and health transitions.
      * Removes are delayed for grace period and each health
      * transition resets the grace period.
      */
-    private[this] def loop(remq: Queue[(T, Time)], h: Health, nextPoll: Time): Future[Unit] = Offer.select(
-      adds.recv map { elem =>
-        current += elem
-        // ensure the added elem is not queued for removal.
-        val newq = remq filter { case(e, _) =>  e != elem }
-        loop(newq, h, nextPoll)
-      },
-      removes.recv map { elem =>
-        val until = Time.now + grace
-        loop(remq enqueue (elem, until), h, nextPoll)
-      },
-      pulse map {
+    private[this] def loop(remq: Queue[(T, Time)], h: Health): Future[Unit] = Offer.select(
+      pulse map { newh =>
+        healthStat = newh.id
+
         // if our health transitions into healthy,
         // reset removal times foreach elem in remq.
-        case newh if h == newh =>
-          loop(remq, newh, nextPoll)
-        case Healthy =>
-          loop(remq map { case (elem, _) => (elem, Time.now + grace) }, Healthy, nextPoll)
-        case newh =>
-          loop(remq, newh, nextPoll)
+        newh match {
+          case newh if h == newh =>
+            loop(remq, newh)
+          case Healthy =>
+            // Transitioned to healthy: push back
+            val newTime = Time.now + grace
+            val newq = remq map { case (elem, _) => (elem, newTime) }
+            loop(newq, Healthy)
+          case newh =>
+            loop(remq, newh)
+        }
       },
-      Offer.timeout(nextPoll - Time.now)(timer) map { _ =>
-        val snap = underlying.members
-        for (add <- snap &~ current) adds ! add
-        def isQueued(elem: T) = remq exists { case (e, _) => e == elem }
-        for (rem <- current &~ snap if !isQueued(rem)) removes ! rem
-        loop(remq, h, Time.now + pollSpan)
+      newSet.recv map { newSet =>
+        val snap  = set()
+        var q = remq
+
+        // Remove pending removes that are present
+        // in this update.
+        q = q filter { case (e, _) => !(newSet contains e) }
+        set() ++= newSet &~ snap
+
+        def inQ(elem: T) = q exists { case (e, _) => e == elem }
+        for (el <- snap &~ newSet if !inQ(el)) {
+          val until = Time.now + grace
+          q = q enqueue (el, until)
+        }
+
+        loop(q, h)
       },
       if (h != Healthy || remq.isEmpty) Offer.never
       else {
         val ((elem, until), nextq) = remq.dequeue
-        Offer.timeout(until - Time.now)(timer) map { _ =>
-          current -= elem
-          loop(nextq, h, nextPoll)
+        Offer.timeout(until - Time.now) map { _ =>
+          set() -= elem
+          loop(nextq, h)
         }
       }
     )
-    loop(Queue(), Healthy, Time.now)
-  }
 
+    loop(Queue.empty, Healthy)
+
+    underlying.set observe { set =>
+      // We can synchronize here because we know loop
+      // is eager, and doesn't itself synchronize.
+      newSet !! set
+    }
+  }
 }

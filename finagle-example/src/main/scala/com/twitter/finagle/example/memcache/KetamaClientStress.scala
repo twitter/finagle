@@ -14,7 +14,6 @@ import com.twitter.ostrich.admin.{AdminHttpService, RuntimeEnvironment}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicLong
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
-import scala.Some
 
 object KetamaClientStress {
   private[this] case class Config(

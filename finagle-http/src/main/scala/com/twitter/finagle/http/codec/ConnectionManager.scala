@@ -12,7 +12,7 @@ class ConnectionManager {
   private[this] var isKeepAlive = false
   private[this] var isIdle = true
 
-  def observeMessage(message: AnyRef) = synchronized {
+  def observeMessage(message: Any) = synchronized {
     message match {
       case request: HttpRequest   => observeRequest(request)
       case response: HttpResponse => observeResponse(response)
@@ -27,7 +27,7 @@ class ConnectionManager {
   }
 
   def observeResponse(response: HttpResponse) = synchronized {
-    if (!response.isChunked && !response.containsHeader(HttpHeaders.Names.CONTENT_LENGTH))
+    if (!response.isChunked && !response.headers.contains(HttpHeaders.Names.CONTENT_LENGTH))
       isKeepAlive = false
     else if (!HttpHeaders.isKeepAlive(response))
       isKeepAlive = false

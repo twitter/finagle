@@ -11,7 +11,7 @@ import scala.util.Random
 import com.twitter.finagle.stats.StatsReceiver
 
 // From $BIRDCAGE_HOME run:
-// ./bin/caliper finagle/finagle-benchmark com.twitter.finagle.benchmark.IsTracingBenchmark
+// ./pants goal bench finagle/finagle-benchmark --bench-target=com.twitter.finagle.benchmark.IsTracingBenchmark
 class IsTracingBenchmark extends SimpleBenchmark {
   val tracer = ZipkinTracer.mk(sampleRate=0.0f)
 

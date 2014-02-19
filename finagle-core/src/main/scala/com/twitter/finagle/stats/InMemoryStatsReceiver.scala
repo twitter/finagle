@@ -15,7 +15,8 @@ class InMemoryStatsReceiver extends StatsReceiver {
 
   def counter(name: String*): ReadableCounter = 
     new ReadableCounter {
-      def incr(delta: Int) {
+
+      def incr(delta: Int): Unit = synchronized {
         val oldValue = apply
         counters(name) = oldValue + delta
       }
@@ -24,7 +25,7 @@ class InMemoryStatsReceiver extends StatsReceiver {
 
   def stat(name: String*): ReadableStat =
     new ReadableStat {
-      def add(value: Float) {
+      def add(value: Float) = synchronized {
         val oldValue = apply
         stats(name) = oldValue :+ value
       }

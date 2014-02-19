@@ -12,9 +12,9 @@ import com.twitter.util.Try;
 class JavaRetryingFilter {
   static {
     /* A rather ugly way */
-    RetryPolicy$.MODULE$.backoffJava(
+    RetryPolicy.backoffJava(
       Backoff.toJava(Backoff.constant(Duration.fromTimeUnit(0, TimeUnit.SECONDS))),
-      RetryPolicy$.MODULE$.TimeoutAndWriteExceptionsOnly());
+      RetryPolicy.TimeoutAndWriteExceptionsOnly());
 
     /* A friendlier way in Java */
     RetryPolicy<Try<Void>> r = new SimpleRetryPolicy<Try<Void>>() {

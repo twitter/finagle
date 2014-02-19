@@ -2,10 +2,11 @@ package com.twitter.finagle.zookeeper
 
 import com.twitter.common.quantity.{Amount, Time => CommonTime}
 import com.twitter.common.zookeeper.{ZooKeeperClient, ZooKeeperUtils}
-import com.twitter.concurrent.{Offer, Broker}
+import com.twitter.concurrent.{Offer, Broker, AsyncMutex}
 import com.twitter.conversions.common._
 import com.twitter.conversions.common.quantity._
-import com.twitter.finagle.group.StabilizingGroup.State._
+import com.twitter.finagle.addr.StabilizingAddr.State._
+import com.twitter.finagle.util.InetSocketAddressUtil
 import com.twitter.finagle.InetResolver
 import com.twitter.util.Duration
 import java.net.InetSocketAddress
@@ -15,12 +16,16 @@ import scala.collection.JavaConverters._
 import scala.collection._
 
 private[finagle] class ZooKeeperHealthHandler extends Watcher {
+  private[this] val mu = new AsyncMutex
   val pulse = new Broker[Health]()
 
-  def process(evt: WatchedEvent) = evt.getState match {
-    case KeeperState.SyncConnected => pulse ! Healthy
-    case _ => pulse ! Unhealthy
-  }
+  def process(evt: WatchedEvent) = for {
+    permit <- mu.acquire()
+    () <- evt.getState match {
+      case KeeperState.SyncConnected => pulse ! Healthy
+      case _ => pulse ! Unhealthy
+    }
+  } permit.release()
 }
 
 private[finagle] object DefaultZkClientFactory
@@ -31,14 +36,12 @@ private[finagle] object DefaultZkClientFactory
 private[finagle] class ZkClientFactory(val sessionTimeout: Duration) {
   private[this] val zkClients: mutable.Map[Set[InetSocketAddress], ZooKeeperClient] = mutable.Map()
 
-  def hostSet(hosts: String) = {
-    val zkGroup = InetResolver.resolve(hosts)() collect { case ia: InetSocketAddress => ia }
-    zkGroup()
-  }
+  def hostSet(hosts: String) = InetSocketAddressUtil.parseHosts(hosts).toSet
 
   def get(zkHosts: Set[InetSocketAddress]): (ZooKeeperClient, Offer[Health]) = synchronized {
     val client = zkClients.getOrElseUpdate(zkHosts, new ZooKeeperClient(
-        Amount.of(sessionTimeout.inMillis.toInt, CommonTime.MILLISECONDS), zkHosts.asJava))
+        Amount.of(sessionTimeout.inMillis.toInt, CommonTime.MILLISECONDS),
+        zkHosts.asJava))
     // TODO: Watchers are tied to the life of the client,
     // which, in turn, is tied to the life of ZkClientFactory.
     // Maybe we should expose a way to unregister watchers.

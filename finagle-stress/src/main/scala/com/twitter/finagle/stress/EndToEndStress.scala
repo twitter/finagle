@@ -22,7 +22,7 @@ object EndToEndStress {
     def apply(request: HttpRequest) = Future {
       val response = new DefaultHttpResponse(
         request.getProtocolVersion, HttpResponseStatus.OK)
-      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, 1)
+      response.headers.set(HttpHeaders.Names.CONTENT_LENGTH, 1)
       response.setContent(ChannelBuffers.wrappedBuffer(".".getBytes))
       response
     }

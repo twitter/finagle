@@ -2,18 +2,19 @@ package com.twitter.finagle.client
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.factory.{RefcountedFactory, StatsFactoryWrapper,   TimeoutFactory}
-import com.twitter.finagle.filter.MonitorFilter
+import com.twitter.finagle.factory._
+import com.twitter.finagle.filter.{ExceptionSourceFilter, MonitorFilter}
 import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, HeapBalancerFactory}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{
-  BroadcastStatsReceiver, ClientStatsReceiver, RollupStatsReceiver,
-  StatsReceiver, NullStatsReceiver
-}
+  BroadcastStatsReceiver, ClientStatsReceiver, NullStatsReceiver, RollupStatsReceiver, 
+  StatsReceiver}
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.util.{DefaultTimer, DefaultMonitor, ReporterFactory, LoadedReporterFactory}
-import com.twitter.util.{Timer, Duration, Monitor}
+import com.twitter.finagle.util.{
+  DefaultMonitor, DefaultTimer, LoadedReporterFactory, ReporterFactory}
+import com.twitter.util.{Duration, Future, Monitor, Return, Timer, Throw, Var}
 import java.net.{SocketAddress, InetSocketAddress}
+import java.util.logging.{Level, Logger}
 
 object DefaultClient {
   private val defaultFailureAccrual: ServiceFactoryWrapper =
@@ -73,10 +74,11 @@ case class DefaultClient[Req, Rep](
 ) extends Client[Req, Rep] {
   com.twitter.finagle.Init()
   val globalStatsReceiver = new RollupStatsReceiver(statsReceiver)
+  private[this] val log = Logger.getLogger(getClass.getName)
 
   /** Bind a socket address to a well-formed stack */
   val bindStack: SocketAddress => ServiceFactory[Req, Rep] = sa => {
-    val hostStats = {
+    val hostStats = if (hostStatsReceiver.isNull) globalStatsReceiver else {
       val host = new RollupStatsReceiver(hostStatsReceiver.scope(
         sa match {
          case ia: InetSocketAddress => "%s:%d".format(ia.getHostName, ia.getPort)
@@ -97,6 +99,10 @@ case class DefaultClient[Req, Rep](
           }
         }
       }
+    }
+
+    val exceptionSourceFilter: Transformer[Req, Rep] = { factory =>
+      new ExceptionSourceFilter[Req, Rep](name) andThen factory
     }
 
     val timeBounded: Transformer[Req, Rep] = {
@@ -125,7 +131,8 @@ case class DefaultClient[Req, Rep](
       factory => filter andThen factory
     }
 
-    val newStack: SocketAddress => ServiceFactory[Req, Rep] = monitored compose
+    val newStack: SocketAddress => ServiceFactory[Req, Rep] = exceptionSourceFilter compose
+      monitored compose
       traceDest compose
       observed compose
       failureAccrual compose
@@ -138,12 +145,14 @@ case class DefaultClient[Req, Rep](
     newStack(sa)
   }
 
-  val newStack: Group[SocketAddress] => ServiceFactory[Req, Rep] = {
+
+  val newStack0: Name => ServiceFactory[Req, Rep] = {
     val refcounted: Transformer[Req, Rep] = new RefcountedFactory(_)
 
     val timeLimited: Transformer[Req, Rep] = factory =>
       if (serviceTimeout == Duration.Top) factory else {
-        val exception = new ServiceTimeoutException(serviceTimeout) { serviceName = name }
+        val exception = new ServiceTimeoutException(serviceTimeout)
+        exception.serviceName = name
         new TimeoutFactory(factory, serviceTimeout, exception, timer)
       }
 
@@ -153,10 +162,42 @@ case class DefaultClient[Req, Rep](
 
     val noBrokersException = new NoBrokersAvailableException(name)
 
-    val balanced: Group[SocketAddress] => ServiceFactory[Req, Rep] = group => {
-      val endpoints = group map { bindStack(_) }
-      loadBalancerFactory.newLoadBalancer(
-        endpoints, statsReceiver.scope("loadbalancer"), noBrokersException)
+    val balanced: Name => ServiceFactory[Req, Rep] = dest => {
+      // TODO: load balancer consumes Var[Addr] directly., 
+      // or at least Var[SocketAddress]
+      val g = Group.mutable[SocketAddress]()
+      val v = dest.bind()
+      v observe {
+        case Addr.Bound(sockaddrs) =>
+          g() = sockaddrs
+        case Addr.Failed(e) =>
+          g() = Set()
+          log.log(Level.WARNING, "Name binding failure", e)
+        case Addr.Delegated(where) =>
+          log.log(Level.WARNING, 
+            "Name was delegated to %s, but delegation is not supported".format(where))
+          g() = Set()
+        case Addr.Pending =>
+          log.log(Level.WARNING, "Name resolution is pending")
+          g() = Set()
+        case Addr.Neg =>
+          log.log(Level.WARNING, "Name resolution is negative")
+          g() = Set()
+      }
+
+      val endpoints = g map { bindStack(_) }
+      val balanced = loadBalancerFactory.newLoadBalancer(
+        endpoints,
+        statsReceiver.scope("loadbalancer"),
+        noBrokersException
+      )
+
+      // observeUntil fails the future on interrupts, but ready should not interruptible
+      // DelayedFactory implicitly masks this future--interrupts will not be propagated to it
+      val ready = v.observeUntil(_ != Addr.Pending)
+      val f = ready map (_ => balanced)
+
+      new DelayedFactory(f)
     }
 
     traced compose
@@ -166,15 +207,11 @@ case class DefaultClient[Req, Rep](
       balanced
   }
 
-  def newClient(group: Group[SocketAddress]) = {
-    val scoped: StatsReceiver => StatsReceiver = group match {
-      case NamedGroup(groupName) => _.scope(groupName)
-      case _ => _.scope(name)
-    }
+  val newStack: Name => ServiceFactory[Req, Rep] =
+    dest => new Refinery(dest, newStack0)
 
-    copy(
-      statsReceiver = scoped(statsReceiver),
-      hostStatsReceiver = scoped(hostStatsReceiver)
-    ).newStack(group)
-  }
+  def newClient(dest: Name, label: String) = copy(
+    statsReceiver = statsReceiver.scope(label),
+    hostStatsReceiver = hostStatsReceiver.scope(label)
+  ).newStack(dest)
 }

@@ -39,8 +39,8 @@ class AppService(clients: Seq[thrift.Backend.FutureIface], responseSample: Seq[(
       val response = new DefaultHttpResponse(req.getProtocolVersion, HttpResponseStatus.OK)
       val bytes = (bodies mkString "").getBytes
       response.setContent(ChannelBuffers.wrappedBuffer(bytes))
-      response.setHeader("Content-Lenth", "%d".format(bytes.size))
-      response.setHeader("X-Finagle-Latency-Ms", "%d".format(elapsed().inMilliseconds))
+      response.headers.set("Content-Lenth", "%d".format(bytes.size))
+      response.headers.set("X-Finagle-Latency-Ms", "%d".format(elapsed().inMilliseconds))
       response
     }
   }
@@ -55,17 +55,14 @@ object Appserver extends App with Logging {
 
   def main() {
     val clients = for {
-      (a, i) <- clientAddrs().zipWithIndex
-      g = Resolver.resolve(a)
-      if g.isReturn
+      (d, i) <- clientAddrs().zipWithIndex
+      dest = Resolver.eval(d)
     } yield {
       if (useThriftmux())
-        ThriftMux.newIface[thrift.Backend.FutureIface](g().named("mux%d".format(i)))
+        ThriftMux.newIface[thrift.Backend.FutureIface](dest, "mux%d".format(i))
       else {
-        // Note: Assumes static groups.
-        val cluster = StaticCluster(g().members.toSeq)
         val transport = ClientBuilder()
-          .cluster(cluster)
+          .dest(dest)
           .name("mux%d".format(i))
           .codec(ThriftClientFramedCodec())
           .hostConnectionLimit(1000)

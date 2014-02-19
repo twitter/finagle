@@ -44,10 +44,11 @@ class NaggatiSpec extends SpecificationWithJUnit {
           }
           "EXPIRE" >> {
             codec(wrap("EXPIRE foo 100\r\n")) mustEqual List(Expire("foo", 100))
-            codec(wrap("EXPIRE foo -1\r\n")) must throwA[ClientError]
+            codec(wrap("EXPIRE foo -1\r\n")) mustEqual List(Expire("foo", -1))
           }
           "EXPIREAT" >> {
-            codec(wrap("EXPIREAT foo 100\r\n")) must throwA[ClientError]
+            codec(wrap("EXPIREAT foo 100\r\n")) mustEqual
+              List(ExpireAt("foo", Time.fromMilliseconds(100*1000)))
             val time = Time.now + 10.seconds
             val foo = s2cb("foo")
             unwrap(codec(wrap("EXPIREAT foo %d\r\n".format(time.inSeconds)))) {
@@ -64,10 +65,11 @@ class NaggatiSpec extends SpecificationWithJUnit {
           }
           "PEXPIRE" >> {
             codec(wrap("PEXPIRE foo 100000\r\n")) mustEqual List(PExpire("foo", 100000L))
-            codec(wrap("PEXPIRE foo -1\r\n")) must throwA[ClientError]
+            codec(wrap("PEXPIRE foo -1\r\n")) mustEqual List(PExpire("foo", -1L))
           }
           "PEXPIREAT" >> {
-            codec(wrap("PEXPIREAT foo 100000\r\n")) must throwA[ClientError]
+            codec(wrap("PEXPIREAT foo 100000\r\n")) mustEqual
+              List(PExpireAt("foo", Time.fromMilliseconds(100000)))
             val time = Time.now + 10.seconds
             val foo = s2cb("foo")
             unwrap(codec(wrap("PEXPIREAT foo %d\r\n".format(time.inMilliseconds)))) {
@@ -270,22 +272,22 @@ class NaggatiSpec extends SpecificationWithJUnit {
                 verify("myset", 0, -1, Some(WithScores))
               }
             }
-            
+
             // Ensure that, after encoding, the bytes we threw in are the bytes we get back
             def testZRangeBytes(key: Array[Byte]) = {
               val zrange = ZRange.get(org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer(key), 0, 1, None)
-              val keyBack = zrange match { 
+              val keyBack = zrange match {
                 case ZRange(key, start, stop, withScores) => key
               }
               val bytesBack = keyBack.toByteBuffer.array
               key.toSeq mustEqual bytesBack.toSeq
             }
-            
+
             val goodKey = Array[Byte](58, 49, 127)
             val nonAsciiKey = Array[Byte](58, 49, -128)
             testZRangeBytes(goodKey)
             testZRangeBytes(nonAsciiKey)
-            
+
           } // ZRANGE
 
           "ZRANGEBYSCORE/ZREVRANGEBYSCORE" >> {
@@ -793,6 +795,61 @@ class NaggatiSpec extends SpecificationWithJUnit {
           case _ => fail("Expected one element in list")
         }
 
+      }
+      "nested multi-bulk replies" >> {
+        codec(wrap("*3\r\n")) mustEqual Nil
+        codec(wrap(":1\r\n")) mustEqual Nil
+        codec(wrap("*2\r\n")) mustEqual Nil
+        codec(wrap("$3\r\n")) mustEqual Nil
+        codec(wrap("one\r\n")) mustEqual Nil
+        codec(wrap("$5\r\n")) mustEqual Nil
+        codec(wrap("three\r\n")) mustEqual Nil
+        codec(wrap(":3\r\n")) match {
+          case reply :: Nil => reply match {
+            case MBulkReply(List(a, b, c)) =>
+              a mustEqual IntegerReply(1)
+              b match {
+                case MBulkReply(xs) =>
+                  ReplyFormat.toString(xs) mustEqual List("one", "three")
+                case xs => fail("Expected MBulkReply, got: %s" format xs)
+              }
+              c mustEqual IntegerReply(3)
+            case xs => fail("Expected 3-element MBulkReply, got: %s" format xs)
+          }
+          case xs => fail("Expected one reply, got: %s" format xs)
+        }
+
+        codec(wrap("*4\r\n")) mustEqual Nil
+        codec(wrap(":0\r\n")) mustEqual Nil
+        codec(wrap(":1\r\n")) mustEqual Nil
+        codec(wrap("*3\r\n")) mustEqual Nil
+        codec(wrap(":10\r\n")) mustEqual Nil
+        codec(wrap("*0\r\n")) mustEqual Nil
+        codec(wrap("*2\r\n")) mustEqual Nil
+        codec(wrap("*0\r\n")) mustEqual Nil
+        codec(wrap(":100\r\n")) mustEqual Nil
+        codec(wrap(":2\r\n")) match {
+          case reply :: Nil => reply match {
+            case MBulkReply(List(a, b, c, d)) =>
+              a mustEqual IntegerReply(0)
+              b mustEqual IntegerReply(1)
+              c match {
+                case MBulkReply(List(aa, ab, ac)) =>
+                  aa mustEqual IntegerReply(10)
+                  ab mustEqual EmptyMBulkReply()
+                  ac match {
+                    case MBulkReply(List(aaa, aab)) =>
+                      aaa mustEqual EmptyMBulkReply()
+                      aab mustEqual IntegerReply(100)
+                    case xs => fail("Expected 2-element MBulkReply, got: %s" format xs)
+                  }
+                case xs => fail("Expected 3-element, got: %s" format xs)
+              }
+              d mustEqual IntegerReply(2)
+            case xs => fail("Expected 4-element MBulkReply, got: %s" format xs)
+          }
+          case xs => fail("Expected one reply, got: %s" format xs)
+        }
       }
     }
 

@@ -9,7 +9,7 @@ class AddResponseHeadersFilter(responseHeaders: Map[String, String])
     extends SimpleFilter[Request, Response] {
   def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
     service(request) map { response =>
-      response.headers ++= responseHeaders
+      response.headerMap ++= responseHeaders
       response
     }
   }

@@ -24,7 +24,7 @@ class HttpMuxerTest extends FunSuite {
 
   val muxService = new HttpMuxer()
     .withHandler("foo/bar/", new DummyService(fooBarPrefix)) // prefix match
-    .withHandler("foo/bar", new DummyService(fooBarExact))  // exact match -- shadowed by foo/bar/
+    .withHandler("foo/bar", new DummyService(fooBarExact))  // exact match -- not shadowed by foo/bar/
     .withHandler("foo/boo/baz/", new DummyService(fooBooBaz))
     .withHandler("exact/match", new DummyService(exactMatch)) // exact match
 
@@ -39,11 +39,11 @@ class HttpMuxerTest extends FunSuite {
 
     assert(Response(Await.result(muxService(Request("/foo//bar/blah")))).contentString === fooBarPrefix)
 
-    assert(Response(Await.result(muxService(Request("/foo/bar")))).contentString === fooBarPrefix)
+    assert(Response(Await.result(muxService(Request("/foo/bar")))).contentString === fooBarExact)
 
     assert(Response(Await.result(muxService(Request("/foo/bar/")))).contentString === fooBarPrefix)
 
-    assert(Response(Await.result(muxService(Request("/foo/boo/baz")))).contentString === fooBooBaz)
+    assert(Response(Await.result(muxService(Request("/foo/boo/baz")))).status === HttpResponseStatus.NOT_FOUND)
 
     assert(Response(Await.result(muxService(Request("/foo/boo/baz/blah")))).contentString === fooBooBaz)
 
@@ -61,7 +61,7 @@ class HttpMuxerTest extends FunSuite {
   test("""special cases "" and "/" are handled correctly""") {
     val slashMux = new HttpMuxer().withHandler("/", new DummyService(specialCase))
     assert(Response(Await.result(slashMux(Request("/")))).contentString === specialCase)
-    assert(Response(Await.result(slashMux(Request("")))).contentString === specialCase)
+    assert(Response(Await.result(slashMux(Request("")))).status === HttpResponseStatus.NOT_FOUND)
     assert(Response(Await.result(slashMux(Request("/anything")))).contentString === specialCase)
 
     val emptyStringMux = new HttpMuxer().withHandler("", new DummyService(specialCase))

@@ -11,7 +11,8 @@ trait Strings { self: BaseClient =>
   /**
    * Appends value at the given key. If key doesn't exist,
    * behavior is similar to SET command
-   * @params key, value
+   * @param key
+   * @param value
    * @return length of string after append operation
    */
   def append(key: ChannelBuffer, value: ChannelBuffer): Future[JLong] =
@@ -64,7 +65,8 @@ trait Strings { self: BaseClient =>
   /**
    * Decrements number stored at key by given amount. If key doesn't
    * exist, value is set to 0 before the operation
-   * @params key, amount
+   * @param key
+   * @param amount
    * @return value after decrement. Error if key contains value
    * of the wrong type
    */
@@ -98,7 +100,9 @@ trait Strings { self: BaseClient =>
 
   /**
    * Gets the substring of the value associated with given key
-   * @params key, start, end
+   * @param key
+   * @param start
+   * @param end
    * @return substring, or none if key doesn't exist
    */
   def getRange(key: ChannelBuffer, start: Long, end: Long): Future[Option[ChannelBuffer]] =
@@ -205,7 +209,8 @@ trait Strings { self: BaseClient =>
   /**
    * Sets the given value to key. If a value already exists for the key,
    * the value is overwritten with the new value
-   * @params key, value
+   * @param key
+   * @param value
    */
   def set(key: ChannelBuffer, value: ChannelBuffer): Future[Unit] =
     doRequest(Set(key, value)) {

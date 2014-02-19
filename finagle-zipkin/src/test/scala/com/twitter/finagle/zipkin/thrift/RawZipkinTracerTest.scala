@@ -21,7 +21,7 @@ class RawZipkinTracerTest extends FunSuite with MockitoSugar {
 
   test("formulate scribe log message correctly") {
     val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver) {
-      override val client = mock[scribe.FinagledClient]
+      override val client = mock[Scribe.FinagledClient]
     }
 
     val localEndpoint = Endpoint(2323, 23)
@@ -43,7 +43,7 @@ class RawZipkinTracerTest extends FunSuite with MockitoSugar {
       bAnnotations = Seq.empty[BinaryAnnotation],
       endpoint = localEndpoint)
 
-    val expected = new LogEntry(
+    val expected = LogEntry(
       category = "zipkin",
       message = "CgABAAAAAAAAAHsLAAMAAAADZm9vCgAEAAAAAAAAAHsKAAUAAAAAAAAAe" +
         "w8ABgwAAAAFCgABAAAAAAdU1MALAAIAAAACY3MMAAMIAAEAAAkTBgACABcLAAMAAA" +
@@ -61,10 +61,10 @@ class RawZipkinTracerTest extends FunSuite with MockitoSugar {
 
   test("send all traces to scribe") {
     val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver) {
-      override val client = mock[scribe.FinagledClient]
+      override val client = mock[Scribe.FinagledClient]
     }
 
-    val expected = new LogEntry(
+    val expected = LogEntry(
       category = "zipkin",
       message = "CgABAAAAAAAAAHsLAAMAAAAGbWV0aG9kCgAEAAAAAAAAAHsKAAUAAAAAA" +
         "AAAew8ABgwAAAAECgABAAAAAAdU1MALAAIAAAACY3IMAAMIAAEBAQEBBgACAVkLAA" +
@@ -109,7 +109,7 @@ class RawZipkinTracerTest extends FunSuite with MockitoSugar {
     val ann3 = Annotation.Message(TimeoutFilter.TimeoutAnnotation)
 
     val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver) {
-      override val client = mock[scribe.FinagledClient]
+      override val client = mock[Scribe.FinagledClient]
     }
 
     when(tracer.client.log(any[Seq[LogEntry]])).thenReturn(Future(ResultCode.Ok))

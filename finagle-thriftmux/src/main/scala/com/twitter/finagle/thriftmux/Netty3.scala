@@ -1,14 +1,15 @@
 package com.twitter.finagle.thriftmux
 
-import com.twitter.finagle.mux.{BadMessageException, Message}
+import com.twitter.finagle.mux.Message
 import com.twitter.finagle.thrift.thrift.{ResponseHeader, RequestHeader, UpgradeReply}
-import com.twitter.finagle.thrift.{OutputBuffer, ThriftTracing, InputBuffer}
+import com.twitter.finagle.thrift._
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceId}
 import com.twitter.finagle.{mux, ThriftMuxUtil}
+import com.twitter.finagle.mux.BadMessageException
 import com.twitter.util.NonFatal
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.atomic.AtomicInteger
-import org.apache.thrift.protocol.{TBinaryProtocol, TProtocolFactory, TMessage, TMessageType}
+import org.apache.thrift.protocol.{TProtocolFactory, TMessage, TMessageType}
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.jboss.netty.channel._
 
@@ -35,6 +36,9 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
         SpanId(header.getSpan_id),
         sampled,
         if (header.isSetFlags) Flags(header.getFlags) else Flags())
+
+      // If this handler is in place requests are being serialized. This should be safe.
+      ClientId.set(Option(header.client_id) map { clientId => ClientId(clientId.name) })
       Message.Treq(Message.MinTag, Some(traceId), ChannelBuffers.wrappedBuffer(request_))
     }
 
@@ -45,6 +49,8 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
     }
 
     override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+      // If this handler is in place requests are being serialized. This should be safe.
+      ClientId.clear()
       Message.decode(e.getMessage.asInstanceOf[ChannelBuffer]) match {
         case Message.RreqOk(_, rep) =>
           super.writeRequested(ctx,
@@ -169,4 +175,4 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
   }
 }
 
-private[finagle] object PipelineFactory extends PipelineFactory(new TBinaryProtocol.Factory())
+private[finagle] object PipelineFactory extends PipelineFactory(Protocols.binaryFactory())
