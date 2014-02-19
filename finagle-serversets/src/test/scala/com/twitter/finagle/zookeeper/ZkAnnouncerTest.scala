@@ -83,8 +83,13 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
       case e: TestFailedDueToTimeoutException =>
         var exceptionString = "#%d eventually failed.\n".format(failedEventually)
 
-        exceptionString += "va1 status: %s\n".format(Var.sample(va1).toString)
-        exceptionString += "va2 status: %s\n".format(Var.sample(va2).toString)
+        if(va1 != null) {
+          exceptionString += "va1 status: %s\n".format(Var.sample(va1).toString)
+        }
+
+        if(va2 != null) {
+          exceptionString += "va2 status: %s\n".format(Var.sample(va2).toString)
+        }
 
         val endpoint = "/services/ci"
         val connection = new URL("http", "0.0.0.0", 4860, endpoint).openConnection()
