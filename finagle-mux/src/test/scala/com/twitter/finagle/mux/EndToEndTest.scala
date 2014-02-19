@@ -1,20 +1,17 @@
 package com.twitter.finagle.mux
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.{Dtab, Mux, Service}
 import com.twitter.util.{Await, Future, Promise}
 import java.io.{PrintWriter, StringWriter}
-import java.nio.charset.Charset
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class EndToEndTest extends FunSuite with Eventually with IntegrationPatience {
-
-  // Flaky test - For details, see https://jira.twitter.biz/browse/AWESOME-7621
-  if (!sys.props.contains("SKIP_FLAKY")) test("Discard request properly sent") {
+class EndToEndTest extends FunSuite {
+  test("Discard request properly sent") {
     @volatile var handled = false
     val p = Promise[ChannelBuffer]()
     p.setInterruptHandler { case t: Throwable =>
@@ -33,7 +30,8 @@ class EndToEndTest extends FunSuite with Eventually with IntegrationPatience {
     assert(!f.isDefined)
     assert(!p.isDefined)
     f.raise(new Exception())
-    eventually { assert(handled) }
+    Await.ready(f, 30.seconds)
+    assert(handled)
   }
 
   test("Dtab propagation") {
@@ -51,7 +49,7 @@ class EndToEndTest extends FunSuite with Eventually with IntegrationPatience {
     Dtab.unwind {
       Dtab.delegate("/foo", "/bar")
       Dtab.delegate("/web", "inet!twitter.com:80")
-      val buf = Await.result(client(ChannelBuffers.EMPTY_BUFFER))
+      val buf = Await.result(client(ChannelBuffers.EMPTY_BUFFER), 30.seconds)
       val bytes = new Array[Byte](buf.readableBytes())
       buf.readBytes(bytes)
       val str = new String(bytes)
