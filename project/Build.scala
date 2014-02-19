@@ -241,12 +241,12 @@ object Finagle extends Build {
     fork in Test := true,
     libraryDependencies ++= Seq(
       "commons-codec" % "commons-codec" % "1.5",
-      "com.twitter.common.zookeeper" % "server-set" % "1.0.42",
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.66",
       util("zk-common")
     ) ++ jacksonLibs,
     ivyXML :=
       <dependencies>
-        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.42">
+        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.66">
           <exclude org="com.google.guava" name="guava"/>
           <exclude org="com.twitter" name="finagle-core"/>
           <exclude org="com.twitter" name="finagle-thrift"/>
@@ -260,7 +260,7 @@ object Finagle extends Build {
           <exclude org="javax.mail" name="mail"/>
         </dependency>
       </dependencies>
-  ).dependsOn(finagleCore)
+  ).dependsOn(finagleCore, finagleTest)
 
   // Protocol support
 
@@ -315,7 +315,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("hashing"),
       "com.google.guava" % "guava" % "15.0",
-      "com.twitter.common" % "zookeeper-testing" % "0.0.34" % "test"
+      "com.twitter.common" % "zookeeper-testing" % "0.0.40" % "test"
     ) ++ jacksonLibs
   ).dependsOn(finagleCore, finagleServersets)
 
@@ -390,10 +390,8 @@ object Finagle extends Build {
       sharedSettings
     ).settings(
       name := "finagle-mysql",
-      libraryDependencies ++= Seq(
-        util("logging"),
-        "mysql" % "mysql-connector-mxj" % "5.0.12" % "test"
-      )
+      libraryDependencies ++= Seq(util("logging")),
+      excludeFilter in unmanagedSources := { "EmbeddableMysql.scala" || "ClientTest.scala" }
     ).dependsOn(finagleCore)
 
   lazy val finagleExp = Project(
