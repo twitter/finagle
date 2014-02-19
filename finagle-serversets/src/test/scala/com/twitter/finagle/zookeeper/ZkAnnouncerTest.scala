@@ -92,7 +92,7 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
         }
 
         val endpoint = "/services/ci"
-        val connection = new URL("http", "0.0.0.0", 4860, endpoint).openConnection()
+        val connection = new URL("http", "0.0.0.0", 4680, endpoint).openConnection()
         val reader = new BufferedReader(new InputStreamReader(connection.getInputStream))
         var fullOutput = ""
         var line = reader.readLine()
