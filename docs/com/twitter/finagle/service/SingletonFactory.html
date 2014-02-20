@@ -29,7 +29,12 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a> that produces
+<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a> identical to the argument <code>service</code>.</p><p>Note that this factory builds new <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>,
+so the &quot;singleton&quot; <code>service</code> argument is not shared by reference. This
+differs from com.twitter.finagle.ServiceFactory#const in that <code>const</code>
+proxies all requests to the same <code>service</code> rather than creating new objects.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep], <span name="com.twitter.util.Closable" class="extype">Closable</span>, (<a name="com.twitter.finagle.ClientConnection" class="extype" href="../ClientConnection.html">ClientConnection</a>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>

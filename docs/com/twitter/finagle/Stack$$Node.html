@@ -2,39 +2,38 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.demo.Tracing1.computeSomething$args.Immutable</title>
+          <title>com.twitter.finagle.Stack.Node</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../lib/template.css" />
+      <script type="text/javascript" src="../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
     
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
-        <a title="Go to companion" href="Tracing1$$computeSomething$args$$Immutable$.html"><img src="../../../../lib/class_to_object_big.png" /></a>
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.demo" class="extype" href="package.html">demo</a>.<a name="com.twitter.finagle.demo.Tracing1" class="extype" href="Tracing1$.html">Tracing1</a>.<a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args$.html">computeSomething$args</a></p>
-        <h1><a title="Go to companion" href="Tracing1$$computeSomething$args$$Immutable$.html">Immutable</a></h1>
+        <a title="Go to companion" href="Stack$$Node$.html"><img src="../../../lib/class_to_object_big.png" /></a>
+        <p id="owner"><a name="com" class="extype" href="../../package.html">com</a>.<a name="com.twitter" class="extype" href="../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="package.html">finagle</a>.<a name="com.twitter.finagle.Stack" class="extype" href="Stack$.html">Stack</a></p>
+        <h1><a title="Go to companion" href="Stack$$Node$.html">Node</a></h1>
       </div>
 
       <h4 class="signature" id="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Immutable</span><span class="result"> extends <a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></span>
+        <span class="name">Node</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="id">id: String</span>, <span name="mk">mk: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a>, <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]) ⇒ <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>, <span name="next">next: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>)</span><span class="result"> extends <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T] with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>The default read-only implementation of computeSomething$args.  You typically should not need to
-directly reference this class; instead, use the computeSomething$args.apply method to construct
-new instances.
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Nodes materialize by transforming the underlying stack in
+some way.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <span name="com.twitter.scrooge.ThriftStruct" class="extype">ThriftStruct</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -48,7 +47,7 @@ new instances.
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.demo.Tracing1.computeSomething$args.Immutable" class="in"><span>Immutable</span></li><li name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="in"><span>computeSomething$args</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="com.twitter.scrooge.ThriftStruct" class="in"><span>ThriftStruct</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.Stack.Node" class="in"><span>Node</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="com.twitter.finagle.Stack" class="in"><span>Stack</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -60,15 +59,15 @@ new instances.
         <div id="allMembers">
         <div class="members" id="constructors">
               <h3>Instance Constructors</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args.Immutable#this" data-isabs="false">
-      <a id="this:Immutable"></a>
+              <ol><li visbl="pub" name="com.twitter.finagle.Stack.Node#this" data-isabs="false">
+      <a id="this:Node[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Immutable</span><span class="params">(<span name="_passthroughFields">_passthroughFields: <span name="scala.collection.immutable.Map" class="extype">Map</span>[<span name="scala.Short" class="extype">Short</span>, <span name="com.twitter.scrooge.TFieldBlob" class="extype">TFieldBlob</span>] = <span name="scala.collection.immutable.immutable$Map.empty[Short, Nothing]" class="defval">...</span></span>)</span>
+        <span class="name">Node</span><span class="params">(<span name="id">id: String</span>, <span name="mk">mk: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a>, <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]) ⇒ <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>, <span name="next">next: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>)</span>
       </span>
       </h4>
       
@@ -117,6 +116,22 @@ new instances.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack#++" data-isabs="false">
+      <a id="++(Stack[T]):Stack[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $plus$plus">++</span><span class="params">(<span name="right">right: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>)</span><span class="result">: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Produce a new stack representing the concatenation of <code>this</code>
+with <code>right</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Produce a new stack representing the concatenation of <code>this</code>
+with <code>right</code>. Note that this replaces the terminating element of
+<code>this</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stack</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
       <a id="==(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -141,18 +156,6 @@ new instances.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args.Immutable#_passthroughFields" data-isabs="false">
-      <a id="_passthroughFields:Map[Short, TFieldBlob]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">_passthroughFields</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[<span name="scala.Short" class="extype">Short</span>, <span name="com.twitter.scrooge.TFieldBlob" class="extype">TFieldBlob</span>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args.Immutable" class="extype" href="">Immutable</a> → <a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -165,7 +168,7 @@ new instances.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#canEqual" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.Stack.Node#canEqual" data-isabs="false">
       <a id="canEqual(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -173,10 +176,10 @@ new instances.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">canEqual</span><span class="params">(<span name="other">other: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">canEqual</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a> → Equals</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Stack.Node" class="extype" href="">Node</a> → Equals</dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
@@ -188,22 +191,10 @@ new instances.
         <span class="name">clone</span><span class="params">()</span><span class="result">: AnyRef</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#copy" data-isabs="false">
-      <a id="copy(Map[Short, TFieldBlob]):computeSomething$args"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">copy</span><span class="params">(<span name="_passthroughFields">_passthroughFields: <span name="scala.collection.immutable.Map" class="extype">Map</span>[<span name="scala.Short" class="extype">Short</span>, <span name="com.twitter.scrooge.TFieldBlob" class="extype">TFieldBlob</span>] = <span class="symbol"><span class="name"><a href="Tracing1$$computeSomething$args.html#_passthroughFields:Map[Short, TFieldBlob]">this._passthroughFields</a></span></span></span>)</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -216,7 +207,7 @@ new instances.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#equals" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.Stack.Node#equals" data-isabs="false">
       <a id="equals(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -224,10 +215,10 @@ new instances.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="other">other: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a> → Equals → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Stack.Node" class="extype" href="">Node</a> → Equals → AnyRef → Any</dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
       <h4 class="signature">
@@ -239,10 +230,23 @@ new instances.
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack#foreach" data-isabs="false">
+      <a id="foreach((Stack[T]) ⇒ Unit):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">foreach</span><span class="params">(<span name="fn">fn: (<span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]) ⇒ <span name="scala.Unit" class="extype">Unit</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Traverse the stack, invoking <code>fn</code> on each element.</p><div class="fullcomment"><div class="comment cmt"><p>Traverse the stack, invoking <code>fn</code> on each element.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stack</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
       <a id="getClass():java.lang.Class[_]"></a>
       <h4 class="signature">
@@ -255,35 +259,7 @@ new instances.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#getFieldBlob" data-isabs="false">
-      <a id="getFieldBlob(Short):Option[TFieldBlob]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">getFieldBlob</span><span class="params">(<span name="_fieldId">_fieldId: <span name="scala.Short" class="extype">Short</span></span>)</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[<span name="com.twitter.scrooge.TFieldBlob" class="extype">TFieldBlob</span>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Gets a field value encoded as a binary blob using TCompactProtocol.</p><div class="fullcomment"><div class="comment cmt"><p>Gets a field value encoded as a binary blob using TCompactProtocol.  If the specified field
-is present in the passthrough map, that value is returend.  Otherwise, if the specified field
-is known and not optional and set to None, then the field is serialized and returned.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#getFieldBlobs" data-isabs="false">
-      <a id="getFieldBlobs(TraversableOnce[Short]):Map[Short, TFieldBlob]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">getFieldBlobs</span><span class="params">(<span name="ids">ids: TraversableOnce[<span name="scala.Short" class="extype">Short</span>]</span>)</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[<span name="scala.Short" class="extype">Short</span>, <span name="com.twitter.scrooge.TFieldBlob" class="extype">TFieldBlob</span>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Collects TCompactProtocol-encoded field values according to <code>getFieldBlob</code> into a map.</p><div class="fullcomment"><div class="comment cmt"><p>Collects TCompactProtocol-encoded field values according to <code>getFieldBlob</code> into a map.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#hashCode" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.Stack.Node#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -294,7 +270,19 @@ is known and not optional and set to None, then the field is serialized and retu
         <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a> → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Stack.Node" class="extype" href="">Node</a> → AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack.Node#id" data-isabs="false">
+      <a id="id:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">id</span><span class="result">: String</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -307,6 +295,35 @@ is known and not optional and set to None, then the field is serialized and retu
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack.Node#make" data-isabs="false">
+      <a id="make(Params):T"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">make</span><span class="params">(<span name="params">params: <a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a></span>)</span><span class="result">: T</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Materialize the current stack with the given parameters,
+producing a <code>T</code>-typed value representing the current
+configuration.</p><div class="fullcomment"><div class="comment cmt"><p>Materialize the current stack with the given parameters,
+producing a <code>T</code>-typed value representing the current
+configuration.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Stack.Node" class="extype" href="">Node</a> → Stack</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack.Node#mk" data-isabs="false">
+      <a id="mk:(Params, Stack[T]) ⇒ Stack[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">mk</span><span class="result">: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a>, <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]) ⇒ <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -319,6 +336,18 @@ is known and not optional and set to None, then the field is serialized and retu
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack.Node#next" data-isabs="false">
+      <a id="next:Stack[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">next</span><span class="result">: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
       <a id="notify():Unit"></a>
       <h4 class="signature">
@@ -343,7 +372,7 @@ is known and not optional and set to None, then the field is serialized and retu
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#productArity" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.Stack.Node#productArity" data-isabs="false">
       <a id="productArity:Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -354,8 +383,8 @@ is known and not optional and set to None, then the field is serialized and retu
         <span class="name">productArity</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a> → Product</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#productElement" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Stack.Node" class="extype" href="">Node</a> → Product</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack.Node#productElement" data-isabs="false">
       <a id="productElement(Int):Any"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -363,10 +392,10 @@ is known and not optional and set to None, then the field is serialized and retu
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">productElement</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Any" class="extype">Any</span></span>
+        <span class="name">productElement</span><span class="params">(<span name="arg0">arg0: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Any" class="extype">Any</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a> → Product</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Stack.Node" class="extype" href="">Node</a> → Product</dd></dl></div>
     </li><li visbl="pub" name="scala.Product#productIterator" data-isabs="false">
       <a id="productIterator:Iterator[Any]"></a>
       <h4 class="signature">
@@ -379,7 +408,7 @@ is known and not optional and set to None, then the field is serialized and retu
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Product</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#productPrefix" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.Stack.Node#productPrefix" data-isabs="false">
       <a id="productPrefix:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -387,26 +416,10 @@ is known and not optional and set to None, then the field is serialized and retu
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">productPrefix</span><span class="result">: String</span>
+        <span class="name">productPrefix</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a> → Product</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#setField" data-isabs="false">
-      <a id="setField(TFieldBlob):computeSomething$args"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">setField</span><span class="params">(<span name="_blob">_blob: <span name="com.twitter.scrooge.TFieldBlob" class="extype">TFieldBlob</span></span>)</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Sets a field using a TCompactProtocol-encoded binary blob.</p><div class="fullcomment"><div class="comment cmt"><p>Sets a field using a TCompactProtocol-encoded binary blob.  If the field is a known
-field, the blob is decoded and the field is set to the decoded value.  If the field
-is unknown and passthrough fields are enabled, then the blob will be stored in
-_passthroughFields.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Stack.Node" class="extype" href="">Node</a> → Product</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -419,7 +432,20 @@ _passthroughFields.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#toString" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.Stack#tails" data-isabs="false">
+      <a id="tails:Iterator[Stack[T]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tails</span><span class="result">: Iterator[<span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Enumerate each well-formed stack contained within this stack.</p><div class="fullcomment"><div class="comment cmt"><p>Enumerate each well-formed stack contained within this stack.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stack</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -430,22 +456,24 @@ _passthroughFields.
         <span class="name">toString</span><span class="params">()</span><span class="result">: String</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a> → AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#unsetField" data-isabs="false">
-      <a id="unsetField(Short):computeSomething$args"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stack → AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack#transform" data-isabs="false">
+      <a id="transform((Stack[T]) ⇒ Stack[T]):Stack[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unsetField</span><span class="params">(<span name="_fieldId">_fieldId: <span name="scala.Short" class="extype">Short</span></span>)</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></span>
+        <span class="name">transform</span><span class="params">(<span name="fn">fn: (<span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]) ⇒ <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>)</span><span class="result">: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">If the specified field is optional, it is set to None.</p><div class="fullcomment"><div class="comment cmt"><p>If the specified field is optional, it is set to None.  Otherwise, if the field is
-known, it is reverted to its default value; if the field is unknown, it is subtracked
-from the passthroughFields map, if present.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></dd></dl></div>
+      <p class="shortcomment cmt">Transform one stack to another by applying <code>fn</code> on each element;
+the map traverses on the element produced by <code>fn</code>, not the
+original stack.</p><div class="fullcomment"><div class="comment cmt"><p>Transform one stack to another by applying <code>fn</code> on each element;
+the map traverses on the element produced by <code>fn</code>, not the
+original stack.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stack</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -491,21 +519,6 @@ from the passthroughFields map, if present.
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args#write" data-isabs="false">
-      <a id="write(TProtocol):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">write</span><span class="params">(<span name="_oprot">_oprot: <span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">If the specified field is optional, it is set to None.</p><div class="fullcomment"><div class="comment cmt"><p>If the specified field is optional, it is set to None.  Otherwise, if the field is
-known, it is reverted to its default value; if the field is unknown, it is subtracked
-from the passthroughFields map, if present.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a> → ThriftStruct</dd></dl></div>
     </li></ol>
             </div>
 
@@ -531,16 +544,16 @@ from the passthroughFields map, if present.
         </div>
 
         <div id="inheritedMembers">
-        <div name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></h3>
+        <div name="scala.Serializable" class="parent">
+              <h3>Inherited from <span name="scala.Serializable" class="extype">Serializable</span></h3>
             </div><div name="java.io.Serializable" class="parent">
               <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
             </div><div name="scala.Product" class="parent">
               <h3>Inherited from <span name="scala.Product" class="extype">Product</span></h3>
             </div><div name="scala.Equals" class="parent">
               <h3>Inherited from <span name="scala.Equals" class="extype">Equals</span></h3>
-            </div><div name="com.twitter.scrooge.ThriftStruct" class="parent">
-              <h3>Inherited from <span name="com.twitter.scrooge.ThriftStruct" class="extype">ThriftStruct</span></h3>
+            </div><div name="com.twitter.finagle.Stack" class="parent">
+              <h3>Inherited from <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

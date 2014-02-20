@@ -2,36 +2,47 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args.Immutable</title>
+          <title>com.twitter.finagle.Stack.Simple</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../lib/template.css" />
+      <script type="text/javascript" src="../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
-        <a title="Go to companion" href="Tracing3$$oneMoreThingToCompute$args$$Immutable.html"><img src="../../../../lib/object_to_class_big.png" /></a>
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.demo" class="extype" href="package.html">demo</a>.<a name="com.twitter.finagle.demo.Tracing3" class="extype" href="Tracing3$.html">Tracing3</a>.<a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args" class="extype" href="Tracing3$$oneMoreThingToCompute$args$.html">oneMoreThingToCompute$args</a></p>
-        <h1><a title="Go to companion" href="Tracing3$$oneMoreThingToCompute$args$$Immutable.html">Immutable</a></h1>
+        <img src="../../../lib/class_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../package.html">com</a>.<a name="com.twitter" class="extype" href="../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="package.html">finagle</a>.<a name="com.twitter.finagle.Stack" class="extype" href="Stack$.html">Stack</a></p>
+        <h1>Simple</h1>
       </div>
 
       <h4 class="signature" id="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">Immutable</span><span class="result"> extends <span name="com.twitter.scrooge.ThriftStructCodec3" class="extype">ThriftStructCodec3</span>[<a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args" class="extype" href="Tracing3$$oneMoreThingToCompute$args.html">oneMoreThingToCompute$args</a>] with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">Simple</span><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a name="com.twitter.finagle.Stackable" class="extype" href="Stackable.html">Stackable</a>[T]</span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A convenient class to construct stackable modules. This variant
+operates over stack values. Useful for building stack elements:</p><pre>
+<span class="kw">def</span> myNode = <span class="kw">new</span> Simple[<span class="std">Int</span><span class="kw">=&gt;</span><span class="std">Int</span>](<span class="lit">"myelem"</span>) {
+  <span class="kw">def</span> make(params: Params, next: <span class="std">Int</span><span class="kw">=&gt;</span><span class="std">Int</span>): (<span class="std">Int</span><span class="kw">=&gt;</span><span class="std">Int</span>) = {
+    <span class="kw">val</span> Multiplied(m) = params[Multiplier]
+    i <span class="kw">=&gt;</span> next(i*m)
+  }
+}
+</pre></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="com.twitter.scrooge.ThriftStructCodec3" class="extype">ThriftStructCodec3</span>[<a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args" class="extype" href="Tracing3$$oneMoreThingToCompute$args.html">oneMoreThingToCompute$args</a>], <span name="com.twitter.scrooge.ThriftStructCodec" class="extype">ThriftStructCodec</span>[<a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args" class="extype" href="Tracing3$$oneMoreThingToCompute$args.html">oneMoreThingToCompute$args</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.Stackable" class="extype" href="Stackable.html">Stackable</a>[T], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+        </div><div class="toggleContainer block">
+          <span class="toggle">Known Subclasses</span>
+          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.netty3.Netty3Stack" class="extype" href="netty3/Netty3Stack.html">Netty3Stack</a></div>
         </div></div>
     
 
@@ -45,7 +56,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args.Immutable" class="in"><span>Immutable</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="com.twitter.scrooge.ThriftStructCodec3" class="in"><span>ThriftStructCodec3</span></li><li name="com.twitter.scrooge.ThriftStructCodec" class="in"><span>ThriftStructCodec</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.Stack.Simple" class="in"><span>Simple</span></li><li name="com.twitter.finagle.Stackable" class="in"><span>Stackable</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -55,14 +66,59 @@
 
       <div id="template">
         <div id="allMembers">
-        
+        <div class="members" id="constructors">
+              <h3>Instance Constructors</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.Stack.Simple#this" data-isabs="false">
+      <a id="this:Simple[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Simple</span><span class="params">(<span name="id">id: String</span>)</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
 
-        
-
-        
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.Stack.Simple#Params" data-isabs="false">
+      <a id="Params:Params"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Params</span><span class="result"> = <a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a></span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
 
         <div class="values members" id="values">
-              <h3>Value Members</h3>
+              <h3>Abstract Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.Stack.Simple#make" data-isabs="true">
+      <a id="make(Params,T):T"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">make</span><span class="params">(<span name="params">params: Params</span>, <span name="next">next: T</span>)</span><span class="result">: T</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Concrete Value Members</h3>
               <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
       <a id="!=(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -146,58 +202,10 @@
         <span class="name">clone</span><span class="params">()</span><span class="result">: AnyRef</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args.Immutable#decode" data-isabs="false">
-      <a id="decode(TProtocol):oneMoreThingToCompute$args"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">decode</span><span class="params">(<span name="_iprot">_iprot: <span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span></span>)</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args" class="extype" href="Tracing3$$oneMoreThingToCompute$args.html">oneMoreThingToCompute$args</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args.Immutable" class="extype" href="">Immutable</a> → ThriftStructCodec</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.scrooge.ThriftStructCodec3#decoder" data-isabs="false">
-      <a id="decoder:(TProtocol) ⇒ oneMoreThingToCompute$args"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">decoder</span><span class="result">: (<span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span>) ⇒ <a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args" class="extype" href="Tracing3$$oneMoreThingToCompute$args.html">oneMoreThingToCompute$args</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ThriftStructCodec3 → ThriftStructCodec</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args.Immutable#encode" data-isabs="false">
-      <a id="encode(oneMoreThingToCompute$args,TProtocol):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">encode</span><span class="params">(<span name="_item">_item: <a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args" class="extype" href="Tracing3$$oneMoreThingToCompute$args.html">oneMoreThingToCompute$args</a></span>, <span name="_oproto">_oproto: <span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args.Immutable" class="extype" href="">Immutable</a> → ThriftStructCodec</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.scrooge.ThriftStructCodec3#encoder" data-isabs="false">
-      <a id="encoder:(oneMoreThingToCompute$args, TProtocol) ⇒ Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">encoder</span><span class="result">: (<a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args" class="extype" href="Tracing3$$oneMoreThingToCompute$args.html">oneMoreThingToCompute$args</a>, <span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span>) ⇒ <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ThriftStructCodec3 → ThriftStructCodec</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -233,7 +241,7 @@
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
@@ -261,6 +269,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack.Simple#id" data-isabs="false">
+      <a id="id:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">id</span><span class="result">: String</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -273,18 +293,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.scrooge.ThriftStructCodec#metaData" data-isabs="false">
-      <a id="metaData:ThriftStructMetaData[oneMoreThingToCompute$args]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">lazy val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">metaData</span><span class="result">: <span name="com.twitter.scrooge.ThriftStructMetaData" class="extype">ThriftStructMetaData</span>[<a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args" class="extype" href="Tracing3$$oneMoreThingToCompute$args.html">oneMoreThingToCompute$args</a>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ThriftStructCodec</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -321,18 +329,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="prt" name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args.Immutable#readResolve" data-isabs="false">
-      <a id="readResolve():AnyRef"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">readResolve</span><span class="params">()</span><span class="result">: AnyRef</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -345,6 +341,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack.Simple#toStack" data-isabs="false">
+      <a id="toStack(Stack[T]):Node[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toStack</span><span class="params">(<span name="next">next: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>)</span><span class="result">: <a name="com.twitter.finagle.Stack.Node" class="extype" href="Stack$$Node.html">Node</a>[T]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Stack.Simple" class="extype" href="">Simple</a> → <a name="com.twitter.finagle.Stackable" class="extype" href="Stackable.html">Stackable</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
@@ -409,14 +417,8 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.Serializable" class="parent">
-              <h3>Inherited from <span name="scala.Serializable" class="extype">Serializable</span></h3>
-            </div><div name="java.io.Serializable" class="parent">
-              <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
-            </div><div name="com.twitter.scrooge.ThriftStructCodec3" class="parent">
-              <h3>Inherited from <span name="com.twitter.scrooge.ThriftStructCodec3" class="extype">ThriftStructCodec3</span>[<a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args" class="extype" href="Tracing3$$oneMoreThingToCompute$args.html">oneMoreThingToCompute$args</a>]</h3>
-            </div><div name="com.twitter.scrooge.ThriftStructCodec" class="parent">
-              <h3>Inherited from <span name="com.twitter.scrooge.ThriftStructCodec" class="extype">ThriftStructCodec</span>[<a name="com.twitter.finagle.demo.Tracing3.oneMoreThingToCompute$args" class="extype" href="Tracing3$$oneMoreThingToCompute$args.html">oneMoreThingToCompute$args</a>]</h3>
+        <div name="com.twitter.finagle.Stackable" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.Stackable" class="extype" href="Stackable.html">Stackable</a>[T]</h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

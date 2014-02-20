@@ -25,7 +25,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">ClusterMultiReaderConfig</span><span class="params">(<span name="_cluster">_cluster: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>, <span name="_queueName">_queueName: String</span>, <span name="_clientBuilder">_clientBuilder: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="../builder/ClientBuilder.html">ClientBuilder</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>, <span name="scala.Nothing" class="extype">Nothing</span>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>]]</span>, <span name="_timer">_timer: <span name="scala.Option" class="extype">Option</span>[<span name="com.twitter.util.Timer" class="extype">Timer</span>]</span>, <span name="_retryBackoffs">_retryBackoffs: <span name="scala.Option" class="extype">Option</span>[() ⇒ Stream[<span name="com.twitter.util.Duration" class="extype">Duration</span>]]</span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">ClusterMultiReaderConfig</span><span class="params">(<span name="_va">_va: <span name="com.twitter.util.Var" class="extype">Var</span>[<a name="com.twitter.finagle.Addr" class="extype" href="../Addr.html">Addr</a>]</span>, <span name="_queueName">_queueName: String</span>, <span name="_clientBuilder">_clientBuilder: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="../builder/ClientBuilder.html">ClientBuilder</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>, <span name="scala.Nothing" class="extype">Nothing</span>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>]]</span>, <span name="_timer">_timer: <span name="scala.Option" class="extype">Option</span>[<span name="com.twitter.util.Timer" class="extype">Timer</span>]</span>, <span name="_retryBackoffs">_retryBackoffs: <span name="scala.Option" class="extype">Option</span>[() ⇒ Stream[<span name="com.twitter.util.Duration" class="extype">Duration</span>]]</span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
@@ -174,18 +174,6 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.ClusterMultiReaderConfig#cluster" data-isabs="false">
-      <a id="cluster:Cluster[SocketAddress]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">cluster</span><span class="result">: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -405,6 +393,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.ClusterMultiReaderConfig" class="extype" href="">ClusterMultiReaderConfig</a> → AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.ClusterMultiReaderConfig#va" data-isabs="false">
+      <a id="va:Var[Addr]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">va</span><span class="result">: <span name="com.twitter.util.Var" class="extype">Var</span>[<a name="com.twitter.finagle.Addr" class="extype" href="../Addr.html">Addr</a>]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">

@@ -338,7 +338,7 @@ only need to modify or operate on the underlying service.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Proxy → AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.ProxyServiceFactory#isAvailable" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.pool.ReusingPool#isAvailable" data-isabs="false">
       <a id="isAvailable:Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -349,7 +349,10 @@ only need to modify or operate on the underlying service.
         <span class="name">isAvailable</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ProxyServiceFactory" class="extype" href="../ProxyServiceFactory.html">ProxyServiceFactory</a> → <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a></dd></dl></div>
+      <p class="shortcomment cmt">isAvailable in this context means that there is an already made service
+that can be used immediately, or else a service can be made.</p><div class="fullcomment"><div class="comment cmt"><p>isAvailable in this context means that there is an already made service
+that can be used immediately, or else a service can be made.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.pool.ReusingPool" class="extype" href="">ReusingPool</a> → <a name="com.twitter.finagle.ProxyServiceFactory" class="extype" href="../ProxyServiceFactory.html">ProxyServiceFactory</a> → <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a></dd></dl></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">

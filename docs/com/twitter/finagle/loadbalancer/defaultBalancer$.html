@@ -2,21 +2,21 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.exception.thrift.Scribe.log$args.Immutable</title>
+          <title>com.twitter.finagle.loadbalancer.defaultBalancer</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
     
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
       <div id="definition">
-        <a title="Go to companion" href="Scribe$$log$args$$Immutable.html"><img src="../../../../../lib/object_to_class_big.png" /></a>
-        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.exception" class="extype" href="../package.html">exception</a>.<a name="com.twitter.finagle.exception.thrift" class="extype" href="package.html">thrift</a>.<a name="com.twitter.finagle.exception.thrift.Scribe" class="extype" href="Scribe$.html">Scribe</a>.<a name="com.twitter.finagle.exception.thrift.Scribe.log$args" class="extype" href="Scribe$$log$args$.html">log$args</a></p>
-        <h1><a title="Go to companion" href="Scribe$$log$args$$Immutable.html">Immutable</a></h1>
+        <img src="../../../../lib/object_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.loadbalancer" class="extype" href="package.html">loadbalancer</a></p>
+        <h1>defaultBalancer</h1>
       </div>
 
       <h4 class="signature" id="signature">
@@ -25,13 +25,13 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Immutable</span><span class="result"> extends <span name="com.twitter.scrooge.ThriftStructCodec3" class="extype">ThriftStructCodec3</span>[<a name="com.twitter.finagle.exception.thrift.Scribe.log$args" class="extype" href="Scribe$$log$args.html">log$args</a>] with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">defaultBalancer</span><span class="result"> extends <span name="com.twitter.app.GlobalFlag" class="extype">GlobalFlag</span>[<span name="java.lang.String" class="extype">String</span>]</span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="com.twitter.scrooge.ThriftStructCodec3" class="extype">ThriftStructCodec3</span>[<a name="com.twitter.finagle.exception.thrift.Scribe.log$args" class="extype" href="Scribe$$log$args.html">log$args</a>], <span name="com.twitter.scrooge.ThriftStructCodec" class="extype">ThriftStructCodec</span>[<a name="com.twitter.finagle.exception.thrift.Scribe.log$args" class="extype" href="Scribe$$log$args.html">log$args</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="com.twitter.app.GlobalFlag" class="extype">GlobalFlag</span>[<span name="java.lang.String" class="extype">String</span>], <span name="com.twitter.app.Flag" class="extype">Flag</span>[<span name="java.lang.String" class="extype">String</span>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.exception.thrift.Scribe.log$args.Immutable" class="in"><span>Immutable</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="com.twitter.scrooge.ThriftStructCodec3" class="in"><span>ThriftStructCodec3</span></li><li name="com.twitter.scrooge.ThriftStructCodec" class="in"><span>ThriftStructCodec</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.loadbalancer.defaultBalancer" class="in"><span>defaultBalancer</span></li><li name="com.twitter.app.GlobalFlag" class="in"><span>GlobalFlag</span></li><li name="com.twitter.app.Flag" class="in"><span>Flag</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -123,6 +123,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#apply" data-isabs="false">
+      <a id="apply():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -146,58 +158,22 @@
         <span class="name">clone</span><span class="params">()</span><span class="result">: AnyRef</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.Scribe.log$args.Immutable#decode" data-isabs="false">
-      <a id="decode(TProtocol):log$args"></a>
+    </li><li visbl="pub" name="com.twitter.app.Flag#defaultString" data-isabs="false">
+      <a id="defaultString:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">decode</span><span class="params">(<span name="_iprot">_iprot: <span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exception.thrift.Scribe.log$args" class="extype" href="Scribe$$log$args.html">log$args</a></span>
+        <span class="name">defaultString</span><span class="result">: String</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exception.thrift.Scribe.log$args.Immutable" class="extype" href="">Immutable</a> → ThriftStructCodec</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.scrooge.ThriftStructCodec3#decoder" data-isabs="false">
-      <a id="decoder:(TProtocol) ⇒ log$args"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">decoder</span><span class="result">: (<span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span>) ⇒ <a name="com.twitter.finagle.exception.thrift.Scribe.log$args" class="extype" href="Scribe$$log$args.html">log$args</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ThriftStructCodec3 → ThriftStructCodec</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.Scribe.log$args.Immutable#encode" data-isabs="false">
-      <a id="encode(log$args,TProtocol):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">encode</span><span class="params">(<span name="_item">_item: <a name="com.twitter.finagle.exception.thrift.Scribe.log$args" class="extype" href="Scribe$$log$args.html">log$args</a></span>, <span name="_oproto">_oproto: <span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exception.thrift.Scribe.log$args.Immutable" class="extype" href="">Immutable</a> → ThriftStructCodec</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.scrooge.ThriftStructCodec3#encoder" data-isabs="false">
-      <a id="encoder:(log$args, TProtocol) ⇒ Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">encoder</span><span class="result">: (<a name="com.twitter.finagle.exception.thrift.Scribe.log$args" class="extype" href="Scribe$$log$args.html">log$args</a>, <span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span>) ⇒ <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ThriftStructCodec3 → ThriftStructCodec</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -233,10 +209,34 @@
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.app.Flag#flaggable" data-isabs="false">
+      <a id="flaggable:Flaggable[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">flaggable</span><span class="result">: <span name="com.twitter.app.Flaggable" class="extype">Flaggable</span>[<span name="java.lang.String" class="extype">String</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#get" data-isabs="false">
+      <a id="get:Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[<span name="java.lang.String" class="extype">String</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
       <a id="getClass():java.lang.Class[_]"></a>
       <h4 class="signature">
@@ -249,6 +249,30 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.GlobalFlag#getGlobalFlag" data-isabs="false">
+      <a id="getGlobalFlag:com.twitter.app.Flag[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getGlobalFlag</span><span class="result">: com.twitter.app.Flag[_]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>GlobalFlag</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.app.GlobalFlag#getValue" data-isabs="false">
+      <a id="getValue:Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getValue</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[<span name="java.lang.String" class="extype">String</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>GlobalFlag → Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
@@ -261,6 +285,30 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#help" data-isabs="false">
+      <a id="help:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">help</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#isDefined" data-isabs="false">
+      <a id="isDefined:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isDefined</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -273,18 +321,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.scrooge.ThriftStructCodec#metaData" data-isabs="false">
-      <a id="metaData:ThriftStructMetaData[log$args]"></a>
+    </li><li visbl="pub" name="com.twitter.app.GlobalFlag#name" data-isabs="false">
+      <a id="name:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">lazy val</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">metaData</span><span class="result">: <span name="com.twitter.scrooge.ThriftStructMetaData" class="extype">ThriftStructMetaData</span>[<a name="com.twitter.finagle.exception.thrift.Scribe.log$args" class="extype" href="Scribe$$log$args.html">log$args</a>]</span>
+        <span class="name">name</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ThriftStructCodec</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>GlobalFlag → Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -297,6 +345,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#noArgumentOk" data-isabs="false">
+      <a id="noArgumentOk:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">noArgumentOk</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
       <a id="notify():Unit"></a>
       <h4 class="signature">
@@ -321,18 +381,42 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="prt" name="com.twitter.finagle.exception.thrift.Scribe.log$args.Immutable#readResolve" data-isabs="false">
-      <a id="readResolve():AnyRef"></a>
+    </li><li visbl="pub" name="com.twitter.app.Flag#parse" data-isabs="false">
+      <a id="parse():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">readResolve</span><span class="params">()</span><span class="result">: AnyRef</span>
+        <span class="name">parse</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#parse" data-isabs="false">
+      <a id="parse(String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">parse</span><span class="params">(<span name="raw">raw: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#reset" data-isabs="false">
+      <a id="reset():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">reset</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -345,7 +429,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.app.Flag#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -356,7 +440,19 @@
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag → AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#usageString" data-isabs="false">
+      <a id="usageString:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">usageString</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -409,14 +505,10 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.Serializable" class="parent">
-              <h3>Inherited from <span name="scala.Serializable" class="extype">Serializable</span></h3>
-            </div><div name="java.io.Serializable" class="parent">
-              <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
-            </div><div name="com.twitter.scrooge.ThriftStructCodec3" class="parent">
-              <h3>Inherited from <span name="com.twitter.scrooge.ThriftStructCodec3" class="extype">ThriftStructCodec3</span>[<a name="com.twitter.finagle.exception.thrift.Scribe.log$args" class="extype" href="Scribe$$log$args.html">log$args</a>]</h3>
-            </div><div name="com.twitter.scrooge.ThriftStructCodec" class="parent">
-              <h3>Inherited from <span name="com.twitter.scrooge.ThriftStructCodec" class="extype">ThriftStructCodec</span>[<a name="com.twitter.finagle.exception.thrift.Scribe.log$args" class="extype" href="Scribe$$log$args.html">log$args</a>]</h3>
+        <div name="com.twitter.app.GlobalFlag" class="parent">
+              <h3>Inherited from <span name="com.twitter.app.GlobalFlag" class="extype">GlobalFlag</span>[<span name="java.lang.String" class="extype">String</span>]</h3>
+            </div><div name="com.twitter.app.Flag" class="parent">
+              <h3>Inherited from <span name="com.twitter.app.Flag" class="extype">Flag</span>[<span name="java.lang.String" class="extype">String</span>]</h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

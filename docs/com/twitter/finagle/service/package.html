@@ -59,7 +59,7 @@
         <a href="ConstantService.html"><span class="name">ConstantService</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends Service[Req, Rep]</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a> that returns a constant result.</p>
     </li><li visbl="pub" name="com.twitter.finagle.service.DelayedFactory" data-isabs="false">
       <a id="DelayedFactory:DelayedFactory[Req, Rep]"></a>
       <h4 class="signature">
@@ -97,7 +97,7 @@ certain amount of idle time.</p>
         <a href="FailedService.html"><span class="name">FailedService</span></a><span class="result"> extends ConstantService[Any, Nothing]</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a> that fails with a constant Throwable.</p>
     </li><li visbl="pub" name="com.twitter.finagle.service.FailingFactory" data-isabs="false">
       <a id="FailingFactory:FailingFactory[Req, Rep]"></a>
       <h4 class="signature">
@@ -109,7 +109,7 @@ certain amount of idle time.</p>
         <a href="FailingFactory.html"><span class="name">FailingFactory</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends ServiceFactory[Req, Rep]</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a> that fails to construct services.</p>
     </li><li visbl="pub" name="com.twitter.finagle.service.FailureAccrualFactory" data-isabs="false">
       <a id="FailureAccrualFactory:FailureAccrualFactory[Req, Rep]"></a>
       <h4 class="signature">
@@ -121,8 +121,8 @@ certain amount of idle time.</p>
         <a href="FailureAccrualFactory.html"><span class="name">FailureAccrualFactory</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends ServiceFactory[Req, Rep]</span>
       </span>
       </h4>
-      <p class="comment cmt">A factory that does failure accrual, marking it unavailable when
-deemed unhealthy according to its parameterization.</p>
+      <p class="comment cmt">A <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a> that accrues failures, marking
+itself unavailable when deemed unhealthy according to its parameterization.</p>
     </li><li visbl="pub" name="com.twitter.finagle.service.KetamaShardingServiceBuilder" data-isabs="false">
       <a id="KetamaShardingServiceBuilder:KetamaShardingServiceBuilder[Req, Rep]"></a>
       <h4 class="signature">
@@ -158,7 +158,8 @@ deemed unhealthy according to its parameterization.</p>
         <a href="OptionallyServableFilter.html"><span class="name">OptionallyServableFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that uses an argument function to predicate
+whether or not to apply the subsequent <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.service.ProxyService" data-isabs="false">
       <a id="ProxyService:ProxyService[Req, Rep]"></a>
       <h4 class="signature">
@@ -170,8 +171,8 @@ deemed unhealthy according to its parameterization.</p>
         <a href="ProxyService.html"><span class="name">ProxyService</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends Service[Req, Rep]</span>
       </span>
       </h4>
-      <p class="comment cmt">A service that simply proxies requests to an underlying service
-yielded through a Future.</p>
+      <p class="comment cmt">A <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a> that proxies requests to an underlying
+service yielded through a Future.</p>
     </li><li visbl="pub" name="com.twitter.finagle.service.RateLimitingFilter" data-isabs="false">
       <a id="RateLimitingFilter:RateLimitingFilter[Req, Rep]"></a>
       <h4 class="signature">
@@ -183,7 +184,8 @@ yielded through a Future.</p>
         <a href="RateLimitingFilter.html"><span class="name">RateLimitingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
       </span>
       </h4>
-      <p class="comment cmt">Filter responsible for accepting/refusing request based on the rate limiting strategy.</p>
+      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that accepts or refuses requests based on a
+rate limiting strategy.</p>
     </li><li visbl="pub" name="com.twitter.finagle.service.RetryPolicy" data-isabs="true">
       <a id="RetryPolicy:RetryPolicy[A]"></a>
       <h4 class="signature">
@@ -207,7 +209,8 @@ yielded through a Future.</p>
         <a href="RetryingFilter.html"><span class="name">RetryingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
       </span>
       </h4>
-      <p class="comment cmt">RetryingFilter will coordinate retries.</p>
+      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that coordinatess retries of subsequent
+<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.service.ShardingService" data-isabs="false">
       <a id="ShardingService:ShardingService[Req, Rep]"></a>
       <h4 class="signature">
@@ -243,7 +246,8 @@ yielded through a Future.</p>
         <a href="SingletonFactory.html"><span class="name">SingletonFactory</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends ServiceFactory[Req, Rep]</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a> that produces
+<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a> identical to the argument <code>service</code>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.service.StatsFilter" data-isabs="false">
       <a id="StatsFilter:StatsFilter[Req, Rep]"></a>
       <h4 class="signature">
@@ -279,7 +283,7 @@ yielded through a Future.</p>
         <a href="TimeoutFilter.html"><span class="name">TimeoutFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
       </span>
       </h4>
-      <p class="comment cmt">A filter to apply a global timeout to the request.</p>
+      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that applies a global timeout to requests.</p>
     </li></ol>
             </div>
 
@@ -310,7 +314,7 @@ yielded through a Future.</p>
         <a href="NilService$.html"><span class="name">NilService</span></a><span class="result"> extends FailedService</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A static com.twitter.finagle.FailedService object.</p>
     </li><li visbl="pub" name="com.twitter.finagle.service.RetryPolicy" data-isabs="false">
       <a id="RetryPolicy:RetryPolicy"></a>
       <h4 class="signature">

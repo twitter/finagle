@@ -84,6 +84,18 @@
       </span>
       </h4>
       <p class="comment cmt">An O(1), concurrent, weighted fair load balancer.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" data-isabs="true">
+      <a id="WeightedLoadBalancerFactory:WeightedLoadBalancerFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="WeightedLoadBalancerFactory.html"><span class="name">WeightedLoadBalancerFactory</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
     </li></ol>
             </div>
 
@@ -100,6 +112,18 @@
       </span>
       <span class="symbol">
         <a href="Benchmark$.html"><span class="name">Benchmark</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.DefaultBalancerFactory" data-isabs="false">
+      <a id="DefaultBalancerFactory:DefaultBalancerFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DefaultBalancerFactory$.html"><span class="name">DefaultBalancerFactory</span></a><span class="result"> extends WeightedLoadBalancerFactory</span>
       </span>
       </h4>
       
@@ -123,7 +147,31 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="HeapBalancerFactory$.html"><span class="name">HeapBalancerFactory</span></a><span class="result"> extends LoadBalancerFactory</span>
+        <a href="HeapBalancerFactory$.html"><span class="name">HeapBalancerFactory</span></a><span class="result"> extends LoadBalancerFactory with WeightedLoadBalancerFactory</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.P2CBalancerFactory" data-isabs="false">
+      <a id="P2CBalancerFactory:P2CBalancerFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="P2CBalancerFactory$.html"><span class="name">P2CBalancerFactory</span></a><span class="result"> extends WeightedLoadBalancerFactory</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.defaultBalancer" data-isabs="false">
+      <a id="defaultBalancer:defaultBalancer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="defaultBalancer$.html"><span class="name">defaultBalancer</span></a><span class="result"> extends GlobalFlag[String]</span>
       </span>
       </h4>
       

@@ -29,7 +29,10 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Implements various backoff strategies.
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Implements various backoff strategies. Strategies are defined by a
+<code>Stream[Duration]</code> and intended for use with
+com.twitter.service.RetryingFilter#backoff to determine the duration
+after which a request is to be retried
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>

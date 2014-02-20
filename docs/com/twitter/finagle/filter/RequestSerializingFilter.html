@@ -29,7 +29,14 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that enforces request serialization,
+meaning that there is guaranteed to be only one outstanding request being
+serviced at any given time. Request concurrency is restricted by a
+com.twitter.concurrent.AsyncMutex.</p><p>This filter is effectively equivalent to a
+<a name="com.twitter.finagle.filter.RequestSemaphoreFilter" class="extype" href="RequestSemaphoreFilter.html">RequestSemaphoreFilter</a> constructed with a
+com.twitter.concurrent.AsyncSemaphore no <code>initialPermits</code> or
+<code>maxWaiters</code>.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a name="com.twitter.finagle.SimpleFilter" class="extype" href="../SimpleFilter.html">SimpleFilter</a>[Req, Rep], <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a>[Req, Rep, Req, Rep], (Req, <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[Rep], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>

@@ -33,10 +33,11 @@
 style.  The load balancing is simple, and falls out naturally from
 the user of the {{Offer}} mechanism: When there are multiple
 available messages, round-robin across them.  Otherwise, wait for
-the first message to arrive.</p><p>Cluster example:</p><pre>
-  Cluster[SocketAddress] cluster = ... <span class="cmt">// e.g. ZookeeperServerSetCluster</span>
+the first message to arrive.</p><p>Var[Addr] example:</p><pre>
+  <span class="kw">val</span> name: com.twitter.finagle.Name = Resolver.eval(...)
+  <span class="kw">val</span> va: Var[Addr] = name.bind()
   <span class="kw">val</span> readHandle =
-    MultiReader(cluster, <span class="lit">"the-queue"</span>)
+    MultiReader(va, <span class="lit">"the-queue"</span>)
       .clientBuilder(
         ClientBuilder()
           .codec(Kestrel())
@@ -140,14 +141,14 @@ the first message to arrive.</p><p>Cluster example:</p><pre>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReader#apply" data-isabs="false">
-      <a id="apply(Cluster[SocketAddress],String):ClusterMultiReaderBuilder"></a>
+      <a id="apply(Var[Addr],String):ClusterMultiReaderBuilder"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="cluster">cluster: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>, <span name="queueName">queueName: String</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="ClusterMultiReaderBuilder.html">ClusterMultiReaderBuilder</a></span>
+        <span class="name">apply</span><span class="params">(<span name="va">va: <span name="com.twitter.util.Var" class="extype">Var</span>[<a name="com.twitter.finagle.Addr" class="extype" href="../Addr.html">Addr</a>]</span>, <span name="queueName">queueName: String</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="ClusterMultiReaderBuilder.html">ClusterMultiReaderBuilder</a></span>
       </span>
       </h4>
       
@@ -253,18 +254,6 @@ the first message to arrive.</p><p>Cluster example:</p><pre>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReader#merge" data-isabs="false">
-      <a id="merge(Cluster[ReadHandle]):ReadHandle"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">merge</span><span class="params">(<span name="readHandleCluster">readHandleCluster: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a></span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -277,18 +266,6 @@ the first message to arrive.</p><p>Cluster example:</p><pre>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReader#newBuilder" data-isabs="false">
-      <a id="newBuilder(Cluster[SocketAddress],String):ClusterMultiReaderBuilder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">newBuilder</span><span class="params">(<span name="cluster">cluster: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>, <span name="queueName">queueName: String</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="ClusterMultiReaderBuilder.html">ClusterMultiReaderBuilder</a></span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
       <a id="notify():Unit"></a>
       <h4 class="signature">
@@ -395,13 +372,13 @@ the first message to arrive.</p><p>Cluster example:</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 5.3.7) Use Cluster-based apply">apply</span><span class="params">(<span name="handles">handles: Seq[<a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.2) Use Var[Addr]-based apply method">apply</span><span class="params">(<span name="handles">handles: Seq[<a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.3.7)</i> Use Cluster-based apply</p></dd></dl></div>
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.2)</i> Use Var[Addr]-based <code>apply</code> method</p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReader#apply" data-isabs="false">
       <a id="apply(Iterator[ReadHandle]):ReadHandle"></a>
       <h4 class="signature">
@@ -410,7 +387,7 @@ the first message to arrive.</p><p>Cluster example:</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 5.3.7) Use Cluster-based apply">apply</span><span class="params">(<span name="handles">handles: <span name="java.util.Iterator" class="extype">Iterator</span>[<a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.2) Use Var[Addr]-based apply method">apply</span><span class="params">(<span name="handles">handles: <span name="java.util.Iterator" class="extype">Iterator</span>[<a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">A java friendly interface: we use scala's implicit conversions to
@@ -419,7 +396,7 @@ feed in a {{java.util.Iterator&lt;ReadHandle&gt;}}
 </p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.3.7)</i> Use Cluster-based apply</p></dd></dl></div>
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.2)</i> Use Var[Addr]-based <code>apply</code> method</p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReader#apply" data-isabs="false">
       <a id="apply(Seq[Client],String):ReadHandle"></a>
       <h4 class="signature">
@@ -428,13 +405,58 @@ feed in a {{java.util.Iterator&lt;ReadHandle&gt;}}
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 5.3.7) Use Cluster-based apply">apply</span><span class="params">(<span name="clients">clients: Seq[<a name="com.twitter.finagle.kestrel.Client" class="extype" href="Client.html">Client</a>]</span>, <span name="queueName">queueName: String</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.2) Use Var[Addr]-based apply method">apply</span><span class="params">(<span name="clients">clients: Seq[<a name="com.twitter.finagle.kestrel.Client" class="extype" href="Client.html">Client</a>]</span>, <span name="queueName">queueName: String</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.3.7)</i> Use Cluster-based apply</p></dd></dl></div>
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.2)</i> Use Var[Addr]-based <code>apply</code> method</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReader#apply" data-isabs="false">
+      <a id="apply(Cluster[SocketAddress],String):ClusterMultiReaderBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.2) Use Var[Addr]-based apply method">apply</span><span class="params">(<span name="cluster">cluster: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>, <span name="queueName">queueName: String</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="ClusterMultiReaderBuilder.html">ClusterMultiReaderBuilder</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.2)</i> Use Var[Addr]-based <code>apply</code> method</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReader#merge" data-isabs="false">
+      <a id="merge(Cluster[ReadHandle]):ReadHandle"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.2) Use Var[Addr]-based apply method">merge</span><span class="params">(<span name="readHandleCluster">readHandleCluster: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.2)</i> Use Var[Addr]-based <code>apply</code> method</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReader#newBuilder" data-isabs="false">
+      <a id="newBuilder(Cluster[SocketAddress],String):ClusterMultiReaderBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.2) Use Var[Addr]-based apply method">newBuilder</span><span class="params">(<span name="cluster">cluster: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>, <span name="queueName">queueName: String</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="ClusterMultiReaderBuilder.html">ClusterMultiReaderBuilder</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.2)</i> Use Var[Addr]-based <code>apply</code> method</p></dd></dl></div>
     </li></ol>
             </div>
         </div>

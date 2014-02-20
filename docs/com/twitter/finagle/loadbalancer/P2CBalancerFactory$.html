@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.demo.Tracing1.computeSomething$args.Immutable</title>
+          <title>com.twitter.finagle.loadbalancer.P2CBalancerFactory</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
@@ -14,9 +14,9 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
       <div id="definition">
-        <a title="Go to companion" href="Tracing1$$computeSomething$args$$Immutable.html"><img src="../../../../lib/object_to_class_big.png" /></a>
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.demo" class="extype" href="package.html">demo</a>.<a name="com.twitter.finagle.demo.Tracing1" class="extype" href="Tracing1$.html">Tracing1</a>.<a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args$.html">computeSomething$args</a></p>
-        <h1><a title="Go to companion" href="Tracing1$$computeSomething$args$$Immutable.html">Immutable</a></h1>
+        <img src="../../../../lib/object_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.loadbalancer" class="extype" href="package.html">loadbalancer</a></p>
+        <h1>P2CBalancerFactory</h1>
       </div>
 
       <h4 class="signature" id="signature">
@@ -25,13 +25,13 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Immutable</span><span class="result"> extends <span name="com.twitter.scrooge.ThriftStructCodec3" class="extype">ThriftStructCodec3</span>[<a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a>] with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">P2CBalancerFactory</span><span class="result"> extends <a name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" class="extype" href="WeightedLoadBalancerFactory.html">WeightedLoadBalancerFactory</a></span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="com.twitter.scrooge.ThriftStructCodec3" class="extype">ThriftStructCodec3</span>[<a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a>], <span name="com.twitter.scrooge.ThriftStructCodec" class="extype">ThriftStructCodec</span>[<a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" class="extype" href="WeightedLoadBalancerFactory.html">WeightedLoadBalancerFactory</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.demo.Tracing1.computeSomething$args.Immutable" class="in"><span>Immutable</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="com.twitter.scrooge.ThriftStructCodec3" class="in"><span>ThriftStructCodec3</span></li><li name="com.twitter.scrooge.ThriftStructCodec" class="in"><span>ThriftStructCodec</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.loadbalancer.P2CBalancerFactory" class="in"><span>P2CBalancerFactory</span></li><li name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" class="in"><span>WeightedLoadBalancerFactory</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -150,54 +150,6 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args.Immutable#decode" data-isabs="false">
-      <a id="decode(TProtocol):computeSomething$args"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">decode</span><span class="params">(<span name="_iprot">_iprot: <span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span></span>)</span><span class="result">: <a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args.Immutable" class="extype" href="">Immutable</a> → ThriftStructCodec</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.scrooge.ThriftStructCodec3#decoder" data-isabs="false">
-      <a id="decoder:(TProtocol) ⇒ computeSomething$args"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">decoder</span><span class="result">: (<span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span>) ⇒ <a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ThriftStructCodec3 → ThriftStructCodec</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args.Immutable#encode" data-isabs="false">
-      <a id="encode(computeSomething$args,TProtocol):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">encode</span><span class="params">(<span name="_item">_item: <a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a></span>, <span name="_oproto">_oproto: <span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing1.computeSomething$args.Immutable" class="extype" href="">Immutable</a> → ThriftStructCodec</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.scrooge.ThriftStructCodec3#encoder" data-isabs="false">
-      <a id="encoder:(computeSomething$args, TProtocol) ⇒ Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">encoder</span><span class="result">: (<a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a>, <span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span>) ⇒ <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ThriftStructCodec3 → ThriftStructCodec</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -273,18 +225,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.scrooge.ThriftStructCodec#metaData" data-isabs="false">
-      <a id="metaData:ThriftStructMetaData[computeSomething$args]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">lazy val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">metaData</span><span class="result">: <span name="com.twitter.scrooge.ThriftStructMetaData" class="extype">ThriftStructMetaData</span>[<a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ThriftStructCodec</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -297,6 +237,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.P2CBalancerFactory#newLoadBalancer" data-isabs="false">
+      <a id="newLoadBalancer[Req, Rep](Var[Set[(ServiceFactory[Req, Rep], Double)]],StatsReceiver,NoBrokersAvailableException):ServiceFactory[Req, Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newLoadBalancer</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="weighted">weighted: <span name="com.twitter.util.Var" class="extype">Var</span>[Set[(<a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep], <span name="scala.Double" class="extype">Double</span>)]]</span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a></span>, <span name="emptyException">emptyException: <a name="com.twitter.finagle.NoBrokersAvailableException" class="extype" href="../NoBrokersAvailableException.html">NoBrokersAvailableException</a></span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.loadbalancer.P2CBalancerFactory" class="extype" href="">P2CBalancerFactory</a> → <a name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" class="extype" href="WeightedLoadBalancerFactory.html">WeightedLoadBalancerFactory</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
       <a id="notify():Unit"></a>
       <h4 class="signature">
@@ -321,18 +273,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="prt" name="com.twitter.finagle.demo.Tracing1.computeSomething$args.Immutable#readResolve" data-isabs="false">
-      <a id="readResolve():AnyRef"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">readResolve</span><span class="params">()</span><span class="result">: AnyRef</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -409,14 +349,8 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.Serializable" class="parent">
-              <h3>Inherited from <span name="scala.Serializable" class="extype">Serializable</span></h3>
-            </div><div name="java.io.Serializable" class="parent">
-              <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
-            </div><div name="com.twitter.scrooge.ThriftStructCodec3" class="parent">
-              <h3>Inherited from <span name="com.twitter.scrooge.ThriftStructCodec3" class="extype">ThriftStructCodec3</span>[<a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a>]</h3>
-            </div><div name="com.twitter.scrooge.ThriftStructCodec" class="parent">
-              <h3>Inherited from <span name="com.twitter.scrooge.ThriftStructCodec" class="extype">ThriftStructCodec</span>[<a name="com.twitter.finagle.demo.Tracing1.computeSomething$args" class="extype" href="Tracing1$$computeSomething$args.html">computeSomething$args</a>]</h3>
+        <div name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" class="extype" href="WeightedLoadBalancerFactory.html">WeightedLoadBalancerFactory</a></h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

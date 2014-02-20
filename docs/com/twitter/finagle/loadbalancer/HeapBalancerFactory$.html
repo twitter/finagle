@@ -25,13 +25,13 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">HeapBalancerFactory</span><span class="result"> extends <a name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extype" href="LoadBalancerFactory.html">LoadBalancerFactory</a></span>
+        <span class="name">HeapBalancerFactory</span><span class="result"> extends <a name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extype" href="LoadBalancerFactory.html">LoadBalancerFactory</a> with <a name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" class="extype" href="WeightedLoadBalancerFactory.html">WeightedLoadBalancerFactory</a></span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extype" href="LoadBalancerFactory.html">LoadBalancerFactory</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" class="extype" href="WeightedLoadBalancerFactory.html">WeightedLoadBalancerFactory</a>, <a name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extype" href="LoadBalancerFactory.html">LoadBalancerFactory</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.loadbalancer.HeapBalancerFactory" class="in"><span>HeapBalancerFactory</span></li><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="in"><span>LoadBalancerFactory</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.loadbalancer.HeapBalancerFactory" class="in"><span>HeapBalancerFactory</span></li><li name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" class="in"><span>WeightedLoadBalancerFactory</span></li><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="in"><span>LoadBalancerFactory</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -238,6 +238,18 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.HeapBalancerFactory#newLoadBalancer" data-isabs="false">
+      <a id="newLoadBalancer[Req, Rep](Var[Set[(ServiceFactory[Req, Rep], Double)]],StatsReceiver,NoBrokersAvailableException):HeapBalancer[Req, Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newLoadBalancer</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="weighted">weighted: <span name="com.twitter.util.Var" class="extype">Var</span>[Set[(<a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep], <span name="scala.Double" class="extype">Double</span>)]]</span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a></span>, <span name="emptyException">emptyException: <a name="com.twitter.finagle.NoBrokersAvailableException" class="extype" href="../NoBrokersAvailableException.html">NoBrokersAvailableException</a></span>)</span><span class="result">: <a name="com.twitter.finagle.loadbalancer.HeapBalancer" class="extype" href="HeapBalancer.html">HeapBalancer</a>[Req, Rep]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.loadbalancer.HeapBalancerFactory" class="extype" href="">HeapBalancerFactory</a> → <a name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" class="extype" href="WeightedLoadBalancerFactory.html">WeightedLoadBalancerFactory</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.HeapBalancerFactory#newLoadBalancer" data-isabs="false">
       <a id="newLoadBalancer[Req, Rep](Group[ServiceFactory[Req, Rep]],StatsReceiver,NoBrokersAvailableException):HeapBalancer[Req, Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -297,6 +309,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory#toWeighted" data-isabs="false">
+      <a id="toWeighted:WeightedLoadBalancerFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toWeighted</span><span class="result">: <a name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" class="extype" href="WeightedLoadBalancerFactory.html">WeightedLoadBalancerFactory</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extype" href="LoadBalancerFactory.html">LoadBalancerFactory</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -349,7 +373,9 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="parent">
+        <div name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" class="extype" href="WeightedLoadBalancerFactory.html">WeightedLoadBalancerFactory</a></h3>
+            </div><div name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extype" href="LoadBalancerFactory.html">LoadBalancerFactory</a></h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>

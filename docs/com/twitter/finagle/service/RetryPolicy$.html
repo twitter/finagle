@@ -194,7 +194,11 @@
         <span class="name">backoff</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="backoffs">backoffs: Stream[<span name="com.twitter.util.Duration" class="extype">Duration</span>]</span>)</span><span class="params">(<span name="shouldRetry">shouldRetry: <span name="scala.PartialFunction" class="extype">PartialFunction</span>[A, <span name="scala.Boolean" class="extype">Boolean</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A]</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Retry based on a series of backoffs defined by a <code>Stream[Duration]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Retry based on a series of backoffs defined by a <code>Stream[Duration]</code>. The
+stream is consulted to determine the duration after which a request is to
+be retried. A <code>PartialFunction</code> argument determines which request types
+are retryable.
+</p></div></div>
     </li><li visbl="pub" name="com.twitter.finagle.service.RetryPolicy#backoffJava" data-isabs="false">
       <a id="backoffJava[A](Callable[Iterator[Duration]],PartialFunction[A, Boolean]):RetryPolicy[A]"></a>
       <h4 class="signature">
@@ -370,18 +374,6 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.service.RetryPolicy#tries" data-isabs="false">
-      <a id="tries[A](Int,PartialFunction[A, Boolean]):RetryPolicy[A]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">tries</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="numTries">numTries: <span name="scala.Int" class="extype">Int</span></span>, <span name="shouldRetry">shouldRetry: <span name="scala.PartialFunction" class="extype">PartialFunction</span>[A, <span name="scala.Boolean" class="extype">Boolean</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.service.RetryPolicy#tries" data-isabs="false">
       <a id="tries(Int):RetryPolicy[Try[Nothing]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -392,7 +384,21 @@
         <span class="name">tries</span><span class="params">(<span name="numTries">numTries: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[<span name="com.twitter.util.Try" class="extype">Try</span>[<span name="scala.Nothing" class="extype">Nothing</span>]]</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Retry a specific number of times on WriteExceptions.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.service.RetryPolicy#tries" data-isabs="false">
+      <a id="tries[A](Int,PartialFunction[A, Boolean]):RetryPolicy[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tries</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="numTries">numTries: <span name="scala.Int" class="extype">Int</span></span>, <span name="shouldRetry">shouldRetry: <span name="scala.PartialFunction" class="extype">PartialFunction</span>[A, <span name="scala.Boolean" class="extype">Boolean</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Retry a specific number of times.</p><div class="fullcomment"><div class="comment cmt"><p>Retry a specific number of times. A <code>PartialFunction</code> argument determines
+which request types are retryable.
+</p></div></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">

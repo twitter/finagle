@@ -198,6 +198,18 @@ name.</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.CanStackFrom" data-isabs="true">
+      <a id="CanStackFrom:CanStackFrom[From, To]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="CanStackFrom.html"><span class="name">CanStackFrom</span></a><span class="tparams">[<span name="From">-From</span>, <span name="To">To</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A typeclass for &quot;stackable&quot; items.</p>
     </li><li visbl="pub" name="com.twitter.finagle.CancelledConnectionException" data-isabs="false">
       <a id="CancelledConnectionException:CancelledConnectionException"></a>
       <h4 class="signature">
@@ -452,7 +464,7 @@ factories in one (when available).</p>
         <a href="Filter.html"><span class="name">Filter</span></a><span class="tparams">[<span name="ReqIn">-ReqIn</span>, <span name="RepOut">+RepOut</span>, <span name="ReqOut">+ReqOut</span>, <span name="RepIn">-RepIn</span>]</span><span class="result"> extends (ReqIn, Service[ReqOut, RepIn]) ⇒ Future[RepOut]</span>
       </span>
       </h4>
-      <p class="comment cmt"> A Filter acts as a decorator/transformer of a service.</p>
+      <p class="comment cmt">A Filter acts as a decorator/transformer of a service.</p>
     </li><li visbl="pub" name="com.twitter.finagle.GlobalRequestTimeoutException" data-isabs="false">
       <a id="GlobalRequestTimeoutException:GlobalRequestTimeoutException"></a>
       <h4 class="signature">
@@ -998,6 +1010,30 @@ ServiceFactory.</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.StackBuilder" data-isabs="false">
+      <a id="StackBuilder:StackBuilder[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="StackBuilder.html"><span class="name">StackBuilder</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">StackBuilders are imperative-style builders for Stacks.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.Stackable" data-isabs="true">
+      <a id="Stackable:Stackable[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Stackable.html"><span class="name">Stackable</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Produce a stack from a <code>T</code>-typed element.</p>
     </li><li visbl="pub" name="com.twitter.finagle.SunkChannel" data-isabs="false">
       <a id="SunkChannel:SunkChannel"></a>
       <h4 class="signature">
@@ -1155,6 +1191,18 @@ into <code>serveIface</code>:</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.WeightedSocketAddress" data-isabs="false">
+      <a id="WeightedSocketAddress:WeightedSocketAddress"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="WeightedSocketAddress.html"><span class="name">WeightedSocketAddress</span></a><span class="params">(<span name="addr">addr: SocketAddress</span>, <span name="weight">weight: Double</span>)</span><span class="result"> extends SocketAddress with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A SocketAddress with a weight.</p>
     </li><li visbl="pub" name="com.twitter.finagle.WriteException" data-isabs="true">
       <a id="WriteException:WriteException"></a>
       <h4 class="signature">
@@ -1246,6 +1294,18 @@ into <code>serveIface</code>:</p>
       </span>
       <span class="symbol">
         <a href="BackupRequestLost$.html"><span class="name">BackupRequestLost</span></a><span class="result"> extends Exception with NoStacktrace</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.CanStackFrom" data-isabs="false">
+      <a id="CanStackFrom:CanStackFrom"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="CanStackFrom$.html"><span class="name">CanStackFrom</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       
@@ -1667,6 +1727,18 @@ registered handler.</p>
       </span>
       <span class="symbol">
         <a href="ServiceFactoryWrapper$.html"><span class="name">ServiceFactoryWrapper</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.Stack" data-isabs="false">
+      <a id="Stack:Stack"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Stack$.html"><span class="name">Stack</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       

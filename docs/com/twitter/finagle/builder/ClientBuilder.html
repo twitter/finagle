@@ -671,6 +671,20 @@ If this is defined concurrently with socksProxy, the order in which they are app
       </h4>
       <p class="shortcomment cmt">Apply TCP keepAlive ({{SO_KEEPALIVE}} socket option).</p>
     </li><li visbl="pub" name="com.twitter.finagle.builder.ClientBuilder#loadBalancer" data-isabs="false">
+      <a id="loadBalancer(WeightedLoadBalancerFactory):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">loadBalancer</span><span class="params">(<span name="loadBalancer">loadBalancer: <a name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" class="extype" href="../loadbalancer/WeightedLoadBalancerFactory.html">WeightedLoadBalancerFactory</a></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Specify a load balancer.</p><div class="fullcomment"><div class="comment cmt"><p>Specify a load balancer.  The load balancer implements
+a strategy for choosing one from a set of hosts to service a request
+</p></div></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientBuilder#loadBalancer" data-isabs="false">
       <a id="loadBalancer(LoadBalancerFactory):This"></a>
       <h4 class="signature">
       <span class="modifier_kind">

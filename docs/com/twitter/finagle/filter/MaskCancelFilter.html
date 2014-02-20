@@ -29,7 +29,12 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Prevent cancellations from propagating to the underlying service.
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that prevents cancellations from propagating
+to any subsequent <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>. i.e. when
+<code>Future.raise</code> is invoked on the result of this filter's <code>apply</code> method, the
+interrupt will not be propagated to the service. This is useful for
+lightweight protocols for which finishing a request is preferable to closing
+and reesstablishing a connection.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a name="com.twitter.finagle.SimpleFilter" class="extype" href="../SimpleFilter.html">SimpleFilter</a>[Req, Rep], <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a>[Req, Rep, Req, Rep], (Req, <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[Rep], AnyRef, <span name="scala.Any" class="extype">Any</span></div>

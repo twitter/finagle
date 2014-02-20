@@ -59,7 +59,7 @@
         <a href="ExceptionSourceFilter.html"><span class="name">ExceptionSourceFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that sources exceptions.</p>
     </li><li visbl="pub" name="com.twitter.finagle.filter.HandletimeFilter" data-isabs="false">
       <a id="HandletimeFilter:HandletimeFilter[Req, Rep]"></a>
       <h4 class="signature">
@@ -71,7 +71,8 @@
         <a href="HandletimeFilter.html"><span class="name">HandletimeFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that records the elapsed execution times of
+the underlying <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.filter.LogFormatter" data-isabs="true">
       <a id="LogFormatter:LogFormatter[Req, Rep]"></a>
       <h4 class="signature">
@@ -95,7 +96,8 @@
         <a href="LoggingFilter.html"><span class="name">LoggingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
       </span>
       </h4>
-      <p class="comment cmt"> Logging filter.</p>
+      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that logs all requests according to
+formatter.</p>
     </li><li visbl="pub" name="com.twitter.finagle.filter.MaskCancelFilter" data-isabs="false">
       <a id="MaskCancelFilter:MaskCancelFilter[Req, Rep]"></a>
       <h4 class="signature">
@@ -107,7 +109,8 @@
         <a href="MaskCancelFilter.html"><span class="name">MaskCancelFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
       </span>
       </h4>
-      <p class="comment cmt">Prevent cancellations from propagating to the underlying service.</p>
+      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that prevents cancellations from propagating
+to any subsequent <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.filter.MkJvmFilter" data-isabs="false">
       <a id="MkJvmFilter:MkJvmFilter"></a>
       <h4 class="signature">
@@ -132,7 +135,7 @@ the future).</p>
         <a href="MonitorFilter.html"><span class="name">MonitorFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that handles exceptions (incl.</p>
     </li><li visbl="pub" name="com.twitter.finagle.filter.RequestSemaphoreFilter" data-isabs="false">
       <a id="RequestSemaphoreFilter:RequestSemaphoreFilter[Req, Rep]"></a>
       <h4 class="signature">
@@ -144,7 +147,8 @@ the future).</p>
         <a href="RequestSemaphoreFilter.html"><span class="name">RequestSemaphoreFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that restricts request concurrency according
+to an argument com.twitter.concurrent.AsyncSemaphore.</p>
     </li><li visbl="pub" name="com.twitter.finagle.filter.RequestSerializingFilter" data-isabs="false">
       <a id="RequestSerializingFilter:RequestSerializingFilter[Req, Rep]"></a>
       <h4 class="signature">
@@ -156,7 +160,9 @@ the future).</p>
         <a href="RequestSerializingFilter.html"><span class="name">RequestSerializingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that enforces request serialization,
+meaning that there is guaranteed to be only one outstanding request being
+serviced at any given time.</p>
     </li></ol>
             </div>
 

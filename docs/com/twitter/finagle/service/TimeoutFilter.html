@@ -29,8 +29,7 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A filter to apply a global timeout to the request. This allows,
-e.g., for a server to apply a global request timeout.
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that applies a global timeout to requests.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a name="com.twitter.finagle.SimpleFilter" class="extype" href="../SimpleFilter.html">SimpleFilter</a>[Req, Rep], <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a>[Req, Rep, Req, Rep], (Req, <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[Rep], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
@@ -82,7 +81,8 @@ e.g., for a server to apply a global request timeout.
         <span class="name">TimeoutFilter</span><span class="params">(<span name="timeout">timeout: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>, <span name="exception">exception: <a name="com.twitter.finagle.RequestTimeoutException" class="extype" href="../RequestTimeoutException.html">RequestTimeoutException</a></span>, <span name="timer">timer: <span name="com.twitter.util.Timer" class="extype">Timer</span></span>)</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">timeout</dt><dd class="cmt"><p>the timeout to apply to requests</p></dd><dt class="param">exception</dt><dd class="cmt"><p>an exception object to return in cases of timeout exceedance</p></dd><dt class="param">timer</dt><dd class="cmt"><p>a <code>Timer</code> object used to track elapsed time
+</p></dd></dl></div>
     </li></ol>
             </div>
 
