@@ -6,10 +6,10 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
-  val libVersion = "6.11.1"
+  val libVersion = "6.12.1"
   val zkVersion = "3.3.4"
-  val utilVersion = "6.11.1"
-  val ostrichVersion = "9.2.1"
+  val utilVersion = "6.12.1"
+  val ostrichVersion = "9.3.1"
   val jacksonVersion = "2.2.2"
   val nettyLib = "io.netty" % "netty" % "3.8.0.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
@@ -23,7 +23,7 @@ object Finagle extends Build {
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
   )
   val scroogeLibs = thriftLibs ++ Seq(
-    "com.twitter" %% "scrooge-core" % "3.11.0")
+    "com.twitter" %% "scrooge-core" % "3.12.2")
 
   def util(which: String) =
     "com.twitter" %% ("util-"+which) % utilVersion excludeAll(
@@ -241,12 +241,12 @@ object Finagle extends Build {
     fork in Test := true,
     libraryDependencies ++= Seq(
       "commons-codec" % "commons-codec" % "1.5",
-      "com.twitter.common.zookeeper" % "server-set" % "1.0.42",
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.66",
       util("zk-common")
     ) ++ jacksonLibs,
     ivyXML :=
       <dependencies>
-        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.42">
+        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.66">
           <exclude org="com.google.guava" name="guava"/>
           <exclude org="com.twitter" name="finagle-core"/>
           <exclude org="com.twitter" name="finagle-thrift"/>
@@ -260,7 +260,7 @@ object Finagle extends Build {
           <exclude org="javax.mail" name="mail"/>
         </dependency>
       </dependencies>
-  ).dependsOn(finagleCore)
+  ).dependsOn(finagleCore, finagleTest)
 
   // Protocol support
 
@@ -315,7 +315,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("hashing"),
       "com.google.guava" % "guava" % "15.0",
-      "com.twitter.common" % "zookeeper-testing" % "0.0.34" % "test"
+      "com.twitter.common" % "zookeeper-testing" % "0.0.40" % "test"
     ) ++ jacksonLibs
   ).dependsOn(finagleCore, finagleServersets)
 
@@ -380,10 +380,6 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-thriftmux",
-    ScroogeSBT.scroogeThriftNamespaceMap in Test := Map(
-      "com.twitter.finagle.thriftmux.thriftjava" ->
-        "com.twitter.finagle.thriftmux.thriftscala"
-    ),
     libraryDependencies ++= scroogeLibs
   ).dependsOn(finagleCore, finagleMux, finagleThrift)
 
@@ -394,7 +390,8 @@ object Finagle extends Build {
       sharedSettings
     ).settings(
       name := "finagle-mysql",
-      libraryDependencies ++= Seq(util("logging"))
+      libraryDependencies ++= Seq(util("logging")),
+      excludeFilter in unmanagedSources := { "EmbeddableMysql.scala" || "ClientTest.scala" }
     ).dependsOn(finagleCore)
 
   lazy val finagleExp = Project(

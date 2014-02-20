@@ -23,6 +23,7 @@ class ClientIdRequiredFilterSpec extends SpecificationWithJUnit with Mockito {
     }
 
     "throws NoClientIdSpecifiedException when ClientId does not exist" in {
+      ClientId.clear()
       Await.result(service(request)) must throwA[NoClientIdSpecifiedException]
       there was no(underlying).apply(any[String])
     }

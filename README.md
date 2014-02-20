@@ -1,3 +1,5 @@
+![Finagle logo](https://raw.github.com/twitter/finagle/master/doc/src/sphinx/_static/logo_medium.png)
+
 # This README is out of date
 We've got plans to update this README, but in the mean time, check out [the updated documentation here](http://twitter.github.io/finagle/).
 

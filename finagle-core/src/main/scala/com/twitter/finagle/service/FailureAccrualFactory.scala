@@ -14,8 +14,8 @@ private[finagle] object FailureAccrualFactory {
 }
 
 /**
- * A factory that does failure accrual, marking it unavailable when
- * deemed unhealthy according to its parameterization.
+ * A [[com.twitter.finagle.ServiceFactory]] that accrues failures, marking
+ * itself unavailable when deemed unhealthy according to its parameterization.
  *
  * TODO: treat different failures differently (eg. connect failures
  * vs. not), enable different backoff strategies.

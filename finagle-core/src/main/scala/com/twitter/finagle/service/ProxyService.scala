@@ -7,8 +7,8 @@ import java.util.ArrayDeque
 import scala.collection.JavaConverters._
 
 /**
- * A service that simply proxies requests to an underlying service
- * yielded through a Future.
+ * A [[com.twitter.finagle.Service]] that proxies requests to an underlying
+ * service yielded through a Future.
  */
 class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]], maxWaiters: Int = Int.MaxValue)
   extends Service[Req, Rep]

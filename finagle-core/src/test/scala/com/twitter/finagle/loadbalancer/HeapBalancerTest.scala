@@ -1,8 +1,9 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.{ClientConnection, Group, NoBrokersAvailableException, Service, ServiceFactory}
-import com.twitter.util.{Await, Future, Time}
+import com.twitter.finagle.{
+  ClientConnection, Group, NoBrokersAvailableException, Service, ServiceFactory}
+import com.twitter.util.{Await, Future, Time, Var}
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -47,7 +48,8 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
       private[this] val i = new AtomicInteger(0)
       override def nextInt(n: Int) = i.incrementAndGet() % n
     }
-    val b = new HeapBalancer[Unit, LoadedFactory](group, statsReceiver, rng = nonRng)
+    val b = new HeapBalancer[Unit, LoadedFactory](
+      group.set, statsReceiver, rng = nonRng)
     val newFactory = new LoadedFactory("new")
 
     def assertGauge(name: String, value: Int) =
@@ -178,11 +180,11 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     val ctx = new Ctx
     import ctx._
 
-    val b = new HeapBalancer(Group.empty[ServiceFactory[Unit, LoadedFactory]])
+    val b = new HeapBalancer[Unit, LoadedFactory](Var.value(Set.empty))
     intercept[NoBrokersAvailableException] { Await.result(b()) }
     val heapBalancerEmptyGroup = "HeapBalancerEmptyGroup"
-    val c = new HeapBalancer(
-      Group.empty[ServiceFactory[Unit, LoadedFactory]],
+    val c = new HeapBalancer[Unit, LoadedFactory](
+      Var.value(Set.empty),
       NullStatsReceiver,
       new NoBrokersAvailableException(heapBalancerEmptyGroup)
     )
@@ -280,5 +282,37 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     assertGauge("size", N)
 
     assertGauge("available", N)
+  }
+
+  test("balance evenly between 2 unhealthy services") {
+    val ctx = new Ctx
+    import ctx._
+
+    val factories = Seq(new LoadedFactory("left"), new LoadedFactory("right"))
+    val group = Group.mutable[ServiceFactory[Unit, LoadedFactory]](
+      factories:_*)
+
+    val b = new HeapBalancer[Unit, LoadedFactory](group.set, statsReceiver)
+
+    b(); b(); b(); b()
+
+    factories(0).setAvailable(false)
+    factories(1).setAvailable(false)
+
+    for (_ <- 0 until 1000) b()
+    assert(factories(0).load === 502)
+    assert(factories(1).load === 502)
+
+    factories(1).setAvailable(true)
+
+    for (_ <- 0 until 1000) b()
+    assert(factories(0).load === 502)
+    assert(factories(1).load === 1502)
+
+    group() -= factories(1)
+
+    for (_ <- 0 until 1000) b()
+    assert(factories(0).load === 1502)
+    assert(factories(1).load === 1502)
   }
 }

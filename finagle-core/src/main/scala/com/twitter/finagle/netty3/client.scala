@@ -2,8 +2,8 @@ package com.twitter.finagle.netty3
 
 import com.twitter.finagle._
 import com.twitter.finagle.channel.{
-  ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler
-}
+  ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler}
+import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.httpproxy.HttpConnectHandler
 import com.twitter.finagle.socks.{SocksConnectHandler, SocksProxyFlags}
 import com.twitter.finagle.ssl.{Engine, SslConnectHandler}
@@ -12,16 +12,15 @@ import com.twitter.finagle.transport.{ChannelTransport,   Transport}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Future, Promise, Duration, NonFatal, Stopwatch}
 import java.net.{InetSocketAddress, SocketAddress}
-import java.util.concurrent.atomic.AtomicLong
-import java.util.concurrent.TimeUnit
 import java.util.IdentityHashMap
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicLong
+import org.jboss.netty.channel.ChannelHandler
 import org.jboss.netty.channel.socket.nio.{NioWorkerPool, NioClientSocketChannelFactory}
 import org.jboss.netty.channel.{
-  Channel, ChannelFactory, ChannelFuture, ChannelFutureListener, ChannelPipeline, ChannelPipelineFactory,
-  Channels
-}
+  Channel, ChannelFactory, ChannelFuture, ChannelFutureListener, ChannelPipeline, 
+  ChannelPipelineFactory, Channels}
 import org.jboss.netty.handler.timeout.IdleStateHandler
-import org.jboss.netty.channel.ChannelHandler
 import scala.collection.JavaConverters._
 
 /** Bridges a netty3 channel with a transport */
@@ -123,7 +122,8 @@ case class Netty3TransporterTLSConfig(
 case class Netty3Transporter[In, Out](
   name: String,
   pipelineFactory: ChannelPipelineFactory,
-  newChannel: ChannelPipeline => Channel = Netty3Transporter.channelFactory.newChannel(_),
+  newChannel: ChannelPipeline => Channel = 
+    Netty3Transporter.channelFactory.newChannel(_),
   newTransport: Channel => Transport[In, Out] = 
     (ch: Channel) => new ChannelTransport(ch).cast[In, Out],
   tlsConfig: Option[Netty3TransporterTLSConfig] = None,
@@ -227,4 +227,21 @@ object Netty3Transporter {
     "reuseAddress" -> java.lang.Boolean.TRUE,
     "connectTimeoutMillis" -> (1000L: java.lang.Long)
   )
+}
+
+case class Netty3Stack[In, Out, Req, Rep](
+  name: String, pipelineFactory: ChannelPipelineFactory,
+  newDispatcher: Transport[In, Out] => Service[Req, Rep])
+  extends Stack.Simple[ServiceFactory[Req, Rep]]("netty3") {
+  import StackClient._
+
+  private[this] val transporter =  Netty3Transporter[In, Out](name, pipelineFactory)
+
+  def make(params: Stack.Params, next: ServiceFactory[Req, Rep])
+    : ServiceFactory[Req, Rep] = {
+    val EndpointAddr(addr) = params[EndpointAddr]
+    val Stats(statsReceiver, _) = params[Stats]
+
+    ServiceFactory(() => transporter(addr, statsReceiver) map(newDispatcher))
+  }
 }

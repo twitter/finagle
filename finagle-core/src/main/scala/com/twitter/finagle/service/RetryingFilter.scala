@@ -86,8 +86,10 @@ object RetryPolicy extends JavaSingleton {
     case Throw(_: ChannelClosedException) => true
   }
 
-  def tries(numTries: Int): RetryPolicy[Try[Nothing]] = tries(numTries, WriteExceptionsOnly)
-
+  /**
+   * Retry a specific number of times. A `PartialFunction` argument determines
+   * which request types are retryable.
+   */
   def tries[A](
     numTries: Int,
     shouldRetry: PartialFunction[A, Boolean]
@@ -96,15 +98,16 @@ object RetryPolicy extends JavaSingleton {
   }
 
   /**
-   * A constructor usable from Java (`backoffs` from `Backoff.toJava`).
+   * Retry a specific number of times on WriteExceptions.
    */
-  def backoffJava[A](
-    backoffs: juc.Callable[ju.Iterator[Duration]],
-    shouldRetry: PartialFunction[A, Boolean]
-  ): RetryPolicy[A] = {
-    backoff[A](backoffs.call().toStream)(shouldRetry)
-  }
+  def tries(numTries: Int): RetryPolicy[Try[Nothing]] = tries(numTries, WriteExceptionsOnly)
 
+  /**
+   * Retry based on a series of backoffs defined by a `Stream[Duration]`. The
+   * stream is consulted to determine the duration after which a request is to
+   * be retried. A `PartialFunction` argument determines which request types
+   * are retryable.
+   */
   def backoff[A](
     backoffs: Stream[Duration]
   )(shouldRetry: PartialFunction[A, Boolean]): RetryPolicy[A] = {
@@ -122,6 +125,16 @@ object RetryPolicy extends JavaSingleton {
         }
       }
     }
+  }
+
+  /**
+   * A constructor usable from Java (`backoffs` from `Backoff.toJava`).
+   */
+  def backoffJava[A](
+    backoffs: juc.Callable[ju.Iterator[Duration]],
+    shouldRetry: PartialFunction[A, Boolean]
+  ): RetryPolicy[A] = {
+    backoff[A](backoffs.call().toStream)(shouldRetry)
   }
 }
 
@@ -151,11 +164,9 @@ object RetryingFilter {
 }
 
 /**
- * RetryingFilter will coordinate retries. The classification of
- * requests as retryable is done by the PartialFunction shouldRetry
- * and the stream of backoffs. This stream is consulted to get the
- * next backoff (Duration) after it has been determined a request must
- * be retried.
+ * A [[com.twitter.finagle.Filter]] that coordinatess retries of subsequent
+ * [[com.twitter.finagle.Service Services]]. Requests can be classified as retryable via
+ * the argument [[com.twitter.finagle.service.RetryPolicy]].
  */
 class RetryingFilter[Req, Rep](
   retryPolicy: RetryPolicy[Try[Nothing]],
@@ -202,7 +213,10 @@ class RetryingFilter[Req, Rep](
 }
 
 /**
- * Implements various backoff strategies.
+ * Implements various backoff strategies. Strategies are defined by a
+ * `Stream[Duration]` and intended for use with
+ * [[com.twitter.service.RetryingFilter#backoff]] to determine the duration
+ * after which a request is to be retried
  */
 object Backoff {
   private[this] def durations(next: Duration, f: Duration => Duration): Stream[Duration] =

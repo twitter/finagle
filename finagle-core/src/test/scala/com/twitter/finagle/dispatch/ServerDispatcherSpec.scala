@@ -43,8 +43,10 @@ class ServerDispatcherSpec extends SpecificationWithJUnit with Mockito {
 
     "interrupt on hangup" in {
       val onClose = new Promise[Throwable]
+      val writep = new Promise[Unit]
       val trans = mock[Transport[String, String]]
       trans.onClose returns onClose
+      trans.write(any[String]) returns writep
       val service = mock[Service[String, String]]
       service.close(any[Time]) returns Future.Done
       val replyp = new Promise[String] {
@@ -67,22 +69,36 @@ class ServerDispatcherSpec extends SpecificationWithJUnit with Mockito {
       }
 
       "while reading" in {
+        there was one(trans).read()
         onClose.setValue(new Exception)
         replyp.interrupted must beNone
         there was no(service).apply(any)
         readp.setValue("ok")
-        there was one(service).apply("ok")
-        replyp.interrupted must beSomething
+        there was no(service).apply(any)
         // This falls through.
         there was one(trans).close()
         there was one(service).close(any[Time])
+      }
+
+      "while draining" in {
+        readp.setValue("ok")
+        there was one(service)("ok")
+        replyp.setValue("yes")
+        disp.close(Time.now)
+        replyp.interrupted must beNone
+        there was one(trans).write("yes")
+        onClose.setValue(new Exception)
+        replyp.interrupted must beNone
       }
     }
 
     "drain" in {
       val onClose = new Promise[Throwable]
+      val writep = new Promise[Unit]
       val trans = mock[Transport[String, String]]
       trans.onClose returns onClose
+      trans.write(any[String]) returns writep
+
       val service = mock[Service[String, String]]
       service.close(any[Time]) returns Future.Done
 
@@ -100,6 +116,7 @@ class ServerDispatcherSpec extends SpecificationWithJUnit with Mockito {
         readp.setException(new Exception("closed!"))
         onClose.setValue(new Exception("closed!"))
         there was one(service).close(any[Time])
+        there was no(service).apply(any)
         there was no(trans).write(any)
         there was one(trans).read()
       }
@@ -109,15 +126,13 @@ class ServerDispatcherSpec extends SpecificationWithJUnit with Mockito {
         service(any) returns servicep
         readp.setValue("ok")
         there was one(service)("ok")
+
         disp.close(Time.now)
         there was no(service).close(any[Time])
         there was no(trans).close()
 
-        val writep = new Promise[Unit]
-        trans.write(any) returns writep
         servicep.setValue("yes")
         there was one(trans).write("yes")
-
         there was no(service).close(any[Time])
         there was no(trans).close()
 
@@ -125,8 +140,6 @@ class ServerDispatcherSpec extends SpecificationWithJUnit with Mockito {
         there was one(trans).close()
         onClose.setValue(new Exception("closed!"))
         there was one(service).close(any[Time])
-
-        there was one(trans).read()
       }
     }
   }

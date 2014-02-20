@@ -53,7 +53,7 @@ case class DefaultServer[Req, Rep, In, Out](
   requestTimeout: Duration = Duration.Top,
   maxConcurrentRequests: Int = Int.MaxValue,
   cancelOnHangup: Boolean = true,
-  prepare: ServiceFactory[Req, Rep] => ServiceFactory[Req, Rep] = 
+  prepare: ServiceFactory[Req, Rep] => ServiceFactory[Req, Rep] =
     (sf: ServiceFactory[Req, Rep]) => sf,
   timer: Timer = DefaultTimer.twitter,
   monitor: Monitor = DefaultMonitor,
@@ -129,7 +129,7 @@ case class DefaultServer[Req, Rep, In, Out](
   }
 
   def serveTransport(
-      serviceFactory: ServiceFactory[Req, Rep], 
+      serviceFactory: ServiceFactory[Req, Rep],
       transport: Transport[In, Out]) {
     val clientConn = new ClientConnection {
       val remoteAddress = transport.remoteAddress
@@ -153,7 +153,7 @@ case class DefaultServer[Req, Rep, In, Out](
   def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
     new ListeningServer with CloseAwaitably {
       val scopedStatsReceiver = statsReceiver match {
-        case ServerStatsReceiver => 
+        case ServerStatsReceiver =>
           statsReceiver.scope(ServerRegistry.nameOf(addr) getOrElse name)
         case sr => sr
       }
@@ -169,11 +169,10 @@ case class DefaultServer[Req, Rep, In, Out](
         // first, we guarantee that no further connections are
         // created.
         //
-        // TODO: it would be cleaner to fully represent the draining
-        // states: accepting no further connections (requests) then
-        // fully drained, then closed.
+        // Note: A draining state machine is implemented by the server
+        // dispatcher, so we can simply call `close` on each connection here.
         val closable = Closable.sequence(
-          underlying, Closable.all(connections.asScala.toSeq:_*))
+          underlying, factory, Closable.all(connections.asScala.toSeq:_*))
         connections.clear()
         closable.close(deadline)
       }

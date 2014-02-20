@@ -1,10 +1,10 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.{Dtab, Service, ServiceProxy}
+import com.twitter.finagle.{ChannelClosedException, CancelledRequestException, Dtab, Service, ServiceProxy}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.io.{Buf, Reader, Writer}
-import com.twitter.util.{Await, Closable, Future, Time}
+import com.twitter.util.{Await, Closable, Future, Promise, Time, JavaTimer}
 import java.io.{StringWriter, PrintWriter}
 import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffers
@@ -98,21 +98,40 @@ class EndToEndTest extends FunSuite {
       client.close()
     }
 
+    test(name + ": client abort") {
+      import com.twitter.conversions.time._
+      val timer = new JavaTimer
+      val promise = new Promise[Response]
+      val service = new HttpService {
+        def apply(request: HttpRequest) = promise
+      }
+      val client = connect(service)
+      client(Request())
+      Await.ready(timer.doLater(20.milliseconds) {
+        Await.ready(client.close())
+        intercept[CancelledRequestException] {
+          promise.isInterrupted match {
+            case Some(intr) => throw intr
+            case _ =>
+          }
+        }
+      })
+    }
   }
 
   def rich(name: String)(connect: RichHttpService => RichHttpService) {
-    test(name + ": stream") {
-      def service(r: Reader) = new RichHttpService {
-        def apply(request: Request) = {
-          val response = new Response {
-            final val httpResponse = request.response.httpResponse
-            override def reader = r
-          }
-          response.setChunked(true)
-          Future.value(response)
+    def service(r: Reader) = new RichHttpService {
+      def apply(request: Request) = {
+        val response = new Response {
+          final val httpResponse = request.response.httpResponse
+          override def reader = r
         }
+        response.setChunked(true)
+        Future.value(response)
       }
+    }
 
+    test(name + ": stream") {
       val writer = Reader.writable()
       val client = connect(service(writer))
       val reader = Await.result(client(Request())).reader

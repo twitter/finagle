@@ -6,8 +6,6 @@ import com.twitter.util.{Await, Promise}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.specs.SpecificationWithJUnit
-import org.specs.mock.Mockito
 
 @RunWith(classOf[JUnitRunner])
 class StatsFilterTest extends FunSuite {
@@ -41,11 +39,11 @@ class StatsFilterTest extends FunSuite {
     assert(unsourced.toSeq(0).exists { s => s.indexOf("RequestException") >= 0 })
     assert(unsourced.toSeq(0).exists { s => s.indexOf("WriteException") >= 0 })
   }
-  
+
   test("don't report BackupRequestLost exceptions") {
     for (exc <- Seq(BackupRequestLost, WriteException(BackupRequestLost))) {
       val (promise, receiver, statsService) = getService
-      
+
       // It may seem strange to test for the absence
       // of these keys, but StatsReceiver semantics are
       // lazy: they are accessed only when incremented.

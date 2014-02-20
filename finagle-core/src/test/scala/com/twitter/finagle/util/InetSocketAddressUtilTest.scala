@@ -15,13 +15,19 @@ class InetSocketAddressUtilTest extends FunSuite {
       val boundSock = new InetSocketAddress(inaddr_any, 1234)
       val loopback = InetAddress.getByName("127.0.0.1")
       val boundLoopback = new InetSocketAddress(loopback, 1234)
+      val ipv6loopback = InetAddress.getByName("::1")
+      val boundIpv6Lo = new InetSocketAddress(ipv6loopback, 1234)
+      val ipv6any = InetAddress.getByName("::0")
+      val boundIpv6Any = new InetSocketAddress(ipv6any, 1234)
 
       assert(InetSocketAddressUtil.toPublic(mySockAddr) === mySockAddr)
       assert(InetSocketAddressUtil.toPublic(boundSock) == mySockAddr)
+      assert(InetSocketAddressUtil.toPublic(boundIpv6Any) == mySockAddr)
 
       // It's ok if this test fails due to some future change, I just want to highlight it
       // to whoever re-implements toPublic in case they change the behavior
       assert(InetSocketAddressUtil.toPublic(boundLoopback) === boundLoopback)
+      assert(InetSocketAddressUtil.toPublic(boundIpv6Lo) === boundIpv6Lo)
     }
     catch {
       // this could happen if you don't have a resolvable hostname or a public ip

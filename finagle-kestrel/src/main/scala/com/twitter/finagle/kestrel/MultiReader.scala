@@ -2,12 +2,13 @@ package com.twitter.finagle.kestrel
 
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._
+import com.twitter.finagle.{Addr, Group, Name}
 import com.twitter.finagle.builder._
 import com.twitter.finagle.kestrel.protocol.{Response, Command, Kestrel}
-import com.twitter.util.{Duration, Timer}
-import _root_.java.lang.{Boolean => JBoolean}
-import _root_.java.net.SocketAddress
+import com.twitter.util.{Await, Closable, Duration, Future, Return, Throw, Try, Timer, Var, Witness}
 import _root_.java.{util => ju}
+import _root_.java.net.SocketAddress
+import scala.collection.mutable
 import scala.collection.JavaConversions._
 
 object AllHandlesDiedException extends Exception
@@ -19,11 +20,12 @@ object AllHandlesDiedException extends Exception
  * available messages, round-robin across them.  Otherwise, wait for
  * the first message to arrive.
  *
- * Cluster example:
+ * Var[Addr] example:
  * {{{
- *   Cluster[SocketAddress] cluster = ... // e.g. ZookeeperServerSetCluster
+ *   val name: com.twitter.finagle.Name = Resolver.eval(...)
+ *   val va: Var[Addr] = name.bind()
  *   val readHandle =
- *     MultiReader(cluster, "the-queue")
+ *     MultiReader(va, "the-queue")
  *       .clientBuilder(
  *         ClientBuilder()
  *           .codec(Kestrel())
@@ -35,14 +37,16 @@ object AllHandlesDiedException extends Exception
  * }}}
  */
 object MultiReader {
-  def apply(cluster: Cluster[SocketAddress], queueName: String): ClusterMultiReaderBuilder = {
-    val config = ClusterMultiReaderConfig(cluster, queueName)
+  def apply(va: Var[Addr], queueName: String): ClusterMultiReaderBuilder = {
+    val config = ClusterMultiReaderConfig(va, queueName)
     new ClusterMultiReaderBuilder(config)
   }
 
-  def newBuilder(cluster: Cluster[SocketAddress], queueName: String) = apply(cluster, queueName)
+  @deprecated("Use Var[Addr]-based `apply` method", "6.8.2")
+  def apply(cluster: Cluster[SocketAddress], queueName: String): ClusterMultiReaderBuilder =
+    apply(Name.fromGroup(Group.fromCluster(cluster)).bind(), queueName)
 
-  @deprecated("Use Cluster-based apply", "5.3.7")
+  @deprecated("Use Var[Addr]-based `apply` method", "6.8.2")
   def apply(clients: Seq[Client], queueName: String): ReadHandle =
     apply(clients map { _.readReliably(queueName) })
 
@@ -50,22 +54,29 @@ object MultiReader {
    * A java friendly interface: we use scala's implicit conversions to
    * feed in a {{java.util.Iterator<ReadHandle>}}
    */
-  @deprecated("Use Cluster-based apply", "5.3.7")
+  @deprecated("Use Var[Addr]-based `apply` method", "6.8.2")
   def apply(handles: ju.Iterator[ReadHandle]): ReadHandle =
-    apply(handles.toSeq)
+    merge(Var.value(Return(handles.toSet)))
 
 
-  @deprecated("Use Cluster-based apply", "5.3.7")
-  def apply(handles: Seq[ReadHandle]): ReadHandle = {
-    val cluster = new StaticCluster[ReadHandle](handles)
-    merge(cluster)
+  @deprecated("Use Var[Addr]-based `apply` method", "6.8.2")
+  def apply(handles: Seq[ReadHandle]): ReadHandle =
+    merge(Var.value(Return(handles.toSet)))
+
+  @deprecated("Use Var[Addr]-based `apply` method", "6.8.2")
+  def newBuilder(cluster: Cluster[SocketAddress], queueName: String) = apply(cluster, queueName)
+
+  @deprecated("Use Var[Addr]-based `apply` method", "6.8.2")
+  def merge(readHandleCluster: Cluster[ReadHandle]): ReadHandle = {
+    val varTrySet = Group.fromCluster(readHandleCluster).set map { Try(_) }
+    merge(varTrySet)
   }
 
-  def merge(readHandleCluster: Cluster[ReadHandle]): ReadHandle = {
+  private[finagle] def merge(readHandles: Var[Try[Set[ReadHandle]]]): ReadHandle = {
     val error = new Broker[Throwable]
     val messages = new Broker[ReadMessage]
     val close = new Broker[Unit]
-    val clusterUpdate = new Broker[Cluster.Change[ReadHandle]]
+    val clusterUpdate = new Broker[Set[ReadHandle]]
 
     def onClose(handles: Set[ReadHandle]) {
       handles foreach { _.close }
@@ -79,11 +90,10 @@ object MultiReader {
       }
 
       val queues = handles.map { _.messages }.toSeq
-      val errors = handles.map { h => h.error  map { _ => h } }.toSeq
+      val errors = handles.map { h => h.error map { _ => h } }.toSeq
       val closeOf = close.recv { _ => onClose(handles) }
 
-      // we sequence here to ensure that close gets
-      // priority over reads
+      // We sequence here to ensure that `close` gets priority over reads.
       val of = closeOf orElse {
         Offer.choose(
           closeOf,
@@ -95,11 +105,10 @@ object MultiReader {
             h.close()
             loop(handles - h)
           },
-          clusterUpdate.recv {
-            case Cluster.Add(handle) => loop(handles + handle)
-            case Cluster.Rem(handle) =>
-              handle.close()
-              loop(handles - handle)
+          clusterUpdate.recv { newHandles =>
+            // Close any handles that exist in old set but not the new one.
+            (handles &~ newHandles) foreach { _.close() }
+            loop(newHandles)
           }
         )
       }
@@ -107,28 +116,48 @@ object MultiReader {
       of.sync()
     }
 
+    // Wait until the ReadHandles set is populated before initializing.
+    val readHandlesPopulatedFuture = readHandles.changes.collect[Try[Set[ReadHandle]]] {
+      case r@Return(x) if x.nonEmpty => r
+    }.toFuture()
 
-    for(() <- readHandleCluster.ready) {
-      val (current, spoolFuture) = readHandleCluster.snap
-      loop(Set() ++ current)
-      spoolFuture foreach { spool =>
-        spool foreach { update => clusterUpdate ! update }
+    val closeWitness: Future[Closable] = readHandlesPopulatedFuture flatMap {
+      // Flatten the Future[Try[T]] to Future[T].
+      Future.const
+    } map { handles =>
+      // Once the cluster is non-empty, start looping and observing updates.
+      loop(handles)
+
+      // Send cluster updates on the appropriate broker.
+      val witness = Witness { tsr: Try[Set[ReadHandle]] =>
+        synchronized {
+          tsr match {
+            case Return(newHandles) => clusterUpdate !! newHandles
+            case Throw(t) => error !! t
+          }
+        }
       }
+
+      readHandles.changes.register(witness)
     }
 
-    ReadHandle(messages.recv, error.recv, close.send(()))
+    val closeHandleOf: Offer[Unit] = close.send(()) map { _ =>
+      closeWitness onSuccess { _.close() }
+    }
+
+    ReadHandle(messages.recv, error.recv, closeHandleOf)
   }
 }
 
 final case class ClusterMultiReaderConfig private[kestrel](
-  private val _cluster: Cluster[SocketAddress],
+  private val _va: Var[Addr],
   private val _queueName: String,
   private val _clientBuilder: Option[ClientBuilder[Command, Response, Nothing, ClientConfig.Yes, ClientConfig.Yes]] = None,
   private val _timer: Option[Timer] = None,
   private val _retryBackoffs: Option[() => Stream[Duration]] = None) {
 
   // Delegators to make a friendly public API
-  val cluster = _cluster
+  val va = _va
   val queueName = _queueName
   val clientBuilder = _clientBuilder
   val timer = _timer
@@ -139,6 +168,7 @@ final case class ClusterMultiReaderConfig private[kestrel](
  * Factory for [[com.twitter.finagle.kestrel.ReadHandle]] instances.
  */
 class ClusterMultiReaderBuilder private[kestrel](config: ClusterMultiReaderConfig) {
+  private[this] val ReturnEmptySet = Return(Set.empty[ReadHandle])
 
   protected def copy(config: ClusterMultiReaderConfig) = new ClusterMultiReaderBuilder(config)
   protected def withConfig(f: ClusterMultiReaderConfig => ClusterMultiReaderConfig): ClusterMultiReaderBuilder = {
@@ -161,7 +191,7 @@ class ClusterMultiReaderBuilder private[kestrel](config: ClusterMultiReaderConfi
     withConfig(_.copy(_retryBackoffs = Some(backoffs), _timer = Some(timer)))
   }
 
-  private[this] def buildReadHandleCluster(): Cluster[ReadHandle] = {
+  private[this] def buildReadHandleVar(): Var[Try[Set[ReadHandle]]] = {
     val baseClientBuilder = config.clientBuilder match {
       case Some(clientBuilder) => clientBuilder
       case None =>
@@ -173,23 +203,46 @@ class ClusterMultiReaderBuilder private[kestrel](config: ClusterMultiReaderConfi
           .daemon(true)
     }
 
-    config.cluster map { socketAddr =>
-      val factory = baseClientBuilder
-        .hosts(socketAddr)
-        .buildFactory()
+    // Use a mutable Map so that we can modify it in-place on cluster change.
+    val currentHandles = mutable.Map.empty[SocketAddress, ReadHandle]
 
-      val client = Client(factory)
+    val event = config.va.changes map {
+      case Addr.Bound(socketAddrs) => {
+        val newHandles = (socketAddrs &~ currentHandles.keySet) map { socketAddr =>
+          val factory = baseClientBuilder
+            .hosts(socketAddr)
+            .buildFactory()
 
-      (config.retryBackoffs, config.timer) match {
-        case (Some(backoffs), Some(timer)) => client.readReliably(config.queueName, timer, backoffs())
-        case _                             => client.readReliably(config.queueName)
+          val client = Client(factory)
+
+          val handle = (config.retryBackoffs, config.timer) match {
+            case (Some(backoffs), Some(timer)) =>
+              client.readReliably(config.queueName, timer, backoffs())
+            case _ => client.readReliably(config.queueName)
+          }
+
+          (socketAddr, handle)
+        }
+
+        synchronized {
+          currentHandles.retain { case (addr, _) => socketAddrs.contains(addr) }
+          currentHandles ++= newHandles
+        }
+
+        Return(currentHandles.values.toSet)
       }
+
+      case Addr.Failed(t) => Throw(t)
+
+      case _ => ReturnEmptySet
     }
+
+    Var(Return(Set.empty), event)
   }
 
   /*
    * Contructs a merged ReadHandle over the members of the configured cluster. The handle is updated
    * as members are added or removed.
    */
-  def build() = MultiReader.merge(buildReadHandleCluster())
+  def build(): ReadHandle = MultiReader.merge(buildReadHandleVar())
 }

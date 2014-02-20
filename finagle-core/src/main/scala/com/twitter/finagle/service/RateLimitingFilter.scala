@@ -38,7 +38,8 @@ class LocalRateLimitingStrategy[Req](
 
 
 /**
- * Filter responsible for accepting/refusing request based on the rate limiting strategy.
+ * A [[com.twitter.finagle.Filter]] that accepts or refuses requests based on a
+ * rate limiting strategy.
  */
 class RateLimitingFilter[Req, Rep](
   strategy: Req => Future[Boolean],

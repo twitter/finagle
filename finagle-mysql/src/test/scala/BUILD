@@ -1,3 +1,13 @@
+scala_library(name='testing',
+  dependencies=[
+    pants('3rdparty/jvm/mysql:mysql-connector-mxj-gpl'),
+    pants('3rdparty/jvm/mysql:mysql-connector-mxj-gpl-db-files'),
+    pants('3rdparty:mysql-connector-java'),
+    pants('finagle/finagle-mysql')
+  ],
+  sources=rglobs('*.scala')
+)
+
 junit_tests(name='scala',
   dependencies=[
     pants('3rdparty:junit'),
@@ -5,8 +15,11 @@ junit_tests(name='scala',
     pants('3rdparty:netty'),
     pants('3rdparty:specs'),
     pants('3rdparty:scalatest'),
-    pants('finagle/finagle-mysql'),
+    pants(':testing'),
     pants('util/util-core')
   ],
-  sources=rglobs('*.scala')
+  sources=rglobs('*.scala'),
+  resources=[
+    pants('finagle/finagle-mysql/src/test/resources')
+  ]
 )

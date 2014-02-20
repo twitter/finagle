@@ -2,6 +2,8 @@ package com.twitter.finagle.mux
 
 import com.twitter.finagle.tracing
 import com.twitter.finagle.{Dtab, Dentry}
+import com.twitter.util.Time
+import com.twitter.util.TimeConversions.intToTimeableNumber
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
 import org.junit.runner.RunWith
@@ -27,7 +29,9 @@ class ProtoTest extends FunSuite {
     Dentry("/foo", "inet!twitter.com:80"))
   val goodDtabs = goodDentries.permutations map { ds => Dtab(ds.toIndexedSeq) }
   val goodDests = Seq("", "okay", "/foo/bar/baz")
-  val goodContexts = 
+  val goodDurationLeases = Seq(Message.Tlease.MinLease, Message.Tlease.MaxLease)
+  val goodTimeLeases = Seq(Time.epoch, Time.now, Time.now + 5.minutes)
+  val goodContexts =
     Seq() ++ (for { k <- goodKeys; v <- goodBufs } yield (k, v)).combinations(2).toSeq
 
   import Message._
@@ -79,7 +83,15 @@ class ProtoTest extends FunSuite {
       tag <- goodTags
       ctx <- goodContexts
     } yield RdispatchNack(tag, ctx))
-    
+
+    ms ++= (for {
+      lease <- goodDurationLeases
+    } yield Tlease(lease))
+
+    ms ++= (for {
+      lease <- goodTimeLeases
+    } yield Tlease(lease))
+
     def assertEquiv(a: Message, b: Message) = (a, b) match {
       case (Tdispatch(tag1, ctxs1, dst1, dtab1, req1), 
           Tdispatch(tag2, ctxs2, dst2, dtab2, req2)) =>

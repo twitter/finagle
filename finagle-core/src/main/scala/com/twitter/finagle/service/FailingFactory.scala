@@ -3,6 +3,9 @@ package com.twitter.finagle.service
 import com.twitter.util.{Future, Time}
 import com.twitter.finagle.{ServiceFactory, ClientConnection}
 
+/**
+ * A [[com.twitter.finagle.ServiceFactory]] that fails to construct services.
+ */
 class FailingFactory[Req, Rep](error: Throwable)
   extends ServiceFactory[Req, Rep]
 {

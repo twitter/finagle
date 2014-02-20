@@ -95,7 +95,14 @@ class ChannelTransport[In, Out](ch: Channel)
 
   def read(): Future[Out] = {
     need(1)
-    readq.poll()
+
+    // This is fine, but we should consider being a little more fine-grained
+    // here. For example, if a read behind another read interrupts, perhaps the
+    // transport shouldn’t be failed, only the read dequeued.
+    val p = new Promise[Out]
+    p.become(readq.poll())
+    p setInterruptHandler { case intr => fail(intr) }
+    p
   }
 
   def isOpen = ch.isOpen

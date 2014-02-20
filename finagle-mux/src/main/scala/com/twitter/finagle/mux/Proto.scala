@@ -1,9 +1,10 @@
 package com.twitter.finagle.mux
 
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.util.CharsetUtil
 import com.twitter.finagle.tracing.{SpanId, TraceId, Flags}
 import com.twitter.finagle.{Dtab, Dentry}
+import com.twitter.util.{Duration, Time}
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.util.CharsetUtil
 
 case class BadMessageException(why: String) extends Exception(why)
 
@@ -32,6 +33,7 @@ private[finagle] object Message {
     val Rping = -63: Byte
 
     val Tdiscarded = -62: Byte
+    val Tlease = -61: Byte
 
     // Could be either:
     val Rerr = 127: Byte
@@ -224,6 +226,30 @@ private[finagle] object Message {
       encodeString(why))
   }
 
+  object Tlease {
+    val MinLease = Duration.Zero
+    val MaxLease = Duration.fromMilliseconds((1L << 32) - 1) // Unsigned Int max value
+
+    val MillisDuration: Byte = 0
+
+    def apply(howLong: Duration): Tlease = {
+      require(howLong >= MinLease && howLong <= MaxLease, "lease out of range")
+      Tlease(0, howLong.inMilliseconds)
+    }
+    def apply(end: Time): Tlease = Tlease(1, end.sinceEpoch.inMilliseconds)
+  }
+
+  case class Tlease(unit: Byte, howLong: Long) extends MarkerMessage(Types.Tlease) {
+    import Tlease._
+
+    lazy val buf = {
+      val b = ChannelBuffers.buffer(9)
+      b.writeByte(unit)
+      b.writeLong(howLong)
+      b
+    }
+  }
+
   object Tmessage {
     def unapply(m: Message): Option[Int] =
       if (m.typ > 0) Some(m.tag)
@@ -376,6 +402,14 @@ private[finagle] object Message {
     Tdiscarded(which, decodeUtf8(buf))
   }
 
+  private def decodeTlease(buf: ChannelBuffer) = {
+    if (buf.readableBytes < 9)
+      throw BadMessageException("short Tlease message")
+    val unit: Byte = buf.readByte()
+    val howMuch: Long = buf.readLong()
+    Tlease(unit, howMuch)
+  }
+
   def decode(buf: ChannelBuffer): Message = {
     if (buf.readableBytes < 4)
       throw BadMessageException("short message")
@@ -393,6 +427,7 @@ private[finagle] object Message {
       case Types.Rping => Rping(tag)
       case Types.Rerr => Rerr(tag, decodeUtf8(buf))
       case Types.Tdiscarded => decodeTdiscarded(buf)
+      case Types.Tlease => decodeTlease(buf)
       case bad => throw BadMessageException("bad message type: %d [tag=%d]".format(bad, tag))
     }
   }

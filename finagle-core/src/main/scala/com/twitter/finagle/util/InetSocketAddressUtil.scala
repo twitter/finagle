@@ -8,14 +8,11 @@ object InetSocketAddressUtil {
   /** converts 0.0.0.0 -> public ip in bound ip */
   def toPublic(bound: SocketAddress): SocketAddress = {
     bound match {
-      case addr: InetSocketAddress =>
-        if (addr.getAddress() == InetAddressUtil.InaddrAny) {
-          val host = try InetAddress.getLocalHost() catch {
-            case _: UnknownHostException => InetAddressUtil.Loopback
-          }
-          new InetSocketAddress(host, addr.getPort())
+      case addr: InetSocketAddress if addr.getAddress().isAnyLocalAddress() =>
+        val host = try InetAddress.getLocalHost() catch {
+          case _: UnknownHostException => InetAddressUtil.Loopback
         }
-        else bound
+        new InetSocketAddress(host, addr.getPort())
       case _ => bound
     }
   }

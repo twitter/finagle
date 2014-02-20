@@ -103,46 +103,40 @@ class StatsReceiverTest extends FunSuite {
     assert(NullStatsReceiver.scope("foo").scope("bar").isNull)
   }
 
-  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
-    test("rollup statsReceiver work in action") {
-      val never = new Service[String, String] {
-        def apply(request: String) = new Promise[String]
-      }
-      val address = new InetSocketAddress(0)
-      val server = ServerBuilder()
-        .codec(StringCodec)
-        .bindTo(address)
-        .name("FinagleServer")
-        .build(never)
-
-      val mem = new InMemoryStatsReceiver
-      val client = ClientBuilder()
-        .name("client")
-        .hosts(server.localAddress)
-        .codec(StringCodec)
-        .requestTimeout(10.millisecond)
-        .hostConnectionLimit(1)
-        .hostConnectionMaxWaiters(1)
-        .reportTo(mem)
-        .build()
-
-      // generate com.twitter.finagle.IndividualRequestTimeoutException
-      intercept[IndividualRequestTimeoutException] { Await.result(client("hi")) }
-      Await.ready(server.close())
-      // generate com.twitter.finagle.WriteException$$anon$1
-      intercept[WriteException] { Await.result(client("hi")) }
-
-      val aggregatedFailures = mem.counters(Seq("client", "failures"))
-      val otherFailuresSum = {
-        val failures = mem.counters filter { case (names, _) =>
-          names.startsWith(Seq("client", "failures"))
-        }
-        failures.values.sum - aggregatedFailures
-      }
-
-      assert(aggregatedFailures === otherFailuresSum)
-      assert(aggregatedFailures === 2)
+  test("rollup statsReceiver work in action") {
+    val never = new Service[String, String] {
+      def apply(request: String) = new Promise[String]
     }
+    val address = new InetSocketAddress(0)
+    val server = ServerBuilder()
+      .codec(StringCodec)
+      .bindTo(address)
+      .name("FinagleServer")
+      .build(never)
+
+    val mem = new InMemoryStatsReceiver
+    val client = ClientBuilder()
+      .name("client")
+      .hosts(server.localAddress)
+      .codec(StringCodec)
+      .requestTimeout(10.millisecond)
+      .hostConnectionLimit(1)
+      .hostConnectionMaxWaiters(1)
+      .reportTo(mem)
+      .build()
+
+    // generate com.twitter.finagle.IndividualRequestTimeoutException
+    intercept[IndividualRequestTimeoutException] { Await.result(client("hi")) }
+    Await.ready(server.close())
+    // generate com.twitter.finagle.WriteException$$anon$1
+    intercept[WriteException] { Await.result(client("hi")) }
+
+    val requestFailures = mem.counters(Seq("client", "failures"))
+    val serviceCreationFailures =
+      mem.counters(Seq("client", "service_creation", "failures"))
+
+    assert(requestFailures === 1)
+    assert(serviceCreationFailures === 1)
   }
 
   test("Forwarding to LoadedStatsReceiver") {

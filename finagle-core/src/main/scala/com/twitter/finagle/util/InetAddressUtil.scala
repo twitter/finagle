@@ -7,7 +7,6 @@ import java.net.{InetAddress, Inet4Address}
 object InetAddressUtil {
 
   val Loopback = InetAddress.getByAddress(Array[Byte](127,0,0,1))
-  val InaddrAny = InetAddress.getByAddress(Array[Byte](0,0,0,0))
 
   /** Check if string is an IPv4 private address. */
   def isPrivateAddress(ip: InetAddress): Boolean =

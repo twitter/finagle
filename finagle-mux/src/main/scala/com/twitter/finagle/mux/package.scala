@@ -115,6 +115,13 @@ string describing why the request was discarded. Note that it does
 *not* free the server from the obligation of replying to the original
 Treq.
 
+''[4]size[1]Tlease[1]unit[8]howmuch'' is a marker message indicating that a
+lease has been issued for ''howmuch'' unit. Unit '1' is reserved for duration in
+milliseconds. Whenever a lease has not been issued, a client can assume it holds
+an indefinite lease. Adhering to the lease is optional, but the server may
+reject requests or provide degraded service should the lease expire. This is
+used by servers to implement features like garbage collection avoidance.
+
  */
 package object mux {
   type NewSession = Session => Session

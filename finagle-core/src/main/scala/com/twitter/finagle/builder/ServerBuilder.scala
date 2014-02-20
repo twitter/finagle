@@ -47,6 +47,15 @@ object ServerBuilder {
    */
   def safeBuild[Req, Rep](service: Service[Req, Rep], builder: Complete[Req, Rep]): Server =
     builder.build(service)(ServerConfigEvidence.FullyConfigured)
+
+  /**
+   * Provides a typesafe `build` for Java.
+   */
+  def safeBuild[Req, Rep](
+    serviceFactory: ServiceFactory[Req, Rep],
+    builder: Complete[Req, Rep]
+  ): Server =
+    builder.build(serviceFactory)(ServerConfigEvidence.FullyConfigured)
 }
 
 object ServerConfig {
@@ -410,9 +419,9 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     val monitor = config.monitor match {
       case Some(newMonitor) =>
         newMonitor(config.name, InetSocketAddressUtil.toPublic(config.bindTo))
-      case None => 
+      case None =>
         NullMonitor
-    } 
+    }
 
     val tracer = config.tracer
     val timer = DefaultTimer.twitter
@@ -422,7 +431,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       name = config.name,
       pipelineFactory = codec.pipelineFactory,
       channelSnooper =
-        if (config.logChannelActivity) 
+        if (config.logChannelActivity)
           Some(ChannelSnooper(config.name)(logger.log(Level.INFO, _, _)))
         else None,
       channelFactory = config.channelFactory,
@@ -432,19 +441,19 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         o += "reuseAddress" -> java.lang.Boolean.TRUE
         o += "child.tcpNoDelay" -> java.lang.Boolean.TRUE
 
-        for (v <- config.backlog) 
+        for (v <- config.backlog)
           o += "backlog" -> (v: java.lang.Integer)
-        for (v <- config.bufferSize.send) 
+        for (v <- config.bufferSize.send)
           o += "child.sendBufferSize" -> (v: java.lang.Integer)
-        for (v <- config.bufferSize.recv) 
+        for (v <- config.bufferSize.recv)
           o += "child.receiveBufferSize" -> (v: java.lang.Integer)
-        for (v <- config.keepAlive) 
+        for (v <- config.keepAlive)
           o += "child.keepAlive" -> (v: java.lang.Boolean)
 
         o.result()
       },
       channelReadTimeout = config.readTimeout getOrElse Duration.Top,
-      channelWriteCompletionTimeout = 
+      channelWriteCompletionTimeout =
         config.writeCompletionTimeout getOrElse Duration.Top,
       tlsConfig = config.newEngine map(Netty3ListenerTLSConfig),
       timer = timer,
@@ -454,15 +463,15 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       logger = logger
     )
 
-    val channelMaxIdleTime = 
+    val channelMaxIdleTime =
       config.hostConnectionMaxIdleTime getOrElse Duration.Top
-    val channelMaxLifeTime = 
+    val channelMaxLifeTime =
       config.hostConnectionMaxLifeTime getOrElse Duration.Top
     val serverDispatcher: (Transport[Any, Any], Service[Req, Rep]) => Closable =
       if (channelMaxIdleTime < Duration.Top || channelMaxLifeTime < Duration.Top) {
-        val idleTime = if (channelMaxIdleTime < Duration.Top) 
+        val idleTime = if (channelMaxIdleTime < Duration.Top)
           Some(channelMaxIdleTime) else None
-        val lifeTime = if (channelMaxLifeTime < Duration.Top) 
+        val lifeTime = if (channelMaxLifeTime < Duration.Top)
           Some(channelMaxLifeTime) else None
         ExpiringServerDispatcher[Req, Rep, Any, Any](
           idleTime, lifeTime, timer,
