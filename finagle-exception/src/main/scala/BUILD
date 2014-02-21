@@ -8,7 +8,7 @@ scala_library(name='scala',
     pants('util/util-app'),
     pants('util/util-codec'),
     pants('util/util-core'),
-    pants('finagle/finagle-exception/src/main/thrift:thrift-scala'),
+    pants('finagle/finagle-exception/src/main/java')
   ],
   sources=rglobs('*.scala'),
   resources=pants('finagle/finagle-exception/src/main/resources')

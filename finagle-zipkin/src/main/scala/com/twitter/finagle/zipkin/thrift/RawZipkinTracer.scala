@@ -14,6 +14,7 @@ import java.nio.ByteBuffer
 import java.util.concurrent.TimeoutException
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.TMemoryBuffer
+import scala.collection.JavaConverters._
 import scala.collection.mutable.{ArrayBuffer, HashMap, SynchronizedMap}
 
 object RawZipkinTracer {
@@ -88,7 +89,7 @@ private[thrift] class RawZipkinTracer(
       .daemon(true)
       .build()
 
-    new Scribe.FinagledClient(
+    new scribe.ServiceToClient(
       new TracelessFilter andThen transport,
       new TBinaryProtocol.Factory())
   }
@@ -108,7 +109,7 @@ private[thrift] class RawZipkinTracer(
     span.toThrift.write(protocolFactory.getProtocol(buffer))
     val thriftBytes = buffer.getArray.take(buffer.length)
     val serializedBase64Span = Base64StringEncoder.encode(thriftBytes) + '\n'
-    Seq(LogEntry(category = TraceCategory, message = serializedBase64Span))
+    Seq(new LogEntry(TraceCategory, serializedBase64Span))
   }
 
   /**
@@ -116,9 +117,9 @@ private[thrift] class RawZipkinTracer(
    */
   def logSpan(span: Span): Future[Unit] = {
     val logEntries = createLogEntries(span)
-    logEntries.flatMap(client.log) onSuccess {
-      case ResultCode.Ok => okCounter.incr()
-      case ResultCode.TryLater => tryLaterCounter.incr()
+    logEntries flatMap { seq => client.Log(seq.asJava) } onSuccess {
+      case ResultCode.OK => okCounter.incr()
+      case ResultCode.TRY_LATER => tryLaterCounter.incr()
       case _ => () /* ignore */
     } onFailure {
       case e: Throwable => errorReceiver.counter(e.getClass.getName).incr()

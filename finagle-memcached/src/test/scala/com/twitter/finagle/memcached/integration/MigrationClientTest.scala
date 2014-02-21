@@ -111,47 +111,47 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     loop()
   }
 
-  test("not migrating yet") {
-    val client1 = MemcachedClient.newKetamaClient(
-      dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
-    val client2 = MemcachedClient.newKetamaClient(
-      dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
-    val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
-    migrationClient.loadZKData() // force loading the config to fully set-up the client
-
-    eventually { Await.result(migrationClient.get("test")) }
-
-    assert(Await.result(migrationClient.get("foo")) == None)
-    Await.result(migrationClient.set("foo", "bar"))
-    assert(Await.result(migrationClient.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
-
-    assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
-    assert(waitForEventualResult(() => Await.result(client2.get("foo")), None))
-  }
-
-  if (!sys.props.contains("SKIP_FLAKY")) test("sending dark traffic") {
-    val migrationConfig = MigrationConstants.MigrationConfig("Warming", false, false)
-    val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
-    zookeeperClient.get().setData(basePath, migrationDataArray, -1)
-
-    val client1 = MemcachedClient.newKetamaClient(
-      dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
-    val client2 = MemcachedClient.newKetamaClient(
-      dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
-    val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
-    migrationClient.loadZKData() // force loading the config to fully set-up the client
-
-    eventually { Await.result(migrationClient.get("test")) }
-
-    assert(Await.result(migrationClient.get("foo")) == None)
-    Await.result(migrationClient.set("foo", "bar"))
-    assert(Await.result(migrationClient.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
-
-    assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
-    assert(waitForEventualResult(() => Await.result(client2.get("foo")).map(_.toString(CharsetUtil.UTF_8)), Some("bar")))
-  }
-
   if (!sys.props.contains("SKIP_FLAKY")) {
+    test("not migrating yet") {
+      val client1 = MemcachedClient.newKetamaClient(
+        dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
+      val client2 = MemcachedClient.newKetamaClient(
+        dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
+      val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
+      migrationClient.loadZKData() // force loading the config to fully set-up the client
+
+      eventually { Await.result(migrationClient.get("test")) }
+
+      assert(Await.result(migrationClient.get("foo")) == None)
+      Await.result(migrationClient.set("foo", "bar"))
+      assert(Await.result(migrationClient.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+
+      assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(waitForEventualResult(() => Await.result(client2.get("foo")), None))
+    }
+
+    test("sending dark traffic") {
+      val migrationConfig = MigrationConstants.MigrationConfig("Warming", false, false)
+      val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
+      zookeeperClient.get().setData(basePath, migrationDataArray, -1)
+
+      val client1 = MemcachedClient.newKetamaClient(
+        dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
+      val client2 = MemcachedClient.newKetamaClient(
+        dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
+      val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
+      migrationClient.loadZKData() // force loading the config to fully set-up the client
+
+      eventually { Await.result(migrationClient.get("test")) }
+
+      assert(Await.result(migrationClient.get("foo")) == None)
+      Await.result(migrationClient.set("foo", "bar"))
+      assert(Await.result(migrationClient.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+
+      assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(waitForEventualResult(() => Await.result(client2.get("foo")).map(_.toString(CharsetUtil.UTF_8)), Some("bar")))
+    }
+
     test("dark read w/ read repair") {
       val migrationConfig = MigrationConstants.MigrationConfig("Warming", true, false)
       val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
