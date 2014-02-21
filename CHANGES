@@ -5,6 +5,13 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.12.2
+~~~~~
+
+- `finagle`: release scrooge version 3.12.3
+- `finagle-exception`: Drop scrooge in favor of pre-generated Thrift Java source code.
+- `finagle-zipkin`: Drop scrooge in favor of pre-generated Thrift Java source code.
+
 6.12.1
 ~~~~~
 
