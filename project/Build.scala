@@ -23,7 +23,7 @@ object Finagle extends Build {
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
   )
   val scroogeLibs = thriftLibs ++ Seq(
-    "com.twitter" %% "scrooge-core" % "3.12.2")
+    "com.twitter" %% "scrooge-core" % "3.12.3")
 
   def util(which: String) =
     "com.twitter" %% ("util-"+which) % utilVersion excludeAll(
@@ -52,6 +52,7 @@ object Finagle extends Build {
       case "2.10" | "2.10.0" => Seq(Tests.Filter(_ => false))
       case _ => Seq()
     },
+    javaOptions in Test := Seq("-DSKIP_FLAKY=1"),
 
     ivyXML :=
       <dependencies>
@@ -200,7 +201,6 @@ object Finagle extends Build {
     id = "finagle-zipkin",
     base = file("finagle-zipkin"),
     settings = Project.defaultSettings ++
-      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-zipkin",
@@ -211,7 +211,6 @@ object Finagle extends Build {
     id = "finagle-exception",
     base = file("finagle-exception"),
     settings = Project.defaultSettings ++
-      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-exception",
@@ -244,6 +243,7 @@ object Finagle extends Build {
       "com.twitter.common.zookeeper" % "server-set" % "1.0.67",
       util("zk-common")
     ) ++ jacksonLibs,
+    excludeFilter in unmanagedSources := "ZkTest.scala",
     ivyXML :=
       <dependencies>
         <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.66">

@@ -175,53 +175,53 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
       assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
       assert(waitForEventualResult(() => Await.result(client2.get("foo")).map(_.toString(CharsetUtil.UTF_8)), Some("bar")))
     }
-  }
 
-  test("use new pool with fallback to old pool") {
-    val migrationConfig = MigrationConstants.MigrationConfig("Verifying", false, false)
-    val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
-    zookeeperClient.get().setData(basePath, migrationDataArray, -1)
+    test("use new pool with fallback to old pool") {
+      val migrationConfig = MigrationConstants.MigrationConfig("Verifying", false, false)
+      val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
+      zookeeperClient.get().setData(basePath, migrationDataArray, -1)
 
-    val client1 = MemcachedClient.newKetamaClient(
-      dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
-    val client2 = MemcachedClient.newKetamaClient(
-      dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
-    val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
-    migrationClient.loadZKData() // force loading the config to fully set-up the client
+      val client1 = MemcachedClient.newKetamaClient(
+        dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
+      val client2 = MemcachedClient.newKetamaClient(
+        dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
+      val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
+      migrationClient.loadZKData() // force loading the config to fully set-up the client
 
-    eventually { Await.result(migrationClient.get("test")) }
+      eventually { Await.result(migrationClient.get("test")) }
 
-    Await.result(client1.set("foo", "bar"))
-    assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
-    assert(Await.result(client2.get("foo")) == None)
+      Await.result(client1.set("foo", "bar"))
+      assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(Await.result(client2.get("foo")) == None)
 
-    assert(Await.result(migrationClient.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(Await.result(migrationClient.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
 
-    assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
-    assert(waitForEventualResult(() => Await.result(client2.get("foo")), None))
-  }
+      assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(waitForEventualResult(() => Await.result(client2.get("foo")), None))
+    }
 
-  if (!sys.props.contains("SKIP_FLAKY")) test("use new pool with fallback to old pool and readrepair") {
-    val migrationConfig = MigrationConstants.MigrationConfig("Verifying", false, true)
-    val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
-    zookeeperClient.get().setData(basePath, migrationDataArray, -1)
+    test("use new pool with fallback to old pool and readrepair") {
+      val migrationConfig = MigrationConstants.MigrationConfig("Verifying", false, true)
+      val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
+      zookeeperClient.get().setData(basePath, migrationDataArray, -1)
 
-    val client1 = MemcachedClient.newKetamaClient(
-      dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
-    val client2 = MemcachedClient.newKetamaClient(
-      dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
-    val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
-    migrationClient.loadZKData() // force loading the config to fully set-up the client
+      val client1 = MemcachedClient.newKetamaClient(
+        dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
+      val client2 = MemcachedClient.newKetamaClient(
+        dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
+      val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
+      migrationClient.loadZKData() // force loading the config to fully set-up the client
 
-    eventually { Await.result(migrationClient.get("test")) }
+      eventually { Await.result(migrationClient.get("test")) }
 
-    Await.result(client1.set("foo", "bar"))
-    assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
-    assert(Await.result(client2.get("foo")) == None)
+      Await.result(client1.set("foo", "bar"))
+      assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(Await.result(client2.get("foo")) == None)
 
-    assert(Await.result(migrationClient.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(Await.result(migrationClient.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
 
-    assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
-    assert(waitForEventualResult(() => Await.result(client2.get("foo")).map(_.toString(CharsetUtil.UTF_8)), Some("bar")))
+      assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(waitForEventualResult(() => Await.result(client2.get("foo")).map(_.toString(CharsetUtil.UTF_8)), Some("bar")))
+    }
   }
 }
