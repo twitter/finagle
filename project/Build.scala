@@ -241,7 +241,7 @@ object Finagle extends Build {
     fork in Test := true,
     libraryDependencies ++= Seq(
       "commons-codec" % "commons-codec" % "1.5",
-      "com.twitter.common.zookeeper" % "server-set" % "1.0.66",
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.67",
       util("zk-common")
     ) ++ jacksonLibs,
     ivyXML :=
