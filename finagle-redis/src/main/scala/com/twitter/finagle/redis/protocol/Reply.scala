@@ -100,14 +100,7 @@ class ReplyCodec extends UnifiedProtocolCodec {
     RequireServerProtocol.safe {
       NumberFormat.toInt(line)
     } match {
-      case empty if empty < 0 => emit(EmptyBulkReply())
-      case 0 => //Here we got an empty string: '$0\r\n\r\n' -> '""'
-        readBytes(2) { eol =>
-          if (eol(0) != '\r' || eol(1) != '\n') {
-            throw new ServerError("Expected EOL after line data and didn't find it")
-          }
-          emit(BulkReply(StringToChannelBuffer("")))
-        }        
+      case empty if empty < 0 => emit(EmptyBulkReply())      
       case replySz => readBytes(replySz) { bytes =>
         readBytes(2) { eol =>
           if (eol(0) != '\r' || eol(1) != '\n') {
