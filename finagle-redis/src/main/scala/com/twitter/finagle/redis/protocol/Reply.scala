@@ -100,7 +100,7 @@ class ReplyCodec extends UnifiedProtocolCodec {
     RequireServerProtocol.safe {
       NumberFormat.toInt(line)
     } match {
-      case empty if empty < 0 => emit(EmptyBulkReply())      
+      case empty if empty < 0 => emit(EmptyBulkReply())
       case replySz => readBytes(replySz) { bytes =>
         readBytes(2) { eol =>
           if (eol(0) != '\r' || eol(1) != '\n') {
