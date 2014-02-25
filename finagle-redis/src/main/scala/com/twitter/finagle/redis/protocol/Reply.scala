@@ -97,7 +97,6 @@ class ReplyCodec extends UnifiedProtocolCodec {
   }
 
   def decodeBulkReply = readLine { line =>
-
     RequireServerProtocol.safe {
       NumberFormat.toInt(line)
     } match {
