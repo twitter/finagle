@@ -273,6 +273,11 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.hGet(bar, baz)) mustEqual None
       }
 
+      "hash set and get an empty value" in {
+        Await.result(client.hSet(foo, bar, StringToChannelBuffer("")))
+        CBToString(Await.result(client.hGet(foo, bar)).get) mustEqual ""
+      }
+
       "hash and field exists" in {
         Await.result(client.hSet(foo, bar, baz))
         Await.result(client.hExists(foo, bar)) mustEqual true
@@ -302,6 +307,12 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.hMSet(foo, Map(baz -> bar, moo -> boo)))
         CBToString.fromList(
           Await.result(client.hMGet(foo, Seq(baz, moo))).toList) mustEqual Seq("bar", "boo")
+      }
+
+      "set multiple values one of which is an empty string value" in {
+        Await.result(client.hMSet(foo, Map(baz -> bar, moo -> StringToChannelBuffer(""))))
+        CBToString.fromList(
+          Await.result(client.hMGet(foo, Seq(baz, moo))).toList) mustEqual Seq("bar", "")
       }
 
       "get multiple values at once" in {
@@ -662,9 +673,13 @@ class ClientSpec extends SpecificationWithJUnit {
       "key command on incorrect data type" in {
         val txResult = Await.result(client.transaction(Seq(HSet(foo, boo, moo),
           Get(foo), HDel(foo, Seq(boo)))))
-        txResult.toList mustEqual Seq(IntegerReply(1),
-          ErrorReply("ERR Operation against a key holding the wrong kind of value"),
-          IntegerReply(1))
+        txResult.toList must beLike {
+          case Seq(IntegerReply(1),
+            // TODO: the exact error message varies in different versions of redis. fix this later
+            ErrorReply(message),
+            IntegerReply(1)) if message endsWith "Operation against a key holding the wrong kind of value" => true
+          case _ => false
+        }
       }
 
       "fail after a watched key is modified" in {
