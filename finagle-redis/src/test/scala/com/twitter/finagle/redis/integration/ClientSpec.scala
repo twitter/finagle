@@ -673,9 +673,13 @@ class ClientSpec extends SpecificationWithJUnit {
       "key command on incorrect data type" in {
         val txResult = Await.result(client.transaction(Seq(HSet(foo, boo, moo),
           Get(foo), HDel(foo, Seq(boo)))))
-        txResult.toList mustEqual Seq(IntegerReply(1),
-          ErrorReply("WRONGTYPE Operation against a key holding the wrong kind of value"),
-          IntegerReply(1))
+        txResult.toList must beLike {
+          case Seq(IntegerReply(1),
+            // TODO: the exact error message varies in different versions of redis. fix this later
+            ErrorReply(message),
+            IntegerReply(1)) if message contains "Operation against a key holding the wrong kind of value" => true
+          case _ => false
+        }
       }
 
       "fail after a watched key is modified" in {
