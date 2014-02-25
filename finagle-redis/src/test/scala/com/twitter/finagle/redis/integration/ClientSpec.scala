@@ -677,7 +677,7 @@ class ClientSpec extends SpecificationWithJUnit {
           case Seq(IntegerReply(1),
             // TODO: the exact error message varies in different versions of redis. fix this later
             ErrorReply(message),
-            IntegerReply(1)) if message contains "Operation against a key holding the wrong kind of value" => true
+            IntegerReply(1)) if message endsWith "Operation against a key holding the wrong kind of value" => true
           case _ => false
         }
       }
