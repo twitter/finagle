@@ -53,13 +53,13 @@ private[redis] object RedisCodec {
       case false => Nil
     }
     val buffers = args.map({ arg =>
-        Seq(
-          ARG_SIZE_MARKER_BA,
-          StringToChannelBuffer(arg.readableBytes.toString),
-          EOL_DELIMITER_BA,
-          arg,
-          EOL_DELIMITER_BA
-        )
+      Seq(
+        ARG_SIZE_MARKER_BA,
+        StringToChannelBuffer(arg.readableBytes.toString),
+        EOL_DELIMITER_BA,
+        arg,
+        EOL_DELIMITER_BA
+      )
     }).flatten
     ChannelBuffers.wrappedBuffer((header ++ buffers).toArray:_*)
   }
