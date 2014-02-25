@@ -242,13 +242,13 @@ object Finagle extends Build {
     fork in Test := true,
     libraryDependencies ++= Seq(
       "commons-codec" % "commons-codec" % "1.5",
-      "com.twitter.common.zookeeper" % "server-set" % "1.0.67",
-      util("zk-common")
+      util("zk-common"),
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.67"
     ) ++ jacksonLibs,
     excludeFilter in unmanagedSources := "ZkTest.scala",
     ivyXML :=
       <dependencies>
-        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.66">
+        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.67">
           <exclude org="com.google.guava" name="guava"/>
           <exclude org="com.twitter" name="finagle-core"/>
           <exclude org="com.twitter" name="finagle-thrift"/>
