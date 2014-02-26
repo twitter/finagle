@@ -132,7 +132,7 @@ class ReplyCodec extends UnifiedProtocolCodec {
         header match {
           case ARG_SIZE_MARKER =>
             val size = NumberFormat.toInt(line.drop(1))
-            if (size < 1) {
+            if (size < 0) {
               decodeMBulkLines(i - 1, stack, EmptyBulkReply() :: lines)
             } else {
               readBytes(size) { byteArray =>
