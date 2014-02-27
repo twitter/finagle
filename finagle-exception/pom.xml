@@ -82,9 +82,20 @@
       <artifactId>util-codec</artifactId>
       <version>6.12.2-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>scrooge-core</artifactId>
+      <version>3.12.4-SNAPSHOT</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
+      <plugin>
+        <groupId>com.twitter</groupId>
+        <artifactId>scrooge-maven-plugin</artifactId>
+        <!-- this version must match the version from scrooge-gen.ivy.xml -->
+        <version>3.12.3</version>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>

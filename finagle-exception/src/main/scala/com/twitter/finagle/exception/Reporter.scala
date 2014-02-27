@@ -1,12 +1,9 @@
 package com.twitter.finagle.exception
 
 import java.net.{SocketAddress, InetSocketAddress, InetAddress}
-import java.util.ArrayList
 
 import org.apache.thrift.protocol.TBinaryProtocol
-
-import com.twitter.finagle.exception.thrift.scribe
-import com.twitter.finagle.exception.thrift.{LogEntry, ResultCode}
+import com.twitter.finagle.exception.thrift.{LogEntry, ResultCode, Scribe, Scribe$FinagleClient}
 
 import com.twitter.app.GlobalFlag
 import com.twitter.util.GZIPStringEncoder
@@ -103,7 +100,7 @@ object Reporter {
       .daemon(true)
       .build()
 
-    new scribe.ServiceToClient(service, new TBinaryProtocol.Factory())
+    new Scribe$FinagleClient(service, new TBinaryProtocol.Factory())
   }
 }
 
@@ -119,7 +116,7 @@ object Reporter {
  * is very wrong!
  */
 sealed case class Reporter(
-  client: scribe.ServiceIface,
+  client: Scribe[Future],
   serviceName: String,
   statsReceiver: StatsReceiver = NullStatsReceiver,
   private val sourceAddress: Option[String] = Some(InetAddress.getLocalHost.getHostName),
@@ -159,7 +156,7 @@ sealed case class Reporter(
     sourceAddress foreach { sa => se = se withSource sa }
     clientAddress foreach { ca => se = se withClient ca }
 
-    new LogEntry(Reporter.scribeCategory, GZIPStringEncoder.encodeString(se.toJson))
+    LogEntry(Reporter.scribeCategory, GZIPStringEncoder.encodeString(se.toJson))
   }
 
   /**
@@ -169,11 +166,9 @@ sealed case class Reporter(
    * implications.
    */
   def handle(t: Throwable) = {
-    val messages = new ArrayList[LogEntry](1)
-    messages.add(createEntry(t))
-    client.Log(messages) onSuccess {
-      case ResultCode.OK => okCounter.incr()
-      case ResultCode.TRY_LATER => tryLaterCounter.incr()
+    client.log(createEntry(t) :: Nil) onSuccess {
+      case ResultCode.Ok => okCounter.incr()
+      case ResultCode.TryLater => tryLaterCounter.incr()
     } onFailure {
       case e => statsReceiver.counter("report_exception_" + e.toString).incr()
     }
