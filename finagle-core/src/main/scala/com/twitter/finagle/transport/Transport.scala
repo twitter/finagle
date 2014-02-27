@@ -2,7 +2,7 @@ package com.twitter.finagle.transport
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.NoStacktrace
-import com.twitter.util.{Closable, Future, Promise, Time}
+import com.twitter.util.{Closable, Future, Promise, Time, Throw}
 import java.net.SocketAddress
 
 // Mapped: ideally via a util-codec?
@@ -89,7 +89,7 @@ class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
   def isOpen = !closep.isDefined
   def close(deadline: Time) = {
     val ex = new IllegalStateException("close() is undefined on QueueTransport")
-    closep.setValue(ex)
+    closep.updateIfEmpty(Throw(ex))
     Future.exception(ex)
   }
 
