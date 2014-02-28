@@ -201,10 +201,10 @@ object Finagle extends Build {
     id = "finagle-zipkin",
     base = file("finagle-zipkin"),
     settings = Project.defaultSettings ++
+      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-zipkin",
-    sources in (Compile, doc) ~= (_ filter (_.getName endsWith ".java")),
     libraryDependencies ++= Seq(util("codec")) ++ scroogeLibs
   ).dependsOn(finagleCore, finagleThrift, finagleTest % "test")
 
@@ -212,10 +212,10 @@ object Finagle extends Build {
     id = "finagle-exception",
     base = file("finagle-exception"),
     settings = Project.defaultSettings ++
+      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-exception",
-    sources in (Compile, doc) ~= (_ filter (_.getName endsWith ".java")),
     libraryDependencies ++= Seq(
       util("codec"),
       "com.twitter" % "streamyj" % "0.4.1" % "test"
