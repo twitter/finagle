@@ -105,7 +105,7 @@ mysql binary protocol.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ClientDispatcher.html"><span class="name">ClientDispatcher</span></a><span class="result"> extends Service[Request, Result]</span>
+        <a href="ClientDispatcher.html"><span class="name">ClientDispatcher</span></a><span class="result"> extends GenSerialClientDispatcher[Request, Result, Packet, Packet]</span>
       </span>
       </h4>
       <p class="comment cmt">A ClientDispatcher that implements the mysql client/server protocol.</p>

@@ -25,7 +25,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ClientDispatcher</span><span class="result"> extends <a name="com.twitter.finagle.Service" class="extype" href="../../Service.html">Service</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a>]</span>
+        <span class="name">ClientDispatcher</span><span class="result"> extends <a name="com.twitter.finagle.dispatch.GenSerialClientDispatcher" class="extype" href="../../dispatch/GenSerialClientDispatcher.html">GenSerialClientDispatcher</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a>, <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="transport/Packet.html">Packet</a>, <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="transport/Packet.html">Packet</a>]</span>
       </span>
       </h4>
       
@@ -35,7 +35,7 @@ For a detailed exposition of the client/server protocol refer to:
 requests are dispatched serially and concurrent requests are queued.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.Service" class="extype" href="../../Service.html">Service</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a>], <span name="com.twitter.util.Closable" class="extype">Closable</span>, (<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.dispatch.GenSerialClientDispatcher" class="extype" href="../../dispatch/GenSerialClientDispatcher.html">GenSerialClientDispatcher</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a>, <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="transport/Packet.html">Packet</a>, <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="transport/Packet.html">Packet</a>], <a name="com.twitter.finagle.Service" class="extype" href="../../Service.html">Service</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a>], <span name="com.twitter.util.Closable" class="extype">Closable</span>, (<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -49,7 +49,7 @@ requests are dispatched serially and concurrent requests are queued.
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.exp.mysql.ClientDispatcher" class="in"><span>ClientDispatcher</span></li><li name="com.twitter.finagle.Service" class="in"><span>Service</span></li><li name="com.twitter.util.Closable" class="in"><span>Closable</span></li><li name="scala.Function1" class="in"><span>Function1</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.exp.mysql.ClientDispatcher" class="in"><span>ClientDispatcher</span></li><li name="com.twitter.finagle.dispatch.GenSerialClientDispatcher" class="in"><span>GenSerialClientDispatcher</span></li><li name="com.twitter.finagle.Service" class="in"><span>Service</span></li><li name="com.twitter.util.Closable" class="in"><span>Closable</span></li><li name="scala.Function1" class="in"><span>Function1</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -168,7 +168,7 @@ the connection phase given a HandshakeInit.
       </span>
       </h4>
       <p class="shortcomment cmt">This is the method to override/implement to create your own Service.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Service.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.ClientDispatcher" class="extype" href="">ClientDispatcher</a> → <a name="com.twitter.finagle.Service" class="extype" href="../../Service.html">Service</a> → Function1</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.ClientDispatcher" class="extype" href="">ClientDispatcher</a> → <a name="com.twitter.finagle.dispatch.GenSerialClientDispatcher" class="extype" href="../../dispatch/GenSerialClientDispatcher.html">GenSerialClientDispatcher</a> → <a name="com.twitter.finagle.Service" class="extype" href="../../Service.html">Service</a> → Function1</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -196,7 +196,7 @@ the connection phase given a HandshakeInit.
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ClientDispatcher#close" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher#close" data-isabs="false">
       <a id="close(Time):Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -207,7 +207,7 @@ the connection phase given a HandshakeInit.
         <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span name="com.twitter.util.Time" class="extype">Time</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.ClientDispatcher" class="extype" href="">ClientDispatcher</a> → <a name="com.twitter.finagle.Service" class="extype" href="../../Service.html">Service</a> → Closable</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.dispatch.GenSerialClientDispatcher" class="extype" href="../../dispatch/GenSerialClientDispatcher.html">GenSerialClientDispatcher</a> → <a name="com.twitter.finagle.Service" class="extype" href="../../Service.html">Service</a> → Closable</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
       <a id="close(Duration):Future[Unit]"></a>
       <h4 class="signature">
@@ -244,6 +244,24 @@ the connection phase given a HandshakeInit.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.exp.mysql.ClientDispatcher#dispatch" data-isabs="false">
+      <a id="dispatch(Request,Promise[Result]):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dispatch</span><span class="params">(<span name="req">req: <a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a></span>, <span name="rep">rep: <span name="com.twitter.util.Promise" class="extype">Promise</span>[<a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns a Future that represents the result of an exchange
+between the client and server.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a Future that represents the result of an exchange
+between the client and server. An exchange does not necessarily entail
+a single write and read operation. Thus, the result promise
+is decoupled from the promise that signals a complete exchange.
+This leaves room for implementing streaming results.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.ClientDispatcher" class="extype" href="">ClientDispatcher</a> → <a name="com.twitter.finagle.dispatch.GenSerialClientDispatcher" class="extype" href="../../dispatch/GenSerialClientDispatcher.html">GenSerialClientDispatcher</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -307,21 +325,21 @@ the connection phase given a HandshakeInit.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ClientDispatcher#isAvailable" data-isabs="false">
-      <a id="isAvailable():Boolean"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher#isAvailable" data-isabs="false">
+      <a id="isAvailable:Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isAvailable</span><span class="params">()</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">isAvailable</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Determines whether this service is available (can accept requests
 with a reasonable likelihood of success).</p><div class="fullcomment"><div class="comment cmt"><p>Determines whether this service is available (can accept requests
 with a reasonable likelihood of success).
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.ClientDispatcher" class="extype" href="">ClientDispatcher</a> → <a name="com.twitter.finagle.Service" class="extype" href="../../Service.html">Service</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.dispatch.GenSerialClientDispatcher" class="extype" href="../../dispatch/GenSerialClientDispatcher.html">GenSerialClientDispatcher</a> → <a name="com.twitter.finagle.Service" class="extype" href="../../Service.html">Service</a></dd></dl></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -478,7 +496,9 @@ undefined if apply() is called after resources are relinquished.
         </div>
 
         <div id="inheritedMembers">
-        <div name="com.twitter.finagle.Service" class="parent">
+        <div name="com.twitter.finagle.dispatch.GenSerialClientDispatcher" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.dispatch.GenSerialClientDispatcher" class="extype" href="../../dispatch/GenSerialClientDispatcher.html">GenSerialClientDispatcher</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a>, <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="transport/Packet.html">Packet</a>, <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="transport/Packet.html">Packet</a>]</h3>
+            </div><div name="com.twitter.finagle.Service" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.Service" class="extype" href="../../Service.html">Service</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a>]</h3>
             </div><div name="com.twitter.util.Closable" class="parent">
               <h3>Inherited from <span name="com.twitter.util.Closable" class="extype">Closable</span></h3>
