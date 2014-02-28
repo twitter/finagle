@@ -6,7 +6,7 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
-  val libVersion = "6.12.1"
+  val libVersion = "6.12.2"
   val zkVersion = "3.3.4"
   val utilVersion = "6.12.1"
   val ostrichVersion = "9.3.1"
@@ -23,7 +23,7 @@ object Finagle extends Build {
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
   )
   val scroogeLibs = thriftLibs ++ Seq(
-    "com.twitter" %% "scrooge-core" % "3.12.2")
+    "com.twitter" %% "scrooge-core" % "3.12.3")
 
   def util(which: String) =
     "com.twitter" %% ("util-"+which) % utilVersion excludeAll(
@@ -52,6 +52,7 @@ object Finagle extends Build {
       case "2.10" | "2.10.0" => Seq(Tests.Filter(_ => false))
       case _ => Seq()
     },
+    javaOptions in Test := Seq("-DSKIP_FLAKY=1"),
 
     ivyXML :=
       <dependencies>
@@ -241,12 +242,13 @@ object Finagle extends Build {
     fork in Test := true,
     libraryDependencies ++= Seq(
       "commons-codec" % "commons-codec" % "1.5",
-      "com.twitter.common.zookeeper" % "server-set" % "1.0.66",
-      util("zk-common")
+      util("zk-common"),
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.67"
     ) ++ jacksonLibs,
+    excludeFilter in unmanagedSources := "ZkTest.scala",
     ivyXML :=
       <dependencies>
-        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.66">
+        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.67">
           <exclude org="com.google.guava" name="guava"/>
           <exclude org="com.twitter" name="finagle-core"/>
           <exclude org="com.twitter" name="finagle-thrift"/>

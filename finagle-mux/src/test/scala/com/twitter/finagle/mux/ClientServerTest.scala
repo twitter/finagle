@@ -36,7 +36,7 @@ class MuxContext extends ContextHandler {
   def emit(): Option[Buf] = Some(MuxContext.buf)
 }
 
-class ClientServerTest(canDispatch: Boolean) 
+private[mux] class ClientServerTest(canDispatch: Boolean)
     extends FunSuite with OneInstancePerTest with MockitoSugar {
   def buf(b: Byte*) = ChannelBuffers.wrappedBuffer(Array[Byte](b:_*))
 
@@ -44,9 +44,9 @@ class ClientServerTest(canDispatch: Boolean)
   Trace.pushTracer(tracer)
   val clientToServer = new AsyncQueue[ChannelBuffer]
   val serverToClient = new AsyncQueue[ChannelBuffer]
-  val serverTransport = 
+  val serverTransport =
     new QueueTransport(writeq=serverToClient, readq=clientToServer)
-  val clientTransport = 
+  val clientTransport =
     new QueueTransport(writeq=clientToServer, readq=serverToClient)
   val service = mock[Service[ChannelBuffer, ChannelBuffer]]
   val client = new ClientDispatcher(clientTransport, NullStatsReceiver)
@@ -203,7 +203,7 @@ class ClientServerTestNoDispatch extends ClientServerTest(false)
 
 @RunWith(classOf[JUnitRunner])
 class ClientServerTestDispatch extends ClientServerTest(true) {
-  // Note: We test trace propagation here, too, 
+  // Note: We test trace propagation here, too,
   // since it's a default request context.
 
   test("Transmits request contexts") {

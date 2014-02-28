@@ -69,24 +69,27 @@ class EndToEndSpec extends SpecificationWithJUnit {
           }
         }
 
-        "writes from the server are queued before the client responds" in {
-          val clientRes = Await.result(client(httpRequest), 1.second)
-          messages !! ChannelBuffers.wrappedBuffer("1".getBytes)
-          messages !! ChannelBuffers.wrappedBuffer("2".getBytes)
-          messages !! ChannelBuffers.wrappedBuffer("3".getBytes)
+        // Flaky test. See https://jira.twitter.biz/browse/DPB-1358
+        if (!sys.props.contains("SKIP_FLAKY")) {
+          "writes from the server are queued before the client responds" in {
+            val clientRes = Await.result(client(httpRequest), 1.second)
+            messages !! ChannelBuffers.wrappedBuffer("1".getBytes)
+            messages !! ChannelBuffers.wrappedBuffer("2".getBytes)
+            messages !! ChannelBuffers.wrappedBuffer("3".getBytes)
 
-          val latch = new CountDownLatch(3)
-          var result = ""
-          clientRes.messages foreach { channelBuffer =>
-            Future {
-              result += channelBuffer.toString(Charset.defaultCharset)
-              latch.countDown()
+            val latch = new CountDownLatch(3)
+            var result = ""
+            clientRes.messages foreach { channelBuffer =>
+              Future {
+                result += channelBuffer.toString(Charset.defaultCharset)
+                latch.countDown()
+              }
             }
-          }
 
-          latch.within(1.second)
-          error !! EOF
-          result mustEqual "123"
+            latch.within(1.second)
+            error !! EOF
+            result mustEqual "123"
+          }
         }
 
         "the client does not admit concurrent requests" in {
