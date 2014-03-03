@@ -1,5 +1,6 @@
 package com.twitter.finagle.tracing
 
+import com.twitter.finagle.util.ByteArrays
 import com.twitter.util.RichU64String
 
 /**
@@ -54,10 +55,34 @@ object TraceId {
   /**
    * Creates a TraceId with no flags set. See case class for more info.
    */
-  def apply(traceId: Option[SpanId],
-            parentId: Option[SpanId],
-            spanId: SpanId,
-            sampled: Option[Boolean]): TraceId = TraceId(traceId, parentId, spanId, sampled, Flags())
+  def apply(
+    traceId: Option[SpanId],
+    parentId: Option[SpanId],
+    spanId: SpanId,
+    sampled: Option[Boolean]
+  ): TraceId =
+    TraceId(traceId, parentId, spanId, sampled, Flags())
+
+  /**
+   * Serialize a TraceId into an array of bytes.
+   */
+  private[finagle] def serialize(traceId: TraceId): Array[Byte] = {
+    val flags = traceId._sampled match {
+      case None =>
+        traceId.flags
+      case Some(true) =>
+        traceId.flags.setFlag(Flags.SamplingKnown | Flags.Sampled)
+      case Some(false) =>
+        traceId.flags.setFlag(Flags.SamplingKnown)
+    }
+
+    val bytes = new Array[Byte](32)
+    ByteArrays.put64be(bytes, 0, traceId.spanId.toLong)
+    ByteArrays.put64be(bytes, 8, traceId.parentId.toLong)
+    ByteArrays.put64be(bytes, 16, traceId.traceId.toLong)
+    ByteArrays.put64be(bytes, 24, flags.toLong)
+    bytes
+  }
 }
 
 /**
@@ -89,7 +114,7 @@ final case class TraceId(
       (this.spanId equals other.spanId)
     case _ => false
   }
-  
+
   override def toString =
     "%s.%s<:%s".format(traceId, spanId, parentId)
 }

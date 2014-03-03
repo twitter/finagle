@@ -4,10 +4,10 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.{DefaultClient, Bridge}
 import com.twitter.finagle.dispatch.{PipeliningDispatcher, SerialClientDispatcher}
 import com.twitter.finagle.server.DefaultServer
-import com.twitter.finagle.thrift.{Protocols, ThriftFramedTransporter, ThriftClientRequest}
+import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftFramedTransporter, ThriftClientRequest}
 import com.twitter.finagle.thriftmux.thriftscala.TestService
-import com.twitter.finagle.tracing.Annotation.{ServerRecv, ClientSend}
 import com.twitter.finagle.tracing._
+import com.twitter.finagle.tracing.Annotation.{ServerRecv, ClientSend}
 import com.twitter.util.{Promise, Await, Future}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.runner.RunWith
@@ -89,6 +89,54 @@ class EndToEndTest extends FunSuite {
     (srvTraceId, cltTraceId) match {
       case (Some(id1), Some(id2)) => assert(id1 === id2)
       case _ => assert(false, "the trace ids sent by client and received by server do not match")
+    }
+  }
+
+  test("thriftmux server + Finagle thrift client: clientId should be passed from client to server") {
+    val server = ThriftMux.serveIface(":*", new TestService.FutureIface {
+      def query(x: String) = Future.value(ClientId.current map { _.name } getOrElse(""))
+    })
+
+    val clientId = "test.service"
+    val client = Thrift
+      .withClientId(ClientId(clientId))
+      .newIface[TestService.FutureIface](server)
+
+    1 to 5 foreach { _ =>
+      assert(Await.result(client.query("ok")) == clientId)
+    }
+  }
+
+  test("thriftmux server + Finagle thrift client: should not override externally-set ClientIds") {
+    val server = ThriftMux.serveIface(":*", new TestService.FutureIface {
+      def query(x: String) = Future.value(ClientId.current map { _.name } getOrElse(""))
+    })
+
+    val clientId = "test.service"
+    val otherClientId = ClientId("other.bar")
+    val client = Thrift
+      .withClientId(ClientId(clientId))
+      .newIface[TestService.FutureIface](server)
+
+    1 to 5 foreach { _ =>
+      otherClientId.asCurrent {
+        assert(Await.result(client.query("ok")) == clientId)
+      }
+    }
+  }
+
+  test("thriftmux server + thriftmux client: should not override externally-set ClientIds") {
+    val server = ThriftMux.serveIface(":*", new TestService.FutureIface {
+      def query(x: String) = Future.value(ClientId.current map { _.name } getOrElse(""))
+    })
+
+    val clientId = ClientId("test.service")
+    val client = ThriftMux.newIface[TestService.FutureIface](server)
+
+    1 to 5 foreach { _ =>
+      clientId.asCurrent {
+        assert(Await.result(client.query("ok")) == clientId.name)
+      }
     }
   }
 
