@@ -1,9 +1,10 @@
 package com.twitter.finagle.zipkin.thrift
 
-import java.nio.ByteBuffer
-import java.net.{InetAddress, InetSocketAddress, SocketAddress}
-import java.util.logging.Logger
+import com.twitter.finagle.core.util.InetAddressUtil
 import com.twitter.finagle.thrift.thrift
+import java.net.{InetAddress, InetSocketAddress, SocketAddress}
+import java.nio.ByteBuffer
+import java.util.logging.Logger
 
 /**
  * Endpoints describe a TCP endpoint that terminates RPC
@@ -35,7 +36,7 @@ object Endpoint {
 
   val Local = {
     try {
-      val ipv4 = Endpoint.toIpv4(InetAddress.getLocalHost)
+      val ipv4 = Endpoint.toIpv4(InetAddressUtil.Loopback)
       Endpoint(ipv4,0)
     } catch {
       case _ => Endpoint.Unknown
