@@ -1,4 +1,5 @@
 language: scala
 scala:
   - 2.9.2
-script: "TRAVIS_CI=1 SKIP_FLAKY=1 ./sbt +test"
+  - 2.10.3
+script: "./sbt ++$TRAVIS_SCALA_VERSION test"
