@@ -70,7 +70,7 @@ is very wrong!
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Reporter</span><span class="params">(<span name="client">client: <a name="com.twitter.finagle.exception.thrift.Scribe" class="extype" href="thrift/Scribe.html">Scribe</a>[<span name="com.twitter.util.Future" class="extype">Future</span>]</span>, <span name="serviceName">serviceName: String</span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a> = <span name="com.twitter.finagle.stats.NullStatsReceiver" class="defval">...</span></span>, <span name="sourceAddress">sourceAddress: <span name="scala.Option" class="extype">Option</span>[String] = <span name="new Some[java.lang.String](java.net.InetAddress.getLocalHost().getHostName())" class="defval">...</span></span>, <span name="clientAddress">clientAddress: <span name="scala.Option" class="extype">Option</span>[String] = <span class="symbol">scala.None</span></span>)</span>
+        <span class="name">Reporter</span><span class="params">(<span name="client">client: <a name="com.twitter.finagle.exception.thrift.Scribe" class="extype" href="thrift/Scribe.html">Scribe</a>[<span name="com.twitter.util.Future" class="extype">Future</span>]</span>, <span name="serviceName">serviceName: String</span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a> = <span name="com.twitter.finagle.stats.NullStatsReceiver" class="defval">...</span></span>, <span name="sourceAddress">sourceAddress: <span name="scala.Option" class="extype">Option</span>[String] = <span name="new Some[java.lang.String](com.twitter.finagle.core.util.InetAddressUtil.Loopback.getHostName())" class="defval">...</span></span>, <span name="clientAddress">clientAddress: <span name="scala.Option" class="extype">Option</span>[String] = <span class="symbol">scala.None</span></span>)</span>
       </span>
       </h4>
       
@@ -530,7 +530,7 @@ implications.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withClient</span><span class="params">(<span name="address">address: <span name="java.net.InetAddress" class="extype">InetAddress</span> = <span class="symbol"><span class="name"><a href="../../../../java/package.html">InetAddress.getLocalHost</a></span></span></span>)</span><span class="result">: <a name="com.twitter.finagle.exception.Reporter" class="extype" href="">Reporter</a></span>
+        <span class="name">withClient</span><span class="params">(<span name="address">address: <span name="java.net.InetAddress" class="extype">InetAddress</span> = <span class="symbol"><span class="name"><a href="../../../package.html">InetAddressUtil.Loopback</a></span></span></span>)</span><span class="result">: <a name="com.twitter.finagle.exception.Reporter" class="extype" href="">Reporter</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Add a modifier to append a client address (i.</p><div class="fullcomment"><div class="comment cmt"><p>Add a modifier to append a client address (i.e. endpoint) to a generated ServiceException.</p><p>The endpoint string is the ip address of the host (e.g. &quot;127.0.0.1&quot;).

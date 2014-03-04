@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.stats.OstrichExporter</title>
+          <title>com.twitter.finagle.stats.ostrichFilterRegex</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
@@ -12,26 +12,26 @@
       <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
       <div id="definition">
-        <img src="../../../../lib/class_big.png" />
+        <img src="../../../../lib/object_big.png" />
         <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.stats" class="extype" href="package.html">stats</a></p>
-        <h1>OstrichExporter</h1>
+        <h1>ostrichFilterRegex</h1>
       </div>
 
       <h4 class="signature" id="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">OstrichExporter</span><span class="result"> extends <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>] with <a name="com.twitter.finagle.http.HttpMuxHandler" class="extype" href="../http/HttpMuxHandler.html">HttpMuxHandler</a></span>
+        <span class="name">ostrichFilterRegex</span><span class="result"> extends <span name="com.twitter.app.GlobalFlag" class="extype">GlobalFlag</span>[<span name="scala.collection.Seq" class="extype">Seq</span>[String]]</span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.http.HttpMuxHandler" class="extype" href="../http/HttpMuxHandler.html">HttpMuxHandler</a>, <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>], <span name="com.twitter.util.Closable" class="extype">Closable</span>, (<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="com.twitter.app.GlobalFlag" class="extype">GlobalFlag</span>[<span name="scala.collection.Seq" class="extype">Seq</span>[String]], <span name="com.twitter.app.Flag" class="extype">Flag</span>[<span name="scala.collection.Seq" class="extype">Seq</span>[String]], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.stats.OstrichExporter" class="in"><span>OstrichExporter</span></li><li name="com.twitter.finagle.http.HttpMuxHandler" class="in"><span>HttpMuxHandler</span></li><li name="com.twitter.finagle.Service" class="in"><span>Service</span></li><li name="com.twitter.util.Closable" class="in"><span>Closable</span></li><li name="scala.Function1" class="in"><span>Function1</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.stats.ostrichFilterRegex" class="in"><span>ostrichFilterRegex</span></li><li name="com.twitter.app.GlobalFlag" class="in"><span>GlobalFlag</span></li><li name="com.twitter.app.Flag" class="in"><span>Flag</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -55,22 +55,7 @@
 
       <div id="template">
         <div id="allMembers">
-        <div class="members" id="constructors">
-              <h3>Instance Constructors</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.stats.OstrichExporter#this" data-isabs="false">
-      <a id="this:OstrichExporter"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">OstrichExporter</span><span class="params">()</span>
-      </span>
-      </h4>
-      
-    </li></ol>
-            </div>
+        
 
         
 
@@ -138,31 +123,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.Function1#andThen" data-isabs="false">
-      <a id="andThen[A]((Future[HttpResponse]) ⇒ A):(HttpRequest) ⇒ A"></a>
+    </li><li visbl="pub" name="com.twitter.app.Flag#apply" data-isabs="false">
+      <a id="apply():Seq[String]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span name="com.twitter.util.Future" class="extype">Future</span>[<span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]) ⇒ A</span>)</span><span class="result">: (<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>) ⇒ A</span>
+        <span class="name">apply</span><span class="params">()</span><span class="result">: <span name="scala.collection.Seq" class="extype">Seq</span>[String]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.stats.OstrichExporter#apply" data-isabs="false">
-      <a id="apply(HttpRequest):Future[HttpResponse]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="request">request: <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">This is the method to override/implement to create your own Service.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Service.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stats.OstrichExporter" class="extype" href="">OstrichExporter</a> → <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a> → Function1</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -190,54 +162,18 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Service#close" data-isabs="false">
-      <a id="close(Time):Future[Unit]"></a>
+    </li><li visbl="pub" name="com.twitter.app.Flag#defaultString" data-isabs="false">
+      <a id="defaultString:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span name="com.twitter.util.Time" class="extype">Time</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+        <span class="name">defaultString</span><span class="result">: String</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a> → Closable</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
-      <a id="close(Duration):Future[Unit]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="after">after: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
-      <a id="close():Future[Unit]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">close</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
-    </li><li visbl="pub" name="scala.Function1#compose" data-isabs="false">
-      <a id="compose[A]((A) ⇒ HttpRequest):(A) ⇒ Future[HttpResponse]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (A) ⇒ <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span></span>)</span><span class="result">: (A) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -277,6 +213,30 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.app.Flag#flaggable" data-isabs="false">
+      <a id="flaggable:Flaggable[Seq[String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">flaggable</span><span class="result">: <span name="com.twitter.app.Flaggable" class="extype">Flaggable</span>[<span name="scala.collection.Seq" class="extype">Seq</span>[String]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#get" data-isabs="false">
+      <a id="get:Option[Seq[String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[<span name="scala.collection.Seq" class="extype">Seq</span>[String]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
       <a id="getClass():java.lang.Class[_]"></a>
       <h4 class="signature">
@@ -289,6 +249,30 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.GlobalFlag#getGlobalFlag" data-isabs="false">
+      <a id="getGlobalFlag:com.twitter.app.Flag[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getGlobalFlag</span><span class="result">: com.twitter.app.Flag[_]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>GlobalFlag</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.app.GlobalFlag#getValue" data-isabs="false">
+      <a id="getValue:Option[Seq[String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getValue</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[<span name="scala.collection.Seq" class="extype">Seq</span>[String]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>GlobalFlag → Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
@@ -301,21 +285,30 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Service#isAvailable" data-isabs="false">
-      <a id="isAvailable:Boolean"></a>
+    </li><li visbl="pub" name="com.twitter.app.Flag#help" data-isabs="false">
+      <a id="help:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">help</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#isDefined" data-isabs="false">
+      <a id="isDefined:Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isAvailable</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">isDefined</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Determines whether this service is available (can accept requests
-with a reasonable likelihood of success).</p><div class="fullcomment"><div class="comment cmt"><p>Determines whether this service is available (can accept requests
-with a reasonable likelihood of success).
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -328,30 +321,18 @@ with a reasonable likelihood of success).
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.stats.OstrichExporter#json" data-isabs="false">
-      <a id="json(Option[String],Option[String],Boolean):String"></a>
+    </li><li visbl="pub" name="com.twitter.app.GlobalFlag#name" data-isabs="false">
+      <a id="name:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">json</span><span class="params">(<span name="period">period: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="namespace">namespace: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="filtered">filtered: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: String</span>
+        <span class="name">name</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.Service#map" data-isabs="false">
-      <a id="map[Req1]((Req1) ⇒ HttpRequest):Service[Req1, HttpResponse]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">map</span><span class="tparams">[<span name="Req1">Req1</span>]</span><span class="params">(<span name="f">f: (Req1) ⇒ <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span></span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req1, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>GlobalFlag → Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -364,6 +345,18 @@ with a reasonable likelihood of success).
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#noArgumentOk" data-isabs="false">
+      <a id="noArgumentOk:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">noArgumentOk</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
       <a id="notify():Unit"></a>
       <h4 class="signature">
@@ -388,30 +381,42 @@ with a reasonable likelihood of success).
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.stats.OstrichExporter#pattern" data-isabs="false">
-      <a id="pattern:String"></a>
+    </li><li visbl="pub" name="com.twitter.app.Flag#parse" data-isabs="false">
+      <a id="parse():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">pattern</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+        <span class="name">parse</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">The pattern on to bind this handler to</p><div class="fullcomment"><div class="comment cmt"><p>The pattern on to bind this handler to</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stats.OstrichExporter" class="extype" href="">OstrichExporter</a> → <a name="com.twitter.finagle.http.HttpMuxHandler" class="extype" href="../http/HttpMuxHandler.html">HttpMuxHandler</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.stats.OstrichExporter#regexes" data-isabs="false">
-      <a id="regexes:List[Regex]"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#parse" data-isabs="false">
+      <a id="parse(String):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">regexes</span><span class="result">: <span name="scala.collection.immutable.List" class="extype">List</span>[<span name="scala.util.matching.Regex" class="extype">Regex</span>]</span>
+        <span class="name">parse</span><span class="params">(<span name="raw">raw: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#reset" data-isabs="false">
+      <a id="reset():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">reset</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -424,7 +429,7 @@ with a reasonable likelihood of success).
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.Function1#toString" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.app.Flag#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -435,7 +440,19 @@ with a reasonable likelihood of success).
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1 → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag → AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#usageString" data-isabs="false">
+      <a id="usageString:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">usageString</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -484,38 +501,14 @@ with a reasonable likelihood of success).
     </li></ol>
             </div>
 
-        <div class="values members" id="values">
-              <h3>Deprecated Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.Service#release" data-isabs="false">
-      <a id="release():Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use close() instead">release</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Relinquishes the use of this service instance.</p><div class="fullcomment"><div class="comment cmt"><p>Relinquishes the use of this service instance. Behavior is
-undefined if apply() is called after resources are relinquished.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a></dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use close() instead</p></dd></dl></div>
-    </li></ol>
-            </div>
+        
         </div>
 
         <div id="inheritedMembers">
-        <div name="com.twitter.finagle.http.HttpMuxHandler" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.http.HttpMuxHandler" class="extype" href="../http/HttpMuxHandler.html">HttpMuxHandler</a></h3>
-            </div><div name="com.twitter.finagle.Service" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</h3>
-            </div><div name="com.twitter.util.Closable" class="parent">
-              <h3>Inherited from <span name="com.twitter.util.Closable" class="extype">Closable</span></h3>
-            </div><div name="scala.Function1" class="parent">
-              <h3>Inherited from (<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</h3>
+        <div name="com.twitter.app.GlobalFlag" class="parent">
+              <h3>Inherited from <span name="com.twitter.app.GlobalFlag" class="extype">GlobalFlag</span>[<span name="scala.collection.Seq" class="extype">Seq</span>[String]]</h3>
+            </div><div name="com.twitter.app.Flag" class="parent">
+              <h3>Inherited from <span name="com.twitter.app.Flag" class="extype">Flag</span>[<span name="scala.collection.Seq" class="extype">Seq</span>[String]]</h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

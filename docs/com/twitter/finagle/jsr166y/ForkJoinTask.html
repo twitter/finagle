@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.stats.OstrichExporter</title>
+          <title>com.twitter.finagle.jsr166y.ForkJoinTask</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
@@ -14,24 +14,27 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
-        <img src="../../../../lib/class_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.stats" class="extype" href="package.html">stats</a></p>
-        <h1>OstrichExporter</h1>
+        <a title="Go to companion" href="ForkJoinTask$.html"><img src="../../../../lib/class_to_object_big.png" /></a>
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.jsr166y" class="extype" href="package.html">jsr166y</a></p>
+        <h1><a title="Go to companion" href="ForkJoinTask$.html">ForkJoinTask</a></h1>
       </div>
 
       <h4 class="signature" id="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">OstrichExporter</span><span class="result"> extends <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>] with <a name="com.twitter.finagle.http.HttpMuxHandler" class="extype" href="../http/HttpMuxHandler.html">HttpMuxHandler</a></span>
+        <span class="name">ForkJoinTask</span><span class="tparams">[<span name="V">V</span>]</span><span class="result"> extends <span name="java.util.concurrent.Future" class="extype">Future</span>[V] with <span name="java.io.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.http.HttpMuxHandler" class="extype" href="../http/HttpMuxHandler.html">HttpMuxHandler</a>, <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>], <span name="com.twitter.util.Closable" class="extype">Closable</span>, (<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="java.io.Serializable" class="extype">Serializable</span>, <span name="java.util.concurrent.Future" class="extype">Future</span>[V], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+        </div><div class="toggleContainer block">
+          <span class="toggle">Known Subclasses</span>
+          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.jsr166y.CountedCompleter" class="extype" href="CountedCompleter.html">CountedCompleter</a></div>
         </div></div>
     
 
@@ -45,7 +48,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.stats.OstrichExporter" class="in"><span>OstrichExporter</span></li><li name="com.twitter.finagle.http.HttpMuxHandler" class="in"><span>HttpMuxHandler</span></li><li name="com.twitter.finagle.Service" class="in"><span>Service</span></li><li name="com.twitter.util.Closable" class="in"><span>Closable</span></li><li name="scala.Function1" class="in"><span>Function1</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.jsr166y.ForkJoinTask" class="in"><span>ForkJoinTask</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="java.util.concurrent.Future" class="in"><span>Future</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -57,15 +60,15 @@
         <div id="allMembers">
         <div class="members" id="constructors">
               <h3>Instance Constructors</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.stats.OstrichExporter#this" data-isabs="false">
-      <a id="this:OstrichExporter"></a>
+              <ol><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#this" data-isabs="false">
+      <a id="this:ForkJoinTask[V]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">OstrichExporter</span><span class="params">()</span>
+        <span class="name">ForkJoinTask</span><span class="params">()</span>
       </span>
       </h4>
       
@@ -74,10 +77,49 @@
 
         
 
-        
+        <div class="values members" id="values">
+              <h3>Abstract Value Members</h3>
+              <ol><li visbl="prt" name="com.twitter.finagle.jsr166y.ForkJoinTask#exec" data-isabs="true">
+      <a id="exec():Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">exec</span><span class="params">()</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="com.twitter.finagle.jsr166y" class="extype" href="package.html">jsr166y</a>] </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#getRawResult" data-isabs="true">
+      <a id="getRawResult():V"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getRawResult</span><span class="params">()</span><span class="result">: V</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="prt" name="com.twitter.finagle.jsr166y.ForkJoinTask#setRawResult" data-isabs="true">
+      <a id="setRawResult(V):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setRawResult</span><span class="params">(<span name="value">value: V</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="com.twitter.finagle.jsr166y" class="extype" href="package.html">jsr166y</a>] </dd></dl></div>
+    </li></ol>
+            </div>
 
         <div class="values members" id="values">
-              <h3>Value Members</h3>
+              <h3>Concrete Value Members</h3>
               <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
       <a id="!=(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -138,31 +180,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.Function1#andThen" data-isabs="false">
-      <a id="andThen[A]((Future[HttpResponse]) ⇒ A):(HttpRequest) ⇒ A"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span name="com.twitter.util.Future" class="extype">Future</span>[<span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]) ⇒ A</span>)</span><span class="result">: (<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>) ⇒ A</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.stats.OstrichExporter#apply" data-isabs="false">
-      <a id="apply(HttpRequest):Future[HttpResponse]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="request">request: <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">This is the method to override/implement to create your own Service.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Service.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stats.OstrichExporter" class="extype" href="">OstrichExporter</a> → <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a> → Function1</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -175,6 +192,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#cancel" data-isabs="false">
+      <a id="cancel(Boolean):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cancel</span><span class="params">(<span name="mayInterruptIfRunning">mayInterruptIfRunning: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.jsr166y.ForkJoinTask" class="extype" href="">ForkJoinTask</a> → Future</dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
@@ -190,54 +219,42 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Service#close" data-isabs="false">
-      <a id="close(Time):Future[Unit]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span name="com.twitter.util.Time" class="extype">Time</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a> → Closable</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
-      <a id="close(Duration):Future[Unit]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="after">after: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
-      <a id="close():Future[Unit]"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#compareAndSetForkJoinTaskTag" data-isabs="false">
+      <a id="compareAndSetForkJoinTaskTag(Short,Short):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+        <span class="name">compareAndSetForkJoinTaskTag</span><span class="params">(<span name="e">e: <span name="scala.Short" class="extype">Short</span></span>, <span name="tag">tag: <span name="scala.Short" class="extype">Short</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
-    </li><li visbl="pub" name="scala.Function1#compose" data-isabs="false">
-      <a id="compose[A]((A) ⇒ HttpRequest):(A) ⇒ Future[HttpResponse]"></a>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#complete" data-isabs="false">
+      <a id="complete(V):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (A) ⇒ <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span></span>)</span><span class="result">: (A) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>
+        <span class="name">complete</span><span class="params">(<span name="value">value: V</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd></dl></div>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#completeExceptionally" data-isabs="false">
+      <a id="completeExceptionally(Throwable):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">completeExceptionally</span><span class="params">(<span name="ex">ex: <span name="java.lang.Throwable" class="extype">Throwable</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -277,6 +294,42 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#fork" data-isabs="false">
+      <a id="fork():ForkJoinTask[V]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fork</span><span class="params">()</span><span class="result">: <a name="com.twitter.finagle.jsr166y.ForkJoinTask" class="extype" href="">ForkJoinTask</a>[V]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#get" data-isabs="false">
+      <a id="get(Long,TimeUnit):V"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get</span><span class="params">(<span name="timeout">timeout: <span name="scala.Long" class="extype">Long</span></span>, <span name="unit">unit: <span name="java.util.concurrent.TimeUnit" class="extype">TimeUnit</span></span>)</span><span class="result">: V</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.jsr166y.ForkJoinTask" class="extype" href="">ForkJoinTask</a> → Future</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#get" data-isabs="false">
+      <a id="get():V"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get</span><span class="params">()</span><span class="result">: V</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.jsr166y.ForkJoinTask" class="extype" href="">ForkJoinTask</a> → Future</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
       <a id="getClass():java.lang.Class[_]"></a>
       <h4 class="signature">
@@ -289,6 +342,30 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#getException" data-isabs="false">
+      <a id="getException():Throwable"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getException</span><span class="params">()</span><span class="result">: <span name="java.lang.Throwable" class="extype">Throwable</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#getForkJoinTaskTag" data-isabs="false">
+      <a id="getForkJoinTaskTag():Short"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getForkJoinTaskTag</span><span class="params">()</span><span class="result">: <span name="scala.Short" class="extype">Short</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
@@ -301,21 +378,66 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Service#isAvailable" data-isabs="false">
-      <a id="isAvailable:Boolean"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#invoke" data-isabs="false">
+      <a id="invoke():V"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isAvailable</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">invoke</span><span class="params">()</span><span class="result">: V</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Determines whether this service is available (can accept requests
-with a reasonable likelihood of success).</p><div class="fullcomment"><div class="comment cmt"><p>Determines whether this service is available (can accept requests
-with a reasonable likelihood of success).
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a></dd></dl></div>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#isCancelled" data-isabs="false">
+      <a id="isCancelled():Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isCancelled</span><span class="params">()</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.jsr166y.ForkJoinTask" class="extype" href="">ForkJoinTask</a> → Future</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#isCompletedAbnormally" data-isabs="false">
+      <a id="isCompletedAbnormally():Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isCompletedAbnormally</span><span class="params">()</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#isCompletedNormally" data-isabs="false">
+      <a id="isCompletedNormally():Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isCompletedNormally</span><span class="params">()</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#isDone" data-isabs="false">
+      <a id="isDone():Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isDone</span><span class="params">()</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.jsr166y.ForkJoinTask" class="extype" href="">ForkJoinTask</a> → Future</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -328,30 +450,18 @@ with a reasonable likelihood of success).
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.stats.OstrichExporter#json" data-isabs="false">
-      <a id="json(Option[String],Option[String],Boolean):String"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#join" data-isabs="false">
+      <a id="join():V"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">json</span><span class="params">(<span name="period">period: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="namespace">namespace: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="filtered">filtered: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: String</span>
+        <span class="name">join</span><span class="params">()</span><span class="result">: V</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.Service#map" data-isabs="false">
-      <a id="map[Req1]((Req1) ⇒ HttpRequest):Service[Req1, HttpResponse]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">map</span><span class="tparams">[<span name="Req1">Req1</span>]</span><span class="params">(<span name="f">f: (Req1) ⇒ <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span></span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req1, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -388,27 +498,63 @@ with a reasonable likelihood of success).
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.stats.OstrichExporter#pattern" data-isabs="false">
-      <a id="pattern:String"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#quietlyComplete" data-isabs="false">
+      <a id="quietlyComplete():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">pattern</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+        <span class="name">quietlyComplete</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">The pattern on to bind this handler to</p><div class="fullcomment"><div class="comment cmt"><p>The pattern on to bind this handler to</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stats.OstrichExporter" class="extype" href="">OstrichExporter</a> → <a name="com.twitter.finagle.http.HttpMuxHandler" class="extype" href="../http/HttpMuxHandler.html">HttpMuxHandler</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.stats.OstrichExporter#regexes" data-isabs="false">
-      <a id="regexes:List[Regex]"></a>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#quietlyInvoke" data-isabs="false">
+      <a id="quietlyInvoke():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">quietlyInvoke</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#quietlyJoin" data-isabs="false">
+      <a id="quietlyJoin():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">quietlyJoin</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#reinitialize" data-isabs="false">
+      <a id="reinitialize():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">regexes</span><span class="result">: <span name="scala.collection.immutable.List" class="extype">List</span>[<span name="scala.util.matching.Regex" class="extype">Regex</span>]</span>
+        <span class="name">reinitialize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#setForkJoinTaskTag" data-isabs="false">
+      <a id="setForkJoinTaskTag(Short):Short"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setForkJoinTaskTag</span><span class="params">(<span name="tag">tag: <span name="scala.Short" class="extype">Short</span></span>)</span><span class="result">: <span name="scala.Short" class="extype">Short</span></span>
       </span>
       </h4>
       
@@ -424,7 +570,7 @@ with a reasonable likelihood of success).
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.Function1#toString" data-isabs="false">
+    </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -435,7 +581,19 @@ with a reasonable likelihood of success).
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1 → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask#tryUnfork" data-isabs="false">
+      <a id="tryUnfork():Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tryUnfork</span><span class="params">()</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -484,38 +642,14 @@ with a reasonable likelihood of success).
     </li></ol>
             </div>
 
-        <div class="values members" id="values">
-              <h3>Deprecated Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.Service#release" data-isabs="false">
-      <a id="release():Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use close() instead">release</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Relinquishes the use of this service instance.</p><div class="fullcomment"><div class="comment cmt"><p>Relinquishes the use of this service instance. Behavior is
-undefined if apply() is called after resources are relinquished.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a></dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use close() instead</p></dd></dl></div>
-    </li></ol>
-            </div>
+        
         </div>
 
         <div id="inheritedMembers">
-        <div name="com.twitter.finagle.http.HttpMuxHandler" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.http.HttpMuxHandler" class="extype" href="../http/HttpMuxHandler.html">HttpMuxHandler</a></h3>
-            </div><div name="com.twitter.finagle.Service" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</h3>
-            </div><div name="com.twitter.util.Closable" class="parent">
-              <h3>Inherited from <span name="com.twitter.util.Closable" class="extype">Closable</span></h3>
-            </div><div name="scala.Function1" class="parent">
-              <h3>Inherited from (<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</h3>
+        <div name="java.io.Serializable" class="parent">
+              <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
+            </div><div name="java.util.concurrent.Future" class="parent">
+              <h3>Inherited from <span name="java.util.concurrent.Future" class="extype">Future</span>[V]</h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">
