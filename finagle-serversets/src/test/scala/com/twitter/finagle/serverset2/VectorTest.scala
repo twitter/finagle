@@ -1,5 +1,6 @@
 package com.twitter.finagle.serverset2
 
+import com.twitter.util.RandomSocket
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
@@ -7,15 +8,16 @@ import java.net.InetSocketAddress
 
 @RunWith(classOf[JUnitRunner])
 class VectorTest extends FunSuite {
+  val port = RandomSocket.nextPort()
   test("Selector.matches") {
     val ep1 = Endpoint(
-      None, new InetSocketAddress("10.0.0.1", 1234),
+      None, new InetSocketAddress("10.0.0.1", port),
       None, Endpoint.Status.Alive, "1234")
     val ep2 = Endpoint(
-      None, new InetSocketAddress("1.0.0.2", 1234),
+      None, new InetSocketAddress("1.0.0.2", port),
       Some(3), Endpoint.Status.Alive, "12345")
 
-    val host = Selector.Host(new InetSocketAddress("10.0.01", 1234))
+    val host = Selector.Host(new InetSocketAddress("10.0.01", port))
     assert(host matches ep1)
     assert(!(host matches ep2))
 
@@ -53,9 +55,9 @@ class VectorTest extends FunSuite {
   }
 
   test("Vector.parseJson") {
-    val Some(Vector(vec)) = Vector.parseJson("""{"vector":[{"select":"member=1","weight":1.2,"priority":1},{"select":"inet=10.0.0.3:1234","weight":1.3,"priority":2}]}""")
+    val Some(Vector(vec)) = Vector.parseJson("""{"vector":[{"select":"member=1","weight":1.2,"priority":1},{"select":"inet=10.0.0.3:%d","weight":1.3,"priority":2}]}""".format(port))
     assert(vec === Seq(
       Descriptor(Selector.Member("1"), 1.2, 1),
-      Descriptor(Selector.Host(new InetSocketAddress("10.0.0.3", 1234)), 1.3, 2)))
+      Descriptor(Selector.Host(new InetSocketAddress("10.0.0.3", port)), 1.3, 2)))
   }
 }

@@ -6,7 +6,7 @@ import com.twitter.common.zookeeper.ServerSet
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.Cluster
 import com.twitter.thrift.{Endpoint, ServiceInstance, Status}
-import com.twitter.util.Await
+import com.twitter.util.{Await, RandomSocket}
 import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -19,6 +19,9 @@ import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class ZookeeperServerSetClusterSpec extends FunSuite with MockitoSugar {
+  val port1 = RandomSocket.nextPort()
+  val port2 = RandomSocket.nextPort()
+
   type EndpointMap = Map[String, InetSocketAddress]
   val EmptyEndpointMap = Map.empty[String, InetSocketAddress]
 
@@ -63,7 +66,7 @@ class ZookeeperServerSetClusterSpec extends FunSuite with MockitoSugar {
     val cluster = new ZookeeperServerSetCluster(serverSet)
     cluster.thread.join()
 
-    val localAddress = new InetSocketAddress(8080)
+    val localAddress = new InetSocketAddress(port1)
     cluster.join(localAddress)
 
     verify(serverSet).join(localAddress, EmptyEndpointMap.asJava, Status.ALIVE)
@@ -78,8 +81,8 @@ class ZookeeperServerSetClusterSpec extends FunSuite with MockitoSugar {
     val cluster = new ZookeeperServerSetCluster(serverSet)
     cluster.thread.join()
 
-    val localAddress = new InetSocketAddress(8080)
-    val altLocalAddress = new InetSocketAddress(9090)
+    val localAddress = new InetSocketAddress(port1)
+    val altLocalAddress = new InetSocketAddress(port2)
 
     cluster.join(localAddress, Map("alt" -> altLocalAddress))
 
@@ -91,7 +94,7 @@ class ZookeeperServerSetClusterSpec extends FunSuite with MockitoSugar {
       val (current, futureChanges) = cluster.snap
       assert(current.isEmpty)
 
-      val remoteAddress = new InetSocketAddress("host", 8080)
+      val remoteAddress = new InetSocketAddress("host", port1)
       registerHost(remoteAddress, EmptyEndpointMap)
 
       val changes = Await.result(futureChanges, 1.minute)
@@ -103,7 +106,7 @@ class ZookeeperServerSetClusterSpec extends FunSuite with MockitoSugar {
     forClient(None) { (cluster, registerHost) =>
       assert(!cluster.ready.isDefined)
 
-      val remoteAddress = new InetSocketAddress("host", 8080)
+      val remoteAddress = new InetSocketAddress("host", port1)
       registerHost(remoteAddress, EmptyEndpointMap)
 
       assert(cluster.ready.isDefined)
@@ -117,8 +120,8 @@ class ZookeeperServerSetClusterSpec extends FunSuite with MockitoSugar {
       val (current, futureChanges) = cluster.snap
       assert(current.isEmpty)
 
-      val remoteAddress = new InetSocketAddress("host", 8080)
-      val otherRemoteAddress = new InetSocketAddress("host", 9090)
+      val remoteAddress = new InetSocketAddress("host", port1)
+      val otherRemoteAddress = new InetSocketAddress("host", port2)
       registerHost(remoteAddress, Map("other-endpoint" -> otherRemoteAddress))
 
       val changes = Await.result(futureChanges, 1.minute)
@@ -128,7 +131,7 @@ class ZookeeperServerSetClusterSpec extends FunSuite with MockitoSugar {
 
   test("ZookeeperServerSetCluster ignores a server which does not specify the additional endpoint") {
     forClient(Some("this-endpoint")) { (cluster, registerHost) =>
-      val remoteAddress = new InetSocketAddress("host", 8080)
+      val remoteAddress = new InetSocketAddress("host", port1)
       registerHost(remoteAddress, EmptyEndpointMap)
       assert(!cluster.ready.isDefined)
     }

@@ -17,9 +17,8 @@ import com.twitter.util.Var$;
  */
 public class MultiReaderUsage {
   public ReadHandle make() {
-    SocketAddress localhost = new InetSocketAddress("localhost", 22133);
     ArrayList<SocketAddress> clusterMembers = new ArrayList<SocketAddress>();
-    clusterMembers.add(localhost);
+    clusterMembers.add(new InetSocketAddress(0));
     Var<Addr> cluster = Var$.MODULE$.apply(Addr.Bound$.MODULE$.apply(clusterMembers));
 
     return
