@@ -124,6 +124,7 @@ object Commands {
   val SREM              = "SREM"
   val SPOP              = "SPOP"
   val SRANDMEMBER       = "SRANDMEMBER"
+  val SINTER            = "SINTER"
 
   // Transactions
   val DISCARD           = "DISCARD"
@@ -375,6 +376,7 @@ object CommandBytes {
   val SREM              = StringToChannelBuffer("SREM")
   val SPOP              = StringToChannelBuffer("SPOP")
   val SRANDMEMBER       = StringToChannelBuffer("SRANDMEMBER")
+  val SINTER            = StringToChannelBuffer("SINTER")
 
   // Transactions
   val DISCARD           = StringToChannelBuffer("DISCARD")

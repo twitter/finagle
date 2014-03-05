@@ -96,4 +96,21 @@ trait Sets { self: BaseClient =>
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
       case EmptyMBulkReply() => Future.Nil
     }
+
+  /**
+   * Returns the members of the set resulting from the intersection of all the given sets.
+   *
+   * Keys that do not exist are considered to be empty sets. With one of the keys being an empty set,
+   * the resulting set is also empty (since set intersection with an empty set always results in an empty set).
+   *
+   * Throws an exception if no or empty keys are provided.
+   *
+   * @param keys list of keys to intersect
+   * @return List with members of the resulting set
+   */
+  def sInter(keys: Seq[ChannelBuffer]): Future[Seq[ChannelBuffer]] =
+    doRequest(SInter(keys)) {
+      case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
+      case EmptyMBulkReply() => Future.Nil
+    }
 }
