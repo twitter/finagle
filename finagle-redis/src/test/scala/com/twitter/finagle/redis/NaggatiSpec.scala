@@ -618,6 +618,20 @@ class NaggatiSpec extends SpecificationWithJUnit {
               }
             }
           }
+          "SINTER" >> {
+            codec(wrap("SINTER\r\n")) must throwA[ClientError]
+            unwrap(codec(wrap("SINTER key\r\n"))) {
+              case SInter(keys) => {
+                CBToString(keys(0)) mustEqual "key"
+              }
+            }
+            unwrap(codec(wrap("SINTER key1 key2\r\n"))) {
+              case SInter(keys) => {
+                CBToString(keys(0)) mustEqual "key1"
+                CBToString(keys(1)) mustEqual "key2"
+              }
+            }
+          }
         }
       } // inline
 

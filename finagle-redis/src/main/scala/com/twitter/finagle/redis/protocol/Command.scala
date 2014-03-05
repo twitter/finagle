@@ -242,6 +242,7 @@ object Commands {
     SREM              -> {SRem(_)},
     SPOP              -> {SPop(_)},
     SRANDMEMBER       -> {SRandMember(_)},
+    SINTER            -> {SInter(_)},
 
     // transactions
     DISCARD           -> {_ => Discard},

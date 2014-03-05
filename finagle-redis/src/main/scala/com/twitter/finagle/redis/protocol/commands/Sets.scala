@@ -104,5 +104,5 @@ case class SInter(keys: Seq[ChannelBuffer]) extends StrictKeysCommand {
 
 object SInter {
   def apply(args: => Seq[Array[Byte]]) =
-    new SInter(args.map(ChannelBuffers.wrappedBuffer(_)))
+    new SInter(args.map(ChannelBuffers.wrappedBuffer))
 }
