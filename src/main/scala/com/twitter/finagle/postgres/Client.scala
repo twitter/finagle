@@ -161,6 +161,13 @@ class Row(val fields: IndexedSeq[String], val vals: IndexedSeq[Value[Any]]) {
     }
   }
 
+  def getOrElse[A](name: String, default: => A)(implicit mf:Manifest[A]):A = {
+    getOption[A](name) match {
+      case Some(x) => x
+      case _ => default
+    }
+  }
+
   def get(index: Int): Value[Any] = vals(index)
 
   def values(): IndexedSeq[Value[Any]] = vals
