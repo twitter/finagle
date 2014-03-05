@@ -106,7 +106,7 @@ class TTwitterFilterTest extends FunSuite with MockitoSugar {
     assert(clientIdContextWasSet === true)
   }
 
-  test("TTwitterFilter should be overrideable with externally-set ClientIds") {
+  test("TTwitterFilter should not be overrideable with externally-set ClientIds") {
     val clientId = ClientId("foo.bar")
     val otherClientId = ClientId("other.bar")
     val filter = new TTwitterFilter("service", true, Some(clientId), protocolFactory)
@@ -137,7 +137,7 @@ class TTwitterFilterTest extends FunSuite with MockitoSugar {
     assert(
       clientIdContextWasSet === true,
       "expected ClientId was not set in the ClientIdContext: expected: %s, actual: %s"
-        .format(clientId.name, otherClientId.name)
+        .format(clientId.name, header.getClient_id.getName)
     )
   }
 }

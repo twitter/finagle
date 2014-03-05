@@ -199,8 +199,17 @@ private[thrift] class TTwitterFilter(
       var i = 0
       while (contexts.hasNext) {
         val (k, buf) = contexts.next()
-        val c = new thrift.RequestContext(
-          Buf.toByteBuffer(k), Buf.toByteBuffer(buf))
+
+        // CSL-863: Pending further review of the Context mechanism's use of
+        // ThreadLocals, we supply the constructor-set ClientId as the value
+        // passed to ClientIdContext.
+        val vBuf: Buf =
+          (k == ClientIdContext.Key, clientId) match {
+            case (true, Some(clientId)) => Buf.Utf8(clientId.name)
+            case _ => buf
+          }
+
+        val c = new thrift.RequestContext(Buf.toByteBuffer(k), Buf.toByteBuffer(vBuf))
         ctxs.add(i, c)
         i += 1
       }
