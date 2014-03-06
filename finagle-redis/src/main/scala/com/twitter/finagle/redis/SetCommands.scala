@@ -105,11 +105,11 @@ trait Sets { self: BaseClient =>
    * the keys being an empty set, the resulting set is also empty
    * (since set intersection with an empty set always results in an empty set).
    *
-   * Throws an exception if the `keys` Seq is empty or if all of the values
-   * included in the `keys` Seq are empty.
+   * Throws an exception if the `keys` Seq is empty or if any of the keys
+   * passed as params are empty.
    *
    * @param keys list of keys to intersect
-   * @return Set of members from the resulting intersection
+   * @return set of members from the resulting intersection
    */
   def sInter(keys: Seq[ChannelBuffer]): Future[ImmutableSet[ChannelBuffer]] =
     doRequest(SInter(keys)) {
