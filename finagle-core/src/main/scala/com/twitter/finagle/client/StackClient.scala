@@ -370,7 +370,7 @@ class StackClient[Req, Rep](
 
   def this(endpoint: Stackable[ServiceFactory[Req, Rep]]) =
     this(StackClient.clientStack[Req, Rep] ++ 
-      endpoint.toStack(StackClient.nilStack))
+      (endpoint +: StackClient.nilStack))
 
   def configured[P: Stack.Param](p: P): StackClient[Req, Rep] =
     new StackClient(stack, params + p)

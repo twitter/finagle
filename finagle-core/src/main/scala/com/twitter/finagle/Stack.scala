@@ -67,6 +67,12 @@ sealed trait Stack[T] {
     case Node(id, mk, left) => Node(id, mk, left++right)
     case Leaf(_, _) => right
   }
+  
+  /**
+   * A copy of this Stack with `stk` prepended.
+   */
+  def +:(stk: Stackable[T]): Stack[T] =
+    stk.toStack(this)
 
   override def toString = {
     val elems = tails map {
@@ -238,7 +244,7 @@ class StackBuilder[T](init: Stack[T]) {
    * typeclass [[com.twitter.finagle.CanStackFrom CanStackFrom]].
    */
   def push[U](id: String, el: U)(implicit csf: CanStackFrom[U, T]): this.type = {
-    stack = csf.toStackable(id, el).toStack(stack)
+    stack = csf.toStackable(id, el) +: stack
     this
   }
 
@@ -247,7 +253,7 @@ class StackBuilder[T](init: Stack[T]) {
    * the stack.
    */
   def push(module: Stackable[T]): this.type = {
-    stack = module.toStack(stack)
+    stack = module +: stack
     this
   }
 
