@@ -114,7 +114,7 @@ trait Sets { self: BaseClient =>
   def sInter(keys: Seq[ChannelBuffer]): Future[ImmutableSet[ChannelBuffer]] =
     doRequest(SInter(keys)) {
       case MBulkReply(messages) =>
-        Future.value(ReplyFormat.toChannelBuffers(messages) toSet)
+        Future.value(ReplyFormat.toChannelBuffers(messages).toSet)
       case EmptyMBulkReply() => Future.value(ImmutableSet())
     }
 }
