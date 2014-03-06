@@ -98,28 +98,43 @@ private trait Zk {
   private def op[T](which: String, arg: String)(go: => Future[Watched[T]]): Var[Op[T]] = 
     Var.async(Op.Pending: Op[T]) { v =>
       @volatile var closed = false
-      def loop(): Unit = 
+      def loop(): Unit =
         if (!closed) safeRetry(go, retryBackoffs) respond {
           case Throw(exc) => 
             v() = Op.Fail(exc)
           case Return((stat, w)) =>
-            v() = Op.Ok(stat)
+            val ok = Op.Ok(stat)
+            v() = ok
             w observe {
               case WatchState.Pending =>
-              case WatchState.Determined => loop()
+
+              case WatchState.Determined => 
+                // Note: since the watch transitioned to determined, we know
+                // that this observation will produce no more values, so there's
+                // no need to apply concurrency control to the subsequent 
+                // branches.
+                loop()
+
               // Note: ReadOnly mode isn't yet available. When it is, uncomment
               // this line.
               //case WatchState.SessionState(KeeperState.ConnectedReadOnly) =>s
+
               case WatchState.SessionState(KeeperState.Expired) =>
                 v() = Op.Fail(new Exception("session expired"))
+                
+              // This should handle SaslAuthenticated in the future (if this
+              // is propagated to non-session watchers).
+              case WatchState.SessionState(KeeperState.SyncConnected) =>
+                v() = ok
+
+              // Disconnected, NoSyncConnected, AuthFailed
               case WatchState.SessionState(state) =>
                 v() = Op.Fail(new Exception(""+state))
             }
-
         }
 
       loop()
-      
+
       Closable.make { deadline =>
         closed = true
         Future.Done
