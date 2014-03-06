@@ -224,6 +224,39 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.get(baz)) mustEqual Some(StringToChannelBuffer("fbaz"))
       }
 
+      "set intersection variations" in {
+        val a = StringToChannelBuffer("a")
+        val b = StringToChannelBuffer("b")
+        val c = StringToChannelBuffer("c")
+        val d = StringToChannelBuffer("d")
+        val e = StringToChannelBuffer("e")
+
+        val fooMembers = CollectionSet(a, b, c, d)
+        Await.result(client.sAdd(foo, fooMembers.toList))
+        Await.result(client.sAdd(boo, List(c)))
+        Await.result(client.sAdd(baz, List(a, c, e)))
+        Await.result(client.sAdd(moo, List(a, b)))
+
+        // Should intersect a single value
+        Await.result(client.sInter(Seq(foo, boo, baz))) mustEqual CollectionSet(c)
+
+        // Has no intersection
+        Await.result(client.sInter(Seq(boo, moo))) mustEqual CollectionSet.empty
+
+        // bar is not a known key
+        Await.result(client.sInter(Seq(foo, bar))) mustEqual CollectionSet.empty
+
+        // neither num or bar is a known key
+        Await.result(client.sInter(Seq(num, bar))) mustEqual CollectionSet.empty
+
+        // Only one key will give itself as intersection
+        Await.result(client.sInter(Seq(foo))) must containAll(fooMembers)
+
+        // At least one non-empty key is required
+        Await.result(client.sInter(Seq())) must throwA[ClientError]
+        Await.result(client.sInter(Seq(StringToChannelBuffer("")))) must throwA[ClientError]
+      }
+
       "new set syntax variations" in {
         Await.result(client.setExNx(foo, 10L, bar)) mustEqual true
         Await.result(client.get(foo)) mustEqual Some(bar)
