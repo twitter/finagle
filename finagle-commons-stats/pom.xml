@@ -19,7 +19,7 @@
     <dependency>
       <groupId>com.twitter.common</groupId>
       <artifactId>stats</artifactId>
-      <version>0.0.86</version>
+      <version>0.0.87</version>
       <exclusions>
         <exclusion>
           <groupId>com.google.guava</groupId>
