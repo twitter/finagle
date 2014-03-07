@@ -13,12 +13,26 @@ import java.net.SocketAddress
  */
 object MysqlTracing extends SimpleFilter[Request, Result] {
   def apply(request: Request, service: Service[Request, Result]) = {
+
     request match {
-      case QueryRequest(sqlStatement) => Trace.recordBinary("mysql.query", sqlStatement)
-      case PrepareRequest(sqlStatement) => Trace.recordBinary("mysql.prepare", sqlStatement)
+      case QueryRequest(sqlStatement) => {
+        Trace.recordRpcname("mysql","query")
+        Trace.recordBinary("mysql.query", sqlStatement)
+      }
+      case PrepareRequest(sqlStatement) => {
+        Trace.recordRpcname("mysql","prepare")
+        Trace.recordBinary("mysql.prepare", sqlStatement)
+      }
       // TODO: save the prepared statement and put it in the executed request trace
-      case ExecuteRequest(ps, flags, iterationCount) => Trace.recordBinary("mysql.execute", "?")
-      case _ => Trace.record("mysql." + request.getClass.getName)
+      case ExecuteRequest(ps, flags, iterationCount) => {
+        Trace.recordRpcname("mysql","execute")
+        Trace.recordBinary("mysql.execute", "?")
+      }
+
+      case _ => {
+        Trace.recordRpcname("mysql", request.getClass.getName)
+        Trace.record("mysql." + request.getClass.getName)
+      }
     }
     service(request)
   }
