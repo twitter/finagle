@@ -12,7 +12,7 @@ import scala.collection.JavaConverters._
  * An implementation of Zk using an underlying 
  * Apache ZooKeeper constructor.
  */
-private class ZooKeeperZk(newZk: Watcher => ZooKeeper) extends Zk {
+private[serverset2] class ZooKeeperZk(newZk: Watcher => ZooKeeper) extends Zk {
   import Zk.newWatcher
   
   protected[serverset2] implicit val timer = DefaultTimer.twitter

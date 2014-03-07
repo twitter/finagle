@@ -4,8 +4,8 @@ import com.twitter.finagle.util.InetSocketAddressUtil.parseHosts
 import java.net.InetSocketAddress
 import com.twitter.util.NonFatal
 
-private sealed trait Selector { def matches(e: Entry): Boolean }
-private object Selector {
+private[serverset2] sealed trait Selector { def matches(e: Entry): Boolean }
+private[serverset2] object Selector {
   case class Host(ia: InetSocketAddress) extends Selector {
     def matches(e: Entry) = e match {
       case Endpoint(_, addr, _, _, _) => addr == ia
@@ -41,7 +41,7 @@ private object Selector {
   }
 }
 
-private case class Descriptor(
+private[serverset2] case class Descriptor(
     selector: Selector,
     weight: Double,
     priority: Int) {
@@ -49,7 +49,7 @@ private case class Descriptor(
   def matches(e: Entry) = selector matches e
 }
 
-private object Descriptor {
+private[serverset2] object Descriptor {
   def parseDict(d: Object => Option[Object]): Option[Descriptor] = for {
     StringObj(s) <- d("select")
     selector <- Selector.parse(s)
@@ -60,7 +60,7 @@ private object Descriptor {
   }
 }
 
-private case class Vector(vector: Seq[Descriptor]) {
+private[serverset2] case class Vector(vector: Seq[Descriptor]) {
   def weightOf(entry: Entry) =
     vector.foldLeft(1.0) {
       case (w, d) if d matches entry => w*d.weight
@@ -68,7 +68,7 @@ private case class Vector(vector: Seq[Descriptor]) {
     }
 }
 
-private object Vector {
+private[serverset2] object Vector {
   def parseJson(json: String): Option[Vector] = {
     val d = JsonDict(json)
     val vec = for { 
