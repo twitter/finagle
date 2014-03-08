@@ -1,6 +1,6 @@
 package com.twitter.finagle.exp.mysql
 
-import com.twitter.concurrent.AsyncQueue
+import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader, Packet}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{CancelledRequestException, Service, WriteException}
@@ -49,50 +49,36 @@ object ClientDispatcher {
 class ClientDispatcher(
   trans: Transport[Packet, Packet],
   handshake: HandshakeInit => Try[HandshakeResponse]
-) extends Service[Request, Result] {
+) extends GenSerialClientDispatcher[Request, Result, Packet, Packet](trans) {
   import ClientDispatcher._
-  private[this] val dispatchq = new AsyncQueue[(Request, Promise[Result])]
 
-  override def apply(req: Request): Future[Result] = {
-    val rep = new Promise[Result]
-    dispatchq.offer((req, rep))
-    rep
-  }
-
-  /**
-   * Dispatches queued requests sequentially and satisfies the
-   * response promise.
-   */
-  private[this] def loop(): Future[Unit] = {
-    dispatchq.poll() flatMap { case (req, rep) =>
-      rep.isInterrupted match {
-        case Some(_) =>
-          rep.setException(cancelledRequestExc)
-          loop()
-        case None =>
-          val signal = new Promise[Unit]
-          val result = connPhase.unit before dispatch(req, signal)
-          result respond rep.updateIfEmpty
-          signal ensure loop()
-      }
+  override def apply(req: Request): Future[Result] =
+    connPhase flatMap { _ =>
+      super.apply(req)
+    } onFailure {
+      // a LostSyncException represents a fatal state between
+      // the client / server. The error is unrecoverable
+      // so we close the service.
+      case e@LostSyncException(_) => close()
+      case _ =>
     }
-  }
-  loop()
 
   /**
-   * Performs the connection phase. The phase
-   * should only be performed once before any
-   * other exchange between the client/server.
+   * Performs the connection phase. The phase should only be performed
+   * once before any other exchange between the client/server. A failure
+   * to handshake renders this service unusable.
    * [[http://dev.mysql.com/doc/internals/en/connection-phase.html]]
    */
   private[this] val connPhase: Future[Result] =
     trans.read() flatMap { packet =>
       const(HandshakeInit(packet)) flatMap { init =>
         const(handshake(init)) flatMap { req =>
-          dispatch(req, new Promise[Unit])
+          val rep = new Promise[Result]
+          dispatch(req, rep)
+          rep
         }
       }
-    }
+    } onFailure { _ => close() }
 
   /**
    * Returns a Future that represents the result of an exchange
@@ -101,16 +87,19 @@ class ClientDispatcher(
    * is decoupled from the promise that signals a complete exchange.
    * This leaves room for implementing streaming results.
    */
-  private[this] def dispatch(req: Request, signal: Promise[Unit]): Future[Result] =
+  protected def dispatch(req: Request, rep: Promise[Result]): Future[Unit] =
     trans.write(req.toPacket) rescue {
       wrapWriteException
     } before {
-      // synthesize COM_STMT_CLOSE response
+      val signal = new Promise[Unit]
       if (req.cmd == Command.COM_STMT_CLOSE) {
+        // synthesize COM_STMT_CLOSE response
         signal.setDone()
-        Future.value(CloseStatementOK)
+        rep.updateIfEmpty(Return(CloseStatementOK))
+        signal
       } else trans.read() flatMap { packet =>
-        decodePacket(packet, req.cmd, signal)
+        rep.become(decodePacket(packet, req.cmd, signal))
+        signal
       }
     }
 
@@ -216,7 +205,4 @@ class ClientDispatcher(
     if (limit <= 0) Future.value(emptyTx)
     else aux(0, Nil)
   }
-
-  override def isAvailable() = trans.isOpen
-  override def close(deadline: Time) = trans.close()
 }

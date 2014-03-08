@@ -1,8 +1,9 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.{ChannelClosedException, CancelledRequestException, Dtab, Service, ServiceProxy}
+import com.twitter.finagle.{CancelledRequestException, Dtab, Service, ServiceProxy}
 import com.twitter.finagle.netty3.ChannelBufferBuf
+import com.twitter.finagle.tracing.Trace
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.{Await, Closable, Future, Promise, Time, JavaTimer}
 import java.io.{StringWriter, PrintWriter}
@@ -143,7 +144,80 @@ class EndToEndTest extends FunSuite {
     }
   }
 
+  def trace(name: String)(connect: HttpService => HttpService) {
+    test(name + ": trace") {
+      Trace.clear()
+
+      var (outerTrace, outerSpan) = ("", "")
+
+      val inner = connect(new HttpService {
+        def apply(request: HttpRequest) = {
+          val response = Response(request)
+          response.contentString = Seq(
+            Trace.id.traceId.toString,
+            Trace.id.spanId.toString,
+            Trace.id.parentId.toString
+          ).mkString(".")
+          Future.value(response)
+        }
+      })
+
+      val outer = connect(new HttpService {
+        def apply(request: HttpRequest) = {
+          outerTrace = Trace.id.traceId.toString
+          outerSpan = Trace.id.spanId.toString
+          inner(request)
+        }
+      })
+
+      val response = Response(Await.result(outer(Request())))
+      val Seq(innerTrace, innerSpan, innerParent) =
+        response.contentString.split('.').toSeq
+      assert(innerTrace === outerTrace, "traceId")
+      assert(outerSpan === innerParent, "outter span vs inner parent")
+      assert(innerSpan != outerSpan, "inner (%s) vs outter (%s) spanId".format(innerSpan, outerSpan))
+
+      outer.close()
+      inner.close()
+    }
+  }
+
+
   if (!sys.props.contains("SKIP_FLAKY")) {
+
+    trace("Client/Server") {
+      service =>
+        import com.twitter.finagle.Http
+        val server = Http.serve(":*", service)
+        val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+        val client = Http.newService("%s:%d".format(addr.getHostName, addr.getPort))
+
+        new ServiceProxy(client) {
+          override def close(deadline: Time) =
+            Closable.all(client, server).close(deadline)
+        }
+    }
+
+    trace("ClientBuilder") {
+      service =>
+        val server = ServerBuilder()
+          .codec(Http().enableTracing(true))
+          .bindTo(new InetSocketAddress(0))
+          .name("server")
+          .build(service)
+
+        val client = ClientBuilder()
+          .codec(Http().enableTracing(true))
+          .hosts(Seq(server.localAddress))
+          .hostConnectionLimit(1)
+          .name("client")
+          .build()
+
+        new ServiceProxy(client) {
+          override def close(deadline: Time) =
+            Closable.all(client, server).close(deadline)
+        }
+    }
 
     go("ClientBuilder") {
       service =>

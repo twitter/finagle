@@ -689,6 +689,11 @@ class NaggatiSpec extends SpecificationWithJUnit {
         val expected = "*3\r\n$3\r\nSET\r\n$3\r\nfoo\r\n$%d\r\n%s\r\n".format(valSz, value)
         codec.send(Set(foo, s2cb(value))) mustEqual List(expected)
       }
+
+      "HSet with an empty string as value" >> {
+        val expected = "*4\r\n$4\r\nHSET\r\n$3\r\nfoo\r\n$3\r\nbar\r\n$0\r\n\r\n"
+        codec.send(HSet(foo, bar, StringToChannelBuffer(""))) mustEqual List(expected)
+      }
     } // Encode properly
 
   } // A Redis Request

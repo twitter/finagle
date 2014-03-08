@@ -42,7 +42,7 @@ class TestReceiver() extends Session with MockitoSugar {
   }
 }
 
-class SessionTest(rolesReversed: Boolean) extends FunSuite with OneInstancePerTest with MockitoSugar {
+private[mux] class SessionTest(rolesReversed: Boolean) extends FunSuite with OneInstancePerTest with MockitoSugar {
   def buf(b: Byte*) = Buf.ByteArray(b:_*)
 
   val tracer = new BufferingTracer

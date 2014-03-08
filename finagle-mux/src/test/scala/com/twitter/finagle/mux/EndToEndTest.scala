@@ -11,7 +11,7 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite {
-  test("Discard request properly sent") {
+  if (!sys.props.contains("SKIP_FLAKY")) test("Discard request properly sent") {
     @volatile var handled = false
     val p = Promise[ChannelBuffer]()
     p.setInterruptHandler { case t: Throwable =>

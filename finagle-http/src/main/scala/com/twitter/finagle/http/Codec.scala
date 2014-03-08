@@ -392,7 +392,7 @@ case class RichHttp[REQUEST <: Request](
       ): ServiceFactory[REQUEST, Response] = {
         val dtab = new DtabFilter[REQUEST, Response]
         val tracing = if (httpFactory._enableTracing)
-          new HttpClientTracingFilter[REQUEST, Response](config.serviceName)
+          new HttpServerTracingFilter[REQUEST, Response](config.serviceName)
         else
           Filter.identity[REQUEST, Response]
 

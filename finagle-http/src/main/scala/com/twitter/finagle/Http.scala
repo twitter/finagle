@@ -49,9 +49,10 @@ extends DefaultServer[HttpRequest, HttpResponse, Any, Any](
   "http", HttpListener, 
   {
     val dtab = new DtabFilter[HttpRequest, HttpResponse]
+    val tracingFilter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("http")
     (t, s) => new HttpServerDispatcher(
       new HttpTransport(t),
-      dtab andThen s
+      tracingFilter andThen dtab andThen s
     )
   }
 )
@@ -65,8 +66,7 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
   }
 
   def serve(addr: SocketAddress, service: ServiceFactory[HttpRequest, HttpResponse]): ListeningServer = {
-    val tracingFilter = new HttpServerTracingFilter[HttpRequest, HttpResponse](HttpServer.name)
-    HttpServer.serve(addr, tracingFilter andThen service)
+    HttpServer.serve(addr, service)
   }
 }
 
