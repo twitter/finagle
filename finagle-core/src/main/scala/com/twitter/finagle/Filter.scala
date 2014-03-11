@@ -106,8 +106,8 @@ object Filter {
   implicit def canStackFromSvc[Req, Rep]
     : CanStackFrom[Filter[Req, Rep, Req, Rep], Service[Req, Rep]] =
     new CanStackFrom[Filter[Req, Rep, Req, Rep], Service[Req, Rep]] {
-      def toStackable(id: String, filter: Filter[Req, Rep, Req, Rep]) =
-        new Stack.Simple[Service[Req, Rep]](id) {
+      def toStackable(headRole: Stack.Role, filter: Filter[Req, Rep, Req, Rep]) =
+        new Stack.Simple[Service[Req, Rep]](headRole) {
           def make(params: Params, next: Service[Req, Rep]) = filter andThen next
         }
     }
@@ -115,8 +115,8 @@ object Filter {
   implicit def canStackFromFac[Req, Rep]
     : CanStackFrom[Filter[Req, Rep, Req, Rep], ServiceFactory[Req, Rep]] =
     new CanStackFrom[Filter[Req, Rep, Req, Rep], ServiceFactory[Req, Rep]] {
-      def toStackable(id: String, filter: Filter[Req, Rep, Req, Rep]) =
-        new Stack.Simple[ServiceFactory[Req, Rep]](id) {
+      def toStackable(headRole: Stack.Role, filter: Filter[Req, Rep, Req, Rep]) =
+        new Stack.Simple[ServiceFactory[Req, Rep]](headRole) {
           def make(params: Params, next: ServiceFactory[Req, Rep]) = filter andThen next
         }
     }

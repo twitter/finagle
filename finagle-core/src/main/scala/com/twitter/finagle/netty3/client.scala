@@ -230,9 +230,11 @@ object Netty3Transporter {
 }
 
 case class Netty3Stack[In, Out, Req, Rep](
-  name: String, pipelineFactory: ChannelPipelineFactory,
-  newDispatcher: Transport[In, Out] => Service[Req, Rep])
-  extends Stack.Simple[ServiceFactory[Req, Rep]]("netty3") {
+    name: String,
+    pipelineFactory: ChannelPipelineFactory,
+    newDispatcher: (Transport[In, Out], StatsReceiver) => Service[Req, Rep])
+  extends Stack.Simple[ServiceFactory[Req, Rep]](StackClient.Role.Netty3)
+{
   import StackClient._
 
   private[this] val transporter =  Netty3Transporter[In, Out](name, pipelineFactory)
@@ -242,6 +244,6 @@ case class Netty3Stack[In, Out, Req, Rep](
     val EndpointAddr(addr) = params[EndpointAddr]
     val Stats(statsReceiver, _) = params[Stats]
 
-    ServiceFactory(() => transporter(addr, statsReceiver) map(newDispatcher))
+    ServiceFactory(() => transporter(addr, statsReceiver).map(newDispatcher(_, statsReceiver)))
   }
 }
