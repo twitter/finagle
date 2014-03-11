@@ -814,6 +814,27 @@ class NaggatiSpec extends SpecificationWithJUnit {
           case _ => fail("Expected one element in list")
         }
 
+        codec(wrap("*4\r\n")) mustEqual Nil
+        codec(wrap("$3\r\n")) mustEqual Nil
+        codec(wrap("foo\r\n")) mustEqual Nil
+        codec(wrap("$0\r\n")) mustEqual Nil
+        codec(wrap("\r\n")) mustEqual Nil
+        codec(wrap("$3\r\n")) mustEqual Nil
+        codec(wrap("moo\r\n")) mustEqual Nil
+        codec(wrap("$3\r\n")) mustEqual Nil
+        codec(wrap("bar\r\n")) match {
+          case reply :: Nil => reply match {
+            case MBulkReply(msgs) =>
+              ReplyFormat.toString(msgs) mustEqual List(
+                "foo",
+                "",
+                "moo",
+                "bar")
+            case _ => fail("Expected MBulkReply")
+          }
+          case _ => fail("Expected one element in list")
+        }
+
       }
       "nested multi-bulk replies" >> {
         codec(wrap("*3\r\n")) mustEqual Nil

@@ -355,6 +355,13 @@ class ClientSpec extends SpecificationWithJUnit {
           Await.result(client.hGetAll(foo))) mustEqual Seq(("bar", "baz"), ("boo", "moo"))
       }
 
+      "get multiple values including one empty string" in {
+        Await.result(client.hSet(foo, bar, StringToChannelBuffer("")))
+        Await.result(client.hSet(foo, boo, moo))
+        CBToString.fromTuples(
+          Await.result(client.hGetAll(foo))) mustEqual Seq(("bar", ""), ("boo", "moo"))
+      }
+
       "increment a value" in {
         Await.result(client.hIncrBy(foo, num, 4L))
         Await.result(client.hGet(foo, num)) mustEqual Some(StringToChannelBuffer(4L.toString))
