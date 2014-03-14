@@ -15,12 +15,6 @@
     <git.dir>${project.basedir}/../../.git</git.dir>
   </properties>
   <dependencies>
-    <!-- library dependencies -->
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty</artifactId>
-      <version>3.8.0.Final</version>
-    </dependency>
     <!-- project dependencies -->
     <dependency>
       <groupId>com.twitter</groupId>
