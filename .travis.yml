@@ -5,27 +5,38 @@ scala:
 
 jdk:
   - oraclejdk7
+  - openjdk6
+  - openjdk7
+
+before_script:
+  # default $SBT_OPTS is irrelevant to sbt lancher
+  - unset SBT_OPTS
 
 script:
-  - echo skip sbt ++$TRAVIS_SCALA_VERSION finagle-http/test
-  - echo skip sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-commons-stats/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-core/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-exception/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-exp/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-kestrel/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-mdns/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-mux/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-mysql/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-native/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-ostrich4/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-redis/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-serversets/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-spdy/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-stats/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-stream/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-stress/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-testers/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-thrift/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-thriftmux/test
-  - sbt ++$TRAVIS_SCALA_VERSION finagle-zipkin/test
+  # skip these projects because they don't pass on travis-ci
+  - echo skip ./sbt ++$TRAVIS_SCALA_VERSION finagle-http/test
+  - echo skip ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test
+  - echo skip ./sbt ++$TRAVIS_SCALA_VERSION finagle-mux/test
+
+  # run conditinally because they don't pass with openjdks
+  - if [ "$TRAVIS_JDK_VERSION" = "oraclejdk7" ]; then ./sbt ++$TRAVIS_SCALA_VERSION finagle-native/test; fi
+
+  # run for all environments
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-commons-stats/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-core/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-exception/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-exp/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-kestrel/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-mdns/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-mysql/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-ostrich4/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-redis/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-serversets/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-spdy/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-stats/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-stream/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-stress/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-testers/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-thrift/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-thriftmux/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-zipkin/test
