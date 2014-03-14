@@ -5,7 +5,7 @@ Finagle is an extensible RPC system for the JVM, used to construct
 high-concurrency servers. Finagle implements uniform client and
 server APIs for several protocols, and is designed for high
 performance and concurrency. Most of Finagle's code is protocol
-agnostic, simplifying the implementation of new protocols.
+agnostic, simplifying the implementation of new :doc:`protocols <Protocols>`.
 
 Finagle uses a *clean*, *simple*, and *safe* concurrent programming
 model, based on :doc:`Futures <Futures>`. This leads to safe and
@@ -41,7 +41,7 @@ User's guide
 ------------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
    Quickstart
    Futures
@@ -49,6 +49,7 @@ User's guide
    ServerAnatomy
    ClientAnatomy
    ClientStack
+   Protocols
    Metrics
    FAQ
 

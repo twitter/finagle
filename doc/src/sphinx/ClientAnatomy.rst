@@ -44,7 +44,7 @@ Our client will employ the SerialClientDispatcher.
 .. [#] Note that finagle also includes a dispatcher that can
        pipeline requests, i.e., allow more than one outstanding request.
        It's possible to create a custom dispatcher as well. For example,
-       :api:`Mux <com.twitter.finagle.Mux$>`, which support true mutliplexing,
+       :doc:`Mux <Protocols>`, which support true mutliplexing,
        defines a custom dispatcher.
 
 A Basic Client
