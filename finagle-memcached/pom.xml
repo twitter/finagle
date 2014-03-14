@@ -48,7 +48,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-hashing</artifactId>
-      <version>6.12.2-SNAPSHOT</version>
+      <version>6.13.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter.common</groupId>
