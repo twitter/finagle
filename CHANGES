@@ -5,6 +5,32 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.13.0
+~~~~~
+
+- `finagle-core`: ForkJoin scheduler: first draft
+- `finagle-doc`: Update URL to Finagle blog post. Motivation: Outdated URL
+- `finagle-http`: compress text-like content-types by default
+- `finagle-memcached`: Mark test "not migrating yet" as flaky
+- `finagle-mux`: don't delegate empty dtabs
+- `finagle-mysql`: Better failure handling for the dispatcher
+- `finagle-ostrich4`: Make OstrichExporter compatible with Ostrich CommandHandler.
+- `finagle-redis`: Add SINTER command to redis client
+- `finagle-redis`: Allow an empty string as a hash field value
+- `finagle-redis`: Fixed the empty string issue of MBULK_REPLY
+- `finagle-serverset`: ServerSets2: reset value on SyncConnected
+- `finagle-stats`: Upgrade metrics dependency to the latest version.
+- `finagle-thrift`: Do not rely on ThreadLocal'd ClientIds in TTwitterFilter
+- `finagle-thrift[mux]`: Reintroduce ClientIdContext by default
+- `finagle-zipkin`: TraceId invariance
+- `finagle/S2`: introduce address stabilization, stats
+- `finagle`: Add Mux and ThriftMux Clients based on com.twitter.finagle.Stack
+- `finagle`: fix dependency problem with multiple version of serversets
+- `finagle`: Fix the sbt doc generation (and tests)
+- `finagle`: upgrade Netty to 3.8.1
+- `finagle`: upgrade ostrich to version 9.4.0
+- `finagle`: upgrade util to version 6.13.0
+
 6.12.2
 ~~~~~
 
