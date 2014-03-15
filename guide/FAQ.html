@@ -1,4 +1,3 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -7,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>FAQ &mdash; Finagle 6.12.2 documentation</title>
+    <title>FAQ &mdash; Finagle 6.13.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '6.12.2',
+        URL_ROOT:    './',
+        VERSION:     '6.13.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.12.2 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.13.0 documentation" href="index.html" />
     <link rel="next" title="Finagle changelog" href="changelog.html" />
     <link rel="prev" title="Metrics" href="Metrics.html" />
    
@@ -59,8 +58,10 @@
             
   <div class="section" id="faq">
 <h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="general-finagle-faq">
+<h2>General Finagle FAQ<a class="headerlink" href="#general-finagle-faq" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="what-s-a-cancelledrequestexception">
-<h2>What&#8217;s a <cite>CancelledRequestException</cite>?<a class="headerlink" href="#what-s-a-cancelledrequestexception" title="Permalink to this headline">¶</a></h2>
+<h3>What&#8217;s a CancelledRequestException?<a class="headerlink" href="#what-s-a-cancelledrequestexception" title="Permalink to this headline">¶</a></h3>
 <p>When a client connected to a Finagle server disconnects, the server raises
 a <em>cancellation</em> interrupt on the pending Future. This is done to
 conserve resources and avoid unnecessary work: the upstream
@@ -78,13 +79,13 @@ val maskedService = masked andThen service
 </pre></div>
 </div>
 <p>Note that most protocols do not natively support request cancellations
-(though modern RPC protocols like <a class="reference external" href="http://twitter.github.com/finagle/docs/#com.twitter.finagle.Mux$">Mux</a>
+(though modern RPC protocols like <a class="reference internal" href="Protocols.html"><em>Mux</em></a>
 do). In practice, this means that for these protocols, we need to disconnect
 the client to signal cancellation, which in turn can cause undue connection
 churn.</p>
 </div>
 <div class="section" id="why-is-com-twitter-common-zookeeper-server-set-not-found">
-<h2>Why is &#8220;com.twitter.common.zookeeper#server-set&#8221; not found?<a class="headerlink" href="#why-is-com-twitter-common-zookeeper-server-set-not-found" title="Permalink to this headline">¶</a></h2>
+<h3>Why is com.twitter.common.zookeeper#server-set not found?<a class="headerlink" href="#why-is-com-twitter-common-zookeeper-server-set-not-found" title="Permalink to this headline">¶</a></h3>
 <p>Some of our libraries still aren&#8217;t published to maven central.  If you add</p>
 <div class="highlight-text"><div class="highlight"><pre>resolvers += &quot;twitter&quot; at &quot;http://maven.twttr.com&quot;
 </pre></div>
@@ -93,10 +94,10 @@ churn.</p>
 published externally, but not yet to maven central.</p>
 </div>
 <div class="section" id="how-do-i-change-my-timeouts-in-the-finagle-6-apis">
-<h2>How do I change my timeouts in the Finagle 6 APIs?<a class="headerlink" href="#how-do-i-change-my-timeouts-in-the-finagle-6-apis" title="Permalink to this headline">¶</a></h2>
-<p>We introduced a new, preferred API for constructing Finagle <cite>Client`s and `Server`s.
-Where the old API used `ServerBuilder</cite>/<cite>ClientBuilder</cite> with Codecs, the new APIs use
-<cite>Proto.newClient</cite>.</p>
+<h3>How do I change my timeouts in the Finagle 6 APIs?<a class="headerlink" href="#how-do-i-change-my-timeouts-in-the-finagle-6-apis" title="Permalink to this headline">¶</a></h3>
+<p>We introduced a new, preferred API for constructing Finagle <tt class="docutils literal"><span class="pre">Client</span></tt>s and <tt class="docutils literal"><span class="pre">Server</span></tt>s.
+Where the old API used <tt class="docutils literal"><span class="pre">ServerBuilder</span></tt>/<tt class="docutils literal"><span class="pre">ClientBuilder</span></tt> with Codecs, the new APIs use
+<tt class="docutils literal"><span class="pre">Proto.newClient</span></tt>.</p>
 <p>Old APIs:</p>
 <div class="highlight-text"><div class="highlight"><pre>val client = ClientBuilder
   .codec(Http)
@@ -113,7 +114,7 @@ Where the old API used `ServerBuilder</cite>/<cite>ClientBuilder</cite> with Cod
 for changing the API this way.</p>
 <p>Timeouts are typically used in two cases:</p>
 <ol class="upperalpha simple">
-<li>Liveness detection (tcp connect timeout)</li>
+<li>Liveness detection (TCP connect timeout)</li>
 <li>Application requirements (global timeout)</li>
 </ol>
 <p>For liveness detection, it is actually fine for timeouts to be long.  We have a
@@ -146,6 +147,54 @@ for input, and would love for the greater Finagle community to help us find good
 defaults.</p>
 </div>
 </div>
+<div class="section" id="mux-specific-faq">
+<h2>Mux-specific FAQ<a class="headerlink" href="#mux-specific-faq" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="what-service-behavior-will-change-when-upgrading-to-mux">
+<h3>What service behavior will change when upgrading to Mux?<a class="headerlink" href="#what-service-behavior-will-change-when-upgrading-to-mux" title="Permalink to this headline">¶</a></h3>
+<p><em>Connecting Pooling Metrics</em></p>
+<p>With Mux, Finagle multiplexes several requests onto a single connection. As a
+consequence, traditional forms of connection-pooling are no longer required. Thus
+Mux employs <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.pool.ReusingPool">com.twitter.finagle.pool.ReusingPool</a>,
+which exposes new stats:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">connects</span></tt>, <tt class="docutils literal"><span class="pre">connections</span></tt>, and <tt class="docutils literal"><span class="pre">closechans</span></tt> stats should drop, since
+there will be less channel opening and closing.</li>
+<li><tt class="docutils literal"><span class="pre">connection_duration</span></tt>, <tt class="docutils literal"><span class="pre">connection_received_bytes</span></tt>, and
+<tt class="docutils literal"><span class="pre">connection_sent_bytes</span></tt> stats should increase, since connections become more
+long-lived.</li>
+<li><tt class="docutils literal"><span class="pre">connect_latency_ms</span></tt> and <tt class="docutils literal"><span class="pre">failed_connect_latency_ms</span></tt> stats may become
+erratic because their sampling will become more sparse.</li>
+<li><tt class="docutils literal"><span class="pre">pool_cached</span></tt>, <tt class="docutils literal"><span class="pre">pool_waiters</span></tt>, <tt class="docutils literal"><span class="pre">pool_num_waited</span></tt>, <tt class="docutils literal"><span class="pre">pool_size</span></tt> stats all
+pertain to connection pool implementations not used by Mux, so they disappear
+from stats output.</li>
+</ul>
+<p><em>ClientBuilder configuration</em></p>
+<p>Certain <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>
+settings related to connection pooling become obsolete:
+<tt class="docutils literal"><span class="pre">hostConnectionCoresize</span></tt>, <tt class="docutils literal"><span class="pre">hostConnectionLimit</span></tt>, <tt class="docutils literal"><span class="pre">hostConnectionIdleTime</span></tt>,
+<tt class="docutils literal"><span class="pre">hostConnectionMaxWaiters</span></tt>, <tt class="docutils literal"><span class="pre">hostConnectionMaxIdleTime</span></tt>,
+<tt class="docutils literal"><span class="pre">hostConnectionMaxLifeTime</span></tt>, and <tt class="docutils literal"><span class="pre">hostConnectionBufferSize</span></tt></p>
+<p><em>Server Connection Stats</em></p>
+<p>The server-side connection model changes as well. Expect the following stats to
+be impacted:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">connects</span></tt>, <tt class="docutils literal"><span class="pre">connections</span></tt>, and <tt class="docutils literal"><span class="pre">closechans</span></tt> stats should drop.</li>
+<li><tt class="docutils literal"><span class="pre">connection_duration</span></tt>, <tt class="docutils literal"><span class="pre">connection_received_bytes</span></tt>, and
+<tt class="docutils literal"><span class="pre">connection_sent_bytes</span></tt> should increase.</li>
+<li>Obsolete stats: <tt class="docutils literal"><span class="pre">idle/idle</span></tt>, <tt class="docutils literal"><span class="pre">idle/refused</span></tt>, and <tt class="docutils literal"><span class="pre">idle/closed</span></tt></li>
+</ul>
+<p><em>ServerBuilder configuration</em>
+Certain <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a>
+connection management settings become obsolete: <tt class="docutils literal"><span class="pre">openConnectionsThresholds</span></tt>,
+<tt class="docutils literal"><span class="pre">hostConnectionMaxIdleTime</span></tt>, and <tt class="docutils literal"><span class="pre">hostConnectionMaxLifeTime</span></tt>.</p>
+</div>
+<div class="section" id="what-is-thriftmux">
+<h3>What is ThriftMux?<a class="headerlink" href="#what-is-thriftmux" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.ThriftMux$">ThriftMux</a>
+is an implementation of the Thrift protocol built on top of Mux.</p>
+</div>
+</div>
+</div>
 
 
           </div>
@@ -167,9 +216,17 @@ defaults.</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">FAQ</a><ul>
-<li><a class="reference internal" href="#what-s-a-cancelledrequestexception">What&#8217;s a <cite>CancelledRequestException</cite>?</a></li>
-<li><a class="reference internal" href="#why-is-com-twitter-common-zookeeper-server-set-not-found">Why is &#8220;com.twitter.common.zookeeper#server-set&#8221; not found?</a></li>
+<li><a class="reference internal" href="#general-finagle-faq">General Finagle FAQ</a><ul>
+<li><a class="reference internal" href="#what-s-a-cancelledrequestexception">What&#8217;s a CancelledRequestException?</a></li>
+<li><a class="reference internal" href="#why-is-com-twitter-common-zookeeper-server-set-not-found">Why is com.twitter.common.zookeeper#server-set not found?</a></li>
 <li><a class="reference internal" href="#how-do-i-change-my-timeouts-in-the-finagle-6-apis">How do I change my timeouts in the Finagle 6 APIs?</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mux-specific-faq">Mux-specific FAQ</a><ul>
+<li><a class="reference internal" href="#what-service-behavior-will-change-when-upgrading-to-mux">What service behavior will change when upgrading to Mux?</a></li>
+<li><a class="reference internal" href="#what-is-thriftmux">What is ThriftMux?</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

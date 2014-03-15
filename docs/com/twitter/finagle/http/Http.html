@@ -29,7 +29,12 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">_compressionLevel</dt><dd class="cmt"><p>The compression level to use. If passed the default value (-1) then use
+<a name="com.twitter.finagle.http.codec.TextualContentCompressor" class="extype" href="codec/TextualContentCompressor.html">TextualContentCompressor</a> which will
+compress text-like content-types with the default compression level (6). Otherwise, use
+org.jboss.netty.handler.codec.http.HttpContentCompressor for all
+content-types with specified compression level.
+</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <a name="com.twitter.finagle.CodecFactory" class="extype" href="../CodecFactory.html">CodecFactory</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
@@ -65,10 +70,15 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Http</span><span class="params">(<span name="_compressionLevel">_compressionLevel: <span name="scala.Int" class="extype">Int</span> = <span class="symbol">0</span></span>, <span name="_maxRequestSize">_maxRequestSize: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span> = <span name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes" class="defval">...</span></span>, <span name="_maxResponseSize">_maxResponseSize: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span> = <span name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes" class="defval">...</span></span>, <span name="_decompressionEnabled">_decompressionEnabled: <span name="scala.Boolean" class="extype">Boolean</span> = <span class="symbol">true</span></span>, <span name="_channelBufferUsageTracker">_channelBufferUsageTracker: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.http.codec.ChannelBufferUsageTracker" class="extype" href="codec/ChannelBufferUsageTracker.html">ChannelBufferUsageTracker</a>] = <span class="symbol">scala.None</span></span>, <span name="_annotateCipherHeader">_annotateCipherHeader: <span name="scala.Option" class="extype">Option</span>[String] = <span class="symbol">scala.None</span></span>, <span name="_enableTracing">_enableTracing: <span name="scala.Boolean" class="extype">Boolean</span> = <span class="symbol">false</span></span>, <span name="_maxInitialLineLength">_maxInitialLineLength: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span> = <span name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(4096).bytes" class="defval">...</span></span>, <span name="_maxHeaderSize">_maxHeaderSize: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span> = <span name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(8192).bytes" class="defval">...</span></span>)</span>
+        <span class="name">Http</span><span class="params">(<span name="_compressionLevel">_compressionLevel: <span name="scala.Int" class="extype">Int</span> = <span class="symbol">-1</span></span>, <span name="_maxRequestSize">_maxRequestSize: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span> = <span name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes" class="defval">...</span></span>, <span name="_maxResponseSize">_maxResponseSize: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span> = <span name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes" class="defval">...</span></span>, <span name="_decompressionEnabled">_decompressionEnabled: <span name="scala.Boolean" class="extype">Boolean</span> = <span class="symbol">true</span></span>, <span name="_channelBufferUsageTracker">_channelBufferUsageTracker: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.http.codec.ChannelBufferUsageTracker" class="extype" href="codec/ChannelBufferUsageTracker.html">ChannelBufferUsageTracker</a>] = <span class="symbol">scala.None</span></span>, <span name="_annotateCipherHeader">_annotateCipherHeader: <span name="scala.Option" class="extype">Option</span>[String] = <span class="symbol">scala.None</span></span>, <span name="_enableTracing">_enableTracing: <span name="scala.Boolean" class="extype">Boolean</span> = <span class="symbol">false</span></span>, <span name="_maxInitialLineLength">_maxInitialLineLength: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span> = <span name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(4096).bytes" class="defval">...</span></span>, <span name="_maxHeaderSize">_maxHeaderSize: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span> = <span name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(8192).bytes" class="defval">...</span></span>)</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">_compressionLevel</dt><dd class="cmt"><p>The compression level to use. If passed the default value (-1) then use
+<a name="com.twitter.finagle.http.codec.TextualContentCompressor" class="extype" href="codec/TextualContentCompressor.html">TextualContentCompressor</a> which will
+compress text-like content-types with the default compression level (6). Otherwise, use
+org.jboss.netty.handler.codec.http.HttpContentCompressor for all
+content-types with specified compression level.
+</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -200,7 +210,12 @@
         <span class="name">_compressionLevel</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">The compression level to use.</p><div class="fullcomment"><div class="comment cmt"><p>The compression level to use. If passed the default value (-1) then use
+<a name="com.twitter.finagle.http.codec.TextualContentCompressor" class="extype" href="codec/TextualContentCompressor.html">TextualContentCompressor</a> which will
+compress text-like content-types with the default compression level (6). Otherwise, use
+org.jboss.netty.handler.codec.http.HttpContentCompressor for all
+content-types with specified compression level.
+</p></div></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.Http#_decompressionEnabled" data-isabs="false">
       <a id="_decompressionEnabled:Boolean"></a>
       <h4 class="signature">

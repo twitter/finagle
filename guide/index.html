@@ -1,4 +1,3 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -7,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>User’s guide &mdash; Finagle 6.12.2 documentation</title>
+    <title>User’s guide &mdash; Finagle 6.13.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '6.12.2',
+        URL_ROOT:    './',
+        VERSION:     '6.13.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.12.2 documentation" href="#" />
+    <link rel="top" title="Finagle 6.13.0 documentation" href="#" />
     <link rel="next" title="Quickstart" href="Quickstart.html" />
    
   
@@ -60,7 +59,7 @@
 high-concurrency servers. Finagle implements uniform client and
 server APIs for several protocols, and is designed for high
 performance and concurrency. Most of Finagle&#8217;s code is protocol
-agnostic, simplifying the implementation of new protocols.</p>
+agnostic, simplifying the implementation of new <a class="reference internal" href="Protocols.html"><em>protocols</em></a>.</p>
 <p>Finagle uses a <em>clean</em>, <em>simple</em>, and <em>safe</em> concurrent programming
 model, based on <a class="reference internal" href="Futures.html"><em>Futures</em></a>. This leads to safe and
 modular programs that are also simple to reason about.</p>
@@ -80,7 +79,7 @@ their behavior.</p>
 <p>Other useful resources include:</p>
 <ul class="simple">
 <li>“<a class="reference external" href="http://monkey.org/~marius/funsrv.pdf">Your Server as a Function</a>” a paper motivating the core abstractions behind finagle (<a class="reference external" href="http://sigops.org/sosp/sosp13/plos.html">PLOS’13</a>).</li>
-<li><a class="reference external" href="http://engineering.twitter.com/2011/08/finagle-protocol-agnostic-rpc-system.html">Twitter engineering blog entry introducing Finagle</a></li>
+<li><a class="reference external" href="https://blog.twitter.com/2011/finagle-a-protocol-agnostic-rpc-system">Twitter engineering blog entry introducing Finagle</a></li>
 <li><a class="reference external" href="http://days2011.scala-lang.org/node/138/286">ScalaDays 2011 presentation on Finagle</a></li>
 <li>Twitter&#8217;s <a class="reference external" href="http://twitter.github.com/scala_school/">Scala School</a> has a section <a class="reference external" href="http://twitter.github.com/scala_school/finagle.html">introducing Finagle</a> and another <a class="reference external" href="http://twitter.github.com/scala_school/searchbird.html">constructing a distributed search engine using Finagle</a></li>
 </ul>
@@ -88,115 +87,15 @@ their behavior.</p>
 <h1>User&#8217;s guide<a class="headerlink" href="#user-s-guide" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Quickstart.html">Quickstart</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Quickstart.html#setting-up-sbt">Setting up SBT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Quickstart.html#a-minimal-http-server">A minimal HTTP server</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Quickstart.html#using-clients">Using clients</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Quickstart.html#putting-it-together">Putting it together</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="Futures.html">Concurrent Programming with Futures</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Futures.html#futures-as-containers">Futures as containers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Futures.html#sequential-composition">Sequential composition</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Futures.html#concurrent-composition">Concurrent composition</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Futures.html#recovering-from-failure">Recovering from failure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Futures.html#other-resources">Other resources</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="ServicesAndFilters.html">Services &amp; Filters</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ServicesAndFilters.html#services">Services</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ServicesAndFilters.html#filters">Filters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ServicesAndFilters.html#composing-filters-and-services">Composing filters and services</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="ServerAnatomy.html">Anatomy of a Server</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ServerAnatomy.html#transport-layer">Transport Layer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ServerAnatomy.html#server-protocol">Server Protocol</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ServerAnatomy.html#listener">Listener</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ServerAnatomy.html#server-dispatcher">Server Dispatcher</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ServerAnatomy.html#default-server">Default Server</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="ClientAnatomy.html">Anatomy of a Client</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ClientAnatomy.html#client-protocol">Client Protocol</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ClientAnatomy.html#transporter">Transporter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ClientAnatomy.html#request-dispatcher">Request Dispatcher</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ClientAnatomy.html#a-basic-client">A Basic Client</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ClientAnatomy.html#a-robust-client">A Robust Client</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ClientAnatomy.html#the-default-client">The Default Client</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="ClientStack.html">Client Stack</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ClientStack.html#load-balancing">Load Balancing</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="ClientStack.html#minimumsetcluster">MinimumSetCluster</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ClientStack.html#heapbalancer">HeapBalancer</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="ClientStack.html#connection-pooling">Connection Pooling</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="ClientStack.html#cachingpool">CachingPool</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ClientStack.html#watermarkpool">WatermarkPool</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ClientStack.html#reusingpool">ReusingPool</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="ClientStack.html#fail-fast">Fail Fast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ClientStack.html#timeouts">Timeouts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ClientStack.html#retries">Retries</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="Metrics.html">Metrics</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Metrics.html#public">Public</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#statsfilter">StatsFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#statsfactorywrapper">StatsFactoryWrapper</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#handletimefilter">HandletimeFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#defaultserver">DefaultServer</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="Metrics.html#construction">Construction</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#clientbuilder">ClientBuilder</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#statsservicefactory">StatsServiceFactory</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="Metrics.html#load-balancing">Load Balancing</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#minimumsetcluster">MinimumSetCluster</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#heapbalancer">HeapBalancer</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="Metrics.html#fail-fast">Fail Fast</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#failfastfactory">FailFastFactory</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="Metrics.html#idle-apoptosis">Idle Apoptosis</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#expiringservice">ExpiringService</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="Metrics.html#rate-limiting">Rate Limiting</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#ratelimitingfilter">RateLimitingFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#retryingfilter">RetryingFilter</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="Metrics.html#pooling">Pooling</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#cachingpool">CachingPool</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#watermarkpool">WatermarkPool</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#reusingpool">ReusingPool</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="Metrics.html#transport">Transport</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#channelconnector">ChannelConnector</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#serverbridge">ServerBridge</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#channelrequeststatshandler">ChannelRequestStatsHandler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#channelstatshandler">ChannelStatsHandler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#idlechannelhandler">IdleChannelHandler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Metrics.html#idleconnectionfilter">IdleConnectionFilter</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="FAQ.html#what-s-a-cancelledrequestexception">What&#8217;s a <cite>CancelledRequestException</cite>?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="FAQ.html#why-is-com-twitter-common-zookeeper-server-set-not-found">Why is &#8220;com.twitter.common.zookeeper#server-set&#8221; not found?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="FAQ.html#how-do-i-change-my-timeouts-in-the-finagle-6-apis">How do I change my timeouts in the Finagle 6 APIs?</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="Quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Futures.html">Concurrent Programming with Futures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ServicesAndFilters.html">Services &amp; Filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ServerAnatomy.html">Anatomy of a Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ClientAnatomy.html">Anatomy of a Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ClientStack.html">Client Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Protocols.html">Protocols</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Metrics.html">Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 </ul>
 </div>
 </div>
@@ -206,11 +105,11 @@ their behavior.</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Finagle changelog</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#x">6.x</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id37">5.x</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id56">4.x</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id58">3.x</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id60">2.x</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id63">1.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id38">5.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id57">4.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id59">3.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id61">2.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id64">1.x</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a><ul>

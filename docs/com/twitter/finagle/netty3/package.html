@@ -124,7 +124,7 @@ that yields <code><code>Out</code></code>-typed upstream messages and accepts
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Netty3Stack.html"><span class="name">Netty3Stack</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>, <span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="name">name: String</span>, <span name="pipelineFactory">pipelineFactory: ChannelPipelineFactory</span>, <span name="newDispatcher">newDispatcher: (Transport[In, Out]) ⇒ Service[Req, Rep]</span>)</span><span class="result"> extends Simple[ServiceFactory[Req, Rep]] with Product with Serializable</span>
+        <a href="Netty3Stack.html"><span class="name">Netty3Stack</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>, <span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="name">name: String</span>, <span name="pipelineFactory">pipelineFactory: ChannelPipelineFactory</span>, <span name="newDispatcher">newDispatcher: (Transport[In, Out], StatsReceiver) ⇒ Service[Req, Rep]</span>)</span><span class="result"> extends Simple[ServiceFactory[Req, Rep]] with Product with Serializable</span>
       </span>
       </h4>
       

@@ -31,7 +31,7 @@
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="com.twitter.app.App" class="extype">App</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="com.twitter.app.App" class="extype">App</span>, <span name="com.twitter.util.CloseAwaitably" class="extype">CloseAwaitably</span>, <span name="com.twitter.util.Awaitable" class="extype">Awaitable</span>[<span name="scala.Unit" class="extype">Unit</span>], <span name="com.twitter.util.Closable" class="extype">Closable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.stress.LoadBalancerTest" class="in"><span>LoadBalancerTest</span></li><li name="com.twitter.app.App" class="in"><span>App</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.stress.LoadBalancerTest" class="in"><span>LoadBalancerTest</span></li><li name="com.twitter.app.App" class="in"><span>App</span></li><li name="com.twitter.util.CloseAwaitably" class="in"><span>CloseAwaitably</span></li><li name="com.twitter.util.Awaitable" class="in"><span>Awaitable</span></li><li name="com.twitter.util.Closable" class="in"><span>Closable</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -123,6 +123,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.App#MinGrace" data-isabs="false">
+      <a id="MinGrace:Duration"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">MinGrace</span><span class="result">: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>App</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.app.App#args" data-isabs="false">
       <a id="args:Array[String]"></a>
       <h4 class="signature">
@@ -174,6 +186,78 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.App#close" data-isabs="false">
+      <a id="close(Time):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span name="com.twitter.util.Time" class="extype">Time</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>App → Closable</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
+      <a id="close(Duration):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">(<span name="after">after: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
+      <a id="close():Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.util.CloseAwaitably#closeAwaitably" data-isabs="false">
+      <a id="closeAwaitably(⇒ Future[Unit]):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">closeAwaitably</span><span class="params">(<span name="f">f: ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>CloseAwaitably</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.app.App#closeOnExit" data-isabs="false">
+      <a id="closeOnExit(Closable):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">closeOnExit</span><span class="params">(<span name="closable">closable: <span name="com.twitter.util.Closable" class="extype">Closable</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>App</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.App#defaultCloseGracePeriod" data-isabs="false">
+      <a id="defaultCloseGracePeriod:Duration"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">defaultCloseGracePeriod</span><span class="result">: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>App</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.stress.LoadBalancerTest#doTest" data-isabs="false">
       <a id="doTest(Duration,Int,PartialFunction[(Int, Seq[EmbeddedServer]), Unit]):Unit"></a>
       <h4 class="signature">
@@ -265,7 +349,7 @@
       <a id="init(⇒ Unit):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -285,6 +369,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.util.CloseAwaitably#isReady" data-isabs="false">
+      <a id="isReady(CanAwait):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isReady</span><span class="params">(<span class="implicit">implicit </span><span name="permit">permit: <span name="com.twitter.util.Awaitable.CanAwait" class="extype">CanAwait</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CloseAwaitably → Awaitable</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.stress.LoadBalancerTest#latencyFlag" data-isabs="false">
       <a id="latencyFlag:Flag[Duration]"></a>
       <h4 class="signature">
@@ -385,7 +481,7 @@
       <a id="onExit(⇒ Unit):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -397,7 +493,7 @@
       <a id="postmain(⇒ Unit):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -409,7 +505,7 @@
       <a id="premain(⇒ Unit):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -417,6 +513,30 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>App</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.util.CloseAwaitably#ready" data-isabs="false">
+      <a id="ready(Duration)(CanAwait):com.twitter.finagle.stress.LoadBalancerTest.type"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ready</span><span class="params">(<span name="timeout">timeout: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="permit">permit: <span name="com.twitter.util.Awaitable.CanAwait" class="extype">CanAwait</span></span>)</span><span class="result">: com.twitter.finagle.stress.LoadBalancerTest.type</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CloseAwaitably → Awaitable</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.util.CloseAwaitably#result" data-isabs="false">
+      <a id="result(Duration)(CanAwait):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">result</span><span class="params">(<span name="timeout">timeout: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="permit">permit: <span name="com.twitter.util.Awaitable.CanAwait" class="extype">CanAwait</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CloseAwaitably → Awaitable</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.stress.LoadBalancerTest#runSuite" data-isabs="false">
       <a id="runSuite():Unit"></a>
       <h4 class="signature">
@@ -531,6 +651,12 @@
         <div id="inheritedMembers">
         <div name="com.twitter.app.App" class="parent">
               <h3>Inherited from <span name="com.twitter.app.App" class="extype">App</span></h3>
+            </div><div name="com.twitter.util.CloseAwaitably" class="parent">
+              <h3>Inherited from <span name="com.twitter.util.CloseAwaitably" class="extype">CloseAwaitably</span></h3>
+            </div><div name="com.twitter.util.Awaitable" class="parent">
+              <h3>Inherited from <span name="com.twitter.util.Awaitable" class="extype">Awaitable</span>[<span name="scala.Unit" class="extype">Unit</span>]</h3>
+            </div><div name="com.twitter.util.Closable" class="parent">
+              <h3>Inherited from <span name="com.twitter.util.Closable" class="extype">Closable</span></h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

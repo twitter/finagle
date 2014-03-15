@@ -1,5 +1,9 @@
 @import url("flasky.css");
 
+div.sphinxsidebar * {
+  word-wrap: break-word;
+}
+
 img.logo {
     display: block;
     margin-left: auto;
@@ -12,9 +16,22 @@ div.body h3,
 div.body h4,
 div.body h5,
 div.body h6 {
-    font-weight: bold;
-    font-style: italic;
-    color: #7f7f7f;
+  font-weight: bold;
+  font-style: italic;
+  color: #7f7f7f;
+}
+
+div.body h2 {
+  font-size: 140%;
+}
+
+div.body h3 {
+  font-size: 115%;
+  font-weight: normal;
+}
+
+div.body h4 {
+  font-size: 100%;
 }
 
 ul {

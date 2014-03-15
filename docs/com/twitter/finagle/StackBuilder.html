@@ -68,7 +68,7 @@ a new stack).
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">StackBuilder</span><span class="params">(<span name="id">id: String</span>, <span name="end">end: T</span>)</span>
+        <span class="name">StackBuilder</span><span class="params">(<span name="headRole">headRole: <a name="com.twitter.finagle.Stack.Role" class="extype" href="Stack$$Role.html">Role</a></span>, <span name="end">end: T</span>)</span>
       </span>
       </h4>
       
@@ -318,14 +318,14 @@ a new stack).
       <p class="shortcomment cmt">Push a <a name="com.twitter.finagle.Stackable" class="extype" href="Stackable.html">Stackable</a> module onto
 the stack.</p>
     </li><li visbl="pub" name="com.twitter.finagle.StackBuilder#push" data-isabs="false">
-      <a id="push[U](String,U)(CanStackFrom[U, T]):StackBuilder.this.type"></a>
+      <a id="push[U](Role,U)(CanStackFrom[U, T]):StackBuilder.this.type"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">push</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="id">id: String</span>, <span name="el">el: U</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="csf">csf: <a name="com.twitter.finagle.CanStackFrom" class="extype" href="CanStackFrom.html">CanStackFrom</a>[U, T]</span>)</span><span class="result">: StackBuilder.this.type</span>
+        <span class="name">push</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="headRole">headRole: <a name="com.twitter.finagle.Stack.Role" class="extype" href="Stack$$Role.html">Role</a></span>, <span name="el">el: U</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="csf">csf: <a name="com.twitter.finagle.CanStackFrom" class="extype" href="CanStackFrom.html">CanStackFrom</a>[U, T]</span>)</span><span class="result">: StackBuilder.this.type</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Push the stack element <code>el</code> onto the stack; el must conform to

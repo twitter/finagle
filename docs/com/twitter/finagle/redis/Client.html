@@ -1104,6 +1104,25 @@ Throws an exception if the key does not refer to a set.</p><div class="fullcomme
 Throws an exception if the key does not refer to a set.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the number of elements in the set.  Unassigned keys are considered
 empty sets.
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Sets" class="extype" href="Sets.html">Sets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Sets#sInter" data-isabs="false">
+      <a id="sInter(Seq[ChannelBuffer]):Future[Set[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sInter</span><span class="params">(<span name="keys">keys: Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.collection.immutable.Set" class="extype">Set</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns the members of the set resulting from the intersection of all
+the given sets.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the members of the set resulting from the intersection of all
+the given sets.</p><p>Keys that do not exist are considered to be empty sets. With one of
+the keys being an empty set, the resulting set is also empty
+(since set intersection with an empty set always results in an empty set).</p><p>Throws an exception if the <code>keys</code> Seq is empty or if any of the keys
+passed as params are empty.
+</p></div><dl class="paramcmts block"><dt class="param">keys</dt><dd class="cmt"><p>list of keys to intersect</p></dd><dt>returns</dt><dd class="cmt"><p>set of members from the resulting intersection
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Sets" class="extype" href="Sets.html">Sets</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Sets#sIsMember" data-isabs="false">
       <a id="sIsMember(ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
       <h4 class="signature">

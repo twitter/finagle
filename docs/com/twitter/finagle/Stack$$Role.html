@@ -2,21 +2,21 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.redis.protocol.KeysCommand</title>
+          <title>com.twitter.finagle.Stack.Role</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../lib/template.css" />
+      <script type="text/javascript" src="../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
     
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
-        <img src="../../../../../lib/trait_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.redis" class="extype" href="../package.html">redis</a>.<a name="com.twitter.finagle.redis.protocol" class="extype" href="package.html">protocol</a></p>
-        <h1>KeysCommand</h1>
+        <img src="../../../lib/trait_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../package.html">com</a>.<a name="com.twitter" class="extype" href="../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="package.html">finagle</a>.<a name="com.twitter.finagle.Stack" class="extype" href="Stack$.html">Stack</a></p>
+        <h1>Role</h1>
       </div>
 
       <h4 class="signature" id="signature">
@@ -25,16 +25,16 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">KeysCommand</span><span class="result"> extends <a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="Command.html">Command</a></span>
+        <span class="name">Role</span><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Base trait for Stack roles. A stack's role is indicative of its
+functionality. Roles provide a way to group similarly-purposed stacks and
+slot stack elements into specific usages.</p><p>TODO: CSL-869
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="Command.html">Command</a>, <a name="com.twitter.finagle.redis.protocol.RedisMessage" class="extype" href="RedisMessage.html">RedisMessage</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
-        </div><div class="toggleContainer block">
-          <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.redis.protocol.Del" class="extype" href="Del.html">Del</a>, <a name="com.twitter.finagle.redis.protocol.MGet" class="extype" href="MGet.html">MGet</a>, <a name="com.twitter.finagle.redis.protocol.MSet" class="extype" href="MSet.html">MSet</a>, <a name="com.twitter.finagle.redis.protocol.MSetNx" class="extype" href="MSetNx.html">MSetNx</a>, <a name="com.twitter.finagle.redis.protocol.MultiSet" class="extype" href="MultiSet.html">MultiSet</a>, <a name="com.twitter.finagle.redis.protocol.SInter" class="extype" href="SInter.html">SInter</a>, <a name="com.twitter.finagle.redis.protocol.StrictKeysCommand" class="extype" href="StrictKeysCommand.html">StrictKeysCommand</a>, <a name="com.twitter.finagle.redis.protocol.Watch" class="extype" href="Watch.html">Watch</a>, <a name="com.twitter.finagle.redis.protocol.ZInterStore" class="extype" href="ZInterStore.html">ZInterStore</a>, <a name="com.twitter.finagle.redis.protocol.ZStore" class="extype" href="ZStore.html">ZStore</a>, <a name="com.twitter.finagle.redis.protocol.ZUnionStore" class="extype" href="ZUnionStore.html">ZUnionStore</a></div>
+          <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -48,7 +48,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.redis.protocol.KeysCommand" class="in"><span>KeysCommand</span></li><li name="com.twitter.finagle.redis.protocol.Command" class="in"><span>Command</span></li><li name="com.twitter.finagle.redis.protocol.RedisMessage" class="in"><span>RedisMessage</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.Stack.Role" class="in"><span>Role</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -62,49 +62,10 @@
 
         
 
-        <div class="values members" id="values">
-              <h3>Abstract Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.redis.protocol.Command#command" data-isabs="true">
-      <a id="command:String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">command</span><span class="result">: String</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="Command.html">Command</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.KeysCommand#keys" data-isabs="true">
-      <a id="keys:Seq[ChannelBuffer]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">keys</span><span class="result">: Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.RedisMessage#toChannelBuffer" data-isabs="true">
-      <a id="toChannelBuffer:ChannelBuffer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">toChannelBuffer</span><span class="result">: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.protocol.RedisMessage" class="extype" href="RedisMessage.html">RedisMessage</a></dd></dl></div>
-    </li></ol>
-            </div>
+        
 
         <div class="values members" id="values">
-              <h3>Concrete Value Members</h3>
+              <h3>Value Members</h3>
               <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
       <a id="!=(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -188,7 +149,7 @@
         <span class="name">clone</span><span class="params">()</span><span class="result">: AnyRef</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
@@ -227,7 +188,7 @@
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
@@ -315,19 +276,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.RedisMessage#toByteArray" data-isabs="false">
-      <a id="toByteArray:Array[Byte]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">toByteArray</span><span class="result">: <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.protocol.RedisMessage" class="extype" href="RedisMessage.html">RedisMessage</a></dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.Stack.Role#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -338,19 +287,7 @@
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="prt" name="com.twitter.finagle.redis.protocol.KeysCommand#validate" data-isabs="false">
-      <a id="validate():Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">validate</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Stack.Role" class="extype" href="">Role</a> → AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -403,11 +340,7 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="com.twitter.finagle.redis.protocol.Command" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="Command.html">Command</a></h3>
-            </div><div name="com.twitter.finagle.redis.protocol.RedisMessage" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.redis.protocol.RedisMessage" class="extype" href="RedisMessage.html">RedisMessage</a></h3>
-            </div><div name="scala.AnyRef" class="parent">
+        <div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">
               <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>

@@ -25,7 +25,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Netty3Stack</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>, <span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="name">name: String</span>, <span name="pipelineFactory">pipelineFactory: <span name="org.jboss.netty.channel.ChannelPipelineFactory" class="extype">ChannelPipelineFactory</span></span>, <span name="newDispatcher">newDispatcher: (<a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[In, Out]) ⇒ <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]</span>)</span><span class="result"> extends <a name="com.twitter.finagle.Stack.Simple" class="extype" href="../Stack$$Simple.html">Simple</a>[<a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep]] with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">Netty3Stack</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>, <span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="name">name: String</span>, <span name="pipelineFactory">pipelineFactory: <span name="org.jboss.netty.channel.ChannelPipelineFactory" class="extype">ChannelPipelineFactory</span></span>, <span name="newDispatcher">newDispatcher: (<a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[In, Out], <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a>) ⇒ <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]</span>)</span><span class="result"> extends <a name="com.twitter.finagle.Stack.Simple" class="extype" href="../Stack$$Simple.html">Simple</a>[<a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep]] with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
@@ -65,7 +65,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Netty3Stack</span><span class="params">(<span name="name">name: String</span>, <span name="pipelineFactory">pipelineFactory: <span name="org.jboss.netty.channel.ChannelPipelineFactory" class="extype">ChannelPipelineFactory</span></span>, <span name="newDispatcher">newDispatcher: (<a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[In, Out]) ⇒ <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]</span>)</span>
+        <span class="name">Netty3Stack</span><span class="params">(<span name="name">name: String</span>, <span name="pipelineFactory">pipelineFactory: <span name="org.jboss.netty.channel.ChannelPipelineFactory" class="extype">ChannelPipelineFactory</span></span>, <span name="newDispatcher">newDispatcher: (<a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[In, Out], <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a>) ⇒ <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]</span>)</span>
       </span>
       </h4>
       
@@ -255,18 +255,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.netty3.Netty3Stack" class="extype" href="">Netty3Stack</a> → AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Stack.Simple#id" data-isabs="false">
-      <a id="id:String"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack.Simple#headRole" data-isabs="false">
+      <a id="headRole:Role"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">id</span><span class="result">: String</span>
+        <span class="name">headRole</span><span class="result">: <a name="com.twitter.finagle.Stack.Role" class="extype" href="../Stack$$Role.html">Role</a></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Stack.Simple" class="extype" href="../Stack$$Simple.html">Simple</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Stack.Simple" class="extype" href="../Stack$$Simple.html">Simple</a> → <a name="com.twitter.finagle.Stackable" class="extype" href="../Stackable.html">Stackable</a></dd></dl></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -316,14 +316,14 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.netty3.Netty3Stack#newDispatcher" data-isabs="false">
-      <a id="newDispatcher:(Transport[In, Out]) ⇒ Service[Req, Rep]"></a>
+      <a id="newDispatcher:(Transport[In, Out], StatsReceiver) ⇒ Service[Req, Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">newDispatcher</span><span class="result">: (<a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[In, Out]) ⇒ <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]</span>
+        <span class="name">newDispatcher</span><span class="result">: (<a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[In, Out], <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a>) ⇒ <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]</span>
       </span>
       </h4>
       

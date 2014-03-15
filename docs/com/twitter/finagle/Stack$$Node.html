@@ -25,7 +25,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Node</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="id">id: String</span>, <span name="mk">mk: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a>, <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]) ⇒ <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>, <span name="next">next: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>)</span><span class="result"> extends <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T] with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">Node</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="headRole">headRole: <a name="com.twitter.finagle.Stack.Role" class="extype" href="Stack$$Role.html">Role</a></span>, <span name="mk">mk: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a>, <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]) ⇒ <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>, <span name="next">next: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>)</span><span class="result"> extends <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T] with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
@@ -67,7 +67,7 @@ some way.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Node</span><span class="params">(<span name="id">id: String</span>, <span name="mk">mk: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a>, <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]) ⇒ <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>, <span name="next">next: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>)</span>
+        <span class="name">Node</span><span class="params">(<span name="headRole">headRole: <a name="com.twitter.finagle.Stack.Role" class="extype" href="Stack$$Role.html">Role</a></span>, <span name="mk">mk: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a>, <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]) ⇒ <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>, <span name="next">next: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>)</span>
       </span>
       </h4>
       
@@ -131,6 +131,19 @@ some way.
 with <code>right</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Produce a new stack representing the concatenation of <code>this</code>
 with <code>right</code>. Note that this replaces the terminating element of
 <code>this</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stack</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack#+:" data-isabs="false">
+      <a id="+:(Stackable[T]):Stack[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $plus$colon">+:</span><span class="params">(<span name="stk">stk: <a name="com.twitter.finagle.Stackable" class="extype" href="Stackable.html">Stackable</a>[T]</span>)</span><span class="result">: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">A copy of this Stack with <code>stk</code> prepended.</p><div class="fullcomment"><div class="comment cmt"><p>A copy of this Stack with <code>stk</code> prepended.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stack</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
       <a id="==(AnyRef):Boolean"></a>
@@ -271,18 +284,21 @@ with <code>right</code>. Note that this replaces the terminating element of
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Stack.Node" class="extype" href="">Node</a> → AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Stack.Node#id" data-isabs="false">
-      <a id="id:String"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack.Node#headRole" data-isabs="false">
+      <a id="headRole:Role"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">id</span><span class="result">: String</span>
+        <span class="name">headRole</span><span class="result">: <a name="com.twitter.finagle.Stack.Role" class="extype" href="Stack$$Role.html">Role</a></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">The <a name="com.twitter.finagle.Stack.Role" class="extype" href="Stack$$Role.html">Role</a> that the head element of
+this Stack can serve.</p><div class="fullcomment"><div class="comment cmt"><p>The <a name="com.twitter.finagle.Stack.Role" class="extype" href="Stack$$Role.html">Role</a> that the head element of
+this Stack can serve.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Stack.Node" class="extype" href="">Node</a> → Stack</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -420,6 +436,22 @@ configuration.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Stack.Node" class="extype" href="">Node</a> → Product</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack#replace" data-isabs="false">
+      <a id="replace(Role,Stackable[T]):Stack[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">replace</span><span class="params">(<span name="targetRole">targetRole: <a name="com.twitter.finagle.Stack.Role" class="extype" href="Stack$$Role.html">Role</a></span>, <span name="replacement">replacement: <a name="com.twitter.finagle.Stackable" class="extype" href="Stackable.html">Stackable</a>[T]</span>)</span><span class="result">: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Replace any stack elements matching the argument role with a given
+<a name="com.twitter.finagle.Stackable" class="extype" href="Stackable.html">Stackable</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Replace any stack elements matching the argument role with a given
+<a name="com.twitter.finagle.Stackable" class="extype" href="Stackable.html">Stackable</a>. If no elements match the
+role, then an unmodified stack is returned.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stack</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">

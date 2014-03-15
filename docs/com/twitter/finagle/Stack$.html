@@ -67,7 +67,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Stack$$Leaf.html"><span class="name">Leaf</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="id">id: String</span>, <span name="t">t: T</span>)</span><span class="result"> extends Stack[T] with Product with Serializable</span>
+        <a href="Stack$$Leaf.html"><span class="name">Leaf</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="headRole">headRole: Role</span>, <span name="t">t: T</span>)</span><span class="result"> extends Stack[T] with Product with Serializable</span>
       </span>
       </h4>
       <p class="comment cmt">A static stack element; necessarily the last.</p>
@@ -91,7 +91,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Stack$$Node.html"><span class="name">Node</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="id">id: String</span>, <span name="mk">mk: (Params, Stack[T]) ⇒ Stack[T]</span>, <span name="next">next: Stack[T]</span>)</span><span class="result"> extends Stack[T] with Product with Serializable</span>
+        <a href="Stack$$Node.html"><span class="name">Node</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="headRole">headRole: Role</span>, <span name="mk">mk: (Params, Stack[T]) ⇒ Stack[T]</span>, <span name="next">next: Stack[T]</span>)</span><span class="result"> extends Stack[T] with Product with Serializable</span>
       </span>
       </h4>
       <p class="comment cmt">Nodes materialize by transforming the underlying stack in
@@ -121,6 +121,18 @@ parameters for stack configuration.</p>
       </span>
       </h4>
       <p class="comment cmt">A parameter map.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack.Role" data-isabs="true">
+      <a id="Role:Role"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Stack$$Role.html"><span class="name">Role</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Base trait for Stack roles.</p>
     </li><li visbl="pub" name="com.twitter.finagle.Stack.Simple" data-isabs="true">
       <a id="Simple:Simple[T]"></a>
       <h4 class="signature">

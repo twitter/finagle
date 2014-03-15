@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Protocols &mdash; Finagle 6.13.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '6.13.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Finagle 6.13.0 documentation" href="index.html" />
+    <link rel="next" title="Metrics" href="Metrics.html" />
+    <link rel="prev" title="Client Stack" href="ClientStack.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="Metrics.html" title="Metrics"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ClientStack.html" title="Client Stack"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Finagle</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="protocols">
+<h1>Protocols<a class="headerlink" href="#protocols" title="Permalink to this headline">¶</a></h1>
+<p>The core of Finagle is protocol-agnostic, meaning its internals provide an
+extensible RPC subsystem without defining any details of specific
+client-server protocols. Thus in order to provide usable APIs for clients and
+servers, there are a number of Finagle subprojects that implement common
+protocols. A few of these protocol implementations are documented below.</p>
+<div class="section" id="thrift">
+<h2>Thrift<a class="headerlink" href="#thrift" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://thrift.apache.org/">Apache Thrift</a> is an interface definition
+language. With its associated code generator(s) and binary communication
+protocol, Thrift facilitates the development of scalable RPC systems. By
+“scalable”, we specifically mean that IDLs can be shared, allowing developers
+to define schemas and expose network services that clients access using code
+generated for their preferred programming language.</p>
+<p>The IDL is the core of Thrift. IDLs provide clear service specifications that we
+can used to implement clients and servers. This means that different
+implementations of servers can be swapped out transparently, since they all
+expose the same interface, regardless of language.</p>
+<p>Thrift was originally built at Facebook. For more details on the original design,
+check out the <a class="reference external" href="http://thrift.apache.org/static/files/thrift-20070401.pdf">whitepaper</a>.</p>
+<p><cite>finagle-thrift</cite> is used extensively within Twitter, but to meet the needs of our
+service-oriented architecture we had to extend the Thrift protocol. We
+introduced the notion of “Twitter-upgraded Thrift”, or TTwitter, which augments
+the protocol with support for our internal infrastructure. Specifically, we tack
+on a request header containing Zipkin tracing info, Finagle ClientId strings, and
+Wily delegations. In order to maintain backwards compatibility, TTwitter clients
+perform protocol negotiation upon connection and will downgrade to raw TBinary
+Thrift if servers are not using the upgraded protocol.</p>
+<p>By default, Finagle uses the Thrift framed codec and the binary protocol for
+serialization. At Twitter, we use our open-source Thrift code-generator called
+<a class="reference external" href="http://twitter.github.io/scrooge/">Scrooge</a>. Scrooge is written in Scala and
+can generate source code in Scala or Java.</p>
+</div>
+<div class="section" id="mux">
+<h2>Mux<a class="headerlink" href="#mux" title="Permalink to this headline">¶</a></h2>
+<p><strong>What is Mux?</strong></p>
+<p>At its core, Mux is a generic RPC multiplexing protocol. Although its primary
+implementation is as a Finagle﻿ subproject, Mux is not Finagle-specific. In the
+same way that HTTP is an application-layer protocol with ﻿﻿﻿numerous implementations
+in a variety of languages, Mux is a session-layer protocol with a Scala
+implementation in the finagle-mux package. Also since it is a purely
+session-layer protocol, Mux can be used in conjunction with protocols from other
+layers of the <a class="reference external" href="http://en.wikipedia.org/wiki/OSI_model">OSI</a> model. For example,
+Finagle currently has an implementation of the Thrift protocol on top of Mux,
+available in the <cite>finagle-thriftmux</cite> package.</p>
+<p>Much of the future work on Finagle will involve improvements to Mux and feature
+development targeting services that support it. The wire format and semantics of
+the Mux protocol are documented in <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-mux/src/main/scala/com/twitter/finagle/mux/package.scala">its source
+code</a>.</p>
+<p><strong>Why is RPC multiplexing important?</strong></p>
+<p>Some important consequences of multiplexing at the RPC level:</p>
+<ul class="simple">
+<li>One network connection per client-server session</li>
+<li>Maximization of available bandwidth without incurring the cost of opening
+additional sockets</li>
+<li>Elimination of head-of-line blocking</li>
+<li>Explicit queue management</li>
+</ul>
+<p><strong>Mux as a pure session-layer protocol</strong></p>
+<p>In OSI terminology, Mux is a pure
+session layer protocol. As such, it provides a rich set of session control
+features:</p>
+<p><em>Session Liveness Detection</em></p>
+<p>In the past, Finagle has relied on mechanisms like failure accrual to detect the
+health of an endpoint. These mechanisms require configuration which tended to
+vary across disparate services and endpoints. Mux introduces a principled way to
+gauge session health via ping messages. This allows Finagle to provide more
+generic facilities for liveness detection that require little-to-no
+configuration.</p>
+<p><em>Request Cancellation</em></p>
+<p>Without proper protocol support, request cancellation in Finagle has historically
+been difficult to implement efficiently. For example, something as simple as
+timing out a request requires closing its TCP connection. Mux gives us granular
+control over request cancellation without having to go so far as to terminate a
+session.</p>
+<p><em>Ability to advertise session windows</em></p>
+<p>Mux enables servers to advertise availability on a per-window basis. This is
+useful for establishing explicit queueing policies, leading the way to
+intelligent back-pressure, slow start, and GC-avoidance.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
+  <img class="logo" src="_static/logo_small.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Protocols</a><ul>
+<li><a class="reference internal" href="#thrift">Thrift</a></li>
+<li><a class="reference internal" href="#mux">Mux</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="ClientStack.html" title="previous chapter">Client Stack</a></li>
+      <li>Next: <a href="Metrics.html" title="next chapter">Metrics</a></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2013 Twitter, Inc.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  
+  </body>
+</html>
