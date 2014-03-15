@@ -81,8 +81,15 @@ private[this] class CheckHttpRequestFilter extends CheckRequestFilter[HttpReques
 }
 
 
+/**
+ * @param _compressionLevel The compression level to use. If passed the default value (-1) then use
+ * [[com.twitter.finagle.http.codec.TextualContentCompressor TextualContentCompressor]] which will
+ * compress text-like content-types with the default compression level (6). Otherwise, use
+ * [[org.jboss.netty.handler.codec.http.HttpContentCompressor HttpContentCompressor]] for all
+ * content-types with specified compression level.
+ */
 case class Http(
-    _compressionLevel: Int = 0,
+    _compressionLevel: Int = -1,
     _maxRequestSize: StorageUnit = 5.megabytes,
     _maxResponseSize: StorageUnit = 5.megabytes,
     _decompressionEnabled: Boolean = true,
@@ -157,9 +164,9 @@ case class Http(
           pipeline.addLast("httpCodec", new SafeHttpServerCodec(maxInitialLineLengthInBytes, maxHeaderSizeInBytes, maxRequestSizeInBytes))
 
           if (_compressionLevel > 0) {
-            pipeline.addLast(
-              "httpCompressor",
-              new HttpContentCompressor(_compressionLevel))
+            pipeline.addLast("httpCompressor", new HttpContentCompressor(_compressionLevel))
+          } else if (_compressionLevel == -1) {
+            pipeline.addLast("httpCompressor", new TextualContentCompressor)
           }
 
           // Response to ``Expect: Continue'' requests.

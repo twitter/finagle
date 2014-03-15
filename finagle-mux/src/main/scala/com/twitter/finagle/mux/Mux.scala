@@ -87,6 +87,37 @@ package exp {
       def boundAddress = listener.boundAddress
     }
   }
+
+  private[finagle]
+  object MuxNetty3Stack extends Netty3Stack[Any, Any, ChannelBuffer, ChannelBuffer](
+    "mux",
+    mux.PipelineFactory,
+    (transport, statsReceiver) =>
+      new mux.ClientDispatcher(transport.cast[ChannelBuffer, ChannelBuffer], statsReceiver)
+  )
+
+  private[finagle]
+  object ReusingPoolModule
+    extends Stack.Simple[ServiceFactory[ChannelBuffer, ChannelBuffer]](StackClient.Role.ReusingPool)
+  {
+    def make(params: Stack.Params, nextFac: ServiceFactory[ChannelBuffer, ChannelBuffer]) = {
+      val StackClient.Stats(statsReceiver, _) = params[StackClient.Stats]
+      new ReusingPool(nextFac, statsReceiver.scope("reusingpool"))
+    }
+  }
+
+  private[finagle]
+  class MuxClient(client: StackClient[ChannelBuffer, ChannelBuffer])
+    extends RichStackClient[ChannelBuffer, ChannelBuffer, MuxClient](client)
+  {
+    protected def newRichClient(client: StackClient[ChannelBuffer, ChannelBuffer]) =
+      new MuxClient(client)
+  }
+
+  object MuxClient extends MuxClient(new StackClient({
+    val reusingClientStack = StackClient.clientStack[ChannelBuffer, ChannelBuffer]
+      .replace(StackClient.Role.Pool, ReusingPoolModule)
+
+    reusingClientStack ++ (MuxNetty3Stack +: StackClient.nilStack)
+  }))
 }
-
-

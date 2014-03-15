@@ -9,7 +9,7 @@ import org.apache.zookeeper.data.Stat
  * commands are being issued, together with
  * their responses.
  */
-private class ZkSnooper(self: Zk, print: String => Unit) extends Zk {
+private[serverset2] class ZkSnooper(self: Zk, print: String => Unit) extends Zk {
   protected[serverset2] implicit val timer: Timer = self.timer
 
   private[this] def printOp[U](name: String, op: => Future[U], args: String*): Future[U] = {

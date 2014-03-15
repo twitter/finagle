@@ -3,10 +3,19 @@ package com.twitter.finagle.tracing
 import com.twitter.finagle.{Context, ContextHandler}
 import com.twitter.finagle.util.ByteArrays
 import com.twitter.io.Buf
+import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 
 private[finagle] object TraceContext {
   val Key = Buf.Utf8("com.twitter.finagle.tracing.TraceContext")
   val KeyBytes = Context.keyBytes(Key)
+  val KeyBytesChannelBuffer = ChannelBuffers.wrappedBuffer(KeyBytes)
+
+  /**
+   * Serialize a TraceId into a tuple of key->value ChannelBuffers. Useful for
+   * piecing together context pairs to give to the construct of `Tdispatch`.
+   */
+  private[finagle] def newKVTuple(traceId: TraceId): (ChannelBuffer, ChannelBuffer) =
+    KeyBytesChannelBuffer.duplicate() -> ChannelBuffers.wrappedBuffer(TraceId.serialize(traceId))
 }
 
 /**
@@ -49,21 +58,6 @@ private[finagle] class TraceContext extends ContextHandler {
     Trace.setId(traceId)
   }
 
-  def emit(): Option[Buf] = {
-    val flags = Trace.id._sampled match {
-      case None =>
-        Trace.id.flags
-      case Some(true) =>
-        Trace.id.flags.setFlag(Flags.SamplingKnown | Flags.Sampled)
-      case Some(false) =>
-        Trace.id.flags.setFlag(Flags.SamplingKnown)
-    }
-
-    val bytes = new Array[Byte](32)
-    ByteArrays.put64be(bytes, 0, Trace.id.spanId.toLong)
-    ByteArrays.put64be(bytes, 8, Trace.id.parentId.toLong)
-    ByteArrays.put64be(bytes, 16, Trace.id.traceId.toLong)
-    ByteArrays.put64be(bytes, 24, flags.toLong)
-    Some(Buf.ByteArray(bytes))
-  }
+  def emit(): Option[Buf] =
+    Some(Buf.ByteArray(TraceId.serialize(Trace.id)))
 }

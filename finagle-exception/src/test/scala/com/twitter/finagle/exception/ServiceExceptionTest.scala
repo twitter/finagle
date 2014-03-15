@@ -1,5 +1,6 @@
 package com.twitter.finagle.exception
 
+import com.twitter.finagle.core.util.InetAddressUtil
 import com.twitter.streamyj.Streamy
 import com.twitter.util.{GZIPStringEncoder, Time}
 import java.lang.{Throwable, StackTraceElement => javaSTE}
@@ -17,7 +18,7 @@ private[exception] class TestServiceException(
   time: Option[Time] = None,
   traceId: Option[Long] = None,
   clientAddress: Option[String] = None,
-  sourceAddress: Option[String] = Some(InetAddress.getLocalHost.getHostName),
+  sourceAddress: Option[String] = Some(InetAddressUtil.Loopback.getHostName),
   cardinality: Option[Int] = None) {
 
   private val ste = new javaSTE("badclass", "badmethod", "badfile", 42)

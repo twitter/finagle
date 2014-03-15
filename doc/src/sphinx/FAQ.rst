@@ -1,8 +1,11 @@
 FAQ
 ===
 
-What's a `CancelledRequestException`?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+General Finagle FAQ
+-------------------
+
+What's a CancelledRequestException?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When a client connected to a Finagle server disconnects, the server raises
 a *cancellation* interrupt on the pending Future. This is done to
@@ -25,13 +28,13 @@ You can disable this behavior by using the :API:`MaskCancelFilter <com.twitter.f
 	val maskedService = masked andThen service
 
 Note that most protocols do not natively support request cancellations
-(though modern RPC protocols like :API:`Mux <com.twitter.finagle.Mux$>`
+(though modern RPC protocols like :doc:`Mux <Protocols>`
 do). In practice, this means that for these protocols, we need to disconnect
 the client to signal cancellation, which in turn can cause undue connection
 churn.
 
-Why is "com.twitter.common.zookeeper#server-set" not found?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Why is com.twitter.common.zookeeper#server-set not found?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Some of our libraries still aren't published to maven central.  If you add
 
@@ -43,11 +46,11 @@ to your sbt configuration, it will be able to pick up the libraries which are
 published externally, but not yet to maven central.
 
 How do I change my timeouts in the Finagle 6 APIs?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We introduced a new, preferred API for constructing Finagle `Client`s and `Server`s.
-Where the old API used `ServerBuilder`/`ClientBuilder` with Codecs, the new APIs use
-`Proto.newClient`.
+We introduced a new, preferred API for constructing Finagle ``Client``\s and ``Server``\s.
+Where the old API used ``ServerBuilder``\/``ClientBuilder`` with Codecs, the new APIs use
+``Proto.newClient``.
 
 Old APIs:
 
@@ -70,7 +73,7 @@ for changing the API this way.
 
 Timeouts are typically used in two cases:
 
-A.  Liveness detection (tcp connect timeout)
+A.  Liveness detection (TCP connect timeout)
 B.  Application requirements (global timeout)
 
 For liveness detection, it is actually fine for timeouts to be long.  We have a
@@ -106,3 +109,56 @@ Of course, there are some points where there are rough edges, and we haven't
 figured out exactly what the right default should be.  We're actively looking
 for input, and would love for the greater Finagle community to help us find good
 defaults.
+
+Mux-specific FAQ
+----------------
+
+What service behavior will change when upgrading to Mux?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*Connecting Pooling Metrics*
+
+With Mux, Finagle multiplexes several requests onto a single connection. As a
+consequence, traditional forms of connection-pooling are no longer required. Thus
+Mux employs `com.twitter.finagle.pool.ReusingPool <http://twitter.github.io/finagle/docs/#com.twitter.finagle.pool.ReusingPool>`_,
+which exposes new stats:
+
+- ``connects``, ``connections``, and ``closechans`` stats should drop, since
+  there will be less channel opening and closing.
+- ``connection_duration``, ``connection_received_bytes``, and
+  ``connection_sent_bytes`` stats should increase, since connections become more
+  long-lived.
+- ``connect_latency_ms`` and ``failed_connect_latency_ms`` stats may become
+  erratic because their sampling will become more sparse.
+- ``pool_cached``, ``pool_waiters``, ``pool_num_waited``, ``pool_size`` stats all
+  pertain to connection pool implementations not used by Mux, so they disappear
+  from stats output.
+
+*ClientBuilder configuration*
+
+Certain `ClientBuilder <http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ClientBuilder>`_
+settings related to connection pooling become obsolete:
+``hostConnectionCoresize``, ``hostConnectionLimit``, ``hostConnectionIdleTime``,
+``hostConnectionMaxWaiters``, ``hostConnectionMaxIdleTime``,
+``hostConnectionMaxLifeTime``, and ``hostConnectionBufferSize``
+
+*Server Connection Stats*
+
+The server-side connection model changes as well. Expect the following stats to
+be impacted:
+
+- ``connects``, ``connections``, and ``closechans`` stats should drop.
+- ``connection_duration``, ``connection_received_bytes``, and
+  ``connection_sent_bytes`` should increase.
+- Obsolete stats: ``idle/idle``, ``idle/refused``, and ``idle/closed``
+
+*ServerBuilder configuration*
+Certain `ServerBuilder <http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ServerBuilder>`_
+connection management settings become obsolete: ``openConnectionsThresholds``,
+``hostConnectionMaxIdleTime``, and ``hostConnectionMaxLifeTime``.
+
+What is ThriftMux?
+~~~~~~~~~~~~~~~~~~
+
+`ThriftMux <http://twitter.github.io/finagle/docs/#com.twitter.finagle.ThriftMux$>`_
+is an implementation of the Thrift protocol built on top of Mux.

@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Var, Updatable}
+import com.twitter.util.{RandomSocket, Var, Updatable}
 import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -137,23 +137,25 @@ class DtabTest extends FunSuite {
   }
 
   test("Dtab.delegated(Dtab)") {
+    val port1 = RandomSocket.nextPort()
+    val port2 = RandomSocket.nextPort()
     val d1 = Dtab.empty
       .delegated("/foo", "/bar")
     
     val d2 = Dtab.empty
       .delegated("/foo", "/biz")
-      .delegated("/biz", "inet!:8080")
-      .delegated("/bar", "inet!:9090")
+      .delegated("/biz", "inet!:" + port1)
+      .delegated("/bar", "inet!:" + port2)
 
     (d1 delegated d2).bind("/foo") match {
       case Var.Sampled(Addr.Bound(s)) if s.size == 1 =>
-        assert(s.head === new InetSocketAddress(8080))
+        assert(s.head === new InetSocketAddress(port1))
       case _ => fail()
     }
     
     (d2 delegated d1).bind("/foo") match {
       case Var.Sampled(Addr.Bound(s)) if s.size == 1 =>
-        assert(s.head === new InetSocketAddress(9090))
+        assert(s.head === new InetSocketAddress(port2))
       case _ => fail()
     }
   }

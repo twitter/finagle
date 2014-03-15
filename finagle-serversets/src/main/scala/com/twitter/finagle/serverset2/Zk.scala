@@ -14,8 +14,8 @@ import org.apache.zookeeper.{ZooKeeper, KeeperException, WatchedEvent, Watcher}
  * transition to SessionState multiple times, and finally to
  * Determined. (Unless it fails on session expiry.)
  */
-private sealed trait WatchState
-private object WatchState {
+private[serverset2] sealed trait WatchState
+private[serverset2] object WatchState {
   object Pending extends WatchState
   object Determined extends WatchState
   case class SessionState(state: KeeperState) extends WatchState
@@ -24,8 +24,8 @@ private object WatchState {
 /**
  * Op represents a ZK operation: it is either Pending, Ok, or Failed.
  */
-private sealed trait Op[+T] { def map[U](f: T => U): Op[U] }
-private object Op {
+private[serverset2] sealed trait Op[+T] { def map[U](f: T => U): Op[U] }
+private[serverset2] object Op {
   object Pending extends Op[Nothing] { def map[U](f: Nothing => U) = this }
   case class Ok[T](v: T) extends Op[T] { def map[U](f: T => U) = Ok(f(v)) }
   case class Fail(e: Throwable) extends Op[Nothing] { def map[U](f: Nothing => U) = this }
@@ -47,7 +47,7 @@ private object Op {
  * [[com.twitter.util.Future Futures]]; watches and session states
  * are represented with a [[com.twitter.util.Var Var]].
  */
-private trait Zk {
+private[serverset2] trait Zk {
   type Watched[T] = (T, Var[WatchState])
 
   def exists(path: String): Future[Option[Stat]]
@@ -98,28 +98,43 @@ private trait Zk {
   private def op[T](which: String, arg: String)(go: => Future[Watched[T]]): Var[Op[T]] = 
     Var.async(Op.Pending: Op[T]) { v =>
       @volatile var closed = false
-      def loop(): Unit = 
+      def loop(): Unit =
         if (!closed) safeRetry(go, retryBackoffs) respond {
           case Throw(exc) => 
             v() = Op.Fail(exc)
           case Return((stat, w)) =>
-            v() = Op.Ok(stat)
+            val ok = Op.Ok(stat)
+            v() = ok
             w observe {
               case WatchState.Pending =>
-              case WatchState.Determined => loop()
+
+              case WatchState.Determined => 
+                // Note: since the watch transitioned to determined, we know
+                // that this observation will produce no more values, so there's
+                // no need to apply concurrency control to the subsequent 
+                // branches.
+                loop()
+
               // Note: ReadOnly mode isn't yet available. When it is, uncomment
               // this line.
               //case WatchState.SessionState(KeeperState.ConnectedReadOnly) =>s
+
               case WatchState.SessionState(KeeperState.Expired) =>
                 v() = Op.Fail(new Exception("session expired"))
+                
+              // This should handle SaslAuthenticated in the future (if this
+              // is propagated to non-session watchers).
+              case WatchState.SessionState(KeeperState.SyncConnected) =>
+                v() = ok
+
+              // Disconnected, NoSyncConnected, AuthFailed
               case WatchState.SessionState(state) =>
                 v() = Op.Fail(new Exception(""+state))
             }
-
         }
 
       loop()
-      
+
       Closable.make { deadline =>
         closed = true
         Future.Done
@@ -202,22 +217,22 @@ private trait Zk {
   }
 }
 
-private trait ZkFactory {
+private[serverset2] trait ZkFactory {
   def apply(hosts: String): Zk
   def withTimeout(d: Duration): ZkFactory
   def purge(zk: Zk)
 }
 
-private class FnZkFactory(
+private[serverset2] class FnZkFactory(
     newZk: (String, Duration) => Zk, 
-    timeout: Duration = 3.seconds) extends ZkFactory {
+    timeout: Duration = 4.seconds) extends ZkFactory {
 
   def apply(hosts: String): Zk = newZk(hosts, timeout)
   def withTimeout(d: Duration) = new FnZkFactory(newZk, d)
   def purge(zk: Zk) = ()
 }
 
-private object Zk extends FnZkFactory(
+private[serverset2] object Zk extends FnZkFactory(
     (hosts, timeout) => new ZooKeeperZk(w => 
       new ZooKeeper(hosts, timeout.inMilliseconds.toInt, w))) {
 

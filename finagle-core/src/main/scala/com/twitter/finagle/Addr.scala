@@ -38,12 +38,16 @@ object Addr {
   /**
    * The binding action is still pending.
    */
-  object Pending extends Addr
+  object Pending extends Addr {
+    override def toString = "Pending"
+  }
 
   /**
    * A negative address: the name could not be bound.
    */
-  object Neg extends Addr
+  object Neg extends Addr {
+    override def toString = "Neg"
+  }
 
   object Bound {
     def apply(addrs: SocketAddress*): Addr =

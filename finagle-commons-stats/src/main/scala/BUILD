@@ -3,5 +3,8 @@ scala_library(name='scala',
     pants('3rdparty/jvm/com/twitter/common:stats'),
     pants('finagle/finagle-core')
   ],
-  sources=rglobs('*.scala')
+  sources=rglobs('*.scala'),
+  resources=[
+    pants('finagle/finagle-commons-stats/src/main/resources')
+  ]
 )

@@ -1,6 +1,7 @@
 scala_library(name='scala',
   dependencies=[
     pants('3rdparty:netty'),
+    pants('finagle/finagle-core/src/main/java'),
     pants('util/util-app'),
     pants('util/util-collection'),
     pants('util/util-core'),
