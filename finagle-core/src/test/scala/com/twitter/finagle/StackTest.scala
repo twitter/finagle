@@ -57,6 +57,10 @@ class StackTest extends FunSuite {
     val params2 = params + TestParam(999)
     val params3 = params2 + TestParam(100)
 
+    assert(!params.contains[TestParam])
+    assert(params2.contains[TestParam])
+    assert(params3.contains[TestParam])
+
     assert(params[TestParam] === TestParam(1))
     assert(params2[TestParam] === TestParam(999))
     assert(params3[TestParam] === TestParam(100))

@@ -165,6 +165,12 @@ object Stack {
     def apply[P: Param]: P
 
     /**
+     * Returns true if there is a non-default value for
+     * the P-typed parameter.
+     */
+    def contains[P: Param]: Boolean
+
+    /**
      * Produce a new parameter map, overriding any previous
      * `P`-typed value.
      */
@@ -178,6 +184,9 @@ object Stack {
           case Some(v) => v.asInstanceOf[P]
           case None => param.default
         }
+
+      def contains[P](implicit param: Param[P]): Boolean =
+        map.contains(param)
 
       def +[P](p: P)(implicit param: Param[P]): Params =
         copy(map + (param -> p))
