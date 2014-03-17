@@ -12,7 +12,7 @@ extensions = ['sphinx.ext.extlinks', 'includecode', 'sphinx.ext.graphviz']
 templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
-exclude_patterns = []
+exclude_patterns = ['metrics/*']
 
 sys.path.append(os.path.abspath('_themes'))
 html_theme_path = ['_themes']
@@ -34,7 +34,7 @@ html_show_sphinx = False
 html_style = 'finagle.css'
 
 project = u'Finagle'
-copyright = u'2013 Twitter, Inc'
+copyright = u'2014 Twitter, Inc'
 htmlhelp_basename = "finagle"
 
 # e.g. :issue:`36` :ticket:`8`

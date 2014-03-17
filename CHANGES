@@ -1,12 +1,12 @@
 .. Author notes: this file is formatted with restructured text
-(http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
-as it is included in Finagle's user's guide.
+  (http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
+  as it is included in Finagle's user's guide.
 
 6.x
------
+---
 
 6.13.0
-~~~~~
+~~~~~~
 
 - `finagle-core`: ForkJoin scheduler: first draft
 - `finagle-doc`: Update URL to Finagle blog post. Motivation: Outdated URL
@@ -32,14 +32,14 @@ as it is included in Finagle's user's guide.
 - `finagle`: upgrade util to version 6.13.0
 
 6.12.2
-~~~~~
+~~~~~~
 
 - `finagle`: release scrooge version 3.12.3
 - `finagle-exception`: Drop scrooge in favor of pre-generated Thrift Java source code.
 - `finagle-zipkin`: Drop scrooge in favor of pre-generated Thrift Java source code.
 
 6.12.1
-~~~~~
+~~~~~~
 
 - `finagle`: release ostrich version 9.3.1
 - `finagle`: release util version 6.12.1
@@ -160,9 +160,9 @@ as it is included in Finagle's user's guide.
 - `finagle-core`: Take -com.twitter.server.serversetZkHosts flag (for tunnelling)
 - `finagle-native`: tomcat-native-1.1.27
 - `finagle-mysql`: fix readLengthCodedBinary to read longs
-- `finagle-testers`: library for integration testing of - `finagle services
+- `finagle-testers`: library for integration testing of finagle services
 - `finagle`: scaladoc warning cleanup
-- `finagle-doc`: documented all of the stats in - `finagle-core
+- `finagle-doc`: documented all of the stats in finagle-core
 - `finagle-serversets`: bump server-set dependency to 1.0.56
 - `finagle-stats`: adds a cautious registration to HttpMuxer / adds a default metrics endpoint to twitter-server
 - `finagle-core`: verifies that statsfilter has the correct behavior
