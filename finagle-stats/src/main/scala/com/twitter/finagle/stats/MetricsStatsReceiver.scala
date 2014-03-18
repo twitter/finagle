@@ -54,8 +54,8 @@ class MetricsStatsReceiver(val registry: Metrics) extends StatsReceiver {
    */
   def addGauge(names: String*)(f: => Float): Gauge = synchronized {
     gauges.getOrElseUpdate(names, {
-      val gauge = new AbstractGauge[java.lang.Float](format(names)) {
-        override def read = new java.lang.Float(f)
+      val gauge = new AbstractGauge[java.lang.Double](format(names)) {
+        override def read = new java.lang.Double(f)
       }
       registry.register(gauge)
       new Gauge { def remove() {} }
