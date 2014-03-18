@@ -167,12 +167,22 @@ class ParamMapSpec extends SpecificationWithJUnit {
       }
     }
 
-    "ignore body when not a POST" in {
-      val request = Request("/search.json?lang=en")
-      request.contentType = "application/x-www-form-urlencoded"
-      request.contentString = "q=twitter"
-      request.params.get("q")    must_== None
-      request.params.get("lang") must_== Some("en")
+    "ignore body only during TRACE requests" in {
+      val url = "/search.json?lang=en"
+      val contentType = "application/x-www-form-urlencoded"
+      val contentString = "q=twitter"
+
+      val getRequest = Request(Method.Get, url)
+      getRequest.contentType = contentType
+      getRequest.contentString = contentString
+      getRequest.params.get("q") must_== Some("twitter")
+      getRequest.params.get("lang") must_== Some("en")
+
+      val traceRequest = Request(Method.Trace, url)
+      traceRequest.contentType = contentType
+      traceRequest.contentString = contentString
+      traceRequest.params.get("q") must_== None
+      traceRequest.params.get("lang") must_== Some("en")
     }
 
     "weird encoded characters" in {
