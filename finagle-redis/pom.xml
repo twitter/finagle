@@ -37,7 +37,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging</artifactId>
-      <version>6.13.1-SNAPSHOT</version>
+      <version>6.13.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
