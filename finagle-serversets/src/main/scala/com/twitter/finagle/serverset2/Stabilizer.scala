@@ -74,18 +74,18 @@ private[serverset2] object Stabilizer {
       // The epoch turned
       case (st@State(limbo, active, last), Right(())) =>
         last match {
-          case Addr.Failed(_) =>
-            // If the last address is a failure, we ignore it and 
-            // maintain our state; we cannot demote the active
-            // set on failure, since that would eventually promote
-            // the failure to the 'last'.
-            st
-
           case Addr.Bound(bound) =>
             State(active, bound, last)
 
-          case addr =>
-            State(active, Set.empty, addr)
+          case Addr.Neg =>
+            State(active, Set.empty, Addr.Neg)
+
+          case Addr.Pending | Addr.Failed(_) | Addr.Delegated(_) =>
+            // If the last address is nonbound, we ignore it and
+            // maintain our state; we cannot demote the active set
+            // when nonbound, since that would eventually promote
+            // the address
+            st
         }
     }
 
