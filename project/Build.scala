@@ -9,7 +9,7 @@ object Finagle extends Build {
   val libVersion = "6.13.0"
   val zkVersion = "3.3.4"
   val utilVersion = "6.13.1"
-  val ostrichVersion = "9.4.0"
+  val ostrichVersion = "9.4.1"
   val jacksonVersion = "2.2.2"
   val nettyLib = "io.netty" % "netty" % "3.8.1.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
