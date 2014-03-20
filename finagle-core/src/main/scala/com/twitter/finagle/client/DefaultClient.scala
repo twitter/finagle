@@ -200,13 +200,10 @@ case class DefaultClient[Req, Rep](
       // observeUntil fails the future on interrupts, but ready
       // should not be interruptible DelayedFactory implicitly masks
       // this future--interrupts will not be propagated to it
-      val ready = v.observeUntil(_ != Addr.Pending)
+      val ready = v.changes.filter(_ != Addr.Pending).toFuture
       val f = ready map (_ => balanced)
 
-      new DelayedFactory(f) {
-        override def close(after: Duration) =
-          Future.join(Seq(observation.close(after), super.close(after)))
-      }
+      DelayedFactory.swapOnComplete(f, observation)
     }
 
     traced compose

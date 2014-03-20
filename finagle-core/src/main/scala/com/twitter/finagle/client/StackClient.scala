@@ -268,7 +268,7 @@ object StackClient {
       // TODO: load balancer consumes Var[Addr] directly., 
       // or at least Var[SocketAddress]
       val g = Group.mutable[SocketAddress]()
-      dest observe {
+      val observation = dest observe {
         case Addr.Bound(sockaddrs) =>
           g() = sockaddrs
         case Addr.Failed(e) =>
@@ -309,10 +309,9 @@ object StackClient {
       // observeUntil fails the future on interrupts, but ready
       // should not interruptible DelayedFactory implicitly masks
       // this future--interrupts will not be propagated to it
-      val ready = dest.observeUntil(_ != Addr.Pending)
+      val ready = dest.changes.filter(_ != Addr.Pending).toFuture
       val f = ready map (_ => balanced)
-      
-      Stack.Leaf("loadbalancer", new DelayedFactory(f))
+      Stack.Leaf("loadbalancer", DelayedFactory.swapOnComplete(f, observation))
     }
   }
 
