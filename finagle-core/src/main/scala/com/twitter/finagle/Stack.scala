@@ -92,8 +92,8 @@ sealed trait Stack[T] {
 
   override def toString = {
     val elems = tails map {
-      case Node(headRole, mk, _) => "Node(mk = %s, headRole(s) = %s)".format(headRole, mk)
-      case Leaf(headRole, t) => "Leaf(t = %s, headRole(s) = %s)".format(headRole, t)
+      case Node(headRole, mk, _) => "Node(headRole = %s, mk = %s)".format(headRole, mk)
+      case Leaf(headRole, t) => "Leaf(headRole = %s, t = %s)".format(headRole, t)
     }
     elems mkString "\n"
   }
