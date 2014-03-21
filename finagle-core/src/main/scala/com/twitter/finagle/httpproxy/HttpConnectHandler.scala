@@ -29,6 +29,8 @@ object HttpConnectHandler {
 class HttpConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress, clientCodec: HttpClientCodec)
   extends SimpleChannelHandler
 {
+  import HttpConnectHandler._
+
   private[this] val connectFuture = new AtomicReference[ChannelFuture](null)
 
   private[this] def fail(c: Channel, t: Throwable) {
@@ -111,7 +113,10 @@ class HttpConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress, clie
       ctx.getPipeline.remove(this)
       connectFuture.get.setSuccess()
     } else {
-      fail(e.getChannel, new ConnectionFailedException(null, addr))
+      val cause = new Throwable("unexpected response status received by HttpConnectHandler:"
+        + resp.getStatus)
+
+      fail(e.getChannel, new ConnectionFailedException(cause, addr))
     }
   }
 }

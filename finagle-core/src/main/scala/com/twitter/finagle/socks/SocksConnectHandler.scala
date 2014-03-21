@@ -9,6 +9,15 @@ import org.jboss.netty.util.CharsetUtil
 
 import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, InconsistentStateException}
 
+object SocksConnectHandler {
+  // Throwables used as `cause` fields for ConnectionFailedExceptions.
+  private[socks] val InvalidInit = new Throwable("unexpected SOCKS version or authentication " +
+    "level specified in connect response from proxy")
+
+  private[socks] val InvalidResponse = new Throwable("unexpected SOCKS version or response " +
+    "status specified in connect response from proxy")
+}
+
 /**
  * Handle connections through a SOCKS proxy.
  *
@@ -19,6 +28,8 @@ import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, I
 class SocksConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress)
   extends SimpleChannelHandler
 {
+  import SocksConnectHandler._
+
   object State extends Enumeration {
     val START, CONNECTED, REQUESTED = Value
   }
@@ -48,7 +59,7 @@ class SocksConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress)
     write(ctx, ChannelBuffers.wrappedBuffer(Array[Byte](0x05, 0x01, 0x00)))
   }
 
-  private[this] def readInit() = {
+  private[this] def readInit(): Boolean = {
     checkReadableBytes(2)
     buf.readBytes(bytes, 0, 2)
     // 0x05 == version 5
@@ -86,7 +97,7 @@ class SocksConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress)
     write(ctx, buf)
   }
 
-  private[this] def readResponse() = {
+  private[this] def readResponse(): Boolean = {
     checkReadableBytes(4)
     buf.readBytes(bytes, 0, 4)
     // 0x05 == version 5
@@ -198,7 +209,7 @@ class SocksConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress)
             state = REQUESTED
             writeRequest(ctx)
           } else {
-            fail(e.getChannel, new ConnectionFailedException(null, addr))
+            fail(e.getChannel, new ConnectionFailedException(InvalidInit, addr))
           }
 
         case REQUESTED =>
@@ -206,7 +217,7 @@ class SocksConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress)
             ctx.getPipeline.remove(this)
             connectFuture.get.setSuccess()
           } else {
-            fail(e.getChannel, new ConnectionFailedException(null, addr))
+            fail(e.getChannel, new ConnectionFailedException(InvalidResponse, addr))
           }
       }
     } catch {
