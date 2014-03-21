@@ -243,7 +243,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       "commons-codec" % "commons-codec" % "1.5",
       util("zk-common"),
-      "com.twitter.common.zookeeper" % "server-set" % "1.0.67"
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.69"
     ) ++ jacksonLibs,
     excludeFilter in unmanagedSources := "ZkTest.scala",
     ivyXML :=
@@ -316,8 +316,8 @@ object Finagle extends Build {
     name := "finagle-memcached",
     libraryDependencies ++= Seq(
       util("hashing"),
-      "com.google.guava" % "guava" % "15.0",
-      "com.twitter.common" % "zookeeper-testing" % "0.0.40" % "test"
+      "com.google.guava" % "guava" % "16.0",
+      "com.twitter.common" % "zookeeper-testing" % "0.0.42" % "test"
     ) ++ jacksonLibs
   ).dependsOn(finagleCore, finagleServersets)
 
