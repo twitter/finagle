@@ -3,6 +3,7 @@ package com.twitter.finagle.thrift
 import com.google.common.base.Charsets
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thrift.Protocols.TFinagleBinaryProtocol
+import java.nio.ByteBuffer
 import org.apache.thrift.transport.TMemoryBuffer
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.junit.runner.RunWith
@@ -18,13 +19,20 @@ class TFinagleBinaryProtocolTest extends FunSuite
 {
 
   private def assertSerializedBytes(
-    expected: String,
+    expectedBytes: Array[Byte],
     trans: TMemoryBuffer
-  ) = {
-    val expectedBytes = expected.getBytes(Charsets.UTF_8)
+  ) {
     // 4 bytes for the string length
     trans.length() should be (expectedBytes.length + 4)
     trans.getArray().drop(4).take(expectedBytes.length) should be (expectedBytes)
+  }
+
+  private def assertSerializedBytes(
+    expected: String,
+    trans: TMemoryBuffer
+  ) {
+    val expectedBytes = expected.getBytes(Charsets.UTF_8)
+    assertSerializedBytes(expectedBytes, trans)
   }
 
   test("writeString") {
@@ -81,6 +89,24 @@ class TFinagleBinaryProtocolTest extends FunSuite
     proto.writeString(longStr)
     stats.counter("larger_than_threadlocal_out_buffer")() should be (1)
     assertSerializedBytes(longStr, trans)
+  }
+
+  test("writeBinary handles non-zero arrayOffsets") {
+    val len = 16
+    val offset = 2
+
+    val bbuf = ByteBuffer.allocate(len)
+    0 until len foreach { i => bbuf.put(i.toByte) }
+    bbuf.position(offset)
+    val withOffset = bbuf.slice()
+    withOffset.arrayOffset() should be (offset)
+
+    val trans = new TMemoryBuffer(128)
+    val proto = new TFinagleBinaryProtocol(trans)
+    proto.writeBinary(withOffset)
+
+    val expected = bbuf.array().drop(offset)
+    assertSerializedBytes(expected, trans)
   }
 
 }
