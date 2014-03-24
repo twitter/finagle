@@ -82,7 +82,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>scrooge-core</artifactId>
-      <version>3.12.4-SNAPSHOT</version>
+      <version>3.13.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
