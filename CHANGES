@@ -1,9 +1,28 @@
 .. Author notes: this file is formatted with restructured text
-  (http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
-  as it is included in Finagle's user's guide.
+(http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
+as it is included in Finagle's user's guide.
 
 6.x
----
+-----
+
+6.13.1
+~~~~~~~
+
+- `finagle-core`: Case insensitive Dtab headers in HTTP codec
+- `finagle-core`: Introduce Stack.Params#contains
+- `finagle-docs`: address small style nits
+- `finagle-http`: support reading params in content body for HTTP methods other than POST and PUT
+- `finagle-memcached`: add ketamaclient initial readiness before the first request
+- `finagle-serversets`: Disable retry behavior but turn exception into negative resolution.
+- `finagle-serversets`: Stabilizer: don't consider Pending update successful
+- `finagle-stats`: use java.lang.Double in addGauge()
+- `finagle`: Add `cause` Throwables for all ConnectionFailedExceptions
+- `finagle`: Fix Travis-CI integration.
+- `finagle`: Swap Stack.Node and Stack.Leaf args in toString formatting
+- `finagle`: Update 3rdparty library versions
+- `finagle`: Upgrade birdcage to guava 16
+- `finagle`: upgrade ostrich to 9.4.2
+- `finagle`: upgrade util to 6.13.2
 
 6.13.0
 ~~~~~~
