@@ -129,7 +129,10 @@ object Resolver {
    */
   @deprecated("Use Resolver.eval", "6.7.x")
   def resolve(addr: String): Try[Group[SocketAddress]] =
-    Try { eval(addr) } map { n => NameGroup(n) }
+    if (addr startsWith "/")
+      throw new IllegalArgumentException("Resolver.resolve does not support logical names")
+    else
+      Try { eval(addr) } map { n => NameGroup(n) }
 
   /**
    * Parse and evaluate the argument into a Name. Eval parses
