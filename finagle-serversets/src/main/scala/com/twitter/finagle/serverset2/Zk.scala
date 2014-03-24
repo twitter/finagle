@@ -4,7 +4,10 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
-import com.twitter.util.{Closable, Var,  Future, Promise, Duration, Return, Throw, Timer, Memoize}
+import com.twitter.util.{
+  Closable, Duration, Future, Memoize, Monitor, Promise, Return, Throw, 
+  Timer, Var, Updatable}
+import java.util.concurrent.LinkedBlockingDeque
 import org.apache.zookeeper.Watcher.Event.{EventType, KeeperState}
 import org.apache.zookeeper.data.Stat
 import org.apache.zookeeper.{ZooKeeper, KeeperException, WatchedEvent, Watcher}
@@ -261,14 +264,37 @@ private[serverset2] object Zk extends FnZkFactory(
     val state: Var[WatchState] = Var.value(WatchState.Pending)
   }
 
+  private object EventDeliveryThread 
+  extends Thread("com.twitter.finagle.serverset2.Zk event delivery") {
+    private val q = new LinkedBlockingDeque[(Updatable[WatchState], WatchState)]
+
+    def offer(u: Updatable[WatchState], s: WatchState) {
+      q.offer((u, s))
+    }
+
+    override def run() {
+      while (true) {
+        val (u, s) = q.take()
+        try {
+          u() = s
+        } catch  {
+          case exc => Monitor.handle(exc)
+        }
+      }
+    }
+
+    setDaemon(true)
+    start()
+  }
+
   private[finagle] def newWatcher() = new Watcher {
     private val p = new Promise[WatchedEvent]
     val state = Var[WatchState](WatchState.Pending)
     def process(event: WatchedEvent) = {
       if (event.getType == EventType.None)
-        state() = WatchState.SessionState(event.getState())
+        EventDeliveryThread.offer(state, WatchState.SessionState(event.getState()))
       else
-        state() = WatchState.Determined
+        EventDeliveryThread.offer(state, WatchState.Determined)
       }
   }
 
