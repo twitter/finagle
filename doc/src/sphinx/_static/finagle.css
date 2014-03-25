@@ -1,7 +1,11 @@
 @import url("flasky.css");
 
-div.sphinxsidebar * {
+div.sphinxsidebar li {
   word-wrap: break-word;
+}
+
+div.sphinxsidebar #searchbox input[type="text"] {
+  width: 160px;
 }
 
 img.logo {

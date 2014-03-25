@@ -170,7 +170,7 @@ class RequestParamMap(val request: Request) extends ParamMap {
     parseParams(request.uri)
 
   private[this] val postParams: JMap[String, JList[String]] = {
-    if ((request.method == Method.Post || request.method == Method.Put) &&
+    if (request.method != Method.Trace &&
         request.mediaType == Some(MediaType.WwwForm) &&
         request.length > 0) {
       parseParams("?" + request.contentString)

@@ -813,6 +813,40 @@ class KetamaClient private[finagle](
     }
   }
 
+  // await for the readiness of initial loading of ketamaNodeGrp prior to first request
+  // this readiness here will be fulfilled the first time the ketamaNodeGrp is updated
+  // with non-empty content, after that group can still be updated with empty endpoints
+  // which will throw NoShardAvailableException to users indicating the lost of cache access
+  val ready = ketamaNodeGrp.set.changes.filter(_.nonEmpty).toFuture.unit
+  override def getsResult(keys: Iterable[String]) = ready before super.getsResult(keys)
+
+  override def getResult(keys: Iterable[String]) = ready before super.getResult(keys)
+
+  override def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+    ready before super.set(key, flags, expiry, value)
+
+  override def delete(key: String) = ready before super.delete(key)
+
+  override def cas(key: String, flags: Int, expiry: Time,
+      value: ChannelBuffer, casUnique: ChannelBuffer) =
+    ready before super.cas(key, flags, expiry, value, casUnique)
+
+  override def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+    ready before super.add(key, flags, expiry, value)
+
+  override def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+    ready before super.replace(key, flags, expiry, value)
+
+  override def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+    ready before super.prepend(key, flags, expiry, value)
+
+  override def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+    ready before super.append(key, flags, expiry, value)
+
+  override def incr(key: String, delta: Long) = ready before super.incr(key, delta)
+
+  override def decr(key: String, delta: Long) = ready before super.decr(key, delta)
+
   def release() = synchronized {
     for ((_, Node(node, _)) <- nodes)
       node.handle.release()

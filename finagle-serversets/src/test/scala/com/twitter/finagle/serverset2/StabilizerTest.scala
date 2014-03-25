@@ -45,6 +45,26 @@ class StabilizerTest extends FunSuite {
     assertStabilized(Addr.Neg)
   })
 
+  test("Pending resolutions don't tick out successful results") (new Ctx {
+    va() = Addr.Bound(sa1)
+    assertStabilized(Addr.Bound(sa1))
+    va() = Addr.Bound(sa2)
+    assertStabilized(Addr.Bound(sa1, sa2))
+    
+    va() = Addr.Failed(new Exception)
+    pulse()
+    pulse()
+    
+    assertStabilized(Addr.Bound(sa1, sa2))
+    
+    va() = Addr.Pending
+    pulse()
+    pulse()
+
+    assertStabilized(Addr.Bound(sa1, sa2))
+  })
+
+
   test("Removes are delayed while failures are observed") (new Ctx {
     va() = Addr.Bound(sa1, sa2)
     assertStabilized(Addr.Bound(sa1, sa2))
