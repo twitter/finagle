@@ -135,7 +135,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.PartitionedClient#add" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClient#add" data-isabs="false">
       <a id="add(String,Int,Time,ChannelBuffer):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -147,7 +147,7 @@
       </span>
       </h4>
       <p class="shortcomment cmt">Store a key but only if it doesn't already exist on the server.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key but only if it doesn't already exist on the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
-</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClient" class="extype" href="">KetamaClient</a> → <a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#add" data-isabs="false">
       <a id="add(String,ChannelBuffer):Future[Boolean]"></a>
       <h4 class="signature">
@@ -161,7 +161,7 @@
       </h4>
       <p class="shortcomment cmt">Store a key but only if it doesn't already exist on the server.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key but only if it doesn't already exist on the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.PartitionedClient#append" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClient#append" data-isabs="false">
       <a id="append(String,Int,Time,ChannelBuffer):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -174,7 +174,7 @@
       </h4>
       <p class="shortcomment cmt">Append bytes to the end of an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Append bytes to the end of an existing key. If the key doesn't exist, the
 operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
-</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClient" class="extype" href="">KetamaClient</a> → <a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#append" data-isabs="false">
       <a id="append(String,ChannelBuffer):Future[Boolean]"></a>
       <h4 class="signature">
@@ -201,7 +201,7 @@ exist, the operation has no effect.</p></div><dl class="paramcmts block"><dt>ret
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.PartitionedClient#cas" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClient#cas" data-isabs="false">
       <a id="cas(String,Int,Time,ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -219,7 +219,7 @@ changed since the value was last retrieved, and <code>casUnique</code>
 extracted from a <code>gets</code> command.  We treat the &quot;cas unique&quot; token
 opaquely, but in reality it is a string-encoded u64.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if replaced, false if not
-</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClient" class="extype" href="">KetamaClient</a> → <a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#cas" data-isabs="false">
       <a id="cas(String,ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
       <h4 class="signature">
@@ -278,7 +278,7 @@ opaquely, but in reality it is a string-encoded u64.
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.PartitionedClient#decr" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClient#decr" data-isabs="false">
       <a id="decr(String,Long):Future[Option[Long]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -291,7 +291,7 @@ opaquely, but in reality it is a string-encoded u64.
       </h4>
       <p class="shortcomment cmt">Decrement a key.</p><div class="fullcomment"><div class="comment cmt"><p>Decrement a key. Interpret the value as an JLong if it is parsable.
 This operation has no effect if there is no value there already.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClient" class="extype" href="">KetamaClient</a> → <a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#decr" data-isabs="false">
       <a id="decr(String):Future[Option[Long]]"></a>
       <h4 class="signature">
@@ -304,7 +304,7 @@ This operation has no effect if there is no value there already.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.PartitionedClient#delete" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClient#delete" data-isabs="false">
       <a id="delete(String):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -316,7 +316,7 @@ This operation has no effect if there is no value there already.
       </span>
       </h4>
       <p class="shortcomment cmt">Remove a key.</p><div class="fullcomment"><div class="comment cmt"><p>Remove a key.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if deleted, false if not found
-</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClient" class="extype" href="">KetamaClient</a> → <a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -394,7 +394,7 @@ This operation has no effect if there is no value there already.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.PartitionedClient#getResult" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClient#getResult" data-isabs="false">
       <a id="getResult(Iterable[String]):Future[GetResult]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -407,7 +407,7 @@ This operation has no effect if there is no value there already.
       </h4>
       <p class="shortcomment cmt">Get a set of keys from the server.</p><div class="fullcomment"><div class="comment cmt"><p>Get a set of keys from the server. Returns a Future[GetResult] that
 encapsulates hits, misses and failures.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClient" class="extype" href="">KetamaClient</a> → <a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#gets" data-isabs="false">
       <a id="gets(Iterable[String]):Future[Map[String, (ChannelBuffer, ChannelBuffer)]]"></a>
       <h4 class="signature">
@@ -441,7 +441,7 @@ keys the server had, together with their &quot;cas unique&quot; token
 is treated opaquely by the memcache client but is in reality a
 string-encoded u64.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.PartitionedClient#getsResult" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClient#getsResult" data-isabs="false">
       <a id="getsResult(Iterable[String]):Future[GetsResult]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -455,7 +455,7 @@ string-encoded u64.
       <p class="shortcomment cmt">Get a set of keys from the server.</p><div class="fullcomment"><div class="comment cmt"><p>Get a set of keys from the server. Returns a Future[GetsResult] that
 encapsulates hits, misses and failures. This variant includes the casToken
 from memcached.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClient" class="extype" href="">KetamaClient</a> → <a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
@@ -468,7 +468,7 @@ from memcached.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.PartitionedClient#incr" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClient#incr" data-isabs="false">
       <a id="incr(String,Long):Future[Option[Long]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -481,7 +481,7 @@ from memcached.
       </h4>
       <p class="shortcomment cmt">Increment a key.</p><div class="fullcomment"><div class="comment cmt"><p>Increment a key. Interpret the value as an Long if it is parsable.
 This operation has no effect if there is no value there already.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClient" class="extype" href="">KetamaClient</a> → <a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#incr" data-isabs="false">
       <a id="incr(String):Future[Option[Long]]"></a>
       <h4 class="signature">
@@ -566,7 +566,7 @@ This operation has no effect if there is no value there already.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.PartitionedClient#prepend" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClient#prepend" data-isabs="false">
       <a id="prepend(String,Int,Time,ChannelBuffer):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -579,7 +579,7 @@ This operation has no effect if there is no value there already.
       </h4>
       <p class="shortcomment cmt">Prepend bytes to the beginning of an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Prepend bytes to the beginning of an existing key. If the key doesn't
 exist, the operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
-</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClient" class="extype" href="">KetamaClient</a> → <a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#prepend" data-isabs="false">
       <a id="prepend(String,ChannelBuffer):Future[Boolean]"></a>
       <h4 class="signature">
@@ -608,6 +608,18 @@ doesn't exist, the operation has no effect.</p></div><dl class="paramcmts block"
       <p class="shortcomment cmt">Send a quit command to the server.</p><div class="fullcomment"><div class="comment cmt"><p>Send a quit command to the server. Alternative to release, for
 protocol compatability.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>none
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClient#ready" data-isabs="false">
+      <a id="ready:Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ready</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClient#release" data-isabs="false">
       <a id="release():Unit"></a>
       <h4 class="signature">
@@ -622,7 +634,7 @@ protocol compatability.</p></div><dl class="paramcmts block"><dt>returns</dt><dd
       <p class="shortcomment cmt">release the underlying service(s)
 </p><div class="fullcomment"><div class="comment cmt"><p>release the underlying service(s)
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClient" class="extype" href="">KetamaClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.PartitionedClient#replace" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClient#replace" data-isabs="false">
       <a id="replace(String,Int,Time,ChannelBuffer):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -635,7 +647,7 @@ protocol compatability.</p></div><dl class="paramcmts block"><dt>returns</dt><dd
       </h4>
       <p class="shortcomment cmt">Replace bytes on an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Replace bytes on an existing key. If the key doesn't exist, the
 operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
-</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClient" class="extype" href="">KetamaClient</a> → <a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#replace" data-isabs="false">
       <a id="replace(String,ChannelBuffer):Future[Boolean]"></a>
       <h4 class="signature">
@@ -650,7 +662,7 @@ operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><d
       <p class="shortcomment cmt">Replace an item if it exists.</p><div class="fullcomment"><div class="comment cmt"><p>Replace an item if it exists. If it doesn't exist, the operation has no
 effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.PartitionedClient#set" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClient#set" data-isabs="false">
       <a id="set(String,Int,Time,ChannelBuffer):Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -662,7 +674,7 @@ effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>
       </span>
       </h4>
       <p class="shortcomment cmt">Store a key.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key. Override an existing value.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true
-</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.KetamaClient" class="extype" href="">KetamaClient</a> → <a name="com.twitter.finagle.memcached.PartitionedClient" class="extype" href="PartitionedClient.html">PartitionedClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#set" data-isabs="false">
       <a id="set(String,ChannelBuffer):Future[Unit]"></a>
       <h4 class="signature">

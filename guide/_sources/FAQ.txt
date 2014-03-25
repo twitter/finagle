@@ -46,7 +46,7 @@ to your sbt configuration, it will be able to pick up the libraries which are
 published externally, but not yet to maven central.
 
 How do I change my timeouts in the Finagle 6 APIs?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We introduced a new, preferred API for constructing Finagle ``Client``\s and ``Server``\s.
 Where the old API used ``ServerBuilder``\/``ClientBuilder`` with Codecs, the new APIs use
