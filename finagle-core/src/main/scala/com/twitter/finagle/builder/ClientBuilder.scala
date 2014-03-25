@@ -531,7 +531,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * The maximum number of connections that are allowed per host.
-   * Required.  Finagle guarantees to to never have more active
+   * Required.  Finagle guarantees to never have more active
    * connections than this limit.
    */
   def hostConnectionLimit(value: Int): ClientBuilder[Req, Rep, HasCluster, HasCodec, Yes] =
