@@ -1,28 +1,11 @@
 package com.twitter.finagle.serverset2
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.serverset2.client._
 import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
-import com.twitter.util.{
-  Closable, Duration, Future, Memoize, Monitor, Promise, Return, Throw, 
-  Timer, Var, Updatable}
-import java.util.concurrent.LinkedBlockingDeque
-import org.apache.zookeeper.Watcher.Event.{EventType, KeeperState}
-import org.apache.zookeeper.data.Stat
-import org.apache.zookeeper.{ZooKeeper, KeeperException, WatchedEvent, Watcher}
-
-/**
- * The state of a ZK watch starts out being Pending. It may
- * transition to SessionState multiple times, and finally to
- * Determined. (Unless it fails on session expiry.)
- */
-private[serverset2] sealed trait WatchState
-private[serverset2] object WatchState {
-  object Pending extends WatchState
-  object Determined extends WatchState
-  case class SessionState(state: KeeperState) extends WatchState
-}
+import com.twitter.util._
 
 /**
  * Op represents a ZK operation: it is either Pending, Ok, or Failed.
@@ -50,46 +33,25 @@ private[serverset2] object Op {
  * [[com.twitter.util.Future Futures]]; watches and session states
  * are represented with a [[com.twitter.util.Var Var]].
  */
-private[serverset2] trait Zk {
-  type Watched[T] = (T, Var[WatchState])
+private class Zk(watchedZk: Watched[ZooKeeperReader], timerIn: Timer) {
+  val state: Var[WatchState] = watchedZk.state
+  protected[serverset2] implicit val timer: Timer = timerIn
+  private val zkr: ZooKeeperReader = watchedZk.value
 
-  def exists(path: String): Future[Option[Stat]]
-  def existsWatch(path: String): Future[Watched[Option[Stat]]]
-
-  def getChildren(path: String): Future[Seq[String]]
-  def getChildrenWatch(path: String): Future[Watched[Seq[String]]]
-
-  def getData(path: String): Future[(Stat, Buf)]
-  def getDataWatch(path: String): Future[Watched[(Stat, Buf)]]
-
-  def sync(path: String): Future[Unit]
-  def close(): Future[Unit]
-
-  def sessionId: Long
-  def sessionPasswd: Buf
-  def sessionTimeout: Duration
-
-  /**
-   * Represents the session state.
-   */
-  val state: Var[WatchState]
-
-  protected[serverset2] implicit val timer: Timer
-
-  protected def retryBackoffs = 
+  private def retryBackoffs =
     (Backoff.exponential(10.milliseconds, 2) take 3) ++ Backoff.const(1.second)
 
   private def safeRetry[T](go: => Future[T], backoff: Stream[Duration])
-      (implicit timer: Timer): Future[T] = 
+      (implicit timer: Timer): Future[T] =
     go rescue {
-      case exc: KeeperException.ConnectionLossException =>
+      case exc: KeeperException.ConnectionLoss =>
         backoff match {
           case wait #:: rest =>
             Future.sleep(wait) before safeRetry(go, rest)
-          case _ => 
+          case _ =>
             Future.exception(exc)
         }
-  }
+    }
 
   /**
    * A persistent operation: reissue a watched operation every
@@ -98,43 +60,43 @@ private[serverset2] trait Zk {
    * The returned Var is asynchronous: watches aren't reissued
    * when the Var is no longer observed.
    */
-  private def op[T](which: String, arg: String)(go: => Future[Watched[T]]): Var[Op[T]] = 
+  private def op[T](which: String, arg: String)(go: => Future[Watched[T]]): Var[Op[T]] =
     Var.async(Op.Pending: Op[T]) { v =>
       @volatile var closed = false
-      def loop(): Unit =
+      def loop() {
         if (!closed) safeRetry(go, retryBackoffs) respond {
-          case Throw(exc) => 
+          case Throw(exc) =>
             v() = Op.Fail(exc)
-          case Return((stat, w)) =>
-            val ok = Op.Ok(stat)
+          case Return(Watched(value, state)) =>
+            val ok = Op.Ok(value)
             v() = ok
-            w observe {
+            state.changes respond {
               case WatchState.Pending =>
 
-              case WatchState.Determined => 
+              case WatchState.Determined(_) =>
                 // Note: since the watch transitioned to determined, we know
                 // that this observation will produce no more values, so there's
-                // no need to apply concurrency control to the subsequent 
+                // no need to apply concurrency control to the subsequent
                 // branches.
                 loop()
 
-              // Note: ReadOnly mode isn't yet available. When it is, uncomment
-              // this line.
-              //case WatchState.SessionState(KeeperState.ConnectedReadOnly) =>s
-
-              case WatchState.SessionState(KeeperState.Expired) =>
-                v() = Op.Fail(new Exception("session expired"))
-                
               // This should handle SaslAuthenticated in the future (if this
               // is propagated to non-session watchers).
-              case WatchState.SessionState(KeeperState.SyncConnected) =>
+              case WatchState.SessionState(SessionState.SyncConnected) =>
                 v() = ok
+
+              case WatchState.SessionState(SessionState.ConnectedReadOnly) =>
+                v() = ok
+
+              case WatchState.SessionState(SessionState.Expired) =>
+                v() = Op.Fail(new Exception("session expired"))
 
               // Disconnected, NoSyncConnected, AuthFailed
               case WatchState.SessionState(state) =>
-                v() = Op.Fail(new Exception(""+state))
+                v() = Op.Fail(new Exception("" + state))
             }
         }
+      }
 
       loop()
 
@@ -143,20 +105,22 @@ private[serverset2] trait Zk {
         Future.Done
       }
     }
-   
+
    private val existsWatchOp = Memoize { path: String =>
-     op("existsOf", path) { existsWatch(path) }
+     op("existsOf", path) { zkr.existsWatch(path) }
    }
-   
+
    private val childrenWatchOp = Memoize { path: String =>
-     op("childrenWatchOp", path) { getChildrenWatch(path) }
+     op("childrenWatchOp", path) { zkr.getChildrenWatch(path) }
    }
+
+  def close() = zkr.close()
 
   /**
    * A persistent version of exists: existsOf returns a Var representing
    * the current (best-effort) Stat for the given path.
    */
-  def existsOf(path: String): Var[Op[Option[Stat]]] =
+  def existsOf(path: String): Var[Op[Option[Data.Stat]]] =
     existsWatchOp(path)
 
   /**
@@ -170,22 +134,21 @@ private[serverset2] trait Zk {
       case Some(_) =>
         childrenWatchOp(path) flatMap {
           case Op.Pending => Var.value(Op.Pending)
-          case Op.Ok(children) => Var.value(Op.Ok(children.toSet))
+          case Op.Ok(Node.Children(children, _)) => Var.value(Op.Ok(children.toSet))
           // This can happen when exists() races with getChildren.
-          case Op.Fail(exc: KeeperException)
-          if exc.code == KeeperException.Code.NONODE =>
-            Var.value(Op.Ok(Set.empty))
+          case Op.Fail(KeeperException.NoNode(_)) => Var.value(Op.Ok(Set.empty))
           case f@Op.Fail(_) => Var.value(f)
         }
     }
 
   private val immutableDataOf_ = Memoize { path: String =>
     Var.async(Op.Pending: Op[Buf]) { v =>
-      safeRetry(getData(path), retryBackoffs) respond {
+      safeRetry(zkr.getData(path), retryBackoffs) respond {
         case Throw(exc) => v() = Op.Fail(exc)
-        case Return((_, buf)) => v() = Op.Ok(buf)
+        case Return(Node.Data(Some(data), _)) => v() = Op.Ok(data)
+        case Return(_) => v() = Op.Ok(Buf.Empty)
       }
-      
+
       Closable.nop
     }
   }
@@ -218,6 +181,36 @@ private[serverset2] trait Zk {
         Op.Ok(pathData.toMap)
     }
   }
+
+  def addAuthInfo(scheme: String, auth: Buf): Future[Unit] = zkr.addAuthInfo(scheme, auth)
+  def existsWatch(path: String): Future[Watched[Option[Data.Stat]]] = zkr.existsWatch(path)
+  def getChildrenWatch(path: String): Future[Watched[Node.Children]] = zkr.getChildrenWatch(path)
+  def getData(path: String): Future[Node.Data] = zkr.getData(path)
+  def sessionId: Long = zkr.sessionId
+  def sessionPasswd: Buf = zkr.sessionPasswd
+  def sessionTimeout: Duration = zkr.sessionTimeout
+}
+
+private class NullZooKeeperReader extends ZooKeeperReader {
+  def addAuthInfo(scheme: String, auth: Buf): Future[Unit] = Future.never
+
+  def exists(path: String): Future[Option[Data.Stat]] = Future.never
+  def existsWatch(path: String): Future[Watched[Option[Data.Stat]]] = Future.never
+
+  def getACL(path: String): Future[Node.ACL] = Future.never
+
+  def getChildren(path: String): Future[Node.Children] = Future.never
+  def getChildrenWatch(path: String): Future[Watched[Node.Children]] = Future.never
+
+  def getData(path: String): Future[Node.Data] = Future.never
+  def getDataWatch(path: String): Future[Watched[Node.Data]] = Future.never
+
+  def sync(path: String): Future[Unit] = Future.never
+  def close(deadline: Time): Future[Unit] = Future.never
+
+  def sessionId: Long = -1
+  def sessionPasswd: Buf = Buf.Empty
+  def sessionTimeout: Duration = 0.seconds
 }
 
 private[serverset2] trait ZkFactory {
@@ -227,8 +220,8 @@ private[serverset2] trait ZkFactory {
 }
 
 private[serverset2] class FnZkFactory(
-    newZk: (String, Duration) => Zk, 
-    timeout: Duration = 4.seconds) extends ZkFactory {
+    newZk: (String, Duration) => Zk,
+    timeout: Duration = 3.seconds) extends ZkFactory {
 
   def apply(hosts: String): Zk = newZk(hosts, timeout)
   def withTimeout(d: Duration) = new FnZkFactory(newZk, d)
@@ -236,71 +229,15 @@ private[serverset2] class FnZkFactory(
 }
 
 private[serverset2] object Zk extends FnZkFactory(
-    (hosts, timeout) => new ZooKeeperZk(w => 
-      new ZooKeeper(hosts, timeout.inMilliseconds.toInt, w))) {
+    (hosts, timeout) => new Zk(
+      ClientBuilder().hosts(hosts).sessionTimeout(timeout).readOnlyOK().reader(),
+      DefaultTimer.twitter)) {
 
-  val nil: Zk = new Zk {
-    protected[serverset2] implicit val timer = Timer.Nil
-
-    def exists(path: String): Future[Option[Stat]] = Future.never
-    def existsWatch(path: String): Future[Watched[Option[Stat]]] = Future.never
-  
-    def getChildren(path: String): Future[Seq[String]] = Future.never
-    def getChildrenWatch(path: String): Future[Watched[Seq[String]]] = Future.never
-  
-    def getData(path: String): Future[(Stat, Buf)] = Future.never
-    def getDataWatch(path: String): Future[Watched[(Stat, Buf)]] = Future.never
-  
-    def sync(path: String): Future[Unit] = Future.never
-    def close(): Future[Unit] = Future.never
-
-    def sessionId: Long = -1
-    def sessionPasswd: Buf = Buf.Empty
-    def sessionTimeout: Duration = 0.seconds
-  
-    /**
-     * Represents the session state.
-     */
-    val state: Var[WatchState] = Var.value(WatchState.Pending)
-  }
-
-  private object EventDeliveryThread 
-  extends Thread("com.twitter.finagle.serverset2.Zk event delivery") {
-    private val q = new LinkedBlockingDeque[(Updatable[WatchState], WatchState)]
-
-    def offer(u: Updatable[WatchState], s: WatchState) {
-      q.offer((u, s))
-    }
-
-    override def run() {
-      while (true) {
-        val (u, s) = q.take()
-        try {
-          u() = s
-        } catch  {
-          case exc => Monitor.handle(exc)
-        }
-      }
-    }
-
-    setDaemon(true)
-    start()
-  }
-
-  private[finagle] def newWatcher() = new Watcher {
-    private val p = new Promise[WatchedEvent]
-    val state = Var[WatchState](WatchState.Pending)
-    def process(event: WatchedEvent) = {
-      if (event.getType == EventType.None)
-        EventDeliveryThread.offer(state, WatchState.SessionState(event.getState()))
-      else
-        EventDeliveryThread.offer(state, WatchState.Determined)
-      }
-  }
+  val nil: Zk = new Zk(Watched(new NullZooKeeperReader, Var(WatchState.Pending)), Timer.Nil)
 
   def retrying(
       backoff: Duration,
-      newZk: () => Zk, 
+      newZk: () => Zk,
       timer: Timer = DefaultTimer.twitter): Var[Zk] = Var.async(nil) { u =>
     @volatile var closing = false
     @volatile var zk: Zk = Zk.nil
@@ -311,8 +248,8 @@ private[serverset2] object Zk extends FnZkFactory(
       zk.close()
       zk = newZk()
       u() = zk
-      val whenUnhealthy = 
-        zk.state.observeUntil(_ == WatchState.SessionState(KeeperState.Expired))
+      val whenUnhealthy =
+        zk.state.changes.filter { _ == WatchState.SessionState(SessionState.Expired) }.toFuture()
       whenUnhealthy onSuccess { _ =>
         timer.doLater(backoff) {
           reconnect()
