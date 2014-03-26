@@ -1,8 +1,23 @@
 package com.twitter.finagle.filter
 
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.{Service, SimpleFilter}
+import com.twitter.finagle.{param, Service, ServiceFactory, SimpleFilter, Stack, Stackable}
 import com.twitter.util.{Stopwatch, Future}
+
+private[finagle] object HandletimeFilter {
+  object HandleTime extends Stack.Role
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.filter.HandletimeFilter]].
+   */
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Simple[ServiceFactory[Req, Rep]](HandleTime) {
+      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
+        val param.Stats(statsReceiver) = params[param.Stats]
+        new HandletimeFilter(statsReceiver) andThen next
+      }
+    }
+}
 
 /**
  * A [[com.twitter.finagle.Filter]] that records the elapsed execution times of

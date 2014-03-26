@@ -1,7 +1,24 @@
 package com.twitter.finagle.filter
 
-import com.twitter.finagle.{SimpleFilter, Service, SourcedException}
+import com.twitter.finagle.{param, SimpleFilter, Service,
+  ServiceFactory, SourcedException, Stack, Stackable}
 import com.twitter.util.Future
+
+private[finagle] object ExceptionSourceFilter {
+  object ExceptionSource extends Stack.Role
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.filter.ExceptionSourceFilter]].
+   */
+   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+     new Stack.Simple[ServiceFactory[Req, Rep]](ExceptionSource) {
+      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
+        val param.Label(label) = params[param.Label]
+        new ExceptionSourceFilter(label) andThen next
+      }
+    }
+}
 
 /**
  * A [[com.twitter.finagle.Filter]] that sources exceptions. The `serviceName`

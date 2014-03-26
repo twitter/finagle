@@ -1,12 +1,38 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.{
-  SimpleFilter, Service, RequestTimeoutException, IndividualRequestTimeoutException}
+import com.twitter.finagle._
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util.{Future, Duration, Timer}
 
 object TimeoutFilter {
   val TimeoutAnnotation = "finagle.timeout"
+
+  object RequestTimeout extends Stack.Role
+
+  /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.service.TimeoutFilter]] module.
+   */
+  case class Param(timeout: Duration)
+  implicit object Param extends Stack.Param[Param] with Stack.Role {
+    val default = Param(Duration.Top)
+  }
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.TimeoutFilter]].
+   */
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Simple[ServiceFactory[Req, Rep]](RequestTimeout) {
+      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
+        val TimeoutFilter.Param(timeout) = params[TimeoutFilter.Param]
+        val param.Timer(timer) = params[param.Timer]
+        if (!timeout.isFinite) next
+        else {
+          val exc = new IndividualRequestTimeoutException(timeout)
+          new TimeoutFilter(timeout, exc, timer) andThen next
+        }
+      }
+    }
 }
 
 /**

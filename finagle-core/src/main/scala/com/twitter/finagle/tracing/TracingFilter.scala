@@ -1,6 +1,19 @@
 package com.twitter.finagle.tracing
 
-import com.twitter.finagle.{Init, Service, SimpleFilter}
+import com.twitter.finagle._
+
+private[finagle] object TracingFilter {
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.tracing.TracingFilter]].
+   */
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Simple[ServiceFactory[Req, Rep]](param.Tracer) {
+      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
+        val param.Tracer(tracer) = params[param.Tracer]
+        new TracingFilter(tracer) andThen next
+      }
+    }
+}
 
 /**
  * The TracingFilter takes care of span lifecycle events. It is always

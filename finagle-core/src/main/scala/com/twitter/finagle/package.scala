@@ -82,4 +82,95 @@ The [[http://twitter.github.io/finagle/ Finagle homepage]] contains
 useful documentation and resources for using Finagle.
 
  */
-package object finagle
+package object finagle {
+  /**
+   * Defines common [[com.twitter.finagle.Stack.Param]]'s shared between
+   * finagle clients and servers.
+   *
+   * TODO: consider moving these params into their own subdirectory and
+   * package object.
+   *
+   * @define param A class eligible for configuring
+   */
+  object param {
+    /**
+     * $param a label used to identify finagle clients and servers.
+     */
+    case class Label(label: String)
+    implicit object Label extends Stack.Param[Label] {
+      val default = Label("")
+    }
+
+    /**
+     * $param a [[com.twitter.util.Timer]] used throughout finagle clients
+     * and servers.
+     */
+    case class Timer(timer: com.twitter.util.Timer)
+    implicit object Timer extends Stack.Param[Timer] {
+      val default = Timer(util.DefaultTimer.twitter)
+    }
+
+    /**
+     * $param a java.util.logging.Logger used throughout finagle
+     * clients and servers.
+     */
+    case class Logger(log: java.util.logging.Logger)
+    implicit object Logger extends Stack.Param[Logger] {
+      val default = Logger(java.util.logging.Logger.getLogger("finagle"))
+    }
+
+    /**
+     * $param a [[com.twitter.finagle.stats.StatsReceiver]] throughout finagle
+     * clients and servers.
+     */
+    case class Stats(statsReceiver: stats.StatsReceiver)
+    implicit object Stats extends Stack.Param[Stats] {
+      // Note, this is lazy to avoid potential failures during
+      // static initialization.
+      lazy val default = Stats(stats.DefaultStatsReceiver)
+    }
+
+    /**
+     * $param a [[com.twitter.util.Monitor]] throughout finagle servers
+     * and clients.
+     */
+    case class Monitor(monitor: com.twitter.util.Monitor)
+    implicit object Monitor extends Stack.Param[Monitor] {
+      // Note, this is lazy to avoid potential failures during
+      // static initialization.
+      lazy val default = Monitor(util.DefaultMonitor)
+    }
+
+    /**
+     * $param a [[com.twitter.util.ReporterFactory]] throughout finagle servers
+     * and clients.
+     */
+    case class Reporter(reporter: util.ReporterFactory)
+    implicit object Reporter extends Stack.Param[Reporter] {
+      // Note, this is lazy to avoid potential failures during
+      // static initialization.
+      lazy val default = Reporter(util.LoadedReporterFactory)
+    }
+
+    /**
+     * $param a [[com.twitter.finagle.tracing.Tracer]] throughout finagle servers
+     * and clients.
+     */
+    case class Tracer(tracer: tracing.Tracer)
+    implicit object Tracer extends Stack.Param[Tracer] with Stack.Role {
+      // Note, this is lazy to avoid potential failures during
+      // static initialization.
+      val default = Tracer(tracing.DefaultTracer)
+    }
+  }
+
+  object stack {
+    object Endpoint extends Stack.Role
+    /**
+     * Creates a [[com.twitter.finagle.Stack.Leaf]] which always fails.
+     */
+    def nilStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = Stack.Leaf(Endpoint,
+      new com.twitter.finagle.service.FailingFactory[Req, Rep](
+        new IllegalArgumentException("Unterminated stack")))
+  }
+}

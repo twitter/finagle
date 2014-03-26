@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicLong
 import org.jboss.netty.channel.ChannelHandler
 import org.jboss.netty.channel.socket.nio.{NioWorkerPool, NioClientSocketChannelFactory}
 import org.jboss.netty.channel.{
-  Channel, ChannelFactory, ChannelFuture, ChannelFutureListener, ChannelPipeline, 
+  Channel, ChannelFactory, ChannelFuture, ChannelFutureListener, ChannelPipeline,
   ChannelPipelineFactory, Channels}
 import org.jboss.netty.handler.timeout.IdleStateHandler
 import scala.collection.JavaConverters._
@@ -122,9 +122,9 @@ case class Netty3TransporterTLSConfig(
 case class Netty3Transporter[In, Out](
   name: String,
   pipelineFactory: ChannelPipelineFactory,
-  newChannel: ChannelPipeline => Channel = 
+  newChannel: ChannelPipeline => Channel =
     Netty3Transporter.channelFactory.newChannel(_),
-  newTransport: Channel => Transport[In, Out] = 
+  newTransport: Channel => Transport[In, Out] =
     (ch: Channel) => new ChannelTransport(ch).cast[In, Out],
   tlsConfig: Option[Netty3TransporterTLSConfig] = None,
   httpProxy: Option[SocketAddress] = None,
@@ -229,20 +229,23 @@ object Netty3Transporter {
   )
 }
 
-case class Netty3Stack[In, Out, Req, Rep](
+private[finagle] object Netty3Stack {
+  object Transport extends Stack.Role
+}
+
+private[finagle] case class Netty3Stack[In, Out, Req, Rep](
     name: String,
     pipelineFactory: ChannelPipelineFactory,
-    newDispatcher: (Transport[In, Out], StatsReceiver) => Service[Req, Rep])
-  extends Stack.Simple[ServiceFactory[Req, Rep]](StackClient.Role.Netty3)
-{
+    newDispatcher: (Transport[In, Out], StatsReceiver) => Service[Req, Rep]
+) extends Stack.Simple[ServiceFactory[Req, Rep]](Netty3Stack.Transport) {
   import StackClient._
 
-  private[this] val transporter =  Netty3Transporter[In, Out](name, pipelineFactory)
+  private[this] val transporter = Netty3Transporter[In, Out](name, pipelineFactory)
 
   def make(params: Stack.Params, next: ServiceFactory[Req, Rep])
     : ServiceFactory[Req, Rep] = {
     val EndpointAddr(addr) = params[EndpointAddr]
-    val Stats(statsReceiver, _) = params[Stats]
+    val param.Stats(statsReceiver) = params[param.Stats]
 
     ServiceFactory(() => transporter(addr, statsReceiver).map(newDispatcher(_, statsReceiver)))
   }

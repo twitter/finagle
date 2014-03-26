@@ -2,9 +2,50 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
 import com.twitter.finagle.util.AsyncLatch
-import com.twitter.finagle.{Service, ServiceProxy}
+import com.twitter.finagle.{param, Service, ServiceFactory, ServiceProxy, Stack, Stackable}
 import com.twitter.util.{Duration, Promise, Future, NullTimerTask, Timer, Time}
 import java.util.concurrent.atomic.AtomicBoolean
+
+private[finagle] object ExpiringService {
+  object Expiration extends Stack.Role
+
+  /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.server.ExpiringService]].
+   *
+   * @param idleTime max duration for which a connection is allowed to be idle.
+   * @param lifeTIme max lifetime of a connection.
+   */
+  case class Param(idleTime: Duration, lifeTime: Duration)
+  implicit object Param extends Stack.Param[Param] with Stack.Role {
+    val default = Param(Duration.Top, Duration.Top)
+  }
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.ExpiringService]].
+   */
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Simple[ServiceFactory[Req, Rep]](Expiration) {
+      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
+        val param.Timer(timer) = params[param.Timer]
+        val ExpiringService.Param(idleTime, lifeTime) = params[ExpiringService.Param]
+        val param.Stats(statsReceiver) = params[param.Stats]
+
+        val idle = if (idleTime.isFinite) Some(idleTime) else None
+        val life = if (lifeTime.isFinite) Some(lifeTime) else None
+
+        (idle, life) match {
+          case (None, None) => next
+          case _ => next map { service =>
+            val closeOnRelease = new CloseOnReleaseService(service)
+            new ExpiringService(closeOnRelease, idle, life, timer, statsReceiver) {
+              def onExpire() { closeOnRelease.close() }
+            }
+          }
+        }
+      }
+    }
+}
 
 /**
  * A service wrapper that expires the self service after a

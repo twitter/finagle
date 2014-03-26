@@ -1,10 +1,9 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
+import com.twitter.finagle._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Proc
-import com.twitter.finagle.{
-  ClientConnection, ServiceFactory, ServiceFactoryProxy, FailedFastException}
 import com.twitter.util.{Future, Duration, Time, Throw, Return, Timer, TimerTask}
 import scala.util.Random
 
@@ -26,6 +25,20 @@ private[finagle] object FailFastFactory {
   // we don't want to retry. This is a bit of a kludge--we should
   // reconsider having this logic in the load balancer instead.
   private val failedFastExc = Future.exception(new FailedFastException)
+
+  object FailFast extends Stack.Role
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.FailFastFactory]].
+   */
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Simple[ServiceFactory[Req, Rep]](FailFast) {
+      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
+          val param.Stats(statsReceiver) = params[param.Stats]
+          val param.Timer(timer) = params[param.Timer]
+          new FailFastFactory(next, statsReceiver.scope("failfast"), timer)
+        }
+      }
 }
 
 /**

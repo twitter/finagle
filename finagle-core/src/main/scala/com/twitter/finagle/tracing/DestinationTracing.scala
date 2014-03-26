@@ -1,7 +1,12 @@
 package com.twitter.finagle.tracing
+
 import com.twitter.finagle._
 import java.net.{SocketAddress, InetSocketAddress}
 
+/**
+ * [[com.twitter.finagle.ServiceFactoryProxy]] used to trace the local addr and
+ * server addr.
+ */
 class ServerDestTracingProxy[Req, Rep](self: ServiceFactory[Req, Rep])
   extends ServiceFactoryProxy[Req, Rep](self)
 {
@@ -32,8 +37,8 @@ class ServerDestTracingProxy[Req, Rep](self: ServiceFactory[Req, Rep])
 }
 
 /**
- * Filter for clients to record the remote address of the server.  We don't log
- * the local addr here because it's already done in the Dispatcher
+ * [[com.twitter.finagle.Filter]] for clients to record the remote address of the server.
+ * We don't log the local addr here because it's already done in the client Dispatcher.
  */
 class ClientDestTracingFilter[Req,Rep](remoteSock: SocketAddress)
   extends SimpleFilter[Req,Rep]

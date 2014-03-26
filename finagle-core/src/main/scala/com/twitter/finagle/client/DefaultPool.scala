@@ -1,10 +1,82 @@
 package com.twitter.finagle.client
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.{param, ServiceFactory, Stack, Stackable, StackBuilder}
 import com.twitter.finagle.pool.{WatermarkPool, CachingPool, BufferingPool}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Timer, Duration}
+
+private[finagle] object DefaultPool {
+  object Role {
+    trait Pool extends Stack.Role
+    object BufferingPool extends Pool
+    object CachingPool extends Pool
+    object WatermarkPool extends Pool
+  }
+
+  /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * default pool module.
+   *
+   * @param low The low watermark used in the Watermark pool. If there
+   * is sufficient request concurrency, no fewer connections will be
+   * maintained by the pool.
+   *
+   * @param high The high watermark. The pool will not maintain more
+   * connections than this.
+   *
+   * @param bufferSize Specifies the size of the lock-free buffer in front of
+   * the pool configuration. Skipped if 0.
+   *
+   * @param idleTime The amount of idle time for which a connection is
+   * cached. This is applied to connections that number greater than
+   * the low watermark but fewer than the high.
+   *
+   * @param maxWaiters The maximum number of connection requests that
+   * are queued when the connection concurrency exceeds the high
+   * watermark.
+   */
+  case class Param(low: Int, high: Int, bufferSize: Int, idleTime: Duration, maxWaiters: Int)
+  implicit object Param extends Stack.Param[Param] {
+    val default = Param(0, Int.MaxValue, 0, Duration.Top, Int.MaxValue)
+  }
+
+  /**
+   * A [[com.twitter.finagle.Stackable]] client connection pool.
+   *
+   * @see [[com.twitter.finagle.pool.BufferingPool]].
+   * @see [[com.twitter.finagle.pool.WatermarkPool]].
+   * @see [[com.twitter.finagle.pool.CachingPool]].
+   */
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Module[ServiceFactory[Req, Rep]](StackClient.Role.Pool) {
+      import com.twitter.finagle.pool.{CachingPool, WatermarkPool, BufferingPool}
+
+      def make(params: Params, next: Stack[ServiceFactory[Req, Rep]]) = {
+        val DefaultPool.Param(low, high, bufferSize, idleTime, maxWaiters) = params[DefaultPool.Param]
+        val param.Stats(statsReceiver) = params[param.Stats]
+        val param.Timer(timer) = params[param.Timer]
+
+        val stack = new StackBuilder[ServiceFactory[Req, Rep]](next)
+
+        if (idleTime > 0.seconds && high > low) {
+          stack.push(Role.CachingPool, (sf: ServiceFactory[Req, Rep]) =>
+            new CachingPool(sf, high-low, idleTime, timer, statsReceiver))
+        }
+
+        stack.push(Role.WatermarkPool, (sf: ServiceFactory[Req, Rep]) =>
+          new WatermarkPool(sf, low, high, statsReceiver, maxWaiters))
+
+        if (bufferSize > 0) {
+          stack.push(Role.BufferingPool, (sf: ServiceFactory[Req, Rep]) =>
+            new BufferingPool(sf, bufferSize))
+        }
+
+        stack.result
+      }
+    }
+}
 
 /**
  * Create a watermark pool backed by a caching pool. This is the

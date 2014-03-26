@@ -97,16 +97,6 @@ package exp {
   )
 
   private[finagle]
-  object ReusingPoolModule
-    extends Stack.Simple[ServiceFactory[ChannelBuffer, ChannelBuffer]](StackClient.Role.ReusingPool)
-  {
-    def make(params: Stack.Params, nextFac: ServiceFactory[ChannelBuffer, ChannelBuffer]) = {
-      val StackClient.Stats(statsReceiver, _) = params[StackClient.Stats]
-      new ReusingPool(nextFac, statsReceiver.scope("reusingpool"))
-    }
-  }
-
-  private[finagle]
   class MuxClient(client: StackClient[ChannelBuffer, ChannelBuffer])
     extends RichStackClient[ChannelBuffer, ChannelBuffer, MuxClient](client)
   {
@@ -115,9 +105,9 @@ package exp {
   }
 
   object MuxClient extends MuxClient(new StackClient({
-    val reusingClientStack = StackClient.clientStack[ChannelBuffer, ChannelBuffer]
-      .replace(StackClient.Role.Pool, ReusingPoolModule)
+    val reusingClientStack: Stack[ServiceFactory[ChannelBuffer, ChannelBuffer]] =
+      StackClient.newStack.replace(StackClient.Role.Pool, ReusingPool.module)
 
-    reusingClientStack ++ (MuxNetty3Stack +: StackClient.nilStack)
-  }))
+    reusingClientStack ++ (MuxNetty3Stack +: stack.nilStack)
+  }, Stack.Params.empty))
 }
