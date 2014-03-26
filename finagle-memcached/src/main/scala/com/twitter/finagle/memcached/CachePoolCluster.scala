@@ -8,7 +8,7 @@ import com.twitter.common.zookeeper._
 import com.twitter.concurrent.Spool
 import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Group, Resolver, Addr}
+import com.twitter.finagle.{Group, Resolver, Addr, WeightedInetSocketAddress}
 import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.zookeeper.{ZkGroup, DefaultZkClientFactory, ZookeeperServerSetCluster}
@@ -76,12 +76,17 @@ object CacheNodeGroup {
 
   def apply(group: Group[SocketAddress], useOnlyResolvedAddress: Boolean = false) = group collect {
     case node: CacheNode => node
-    case addr: InetSocketAddress if (useOnlyResolvedAddress && !addr.isUnresolved) =>
-      //Note: unresolvedAddresses won't be added even if they are able to be resolved after added
-      new CacheNode(addr.getHostName, addr.getPort, 1,
-        Some(addr.getAddress.getHostAddress + ":" + addr.getPort))
-    case addr: InetSocketAddress if (!useOnlyResolvedAddress) =>
-      new CacheNode(addr.getHostName, addr.getPort, 1, None)
+
+    // TODO: should we use the weights propagated here? The weights passed
+    // by WeightedInetSocketAddress are doubles -- should we discretize these?
+    case WeightedInetSocketAddress(ia, weight)
+    if useOnlyResolvedAddress && !ia.isUnresolved =>
+      //Note: unresolvedAddresses won't be added even if they are able 
+      // to be resolved after added
+      new CacheNode(ia.getHostName, ia.getPort, 1,
+        Some(ia.getAddress.getHostAddress + ":" + ia.getPort))
+    case WeightedInetSocketAddress(ia, weight) if !useOnlyResolvedAddress =>
+      new CacheNode(ia.getHostName, ia.getPort, 1, None)
   }
 
   def newStaticGroup(cacheNodeSet: Set[CacheNode]) = Group(cacheNodeSet toSeq:_*)
