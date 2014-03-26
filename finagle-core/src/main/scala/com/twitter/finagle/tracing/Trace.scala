@@ -17,6 +17,9 @@ import com.twitter.finagle.Init
 import com.twitter.util.{Future, Duration, Time, Local, Stopwatch}
 import java.net.InetSocketAddress
 import scala.util.Random
+import com.twitter.app.GlobalFlag
+
+object debugTrace extends GlobalFlag(false, "Print all traces to the console.")
 
 /**
  * `Trace` maintains the state of the tracing stack
@@ -235,7 +238,10 @@ object Trace  {
    * tracers in the stack.
    */
   def record(rec: => Record) {
-    if (isActivelyTracing) uncheckedRecord(rec)
+    if (debugTrace())
+      System.err.println(rec)
+    if (isActivelyTracing)
+      uncheckedRecord(rec)
   }
 
   /**
@@ -267,11 +273,15 @@ object Trace  {
     * Convenience methods that construct records of different kinds.
     */
   def record(ann: Annotation) {
+    if (debugTrace())
+      System.err.println(Record(id, Time.now, ann, None))
     if (isActivelyTracing)
       uncheckedRecord(Record(id, Time.now, ann, None))
    }
 
   def record(ann: Annotation, duration: Duration) {
+    if (debugTrace())
+      System.err.println(Record(id, Time.now, ann, Some(duration)))
     if (isActivelyTracing)
       uncheckedRecord(Record(id, Time.now, ann, Some(duration)))
   }
