@@ -5,7 +5,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.factory._
 import com.twitter.finagle.filter.{ExceptionSourceFilter, MonitorFilter}
 import com.twitter.finagle.loadbalancer.{
-  HeapBalancer, HeapBalancerFactory, WeightedLoadBalancerFactory}
+  HeapBalancer, DefaultBalancerFactory, WeightedLoadBalancerFactory}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{
   BroadcastStatsReceiver, ClientStatsReceiver, NullStatsReceiver, RollupStatsReceiver,
@@ -71,7 +71,7 @@ case class DefaultClient[Req, Rep](
   tracer: Tracer  = DefaultTracer,
   monitor: Monitor = DefaultMonitor,
   reporter: ReporterFactory = LoadedReporterFactory,
-  loadBalancer: WeightedLoadBalancerFactory = HeapBalancerFactory.toWeighted
+  loadBalancer: WeightedLoadBalancerFactory = DefaultBalancerFactory
 ) extends Client[Req, Rep] {
   com.twitter.finagle.Init()
   val globalStatsReceiver = new RollupStatsReceiver(statsReceiver)

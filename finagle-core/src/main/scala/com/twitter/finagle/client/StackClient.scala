@@ -3,7 +3,7 @@ package com.twitter.finagle.client
 import com.twitter.finagle._
 import com.twitter.finagle.factory._
 import com.twitter.finagle.filter.{ExceptionSourceFilter, MonitorFilter}
-import com.twitter.finagle.loadbalancer.{WeightedLoadBalancerFactory, HeapBalancerFactory}
+import com.twitter.finagle.loadbalancer.{WeightedLoadBalancerFactory, DefaultBalancerFactory}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats._
 import com.twitter.finagle.tracing.{ClientDestTracingFilter, TracingFilter}
@@ -106,7 +106,7 @@ private[finagle] object StackClient {
    */
   case class LoadBalancer(loadBalancerFactory: WeightedLoadBalancerFactory)
   implicit object LoadBalancer extends Stack.Param[LoadBalancer] {
-    val default = LoadBalancer(HeapBalancerFactory)
+    val default = LoadBalancer(DefaultBalancerFactory)
   }
 
   /**
