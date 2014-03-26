@@ -80,7 +80,7 @@
         <groupId>com.twitter</groupId>
         <artifactId>scrooge-maven-plugin</artifactId>
         <!-- this version must match the version from scrooge-gen.ivy.xml -->
-        <version>3.12.3</version>
+        <version>3.13.0</version>
         <configuration>
           <outputDirectory>target/generated-test-sources</outputDirectory>
         </configuration>
