@@ -19,7 +19,7 @@ private[finagle] object StackServer {
   /**
    * Canonical Roles for each Server-related Stack modules.
    */
-  object Roles {
+  object Role {
     object ServerDestTracing extends Stack.Role
     object JvmTracing extends Stack.Role
     object Preparer extends Stack.Role
@@ -46,15 +46,15 @@ private[finagle] object StackServer {
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](
       stack.nilStack[Req, Rep])
 
-    stk.push(Roles.ServerDestTracing, ((next: ServiceFactory[Req, Rep]) =>
+    stk.push(Role.ServerDestTracing, ((next: ServiceFactory[Req, Rep]) =>
       new ServerDestTracingProxy[Req, Rep](next)))
     stk.push(TimeoutFilter.module)
     stk.push(StatsFilter.module)
     stk.push(RequestSemaphoreFilter.module)
-    stk.push(Roles.MaskCancel, identity[ServiceFactory[Req, Rep]](_))
+    stk.push(Role.MaskCancel, identity[ServiceFactory[Req, Rep]](_))
     stk.push(ExceptionSourceFilter.module)
-    stk.push(Roles.Preparer, identity[ServiceFactory[Req, Rep]](_))
-    stk.push(Roles.JvmTracing, ((next: ServiceFactory[Req, Rep]) =>
+    stk.push(Role.Preparer, identity[ServiceFactory[Req, Rep]](_))
+    stk.push(Role.JvmTracing, ((next: ServiceFactory[Req, Rep]) =>
       newJvmFilter[Req, Rep]() andThen next))
     stk.push(TracingFilter.module)
     stk.push(MonitorFilter.module)
@@ -102,6 +102,15 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
    * @see [[com.twitter.finagle.dispatch.GenSerialServerDispatcher]]
    */
   protected val newDispatcher: ServerDispatcher
+
+  /**
+   * Creates a new StackServer with with `f` applied to `stack`.
+   */
+  def transformed(f: Stack[ServiceFactory[Req, Rep]] => Stack[ServiceFactory[Req, Rep]]) =
+    new StackServer[Req, Rep, In, Out](f(stack), params) {
+      protected val listener = self.listener
+      protected val newDispatcher = self.newDispatcher
+    }
 
   /**
    * Creates a new StackServer with `p` added to the `params`

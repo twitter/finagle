@@ -1,23 +1,26 @@
 package com.twitter.finagle.builder
 
 import com.twitter.finagle._
-import com.twitter.finagle.channel.OpenConnectionsThresholds
 import com.twitter.finagle.channel.IdleConnectionFilter
+import com.twitter.finagle.channel.OpenConnectionsThresholds
 import com.twitter.finagle.dispatch.ExpiringServerDispatcher
+import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter}
 import com.twitter.finagle.netty3.Netty3Listener
+import com.twitter.finagle.server.{Listener, NullListener, StackServer}
+import com.twitter.finagle.service.ExpiringService
+import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.ssl.{Ssl, Engine}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, Tracer}
-import com.twitter.finagle.util._
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.util._
 import com.twitter.util.{Closable, Duration, Future, Monitor, NullMonitor,   Time}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.{Logger, Level}
 import javax.net.ssl.SSLEngine
-import org.jboss.netty.channel.ServerChannelFactory
+import org.jboss.netty.channel.{Channels, ServerChannelFactory}
 import scala.annotation.implicitNotFound
-import scala.collection.mutable
 
 /**
  * A listening server.
@@ -61,6 +64,28 @@ object ServerBuilder {
 object ServerConfig {
   sealed abstract trait Yes
   type FullySpecified[Req, Rep] = ServerConfig[Req, Rep, Yes, Yes, Yes]
+
+  def nilServer[Req, Rep] = new StackServer[Req, Rep, Any, Any](
+    stack.nilStack, Stack.Params.empty) {
+    val listener = NullListener
+    val newDispatcher = (_: Any, _: Any) => Closable.nop
+  }
+
+  // params specific to ServerBuilder
+  case class CancelOnHangup(yesOrNo: Boolean)
+  implicit object CancelOnHangup extends Stack.Param[CancelOnHangup] {
+    val default = CancelOnHangup(true)
+  }
+
+  case class MonitorFactory(mFactory: (String, SocketAddress) => Monitor)
+  implicit object MonitorFactory extends Stack.Param[MonitorFactory] {
+    val default = MonitorFactory((_, _) => NullMonitor)
+  }
+
+  case class Daemonize(onOrOff: Boolean)
+  implicit object Daemonize extends Stack.Param[Daemonize] {
+    val default = Daemonize(false)
+  }
 }
 
 @implicitNotFound("Builder is not fully configured: Codec: ${HasCodec}, BindTo: ${HasBindTo}, Name: ${HasName}")
@@ -70,115 +95,10 @@ private[builder] object ServerConfigEvidence {
   implicit object FullyConfigured extends ServerConfigEvidence[ServerConfig.Yes, ServerConfig.Yes, ServerConfig.Yes]
 }
 
-private[builder] case class BufferSize(
-  send: Option[Int] = None,
-  recv: Option[Int] = None
-)
-
-private[builder] case class TimeoutConfig(
-  hostConnectionMaxIdleTime: Option[Duration] = None,
-  hostConnectionMaxLifeTime: Option[Duration] = None,
-  requestTimeout: Option[Duration] = None,
-  readTimeout: Option[Duration] = None,
-  writeCompletionTimeout: Option[Duration] = None
-)
-
 /**
  * A configuration object that represents what shall be built.
  */
-private[builder] final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
-  private val _codecFactory:                    Option[CodecFactory[Req, Rep]#Server]    = None,
-  private val _statsReceiver:                   Option[StatsReceiver]                    = None,
-  private val _monitor:                         Option[(String, SocketAddress) => Monitor] = None,
-  private val _name:                            Option[String]                           = None,
-  private val _bufferSize:                      BufferSize                               = BufferSize(),
-  private val _keepAlive:                       Option[Boolean]                          = None,
-  private val _backlog:                         Option[Int]                              = None,
-  private val _bindTo:                          Option[SocketAddress]                    = None,
-  private val _logger:                          Option[Logger]                           = None,
-  private val _newEngine:                       Option[() => Engine]                     = None,
-  private val _channelFactory:                  ServerChannelFactory                     = Netty3Listener.channelFactory,
-  private val _maxConcurrentRequests:           Option[Int]                              = None,
-  private val _timeoutConfig:                   TimeoutConfig                            = TimeoutConfig(),
-  private val _tracer:                          Tracer                                   = NullTracer,
-  private val _openConnectionsThresholds:       Option[OpenConnectionsThresholds]        = None,
-  private val _cancelOnHangup:                  Boolean                                  = true,
-  private val _logChannelActivity:              Boolean                                  = false,
-  private val _daemon:                          Boolean                                  = false)
-{
-  import ServerConfig._
-
-  /**
-   * The Scala compiler errors if the case class members don't have underscores.
-   * Nevertheless, we want a friendly public API so we create delegators without
-   * underscores.
-   */
-  lazy val codecFactory               = _codecFactory.get
-  val statsReceiver                   = _statsReceiver
-  val monitor                         = _monitor
-  lazy val name                       = _name.get
-  val bufferSize                      = _bufferSize
-  val keepAlive                       = _keepAlive
-  val backlog                         = _backlog
-  lazy val bindTo                     = _bindTo.get
-  val logger                          = _logger
-  val newEngine                       = _newEngine
-  val channelFactory                  = _channelFactory
-  val maxConcurrentRequests           = _maxConcurrentRequests
-  val hostConnectionMaxIdleTime       = _timeoutConfig.hostConnectionMaxIdleTime
-  val hostConnectionMaxLifeTime       = _timeoutConfig.hostConnectionMaxLifeTime
-  val requestTimeout                  = _timeoutConfig.requestTimeout
-  val readTimeout                     = _timeoutConfig.readTimeout
-  val writeCompletionTimeout          = _timeoutConfig.writeCompletionTimeout
-  val timeoutConfig                   = _timeoutConfig
-  val tracer                          = _tracer
-  val openConnectionsThresholds       = _openConnectionsThresholds
-  val cancelOnHangup                  = _cancelOnHangup
-  val logChannelActivity              = _logChannelActivity
-  val daemon                          = _daemon
-
-  def toMap = Map(
-    "codecFactory"                    -> _codecFactory,
-    "statsReceiver"                   -> _statsReceiver,
-    "monitor"                         -> _monitor,
-    "name"                            -> _name,
-    "bufferSize"                      -> _bufferSize,
-    "keepAlive"                       -> _keepAlive,
-    "backlog"                         -> _backlog,
-    "bindTo"                          -> _bindTo,
-    "logger"                          -> _logger,
-    "newEngine"                       -> _newEngine,
-    "channelFactory"                  -> Some(_channelFactory),
-    "maxConcurrentRequests"           -> _maxConcurrentRequests,
-    "hostConnectionMaxIdleTime"       -> _timeoutConfig.hostConnectionMaxIdleTime,
-    "hostConnectionMaxLifeTime"       -> _timeoutConfig.hostConnectionMaxLifeTime,
-    "requestTimeout"                  -> _timeoutConfig.requestTimeout,
-    "readTimeout"                     -> _timeoutConfig.readTimeout,
-    "writeCompletionTimeout"          -> _timeoutConfig.writeCompletionTimeout,
-    "tracer"                          -> Some(_tracer),
-    "openConnectionsThresholds"       -> Some(_openConnectionsThresholds),
-    "cancelOnHangup"                  -> Some(_cancelOnHangup),
-    "logChannelActivity"              -> Some(_logChannelActivity),
-    "daemon"                          -> Some(_daemon)
-  )
-
-  override def toString = {
-    "ServerConfig(%s)".format(
-      toMap flatMap {
-        case (k, Some(v)) =>
-          Some("%s=%s".format(k, v))
-        case _ =>
-          None
-      } mkString(", "))
-  }
-
-  def validated: ServerConfig[Req, Rep, Yes, Yes, Yes] = {
-    _codecFactory getOrElse { throw new IncompleteSpecification("No codec was specified") }
-    _bindTo       getOrElse { throw new IncompleteSpecification("No bindTo was specified") }
-    _name         getOrElse { throw new IncompleteSpecification("No name were specified") }
-    copy()
-  }
-}
+private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName]
 
 /**
  * A handy Builder for constructing Servers (i.e., binding Services to
@@ -223,7 +143,8 @@ private[builder] final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, Ha
  * instead of a compiler error.
  */
 class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
-  val config: ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName]
+  params: Stack.Params,
+  mk: Stack.Params => StackServer[Req, Rep, Any, Any]
 ) {
   import ServerConfig._
 
@@ -232,64 +153,96 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   type ThisConfig           = ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName]
   type This                 = ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName]
 
-  private[builder] def this() = this(new ServerConfig)
+  private[builder] def this() = this(Stack.Params.empty, Function.const(ServerConfig.nilServer)_)
 
-  override def toString() = "ServerBuilder(%s)".format(config.toString)
+  override def toString() = "ServerBuilder(%s)".format(params)
 
   protected def copy[Req1, Rep1, HasCodec1, HasBindTo1, HasName1](
-    config: ServerConfig[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]
+    ps: Stack.Params,
+    newServer: Stack.Params => StackServer[Req1, Rep1, Any, Any]
   ): ServerBuilder[Req1, Rep1, HasCodec1, HasBindTo1, HasName1] =
-    new ServerBuilder(config)
+    new ServerBuilder(ps, newServer)
 
-  protected def withConfig[Req1, Rep1, HasCodec1, HasBindTo1, HasName1](
-    f: ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName] =>
-       ServerConfig[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]
-    ): ServerBuilder[Req1, Rep1, HasCodec1, HasBindTo1, HasName1] = copy(f(config))
+  protected def configured[P: Stack.Param, HasCodec1, HasBindTo1, HasName1](
+    param: P
+  ): ServerBuilder[Req, Rep, HasCodec1, HasBindTo1, HasName1] =
+    copy(params + param, mk)
 
   def codec[Req1, Rep1](
     codec: Codec[Req1, Rep1]
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
-    withConfig(_.copy(_codecFactory = Some(Function.const(codec) _)))
-
-  def codec[Req1, Rep1](
-    codecFactory: CodecFactory[Req1, Rep1]#Server
-  ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
-    withConfig(_.copy(_codecFactory = Some(codecFactory)))
+    this.codec((_: ServerCodecConfig) => codec)
 
   def codec[Req1, Rep1](
     codecFactory: CodecFactory[Req1, Rep1]
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
-    withConfig(_.copy(_codecFactory = Some(codecFactory.server)))
+    this.codec(codecFactory.server)
+
+  def codec[Req1, Rep1](
+    codecFactory: CodecFactory[Req1, Rep1]#Server
+  ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
+    stack({ ps =>
+      val param.Label(label) = ps[param.Label]
+      val Listener.BindTo(addr) = ps[Listener.BindTo]
+      val codec = codecFactory(ServerCodecConfig(label, addr))
+      val newStack = StackServer.newStack[Req1, Rep1].replace(
+        StackServer.Role.Preparer, (next: ServiceFactory[Req1, Rep1]) =>
+          codec.prepareConnFactory(next)
+      )
+      new StackServer[Req1, Rep1, Any, Any](newStack, ps) {
+        protected val listener: Listener[Any, Any] = Netty3Listener.fromParams(
+          ps + Netty3Listener.PipelineFactory(codec.pipelineFactory))
+
+        protected val newDispatcher = {
+          // TODO: Expiration logic should be installed using ExpiringService
+          // in StackServer#newStack. Then we can thread through "closes"
+          // via ClientConnection.
+          val param.Timer(timer) = ps[param.Timer]
+          val ExpiringService.Param(idleTime, lifeTime) = ps[ExpiringService.Param]
+          val param.Stats(sr) = ps[param.Stats]
+          val idle = if (idleTime.isFinite) Some(idleTime) else None
+          val life = if (lifeTime.isFinite) Some(lifeTime) else None
+          val f = codec.newServerDispatcher(_, _)
+          (idle, life) match {
+            case (None, None) => f
+            case _ => ExpiringServerDispatcher[Req1, Rep1, Any, Any](
+              idle, life, timer, sr.scope("expired"), f)
+          }
+        }
+      }
+    })
+
+  def stack[Req1, Rep1](
+    mk: Stack.Params => StackServer[Req1, Rep1, Any, Any]
+  ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
+    copy(params, mk)
 
   def reportTo(receiver: StatsReceiver): This =
-    withConfig(_.copy(_statsReceiver = Some(receiver)))
+    configured(param.Stats(receiver))
 
   def name(value: String): ServerBuilder[Req, Rep, HasCodec, HasBindTo, Yes] =
-    withConfig(_.copy(_name = Some(value)))
+    configured(param.Label(value))
 
-  def sendBufferSize(value: Int): This =
-    withConfig(_.copy(_bufferSize = config.bufferSize.copy(send = Some(value))))
+ def sendBufferSize(value: Int): This =
+    configured(params[Listener.BufferSize].copy(send = Some(value)))
 
   def recvBufferSize(value: Int): This =
-    withConfig(_.copy(_bufferSize = config.bufferSize.copy(recv = Some(value))))
-
-  def keepAlive(value: Boolean): This =
-    withConfig(_.copy(_keepAlive = Some(value)))
+    configured(params[Listener.BufferSize].copy(recv = Some(value)))
 
   def backlog(value: Int): This =
-    withConfig(_.copy(_backlog = Some(value)))
+    configured(Listener.Backlog(Some(value)))
 
   def bindTo(address: SocketAddress): ServerBuilder[Req, Rep, HasCodec, Yes, HasName] =
-    withConfig(_.copy(_bindTo = Some(address)))
+    configured(Listener.BindTo(address))
 
   def channelFactory(cf: ServerChannelFactory): This =
-    withConfig(_.copy(_channelFactory = cf))
+    configured(Netty3Listener.ChannelFactory(cf))
 
   def logger(logger: Logger): This =
-    withConfig(_.copy(_logger = Some(logger)))
+    configured(param.Logger(logger))
 
   def logChannelActivity(v: Boolean): This =
-    withConfig(_.copy(_logChannelActivity = v))
+    configured(Listener.Verbose(v))
 
   def tls(certificatePath: String, keyPath: String,
           caCertificatePath: String = null, ciphers: String = null, nextProtos: String = null): This =
@@ -302,28 +255,25 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     newFinagleSslEngine(() => new Engine(newSsl()))
 
   def newFinagleSslEngine(v: () => Engine): This =
-    withConfig(_.copy(_newEngine = Some(v)))
+    configured(Listener.SslEngine(Some(v)))
 
   def maxConcurrentRequests(max: Int): This =
-    withConfig(_.copy(_maxConcurrentRequests = Some(max)))
-
-  def hostConnectionMaxIdleTime(howlong: Duration): This =
-    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(hostConnectionMaxIdleTime = Some(howlong))))
-
-  def hostConnectionMaxLifeTime(howlong: Duration): This =
-    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(hostConnectionMaxLifeTime = Some(howlong))))
+    configured(RequestSemaphoreFilter.Param(max))
 
   def requestTimeout(howlong: Duration): This =
-    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(requestTimeout = Some(howlong))))
+    configured(TimeoutFilter.Param(howlong))
+
+  def keepAlive(value: Boolean): This =
+    configured(params[Listener.Liveness].copy(keepAlive = Some(value)))
 
   def readTimeout(howlong: Duration): This =
-    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(readTimeout = Some(howlong))))
+    configured(params[Listener.Liveness].copy(readTimeout = howlong))
 
   def writeCompletionTimeout(howlong: Duration): This =
-    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(writeCompletionTimeout = Some(howlong))))
+    configured(params[Listener.Liveness].copy(writeTimeout = howlong))
 
   def monitor(mFactory: (String, SocketAddress) => Monitor): This =
-    withConfig(_.copy(_monitor = Some(mFactory)))
+    configured(MonitorFactory(mFactory))
 
   @deprecated("Use tracer() instead", "7.0.0")
   def tracerFactory(factory: Tracer.Factory): This =
@@ -335,17 +285,23 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     tracer(t)
 
   def tracer(t: Tracer): This =
-    withConfig(_.copy(_tracer = t))
+    configured(param.Tracer(t))
 
   /**
    * Cancel pending futures whenever the the connection is shut down.
    * This defaults to true.
    */
   def cancelOnHangup(yesOrNo: Boolean): This =
-    withConfig(_.copy(_cancelOnHangup = yesOrNo))
+    configured(CancelOnHangup(yesOrNo))
+
+  def hostConnectionMaxIdleTime(howlong: Duration): This =
+    configured(params[ExpiringService.Param].copy(idleTime = howlong))
+
+  def hostConnectionMaxLifeTime(howlong: Duration): This =
+    configured(params[ExpiringService.Param].copy(lifeTime = howlong))
 
   def openConnectionsThresholds(thresholds: OpenConnectionsThresholds): This =
-    withConfig(_.copy(_openConnectionsThresholds = Some(thresholds)))
+    configured(IdleConnectionFilter.Param(Some(thresholds)))
 
   /**
    * When true, the server is daemonized. As with java threads, a
@@ -353,7 +309,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * False by default.
    */
   def daemon(daemonize: Boolean): This =
-    withConfig(_.copy(_daemon = daemonize))
+    configured(Daemonize(daemonize))
 
   /* Builder methods follow */
 
@@ -403,109 +359,33 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
       ServerConfigEvidence[HasCodec, HasBindTo, HasName]
   ): Server = new Server {
-    import com.twitter.finagle.server._
-    import com.twitter.finagle.netty3._
+    val param.Label(label) = params[param.Label]
+    val Listener.BindTo(addr) = params[Listener.BindTo]
+    val param.Stats(sr) = params[param.Stats]
+    val param.Logger(logger) = params[param.Logger]
+    val Daemonize(daemon) = params[Daemonize]
+    val MonitorFactory(newMonitor) = params[MonitorFactory]
 
-    val codecConfig = ServerCodecConfig(
-      serviceName = config.name, boundAddress = config.bindTo)
-    val codec = config.codecFactory(codecConfig)
+    val monitor = new SourceTrackingMonitor(logger, "server") andThen
+      newMonitor(label, InetSocketAddressUtil.toPublic(addr))
+    val statsReceiver = if (label.isEmpty) sr else sr.scope(label)
 
-    val statsReceiver = config.statsReceiver match {
-      case Some(sr) => sr.scope(config.name)
-      case None => NullStatsReceiver
-    }
-    val logger = config.logger getOrElse Logger.getLogger(config.name)
+    val newParams = params +
+      param.Monitor(monitor) +
+      param.Stats(statsReceiver)
 
-    val monitor = config.monitor match {
-      case Some(newMonitor) =>
-        newMonitor(config.name, InetSocketAddressUtil.toPublic(config.bindTo))
-      case None =>
-        NullMonitor
-    }
-
-    val tracer = config.tracer
-    val timer = DefaultTimer.twitter
-    val nettyTimer = DefaultTimer
-
-    val listener = Netty3Listener[Any, Any](
-      name = config.name,
-      pipelineFactory = codec.pipelineFactory,
-      channelSnooper =
-        if (config.logChannelActivity)
-          Some(ChannelSnooper(config.name)(logger.log(Level.INFO, _, _)))
-        else None,
-      channelFactory = config.channelFactory,
-      bootstrapOptions = {
-        val o = new mutable.MapBuilder[String, Object, Map[String, Object]](Map())
-        o += "soLinger" -> (0: java.lang.Integer)
-        o += "reuseAddress" -> java.lang.Boolean.TRUE
-        o += "child.tcpNoDelay" -> java.lang.Boolean.TRUE
-
-        for (v <- config.backlog)
-          o += "backlog" -> (v: java.lang.Integer)
-        for (v <- config.bufferSize.send)
-          o += "child.sendBufferSize" -> (v: java.lang.Integer)
-        for (v <- config.bufferSize.recv)
-          o += "child.receiveBufferSize" -> (v: java.lang.Integer)
-        for (v <- config.keepAlive)
-          o += "child.keepAlive" -> (v: java.lang.Boolean)
-
-        o.result()
-      },
-      channelReadTimeout = config.readTimeout getOrElse Duration.Top,
-      channelWriteCompletionTimeout =
-        config.writeCompletionTimeout getOrElse Duration.Top,
-      tlsConfig = config.newEngine map(Netty3ListenerTLSConfig),
-      timer = timer,
-      nettyTimer = nettyTimer,
-      statsReceiver = statsReceiver,
-      monitor = monitor,
-      logger = logger
-    )
-
-    val channelMaxIdleTime =
-      config.hostConnectionMaxIdleTime getOrElse Duration.Top
-    val channelMaxLifeTime =
-      config.hostConnectionMaxLifeTime getOrElse Duration.Top
-    val serverDispatcher: (Transport[Any, Any], Service[Req, Rep]) => Closable =
-      if (channelMaxIdleTime < Duration.Top || channelMaxLifeTime < Duration.Top) {
-        val idleTime = if (channelMaxIdleTime < Duration.Top)
-          Some(channelMaxIdleTime) else None
-        val lifeTime = if (channelMaxLifeTime < Duration.Top)
-          Some(channelMaxLifeTime) else None
-        ExpiringServerDispatcher[Req, Rep, Any, Any](
-          idleTime, lifeTime, timer,
-          statsReceiver.scope("expired"),
-          codec.newServerDispatcher)
-      } else codec.newServerDispatcher _
-
-    val server = DefaultServer[Req, Rep, Any, Any](
-      name = config.name,
-      listener = listener,
-      serviceTransport = serverDispatcher,
-      requestTimeout = config.requestTimeout getOrElse Duration.Top,
-      maxConcurrentRequests = config.maxConcurrentRequests getOrElse Int.MaxValue,
-      cancelOnHangup = config.cancelOnHangup,
-      prepare = codec.prepareConnFactory(_),
-      timer = timer,
-      monitor = monitor,
-      logger = logger,
-      statsReceiver = statsReceiver,
-      tracer = tracer,
-      reporter = NullReporterFactory
-    )
-
-    val factory = config.openConnectionsThresholds match {
-      case Some(thresh) =>
-        new IdleConnectionFilter(serviceFactory, thresh, statsReceiver.scope("idle"))
-      case None =>
-        serviceFactory
+    val server = mk(newParams).transformed { stk =>
+      newParams[CancelOnHangup] match {
+        case CancelOnHangup(false) => stk.replace(StackServer.Role.MaskCancel,
+          new MaskCancelFilter[Req, Rep])
+        case _ => stk
+      }
     }
 
-    val listeningServer = server.serve(config.bindTo, factory)
+    val listeningServer = server.serve(addr, serviceFactory)
     val closed = new AtomicBoolean(false)
 
-    if (!config.daemon) ExitGuard.guard()
+    if (!daemon) ExitGuard.guard()
     def close(deadline: Time): Future[Unit] = {
       if (!closed.compareAndSet(false, true)) {
         logger.log(Level.WARNING, "Server closed multiple times!",
@@ -514,7 +394,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       }
 
       listeningServer.close(deadline) ensure {
-        if (!config.daemon) ExitGuard.unguard()
+        if (!daemon) ExitGuard.unguard()
       }
     }
 
@@ -532,6 +412,17 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * Construct a Service, with runtime checks for builder
    * completeness.
    */
-  def unsafeBuild(service: Service[Req, Rep]): Server =
-    withConfig(_.validated).build(service)
+  def unsafeBuild(service: Service[Req, Rep]): Server = {
+    if (mk(params).stack.tails.size == 1)
+      throw new IncompleteSpecification("No codec was specified")
+
+    if (!params.contains[Listener.BindTo])
+      throw new IncompleteSpecification("No bindTo was specified")
+
+    if (!params.contains[param.Label])
+      throw new IncompleteSpecification("No name were specified")
+
+    val sb = this.asInstanceOf[ServerBuilder[Req, Rep, Yes, Yes, Yes]]
+    sb.build(service)
+  }
 }

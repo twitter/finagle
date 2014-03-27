@@ -105,8 +105,8 @@ package exp {
   }
 
   object MuxClient extends MuxClient(new StackClient({
-    val reusingClientStack: Stack[ServiceFactory[ChannelBuffer, ChannelBuffer]] =
-      StackClient.newStack.replace(StackClient.Role.Pool, ReusingPool.module)
+    val reusingClientStack = StackClient.newStack[ChannelBuffer, ChannelBuffer]
+        .replace(StackClient.Role.Pool, ReusingPool.module[ChannelBuffer, ChannelBuffer])
 
     reusingClientStack ++ (MuxNetty3Stack +: stack.nilStack)
   }, Stack.Params.empty))
