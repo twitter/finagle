@@ -16,13 +16,4 @@ import com.twitter.concurrent.NamedPoolThreadFactory
 package object netty3 {
   val Executor = Executors.newCachedThreadPool(
     new NamedPoolThreadFactory("finagle/netty3", true/*daemon*/))
-
-  /**
-   * A [[com.twitter.finagle.Stack.Param]] used to configure a
-   * Stack-based Netty3Listener.
-   */
-  case class Netty3Timer(timer: org.jboss.netty.util.Timer)
-  implicit object Netty3Timer extends Stack.Param[Netty3Timer] {
-    val default = Netty3Timer(util.DefaultTimer)
-  }
 }
