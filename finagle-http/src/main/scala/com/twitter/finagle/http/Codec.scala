@@ -261,7 +261,8 @@ class HttpClientTracingFilter[Req <: HttpRequest, Res](serviceName: String)
     request.headers.add(Header.Flags, Trace.id.flags.toLong)
 
     if (Trace.isActivelyTracing) {
-      Trace.recordRpcname(serviceName, request.getMethod.getName)
+      Trace.recordServiceName(serviceName)
+      Trace.recordRpc(request.getMethod.getName)
       Trace.recordBinary("http.uri", stripParameters(request.getUri))
 
       Trace.record(Annotation.ClientSend())
@@ -316,7 +317,8 @@ class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String)
     // even if no trace id was passed from the client we log the annotations
     // with a locally generated id
     if (Trace.isActivelyTracing) {
-      Trace.recordRpcname(serviceName, request.getMethod.getName)
+      Trace.recordServiceName(serviceName)
+      Trace.recordRpc(request.getMethod.getName)
       Trace.recordBinary("http.uri", stripParameters(request.getUri))
 
       Trace.record(Annotation.ServerRecv())

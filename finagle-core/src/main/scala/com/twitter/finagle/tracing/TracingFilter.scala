@@ -10,7 +10,9 @@ private[finagle] object TracingFilter {
     new Stack.Simple[ServiceFactory[Req, Rep]](param.Tracer) {
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
         val param.Tracer(tracer) = params[param.Tracer]
-        new TracingFilter(tracer) andThen next
+        val param.Label(label) = params[param.Label]
+        val tracingFilter = new TracingFilter[Req,Rep](tracer, label)
+        tracingFilter andThen next
       }
     }
 }
@@ -20,12 +22,20 @@ private[finagle] object TracingFilter {
  * placed first in the server filter chain so that protocols with
  * trace support will override the span resets, and still be properly
  * reported here.
+ *
+ * @param tracer An instance of a tracer to use. Eg: ZipkinTracer
+ * @param label The name of the service being traced
  */
-class TracingFilter[Req, Rep](tracer: Tracer) extends SimpleFilter[Req, Rep] {
+class TracingFilter[Req, Rep](tracer: Tracer, label: String) extends SimpleFilter[Req, Rep] {
+
+  @deprecated("Please add a label to the tracing filter constructor", "6.13.x")
+  def this(tracer: Tracer) = this(tracer, "Unknown")
+  
   def apply(request: Req, service: Service[Req, Rep]) = {
     Trace.unwind {
       Trace.pushTracerAndSetNextId(tracer)
       Trace.recordBinary("finagle.version", Init.finagleVersion)
+      Trace.recordServiceName(label)
       service(request)
     }
   }

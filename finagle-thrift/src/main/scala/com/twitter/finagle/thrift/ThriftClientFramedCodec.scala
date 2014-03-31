@@ -244,7 +244,8 @@ private[thrift] class TTwitterFilter(
   ) = {
     // Create a new span identifier for this request.
     val msg = new InputBuffer(request.message, protocolFactory)().readMessageBegin()
-    Trace.recordRpcname(serviceName, msg.name)
+    Trace.recordServiceName(serviceName)
+    Trace.recordRpc(msg.name)
 
     val thriftRequest =
       if (isUpgraded)

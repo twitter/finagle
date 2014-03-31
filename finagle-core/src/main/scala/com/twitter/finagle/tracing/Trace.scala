@@ -192,7 +192,8 @@ object Trace  {
     unwind {
       Trace.setId(Trace.nextId)
       Trace.recordBinary("finagle.version", Init.finagleVersion)
-      Trace.recordRpcname(service, rpc)
+      Trace.recordServiceName(service)
+      Trace.recordRpc(rpc)
       hostOpt map { Trace.recordServerAddr(_) }
       Trace.record(Annotation.ServerRecv())
       try f finally {
@@ -294,8 +295,17 @@ object Trace  {
     record(Annotation.Message(message), duration)
   }
 
+  @deprecated("Use recordRpc and recordServiceName", "6.13.x")
   def recordRpcname(service: String, rpc: String) {
     record(Annotation.Rpcname(service, rpc))
+  }
+
+  def recordServiceName(serviceName: String) {
+    record(Annotation.ServiceName(serviceName))
+  }
+
+  def recordRpc(name: String) {
+    record(Annotation.Rpc(name))
   }
 
   def recordClientAddr(ia: InetSocketAddress) {

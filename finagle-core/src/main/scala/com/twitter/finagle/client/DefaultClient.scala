@@ -157,7 +157,7 @@ case class DefaultClient[Req, Rep](
         new TimeoutFactory(factory, serviceTimeout, exception, timer)
       }
 
-    val traced: Transformer[Req, Rep] = new TracingFilter[Req, Rep](tracer) andThen _
+    val traced: Transformer[Req, Rep] = new TracingFilter[Req, Rep](tracer, name) andThen _
 
     val observed: Transformer[Req, Rep] =
       new StatsFactoryWrapper(_, globalStatsReceiver.scope("service_creation"))

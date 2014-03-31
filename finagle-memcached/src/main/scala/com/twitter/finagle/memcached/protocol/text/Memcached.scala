@@ -75,7 +75,8 @@ class Memcached(stats: StatsReceiver) extends CodecFactory[Command, Response] {
  */
 private class MemcachedTracingFilter extends SimpleFilter[Command, Response] {
   def apply(command: Command, service: Service[Command, Response]) = Trace.unwind {
-    Trace.recordRpcname("memcached", command.name)
+    Trace.recordServiceName("memcached")
+    Trace.recordRpc(command.name)
     Trace.record(Annotation.ClientSend())
 
     val response = service(command)
