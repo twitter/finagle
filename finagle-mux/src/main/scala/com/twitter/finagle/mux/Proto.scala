@@ -1,10 +1,10 @@
 package com.twitter.finagle.mux
 
+import com.twitter.io.Charsets
 import com.twitter.finagle.tracing.{SpanId, TraceId, Flags}
 import com.twitter.finagle.{Dtab, Dentry}
 import com.twitter.util.{Duration, Time}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.util.CharsetUtil
 
 case class BadMessageException(why: String) extends Exception(why)
 
@@ -141,7 +141,7 @@ private[finagle] object Message {
         seq = seq.tail
       }
 
-      val dstbytes = dst.getBytes(CharsetUtil.UTF_8)
+      val dstbytes = dst.getBytes(Charsets.Utf8)
       hd.writeShort(dstbytes.size)
       hd.writeBytes(dstbytes)
 
@@ -149,10 +149,10 @@ private[finagle] object Message {
       delegations = dtab.iterator
       while (delegations.hasNext) {
         val Dentry(src, dst) = delegations.next()
-        val srcbytes = src.getBytes(CharsetUtil.UTF_8)
+        val srcbytes = src.getBytes(Charsets.Utf8)
         hd.writeShort(srcbytes.size)
         hd.writeBytes(srcbytes)
-        val dstbytes = dst.reified.getBytes(CharsetUtil.UTF_8)
+        val dstbytes = dst.reified.getBytes(Charsets.Utf8)
         hd.writeShort(dstbytes.size)
         hd.writeBytes(dstbytes)
       }
@@ -268,11 +268,11 @@ private[finagle] object Message {
   def decodeUtf8(buf: ChannelBuffer, n: Int): String = {
     val arr = new Array[Byte](n)
     buf.readBytes(arr)
-    new String(arr, CharsetUtil.UTF_8)
+    new String(arr, Charsets.Utf8)
   }
 
   def encodeString(str: String) =
-    ChannelBuffers.wrappedBuffer(str.getBytes(CharsetUtil.UTF_8))
+    ChannelBuffers.wrappedBuffer(str.getBytes(Charsets.Utf8))
 
   private def decodeTreq(tag: Int, buf: ChannelBuffer) = {
     if (buf.readableBytes < 1)

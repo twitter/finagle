@@ -16,11 +16,11 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.service.{FailureAccrualFactory, FailedService}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.hashing._
+import com.twitter.io.Charsets.Utf8
 import com.twitter.util.{Command => _, Function => _, _}
 
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.util.CharsetUtil.UTF_8
 
 object Client {
   /**
@@ -388,12 +388,12 @@ trait ProxyClient extends Client {
  */
 protected class ConnectedClient(protected val service: Service[Command, Response]) extends Client {
   protected def rawGet(command: RetrievalCommand) = {
-    val keys = immutable.Set(command.keys map { _.toString(UTF_8) }: _*)
+    val keys = immutable.Set(command.keys map { _.toString(Utf8) }: _*)
 
     service(command) map {
       case Values(values) =>
         val tuples = values.map {
-          case value => (value.key.toString(UTF_8), value)
+          case value => (value.key.toString(Utf8), value)
         }
         val hits = tuples.toMap
         val misses = keys -- hits.keySet
@@ -552,7 +552,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
       case InfoLines(lines) => lines.map { line =>
         val key = line.key
         val values = line.values
-        key.toString(UTF_8) + " " + values.map { value => value.toString(UTF_8) }.mkString(" ")
+        key.toString(Utf8) + " " + values.map { value => value.toString(Utf8) }.mkString(" ")
       }
       case Error(e) => throw e
       case Values(list) => Nil

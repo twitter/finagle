@@ -6,10 +6,10 @@ import com.twitter.finagle.memcached.Client
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.{Service, ServiceClosedException}
+import com.twitter.io.Charsets
 import com.twitter.util.{Await, RandomSocket}
 import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.util.CharsetUtil
 import org.specs.SpecificationWithJUnit
 
 class ProxySpec extends SpecificationWithJUnit {
@@ -60,17 +60,17 @@ class ProxySpec extends SpecificationWithJUnit {
     "handle a basic get/set operation" in {
       Await.result(externalClient.delete("foo"))
       Await.result(externalClient.get("foo")) must beNone
-      Await.result(externalClient.set("foo", ChannelBuffers.wrappedBuffer("bar".getBytes(CharsetUtil.UTF_8))))
+      Await.result(externalClient.set("foo", ChannelBuffers.wrappedBuffer("bar".getBytes(Charsets.Utf8))))
       val foo = Await.result(externalClient.get("foo"))
       foo must beSome
-      foo.get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+      foo.get.toString(Charsets.Utf8) mustEqual "bar"
       externalClient.release()
     }
 
     if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) "stats is supported" in {
       Await.result(externalClient.delete("foo"))
       Await.result(externalClient.get("foo")) must beNone
-      Await.result(externalClient.set("foo", ChannelBuffers.wrappedBuffer("bar".getBytes(CharsetUtil.UTF_8))))
+      Await.result(externalClient.set("foo", ChannelBuffers.wrappedBuffer("bar".getBytes(Charsets.Utf8))))
       Seq(None, Some("slabs")).foreach { arg =>
         val stats = Await.result(externalClient.stats(arg))
         stats must notBeEmpty
@@ -84,7 +84,7 @@ class ProxySpec extends SpecificationWithJUnit {
     if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) "stats (cachedump) is supported" in {
       Await.result(externalClient.delete("foo"))
       Await.result(externalClient.get("foo")) must beNone
-      Await.result(externalClient.set("foo", ChannelBuffers.wrappedBuffer("bar".getBytes(CharsetUtil.UTF_8))))
+      Await.result(externalClient.set("foo", ChannelBuffers.wrappedBuffer("bar".getBytes(Charsets.Utf8))))
       val slabs = Await.result(externalClient.stats(Some("slabs")))
       slabs must notBeEmpty
       val n = slabs.head.split(" ")(1).split(":")(0).toInt

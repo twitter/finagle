@@ -2,10 +2,10 @@ package com.twitter.finagle.mux
 
 import com.twitter.finagle.tracing
 import com.twitter.finagle.{Dtab, Dentry}
+import com.twitter.io.Charsets
 import com.twitter.util.Time
 import com.twitter.util.TimeConversions.intToTimeableNumber
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.util.CharsetUtil
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -21,7 +21,7 @@ class ProtoTest extends FunSuite {
   val goodBufs = Seq(ChannelBuffers.EMPTY_BUFFER, buf(1), buf(4), buf(100))
   val goodStrings = Seq("", "Hello, world!", "☺☹")
   val goodKeys = goodStrings map { s =>
-    val bytes = s.getBytes(CharsetUtil.UTF_8)
+    val bytes = s.getBytes(Charsets.Utf8)
     ChannelBuffers.wrappedBuffer(bytes)
   }
   val goodDentries = Seq(

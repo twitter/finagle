@@ -2,8 +2,8 @@ package com.twitter.finagle.memcached.util
 
 import collection.mutable.ArrayBuffer
 import com.google.common.base.Strings
+import com.twitter.io.Charsets
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers, ChannelBufferIndexFinder}
-import org.jboss.netty.util.CharsetUtil
 
 private[finagle] object ChannelBufferUtils {
   private val FIND_SPACE = new ChannelBufferIndexFinder() {
@@ -32,10 +32,10 @@ private[finagle] object ChannelBufferUtils {
   }
 
   class RichChannelBuffer(buffer: ChannelBuffer) {
-    def matches(string: String) = buffer.toString(CharsetUtil.UTF_8).matches(string)
+    def matches(string: String) = buffer.toString(Charsets.Utf8).matches(string)
     def toInt = toString.toInt
     def toLong = toString.toLong
-    override def toString = buffer.toString(CharsetUtil.UTF_8)
+    override def toString = buffer.toString(Charsets.Utf8)
     def size = buffer.writerIndex() - buffer.readerIndex()
 
     def split: Seq[ChannelBuffer] =
@@ -83,14 +83,14 @@ private[finagle] object ChannelBufferUtils {
 
   implicit def stringToChannelBuffer(string: String) =
     if(Strings.isNullOrEmpty(string)) null else {
-      ChannelBuffers.copiedBuffer(string, CharsetUtil.UTF_8)
+      ChannelBuffers.copiedBuffer(string, Charsets.Utf8)
     }
 
   implicit def seqOfStringToSeqOfChannelBuffer(strings: Seq[String]) =
     if (strings == null) null else {
       strings.map { string =>
         if(Strings.isNullOrEmpty(string)) null else {
-          ChannelBuffers.copiedBuffer(string, CharsetUtil.UTF_8)
+          ChannelBuffers.copiedBuffer(string, Charsets.Utf8)
         }
       }
     }

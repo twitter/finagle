@@ -1,8 +1,8 @@
 package com.twitter.finagle.memcached.unit.protocol
 
 import com.twitter.finagle.memcached.protocol.KeyValidation
+import com.twitter.io.Charsets
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
-import org.jboss.netty.util.CharsetUtil
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -20,7 +20,7 @@ class KeyValidationTest extends FunSuite
   test("reject invalid key that is too long") {
     val length = 251
     val key = "x" * length
-    val cb = ChannelBuffers.copiedBuffer(key, CharsetUtil.UTF_8)
+    val cb = ChannelBuffers.copiedBuffer(key, Charsets.Utf8)
 
     val x = intercept[IllegalArgumentException] {
       new BasicKeyValidation(Seq(cb))
@@ -35,7 +35,7 @@ class KeyValidationTest extends FunSuite
       "anda\rcarraigereturn",
       "yo\u0000ihaveacontrolchar",
       "andheres\nanewline"
-    ) map { ChannelBuffers.copiedBuffer(_, CharsetUtil.UTF_8) }
+    ) map { ChannelBuffers.copiedBuffer(_, Charsets.Utf8) }
 
     bads foreach { bad =>
       val x = intercept[IllegalArgumentException] {

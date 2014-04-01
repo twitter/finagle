@@ -6,7 +6,7 @@ import com.twitter.finagle.memcached.protocol.{
   NonexistentCommand,
   ServerError
 }
-import org.jboss.netty.util.CharsetUtil
+import com.twitter.io.Charsets
 import org.specs.SpecificationWithJUnit
 
 class ShowSpec extends SpecificationWithJUnit {
@@ -20,7 +20,7 @@ class ShowSpec extends SpecificationWithJUnit {
         res must haveClass[Tokens]
         val tokens = res.asInstanceOf[Tokens]
         tokens.tokens must haveSize(1)
-        tokens.tokens.head.toString(CharsetUtil.UTF_8) mustEqual "ERROR"
+        tokens.tokens.head.toString(Charsets.Utf8) mustEqual "ERROR"
       }
       "CLIENT_ERROR" >> {
         val error = MemcacheError(new ClientError("Invalid Input"))
@@ -28,7 +28,7 @@ class ShowSpec extends SpecificationWithJUnit {
         res must haveClass[Tokens]
         val tokens = res.asInstanceOf[Tokens]
         tokens.tokens must haveSize(2)
-        tokens.tokens.head.toString(CharsetUtil.UTF_8) mustEqual "CLIENT_ERROR"
+        tokens.tokens.head.toString(Charsets.Utf8) mustEqual "CLIENT_ERROR"
       }
       "SERVER_ERROR" >> {
         val error = MemcacheError(new ServerError("Out of Memory"))
@@ -36,7 +36,7 @@ class ShowSpec extends SpecificationWithJUnit {
         res must haveClass[Tokens]
         val tokens = res.asInstanceOf[Tokens]
         tokens.tokens must haveSize(2)
-        tokens.tokens.head.toString(CharsetUtil.UTF_8) mustEqual "SERVER_ERROR"
+        tokens.tokens.head.toString(Charsets.Utf8) mustEqual "SERVER_ERROR"
       }
     }
   }

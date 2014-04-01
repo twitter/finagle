@@ -6,12 +6,11 @@ import com.twitter.finagle.tracing.{
   Annotation, BufferingTracer, Flags, Record, SpanId, Trace, TraceId}
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.{Service, ContextHandler}
-import com.twitter.io.Buf
+import com.twitter.io.{Charsets, Buf}
 import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.util.CharsetUtil
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify, when}
@@ -177,7 +176,7 @@ private[mux] class SessionTest(rolesReversed: Boolean) extends FunSuite with One
       new Answer[Future[Buf]]() {
         def answer(invocation: InvocationOnMock) = {
           val traceId = Buf.ByteArray(
-            Trace.id.toString.getBytes(CharsetUtil.UTF_8))
+            Trace.id.toString.getBytes(Charsets.Utf8))
           Future.value(traceId)
         }
       }
@@ -192,7 +191,7 @@ private[mux] class SessionTest(rolesReversed: Boolean) extends FunSuite with One
     val respBuf = Await.result(resp)
     val respArr = new Array[Byte](respBuf.length)
     respBuf.write(respArr, 0)
-    val respStr = new String(respArr, CharsetUtil.UTF_8)
+    val respStr = new String(respArr, Charsets.Utf8)
     assert(respStr === id.toString)
   }
 

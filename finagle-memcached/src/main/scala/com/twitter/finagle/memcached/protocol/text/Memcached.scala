@@ -4,6 +4,7 @@ import client.DecodingToResponse
 import client.{Decoder => ClientDecoder}
 import server.DecodingToCommand
 import server.{Decoder => ServerDecoder}
+import com.twitter.io.Charsets.Utf8
 import com.twitter.finagle._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
@@ -11,7 +12,6 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel._
-import org.jboss.netty.util.CharsetUtil.UTF_8
 import scala.collection.immutable
 
 object Memcached {
@@ -85,15 +85,15 @@ private class MemcachedTracingFilter extends SimpleFilter[Command, Response] {
         case Values(values) =>
           command match {
             case cmd: RetrievalCommand =>
-              val keys = immutable.Set(cmd.keys map { _.toString(UTF_8) }: _*)
+              val keys = immutable.Set(cmd.keys map { _.toString(Utf8) }: _*)
               val hits = values.map {
                 case value =>
-                  Trace.recordBinary(value.key.toString(UTF_8), "Hit")
-                  value.key.toString(UTF_8)
+                  Trace.recordBinary(value.key.toString(Utf8), "Hit")
+                  value.key.toString(Utf8)
               }
               val misses = keys -- hits
               misses foreach { k =>
-                Trace.recordBinary(k.toString(UTF_8), "Miss")
+                Trace.recordBinary(k.toString(Utf8), "Miss")
               }
               case _ =>
           }

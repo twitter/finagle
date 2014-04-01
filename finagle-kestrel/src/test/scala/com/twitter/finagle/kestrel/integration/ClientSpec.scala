@@ -4,8 +4,8 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.kestrel.Client
 import com.twitter.finagle.kestrel.protocol.Kestrel
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import com.twitter.io.Charsets
 import com.twitter.util.Await
-import org.jboss.netty.util.CharsetUtil
 import org.specs.SpecificationWithJUnit
 
 class ClientSpec extends SpecificationWithJUnit {
@@ -25,7 +25,7 @@ class ClientSpec extends SpecificationWithJUnit {
       "set & get" in {
         Await.result(client.get("foo")) mustEqual None
         Await.result(client.set("foo", "bar"))
-        Await.result(client.get("foo")) map { _.toString(CharsetUtil.UTF_8) } mustEqual Some("bar")
+        Await.result(client.get("foo")) map { _.toString(Charsets.Utf8) } mustEqual Some("bar")
       }
     }
   }
