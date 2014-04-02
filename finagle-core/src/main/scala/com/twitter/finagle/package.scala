@@ -116,7 +116,7 @@ package object finagle {
      */
     case class Logger(log: java.util.logging.Logger)
     implicit object Logger extends Stack.Param[Logger] {
-      val default = Logger(java.util.logging.Logger.getLogger("finagle"))
+      val default = Logger(util.DefaultLogger)
     }
 
     /**

@@ -366,12 +366,13 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     val Daemonize(daemon) = params[Daemonize]
     val MonitorFactory(newMonitor) = params[MonitorFactory]
 
-    val monitor = new SourceTrackingMonitor(logger, "server") andThen
-      newMonitor(label, InetSocketAddressUtil.toPublic(addr))
+    val monitor = newMonitor(label, InetSocketAddressUtil.toPublic(addr)) andThen
+      new SourceTrackingMonitor(logger, "server")
     val statsReceiver = if (label.isEmpty) sr else sr.scope(label)
 
     val newParams = params +
       param.Monitor(monitor) +
+      param.Reporter(NullReporterFactory) +
       param.Stats(statsReceiver)
 
     val server = mk(newParams).transformed { stk =>
