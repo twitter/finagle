@@ -133,10 +133,6 @@ private[finagle] object StackClient {
           case Addr.Failed(e) =>
             g() = Set()
             log.log(Level.WARNING, "Name binding failure", e)
-          case Addr.Delegated(where) =>
-            log.log(Level.WARNING,
-              "Name was delegated to %s, but delegation is not supported".format(where))
-            g() = Set()
           case Addr.Pending =>
             log.log(Level.WARNING, "Name resolution is pending")
             g() = Set()

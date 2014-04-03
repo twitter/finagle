@@ -181,8 +181,11 @@ private[thrift] class ThriftServerTracingFilter(
         val ds = header.getDelegationsIterator()
         while (ds.hasNext()) {
           val d = ds.next()
-          if (d.src != null && d.dst != null)
-            Dtab.delegate(d.src, d.dst)
+          if (d.src != null && d.dst != null) {
+            val src = Path.read(d.src)
+            val dst = NameTree.read(d.dst)
+            Dtab.delegate(Dentry(src, dst))
+          }
         }
       }
 

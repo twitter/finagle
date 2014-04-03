@@ -142,6 +142,10 @@ object Resolver {
    * The scheme is looked up from registered Resolvers, and the
    * argument is passed in.
    *
+   * When `name` begins with the character '/' it is intepreted to be
+   * a logical name whose interpetation is subject to a
+   * [[com.twitter.finagle.Dtab Dtab]].
+   *
    * Eval throws exceptions upon failure to parse the name, or
    * on failure to scheme lookup. Since names are late bound,
    * binding failures are deferred.

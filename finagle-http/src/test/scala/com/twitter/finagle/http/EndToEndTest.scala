@@ -70,8 +70,7 @@ class EndToEndTest extends FunSuite {
       val client = connect(service)
 
       Dtab.unwind {
-        Dtab.delegate("/a", "/b")
-        Dtab.delegate("/c", "/d")
+        Dtab.delegate(Dtab.read("/a=>/b; /c=>/d"))
 
         val res = Response(Await.result(client(Request("/"))))
         assert(res.contentString === "Dtab(2)\n\t/a -> /b\n\t/c -> /d\n")

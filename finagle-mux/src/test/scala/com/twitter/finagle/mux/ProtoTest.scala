@@ -25,8 +25,8 @@ class ProtoTest extends FunSuite {
     ChannelBuffers.wrappedBuffer(bytes)
   }
   val goodDentries = Seq(
-    Dentry("/a", "/b"),
-    Dentry("/foo", "inet!twitter.com:80"))
+    Dentry.read("/a=>/b"),
+    Dentry.read("/foo=>/$/inet/twitter.com/80"))
   val goodDtabs = goodDentries.permutations map { ds => Dtab(ds.toIndexedSeq) }
   val goodDests = Seq("", "okay", "/foo/bar/baz")
   val goodDurationLeases = Seq(Message.Tlease.MinLease, Message.Tlease.MaxLease)

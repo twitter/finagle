@@ -89,7 +89,7 @@ object ClientConnection {
     def remoteAddress = unconnected
     def localAddress = unconnected
     def close(deadline: Time) = Future.Done
-    def onClose = new com.twitter.util.Promise[Unit]
+    def onClose = Future.never
   }
 }
 

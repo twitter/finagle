@@ -224,7 +224,7 @@ private[thrift] class TTwitterFilter(
     if (dtab.nonEmpty) {
       val delegations = new ArrayList[thrift.Delegation](dtab.size)
       for (Dentry(src, dst) <- dtab)
-        delegations.add(new thrift.Delegation(src, dst.reified))
+        delegations.add(new thrift.Delegation(src.show, dst.show))
 
       header.setDelegations(delegations)
     }

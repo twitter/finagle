@@ -3,7 +3,6 @@ package com.twitter.finagle
 import collection.immutable
 import java.net.SocketAddress
 import com.twitter.util.Var
-import com.twitter.finagle.util.Path
 
 /**
  * A name identifies an object. Names may be resolved from strings
@@ -14,19 +13,13 @@ import com.twitter.finagle.util.Path
  * used in trait [[com.twitter.finagle.Client]] to name
  * destinations-- i.e. where client traffic terminates.
  */
-trait Name {
+trait Name extends SocketAddress {
   /**
    * Bind the name. The bound name is returned as a
    * variable representation -- it is subject to change at
    * any time.
    */
   def bind(): Var[Addr]
-
-  /**
-   * Scope the name by the given path.
-   */
-  def enter(path: String): Name =
-    if (path.isEmpty) this else PartialName(this, path)
 
   /**
    * The reified version of the Name -- a resolvable string.
@@ -63,14 +56,29 @@ object Name {
   }
 
   /**
-   * Create a pure path Name.
+   * Create a path-based Name which is interpreted vis-à-vis
+   * the current request-local delegation table.
    */
-  def apply(path: String): Name = new Name {
-    def bind() = Var.value(Addr.Delegated(path))
-    override def enter(suffix: String) =
-      Name(Path.join(path, suffix))
-    val reified = path
+  def apply(path: Path): Name = {
+    // TODO: avoid the extra allocation here 
+    // (orElse construction).
+    def getName() = Dtab() orElse Namer.global
+    val tree = NameTree.Leaf(path)
+    UninterpretedName(getName, tree)
   }
+
+  /**
+   * Create a path-based Name which is interpreted vis-à-vis
+   * the current request-local delegation table.
+   */
+  def apply(path: String): Name =
+    Name(Path.read(path))
+
+  /**
+   * Create a new name from the given `Var[Addr]`.
+   */
+  def apply(va: Var[Addr]): Name = 
+    VAName(va)
 }
 
 /**
@@ -98,8 +106,11 @@ private case class PartialName(
     case a => a
   }
 
-  override def enter(path: String): Name =
-    PartialName(parent, Path.join(this.path, path))
-  
   val reified = "fail!"
 }
+
+case class VAName(va: Var[Addr]) extends Name {
+  def bind() = va
+  val reified = "fail!"
+}
+

@@ -147,7 +147,7 @@ case class DefaultClient[Req, Rep](
   }
 
 
-  val newStack0: Name => ServiceFactory[Req, Rep] = {
+  val newStack0: Var[Addr] => ServiceFactory[Req, Rep] = {
     val refcounted: Transformer[Req, Rep] = new RefcountedFactory(_)
 
     val timeLimited: Transformer[Req, Rep] = factory =>
@@ -164,26 +164,23 @@ case class DefaultClient[Req, Rep](
 
     val noBrokersException = new NoBrokersAvailableException(name)
 
-    val balanced: Name => ServiceFactory[Req, Rep] = dest => {
-      // TODO: load balancer consumes Var[Addr] directly.,
+    // Name is bound(!)
+    val balanced: Var[Addr] => ServiceFactory[Req, Rep] = va => {
+      // TODO: load balancer consumes Var[Addr] directly., 
       // or at least Var[SocketAddress]
       val g = Group.mutable[SocketAddress]()
-      val v = dest.bind()
-      val observation = v.observe {
+
+      val observation = va.observe {
         case Addr.Bound(sockaddrs) =>
           g() = sockaddrs
         case Addr.Failed(e) =>
           g() = Set()
           log.log(Level.WARNING, "Name binding failure", e)
-        case Addr.Delegated(where) =>
-          log.log(Level.WARNING,
-            "Name was delegated to %s, but delegation is not supported".format(where))
-          g() = Set()
         case Addr.Pending =>
           log.log(Level.WARNING, "Name resolution is pending")
           g() = Set()
         case Addr.Neg =>
-          log.log(Level.WARNING, "Name resolution for " + name + " to " + dest + " failed")
+          log.log(Level.WARNING, "Name resolution for " + name + "  failed")
           g() = Set()
       }
 
@@ -200,8 +197,10 @@ case class DefaultClient[Req, Rep](
       // observeUntil fails the future on interrupts, but ready
       // should not be interruptible DelayedFactory implicitly masks
       // this future--interrupts will not be propagated to it
-      val ready = v.observeUntil(_ != Addr.Pending)
+      val ready = va.observeUntil(_ != Addr.Pending)
       val f = ready map (_ => balanced)
+
+      // TODO: should we retain a count for the number of clients here?
 
       new DelayedFactory(f) {
         override def close(after: Duration) =
@@ -216,8 +215,14 @@ case class DefaultClient[Req, Rep](
       balanced
   }
 
-  val newStack: Name => ServiceFactory[Req, Rep] =
-    dest => new Refinery(dest, newStack0)
+  val newStack: Name => ServiceFactory[Req, Rep] = {
+    case name: UninterpretedName =>
+      new InterpreterFactory(
+        name, newStack0, 
+        statsReceiver.scope("interpreter"))
+    case name =>
+      newStack0(name.bind())
+  }
 
   def newClient(dest: Name, label: String) = copy(
     statsReceiver = statsReceiver.scope(label),

@@ -2,9 +2,11 @@ package com.twitter.finagle.mux
 
 import com.twitter.io.Charsets
 import com.twitter.finagle.tracing.{SpanId, TraceId, Flags}
-import com.twitter.finagle.{Dtab, Dentry}
 import com.twitter.util.{Duration, Time}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.util.CharsetUtil
+import com.twitter.finagle.tracing.{SpanId, TraceId, Flags}
+import com.twitter.finagle.{Dtab, Dentry, NameTree, Path}
 
 case class BadMessageException(why: String) extends Exception(why)
 
@@ -124,7 +126,7 @@ private[finagle] object Message {
       var delegations = dtab.iterator
       while (delegations.hasNext) {
         val Dentry(src, dst) = delegations.next()
-        n += src.size+2 + dst.reified.size+2
+        n += src.show.size+2 + dst.show.size+2
       }
 
       val hd = ChannelBuffers.dynamicBuffer(n)
@@ -149,10 +151,10 @@ private[finagle] object Message {
       delegations = dtab.iterator
       while (delegations.hasNext) {
         val Dentry(src, dst) = delegations.next()
-        val srcbytes = src.getBytes(Charsets.Utf8)
+        val srcbytes = src.show.getBytes(Charsets.Utf8)
         hd.writeShort(srcbytes.size)
         hd.writeBytes(srcbytes)
-        val dstbytes = dst.reified.getBytes(Charsets.Utf8)
+        val dstbytes = dst.show.getBytes(Charsets.Utf8)
         hd.writeShort(dstbytes.size)
         hd.writeBytes(dstbytes)
       }
@@ -364,7 +366,12 @@ private[finagle] object Message {
       while (i < nd) {
         val src = decodeUtf8(buf, buf.readUnsignedShort())
         val dst = decodeUtf8(buf, buf.readUnsignedShort())
-        delegations(i) = Dentry(src, dst)
+        try {
+          delegations(i) = Dentry(Path.read(src), NameTree.read(dst))
+        } catch {
+          case _: IllegalArgumentException =>
+            delegations(i) = Dentry.nop
+        }
         i += 1
       }
       Dtab(delegations)

@@ -1,7 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.util.Path
-import com.twitter.util.{Local, Var}
+import com.twitter.util.{Local, Var, Activity}
 import java.io.PrintWriter
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicReference
@@ -9,101 +8,43 @@ import scala.collection.generic.CanBuildFrom
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable.Builder
 
-/*
-
-Note: Dtabs are currently experimental, and
-are guaranteed to evolve substantially beyond
-their current manifestation. Use with care.
-
-TODO: better handling of paths. They 
-need to be normalized, and probably also
-tokenized throughout.
-
-*/
-
 /**
  * A Dtab--short for delegation table--comprises a sequence
  * of delegation rules. Together, these describe how to bind a
  * path to an Addr.
- *
- * @bug Path handling is quick and dirty. This will change.
- *
- * @define delegated
- *
- * Construct a new Dtab with the given delegation
- * entry appended.
  */
-private[twitter] case class Dtab(dentries0: IndexedSeq[Dentry]) 
-    extends IndexedSeq[Dentry] {
+case class Dtab(dentries0: IndexedSeq[Dentry]) 
+    extends IndexedSeq[Dentry] with Namer {
   private[this] lazy val dentries = dentries0.reverse
 
   def apply(i: Int): Dentry = dentries0(i)
   def length = dentries0.length
 
-  /**
-   * Bind a path in the context of this Dtab. Returns a
-   * variable (observable) representation of the bound
-   * address, guaranteed to be free of further delegations.
-   */
-  def bind(path: String): Var[Addr] = 
-    bind(Path.split(path), dentries, 100)
-
-  /**
-   * Refine the name vis-à-vis this Dtab.
-   *
-   * @return A Name that binds with this delegation table.
-   * The name is guaranteed to not be delegated in turn,
-   * though it can return partially bound addresses.
-   */
-  def refine(name: Name): Name = 
-    RefinedName(name, this, "")
-
-  private def bind(elems: Seq[String], ents: Seq[Dentry], depth: Int): Var[Addr] = {
-    if (depth == 0) Var.value(Addr.Failed("Resolution reached maximum depth"))
-    else ents match {
-      case Seq(d, ds@_*) if elems startsWith d.prefixElems =>
-        val stripped = elems drop d.prefixElems.size
-        d.bind(stripped mkString "/") flatMap {
-          case Addr.Neg => 
-            bind(elems, ds, depth)
-          case Addr.Delegated(path) =>
-            bind(Path.split(path), dentries, depth-1) flatMap {
-              case Addr.Neg => bind(elems, ds, depth)
-              case a => Var.value(a)
-            }
-
-          case a => Var.value(a)
-        }
-
-      case Seq(_, ds@_*) =>
-        bind(elems, ds, depth)
-      case Seq() =>
-        Var.value(Addr.Neg)
+  def lookup(path: Path): Activity[NameTree[Path]] = {
+    val matches = dentries collect {
+      case Dentry(prefix, dst) if path startsWith prefix =>
+        val suff = path drop prefix.size
+        dst map { pfx => pfx ++ suff }
     }
+
+    if (matches.nonEmpty)
+      Activity.value(NameTree.Alt(matches:_*))
+    else
+      Activity.value(NameTree.Neg)
   }
 
-  /** $delegated */
-  def delegated(dentry: Dentry): Dtab =
+  /**
+   * Construct a new Dtab with the given delegation
+   * entry appended.
+   */
+  def +(dentry: Dentry): Dtab =
     Dtab(dentries0 :+ dentry)
-
-  /** $delegated */
-  def delegated(prefix: String, dst: String): Dtab = 
-    delegated(Dentry(prefix, dst))
-
-  /** $delegated */
-  def delegated(prefix: String, dst: Name): Dtab = 
-    delegated(Dentry(prefix, dst))
 
   /**
    * Construct a new Dtab with the given dtab appended.
    */
-  def delegated(dtab: Dtab): Dtab =
+  def ++(dtab: Dtab): Dtab =
     Dtab(dentries0 ++ dtab.dentries0)
-
-  override def toString = {
-    val ds = for (Dentry(prefix, dest) <- this) yield prefix+"->"+dest.reified
-    "Dtab("+(ds mkString ",")+")"
-  }
 
   /**
    * Efficiently removes prefix `prefix` from `dtab`.
@@ -117,7 +58,7 @@ private[twitter] case class Dtab(dentries0: IndexedSeq[Dentry])
     while (i < prefix.size) {
       val d1 = this(i)
       val d2 = prefix(i)
-      if (!Equiv[Dentry].equiv(d1, d2))
+      if (d1 != d2)
         return this
       i += 1
     }
@@ -134,45 +75,55 @@ private[twitter] case class Dtab(dentries0: IndexedSeq[Dentry])
   def print(printer: PrintWriter) {
     printer.println("Dtab("+size+")")
     for (Dentry(prefix, dst) <- this)
-      printer.println("	"+prefix+" -> "+dst.reified)
+      printer.println("	"+prefix.show+" => "+dst.show)
   }
+
+  def show: String = dentries0 map (_.show) mkString ";"
+  override def toString = "Dtab("+show+")"
 }
 
 /**
  * Trait Dentry describes a delegation table entry.
- * It always a has a prefix, describing the paths to
+ * It always has a prefix, describing the paths to
  * which the entry applies, and a bind method to
  * bind the given path.
  */
-private[twitter] case class Dentry(prefix: String, dst: Name) {
-  def bind(path: String): Var[Addr] = dst.enter(path).bind()
-  val prefixElems = Path.split(prefix)
+case class Dentry(prefix: Path, dst: NameTree[Path]) {
+  def show = "%s=>%s".format(prefix.show, dst.show)
+  override def toString = "Dentry("+show+")"
 }
 
-private[twitter] object Dentry {
-  def apply(prefix: String, dst: String): Dentry =
-    if (dst.startsWith("/")) Dentry(prefix, Name(dst))
-    else Dentry(prefix, Resolver.eval(dst))
+object Dentry {
+  def read(s: String): Dentry = DentryParser(s)
 
-  implicit val equiv: Equiv[Dentry] = new Equiv[Dentry] {
-    def equiv(d1: Dentry, d2: Dentry) =
-      (d1 eq d2) || (d1.prefix == d2.prefix && d1.dst.reified == d2.dst.reified)
+  // The prefix to this is an illegal path in the sense that the
+  // concrete syntax will not admit it. It will do for a no-op.
+  val nop: Dentry = Dentry(Path.Utf8("/"), NameTree.Neg)
+}
+
+object Dtab {
+  val empty: Dtab = Dtab(Vector.empty)
+
+  @volatile var base: Dtab = empty
+
+  private[this] val l = new Local[Dtab]
+
+  def apply(): Dtab = l() getOrElse base
+  def update(dtab: Dtab) { l() = dtab }
+  def clear() { l.clear() }
+
+  def unwind[T](f: => T): T = {
+    val save = l()
+    try f finally l.set(save)
   }
-}
 
-/**
- * A context comprising a local current dtab 
- * and a global base dtab.
- */
-private[twitter] trait DtabCtx {
-  def base: Dtab
+  def delegate(dentry: Dentry) {
+    this() = this() + dentry
+  }
 
-  /**
-   * Set the base Dtab. 
-   */
-  def base_=(newBase: Dtab)
-
-  def isBase: Boolean = apply() eq base
+  def delegate(dtab: Dtab) {
+    this() = this() ++ dtab
+  }
 
   /**
    * Retrieve the difference between the base dtab
@@ -180,49 +131,8 @@ private[twitter] trait DtabCtx {
    */
   def baseDiff(): Dtab = this().stripPrefix(base)
 
-  /**
-   * Retrieve the current local dtab. When there
-   * is no local Dtab, the base dtab is returned.
-   */
-  def apply(): Dtab
+  def read(s: String): Dtab = DtabParser(s)
 
-  /**
-   * Set the local dtab.
-   */
-  def update(dtab: Dtab)
-
-  /**
-   * Clear the local dtab.
-   */
-  def clear()
-
-  def delegate(src: String, dst: String) {
-    delegate(Dentry(src, dst))
-  }
-
-  def delegate(src: String, dst: Name) {
-    delegate(Dentry(src, dst))
-  }
-
-  def delegate(dentry: Dentry) {
-    this() = this() delegated dentry
-  }
-  
-  def delegate(dtab: Dtab) {
-    this() = this() delegated dtab
-  }
-
-  /**
-   * Refine the given name vis-à-vis the current Dtab. The
-   * refined name will not resolve to a delegated name.
-   *
-   * @return Refined name, whose binding is relative to the
-   * current Dtab.
-   */
-  def refine(name: Name): Name = this().refine(name)
-}
-
-private[twitter] object Dtab extends DtabCtx {
   /** Scala collection plumbing required to build new dtabs */
   def newBuilder: DtabBuilder = new DtabBuilder
 
@@ -231,43 +141,9 @@ private[twitter] object Dtab extends DtabCtx {
       def apply(_ign: TraversableOnce[Dentry]): DtabBuilder = newBuilder
       def apply(): DtabBuilder = newBuilder
     }
-    
-  val empty = Dtab(Vector.empty)
-
-  /**
-   * Computes functional equivalence (not necessarily 
-   * object equivalence) of `d1` and `d2`.
-   */
-  implicit val equiv: Equiv[Dtab] = new Equiv[Dtab] {
-    def equiv(d1: Dtab, d2: Dtab): Boolean = {
-      if (d1 eq d2) return true
-      if (d1.size != d2.size) return false
-      val n = d1.size
-      var i = 0
-      while (i < n) {
-        if (!Equiv[Dentry].equiv(d1(i), d2(i)))
-          return false
-        i += 1
-      }
-      true
-    }
-  }
-
-  // DtabCtx:
-  @volatile var base: Dtab = Dtab.empty
-
-  private[this] val l = new Local[Dtab]
-  def apply(): Dtab = l() getOrElse base
-  def update(dtab: Dtab) { l() = dtab }
-  def clear() { l.clear() }
- 
-  def unwind[T](f: => T): T = {
-    val save = l()
-    try f finally l.set(save)
-  }
 }
 
-private[twitter] final class DtabBuilder extends Builder[Dentry, Dtab] {
+final class DtabBuilder extends Builder[Dentry, Dtab] {
   private var builder = new VectorBuilder[Dentry]
 
   def +=(d: Dentry): this.type = {
@@ -280,21 +156,33 @@ private[twitter] final class DtabBuilder extends Builder[Dentry, Dtab] {
   def result(): Dtab = Dtab(builder.result)
 }
 
-private case class RefinedName(parent: Name, dtab: Dtab, suffix: String)
-    extends Name {
-  override def enter(path: String) = 
-    RefinedName(parent, dtab, Path.join(suffix, path))
-
-  def bind() = parent.bind() flatMap {
-    case Addr.Delegated(path) => 
-      dtab.bind(Path.join(path, suffix))
-    case a@Addr.Bound(_) if suffix.isEmpty => Var.value(a)
-    case Addr.Bound(sockaddrs) =>
-      val partial: Set[SocketAddress] =
-        sockaddrs map { sa => PartialSocketAddress(sa, suffix) }
-      Var.value(Addr.Bound(partial))
-    case a => Var.value(a)
+private trait DtabParsers extends NameTreePathParsers {
+  lazy val dtab: Parser[Dtab] = repsep(dentry, ";") ^^ { dentries => 
+    Dtab(dentries.toIndexedSeq)
   }
-  
-  val reified = "fail!"
+
+  lazy val dentry: Parser[Dentry] =
+    path ~ "=>" ~ tree ^^ {
+      case p ~ "=>" ~ t => Dentry(p, t)
+    }
+}
+
+private object DtabParser extends DtabParsers {
+  def apply(str: String): Dtab = synchronized {
+    parseAll(dtab, str) match {
+      case Success(dtab, _) => dtab
+      case err: NoSuccess => 
+        throw new IllegalArgumentException(err.msg+" at "+err.next.first)
+    }
+  }
+}
+
+private object DentryParser extends DtabParsers {
+  def apply(str: String): Dentry = synchronized {
+    parseAll(dentry, str) match {
+      case Success(dentry, _) => dentry
+      case err: NoSuccess => 
+        throw new IllegalArgumentException(err.msg+" at "+err.next.first)
+    }
+  }
 }

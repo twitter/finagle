@@ -31,11 +31,6 @@ object Addr {
   case class Failed(cause: Throwable) extends Addr
 
   /**
-   * Binding was delegated to `where`.
-   */
-  case class Delegated(where: String) extends Addr
-
-  /**
    * The binding action is still pending.
    */
   object Pending extends Addr {
@@ -54,7 +49,7 @@ object Addr {
       Bound(Set(addrs:_*))
 
     /**
-     * Provided for Java compatibility.
+     * Provided for Java compatibility. 
      */
     def apply(addrs: java.util.List[SocketAddress]): Addr =
       apply(addrs.asScala: _*)
