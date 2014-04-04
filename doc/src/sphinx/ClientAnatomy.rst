@@ -103,7 +103,7 @@ The Default Client
 
 The :src:`DefaultClient <com/twitter/finagle/client/DefaultClient.scala>`
 decorates a client with many prominent features including
-:ref:`load balancing <heap_balancer>` over multiple hosts
+:ref:`load balancing <load_balancer>` over multiple hosts
 and :ref:`connection pooling <watermark_pool>` per host.
 We can create a DefaultClient with the bridge defined above:
 

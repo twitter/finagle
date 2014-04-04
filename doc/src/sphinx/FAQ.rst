@@ -48,9 +48,9 @@ published externally, but not yet to maven central.
 How do I change my timeouts in the Finagle 6 APIs?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We introduced a new, preferred API for constructing Finagle ``Client``\s and ``Server``\s.
+As of :doc:`6.x <changelog>`, We introduced a new, preferred API for constructing Finagle ``Client``\s and ``Server``\s.
 Where the old API used ``ServerBuilder``\/``ClientBuilder`` with Codecs, the new APIs use
-``Proto.newClient``.
+``Proto.newClient`` [#].
 
 Old APIs:
 
@@ -109,6 +109,11 @@ Of course, there are some points where there are rough edges, and we haven't
 figured out exactly what the right default should be.  We're actively looking
 for input, and would love for the greater Finagle community to help us find good
 defaults.
+
+.. [#] Protocol implementors are encouraged to provide sensible
+       defaults and leave room for application specific behavior
+       to be built on top of the base layer via filters or
+       synchronization mechanisms.
 
 Mux-specific FAQ
 ----------------
