@@ -2,10 +2,11 @@ package com.twitter.finagle.exp
 
 import com.twitter.app.GlobalFlag
 import com.twitter.concurrent.{BridgedThreadPoolScheduler, Scheduler}
+import com.twitter.finagle.stats.DefaultStatsReceiver
+import com.twitter.finagle.util.DefaultLogger
 import com.twitter.jvm.numProcs
 import java.util.concurrent.{BlockingQueue, ThreadFactory, ThreadPoolExecutor, TimeUnit}
 import java.util.logging.{Level, Logger}
-import com.twitter.finagle.stats.DefaultStatsReceiver
 
 object scheduler extends GlobalFlag(
   "local",
@@ -14,7 +15,7 @@ object scheduler extends GlobalFlag(
 )
 
 private[finagle] object FinagleScheduler {
-  private val log = Logger.getLogger("finagle")
+  private val log = DefaultLogger
 
   private object Integer {
     def unapply(str: String): Option[Int] = {
