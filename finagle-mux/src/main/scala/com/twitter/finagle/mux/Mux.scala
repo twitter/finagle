@@ -5,7 +5,8 @@ import com.twitter.finagle.netty3._
 import com.twitter.finagle.pool.ReusingPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
-import com.twitter.util.{CloseAwaitably, Future, Promise, Return, Time}
+import com.twitter.finagle.transport.Transport
+import com.twitter.util.{Closable, CloseAwaitably, Future, Promise, Return, Time}
 import java.net.SocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
 
@@ -35,7 +36,7 @@ object Mux extends Client[ChannelBuffer, ChannelBuffer] with Server[ChannelBuffe
 }
 
 package exp {
-
+  
   object MuxSession {
     /**
      * Connect to addr to establish a mux session. The returned function

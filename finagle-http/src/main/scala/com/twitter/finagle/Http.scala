@@ -92,7 +92,7 @@ package exp {
 
   object HttpServer extends StackServer[HttpRequest, HttpResponse, Any, Any] {
     val listener = HttpListener
-    val newDispatcher: ServerDispatcher = {
+    val newDispatcher: StackServer.Dispatcher[HttpRequest, HttpResponse, Any, Any] = {
       val dtab = new DtabFilter[HttpRequest, HttpResponse]
       val tracingFilter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("http")
       (t, s) => new HttpServerDispatcher(

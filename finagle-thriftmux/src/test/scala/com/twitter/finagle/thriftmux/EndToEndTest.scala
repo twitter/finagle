@@ -221,20 +221,19 @@ class EndToEndTest extends FunSuite {
 */
 
   test("StackClient-based ThriftMux client properly creates clients") {
-    object ThriftMuxStackClient
-      extends Client[ThriftClientRequest, Array[Byte]]
-      with ThriftRichClient
-    {
-      protected val protocolFactory = Protocols.binaryFactory()
-      protected val defaultClientName = "mux"
-
-      def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
-        exp.ThriftMuxClient.newClient(dest, label)
-    }
-
     new ThriftMuxTestServer {
-      val client = ThriftMuxStackClient.newIface[TestService.FutureIface](server)
+      val client = exp.ThriftMuxClient.newIface[TestService.FutureIface](server)
       assert(Await.result(client.query("ok")) == "okok")
     }
+  }
+
+  test("StackServer-based ThriftMux server properly creates servers") {
+    val server = exp.ThriftMuxServer.serveIface(":*", new TestService.FutureIface {
+      def query(x: String) = Future.value(x+x)
+    })
+
+    val client = ThriftMux.newIface[TestService.FutureIface](server)
+
+    assert(Await.result(client.query("ok")) == "okok")
   }
 }

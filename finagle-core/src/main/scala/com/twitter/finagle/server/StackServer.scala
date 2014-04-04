@@ -14,6 +14,11 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.collection.JavaConverters._
 
 private[finagle] object StackServer {
+  /**
+   * A convenience type for server dispatcher factory functions.
+   */
+  type Dispatcher[Req, Rep, In, Out] = (Transport[In, Out], Service[Req, Rep]) => Closable
+
   private[this] val newJvmFilter = new MkJvmFilter(Jvm())
 
   /**
@@ -67,7 +72,7 @@ private[finagle] object StackServer {
  * A [[com.twitter.finagle.Stack Stack]]-based server.
  * Concrete implementations are required to define a
  * [[com.twitter.finagle.server.Listener]] and a dispatcher which
- * bridges each incoming [[om.twitter.finagle.transport.Transport]]
+ * bridges each incoming [[com.twitter.finagle.transport.Transport]]
  * with the materialized `stack` (i.e. services produced
  * by the ServiceFactory).
  *
@@ -78,9 +83,6 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
   val stack: Stack[ServiceFactory[Req, Rep]],
   val params: Stack.Params
 ) extends Server[Req, Rep] { self =>
-
-  type ServerDispatcher = (Transport[In, Out], Service[Req, Rep]) => Closable
-
   /**
    * Creates a new StackServer with the default stack (StackServer#newStack)
    * and empty params.
@@ -101,7 +103,7 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
    *
    * @see [[com.twitter.finagle.dispatch.GenSerialServerDispatcher]]
    */
-  protected val newDispatcher: ServerDispatcher
+  protected val newDispatcher: StackServer.Dispatcher[Req, Rep, In, Out]
 
   /**
    * Creates a new StackServer with with `f` applied to `stack`.
@@ -188,17 +190,19 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
 }
 
 /**
- * A [[com.twitter.finagle.Stack Stack]]-based server which
- * preserves "rich" client semantics.
+ * A [[com.twitter.finagle.Stack Stack]]-based server with `Like` semantics.
  */
 private[finagle]
-abstract class RichStackServer[Req, Rep, In, Out, This <: RichStackServer[Req, Rep, In, Out, This]](
-  server: StackServer[Req, Rep, In, Out]) extends Server[Req, Rep] {
-  protected def newRichServer(server: StackServer[Req, Rep, In, Out]): This
+abstract class StackServerLike[Req, Rep, In, Out, Repr <: StackServerLike[Req, Rep, In, Out, Repr]](
+    server: StackServer[Req, Rep, In, Out])
+  extends Server[Req, Rep]
+{
   val stack = server.stack
 
-  def configured[P: Stack.Param](p: P): This =
-    newRichServer(server.configured(p))
+  protected def newInstance(server: StackServer[Req, Rep, In, Out]): Repr
+
+  def configured[P: Stack.Param](p: P): Repr =
+    newInstance(server.configured(p))
 
   def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]) =
     server.serve(addr, factory)

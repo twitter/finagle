@@ -26,6 +26,7 @@ import org.jboss.netty.buffer.ChannelBuffer
  * factories may be supplied by instantiating new clients or servers.
  *
  * @define clientExampleObject ThriftMux
+ * @define serverExampleObject ThriftMux
  */
 object ThriftMux
   extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
