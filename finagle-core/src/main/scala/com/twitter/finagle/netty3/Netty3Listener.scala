@@ -1,13 +1,14 @@
 package com.twitter.finagle.netty3
 
 import com.twitter.finagle._
-import com.twitter.finagle.channel.{ChannelRequestStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler}
+import com.twitter.finagle.channel.{
+  ChannelRequestStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler}
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.ssl.{Engine, SslShutdownHandler}
 import com.twitter.finagle.stats.{ServerStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.{ChannelTransport, Transport}
-import com.twitter.finagle.util.{DefaultLogger, DefaultMonitor, DefaultTimer}
-import com.twitter.util.{CloseAwaitably, Duration, Future, Promise, Time}
+import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
+import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Promise, Time}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicLong
 import java.util.IdentityHashMap
@@ -232,6 +233,8 @@ object Netty3Listener {
  * time to complete a write.
  *
  * @param tlsConfig When present, SSL is used to provide session security.
+ *
+ * @param monitor Currently unused. Maintained for API compatibility.
  */
 case class Netty3Listener[In, Out](
   name: String,
@@ -249,7 +252,7 @@ case class Netty3Listener[In, Out](
   timer: com.twitter.util.Timer = DefaultTimer.twitter,
   nettyTimer: org.jboss.netty.util.Timer = DefaultTimer,
   statsReceiver: StatsReceiver = ServerStatsReceiver,
-  monitor: com.twitter.util.Monitor = DefaultMonitor,
+  monitor: com.twitter.util.Monitor = NullMonitor,
   logger: java.util.logging.Logger = DefaultLogger
 ) extends Listener[In, Out] {
   import Netty3Listener._
@@ -316,8 +319,11 @@ case class Netty3Listener[In, Out](
       val closer = new Closer(timer)
 
       val newBridge = () => new ServerBridge(
-        serveTransport, monitor, logger,
-        scopedStatsReceiver, closer.activeChannels)
+        serveTransport,
+        logger,
+        scopedStatsReceiver,
+        closer.activeChannels
+      )
       val bootstrap = new ServerBootstrap(channelFactory)
       bootstrap.setOptions(bootstrapOptions.asJava)
       bootstrap.setPipelineFactory(
@@ -337,7 +343,6 @@ case class Netty3Listener[In, Out](
  */
 private[netty3] class ServerBridge[In, Out](
   serveTransport: Transport[In, Out] => Unit,
-  monitor: com.twitter.util.Monitor,
   log: java.util.logging.Logger,
   statsReceiver: StatsReceiver,
   channels: ChannelGroup
@@ -373,7 +378,6 @@ private[netty3] class ServerBridge[In, Out](
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
     val cause = e.getCause
-    monitor.handle(cause)
 
     cause match {
       case e: ReadTimeoutException => readTimeoutCounter.incr()
