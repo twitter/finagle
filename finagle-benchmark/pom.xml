@@ -21,12 +21,17 @@
       <artifactId>caliper</artifactId>
       <version>0.5-rc1</version>
       <exclusions>
-        <!-- a more modern guava is provided through swift -->
         <exclusion>
           <groupId>com.google.guava</groupId>
           <artifactId>guava</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <!-- Current version of caliper requires Guava 15 -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>15.0</version>
     </dependency>
     <!-- project dependencies -->
     <dependency>
