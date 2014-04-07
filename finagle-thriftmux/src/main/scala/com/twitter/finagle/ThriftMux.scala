@@ -1,6 +1,5 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client.{RichStackClient, StackClient}
 import com.twitter.finagle.thrift.{Protocols, ThriftClientRequest}
 import java.net.SocketAddress
 import org.jboss.netty.buffer.ChannelBuffer

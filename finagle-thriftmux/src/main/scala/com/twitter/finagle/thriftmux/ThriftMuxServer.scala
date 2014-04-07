@@ -77,10 +77,11 @@ package exp {
   {
     def this() = this(StackServer.newStack[ChannelBuffer, ChannelBuffer], Stack.Params.empty)
 
-    protected val listener: Listener[ChannelBuffer, ChannelBuffer] = ThriftMuxListener
-    protected val newDispatcher: StackServer.Dispatcher[
-      ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer
-    ] = new mux.ServerDispatcher(_, _, true)
+    protected val newListener: Stack.Params => Listener[ChannelBuffer, ChannelBuffer] =
+      Function.const(ThriftMuxListener)
+
+    protected val newDispatcher: Dispatcher =
+      new mux.ServerDispatcher(_, _, true)
   }
 
   private[finagle]
@@ -99,8 +100,11 @@ package exp {
     {
       // This StackServer will proxy to `underlying`'s listener and dispatcher, so
       // we provide null objects here.
-      protected val listener = NullListener
-      protected val newDispatcher = (_: Any, _: Any) => Closable.nop
+      protected val newListener: Stack.Params => Listener[Any, Any] =
+        Function.const(NullListener)
+
+      protected val newDispatcher: Dispatcher =
+        (_: Any, _: Any) => Closable.nop
 
       /**
        * @inheritdoc

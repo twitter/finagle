@@ -1,8 +1,7 @@
 package com.twitter.finagle.netty3
 
 import com.twitter.finagle._
-import com.twitter.finagle.channel.{
-  ChannelRequestStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler}
+import com.twitter.finagle.channel.{ChannelRequestStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler}
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.ssl.{Engine, SslShutdownHandler}
 import com.twitter.finagle.stats.{ServerStatsReceiver, NullStatsReceiver, StatsReceiver}
@@ -29,12 +28,8 @@ import scala.collection.JavaConverters._
 case class Netty3ListenerTLSConfig(newEngine: () => Engine)
 
 object Netty3Listener {
-  import Listener._
-
-  val channelFactory: ServerChannelFactory =
-    new NioServerSocketChannelFactory(Executor, WorkerPool) {
-      override def releaseExternalResources() = ()  // no-op
-    }
+  import com.twitter.finagle.param._
+  import param._
 
   /**
    * Class Closer implements channel tracking and semi-graceful closing
@@ -125,30 +120,14 @@ object Netty3Listener {
     )
   }
 
-  // TODO: should these params should be under a more general namespace
-  // and shared with clients Netty3Stack?
+  val channelFactory: ServerChannelFactory =
+    new NioServerSocketChannelFactory(Executor, WorkerPool) {
+      override def releaseExternalResources() = ()  // no-op
+    }
 
   /**
-   * A [[com.twitter.finagle.Stack.Param]] used to configure a
-   * Stack-based Netty3Listener.
-   */
-  case class Netty3Timer(timer: org.jboss.netty.util.Timer)
-  implicit object Netty3Timer extends Stack.Param[Netty3Timer] {
-    val default = Netty3Timer(util.DefaultTimer)
-  }
-
-  /**
-   * A [[com.twitter.finagle.Stack.Param]] used to configure a
-   * Stack-based Netty3Listener.
-   */
-  case class PipelineFactory(pipeline: ChannelPipelineFactory)
-  implicit object PipelineFactory extends Stack.Param[PipelineFactory] {
-    val default = PipelineFactory(Channels.pipelineFactory(Channels.pipeline()))
-  }
-
-  /**
-   * A [[com.twitter.finagle.Stack.Param]] used to configure a
-   * Stack-based Netty3Listener.
+   * A [[com.twitter.finagle.Stack.Param]] used to configure
+   * the ServerChannelFactory for a `Listener`.
    */
   case class ChannelFactory(cf: ServerChannelFactory)
   implicit object ChannelFactory extends Stack.Param[ChannelFactory] {
@@ -156,41 +135,45 @@ object Netty3Listener {
   }
 
   /**
-   * Constructs a Listener[In, Out] from the relevant
-   * [[com.twitter.finagle.Stack.Param]]'s in `params`.
+   * Constructs a `Listener[In, Out]` given a netty3 `ChannelPipelineFactory`
+   * responsible for framing a `Transport` stream. The `Listener` is configured
+   * via the passed in [[com.twitter.finagle.Stack.Param]]'s.
+   *
+   * @see [[com.twitter.finagle.server.Listener]]
+   * @see [[com.twitter.finagle.transport.Transport]]
+   * @see [[com.twitter.finagle.param]]
    */
-  def fromParams[In, Out](params: Stack.Params): Listener[In, Out] = {
-    import param._
+  def apply[In, Out](
+    pipeline: ChannelPipelineFactory,
+    params: Stack.Params
+  ): Listener[In, Out] = {
     val Label(label) = params[Label]
     val Logger(logger) = params[Logger]
     val Monitor(monitor) = params[Monitor]
     val Stats(stats) = params[Stats]
     val Timer(timer) = params[Timer]
-    val Netty3Timer(nettyTimer) = params[Netty3Timer]
-    val PipelineFactory(pf) = params[PipelineFactory]
+
+    // transport and listener params
     val ChannelFactory(cf) = params[ChannelFactory]
+    val Netty3Timer(nettyTimer) = params[Netty3Timer]
     val Listener.Backlog(backlog) = params[Listener.Backlog]
-    val Listener.BufferSize(send, recv) = params[Listener.BufferSize]
-    val Listener.Liveness(readTimeout, writeTimeout, keepAlive) = params[Listener.Liveness]
-    val Listener.SslEngine(engine) = params[Listener.SslEngine]
-    val snooper = params[Listener.Verbose] match {
-      case Listener.Verbose(true) => Some(ChannelSnooper(label)(logger.log(Level.INFO, _, _)))
+    val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
+    val Transport.Liveness(readTimeout, writeTimeout, keepAlive) = params[Transport.Liveness]
+    val Transport.TLSEngine(engine) = params[Transport.TLSEngine]
+    val snooper = params[Transport.Verbose] match {
+      case Transport.Verbose(true) => Some(ChannelSnooper(label)(logger.log(Level.INFO, _, _)))
       case _ => None
     }
 
-    Netty3Listener[In, Out](label, pf, snooper, cf, bootstrapOptions = {
+    Netty3Listener[In, Out](label, pipeline, snooper, cf, bootstrapOptions = {
       val o = new scala.collection.mutable.MapBuilder[String, Object, Map[String, Object]](Map())
         o += "soLinger" -> (0: java.lang.Integer)
         o += "reuseAddress" -> java.lang.Boolean.TRUE
         o += "child.tcpNoDelay" -> java.lang.Boolean.TRUE
-        for (v <- backlog)
-          o += "backlog" -> (v: java.lang.Integer)
-        for (v <- send)
-          o += "child.sendBufferSize" -> (v: java.lang.Integer)
-        for (v <- recv)
-          o += "child.receiveBufferSize" -> (v: java.lang.Integer)
-        for (v <- keepAlive)
-          o += "child.keepAlive" -> (v: java.lang.Boolean)
+        for (v <- backlog) o += "backlog" -> (v: java.lang.Integer)
+        for (v <- sendBufSize) o += "child.sendBufferSize" -> (v: java.lang.Integer)
+        for (v <- recvBufSize) o += "child.receiveBufferSize" -> (v: java.lang.Integer)
+        for (v <- keepAlive) o += "child.keepAlive" -> (v: java.lang.Boolean)
         o.result()
       },
       channelReadTimeout = readTimeout,

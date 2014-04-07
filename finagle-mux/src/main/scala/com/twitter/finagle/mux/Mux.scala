@@ -89,26 +89,18 @@ package exp {
     }
   }
 
-  private[finagle]
-  object MuxNetty3Stack extends Netty3Stack[Any, Any, ChannelBuffer, ChannelBuffer](
-    "mux",
-    mux.PipelineFactory,
-    (transport, statsReceiver) =>
-      new mux.ClientDispatcher(transport.cast[ChannelBuffer, ChannelBuffer], statsReceiver)
-  )
+  object MuxClient extends StackClient[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer](
+    StackClient.newStack.replace(StackClient.Role.Pool, ReusingPool.module[ChannelBuffer, ChannelBuffer]),
+    Stack.Params.empty
+  ) {
+    protected val newTransporter: Stack.Params => Transporter[ChannelBuffer, ChannelBuffer] = { prms =>
+      Netty3Transporter(mux.PipelineFactory, prms)
+    }
 
-  private[finagle]
-  class MuxClient(client: StackClient[ChannelBuffer, ChannelBuffer])
-    extends RichStackClient[ChannelBuffer, ChannelBuffer, MuxClient](client)
-  {
-    protected def newRichClient(client: StackClient[ChannelBuffer, ChannelBuffer]) =
-      new MuxClient(client)
+    protected val newDispatcher: Dispatcher = transport => {
+      // TODO: This isn't the same sr we thread through our stack.
+      val param.Stats(sr) = params[param.Stats]
+      new mux.ClientDispatcher(transport.cast[ChannelBuffer, ChannelBuffer], sr)
+    }
   }
-
-  object MuxClient extends MuxClient(new StackClient({
-    val reusingClientStack = StackClient.newStack[ChannelBuffer, ChannelBuffer]
-        .replace(StackClient.Role.Pool, ReusingPool.module[ChannelBuffer, ChannelBuffer])
-
-    reusingClientStack ++ (MuxNetty3Stack +: stack.nilStack)
-  }, Stack.Params.empty))
 }

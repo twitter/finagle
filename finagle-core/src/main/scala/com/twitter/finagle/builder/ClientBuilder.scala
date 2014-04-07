@@ -767,7 +767,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       name = config.nameOrDefault,
       pipelineFactory = codec.pipelineFactory,
       newChannel = newChannel,
-      newTransport = codec.newClientTransport(_, statsReceiver),
+      newTransport = (c: Channel) => codec.newClientTransport(c, statsReceiver),
       tlsConfig = config.tls map { case (e, v) => Netty3TransporterTLSConfig(e, v) },
       httpProxy = config.httpProxy,
       socksProxy = config.socksProxy,

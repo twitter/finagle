@@ -3,6 +3,7 @@ package com.twitter.finagle.server
 import com.twitter.finagle._
 import com.twitter.finagle.filter._
 import com.twitter.finagle.service.{StatsFilter, TimeoutFilter, FailingFactory}
+import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.{StatsReceiver, ServerStatsReceiver}
 import com.twitter.finagle.tracing.{TracingFilter, ServerDestTracingProxy}
 import com.twitter.finagle.transport.Transport
@@ -14,11 +15,6 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.collection.JavaConverters._
 
 private[finagle] object StackServer {
-  /**
-   * A convenience type for server dispatcher factory functions.
-   */
-  type Dispatcher[Req, Rep, In, Out] = (Transport[In, Out], Service[Req, Rep]) => Closable
-
   private[this] val newJvmFilter = new MkJvmFilter(Jvm())
 
   /**
@@ -51,8 +47,7 @@ private[finagle] object StackServer {
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](
       stack.nilStack[Req, Rep])
 
-    stk.push(Role.ServerDestTracing, ((next: ServiceFactory[Req, Rep]) =>
-      new ServerDestTracingProxy[Req, Rep](next)))
+    stk.push(Role.ServerDestTracing, ((next: ServiceFactory[Req, Rep]) => new ServerDestTracingProxy[Req, Rep](next)))
     stk.push(TimeoutFilter.module)
     stk.push(StatsFilter.module)
     stk.push(RequestSemaphoreFilter.module)
@@ -83,6 +78,11 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
   val stack: Stack[ServiceFactory[Req, Rep]],
   val params: Stack.Params
 ) extends Server[Req, Rep] { self =>
+   /**
+    * A convenient type alias for a server dispatcher.
+    */
+  type Dispatcher = (Transport[In, Out], Service[Req, Rep]) => Closable
+
   /**
    * Creates a new StackServer with the default stack (StackServer#newStack)
    * and empty params.
@@ -93,24 +93,24 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
    * Defines a typed [[com.twitter.finagle.Listener]] for this server.
    * Concrete StackServer implementations are expected to specify this.
    */
-  protected val listener: Listener[In, Out]
+  protected val newListener: Stack.Params => Listener[In, Out]
 
   /**
    * Defines a dispatcher, a function which binds a transport to a
-   * [[com.twitter.finagle.Service]. Together with a `Listener`, it
+   * [[com.twitter.finagle.Service]]. Together with a `Listener`, it
    * forms the foundation of a finagle server. Concrete implementations
    * are expected to specify this.
    *
    * @see [[com.twitter.finagle.dispatch.GenSerialServerDispatcher]]
    */
-  protected val newDispatcher: StackServer.Dispatcher[Req, Rep, In, Out]
+  protected val newDispatcher: Dispatcher
 
   /**
-   * Creates a new StackServer with with `f` applied to `stack`.
+   * Creates a new StackServer with `f` applied to `stack`.
    */
   def transformed(f: Stack[ServiceFactory[Req, Rep]] => Stack[ServiceFactory[Req, Rep]]) =
     new StackServer[Req, Rep, In, Out](f(stack), params) {
-      protected val listener = self.listener
+      protected val newListener = self.newListener
       protected val newDispatcher = self.newDispatcher
     }
 
@@ -120,22 +120,25 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
    */
   def configured[P: Stack.Param](p: P): StackServer[Req, Rep, In, Out] =
     new StackServer[Req, Rep, In, Out](stack, params + p) {
-      protected val listener = self.listener
+      protected val newListener = self.newListener
       protected val newDispatcher = self.newDispatcher
     }
 
   /** @inheritdoc */
   def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
     new ListeningServer with CloseAwaitably {
+      import com.twitter.finagle.param._
+
+      // Ensure that we have performed global initialization.
       com.twitter.finagle.Init()
 
-      val param.Label(label) = params[param.Label]
-      val param.Monitor(monitor) = params[param.Monitor]
-      val param.Reporter(reporter) = params[param.Reporter]
-      val statsReceiver = params[param.Stats] match {
-        case param.Stats(`ServerStatsReceiver`) =>
+      val Label(label) = params[Label]
+      val Monitor(monitor) = params[Monitor]
+      val Reporter(reporter) = params[Reporter]
+      val statsReceiver = params[Stats] match {
+        case Stats(`ServerStatsReceiver`) =>
           val scope = ServerRegistry.nameOf(addr) getOrElse label
-          param.Stats(ServerStatsReceiver.scope(scope))
+          Stats(ServerStatsReceiver.scope(scope))
         case sr => sr
       }
 
@@ -156,15 +159,16 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
         val onClose = transport.onClose.map(_ => ())
       }
 
-      object Endpoint extends Stack.Role
-      val serviceFactory = (stack ++ Stack.Leaf(Endpoint, factory)).make(
-        params +
+      val newParams = params +
         statsReceiver +
-        param.Monitor(reporter(label, None) andThen monitor)
-      )
+        Monitor(reporter(label, None) andThen monitor)
+
+      val serviceFactory = (stack ++ Stack.Leaf(Endpoint, factory))
+        .make(newParams)
 
       // Listen over `addr` and serve traffic from incoming transports to
       // `serviceFactory` via `newDispatcher`.
+      val listener = newListener(newParams)
       val underlying = listener.listen(addr) { transport =>
         serviceFactory(newConn(transport)) respond {
           case Return(service) =>

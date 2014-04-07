@@ -10,16 +10,16 @@ import com.twitter.finagle.server.{Listener, NullListener, StackServer}
 import com.twitter.finagle.service.ExpiringService
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.ssl.{Ssl, Engine}
+import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.tracing.{NullTracer, Tracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
-import com.twitter.util.{Closable, Duration, Future, Monitor, NullMonitor,   Time}
+import com.twitter.util.{Closable, Duration, Future, NullMonitor, Time}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.logging.{Logger, Level}
+import java.util.logging.Level
 import javax.net.ssl.SSLEngine
-import org.jboss.netty.channel.{Channels, ServerChannelFactory}
+import org.jboss.netty.channel.ServerChannelFactory
 import scala.annotation.implicitNotFound
 
 /**
@@ -65,19 +65,25 @@ object ServerConfig {
   sealed abstract trait Yes
   type FullySpecified[Req, Rep] = ServerConfig[Req, Rep, Yes, Yes, Yes]
 
-  def nilServer[Req, Rep] = new StackServer[Req, Rep, Any, Any](
-    stack.nilStack, Stack.Params.empty) {
-    val listener = NullListener
+  def nilServer[Req, Rep] = new StackServer[Req, Rep, Any, Any](nilStack, Stack.Params.empty) {
+    val newListener: Stack.Params => Listener[Any, Any] = Function.const(NullListener)(_)
     val newDispatcher = (_: Any, _: Any) => Closable.nop
   }
 
   // params specific to ServerBuilder
+  case class BindTo(addr: SocketAddress)
+  implicit object BindTo extends Stack.Param[BindTo] {
+    val default = BindTo(new SocketAddress {
+      override val toString = "unknown"
+    })
+  }
+
   case class CancelOnHangup(yesOrNo: Boolean)
   implicit object CancelOnHangup extends Stack.Param[CancelOnHangup] {
     val default = CancelOnHangup(true)
   }
 
-  case class MonitorFactory(mFactory: (String, SocketAddress) => Monitor)
+  case class MonitorFactory(mFactory: (String, SocketAddress) => com.twitter.util.Monitor)
   implicit object MonitorFactory extends Stack.Param[MonitorFactory] {
     val default = MonitorFactory((_, _) => NullMonitor)
   }
@@ -147,6 +153,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   mk: Stack.Params => StackServer[Req, Rep, Any, Any]
 ) {
   import ServerConfig._
+  import com.twitter.finagle.param._
 
   // Convenient aliases.
   type FullySpecifiedConfig = FullySpecified[Req, Rep]
@@ -182,24 +189,25 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     codecFactory: CodecFactory[Req1, Rep1]#Server
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
     stack({ ps =>
-      val param.Label(label) = ps[param.Label]
-      val Listener.BindTo(addr) = ps[Listener.BindTo]
+      val Label(label) = ps[Label]
+      val BindTo(addr) = ps[BindTo]
       val codec = codecFactory(ServerCodecConfig(label, addr))
       val newStack = StackServer.newStack[Req1, Rep1].replace(
         StackServer.Role.Preparer, (next: ServiceFactory[Req1, Rep1]) =>
           codec.prepareConnFactory(next)
       )
       new StackServer[Req1, Rep1, Any, Any](newStack, ps) {
-        protected val listener: Listener[Any, Any] = Netty3Listener.fromParams(
-          ps + Netty3Listener.PipelineFactory(codec.pipelineFactory))
+        protected val newListener: Stack.Params => Listener[Any, Any] = { prms =>
+          Netty3Listener(codec.pipelineFactory, prms)
+        }
 
         protected val newDispatcher = {
           // TODO: Expiration logic should be installed using ExpiringService
           // in StackServer#newStack. Then we can thread through "closes"
           // via ClientConnection.
-          val param.Timer(timer) = ps[param.Timer]
+          val Timer(timer) = ps[Timer]
           val ExpiringService.Param(idleTime, lifeTime) = ps[ExpiringService.Param]
-          val param.Stats(sr) = ps[param.Stats]
+          val Stats(sr) = ps[Stats]
           val idle = if (idleTime.isFinite) Some(idleTime) else None
           val life = if (lifeTime.isFinite) Some(lifeTime) else None
           val f = codec.newServerDispatcher(_, _)
@@ -218,31 +226,31 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     copy(params, mk)
 
   def reportTo(receiver: StatsReceiver): This =
-    configured(param.Stats(receiver))
+    configured(Stats(receiver))
 
   def name(value: String): ServerBuilder[Req, Rep, HasCodec, HasBindTo, Yes] =
-    configured(param.Label(value))
+    configured(Label(value))
 
  def sendBufferSize(value: Int): This =
-    configured(params[Listener.BufferSize].copy(send = Some(value)))
+    configured(params[Transport.BufferSizes].copy(send = Some(value)))
 
   def recvBufferSize(value: Int): This =
-    configured(params[Listener.BufferSize].copy(recv = Some(value)))
+    configured(params[Transport.BufferSizes].copy(recv = Some(value)))
 
   def backlog(value: Int): This =
     configured(Listener.Backlog(Some(value)))
 
   def bindTo(address: SocketAddress): ServerBuilder[Req, Rep, HasCodec, Yes, HasName] =
-    configured(Listener.BindTo(address))
+    configured(BindTo(address))
 
   def channelFactory(cf: ServerChannelFactory): This =
     configured(Netty3Listener.ChannelFactory(cf))
 
-  def logger(logger: Logger): This =
-    configured(param.Logger(logger))
+  def logger(logger: java.util.logging.Logger): This =
+    configured(Logger(logger))
 
   def logChannelActivity(v: Boolean): This =
-    configured(Listener.Verbose(v))
+    configured(Transport.Verbose(v))
 
   def tls(certificatePath: String, keyPath: String,
           caCertificatePath: String = null, ciphers: String = null, nextProtos: String = null): This =
@@ -255,7 +263,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     newFinagleSslEngine(() => new Engine(newSsl()))
 
   def newFinagleSslEngine(v: () => Engine): This =
-    configured(Listener.SslEngine(Some(v)))
+    configured(Transport.TLSEngine(Some(v)))
 
   def maxConcurrentRequests(max: Int): This =
     configured(RequestSemaphoreFilter.Param(max))
@@ -264,28 +272,28 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     configured(TimeoutFilter.Param(howlong))
 
   def keepAlive(value: Boolean): This =
-    configured(params[Listener.Liveness].copy(keepAlive = Some(value)))
+    configured(params[Transport.Liveness].copy(keepAlive = Some(value)))
 
   def readTimeout(howlong: Duration): This =
-    configured(params[Listener.Liveness].copy(readTimeout = howlong))
+    configured(params[Transport.Liveness].copy(readTimeout = howlong))
 
   def writeCompletionTimeout(howlong: Duration): This =
-    configured(params[Listener.Liveness].copy(writeTimeout = howlong))
+    configured(params[Transport.Liveness].copy(writeTimeout = howlong))
 
-  def monitor(mFactory: (String, SocketAddress) => Monitor): This =
+  def monitor(mFactory: (String, SocketAddress) => com.twitter.util.Monitor): This =
     configured(MonitorFactory(mFactory))
 
   @deprecated("Use tracer() instead", "7.0.0")
-  def tracerFactory(factory: Tracer.Factory): This =
+  def tracerFactory(factory: com.twitter.finagle.tracing.Tracer.Factory): This =
     tracer(factory())
 
   // API compatibility method
   @deprecated("Use tracer() instead", "7.0.0")
-  def tracerFactory(t: Tracer): This =
+  def tracerFactory(t: com.twitter.finagle.tracing.Tracer): This =
     tracer(t)
 
-  def tracer(t: Tracer): This =
-    configured(param.Tracer(t))
+  def tracer(t: com.twitter.finagle.tracing.Tracer): This =
+    configured(Tracer(t))
 
   /**
    * Cancel pending futures whenever the the connection is shut down.
@@ -359,10 +367,10 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
       ServerConfigEvidence[HasCodec, HasBindTo, HasName]
   ): Server = new Server {
-    val param.Label(label) = params[param.Label]
-    val Listener.BindTo(addr) = params[Listener.BindTo]
-    val param.Stats(sr) = params[param.Stats]
-    val param.Logger(logger) = params[param.Logger]
+    val Label(label) = params[Label]
+    val BindTo(addr) = params[BindTo]
+    val Stats(sr) = params[Stats]
+    val Logger(logger) = params[Logger]
     val Daemonize(daemon) = params[Daemonize]
     val MonitorFactory(newMonitor) = params[MonitorFactory]
 
@@ -370,20 +378,20 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       new SourceTrackingMonitor(logger, "server")
     val statsReceiver = if (label.isEmpty) sr else sr.scope(label)
 
-    val newParams = params +
-      param.Monitor(monitor) +
-      param.Reporter(NullReporterFactory) +
-      param.Stats(statsReceiver)
-
-    val server = mk(newParams).transformed { stk =>
-      newParams[CancelOnHangup] match {
+    val server = mk(params) transformed { stk =>
+      params[CancelOnHangup] match {
         case CancelOnHangup(false) => stk.replace(StackServer.Role.MaskCancel,
           new MaskCancelFilter[Req, Rep])
         case _ => stk
       }
     }
 
-    val listeningServer = server.serve(addr, serviceFactory)
+    val listeningServer = server
+      .configured(Monitor(monitor))
+      .configured(Stats(statsReceiver))
+      .configured(Reporter(NullReporterFactory))
+      .serve(addr, serviceFactory)
+
     val closed = new AtomicBoolean(false)
 
     if (!daemon) ExitGuard.guard()
@@ -417,10 +425,10 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     if (mk(params).stack.tails.size == 1)
       throw new IncompleteSpecification("No codec was specified")
 
-    if (!params.contains[Listener.BindTo])
+    if (!params.contains[BindTo])
       throw new IncompleteSpecification("No bindTo was specified")
 
-    if (!params.contains[param.Label])
+    if (!params.contains[Label])
       throw new IncompleteSpecification("No name were specified")
 
     val sb = this.asInstanceOf[ServerBuilder[Req, Rep, Yes, Yes, Yes]]

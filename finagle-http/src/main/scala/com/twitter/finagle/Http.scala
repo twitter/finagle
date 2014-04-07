@@ -72,27 +72,32 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
 
 package exp {
   private[finagle]
-  object HttpNetty3Stack
-    extends Netty3Stack[Any, Any, HttpRequest, HttpResponse](
-    "http", http.Http()
-      .enableTracing(true)
-      .client(ClientCodecConfig("httpclient")).pipelineFactory,
-    (trans, _) => new HttpClientDispatcher(trans))
-
-  private[finagle]
-  class HttpClient(client: StackClient[HttpRequest, HttpResponse])
-    extends RichStackClient[HttpRequest, HttpResponse, HttpClient](client)
+  class HttpClient(client: StackClient[HttpRequest, HttpResponse, Any, Any])
+    extends StackClientLike[HttpRequest, HttpResponse, Any, Any, HttpClient](client)
     with HttpRichClient {
-    protected def newRichClient(client: StackClient[HttpRequest, HttpResponse]) =
+    protected def newInstance(client: StackClient[HttpRequest, HttpResponse, Any, Any]) =
       new HttpClient(client)
   }
 
-  private[finagle]
-  object HttpClient extends HttpClient(new StackClient(HttpNetty3Stack))
+  object HttpClient extends HttpClient(new StackClient[HttpRequest, HttpResponse, Any, Any] {
+    protected val newTransporter: Stack.Params => Transporter[Any, Any] = { prms =>
+      val param.Label(label) = prms[param.Label]
+      val httpPipeline = http.Http().client(ClientCodecConfig(label)).pipelineFactory
+      Netty3Transporter(httpPipeline, prms)
+    }
+
+    protected val newDispatcher: Dispatcher = new HttpClientDispatcher(_)
+  })
 
   object HttpServer extends StackServer[HttpRequest, HttpResponse, Any, Any] {
-    val listener = HttpListener
-    val newDispatcher: StackServer.Dispatcher[HttpRequest, HttpResponse, Any, Any] = {
+    protected val newListener: Stack.Params => Listener[Any, Any] = { prms =>
+      val param.Label(label) = prms[param.Label]
+      val httpPipeline = http.Http().server(ServerCodecConfig(label,
+        new SocketAddress{})).pipelineFactory
+      Netty3Listener(httpPipeline, prms)
+    }
+
+    protected val newDispatcher: Dispatcher = {
       val dtab = new DtabFilter[HttpRequest, HttpResponse]
       val tracingFilter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("http")
       (t, s) => new HttpServerDispatcher(

@@ -1,25 +1,23 @@
 package com.twitter.finagle.netty3
 
-import com.twitter.finagle._
-import com.twitter.finagle.channel.{
-  ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler}
-import com.twitter.finagle.client.StackClient
+import com.twitter.finagle.channel.{ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler}
+import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.httpproxy.HttpConnectHandler
-import com.twitter.finagle.socks.{SocksConnectHandler, SocksProxyFlags}
+import com.twitter.finagle.socks.{SocksProxyFlags, SocksConnectHandler}
 import com.twitter.finagle.ssl.{Engine, SslConnectHandler}
-import com.twitter.finagle.stats.{ClientStatsReceiver,   StatsReceiver}
-import com.twitter.finagle.transport.{ChannelTransport,   Transport}
+import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
+import com.twitter.finagle.transport.{ChannelTransport, Transport}
 import com.twitter.finagle.util.DefaultTimer
+import com.twitter.finagle.{Stack, Service, ServiceFactory, WriteException, CancelledConnectionException}
+import com.twitter.util.TimeConversions._
 import com.twitter.util.{Future, Promise, Duration, NonFatal, Stopwatch}
 import java.net.{InetSocketAddress, SocketAddress}
-import java.util.IdentityHashMap
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.TimeUnit
+import java.util.IdentityHashMap
 import org.jboss.netty.channel.ChannelHandler
 import org.jboss.netty.channel.socket.nio.{NioWorkerPool, NioClientSocketChannelFactory}
-import org.jboss.netty.channel.{
-  Channel, ChannelFactory, ChannelFuture, ChannelFutureListener, ChannelPipeline,
-  ChannelPipelineFactory, Channels}
+import org.jboss.netty.channel.{ChannelFactory => NettyChannelFactory, _}
 import org.jboss.netty.handler.timeout.IdleStateHandler
 import scala.collection.JavaConverters._
 
@@ -70,6 +68,83 @@ private[netty3] class ChannelConnector[In, Out](
 
     promise onFailure { _ =>
       Channels.close(ch)
+    }
+  }
+}
+
+object Netty3Transporter {
+  import com.twitter.finagle.param._
+  import param._
+
+  val defaultChannelOptions: Map[String, Object] = Map(
+    "tcpNoDelay" -> java.lang.Boolean.TRUE,
+    "reuseAddress" -> java.lang.Boolean.TRUE,
+    "connectTimeoutMillis" -> (1000L: java.lang.Long)
+  )
+
+  val channelFactory: NettyChannelFactory = new NioClientSocketChannelFactory(
+    Executor, 1 /*# boss threads*/, WorkerPool, DefaultTimer) {
+    override def releaseExternalResources() = ()  // no-op; unreleasable
+  }
+
+  /**
+   * A [[com.twitter.finagle.Stack.Param]] used to configure
+   * the ServerChannelFactory for a `Listener`.
+   */
+  case class ChannelFactory(cf: NettyChannelFactory)
+  implicit object ChannelFactory extends Stack.Param[ChannelFactory] {
+    val default = ChannelFactory(channelFactory)
+  }
+
+  /**
+   * Constructs a `Transporter[In, Out]` given a netty3 `ChannelPipelineFactory`
+   * responsible for framing a `Transport` stream. The `Transporter` is configured
+   * via the passed in [[com.twitter.finagle.Stack.Param]]'s.
+   *
+   * @see [[com.twitter.finagle.server.Listener]]
+   * @see [[com.twitter.finagle.transport.Transport]]
+   * @see [[com.twitter.finagle.param]]
+   */
+  def apply[In, Out](
+    pipelineFactory: ChannelPipelineFactory,
+    params: Stack.Params
+  ): Transporter[In, Out] = {
+    val Label(label) = params[Label]
+    val Stats(stats) = params[Stats]
+
+    // transport and transporter params
+    val ChannelFactory(cf) = params[ChannelFactory]
+    val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
+    val Transporter.TLSHostname(tlsHostname) = params[Transporter.TLSHostname]
+    val Transporter.HttpProxy(httpProxy) = params[Transporter.HttpProxy]
+    val Transporter.SocksProxy(socksProxy) = params[Transporter.SocksProxy]
+    val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
+    val Transport.TLSEngine(tls) = params[Transport.TLSEngine]
+    val Transport.Liveness(readerTimeout, writerTimeout, keepAlive) = params[Transport.Liveness]
+
+    val transporter = Netty3Transporter[In, Out](
+      label,
+      pipelineFactory,
+      newChannel = cf.newChannel(_),
+      tlsConfig = tls map { case engine => Netty3TransporterTLSConfig(engine, tlsHostname) },
+      httpProxy = httpProxy,
+      socksProxy = socksProxy,
+      channelReaderTimeout = readerTimeout,
+      channelWriterTimeout = writerTimeout,
+      channelOptions = {
+        val o = new scala.collection.mutable.MapBuilder[String, Object, Map[String, Object]](Map())
+        o += "connectTimeoutMillis" -> (connectTimeout.inMilliseconds: java.lang.Long)
+        o += "tcpNoDelay" -> java.lang.Boolean.TRUE
+        o += "reuseAddress" -> java.lang.Boolean.TRUE
+        for (v <- keepAlive) o += "keepAlive" -> (v: java.lang.Boolean)
+        for (s <- sendBufSize) o += "sendBufferSize" -> (s: java.lang.Integer)
+        for (s <- recvBufSize) o += "receiveBufferSize" -> (s: java.lang.Integer)
+        o.result()
+      }
+    )
+    new Transporter[In, Out] {
+      def apply(sa: SocketAddress): Future[Transport[In, Out]] =
+        transporter(sa, stats)
     }
   }
 }
@@ -214,39 +289,5 @@ case class Netty3Transporter[In, Out](
       () => newConfiguredChannel(addr, statsReceiver),
       newTransport, statsReceiver)
     conn(addr)
-  }
-}
-
-object Netty3Transporter {
-  val channelFactory: ChannelFactory = new NioClientSocketChannelFactory(
-    Executor, 1 /*# boss threads*/, WorkerPool, DefaultTimer) {
-    override def releaseExternalResources() = ()  // no-op; unreleasable
-  }
-  val defaultChannelOptions: Map[String, Object] = Map(
-    "tcpNoDelay" -> java.lang.Boolean.TRUE,
-    "reuseAddress" -> java.lang.Boolean.TRUE,
-    "connectTimeoutMillis" -> (1000L: java.lang.Long)
-  )
-}
-
-private[finagle] object Netty3Stack {
-  object Transport extends Stack.Role
-}
-
-private[finagle] case class Netty3Stack[In, Out, Req, Rep](
-    name: String,
-    pipelineFactory: ChannelPipelineFactory,
-    newDispatcher: (Transport[In, Out], StatsReceiver) => Service[Req, Rep]
-) extends Stack.Simple[ServiceFactory[Req, Rep]](Netty3Stack.Transport) {
-  import StackClient._
-
-  private[this] val transporter = Netty3Transporter[In, Out](name, pipelineFactory)
-
-  def make(params: Stack.Params, next: ServiceFactory[Req, Rep])
-    : ServiceFactory[Req, Rep] = {
-    val EndpointAddr(addr) = params[EndpointAddr]
-    val param.Stats(statsReceiver) = params[param.Stats]
-
-    ServiceFactory(() => transporter(addr, statsReceiver).map(newDispatcher(_, statsReceiver)))
   }
 }
