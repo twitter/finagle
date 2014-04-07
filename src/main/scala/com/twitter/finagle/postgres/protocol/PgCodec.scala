@@ -50,7 +50,7 @@ class HandleErrorsProxy(delegate: ServiceFactory[PgRequest, PgResponse])
   object HandleErrors extends SimpleFilter[PgRequest, PgResponse] {
     def apply(request: PgRequest, service: Service[PgRequest, PgResponse]) =
       service.apply(request).flatMap {
-        case Error(details) => Future.exception(Errors.server(details.getOrElse("")))
+        case Error(details) => Future.exception(Errors.server("%s\n%s".format(request.toString(), details.getOrElse(""))))
         case r => Future.value(r)
       }
   }
