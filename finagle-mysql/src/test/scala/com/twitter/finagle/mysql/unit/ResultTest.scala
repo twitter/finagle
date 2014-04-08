@@ -97,7 +97,7 @@ class PrepareOKTest extends FunSuite with HexDump {
   test("decode") {
     assert(packets.size > 0, "expected header packet")
     val p = PrepareOK.decode(packets.head)
-    assert(p.statementId === 1)
+    assert(p.id === 1)
     assert(p.numOfParams === 2)
     assert(p.numOfCols === 1)
     assert(packets.size >= 1 + p.numOfParams, "expected %d param packets".format(p.numOfParams))

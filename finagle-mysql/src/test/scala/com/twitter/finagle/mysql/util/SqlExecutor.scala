@@ -20,9 +20,7 @@ object SqlExecutor {
    */
   def executeSql(client: Client, url: URL): Future[Unit] = {
     val queries = SqlSource.fromUrl(url)
-    val results = (queries map { query =>
-      client.query(query)
-    }).toSeq
+    val results = queries.map(client.query).toSeq
     Future.join(results)
   }
 
@@ -33,11 +31,8 @@ object SqlExecutor {
    * @param client a client
    * @param urls URLs to SQL content
    */
-  def executeSql(client: Client, urls: Seq[URL]): Future[Unit] = {
-    val results = urls map { url =>
-      executeSql(client, url)
+  def executeSql(client: Client, urls: Seq[URL]): Future[Unit] =
+    urls.foldLeft(Future.Done) { (f, url) =>
+      f before executeSql(client, url)
     }
-    Future.join(results)
-  }
-
 }

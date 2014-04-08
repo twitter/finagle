@@ -1,21 +1,39 @@
 package com.twitter.finagle.exp.mysql
 
 import com.twitter.finagle.ServiceFactory
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.util.{Closable, Future, Time}
-import java.util.logging.{Logger, Level}
-import com.twitter.finagle.exp.Mysql
-
-class ClientError(msg: String) extends Exception(msg)
+import java.util.logging.Level
 
 object Client {
-  private[this] val logger = Logger.getLogger("finagle-mysql")
-
   /**
-   * Constructs a Client given a ServiceFactory.
+   * Creates a new Client based on a ServiceFactory.
    */
-  def apply(factory: ServiceFactory[Request, Result]): Client = {
-    new Client(factory)
+  def apply(factory: ServiceFactory[Request, Result]): Client = new Client {
+    private[this] val service = factory.toService
+
+    def query(sql: String): Future[Result] = service(QueryRequest(sql))
+    def ping(): Future[Result] = service(PingRequest)
+
+    def select[T](sql: String)(f: Row => T): Future[Seq[T]] =
+      query(sql) map {
+        case rs: ResultSet => rs.rows.map(f)
+        case _ => Seq.empty
+      }
+
+    def prepare(sql: String): PreparedStatement = new PreparedStatement {
+      def apply(ps: Any*): Future[Result] = factory() flatMap { svc =>
+        svc(PrepareRequest(sql)) flatMap {
+          case ok: PrepareOK => svc(ExecuteRequest(ok.id, ps.toIndexedSeq))
+          case r => Future.exception(new Exception("Unexpected result %s when preparing %s"
+            .format(r, sql)))
+        } ensure {
+          svc.close()
+        }
+      }
+    }
+
+    def close(deadline: Time): Future[Unit] = factory.close(deadline)
   }
 
   /**
@@ -37,9 +55,7 @@ object Client {
     logLevel: Level = Level.OFF,
     statsReceiver: StatsReceiver = NullStatsReceiver
   ): Client = {
-    logger.setLevel(logLevel)
-
-    val factory = Mysql
+    val factory = com.twitter.finagle.exp.Mysql
       .withCredentials(username, password)
       .withDatabase(dbname)
       .newClient(host)
@@ -48,133 +64,33 @@ object Client {
   }
 }
 
-class Client(val factory: ServiceFactory[Request, Result]) extends Closable {
-  private[this] val service = factory.toService
+trait Client extends Closable {
+  /**
+   * Returns the result of executing the `sql` query on the server.
+   */
+  def query(sql: String): Future[Result]
 
   /**
-   * Sends a query without using prepared statements.
+   * Sends the given `sql` to the server and maps each resulting row to
+   * `f`, a function from Row => T. If no ResultSet is returned, the function
+   * returns an empty Seq.
+   */
+  def select[T](sql: String)(f: Row => T): Future[Seq[T]]
+
+  /**
+   * Returns a new PreparedStatement instance based on the given sql query.
+   * The returned prepared statement can be reused and applied with varying
+   * parameters.
    *
-   * @param sql the sql string to be sent to the server
-   * @return a Future containing the Result object from the query.
+   * @note Mysql prepared statements are stateful, that is, they allocate
+   * resources on the mysql server. The allocations are managed by a
+   * finagle-mysql connection. Closing the client implicitly closes all
+   * outstanding PreparedStatements.
    */
-  def query(sql: String): Future[Result] =
-    service(QueryRequest(sql))
+  def prepare(sql: String): PreparedStatement
 
   /**
-   * Sends a query that presumably returns a ResultSet.
-   * Each row is mapped to f, a function from Row => T.
-   *
-   * @param sql A sql statement that returns a result set.
-   * @param f A function from Row to any type T.
-   * @return a Future of Seq[T] that contains the result
-   * of f applied to each row.
+   * Returns the result of pinging the server.
    */
-  def select[T](sql: String)(f: Row => T): Future[Seq[T]] =
-    query(sql) map {
-      case rs: ResultSet => rs.rows.map(f)
-      case _ => Seq.empty
-    }
-
-  /**
-   * Sends a query to server to be prepared for execution.
-   * @param sql A query to be prepared on the server.
-   * @return a Future[PreparedStatement]
-   */
-  def prepare(sql: String): Future[PreparedStatement] =
-    service(PrepareRequest(sql)) flatMap {
-      case ok: PrepareOK =>
-        Future.value(new PreparedStatement(ok))
-      case result =>
-        Future.exception(
-          new ClientError("Unexpected result: %s".format(result))
-        )
-    }
-
-  /**
-   * Execute a prepared statement on the server. Set the parameters
-   * field or use the update(index, param) method on the
-   * prepared statement object to change parameters.
-   * @return a Future containing an OK Result or a ResultSet
-   * for queries that return rows.
-   */
-  def execute(ps: PreparedStatement): Future[Result] =
-    service(ExecuteRequest(ps)) flatMap {
-      case rs: ResultSet =>
-        ps.bindParameters()
-        Future.value(rs)
-      case ok: OK =>
-        ps.bindParameters()
-        Future.value(ok)
-      case result =>
-        Future.value(result)
-    }
-
-  /**
-   * Combines the prepare and execute operations.
-   * @return a Future[(PreparedStatement, Result)] tuple.
-   */
-  def prepareAndExecute(sql: String, queryParams: Any*): Future[(PreparedStatement, Result)] =
-    prepare(sql) flatMap { ps =>
-      ps.parameters = queryParams.toArray
-      execute(ps) map {
-        res => (ps, res)
-      }
-    }
-
-  /**
-   * Send a SELECT query that returns a ResultSet. For each row
-   * in the ResultSet, call f on the row and return the results.
-   * If a prepared statement that does not represent a SELECT
-   * query is passed in, an empty Seq is returned.
-   * @param ps A prepared statement.
-   * @param f A function from Row to any type T.
-   * @return a Future of Seq[T] that contains rows.map(f)
-   */
-  def select[T](ps: PreparedStatement)(f: Row => T): Future[Seq[T]] =
-    execute(ps) map {
-      case rs: ResultSet => rs.rows.map(f)
-      case _ => Seq()
-    }
-
-  /**
-   * Combines the prepare and select operations.
-   * @return a Future[(PreparedStatement, Seq[T])] tuple.
-   */
-  def prepareAndSelect[T](sql: String, queryParams: Any*)(f: Row => T): Future[(PreparedStatement, Seq[T])] =
-    prepare(sql) flatMap { ps =>
-      ps.parameters = queryParams.toArray
-      select(ps)(f) map {
-          seq => (ps, seq)
-      }
-    }
-
-  /**
-   * Close a prepared statement on the server.
-   * @return a Future with an OK value if successful.
-   */
-  def closeStatement(ps: PreparedStatement): Future[Result] =
-    service(CloseRequest(ps.statementId))
-
-  /**
-   * Changes the default schema.
-   *
-   * @param schema The new schema to use.
-   * @return a Future with an OK value if successful.
-   */
-  def selectDB(schema: String): Future[Result] =
-    service(UseRequest(schema))
-
-  /**
-   * Checks if the server is alive.
-   *
-   * @return a Future with an OK value if the
-   * server is alive.
-   */
-  def ping: Future[Result] =
-    service(PingRequest)
-
-  /**
-   * Close the ServiceFactory and its underlying resources.
-   */
-  def close(deadline: Time): Future[Unit] = factory.close(deadline)
+  def ping(): Future[Result]
 }

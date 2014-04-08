@@ -1,24 +1,28 @@
 package com.twitter.finagle.exp.mysql
 
-case class PreparedStatement(metadata: PrepareOK) {
-  private[this] var params: Array[Any] = new Array[Any](numberOfParams)
-  private[this] var hasNewParams: Boolean = false
+import com.twitter.util.Future
 
-  val numberOfParams: Int = metadata.numOfParams
-  val statementId: Int = metadata.statementId
-  def parameters: Array[Any] = params
-  def hasNewParameters: Boolean = hasNewParams
+/**
+ * A PreparedStatement represents a parameterized
+ * sql statement which may be applied concurrently
+ * with varying parameters.
+ */
+trait PreparedStatement {
+  /**
+   * Executes the prepared statement with the
+   * given `params`.
+   */
+  def apply(params: Any*): Future[Result]
 
-  def bindParameters() { hasNewParams = false }
-
-  def parameters_=(arr: Array[Any]) = {
-    require(arr.size == numberOfParams, "Invalid number of parameters.")
-    hasNewParams = true
-    params = arr
-  }
-
-  def updateParameter(index: Int, value: Any): Unit = {
-    hasNewParams = true
-    params(index) = value
-  }
+  /**
+   * Executes the prepared statement with the
+   * given `params` and maps `f` to the rows
+   * of the returned ResultSet. If no ResultSet
+   * is returned, the function returns an empty Seq.
+   */
+  def select[T](params: Any*)(f: Row => T): Future[Seq[T]] =
+    apply(params:_*) map {
+      case rs: ResultSet => rs.rows.map(f)
+      case _ => Seq.empty
+    }
 }

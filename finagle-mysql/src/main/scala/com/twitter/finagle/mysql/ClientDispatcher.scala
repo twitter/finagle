@@ -3,9 +3,10 @@ package com.twitter.finagle.exp.mysql
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader, Packet}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{CancelledRequestException, Service, WriteException}
-import com.twitter.util.{Future, Promise, Time, Try, Throw, Return}
-import java.util.logging.Logger
+import com.twitter.finagle.{CancelledRequestException, Service, SimpleFilter, WriteException}
+import com.twitter.util.{Closable, Future, Promise, Return, Time, Try, Throw}
+import java.util.ArrayDeque
+import scala.collection.JavaConverters._
 
 case class ServerError(code: Short, sqlState: String, message: String)
   extends Exception(message)
@@ -16,12 +17,87 @@ case class LostSyncException(underlying: Throwable)
     override def getStackTrace = underlying.getStackTrace
   }
 
+/**
+ * Caches statements that have been successfully prepared over the connection
+ * managed by the underlying service (a ClientDispatcher). This decreases
+ * the chances of leaking prepared statements and can simplify the
+ * implementation of prepared statements in the presence of a connection pool.
+ * The cache is capped at `max` and eldest elements are evicted.
+ */
+private[mysql] class PrepareCache(max: Int = 20) extends SimpleFilter[Request, Result] {
+  // TODO: consider using a more suitable cache as an lru.
+  private[this] val lru = new ArrayDeque[(String, Future[Result])]()
+  private[this] val iter = lru.asScala
+
+  /**
+   * Populate cache with unique prepare requests identified by their
+   * sql queries. Note, access to `lru` is synchronized, however, because
+   * the finagle default pool guarantees us exlusive access to a service
+   * per dispatch, there should not be contention here.
+   */
+  def apply(req: Request, svc: Service[Request, Result]) = {
+    // remove the eldest entry in the lru and
+    // dispatch a CloseRequest for the corresponding
+    // entry over `svc`.
+    def removeEldest() = synchronized {
+      if (lru.size > max) lru.peekLast match {
+        case null => // ignore
+        case eldest =>
+          lru.remove(eldest)
+          val (_, ok) = eldest
+          ok onSuccess {
+            case r: PrepareOK => svc(CloseRequest(r.id))
+            case _ => // ignore
+          }
+      }
+    }
+
+    req match {
+      case PrepareRequest(sql) => synchronized {
+        iter.find(_._1 == sql) match {
+          // maintain access order.
+          case Some(entry) =>
+            lru.remove(entry)
+            lru.push(entry)
+            entry._2
+
+          // dispatch prepare request and
+          // populate cache preemptively.
+          case None =>
+            val ok = svc(req)
+            val entry = (sql, ok)
+            lru.push(entry)
+            ok respond {
+              case Throw(_) => synchronized { lru.remove(entry) }
+              case Return(_) => removeEldest()
+            }
+        }
+      }
+
+      case _ => svc(req)
+    }
+  }
+}
+
 object ClientDispatcher {
   private val cancelledRequestExc = new CancelledRequestException
   private val lostSyncExc = new LostSyncException(new Throwable)
   private val emptyTx = (Nil, EOF(0: Short, 0: Short))
   private val wrapWriteException: PartialFunction[Throwable, Future[Nothing]] = {
     case exc: Throwable => Future.exception(WriteException(exc))
+  }
+
+  /**
+   * Creates a mysql client dispatcher with write-through caches for optimization.
+   * @param trans A transport that reads a writes logical mysql packets.
+   * @param handshake A function that is responsible for facilitating
+   * the connection phase given a HandshakeInit.
+   */
+  def apply(
+    trans: Transport[Packet, Packet],
+    handshake: HandshakeInit => Try[HandshakeResponse]
+  ): Service[Request, Result] = {
+    new PrepareCache andThen new ClientDispatcher(trans, handshake)
   }
 
   /**
@@ -41,10 +117,6 @@ object ClientDispatcher {
  *
  * Note, the mysql protocol does not support any form of multiplexing so
  * requests are dispatched serially and concurrent requests are queued.
- *
- * @param trans A transport that reads a writes logical mysql packets.
- * @param handshake A function that is responsible for facilitating
- * the connection phase given a HandshakeInit.
  */
 class ClientDispatcher(
   trans: Transport[Packet, Packet],

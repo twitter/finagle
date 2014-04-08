@@ -3,12 +3,12 @@ package com.twitter.finagle.mysql.util
 import com.mysql.management.{MysqldResource, MysqldResourceI}
 import com.twitter.finagle.exp.Mysql
 import com.twitter.finagle.exp.mysql.Client
+import com.twitter.logging.Level
 import com.twitter.util.RandomSocket
 import java.io.File
-import java.util.UUID
 import java.util.logging.Logger
+import java.util.UUID
 import scala.collection.JavaConversions._
-import com.twitter.logging.Level
 
 /**
  * Creates an embeddable instance of MySQL.  By default, the database will be created in a
@@ -60,9 +60,7 @@ class EmbeddableMysql(
   }
 
   def port = mysqldRsrc.getPort
-
   def baseDir = mysqldRsrc.getBaseDir
-
   def dataDir = mysqldRsrc.getDataDir
 
   def shutdown() {
@@ -76,12 +74,10 @@ class EmbeddableMysql(
     log.info("MySql shutdown")
   }
 
-  def createClient(): Client = {
-    Mysql
-        .withDatabase(db)
-        .withCredentials(user, password)
-        .newRichClient("localhost:%d".format(port))
-  }
+  def createClient(): Client =
+    Mysql.withDatabase(db)
+      .withCredentials(user, password)
+      .newRichClient("localhost:%d".format(port))
 
   private def createTempDirectory(): File = {
     val tempDir = new File(System.getProperty("java.io.tmpdir") + "/finagle-mysql/" + UUID.randomUUID.toString)

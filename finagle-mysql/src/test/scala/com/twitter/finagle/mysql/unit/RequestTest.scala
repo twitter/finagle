@@ -75,11 +75,7 @@ class ExecuteRequestTest extends FunSuite {
   test("null values") {
     val numOfParams = 18
     val nullParams: Array[Any] = Array.fill(numOfParams)(null)
-    val ok = PrepareOK(0, 0, numOfParams, 0, Nil, Nil)
-    val p = PreparedStatement(ok)
-    p.parameters = nullParams
-    p.bindParameters() // set no new parameters
-    val e = ExecuteRequest(p)
+    val e = ExecuteRequest(0, nullParams, false)
     val br = BufferReader(e.toPacket.body)
     br.skip(10) // payload header (10bytes)
     br.skip(1) // new params bound flag
@@ -102,7 +98,7 @@ class ExecuteRequestTest extends FunSuite {
   val timestamp = new Timestamp(millis)
   val sqlDate = new SQLDate(millis)
   val datetime = new Date(millis)
-  val params = Array(
+  val params = IndexedSeq(
     strVal,
     nonAsciiStrVal,
     boolVal,
@@ -121,23 +117,9 @@ class ExecuteRequestTest extends FunSuite {
   )
   // create a prepared statement
   val stmtId = 1
-  val ok = PrepareOK(1, 0, params.size, 0, Nil, Nil)
-  val ps = PreparedStatement(ok)
-  ps.parameters = params
-  val flags, iteration = 0
-  val req = ExecuteRequest(ps, flags.toByte, iteration)
+  val flags = 0
+  val req = ExecuteRequest(stmtId, params)
   val br = BufferReader(req.toPacket.body)
-
-  // Note, this invariant can change if we decide to
-  // make PreparedStatements persistent data structures.
-  test("ExecuteRequest properly handles recycled PreparedStatements") {
-    val execute1 = ExecuteRequest(ps)
-    ps.parameters = (1 to params.size).map(_ => "new param").toArray
-    val execute2 = ExecuteRequest(ps)
-    val cb1 = execute1.toPacket.toChannelBuffer
-    val cb2 = execute2.toPacket.toChannelBuffer
-    assert(!cb1.equals(cb2))
-  }
 
   val cmd = br.readByte()
   val id = br.readInt()
@@ -147,7 +129,7 @@ class ExecuteRequestTest extends FunSuite {
     assert(cmd === Command.COM_STMT_EXECUTE)
     assert(id === stmtId)
     assert(flg === flags)
-    assert(iter === iteration)
+    assert(iter === 1)
   }
 
   val len = ((params.size + 7) / 8).toInt
@@ -166,7 +148,7 @@ class ExecuteRequestTest extends FunSuite {
 
   val hasNewParams = br.readByte() == 1
   test("has new parameters") {
-    assert(hasNewParams === ps.hasNewParameters)
+    assert(hasNewParams === true)
   }
 
   if (hasNewParams) {

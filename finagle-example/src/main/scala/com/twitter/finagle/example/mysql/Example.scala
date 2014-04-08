@@ -14,16 +14,11 @@ case class SwimmingRecord(
   name: String,
   nationality: String,
   date: Date
-) {
-  override def toString = {
-    def q(s: String) = "'" + s + "'"
-    "(" + q(event) + "," + time + "," + q(name) + "," + q(nationality) + "," + q(date.toString) + ")"
-  }
-}
+)
 
 object SwimmingRecord {
   val createTableSQL =
-  """CREATE TEMPORARY TABLE IF NOT EXISTS `finagle-mysql-example` (
+  """CREATE TABLE IF NOT EXISTS `finagle-mysql-example` (
     `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
     `event` varchar(30) DEFAULT NULL,
     `time` float DEFAULT NULL,
@@ -53,7 +48,7 @@ object Example extends App {
     val client = Mysql
       .withCredentials(username(), password())
       .withDatabase(dbname())
-      .newRichClient(host().getHostName+":"+host().getPort)
+      .newRichClient("%s:%d".format(host().getHostName, host().getPort))
 
     val resultFuture = for {
       _ <- createTable(client)
@@ -66,7 +61,9 @@ object Example extends App {
     } onFailure { e =>
       println(e)
     } ensure {
-      client.close()
+      client.query("DROP TABLE IF EXISTS `finagle-mysql-example`") ensure {
+        client.close()
+      }
     }
 
     Await.ready(resultFuture)
@@ -78,19 +75,15 @@ object Example extends App {
 
   def insertValues(client: Client): Future[Seq[Result]] = {
     val insertSQL = "INSERT INTO `finagle-mysql-example` (`event`, `time`, `name`, `nationality`, `date`) VALUES (?,?,?,?,?)"
-    client.prepare(insertSQL) flatMap { ps =>
-      val insertResults = SwimmingRecord.records map { r =>
-        ps.parameters = Array(r.event, r.time, r.name, r.nationality, r.date)
-        client.execute(ps)
-      }
-      Future.collect(insertResults) ensure {
-        client.closeStatement(ps)
-      }
+    val ps = client.prepare(insertSQL)
+    val insertResults = SwimmingRecord.records map { r =>
+      ps(r.event, r.time, r.name, r.nationality, r.date)
     }
+    Future.collect(insertResults)
   }
 
   def selectQuery(client: Client): Future[Seq[_]] = {
-    val query = "SELECT * FROM `finagle-mysql-example` WHERE `date` BETWEEN '2009-06-01' AND '2009-8-31'"
+    val query = "SELECT * FROM `finagle-mysql-example` WHERE `date` BETWEEN '2009-06-01' AND '2009-08-31'"
     client.select(query) { row =>
       val StringValue(event) = row("event").get
       val DateValue(date) = row("date").get
@@ -100,7 +93,7 @@ object Example extends App {
         case _ => 0.0F
       } get
 
-      (name, time)
+      (name, time, date)
     }
   }
 }

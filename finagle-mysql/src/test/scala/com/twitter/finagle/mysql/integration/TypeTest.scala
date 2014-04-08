@@ -35,7 +35,8 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
       case v => fail("expected a ResultSet with 1 row but received: %s".format(v))
     })
 
-    val binaryrows = Await.result(c.prepareAndSelect("SELECT * FROM `numeric`")(row => row))._2
+    val ps = c.prepare("SELECT * FROM `numeric`")
+    val binaryrows = Await.result(ps.select()(identity))
     assert(binaryrows.size === 1)
     val binaryEncoded = binaryrows(0)
 
@@ -147,7 +148,8 @@ class BlobTypeTest extends FunSuite with IntegrationClient {
       case v => fail("expected a ResultSet with 1 row but received: %s".format(v))
     })
 
-    val binaryrows = Await.result(c.prepareAndSelect("SELECT * FROM `blobs`")(row => row))._2
+    val ps = c.prepare("SELECT * FROM `blobs`")
+    val binaryrows = Await.result(ps.select()(identity))
     assert(binaryrows.size === 1)
     val binaryEncoded = binaryrows(0)
 
@@ -268,7 +270,8 @@ class DateTimeTypeTest extends FunSuite with IntegrationClient {
       case v => fail("expected a ResultSet with 1 row but received: %s".format(v))
     })
 
-    val binaryrows = Await.result(c.prepareAndSelect("SELECT * FROM `datetime`")(row => row))._2
+    val ps = c.prepare("SELECT * FROM `datetime`")
+    val binaryrows = Await.result(ps.select()(identity))
     assert(binaryrows.size === 1)
     val binaryEncoded = binaryrows(0)
 
