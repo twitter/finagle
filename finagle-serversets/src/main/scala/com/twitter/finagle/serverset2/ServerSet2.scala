@@ -1,20 +1,16 @@
 package com.twitter.finagle.serverset2
 
 import com.twitter.app.GlobalFlag
-import com.twitter.concurrent.{Offer, Broker}
 import com.twitter.conversions.time._
+import com.twitter.finagle.WeightedSocketAddress
 import com.twitter.finagle.stats.{StatsReceiver, DefaultStatsReceiver}
-import com.twitter.finagle.util.{DefaultTimer, InetSocketAddressUtil}
-import com.twitter.finagle.{Addr, Resolver, WeightedSocketAddress}
+import com.twitter.finagle.util.DefaultTimer
+import com.twitter.finagle.{Addr, Resolver}
 import com.twitter.io.Buf
-import com.twitter.util.{Closable, Future, Memoize, Var, Throw, Return, Witness}
+import com.twitter.util.{Closable, Memoize, Witness, Var}
 import java.net.SocketAddress
-import java.util.concurrent.atomic.AtomicInteger
 import java.nio.charset.Charset
-import org.apache.zookeeper.KeeperException
-import org.apache.zookeeper.Watcher.Event.KeeperState
-import org.apache.zookeeper.data.Stat
-import scala.collection.{immutable, mutable}
+import java.util.concurrent.atomic.AtomicInteger
 
 object chatty extends GlobalFlag(false, "Log resolved ServerSet2 addresses")
 
@@ -51,10 +47,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
   private[this] def serverSetOf(hosts: String) = synchronized {
     val key = hosts.split(",").sorted mkString ","
     if (!(cache contains key)) {
-      val newZk = if (chatty()) 
-          () => new ZkSnooper(zkFactory(hosts), eprintln(_)) 
-        else 
-          () => zkFactory(hosts)
+      val newZk = () => zkFactory(hosts)
       val vzk = Zk.retrying(ServerSet2.DefaultRetrying, newZk)
       cache += key -> ServerSet2(vzk)
     }
@@ -209,6 +202,7 @@ private[serverset2] object ZkServerSet2 {
 }
 
 private[serverset2] case class ZkServerSet2(zk: Zk) extends ServerSet2 {
+
   import ZkServerSet2._
 
   private[this] def dataOf(path: String, p: String => Boolean) =
