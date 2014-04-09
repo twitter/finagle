@@ -23,7 +23,7 @@ final case class Failure private[finagle](
   flags: Long = Failure.Flag.None,
   sources: Map[String, Object] = Map(),
   stacktrace: Array[StackTraceElement] = Failure.NoStacktrace
-) extends RuntimeException(why, cause, false, false) {
+) extends RuntimeException(why, cause) with NoStacktrace {
   import Failure._
 
   /**
