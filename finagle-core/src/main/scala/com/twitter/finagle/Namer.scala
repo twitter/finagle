@@ -19,7 +19,7 @@ trait Namer { self =>
    * Translate a [[com.twitter.finagle.Path Path]] into a
    * [[com.twitter.finagle.NameTree NameTree]].
    */
-  def lookup(path: Path): Activity[NameTree[Path]]
+  def lookup(path: Path): Activity[NameTree[Either[Path, Name]]]
 
   /**
    * Compose this [[com.twitter.finagle.Namer Namer]] with `next`;
@@ -30,31 +30,28 @@ trait Namer { self =>
   def orElse(next: Namer): Namer = Namer.OrElse(self, next)
 
   /**
-   * Bind and evaluate the tree. BindAndEval is lazy with respect to 
-   * [[com.twitter.finagle.NameTree.Alt Alt]], whose branches are evaluated
-   * only when needed.
+   * Bind the given tree with this namer. Bind recursively follows
+   * paths by looking them up in this namer. A recursion depth of up
+   * to 100 is allowed.
    */
-  def bindAndEval(tree: NameTree[Path]): Var[Addr] =
-    Namer.bindAndEval(this, tree).run map {
-      case Activity.Ok(Some(addrs)) => Addr.Bound(addrs.toSet)
-      case Activity.Ok(None) => Addr.Neg
-      case Activity.Pending => Addr.Pending
-      case Activity.Failed(exc) => Addr.Failed(exc)
-    }
+  def bind(tree: NameTree[Path]): Activity[NameTree[Name]] =
+    Namer.bind(this, tree)
 
   /**
-   * Perform one step of a [[com.twitter.finagle.NameTree.bind bind]]. This 
-   * binds until a [[com.twitter.finagle.Namer Namer]] lookup. 
-   * [[com.twitter.finagle.NameTree.bind Bind]] is equivalent to calling 
-   * [[com.twitter.finagle.NameTree.bind1 bind1]] successively until a
-   * fixpoint is reached.
+   * Bind, then evaluate the given NameTree with this Namer. The result
+   * is translated into a Var[Addr].
    */
-  def bind1(tree: NameTree[Path]): Activity[NameTree[Path]]  = 
-    Namer.bind1(this)(tree)
+  def bindAndEval(tree: NameTree[Path]): Var[Addr] =
+    bind(tree).map(_.eval).run flatMap {
+      case Activity.Ok(None) => Var.value(Addr.Neg)
+      case Activity.Ok(Some(names)) => Name.all(names).bind()
+      case Activity.Pending => Var.value(Addr.Pending)
+      case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
+    }
 }
 
 private case class FailingNamer(exc: Throwable) extends Namer {
-  def lookup(path: Path): Activity[NameTree[Path]] = 
+  def lookup(path: Path): Activity[NameTree[Either[Path, Name]]] =
     Activity.exception(exc)
 }
 
@@ -88,14 +85,15 @@ object Namer  {
         }
     }
 
-    def lookup(path: Path): Activity[NameTree[Path]] = path match {
-      case Path.Utf8("$", "inet", _*) => Activity.value(Leaf(path))
-      // Temporary hack until we make weights first-class in
-      // NameTrees again.      
-      case Path.Utf8("$", "inetw", _*) => Activity.value(Leaf(path))
+    def lookup(path: Path): Activity[NameTree[Either[Path, Name]]] = path match {
+      case Path.Utf8("$", "inet", "", IntegerString(port)) =>
+        Activity.value(Leaf(Right(Name.bound(new InetSocketAddress(port)))))
+
+      case Path.Utf8("$", "inet", host, IntegerString(port)) =>
+        Activity.value(Leaf(Right(Name.bound(new InetSocketAddress(host, port)))))
+
       case Path.Utf8("$", "nil", _*) => Activity.value(Empty)
-      case Path.Utf8("$", kind, rest@_*) =>
-        namerOfKind(kind).lookup(Path.Utf8(rest:_*))
+      case Path.Utf8("$", kind, rest@_*) => namerOfKind(kind).lookup(Path.Utf8(rest:_*))
       case _ => Activity.value(Neg)
     }
   }
@@ -110,79 +108,33 @@ object Namer  {
       Try(s.toDouble).toOption
   }
   
-  private type Res = Option[Seq[SocketAddress]]
   private val MaxDepth = 100
 
-  /**
-   * Bind and evaluate the tree. BindAndEval is lazy with respect to 
-   * [[com.twitter.finagle.NameTree.Alt Alt]], whose branches are evaluated
-   * only when needed.
-   */
- private def bindAndEval(namer: Namer, tree: NameTree[Path]): Activity[Res] =
-   bindAndEval(namer, 0)(tree)
+  private def bind(namer: Namer, tree: NameTree[Path]): Activity[NameTree[Name]] =
+    bind(namer, 0)(tree map { leaf => Left(leaf) })
 
-  private def bindAndEval(namer: Namer, depth: Int)(tree: NameTree[Path]): Activity[Res] = 
+  private def bind(namer: Namer, depth: Int)(tree: NameTree[Either[Path, Name]])
+  : Activity[NameTree[Name]] =
     if (depth > MaxDepth)
       Activity.exception(new IllegalArgumentException("Max recursion level reached."))
     else tree match {
-      // TODO: Residual paths. Also, this treatment of special
-      // paths isn't very satisfying.
-      case Leaf(Path.Utf8("$", "inet", "", IntegerString(port))) =>
-        Activity.value(Some(Seq(new InetSocketAddress(port))))
-
-      case Leaf(Path.Utf8("$", "inet", host, IntegerString(port))) =>
-        Activity.value(Some(Seq(new InetSocketAddress(host, port))))
-
-      // Temporary hack until we make weights first-class in
-      // NameTrees again.
-      case Leaf(Path.Utf8("$", "inetw", DoubleString(weight), host, IntegerString(port))) =>
-        val ia = new InetSocketAddress(host, port)
-        Activity.value(Some(Seq(WeightedSocketAddress(ia, weight))))
-
-      case Leaf(p) => 
-        namer.lookup(p) flatMap bindAndEval(namer, depth+1)
-
-      case Neg => Activity.value(None)
-      case Empty => Activity.value(Some(Seq.empty))
-
-      case Union(trees@_*) => and(trees map bindAndEval(namer, depth+1))
-  
-      case Alt(fst, rest@_*) =>
-        bindAndEval(namer, depth+1)(fst) flatMap {
-          case None => bindAndEval(namer, depth+1)(Alt(rest:_*))
-          case other => Activity.value(other)
-        }
-  
-      case Alt() => Activity.value(None)
-    }
-
-  private def and(trees: Seq[Activity[Res]]): Activity[Res] = 
-    Activity.collect(trees) map {
-      case trees if trees exists (_.isDefined) =>
-        Some(trees flatMap(_.getOrElse(Seq.empty)))
-      case _ => None
-    }
-
-  /**
-   * Perform one step of a [[com.twitter.finagle.NameTree.bind bind]]. This 
-   * binds until a [[com.twitter.finagle.Namer Namer]] lookup. 
-   * [[com.twitter.finagle.NameTree.bind Bind]] is equivalent to calling 
-   * [[com.twitter.finagle.NameTree.bind1 bind1]] successively until a
-   * fixpoint is reached.
-   */
-  private def bind1(namer: Namer)(tree: NameTree[Path]): Activity[NameTree[Path]] = 
-    tree match {
-      case Leaf(p) => namer.lookup(p)
-      case Union(trees@_*) => Activity.collect(trees map bind1(namer)) map Union.fromSeq
-      case Alt(trees@_*) => Activity.collect(trees map bind1(namer)) map Alt.fromSeq
+      case Leaf(Left(p)) => namer.lookup(p) flatMap bind(namer, depth+1)
+      case Leaf(Right(n)) => Activity.value(Leaf(n))
       case Neg => Activity.value(Neg)
       case Empty => Activity.value(Empty)
+      case Union() | Alt() => Activity.value(Neg)
+
+      case Union(trees@_*) => 
+        Activity.collect(trees map bind(namer, depth+1)) map Union.fromSeq
+
+      case Alt(trees@_*) =>
+        Activity.collect(trees map bind(namer, depth+1)) map Alt.fromSeq
     }
 
   private case class OrElse(fst: Namer, snd: Namer) extends Namer {
-    def lookup(path: Path): Activity[NameTree[Path]] = 
-      (fst.lookup(path) join snd.lookup(path)) map { 
-        case (left, right) => NameTree.Alt(left, right) 
+    def lookup(path: Path): Activity[NameTree[Either[Path, Name]]] =
+      (fst.lookup(path) join snd.lookup(path)) map {
+        case (left, right) => NameTree.Alt(left, right)
       }
   }
 }
@@ -198,10 +150,11 @@ object Namer  {
  * InterpreterFactory]] should be used: it is capable of
  * interepreting such names efficiently on a per-request basis.
  */
-case class UninterpretedName(
+case class PathName(
     getNamer: () => Namer, 
     tree: NameTree[Path]) 
   extends Name {
   def bind(): Var[Addr] = getNamer().bindAndEval(tree)
-  def reified: String = tree.show
+  def show: String = tree.show
 }
+

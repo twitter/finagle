@@ -5,6 +5,7 @@ import com.twitter.io.Buf
 import com.twitter.finagle.util.Showable
 import scala.util.parsing.combinator.{RegexParsers, JavaTokenParsers}
 import java.net.{InetSocketAddress, SocketAddress}
+import scala.collection.breakOut
 
 /**
  * Name trees represent a composite T-typed name whose interpretation
@@ -51,6 +52,13 @@ sealed trait NameTree[+T] {
    * }}}
    */
   def simplified: NameTree[T] = NameTree.simplify(this)
+
+  /**
+   * Evaluate this NameTree with the default evaluation strategy. A
+   * tree is evaluated recursively, Alt nodes are evaluated by
+   * selecting its first nonnegative child.
+   */
+  def eval[U>:T]: Option[Set[U]] = NameTree.eval(this)
 }
 
 /**
@@ -126,13 +134,18 @@ object NameTree {
    * is evaluation-equivalent.
    */
   def simplify[T](tree: NameTree[T]): NameTree[T] = tree match {
-    case Alt() => Neg
+    case Alt() | Union() => Neg
+
+    case Alt(tree) => simplify(tree)
+
     case Alt(trees@_*) =>
-      (trees map simplify).reduceLeft({
-        case (Neg, t) => t
-        case (t, _) => t
-      }: ((NameTree[T], NameTree[T]) => NameTree[T]))
-    
+      val trees1 = (trees map simplify).foldLeft(Seq.empty: Seq[NameTree[T]]) {
+        case (a, Neg) => a
+        case (a, e) => a :+ e
+      }
+
+      Alt(trees1:_*)
+
     case Union(trees@_*) =>
       val trees1 = (trees map simplify) filter {
         case Neg => false
@@ -153,6 +166,11 @@ object NameTree {
 
   private def show1[T: Showable](level: Int)(name: NameTree[T]): String = name match {
   /* case Weighted(weight, name) => "%.02f*(%s)".format(weight, show(name, level+1)) */
+    case Union(tree) =>
+      show1(level)(tree)
+
+    case Alt(tree) => 
+      show1(level)(tree)
 
     case Union(trees@_*) => 
       val trees1 = trees map show1(level+1)
@@ -170,6 +188,23 @@ object NameTree {
 
     case Neg => "~" 
     case Empty => "$"
+  }
+  
+  private def eval[T](tree: NameTree[T]): Option[Set[T]] = tree match {
+    case Union() | Alt() => None
+    case Alt(tree) => eval(tree)
+    case Union(tree) => eval(tree)
+    case Neg => None
+    case Empty => Some(Set.empty)
+    case Leaf(t) => Some(Set(t))
+
+    case Union(trees@_*) =>
+      val trees1 = trees flatMap { x => eval (x) }
+      if (trees1.isEmpty) None
+      else Some(trees1.flatten.toSet)
+
+    case Alt(trees@_*) =>
+      (trees flatMap { x => eval(x) }).headOption
   }
 
   implicit def equiv[T]: Equiv[NameTree[T]] = new Equiv[NameTree[T]] {

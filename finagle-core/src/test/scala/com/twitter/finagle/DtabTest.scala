@@ -9,6 +9,9 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class DtabTest extends FunSuite {
 
+  def pathTree(t: String) = 
+    NameTree.read(t).map(Left(_))
+
   def assertEquiv[T: Equiv](left: T, right: T) = assert(
     if (Equiv[T].equiv(left, right)) None
     else Some(left+"!="+right)
@@ -19,7 +22,7 @@ class DtabTest extends FunSuite {
 
     assertEquiv(
       dtab.lookup(Path.read("/foo/bar/baz")).sample(),
-      NameTree.read("/yyy/bar/baz | /xxx/baz"))
+      pathTree("/yyy/bar/baz | /xxx/baz"))
   }
 
   test("Expand names") {
@@ -27,7 +30,7 @@ class DtabTest extends FunSuite {
 
     assertEquiv(
       dtab.lookup(Path.read("/foo/bar/baz")).sample(),
-      NameTree.read("/xxx/baz | /yyy/baz & /zzz/baz"))
+      pathTree("/xxx/baz | /yyy/baz & /zzz/baz"))
   }
 
   test("d1 ++ d2") {

@@ -216,7 +216,7 @@ case class DefaultClient[Req, Rep](
   }
 
   val newStack: Name => ServiceFactory[Req, Rep] = {
-    case name: UninterpretedName =>
+    case name: PathName =>
       new InterpreterFactory(
         name, newStack0, 
         statsReceiver.scope("interpreter"))

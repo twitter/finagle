@@ -3,40 +3,62 @@ package com.twitter.finagle
 import collection.immutable
 import java.net.SocketAddress
 import com.twitter.util.Var
+import com.twitter.finagle.util.Showable
 
 /**
- * A name identifies an object. Names may be resolved from strings
- * via [[com.twitter.finagle.Resolver]]s. Names are late
- * bound via `bind`.
+ * A name represents a logical entity. Names are opaque and may be
+ * bound to a (dynamic) set of socket addresses which terminate the
+ * name.
  *
- * Names are typically used to identify service endpoints, and are
- * used in trait [[com.twitter.finagle.Client]] to name
- * destinations-- i.e. where client traffic terminates.
+ * Names may be created from strings of the form
+ *
+ * {{{
+ * resolver!arg
+ * }}}
+ *
+ * which asks the resolver to interpret the given argument. For
+ * example `inet!localhost:9090` is a name which binds to the socket
+ * address `localhost:9090`.
+ *
+ * Names that begin with the character `/` are ''path'' names. These
+ * are abstract names that require interpretation by a
+ * [[com.twitter.finagle.Dtab Dtab]].
  */
 trait Name extends SocketAddress {
   /**
-   * Bind the name. The bound name is returned as a
-   * variable representation -- it is subject to change at
-   * any time.
+   * Bind the name. The bound name is returned as a variable
+   * representation -- it is subject to change at any time.
    */
   def bind(): Var[Addr]
-
-  /**
-   * The reified version of the Name -- a resolvable string.
-   */
-  def reified: String
   
-  override def toString = "Name("+reified+")"
+  @deprecated("Use 'show' instead", "6.13.x")
+  def reified = show
+
+  def show: String
+
+  override def toString = "Name("+show+")"
+
+  // A temporary bridge API to wait for some other changes to land.
+  // Do not use.
+  def tempAPI_toGroup: Group[SocketAddress] = NameGroup(this)
 }
 
 object Name {
+
+  // So that we can print NameTree[Name]
+  implicit val showable: Showable[Name] = new Showable[Name] {
+    def show(name: Name) = name.show
+  }
+
   /**
    * Create a pre-bound address.
    */
-  def bound(addrs: SocketAddress*): Name = new Name {
-    def bind() = Var.value(Addr.Bound(addrs:_*))
-    val reified = "inet!"+(addrs mkString ",")
-  }
+  def bound(addrs: SocketAddress*): Name = BoundName(addrs.toSet)
+
+  /** 
+   * An always-empty name.
+   */
+  val empty: Name = bound()
 
   /**
    * Create a name from a group.
@@ -51,7 +73,7 @@ object Name {
     case g =>
       new Name {
         def bind() = g.set map { newSet => Addr.Bound(newSet) }
-        val reified = "fail!"
+        val show = "unknown"
       }
   }
 
@@ -64,21 +86,57 @@ object Name {
     // (orElse construction).
     def getName() = Dtab() orElse Namer.global
     val tree = NameTree.Leaf(path)
-    UninterpretedName(getName, tree)
+    PathName(getName, tree)
   }
 
   /**
    * Create a path-based Name which is interpreted vis-à-vis
    * the current request-local delegation table.
    */
-  def apply(path: String): Name =
-    Name(Path.read(path))
+  def apply(path: String): Name = Resolver.eval(path)
 
   /**
-   * Create a new name from the given `Var[Addr]`.
+   * Create a name from a variable address.
    */
-  def apply(va: Var[Addr]): Name = 
-    VAName(va)
+  def apply(va: Var[Addr]): Name = new Name {
+    def bind() = va
+    val show = "unknown"
+  }
+
+  /**
+   * Create a name representing the union of the passed-in
+   * names.
+   */
+  def all(names: Set[Name]): Name = 
+    if (names.isEmpty) empty
+    else if (names.size == 1) names.head
+    else AllName(names)
+}
+
+private case class AllName(names: Set[Name]) extends Name {
+  assert(names.nonEmpty)
+
+  def bind() = Var.collect(names map(_.bind())) map {
+    case addrs if addrs.exists({case Addr.Bound(_) => true; case _ => false}) =>
+      Addr.Bound((addrs flatMap {
+        case Addr.Bound(as) => as
+        case _ => Set.empty: Set[SocketAddress]
+      }).toSet)
+
+    case addrs if addrs.forall(_ == Addr.Neg) => Addr.Neg
+    case addrs if addrs.forall({case Addr.Failed(_) => true; case _ => false}) =>
+      Addr.Failed(new Exception)
+
+    case _ => Addr.Pending
+  }
+
+  def show = "union"
+}
+
+private case class BoundName(addrs: Set[SocketAddress]) extends Name {
+  private[this] val bound = Var.value(Addr.Bound(addrs))
+  def bind() = bound
+  val show = "bound"
 }
 
 /**
@@ -106,11 +164,5 @@ private case class PartialName(
     case a => a
   }
 
-  val reified = "fail!"
+  val show = "partial"
 }
-
-case class VAName(va: Var[Addr]) extends Name {
-  def bind() = va
-  val reified = "fail!"
-}
-

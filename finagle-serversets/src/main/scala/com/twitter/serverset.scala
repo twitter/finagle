@@ -3,7 +3,7 @@ package com.twitter
 import com.twitter.app.GlobalFlag
 import com.twitter.finagle.serverset2.Zk2Resolver
 import com.twitter.finagle.zookeeper.ZkResolver
-import com.twitter.finagle.{Addr, NameTree, Namer, Resolver, Path, WeightedInetSocketAddress}
+import com.twitter.finagle.{Addr, NameTree, Namer, Resolver, Path, WeightedInetSocketAddress, Name}
 import com.twitter.util.Activity
 import java.net.InetSocketAddress
 
@@ -21,34 +21,21 @@ object newZk extends GlobalFlag(
  * of /$/inet names.
  */
 class serverset extends Namer {
-  val zk = {
-    val cls = if(newZk()) classOf[Zk2Resolver] else classOf[ZkResolver]
-    val Some(z) = Resolver.get(cls)
-    z
-  }
-
-  def lookup(path: Path): Activity[NameTree[Path]] = path match {
+  val whichZk = if (newZk()) "zk2" else "zk"
+  
+  // We have to involve a serverset roundtrip here to return a tree.
+  // We risk invalidate an otherwise valid tree when there is a bad
+  // serverset on an Alt branch that would never be taken. A
+  // potential solution to this conundrum is to introduce some form
+  // of lazy evaluation of name trees.
+  def lookup(path: Path): Activity[NameTree[Either[Path, Name]]] = path match {
     case Path.Utf8(hosts, rest@_*) =>
-      val va = zk.bind(hosts+"!/"+(rest mkString "/"))
-
-      Activity(va map {
-        case Addr.Bound(addrs) =>
-          val leaves = addrs.toSeq collect {
-            // This filters out non inet-addresses. This could be
-            // surprising if you are converting names that produce
-            // esoteric socket addresses. There's no real clean solution
-            // since we can't assign these into a global namespace.
-            case ia: InetSocketAddress =>
-              NameTree.Leaf(Path.Utf8("$", "inet", ia.getHostName, ia.getPort.toString))
-
-            // Temporary hack until we add first-class weights back
-            // into NameTrees.
-            case WeightedInetSocketAddress(ia, w) =>
-              NameTree.Leaf(Path.Utf8("$", "inetw", w.toString, ia.getHostName, ia.getPort.toString))
-          }
-
-          Activity.Ok(NameTree.Union(leaves:_*))
-
+      val name = Name("%s!%s!/%s".format(whichZk, hosts, rest mkString "/"))
+      
+      // We have to bind the name ourselves in order to know whether
+      // it resolves negatively.
+      Activity(name.bind() map {
+        case Addr.Bound(_) => Activity.Ok(NameTree.Leaf(Right(name)))
         case Addr.Neg => Activity.Ok(NameTree.Neg)
         case Addr.Pending => Activity.Pending
         case Addr.Failed(exc) => Activity.Failed(exc)

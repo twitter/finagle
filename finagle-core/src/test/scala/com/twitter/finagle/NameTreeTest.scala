@@ -89,4 +89,27 @@ class NameTreeTest extends FunSuite {
     val Addr.Failed(_: IllegalArgumentException) = 
       dtab.bindAndEval(NameTree.read("/foo/bar")).sample()
   }
+  
+  test("NameTree.eval") {
+    val cases = Seq[(String, Option[Set[String]])](
+      "~" -> None,
+      "/ok" -> Some(Set("/ok")),
+      "/ok & /ok1" -> Some(Set("/ok", "/ok1")),
+      "/ok & ~ & /blah & $" -> Some(Set("/ok", "/blah")),
+      "$ & $ & $" -> Some(Set.empty),
+      "~ & ~ & (~ | ~)" -> None,
+      "~ | /foo | /bar" -> Some(Set("/foo")),
+      "~ | $ | /blah" -> Some(Set.empty),
+      "~ | (~ | $) | /blah" -> Some(Set.empty),
+      "(~|$|/foo) & (/bar|/blah) & ~ & /FOO" -> Some(Set("/bar", "/FOO"))
+      )
+      
+    for ((tree, res) <- cases) {
+      val expect = res map { set =>
+        set map { el: String => Path.read(el) }
+      }
+
+      assert(NameTree.read(tree).eval === expect)
+    }
+  }
 }

@@ -24,18 +24,25 @@ class NamerTest extends FunSuite {
         wit
       }
 
-      def lookup(path: Path): Activity[NameTree[Path]] = path match {
-        case Path.Utf8(elems@_*) =>
-          val p = Path.Utf8(elems:_*)
-          acts.get(p) match {
-            case Some((a, _)) => a
-            case None =>
-              val tup@(act, _) = Activity[NameTree[Path]]()
-              acts += p -> tup
-              act
-          }
-        case _ =>  Activity.value(NameTree.Neg)
+      val pathNamer = new Namer {
+        def lookup(path: Path): Activity[NameTree[Either[Path, Name]]] = path match {
+          // Don't capture system paths.
+          case Path.Utf8("$", _*) => Activity.value(NameTree.Neg)
+          case Path.Utf8(elems@_*) =>
+            val p = Path.Utf8(elems:_*)
+            acts.get(p) match {
+              case Some((a, _)) => a map { tree => tree.map(Left(_)) }
+              case None =>
+                val tup@(act, _) = Activity[NameTree[Path]]()
+                acts += p -> tup
+                act map { tree => tree.map(Left(_)) }
+            }
+          case _ =>  Activity.value(NameTree.Neg)
+        }
       }
+
+      val namer = pathNamer orElse Namer.global
+      def lookup(path: Path) = namer.lookup(path)
     }
   }
 
@@ -50,6 +57,7 @@ class NamerTest extends FunSuite {
     assert(res.sample() === Addr.Pending)
 
     namer("/test/2").notify(Return(NameTree.read("/$/inet//2")))
+
     assert(res.sample() === Addr.Bound(ia(1), ia(2)))
 
     namer("/test/2").notify(Return(NameTree.Neg))
@@ -59,6 +67,7 @@ class NamerTest extends FunSuite {
     assert(res.sample() === Addr.Neg)
 
     namer("/test/1").notify(Return(NameTree.Empty))
+
     assert(res.sample() === Addr.Bound())
 
     namer("/test/2").notify(Throw(exc))
@@ -70,29 +79,21 @@ class NamerTest extends FunSuite {
     assert(res.sample() === Addr.Pending)
     
     namer("/test/0").notify(Return(NameTree.Empty))
+    namer("/test/1").notify(Return(NameTree.Neg))
+    namer("/test/2").notify(Return(NameTree.Neg))
+
     assert(res.sample() === Addr.Bound())
     
-    // (Test laziness.)
-    assert(!(namer contains "/test/1"))
-
     namer("/test/0").notify(Return(NameTree.read("/$/inet//1")))
     assert(res.sample() === Addr.Bound(ia(1)))
 
     namer("/test/0").notify(Return(NameTree.Neg))
-    assert(res.sample() === Addr.Pending)
+    assert(res.sample() === Addr.Neg)
 
-    namer("/test/1").notify(Return(NameTree.Neg))
-    assert(res.sample() === Addr.Pending)
-    
     namer("/test/2").notify(Return(NameTree.read("/$/inet//2")))
     assert(res.sample() === Addr.Bound(ia(2)))
-    
-    namer("/test/0").notify(Throw(exc))
-    assert(res.sample() === Addr.Failed(exc))
 
     namer("/test/0").notify(Return(NameTree.read("/$/inet//3")))
-    assert(res.sample() === Addr.Bound(ia(3)))
-    namer("/test/1").notify(Throw(exc))
     assert(res.sample() === Addr.Bound(ia(3)))
   })
 

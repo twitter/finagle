@@ -402,7 +402,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
           Addr.Bound(newSet)
       }
 
-      val reified = "fail!"
+      val show = "unknown"
     })
 
   /**

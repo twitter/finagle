@@ -151,8 +151,8 @@ object Resolver {
    * binding failures are deferred.
    */
   def eval(name: String): Name =
-    if (name startsWith "/") Name(name)
-    else new Name {
+    if (name startsWith "/") Name(Path.read(name))
+    else {
       val (resolver, arg) = lex(name) match {
         case (Eq :: _) | (Bang :: _) =>
           throw new ResolverAddressInvalid(name)
@@ -166,9 +166,7 @@ object Resolver {
         case ts => (InetResolver, delex(ts))
       }
 
-      def bind() = resolver.bind(arg)
-
-      val reified = name
+      EvaldName(resolver, arg, name)
     }
 
   /**
@@ -185,6 +183,11 @@ object Resolver {
 
     (eval(delex(rest)), label)
   }
+}
+
+private case class EvaldName(resolver: Resolver, arg: String, name: String) extends Name {
+  def bind() = resolver.bind(arg)
+  val show = name
 }
 
 private object ServerRegistry {

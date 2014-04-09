@@ -170,7 +170,7 @@ class DefaultClientTest extends FunSuite with Eventually {
       val dest = new Name {
         def bind(): Var[Addr] = Var(Addr.Pending)
 
-        def reified: String = "test"
+        val show = "test"
       }
       val svc = client.newService(dest, "test")
       val f = svc.close()
