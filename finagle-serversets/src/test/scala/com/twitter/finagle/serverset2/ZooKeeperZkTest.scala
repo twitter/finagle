@@ -1,15 +1,19 @@
 package com.twitter.finagle.serverset2
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.serverset2.client._
 import com.twitter.finagle.zookeeper.ZkInstance
-import com.twitter.io.Buf
-import com.twitter.util.{Await, Duration, Promise, Stopwatch, Var}
+import org.apache.zookeeper.ZooKeeper
+import org.apache.zookeeper.Watcher.Event.KeeperState
+import org.apache.zookeeper.Watcher
+import org.apache.zookeeper.WatchedEvent
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.Eventually._
+import org.scalatest.concurrent.Timeouts._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.time._
 import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
+import org.scalatest.time._
+import com.twitter.util.{Await, Duration, Promise, Stopwatch, Var}
+import org.apache.zookeeper.data.Stat
 
 @RunWith(classOf[JUnitRunner])
 class ZooKeeperZkTest extends FunSuite with BeforeAndAfter {
@@ -45,15 +49,21 @@ class ZooKeeperZkTest extends FunSuite with BeforeAndAfter {
       super.test(testName, testTags:_*)(f)
   }
 
+  class Recorder(prefix: String) extends Watcher {
+    def process(e: WatchedEvent) {
+      println(prefix+": "+e)
+    }
+  }
+
   test("Session expiration 2") {
     val connected: (WatchState => Boolean) = {
-      case WatchState.SessionState(SessionState.SyncConnected) => true
+      case WatchState.SessionState(KeeperState.SyncConnected) => true
       case _ => false
     }
     val notConnected: (WatchState => Boolean) = w => !connected(w)
 
     val zk1 = Zk.retrying(zkTimeout, () => Zk(inst.zookeeperConnectstring))
-    @volatile var states = Seq.empty[SessionState]
+    @volatile var states = Seq.empty[KeeperState]
     val state = zk1 flatMap { zk1 => zk1.state }
     state observe {
       case WatchState.SessionState(s) => states = s +: states
@@ -68,22 +78,20 @@ class ZooKeeperZkTest extends FunSuite with BeforeAndAfter {
       val p = new Array[Byte](z.sessionPasswd.length)
       z.sessionPasswd.write(p, 0)
 
-      ClientBuilder()
-        .hosts(inst.zookeeperConnectstring)
-        .sessionTimeout(zkTimeout)
-        .sessionId(z.sessionId)
-        .password(Buf.ByteArray(p))
-        .reader()
+      new ZooKeeperZk(w => new ZooKeeper(
+        inst.zookeeperConnectstring,
+        zkTimeout.inMilliseconds.toInt,
+        w, z.sessionId, p))
     }
     Await.result(zk2.state.observeUntil(connected))
-    zk2.value.close()
+    zk2.close()
 
     Await.result(cond)
     Await.result(state.observeUntil(connected))
 
     assert(states === Seq(
-      SessionState.SyncConnected, SessionState.Expired,
-      SessionState.Disconnected, SessionState.SyncConnected))
+      KeeperState.SyncConnected, KeeperState.Expired,
+      KeeperState.Disconnected, KeeperState.SyncConnected))
   }
 
   test("Zk.retrying") {
@@ -92,7 +100,7 @@ class ZooKeeperZkTest extends FunSuite with BeforeAndAfter {
     val zk = Zk.retrying(zkTimeout, () => Zk(inst.zookeeperConnectstring))
 
     val zkState = for (zk <- zk; state <- zk.state) yield state
-    @volatile var zkStates = Seq[(SessionState, Duration)]()
+    @volatile var zkStates = Seq[(KeeperState, Duration)]()
     zkState observe {
       case WatchState.SessionState(state) =>
         zkStates = (state, watch()) +: zkStates
@@ -105,7 +113,7 @@ class ZooKeeperZkTest extends FunSuite with BeforeAndAfter {
     // Wait for the initial connect.
     eventually {
       assert(Var.sample(zkState) ===
-        WatchState.SessionState(SessionState.SyncConnected))
+        WatchState.SessionState(KeeperState.SyncConnected))
       assert(zks.size === 1)
     }
 
@@ -115,33 +123,30 @@ class ZooKeeperZkTest extends FunSuite with BeforeAndAfter {
     val zk2 = {
       val p = new Array[Byte](zk1.sessionPasswd.length)
       zk1.sessionPasswd.write(p, 0)
-
-      ClientBuilder()
-        .hosts(inst.zookeeperConnectstring)
-        .sessionTimeout(zkTimeout)
-        .sessionId(zk1.sessionId)
-        .password(Buf.ByteArray(p))
-        .reader()
+      new ZooKeeperZk(w => new ZooKeeper(
+        inst.zookeeperConnectstring,
+        zkTimeout.inMilliseconds.toInt,
+        w, zk1.sessionId, p))
     }
 
     val connected = new Promise[Unit]
     val closed = new Promise[Unit]
     zk2.state observe {
-      case WatchState.SessionState(SessionState.SyncConnected) =>
+      case WatchState.SessionState(KeeperState.SyncConnected) =>
         connected.setDone()
-      case WatchState.SessionState(SessionState.Disconnected) =>
+      case WatchState.SessionState(KeeperState.Disconnected) =>
         closed.setDone()
       case _ =>
     }
 
     Await.ready(connected)
-    Await.ready(zk2.value.close())
+    Await.ready(zk2.close())
 
     // This will expire the session.
     val zk1Expired = zk1.state.observeUntil(
-      _ == WatchState.SessionState(SessionState.Expired))
+      _ == WatchState.SessionState(KeeperState.Expired))
     val zkConnected = zkState.observeUntil(
-      _ == WatchState.SessionState(SessionState.SyncConnected))
+      _ == WatchState.SessionState(KeeperState.SyncConnected))
 
     Await.ready(zk1.getData("/sadfads"))
     Await.ready(zk1Expired)
@@ -149,10 +154,9 @@ class ZooKeeperZkTest extends FunSuite with BeforeAndAfter {
 
     eventually {
       assert((zkStates map { case (s, _) => s }).reverse ===
-        Seq(SessionState.SyncConnected, SessionState.Disconnected,
-          SessionState.Expired, SessionState.SyncConnected))
+        Seq(KeeperState.SyncConnected, KeeperState.Disconnected,
+          KeeperState.Expired, KeeperState.SyncConnected))
     }
     assert(zks.size === 2)
   }
-
 }
