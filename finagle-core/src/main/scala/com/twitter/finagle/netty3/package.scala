@@ -22,7 +22,7 @@ package object netty3 {
      * A class eligible for configuring a netty3 timer.
      */
     case class Netty3Timer(timer: org.jboss.netty.util.Timer)
-    implicit object netty3Timer extends Stack.Param[Netty3Timer] {
+    implicit object Netty3Timer extends Stack.Param[Netty3Timer] {
       val default = Netty3Timer(util.DefaultTimer)
     }
   }
