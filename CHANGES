@@ -1,9 +1,41 @@
 .. Author notes: this file is formatted with restructured text
-  (http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
-  as it is included in Finagle's user's guide.
+(http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
+as it is included in Finagle's user's guide.
 
 6.x
 -----
+
+6.14.0
+~~~~~~~
+
+- `finagle-*`: Add com.twitter.io.Charsets and replace the use of org.jboss.netty.util.CharsetUtil
+- `finagle-benchmark`: Fix caliper failures due to new guava
+- `finagle-core`: Disable Monitor usage of in Netty3Listener
+- `finagle-core`: Enforce usage of c.t.finagle.util.DefaultLogger
+- `finagle-core`: Fix a Netty3Timer capitalization bug
+- `finagle-core`: Fixed unresolved promises in client dispatcher
+- `finagle-core`: Implement ServerBuilder in terms of StackServer.
+- `finagle-core`: Introduce 2-level caching in the name interpreter
+- `finagle-core`: Introduce Failure interface (internally)
+- `finagle-core`: Introduce StackServer
+- `finagle-core`: Introduce a flag for debug tracing
+- `finagle-core`: Make StackClient symmetric to StackServer
+- `finagle-core`: Parse names into trees; introduce separate evaluation.
+- `finagle-core`: Remove redundant Netty3Timer param def
+- `finagle-core`: Resolver.resolve throws IllegalArgumentException on logical name
+- `finagle-core`: RetryPolicy filter, limit, combine
+- `finagle-core`: Thread through NullReporterFactory in ServerBuilder.
+- `finagle-core`: Use DefaultLoadBalancerFactory
+- `finagle-core`: Use JDK6-friendly RuntimeException constructor in Failure
+- `finagle-doc`: README refresh
+- `finagle-doc`: Refresh client stack docs
+- `finagle-memcached`: Ketama memcache: accept weighted addresses
+- `finagle-mux`: Add server-side Stack wiring for Mux and ThriftMux
+- `finagle-mysql`: Proper prepared statement support.
+- `finagle-serversets`: Add Read-Only ZK support to zk2 Resolver
+- `finagle-serversets`: Zk2: deliver events serially in their own thread
+- `finagle-thrift`: workaround libthrift TBinaryProtocol.writeBinary bug
+- `finagle-zipkin`: Include service name in all traces
 
 6.13.1
 ~~~~~~~
