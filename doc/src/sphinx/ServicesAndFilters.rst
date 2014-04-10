@@ -130,3 +130,23 @@ so that
 
 creates a filter that dispatches requests first through `retryFilter` and
 then `timeoutFilter`.
+
+.. _service_factory:
+
+ServiceFactory
+--------------
+
+In certain modules, it's important to take into account the process of acquiring
+a `Service`. For example, a connection pool would need to play a significant role
+in the `Service` acquisition phase. The `ServiceFactory` exists for this exact reason.
+It produces `Service`s over which requests can be dispatched. Its definition:
+
+::
+
+	abstract class ServiceFactory[-Req, +Rep]
+		extends (ClientConnection => Future[Service[Req, Rep]])
+
+Internally, Finagle makes heavy use of this. In Finagle's client and server stacks, modules
+are lifted into ServiceFactories and then composed using the aforementioned combinators.
+
+

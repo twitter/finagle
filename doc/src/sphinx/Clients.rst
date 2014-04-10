@@ -1,12 +1,49 @@
-Client Stack
-============
+.. _finagle_clients:
 
-The default Finagle client is designed to maximize success and minimize latency.
+Clients
+=======
+
+Finagle clients adheres to a simple :src:`interface <com/twitter/finagle/Client.scala>` for
+construction:
+
+::
+
+  def newClient(dest: Name, label: String): ServiceFactory[Req, Rep]
+
+That is, given a logical destination and an identifier, return a function
+that produces a typed `Service` over which requests can be dispatched.
+There are variants of this constructor for stateless clients that create a simple
+`Service`, for example:
+
+::
+
+  def newService(dest: Name, label: String): Service[Req, Rep]
+
+As of :doc:`6.x <changelog>`, client implementations are encouraged to expose
+this interface on a Scala object named after the protocol implementation. This
+results in a uniform way to construct clients, ``Protocol.newClient(...)``. For
+example:
+
+::
+
+    Http.newClient(...)
+    Memcached.newClient(...)
+
+Clients can further furnish the resulting `ServiceFactory` with protocol
+specific API's. A common pattern is to expose a ``newRichClient`` method that
+does exactly this. For cases like Thrift, where IDLs are part of
+the rich API, a more specialized API is exposed. See the protocols section on
+:ref:`Thrift <thrift_and_scrooge>` for more details.
+
+Client Modules
+--------------
+
+A default Finagle client is designed to maximize success and minimize latency.
 Each request dispatched through a client will flow through various modules that
 help it achieve these goals. The modules are logically separated into three
 stacks: the `loadbalancer stack` balances requests across multiple endpoints, the
 `endpoint stack` provides failure management and connection pooling, and
-the `connection stack` provides connection lifecycle management and implements
+the `connection stack` provides connection life-cycle management and implements
 the wire protocol.
 
 .. figure:: _static/clientstack.svg
@@ -18,12 +55,12 @@ the wire protocol.
 Module Composition
 ^^^^^^^^^^^^^^^^^^
 
-A materialized Finagle client is a :src:`ServiceFactory <com/twitter/finagle/Service.scala#L109>`.
-It produces :ref:`Services <services>` over which requests can be dispatched. The modules in `Fig. 1`
-are defined in terms of `ServiceFactories` and `Filters` and thus are composed via the usual
+A materialized Finagle client is a :ref:`ServiceFactory <service_factory>`. It produces
+:ref:`Services <services>` over which requests can be dispatched. The modules in
+`Fig. 1` are defined in terms of a `ServiceFactory` and thus are composed via the usual
 :ref:`combinators <composing_services_filters>`. An important consequence of this is that
-modules deeper in the stack can affect the behavior and availability of the client. For example, this is how
-failure management modules mark entire endpoints as unavailable.
+modules deeper in the stack can affect the behavior and availability of the client. For example,
+this is how failure management modules mark entire endpoints as unavailable.
 
 Observability
 ^^^^^^^^^^^^^
@@ -159,3 +196,10 @@ There is no direct protocol or annotation support for marking endpoints as idemp
 A common workaround is to create separate client instances for issuing non-idempotent requests.
 For example, one could keep separate client objects for reads and writes, the former configured to retry on
 any request failure and the latter being more conservative in order to avoid conflicting writes.
+
+Configuration
+-------------
+
+Prior to :doc:`6.x <changelog>`, the `ClientBuilder` was the primary method for configuring
+the modules inside a Finagle client. We've moved away from this model for various
+:ref:`reasons <configuring_finagle6>`.

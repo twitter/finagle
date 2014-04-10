@@ -46,10 +46,10 @@ User's guide
    Quickstart
    Futures
    ServicesAndFilters
-   ServerAnatomy
-   ClientAnatomy
-   ClientStack
+   Servers
+   Clients
    Protocols
+   Extending
    Metrics
    FAQ
 

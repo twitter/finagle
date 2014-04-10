@@ -4,6 +4,8 @@ FAQ
 General Finagle FAQ
 -------------------
 
+.. _propagate_failure:
+
 What's a CancelledRequestException?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -45,12 +47,14 @@ Some of our libraries still aren't published to maven central.  If you add
 to your sbt configuration, it will be able to pick up the libraries which are
 published externally, but not yet to maven central.
 
-How do I change my timeouts in the Finagle 6 APIs?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. _configuring_finagle6:
+
+How do I configure clients and servers with Finagle 6 APIs?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 As of :doc:`6.x <changelog>`, We introduced a new, preferred API for constructing Finagle ``Client``\s and ``Server``\s.
 Where the old API used ``ServerBuilder``\/``ClientBuilder`` with Codecs, the new APIs use
-``Proto.newClient`` [#].
+``Proto.newClient`` [#]_.
 
 Old APIs:
 
@@ -108,7 +112,9 @@ and a few details about the transport (ssl?  no ssl?), but that's about it.
 Of course, there are some points where there are rough edges, and we haven't
 figured out exactly what the right default should be.  We're actively looking
 for input, and would love for the greater Finagle community to help us find good
-defaults.
+defaults. We've also been experimenting with some new abstractions that should
+make configuration a lot more flexible. Stay tuned and of course reach out to
+the mailing list with any questions.
 
 .. [#] Protocol implementors are encouraged to provide sensible
        defaults and leave room for application specific behavior
