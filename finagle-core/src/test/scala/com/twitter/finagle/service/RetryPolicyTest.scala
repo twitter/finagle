@@ -2,7 +2,8 @@ package com.twitter.finagle.service
 
 import RetryPolicy._
 import com.twitter.conversions.time._
-import com.twitter.finagle.{CancelledRequestException, ChannelClosedException, TimeoutException, WriteException}
+import com.twitter.finagle.{
+  CancelledRequestException, ChannelClosedException, TimeoutException, WriteException}
 import com.twitter.util._
 import org.junit.runner.RunWith
 import org.scalatest.FunSpec
@@ -42,12 +43,13 @@ class RetryPolicyTest extends FunSpec {
     }
 
     it("should TimeoutAndWriteExceptionsOnly") {
-      val weo = TimeoutAndWriteExceptionsOnly orElse NoExceptions
+      val taweo = TimeoutAndWriteExceptionsOnly orElse NoExceptions
 
-      assert(weo(Throw(new Exception)) === false)
-      assert(weo(Throw(WriteException(new Exception))) === true)
-      assert(weo(Throw(WriteException(new CancelledRequestException))) === false)
-      assert(weo(Throw(timeoutExc)) === true)
+      assert(taweo(Throw(new Exception)) === false)
+      assert(taweo(Throw(WriteException(new Exception))) === true)
+      assert(taweo(Throw(WriteException(new CancelledRequestException))) === false)
+      assert(taweo(Throw(timeoutExc)) === true)
+      assert(taweo(Throw(new com.twitter.util.TimeoutException(""))) === true)
     }
   }
 

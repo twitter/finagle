@@ -2,9 +2,9 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.{
-  CancelledRequestException, ChannelClosedException, TimeoutException, WriteException
-}
-import com.twitter.util.{Function => _, _}
+  CancelledRequestException, ChannelClosedException, TimeoutException, WriteException}
+import com.twitter.util.{
+  TimeoutException => UtilTimeoutException, Duration, JavaSingleton, Throw, Try}
 import java.util.{concurrent => juc}
 import java.{util => ju}
 import scala.collection.JavaConversions._
@@ -145,6 +145,7 @@ object RetryPolicy extends JavaSingleton {
 
   val TimeoutAndWriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = WriteExceptionsOnly orElse {
     case Throw(_: TimeoutException) => true
+    case Throw(_: UtilTimeoutException) => true
   }
 
   val ChannelClosedExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
