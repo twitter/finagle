@@ -15,5 +15,8 @@ junit_tests(name='scala',
     pants('finagle/finagle-serversets'),
     pants('util/util-core')
   ],
-  sources=rglobs('*.scala')
+  sources=rglobs('*.scala'),
+  resources=[
+    pants('finagle/finagle-serversets/src/test/resources')
+  ]
 )

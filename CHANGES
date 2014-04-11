@@ -5,15 +5,60 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.13.1
+~~~~~~~
+
+- `finagle-core`: Case insensitive Dtab headers in HTTP codec
+- `finagle-core`: Introduce Stack.Params#contains
+- `finagle-docs`: address small style nits
+- `finagle-http`: support reading params in content body for HTTP methods other than POST and PUT
+- `finagle-memcached`: add ketamaclient initial readiness before the first request
+- `finagle-serversets`: Disable retry behavior but turn exception into negative resolution.
+- `finagle-serversets`: Stabilizer: don't consider Pending update successful
+- `finagle-stats`: use java.lang.Double in addGauge()
+- `finagle`: Add `cause` Throwables for all ConnectionFailedExceptions
+- `finagle`: Fix Travis-CI integration.
+- `finagle`: Swap Stack.Node and Stack.Leaf args in toString formatting
+- `finagle`: Update 3rdparty library versions
+- `finagle`: Upgrade birdcage to guava 16
+- `finagle`: upgrade ostrich to 9.4.2
+- `finagle`: upgrade util to 6.13.2
+
+6.13.0
+~~~~~~
+
+- `finagle-core`: ForkJoin scheduler: first draft
+- `finagle-doc`: Update URL to Finagle blog post. Motivation: Outdated URL
+- `finagle-http`: compress text-like content-types by default
+- `finagle-memcached`: Mark test "not migrating yet" as flaky
+- `finagle-mux`: don't delegate empty dtabs
+- `finagle-mysql`: Better failure handling for the dispatcher
+- `finagle-ostrich4`: Make OstrichExporter compatible with Ostrich CommandHandler.
+- `finagle-redis`: Add SINTER command to redis client
+- `finagle-redis`: Allow an empty string as a hash field value
+- `finagle-redis`: Fixed the empty string issue of MBULK_REPLY
+- `finagle-serverset`: ServerSets2: reset value on SyncConnected
+- `finagle-stats`: Upgrade metrics dependency to the latest version.
+- `finagle-thrift`: Do not rely on ThreadLocal'd ClientIds in TTwitterFilter
+- `finagle-thrift[mux]`: Reintroduce ClientIdContext by default
+- `finagle-zipkin`: TraceId invariance
+- `finagle/S2`: introduce address stabilization, stats
+- `finagle`: Add Mux and ThriftMux Clients based on com.twitter.finagle.Stack
+- `finagle`: fix dependency problem with multiple version of serversets
+- `finagle`: Fix the sbt doc generation (and tests)
+- `finagle`: upgrade Netty to 3.8.1
+- `finagle`: upgrade ostrich to version 9.4.0
+- `finagle`: upgrade util to version 6.13.0
+
 6.12.2
-~~~~~
+~~~~~~
 
 - `finagle`: release scrooge version 3.12.3
 - `finagle-exception`: Drop scrooge in favor of pre-generated Thrift Java source code.
 - `finagle-zipkin`: Drop scrooge in favor of pre-generated Thrift Java source code.
 
 6.12.1
-~~~~~
+~~~~~~
 
 - `finagle`: release ostrich version 9.3.1
 - `finagle`: release util version 6.12.1
@@ -134,9 +179,9 @@ as it is included in Finagle's user's guide.
 - `finagle-core`: Take -com.twitter.server.serversetZkHosts flag (for tunnelling)
 - `finagle-native`: tomcat-native-1.1.27
 - `finagle-mysql`: fix readLengthCodedBinary to read longs
-- `finagle-testers`: library for integration testing of - `finagle services
+- `finagle-testers`: library for integration testing of finagle services
 - `finagle`: scaladoc warning cleanup
-- `finagle-doc`: documented all of the stats in - `finagle-core
+- `finagle-doc`: documented all of the stats in finagle-core
 - `finagle-serversets`: bump server-set dependency to 1.0.56
 - `finagle-stats`: adds a cautious registration to HttpMuxer / adds a default metrics endpoint to twitter-server
 - `finagle-core`: verifies that statsfilter has the correct behavior

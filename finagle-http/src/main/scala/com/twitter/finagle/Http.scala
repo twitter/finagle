@@ -73,24 +73,24 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
 package exp {
 
 
-private[finagle]
-object HttpNetty3Stack
-  extends Netty3Stack[Any, Any, HttpRequest, HttpResponse](
-  "http", 
-  http.Http()
-    .enableTracing(true)
-    .client(ClientCodecConfig("httpclient")).pipelineFactory,
-  new HttpClientDispatcher(_))
+  private[finagle]
+  object HttpNetty3Stack extends Netty3Stack[Any, Any, HttpRequest, HttpResponse](
+    "http",
+    http.Http()
+      .enableTracing(true)
+      .client(ClientCodecConfig("httpclient")).pipelineFactory,
+    (trans, _) => new HttpClientDispatcher(trans)
+  )
 
-private[finagle]
-class HttpClient(client: StackClient[HttpRequest, HttpResponse])
-  extends RichStackClient[HttpRequest, HttpResponse, HttpClient](client)
-  with HttpRichClient {
-  protected def newRichClient(client: StackClient[HttpRequest, HttpResponse]) = 
-    new HttpClient(client)
-}
+  private[finagle]
+  class HttpClient(client: StackClient[HttpRequest, HttpResponse])
+      extends RichStackClient[HttpRequest, HttpResponse, HttpClient](client)
+      with HttpRichClient {
+    protected def newRichClient(client: StackClient[HttpRequest, HttpResponse]) =
+      new HttpClient(client)
+  }
 
-private[finagle]
-object HttpClient extends HttpClient(new StackClient(HttpNetty3Stack))
+  private[finagle]
+  object HttpClient extends HttpClient(new StackClient(HttpNetty3Stack))
 
 }

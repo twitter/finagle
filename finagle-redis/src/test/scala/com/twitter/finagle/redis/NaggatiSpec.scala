@@ -618,6 +618,20 @@ class NaggatiSpec extends SpecificationWithJUnit {
               }
             }
           }
+          "SINTER" >> {
+            codec(wrap("SINTER\r\n")) must throwA[ClientError]
+            unwrap(codec(wrap("SINTER key\r\n"))) {
+              case SInter(keys) => {
+                CBToString(keys(0)) mustEqual "key"
+              }
+            }
+            unwrap(codec(wrap("SINTER key1 key2\r\n"))) {
+              case SInter(keys) => {
+                CBToString(keys(0)) mustEqual "key1"
+                CBToString(keys(1)) mustEqual "key2"
+              }
+            }
+          }
         }
       } // inline
 
@@ -794,6 +808,27 @@ class NaggatiSpec extends SpecificationWithJUnit {
               ReplyFormat.toString(msgs) mustEqual List(
                 "foo",
                 "nil",
+                "bar")
+            case _ => fail("Expected MBulkReply")
+          }
+          case _ => fail("Expected one element in list")
+        }
+
+        codec(wrap("*4\r\n")) mustEqual Nil
+        codec(wrap("$3\r\n")) mustEqual Nil
+        codec(wrap("foo\r\n")) mustEqual Nil
+        codec(wrap("$0\r\n")) mustEqual Nil
+        codec(wrap("\r\n")) mustEqual Nil
+        codec(wrap("$3\r\n")) mustEqual Nil
+        codec(wrap("moo\r\n")) mustEqual Nil
+        codec(wrap("$3\r\n")) mustEqual Nil
+        codec(wrap("bar\r\n")) match {
+          case reply :: Nil => reply match {
+            case MBulkReply(msgs) =>
+              ReplyFormat.toString(msgs) mustEqual List(
+                "foo",
+                "",
+                "moo",
                 "bar")
             case _ => fail("Expected MBulkReply")
           }

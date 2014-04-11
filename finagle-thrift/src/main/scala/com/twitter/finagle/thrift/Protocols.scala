@@ -188,8 +188,14 @@ object Protocols {
       }
     }
 
+    // Note: libthrift 0.5.0 has a bug when operating on ByteBuffer's with a non-zero arrayOffset.
+    // We instead use the version from head that fixes this issue.
+    override def writeBinary(bin: ByteBuffer) {
+      val length = bin.limit() - bin.position()
+      writeI32(length)
+      trans.write(bin.array(), bin.position() + bin.arrayOffset(), length)
+    }
+
   }
 
 }
-
-

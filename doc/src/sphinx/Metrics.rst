@@ -1,5 +1,5 @@
 Metrics
-=====
+=======
 
 This section aims to be a comprehensive list of all of the stats that finagle
 exposes.  The stats are organized by layer and then by class.

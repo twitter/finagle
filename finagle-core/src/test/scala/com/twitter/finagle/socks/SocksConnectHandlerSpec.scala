@@ -1,5 +1,6 @@
 package com.twitter.finagle.socks
 
+import com.twitter.util.RandomSocket
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.util.Arrays
 import org.jboss.netty.channel._
@@ -37,7 +38,8 @@ class SocksConnectHandlerSpec extends SpecificationWithJUnit with Mockito {
     channel.getPipeline returns pipeline
     val closeFuture = Channels.future(channel)
     channel.getCloseFuture returns closeFuture
-    val remoteAddress = new InetSocketAddress(InetAddress.getByAddress(null, Array[Byte](0x7F, 0x0, 0x0, 0x1)), 0x7F7F)
+    val port = RandomSocket.nextPort()
+    val remoteAddress = new InetSocketAddress(InetAddress.getByAddress(null, Array[Byte](0x7F, 0x0, 0x0, 0x1)), port)
     channel.getRemoteAddress returns remoteAddress
     val proxyAddress = mock[SocketAddress]
 
@@ -93,6 +95,9 @@ class SocksConnectHandlerSpec extends SpecificationWithJUnit with Mockito {
       }
 
       "do SOCKS negotiation" in {
+        val portByte1 = (port >> 8).toByte
+        val portByte2 = (port ^ (portByte1 << 8)).toByte
+
         { // on connect send init
           val ec = ArgumentCaptor.forClass(classOf[DownstreamMessageEvent])
           there was atLeastOne(ctx).sendDownstream(ec.capture)
@@ -107,13 +112,13 @@ class SocksConnectHandlerSpec extends SpecificationWithJUnit with Mockito {
           val ec = ArgumentCaptor.forClass(classOf[DownstreamMessageEvent])
           there was atLeastOne(ctx).sendDownstream(ec.capture)
           val e = ec.getValue
-          e.getMessage must matchBuffer(0x05, 0x01, 0x00, 0x01, 0x7F, 0x00, 0x00, 0x01, 0x7F, 0x7F)
+          e.getMessage must matchBuffer(0x05, 0x01, 0x00, 0x01, 0x7F, 0x00, 0x00, 0x01, portByte1, portByte2)
         }
 
         { // when connect response is received, propagate the connect and remove the handler
           ch.handleUpstream(ctx, new UpstreamMessageEvent(
             channel,
-            ChannelBuffers.wrappedBuffer(Array[Byte](0x05, 0x00, 0x00, 0x01, 0x7F, 0x00, 0x00, 0x01, 0x7F, 0x7F)),
+            ChannelBuffers.wrappedBuffer(Array[Byte](0x05, 0x00, 0x00, 0x01, 0x7F, 0x00, 0x00, 0x01, portByte1, portByte2)),
             null))
 
           connectFuture.isDone must beTrue

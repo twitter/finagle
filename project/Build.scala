@@ -6,12 +6,12 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
-  val libVersion = "6.12.2"
+  val libVersion = "6.13.1"
   val zkVersion = "3.3.4"
-  val utilVersion = "6.12.1"
-  val ostrichVersion = "9.3.1"
+  val utilVersion = "6.13.2"
+  val ostrichVersion = "9.4.2"
   val jacksonVersion = "2.2.2"
-  val nettyLib = "io.netty" % "netty" % "3.8.0.Final"
+  val nettyLib = "io.netty" % "netty" % "3.8.1.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonLibs = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
@@ -243,7 +243,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       "commons-codec" % "commons-codec" % "1.5",
       util("zk-common"),
-      "com.twitter.common.zookeeper" % "server-set" % "1.0.67"
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.69"
     ) ++ jacksonLibs,
     excludeFilter in unmanagedSources := "ZkTest.scala",
     ivyXML :=
@@ -316,8 +316,8 @@ object Finagle extends Build {
     name := "finagle-memcached",
     libraryDependencies ++= Seq(
       util("hashing"),
-      "com.google.guava" % "guava" % "15.0",
-      "com.twitter.common" % "zookeeper-testing" % "0.0.40" % "test"
+      "com.google.guava" % "guava" % "16.0",
+      "com.twitter.common" % "zookeeper-testing" % "0.0.42" % "test"
     ) ++ jacksonLibs
   ).dependsOn(finagleCore, finagleServersets)
 

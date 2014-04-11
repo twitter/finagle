@@ -48,10 +48,18 @@ class HttpDtabTest extends FunSuite {
   
   test("Invalid: non-ASCII encoding") {
     val m = newMsg()
-    m.headers.set("X-Dtab-01-A", "☺")
-    m.headers.set("X-Dtab-01-B", "☹")
+    m.headers.set("X-Dtab-00-A", "☺")
+    m.headers.set("X-Dtab-00-B", "☹")
     assert(HttpDtab.read(m) == Dtab.empty)
-  }  
+  }
+
+  test("Valid: mixed-case Dtab headers") {
+    val m = newMsg()
+    m.headers.set("x-dtab-00-a", "L2E=")
+    m.headers.set("X-Dtab-00-B", "L2I=")
+
+    assert(Equiv[Dtab].equiv(HttpDtab.read(m), Dtab.empty.delegated("/a", "/b")))
+  }
   
   test("clear()") {
     val m = newMsg()
@@ -73,6 +81,4 @@ class HttpDtabTest extends FunSuite {
     for (h <- headers)
       assert(!m.headers.contains(h))
   }
-
-
 }

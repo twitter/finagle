@@ -10,17 +10,17 @@ import java.nio.charset.Charset
 /**
  * Dtab serialization for Http. Dtabs are encoded into Http
  * headers with keys
- *	X-Dtab-$idx-(A|B)
+ *	x-dtab-$idx-(a|b)
  * where $idx is a two-digit integer. These headers are encoded in
- * pairs: 'A' and 'B' headers must exist for each index. Thus when
+ * pairs: 'a' and 'b' headers must exist for each index. Thus when
  * header names are lexically sorted, Dtab entries are decoded
- * pairwise. 'A' denoting prefix, 'B' destination.
+ * pairwise. 'a' denoting prefix, 'b' destination.
  *
  * Header values are base64-encoded ("standard" alphabet)
  * Utf8 strings.
  */
 object HttpDtab {
-  private val Prefix = "X-Dtab-"
+  private val Prefix = "x-dtab-"
   private val Maxsize = 100
   private val Utf8 = Charset.forName("UTF-8") 
   private val Ascii = Charset.forName("ASCII") 
@@ -44,7 +44,7 @@ object HttpDtab {
     val names = msg.headers.names.iterator()
     while (names.hasNext()) {
       val n = names.next()
-      if (n startsWith Prefix)
+      if (n.toLowerCase startsWith Prefix)
         msg.headers.remove(n)
     }
   }
@@ -69,7 +69,7 @@ object HttpDtab {
     var keys: ArrayBuffer[String] = null
     val names = msg.headers.names.iterator()
     while (names.hasNext()) {
-      val key = names.next()
+      val key = names.next().toLowerCase
       if (key startsWith Prefix) {
         if (keys == null) keys = ArrayBuffer[String]()
         keys += key
@@ -96,7 +96,7 @@ object HttpDtab {
 
       if (prefix.substring(0, prefix.size-1) != dest.substring(0, dest.size-1))
         return Dtab.empty
-      if (prefix(prefix.size-1) != 'A' || dest(dest.size-1) != 'B')
+      if (prefix(prefix.size-1) != 'a' || dest(dest.size-1) != 'b')
         return Dtab.empty
 
       dentries(i) = 

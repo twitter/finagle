@@ -1,10 +1,10 @@
 package com.twitter.finagle.mux
 
+import com.twitter.finagle.{Context, Dtab, Service, WriteException, NoStacktrace}
 import com.twitter.finagle.mux.lease.Acting
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Context, Dtab, Service, WriteException, NoStacktrace}
 import com.twitter.io.Buf
 import com.twitter.util.{Future, Promise, Time, Duration}
 import com.twitter.conversions.time._

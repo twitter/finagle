@@ -2,7 +2,7 @@ package com.twitter.finagle.zookeeper
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Announcer, Resolver, Addr}
-import com.twitter.util.{Await, Duration, Var}
+import com.twitter.util.{Await, Duration, RandomSocket, Var}
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.Eventually._
@@ -15,6 +15,8 @@ import java.io.{InputStreamReader, BufferedReader}
 
 @RunWith(classOf[JUnitRunner])
 class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
+  val port1 = RandomSocket.nextPort()
+  val port2 = RandomSocket.nextPort()
   val zkTimeout = 100.milliseconds
   var inst: ZkInstance = _
   val factory = new ZkClientFactory(zkTimeout)
@@ -44,7 +46,7 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
   test("announce a primary endpoint") {
     val ann = new ZkAnnouncer(factory)
     val res = new ZkResolver(factory)
-    val addr = new InetSocketAddress(8080)
+    val addr = new InetSocketAddress(port1)
     Await.result(ann.announce(addr, "%s!0".format(hostPath)))
 
     val va = res.bind(hostPath)
@@ -65,8 +67,8 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
     try {
       val ann = new ZkAnnouncer(factory)
       val res = new ZkResolver(factory)
-      val addr1 = new InetSocketAddress(8080)
-      val addr2 = new InetSocketAddress(8081)
+      val addr1 = new InetSocketAddress(port1)
+      val addr2 = new InetSocketAddress(port2)
 
       Await.ready(ann.announce(addr2, "%s!0!addr2".format(hostPath)))
       va2 = res.bind("%s!addr2".format(hostPath))
@@ -109,8 +111,8 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
   test("unannounce additional endpoints, but not primary endpoints") {
     val ann = new ZkAnnouncer(factory)
     val res = new ZkResolver(factory)
-    val addr1 = new InetSocketAddress(8080)
-    val addr2 = new InetSocketAddress(8081)
+    val addr1 = new InetSocketAddress(port1)
+    val addr2 = new InetSocketAddress(port2)
 
     val anm1 = Await.result(ann.announce(addr1, "%s!0".format(hostPath)))
     val anm2 = Await.result(ann.announce(addr2, "%s!0!addr2".format(hostPath)))
@@ -129,8 +131,8 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
   test("unannounce primary endpoints and additional endpoints") {
     val ann = new ZkAnnouncer(factory)
     val res = new ZkResolver(factory)
-    val addr1 = new InetSocketAddress(8080)
-    val addr2 = new InetSocketAddress(8081)
+    val addr1 = new InetSocketAddress(port1)
+    val addr2 = new InetSocketAddress(port2)
 
     val anm1 = Await.result(ann.announce(addr1, "%s!0".format(hostPath)))
     val anm2 = Await.result(ann.announce(addr2, "%s!0!addr2".format(hostPath)))
@@ -147,7 +149,7 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
   }
 
   test("announces from the main announcer") {
-    val addr = new InetSocketAddress(8080)
+    val addr = new InetSocketAddress(port1)
     Await.result(Announcer.announce(addr, "zk!%s!0".format(hostPath)))
   }
 

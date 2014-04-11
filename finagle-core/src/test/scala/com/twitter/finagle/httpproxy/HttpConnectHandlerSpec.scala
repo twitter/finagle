@@ -1,5 +1,6 @@
 package com.twitter.finagle.httpproxy
 
+import com.twitter.util.RandomSocket
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.util.Arrays
 import org.jboss.netty.channel._
@@ -21,7 +22,8 @@ class HttpConnectHandlerSpec extends SpecificationWithJUnit with Mockito {
     channel.getPipeline returns pipeline
     val closeFuture = Channels.future(channel)
     channel.getCloseFuture returns closeFuture
-    val remoteAddress = new InetSocketAddress("localhost", 443)
+    val port = RandomSocket.nextPort()
+    val remoteAddress = new InetSocketAddress("localhost", port)
     channel.getRemoteAddress returns remoteAddress
     val proxyAddress = mock[SocketAddress]
     val connectFuture = Channels.future(channel, true)
@@ -81,7 +83,7 @@ class HttpConnectHandlerSpec extends SpecificationWithJUnit with Mockito {
           val e = ec.getValue
           val req = e.getMessage.asInstanceOf[DefaultHttpRequest]
           req.getMethod must_== HttpMethod.CONNECT
-          req.getUri must_== "localhost:443"
+          req.getUri must_== "localhost:" + port
         }
 
         { // when connect response is received, propagate the connect and remove the handler

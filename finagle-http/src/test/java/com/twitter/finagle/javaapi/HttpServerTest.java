@@ -13,6 +13,7 @@ import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.ServerBuilder;
 import com.twitter.finagle.http.Http;
 import com.twitter.util.Future;
+import com.twitter.util.RandomSocket;
 
 public class HttpServerTest {
   private static void runServer() {
@@ -33,7 +34,7 @@ public class HttpServerTest {
       service,
       ServerBuilder.get()
       .codec(Http.get())
-      .bindTo(new InetSocketAddress("localhost", 10000))
+      .bindTo(new InetSocketAddress(0))
       .name("HttpServer"));
   }
 

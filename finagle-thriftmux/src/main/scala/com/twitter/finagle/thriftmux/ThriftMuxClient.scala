@@ -5,7 +5,6 @@ import com.twitter.util.{Future, Time}
 import org.apache.thrift.protocol.TProtocolFactory
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
-
 /**
  * $clientExample
  *
@@ -40,3 +39,7 @@ case class ThriftMuxClientImpl(
  * @define clientExampleObject ThriftMuxClient
  */
 object ThriftMuxClient extends ThriftMuxClientImpl(MuxClient)
+
+package exp {
+  object ThriftMuxClient extends ThriftMuxClientImpl(MuxClient)
+}

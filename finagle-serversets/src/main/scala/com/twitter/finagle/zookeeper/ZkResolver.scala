@@ -7,14 +7,14 @@ import com.twitter.common.zookeeper.{ServerSet, ServerSetImpl}
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.finagle.addr.StabilizingAddr
 import com.twitter.finagle.stats.DefaultStatsReceiver
-import com.twitter.finagle.{Group, Resolver, InetResolver, Addr}
+import com.twitter.finagle.{Group, Resolver, Addr}
 import com.twitter.thrift.Endpoint
 import com.twitter.thrift.ServiceInstance
-import com.twitter.thrift.Status.ALIVE
-import com.twitter.util.{Future, Return, Throw, Try, Var}
+import com.twitter.util.Var
 import java.net.{InetSocketAddress, SocketAddress}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
+import java.util.logging.{Level, Logger}
 
 class ZkResolverException(msg: String) extends Exception(msg)
 
@@ -43,26 +43,24 @@ private class ZkOffer(serverSet: ServerSet, path: String)
   setDaemon(true)
   start()
 
-  private val inbound = new Broker[Set[ServiceInstance]]
+  private[this] val inbound = new Broker[Set[ServiceInstance]]
+  private[this] val log = Logger.getLogger("zkoffer")
 
   override def run() {
-    var ok = false
-    while (!ok) {
-      try {
-        serverSet.watch(new DynamicHostSet.HostChangeMonitor[ServiceInstance] {
-          def onChange(newSet: ImmutableSet[ServiceInstance]) {
-            inbound !! newSet.asScala.toSet
-          }
-        })
-        ok = true
-      } catch {
-        case exc: MonitorException =>
-          // There are certain path permission checks in the serverset library
-          // that can cause exceptions here. We'll send an empty set (which 
-          // becomes a negative resolution), but keep on trying.
-          inbound !! Set.empty
-          Thread.sleep(5000)
-      }
+    try {
+      serverSet.watch(new DynamicHostSet.HostChangeMonitor[ServiceInstance] {
+        def onChange(newSet: ImmutableSet[ServiceInstance]) {
+          inbound !! newSet.asScala.toSet
+        }
+      })
+    } catch {
+      case exc: MonitorException =>
+        // There are certain path permission checks in the serverset library
+        // that can cause exceptions here. We'll send an empty set (which
+        // becomes a negative resolution).
+        log.log(Level.WARNING, "Exception when trying to watch a ServerSet! " +
+          "Returning negative resolution.", exc)
+        inbound !! Set.empty
     }
   }
 
@@ -72,7 +70,7 @@ private class ZkOffer(serverSet: ServerSet, path: String)
 
 class ZkResolver(factory: ZkClientFactory) extends Resolver {
   val scheme = "zk"
-  
+
   // With the current serverset client, instances are maintained
   // forever; additional resource leaks aren't created by caching
   // instances here.
@@ -82,10 +80,10 @@ class ZkResolver(factory: ZkClientFactory) extends Resolver {
   def this() = this(DefaultZkClientFactory)
 
   def resolve(
-      zkHosts: Set[InetSocketAddress], 
-      path: String, 
+      zkHosts: Set[InetSocketAddress],
+      path: String,
       endpoint: Option[String] = None,
-      shardId: Option[Int] = None): Var[Addr] = 
+      shardId: Option[Int] = None): Var[Addr] =
     synchronized {
       cache.getOrElseUpdate(
         (zkHosts, path, endpoint, shardId),
@@ -103,7 +101,7 @@ class ZkResolver(factory: ZkClientFactory) extends Resolver {
         case inst: ServiceInstance => inst.getServiceEndpoint()
       }
     }
-    
+
     val filterShardId: PartialFunction[ServiceInstance, ServiceInstance] = shardId match {
       case Some(id) => {
         case inst if inst.isSetShard && inst.shard == id => inst

@@ -190,11 +190,6 @@ private[thrift] class ThriftServerTracingFilter(
       Trace.recordRpcname(serviceName, msg.name)
       Trace.record(Annotation.ServerRecv())
 
-      // Ditto for the ClientId: it'll be overwritten by ClientIdContext, if it
-      // is loaded, but it should never be the case that the ids from the two
-      // pathes won't match.
-      ClientId.set(extractClientId(header))
-
       if (header.contexts != null) {
         val iter = header.contexts.iterator()
         while (iter.hasNext) {
@@ -202,6 +197,10 @@ private[thrift] class ThriftServerTracingFilter(
           Context.handle(Buf.ByteArray(c.getKey()), Buf.ByteArray(c.getValue()))
         }
       }
+
+      // If `header.client_id` field is non-null, then allow it to take
+      // precedence over the id provided by ClientIdContext.
+      extractClientId(header) foreach { clientId => ClientId.set(Some(clientId)) }
 
       try {
         service(request_) map {

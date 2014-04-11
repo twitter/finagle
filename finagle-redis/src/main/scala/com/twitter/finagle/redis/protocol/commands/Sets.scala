@@ -96,3 +96,13 @@ object SRandMember {
   def apply(args: Seq[Array[Byte]]): SRandMember = 
     SRandMember(GetMonadArg(args, CommandBytes.SRANDMEMBER))
 }
+
+case class SInter(keys: Seq[ChannelBuffer]) extends StrictKeysCommand {
+  val command = Commands.SINTER
+  override def toChannelBuffer = RedisCodec.toUnifiedFormat(CommandBytes.SINTER +: keys)
+}
+
+object SInter {
+  def apply(args: => Seq[Array[Byte]]) =
+    new SInter(args.map(ChannelBuffers.wrappedBuffer))
+}

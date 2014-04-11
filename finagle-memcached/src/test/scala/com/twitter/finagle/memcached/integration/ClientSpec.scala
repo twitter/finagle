@@ -10,7 +10,7 @@ import com.twitter.common.zookeeper.testing.ZooKeeperTestServer
 import com.twitter.concurrent.Spool
 import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Group, MemcachedClient, Name, WriteException}
+import com.twitter.finagle.{Group, MemcachedClient, Name, Resolver, WriteException}
 import com.twitter.finagle.builder.{Cluster, ClientBuilder}
 import com.twitter.finagle.memcached.{CacheNode, CacheNodeGroup, CachePoolCluster, CachePoolConfig,
   Client, KetamaClientBuilder, PartitionedClient}
@@ -265,6 +265,7 @@ class ClientSpec extends SpecificationWithJUnit {
     var zookeeperClient: ZooKeeperClient = null
     val zkPath = "/cache/test/silly-cache"
     var zookeeperServer: ZooKeeperTestServer = null
+    var dest: Name = null
 
     doBefore {
       // start zookeeper server and create zookeeper client
@@ -297,6 +298,9 @@ class ClientSpec extends SpecificationWithJUnit {
 
       // a separate client which only does zk discovery for integration test
       zookeeperClient = zookeeperServer.createClient(ZooKeeperClient.digestCredentials("user","pass"))
+
+      // destination of the test cache endpoints
+      dest = Resolver.eval("twcache!localhost:" + zookeeperServer.getPort.toString + "!" + zkPath)
     }
 
     doAfter {
@@ -452,14 +456,10 @@ class ClientSpec extends SpecificationWithJUnit {
 
     "Ketama ClusterClient using a distributor" in {
       "set & get" in {
-        // create my cluster client solely based on a zk client and a path
-        val mycluster = CachePoolCluster.newZkCluster(zkPath, zookeeperClient)
-        mycluster.ready() // give it sometime for the cluster to get the initial set of memberships
-
         val client = KetamaClientBuilder()
                 .clientBuilder(ClientBuilder().hostConnectionLimit(1).codec(Memcached()).failFast(false))
                 .failureAccrualParams(Int.MaxValue, Duration.Top)
-                .cachePoolCluster(mycluster)
+                .dest(dest)
                 .build()
 
         client.delete("foo")()
@@ -469,14 +469,10 @@ class ClientSpec extends SpecificationWithJUnit {
       }
 
       "many keys" in {
-        // create my cluster client solely based on a zk client and a path
-        val mycluster = CachePoolCluster.newZkCluster(zkPath, zookeeperClient)
-        mycluster.ready() // give it sometime for the cluster to get the initial set of memberships
-
         val client = KetamaClientBuilder()
                 .clientBuilder(ClientBuilder().hostConnectionLimit(1).codec(Memcached()).failFast(false))
                 .failureAccrualParams(Int.MaxValue, Duration.Top)
-                .cachePoolCluster(mycluster)
+                .dest(dest)
                 .build()
                 .asInstanceOf[PartitionedClient]
 

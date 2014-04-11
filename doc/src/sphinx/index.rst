@@ -5,7 +5,7 @@ Finagle is an extensible RPC system for the JVM, used to construct
 high-concurrency servers. Finagle implements uniform client and
 server APIs for several protocols, and is designed for high
 performance and concurrency. Most of Finagle's code is protocol
-agnostic, simplifying the implementation of new protocols.
+agnostic, simplifying the implementation of new :doc:`protocols <Protocols>`.
 
 Finagle uses a *clean*, *simple*, and *safe* concurrent programming
 model, based on :doc:`Futures <Futures>`. This leads to safe and
@@ -30,7 +30,7 @@ their behavior.
 Other useful resources include:
 
 - “`Your Server as a Function <http://monkey.org/~marius/funsrv.pdf>`_” a paper motivating the core abstractions behind finagle (`PLOS’13 <http://sigops.org/sosp/sosp13/plos.html>`_).
-- `Twitter engineering blog entry introducing Finagle <http://engineering.twitter.com/2011/08/finagle-protocol-agnostic-rpc-system.html>`_
+- `Twitter engineering blog entry introducing Finagle <https://blog.twitter.com/2011/finagle-a-protocol-agnostic-rpc-system>`_
 - `ScalaDays 2011 presentation on Finagle <http://days2011.scala-lang.org/node/138/286>`_
 - Twitter's `Scala School <http://twitter.github.com/scala_school/>`_ has a section `introducing Finagle <http://twitter.github.com/scala_school/finagle.html>`_ and another `constructing a distributed search engine using Finagle <http://twitter.github.com/scala_school/searchbird.html>`_
 
@@ -41,7 +41,7 @@ User's guide
 ------------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
    Quickstart
    Futures
@@ -49,6 +49,7 @@ User's guide
    ServerAnatomy
    ClientAnatomy
    ClientStack
+   Protocols
    Metrics
    FAQ
 

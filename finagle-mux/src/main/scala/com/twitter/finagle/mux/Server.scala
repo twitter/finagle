@@ -48,7 +48,8 @@ private[finagle] class ServerDispatcher(
           for ((k, v) <- contexts)
             Context.handle(ChannelBufferBuf(k), ChannelBufferBuf(v))
           Trace.record(Annotation.ServerRecv())
-          Dtab.delegate(dtab)
+          if (dtab.length > 0)
+            Dtab.delegate(dtab)
           val f = service(req)
           pending.put(tag, f)
           f respond {
