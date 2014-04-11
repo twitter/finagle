@@ -11,28 +11,23 @@ import java.net.SocketAddress
 /**
  * Tracing filter for mysql client requests.
  */
-object MysqlTracing extends SimpleFilter[Request, Result] {
+class MysqlTracing(clientName: String) extends SimpleFilter[Request, Result] {
   def apply(request: Request, service: Service[Request, Result]) = {
 
     request match {
-      case QueryRequest(sqlStatement) => {
-        Trace.recordRpcname("mysql","query")
-        Trace.recordBinary("mysql.query", sqlStatement)
-      }
-      case PrepareRequest(sqlStatement) => {
-        Trace.recordRpcname("mysql","prepare")
-        Trace.recordBinary("mysql.prepare", sqlStatement)
-      }
+      case QueryRequest(sqlStatement) => 
+        Trace.recordRpcname(clientName,"query")
+        Trace.recordBinary(clientName + ".query", sqlStatement)
+      case PrepareRequest(sqlStatement) => 
+        Trace.recordRpcname(clientName,"prepare")
+        Trace.recordBinary(clientName + ".prepare", sqlStatement)
       // TODO: save the prepared statement and put it in the executed request trace
-      case ExecuteRequest(ps, flags, iterationCount) => {
-        Trace.recordRpcname("mysql","execute")
-        Trace.recordBinary("mysql.execute", "?")
-      }
-
-      case _ => {
-        Trace.recordRpcname("mysql", request.getClass.getName)
+      case ExecuteRequest(ps, flags, iterationCount) => 
+        Trace.recordRpcname(clientName,"execute")
+        Trace.recordBinary(clientName + ".execute", "?")
+      case _ => 
+        Trace.recordRpcname(clientName, request.getClass.getName)
         Trace.record("mysql." + request.getClass.getName)
-      }
     }
     service(request)
   }
@@ -81,11 +76,12 @@ trait MysqlRichClient { self: Client[Request, Result] =>
  * a mysql client in terms of a finagle DefaultClient.
  */
 case class MysqlClient private[finagle](
-  handshake: Handshake
+  handshake: Handshake,
+  clientName: Option[String] = None
 ) extends Client[Request, Result]
   with MysqlRichClient {
   val defaultClient = new DefaultClient[Request, Result](
-    name = "mysql",
+    name = clientName.getOrElse("mysql"),
     // TODO: Remove limit when we can multiplex requests over
     // the DefaultPool with respect to prepared statements.
     pool = DefaultPool(high = 1),
@@ -96,6 +92,9 @@ case class MysqlClient private[finagle](
       (sa, sr) => bridge(sa, sr)
     }
   )
+
+  def withClientName(name: String): MysqlClient = 
+    copy(handshake, Some(name))
 
   def withCredentials(u: String, p: String): MysqlClient =
     copy(handshake = handshake.copy(
@@ -114,7 +113,7 @@ case class MysqlClient private[finagle](
     ))
 
   override def newClient(dest: Name, label: String): ServiceFactory[Request, Result] =
-    MysqlTracing andThen defaultClient.newClient(dest, label)
+    new MysqlTracing(defaultClient.name) andThen defaultClient.newClient(dest, label)
 }
 
 object Mysql extends MysqlClient(Handshake())
