@@ -175,22 +175,6 @@ package exp {
   }
 
   /**
-   * A [[com.twitter.finagle.server.StackServer]] factory function for use
-   * with [[com.twitter.finagle.builder.ServerBuilder]].
-   */
-  object ThriftMuxStackServerFactory
-    extends (Stack.Params => StackServer[Array[Byte], Array[Byte], Any, Any])
-  {
-    def apply(params: Stack.Params): StackServer[Array[Byte], Array[Byte], Any, Any] =
-      ThriftMuxServerImpl.WrappedMuxStackServer(
-        new ThriftMuxStackServer(
-          StackServer.newStack[ChannelBuffer, ChannelBuffer],
-          params
-        )
-      )
-  }
-
-  /**
    * A Thrift server served over [[com.twitter.finagle.mux]]. The same
    * backwards-compatibility as in [[com.twitter.finagle.thriftmux.ThriftMuxServer]]
    * is guaranteed.
@@ -200,4 +184,18 @@ package exp {
    * @define serverExampleObject ThriftMuxServer
    */
   object ThriftMuxServer extends ThriftMuxServerImpl(new ThriftMuxStackServer)
+    with (Stack.Params => StackServer[Array[Byte], Array[Byte], Any, Any])
+  {
+    /**
+     * A [[com.twitter.finagle.server.StackServer]] factory function for use
+     * with [[com.twitter.finagle.builder.ServerBuilder]].
+     */
+    def apply(params: Stack.Params): StackServer[Array[Byte], Array[Byte], Any, Any] =
+      ThriftMuxServerImpl.WrappedMuxStackServer(
+        new ThriftMuxStackServer(
+          StackServer.newStack[ChannelBuffer, ChannelBuffer],
+          params
+        )
+      )
+  }
 }
