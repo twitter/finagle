@@ -86,7 +86,8 @@ package exp {
       Netty3Transporter(httpPipeline, prms)
     }
 
-    protected val newDispatcher: Dispatcher = new HttpClientDispatcher(_)
+    protected val newDispatcher: Stack.Params => Dispatcher =
+      Function.const(new HttpClientDispatcher(_))
   })
 
   object HttpServer extends StackServer[HttpRequest, HttpResponse, Any, Any] {
@@ -97,13 +98,13 @@ package exp {
       Netty3Listener(httpPipeline, prms)
     }
 
-    protected val newDispatcher: Dispatcher = {
+    protected val newDispatcher: Stack.Params => Dispatcher = {
       val dtab = new DtabFilter[HttpRequest, HttpResponse]
       val tracingFilter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("http")
-      (t, s) => new HttpServerDispatcher(
+      Function.const((t, s) => new HttpServerDispatcher(
         new HttpTransport(t),
         tracingFilter andThen dtab andThen s
-      )
+      ))
     }
   }
 }

@@ -66,8 +66,11 @@ object ServerConfig {
   type FullySpecified[Req, Rep] = ServerConfig[Req, Rep, Yes, Yes, Yes]
 
   def nilServer[Req, Rep] = new StackServer[Req, Rep, Any, Any](nilStack, Stack.Params.empty) {
-    val newListener: Stack.Params => Listener[Any, Any] = Function.const(NullListener)(_)
-    val newDispatcher = (_: Any, _: Any) => Closable.nop
+    protected val newListener: Stack.Params => Listener[Any, Any] =
+      Function.const(NullListener)
+
+    protected val newDispatcher: Stack.Params => Dispatcher =
+      Function.const((_: Any, _: Any) => Closable.nop)
   }
 
   // params specific to ServerBuilder
@@ -201,7 +204,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
           Netty3Listener(codec.pipelineFactory, prms)
         }
 
-        protected val newDispatcher = {
+        protected val newDispatcher: Stack.Params => Dispatcher = { _ =>
           // TODO: Expiration logic should be installed using ExpiringService
           // in StackServer#newStack. Then we can thread through "closes"
           // via ClientConnection.

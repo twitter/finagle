@@ -36,7 +36,7 @@ object Mux extends Client[ChannelBuffer, ChannelBuffer] with Server[ChannelBuffe
 }
 
 package exp {
-  
+
   object MuxSession {
     /**
      * Connect to addr to establish a mux session. The returned function
@@ -97,10 +97,9 @@ package exp {
       Netty3Transporter(mux.PipelineFactory, prms)
     }
 
-    protected val newDispatcher: Dispatcher = transport => {
-      // TODO: This isn't the same sr we thread through our stack.
-      val param.Stats(sr) = params[param.Stats]
-      new mux.ClientDispatcher(transport.cast[ChannelBuffer, ChannelBuffer], sr)
+    protected val newDispatcher: Stack.Params => Dispatcher = { prms =>
+      val param.Stats(sr) = prms[param.Stats]
+      trans => new mux.ClientDispatcher(trans.cast[ChannelBuffer, ChannelBuffer], sr)
     }
   }
 }

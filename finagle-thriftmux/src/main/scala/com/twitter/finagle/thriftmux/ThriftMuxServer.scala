@@ -80,8 +80,8 @@ package exp {
     protected val newListener: Stack.Params => Listener[ChannelBuffer, ChannelBuffer] =
       Function.const(ThriftMuxListener)
 
-    protected val newDispatcher: Dispatcher =
-      new mux.ServerDispatcher(_, _, true)
+    protected val newDispatcher: Stack.Params => Dispatcher =
+      Function.const(new mux.ServerDispatcher(_, _, true))
   }
 
   private[finagle]
@@ -103,8 +103,8 @@ package exp {
       protected val newListener: Stack.Params => Listener[Any, Any] =
         Function.const(NullListener)
 
-      protected val newDispatcher: Dispatcher =
-        (_: Any, _: Any) => Closable.nop
+      protected val newDispatcher: Stack.Params => Dispatcher =
+        Function.const((_: Any, _: Any) => Closable.nop)
 
       /**
        * @inheritdoc

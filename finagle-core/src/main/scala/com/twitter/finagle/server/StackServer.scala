@@ -103,7 +103,7 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
    *
    * @see [[com.twitter.finagle.dispatch.GenSerialServerDispatcher]]
    */
-  protected val newDispatcher: Dispatcher
+  protected val newDispatcher: Stack.Params => Dispatcher
 
   /**
    * Creates a new StackServer with `f` applied to `stack`.
@@ -169,12 +169,13 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
       // Listen over `addr` and serve traffic from incoming transports to
       // `serviceFactory` via `newDispatcher`.
       val listener = newListener(newParams)
+      val dispatcher = newDispatcher(newParams)
       val underlying = listener.listen(addr) { transport =>
         serviceFactory(newConn(transport)) respond {
           case Return(service) =>
-            val dispatcher = newDispatcher(transport, service)
-            connections.add(dispatcher)
-            transport.onClose ensure connections.remove(dispatcher)
+            val d = dispatcher(transport, service)
+            connections.add(d)
+            transport.onClose ensure connections.remove(d)
           case Throw(_) => transport.close()
         }
       }

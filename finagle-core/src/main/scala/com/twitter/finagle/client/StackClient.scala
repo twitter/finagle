@@ -115,7 +115,7 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
    *
    * @see [[com.twitter.finagle.dispatch.GenSerialServerDispatcher]]
    */
-  protected val newDispatcher: Dispatcher
+  protected val newDispatcher: Stack.Params => Dispatcher
 
   /**
    * Creates a new StackClient with `f` applied to `stack`.
@@ -144,7 +144,8 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
     def make(prms: Stack.Params, next: ServiceFactory[Req, Rep]) = {
       val Transporter.EndpointAddr(addr) = prms[Transporter.EndpointAddr]
       val transporter = newTransporter(prms)
-      ServiceFactory(() => transporter(addr) map newDispatcher)
+      val dispatcher = newDispatcher(prms)
+      ServiceFactory(() => transporter(addr) map dispatcher)
     }
   }
 
