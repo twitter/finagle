@@ -213,7 +213,42 @@ object NameTree {
   }
 
   /**
-   * Parse a [[com.twitter.finagle.NameTree NameTree]] from a string.
+   * Parse a [[com.twitter.finagle.NameTree NameTree]] from a string
+   * with concrete syntax
+   *
+   * {{{
+   * tree       ::= name
+   *                weight '*' tree
+   *                tree '&' tree
+   *                tree '|' tree
+   *                '(' tree ')'
+   * 
+   * name       ::= path | '~' | '$'
+   * 
+   * path       ::= '/' labels
+   * 
+   * labels     ::= label '/' label
+   *                label
+   * 
+   * label      ::= litlabel | hexlabel
+   * 
+   * hexlabel   ::= (\\x[a-f0-9][a-f0-9])+
+   * 
+   * litlabel   ::= [0-9A-Za-z:.#$%-]+
+   * weight     ::= -?([0-9]++(\.[0-9]+*)?|[0-9]+*\.[0-9]++)([eE][+-]?[0-9]++)?[fFdD]?
+   * }}}
+   *
+   * For example:
+   *
+   * {{{
+   * /foo & /bar | /baz | $
+   * }}}
+   *
+   * parses in to the [[com.twitter.finagle.NameTree NameTree]]
+   *
+   * {{{
+   * Alt(Union(Leaf(Path(foo)),Leaf(Path(bar))),Leaf(Path(baz)),Empty)
+   * }}}
    *
    * @throws IllegalArgumentException when the string does not
    * represent a valid name tree.

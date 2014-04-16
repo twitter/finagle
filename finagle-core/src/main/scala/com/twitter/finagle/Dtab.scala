@@ -94,6 +94,15 @@ case class Dentry(prefix: Path, dst: NameTree[Path]) {
 }
 
 object Dentry {
+  /**
+   * Parse a Dentry from the string `s` with concrete syntax:
+   * {{{
+   * dentry     ::= path '=>' tree
+   * }}}
+   *
+   * where the productions ``path`` and ``tree`` are from the grammar
+   * documented in [[com.twitter.finagle.NameTree$ NameTree.read]].
+   */
   def read(s: String): Dentry = DentryParser(s)
 
   // The prefix to this is an illegal path in the sense that the
@@ -131,6 +140,17 @@ object Dtab {
    */
   def baseDiff(): Dtab = this().stripPrefix(base)
 
+  /**
+   * Parse a Dtab from string `s` with concrete syntax
+   * 
+   * {{{
+   * dtab       ::= dentry ';' dtab | dentry
+   * }}}
+   * 
+   * where the production ``dentry`` is from the grammar documented in
+   * [[com.twitter.finagle.Dentry$ Dentry.read]]
+   *
+   */
   def read(s: String): Dtab = DtabParser(s)
 
   /** Scala collection plumbing required to build new dtabs */

@@ -91,7 +91,33 @@ object Path {
   }
 
   /**
-   * Parse `s` as a path.
+   * Parse `s` as a path with concrete syntax
+   *
+   * {{{
+   * path       ::= '/' labels
+   * 
+   * labels     ::= label '/' label
+   *                label
+   *
+   * label      ::= litlabel | hexlabel
+   *
+   * hexlabel   ::= (\\x[a-f0-9][a-f0-9])+
+   *
+   * litlabel   ::= [0-9A-Za-z:.#$%-]+
+   * }}}
+   *
+   * for example
+   *
+   * {{{
+   * /foo/bar/baz
+   * }}}
+   *
+   * parses into the path 
+   *
+   * {{{
+   * Path(foo,bar,baz)
+   * }}}
+   *
    * @throws IllegalArgumentException when `s` is not a syntactically valid path.
    */
   def read(s: String): Path = NameTreeParser(s) match {
