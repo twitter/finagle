@@ -44,7 +44,6 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
   test("end-to-end: service endpoint") {
     val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar")
     val Name.Bound(va) = Resolver.eval("zk2!"+inst.zookeeperConnectstring+"!/foo/bar")
-
     eventually { assert(Var.sample(va) === Addr.Neg) }
 
     val joinAddr = RandomSocket.nextAddress

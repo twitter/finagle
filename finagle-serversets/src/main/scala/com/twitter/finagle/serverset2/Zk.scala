@@ -8,26 +8,6 @@ import com.twitter.io.Buf
 import com.twitter.util._
 
 /**
- * Op represents a ZK operation: it is either Pending, Ok, or Failed.
- */
-private[serverset2] sealed trait Op[+T] { def map[U](f: T => U): Op[U] }
-private[serverset2] object Op {
-  object Pending extends Op[Nothing] { def map[U](f: Nothing => U) = this }
-  case class Ok[T](v: T) extends Op[T] { def map[U](f: T => U) = Ok(f(v)) }
-  case class Fail(e: Throwable) extends Op[Nothing] { def map[U](f: Nothing => U) = this }
-  
-  def flatMap[T, U](v: Var[Op[T]])(f: T => Var[Op[U]]): Var[Op[U]] =
-    v flatMap {
-      case Op.Pending => Var.value(Op.Pending)
-      case op@Op.Fail(_) => Var.value(op)
-      case Op.Ok(t) => f(t)
-    }
-
-  def map[T, U](v: Var[Op[T]])(f: T => U): Var[Op[U]] =
-    flatMap(v) { t => Var.value(Op.Ok(f(t))) }
-}
-
-/**
  * Zk represents a ZK session.  Session operations are as in Apache
  * Zookeeper, but represents pending results with
  * [[com.twitter.util.Future Futures]]; watches and session states
@@ -57,18 +37,18 @@ private class Zk(watchedZk: Watched[ZooKeeperReader], timerIn: Timer) {
    * A persistent operation: reissue a watched operation every
    * time the watch fires, applying safe retries when possible.
    *
-   * The returned Var is asynchronous: watches aren't reissued
-   * when the Var is no longer observed.
+   * The returned Activity is asynchronous: watches aren't reissued
+   * when the Activity is no longer observed.
    */
-  private def op[T](which: String, arg: String)(go: => Future[Watched[T]]): Var[Op[T]] =
-    Var.async(Op.Pending: Op[T]) { v =>
+  private def op[T](which: String, arg: String)(go: => Future[Watched[T]]): Activity[T] =
+    Activity(Var.async[Activity.State[T]](Activity.Pending) { v =>
       @volatile var closed = false
       def loop() {
         if (!closed) safeRetry(go, retryBackoffs) respond {
           case Throw(exc) =>
-            v() = Op.Fail(exc)
+            v() = Activity.Failed(exc)
           case Return(Watched(value, state)) =>
-            val ok = Op.Ok(value)
+            val ok = Activity.Ok(value)
             v() = ok
             state.changes respond {
               case WatchState.Pending =>
@@ -89,11 +69,11 @@ private class Zk(watchedZk: Watched[ZooKeeperReader], timerIn: Timer) {
                 v() = ok
 
               case WatchState.SessionState(SessionState.Expired) =>
-                v() = Op.Fail(new Exception("session expired"))
+                v() = Activity.Failed(new Exception("session expired"))
 
               // Disconnected, NoSyncConnected, AuthFailed
               case WatchState.SessionState(state) =>
-                v() = Op.Fail(new Exception("" + state))
+                v() = Activity.Failed(new Exception("" + state))
             }
         }
       }
@@ -104,7 +84,7 @@ private class Zk(watchedZk: Watched[ZooKeeperReader], timerIn: Timer) {
         closed = true
         Future.Done
       }
-    }
+    })
 
    private val existsWatchOp = Memoize { path: String =>
      op("existsOf", path) { zkr.existsWatch(path) }
@@ -117,68 +97,60 @@ private class Zk(watchedZk: Watched[ZooKeeperReader], timerIn: Timer) {
   def close() = zkr.close()
 
   /**
-   * A persistent version of exists: existsOf returns a Var representing
+   * A persistent version of exists: existsOf returns a Activity representing
    * the current (best-effort) Stat for the given path.
    */
-  def existsOf(path: String): Var[Op[Option[Data.Stat]]] =
+  def existsOf(path: String): Activity[Option[Data.Stat]] =
     existsWatchOp(path)
 
   /**
-   * A persistent version of getChildren: childrenOf returns a Var
+   * A persistent version of getChildren: childrenOf returns a Activity
    * representing the current (best-effort) list of children for the
    * given path.
    */
-  def childrenOf(path: String): Var[Op[Set[String]]] =
-    Op.flatMap(existsOf(path)) {
-      case None => Var.value(Op.Ok(Set.empty))
+  def childrenOf(path: String): Activity[Set[String]] =
+    existsOf(path) flatMap {
+      case None => Activity.value(Set.empty)
       case Some(_) =>
-        childrenWatchOp(path) flatMap {
-          case Op.Pending => Var.value(Op.Pending)
-          case Op.Ok(Node.Children(children, _)) => Var.value(Op.Ok(children.toSet))
+        childrenWatchOp(path) transform {
+          case Activity.Pending => Activity.pending
+          case Activity.Ok(Node.Children(children, _)) => Activity.value(children.toSet)
           // This can happen when exists() races with getChildren.
-          case Op.Fail(KeeperException.NoNode(_)) => Var.value(Op.Ok(Set.empty))
-          case f@Op.Fail(_) => Var.value(f)
+          case Activity.Failed(KeeperException.NoNode(_)) => Activity.value(Set.empty)
+          case Activity.Failed(exc) => Activity.exception(exc)
         }
     }
 
   private val immutableDataOf_ = Memoize { path: String =>
-    Var.async(Op.Pending: Op[Buf]) { v =>
+    Activity(Var.async[Activity.State[Buf]](Activity.Pending) { v =>
       safeRetry(zkr.getData(path), retryBackoffs) respond {
-        case Throw(exc) => v() = Op.Fail(exc)
-        case Return(Node.Data(Some(data), _)) => v() = Op.Ok(data)
-        case Return(_) => v() = Op.Ok(Buf.Empty)
+        case Throw(exc) => v() = Activity.Failed(exc)
+        case Return(Node.Data(Some(data), _)) => v() = Activity.Ok(data)
+        case Return(_) => v() = Activity.Ok(Buf.Empty)
       }
 
       Closable.nop
-    }
+    })
   }
 
   /**
-   * A persistent version of getData: immutableDataOf returns a Var
+   * A persistent version of getData: immutableDataOf returns a Activity
    * representing the current (best-effort) contents of the given
    * path. Note: this only works on immutable nodes. I.e. it does not
    * leave a watch on the node to look for changes.
    */
-  def immutableDataOf(path: String): Var[Op[Buf]] =
+  def immutableDataOf(path: String): Activity[Buf] =
     immutableDataOf_(path)
 
   /**
    * Collect immutable data from a number of paths together.
    */
-  def collectImmutableDataOf(paths: Set[String]): Var[Op[Map[String, Buf]]] = {
-    def pathDataOf(path: String): Var[Op[(String, Buf)]] =
-      immutableDataOf(path) map {
-        op => op map { data => path -> data }
-      }
+  def collectImmutableDataOf(paths: Set[String]): Activity[Map[String, Buf]] = {
+    def pathDataOf(path: String): Activity[(String, Buf)] =
+      immutableDataOf(path).map(path -> _)
 
-    Var.collect(paths map pathDataOf) map {
-      // TODO: be more eager here?
-      case ops if ops exists (_ == Op.Pending) => Op.Pending
-      case ops =>
-        val pathData = ops collect {
-          case Op.Ok(pathData@(_, data)) if data != null => pathData
-        }
-        Op.Ok(pathData.toMap)
+    Activity.collect(paths map pathDataOf) map { pairs =>
+      pairs.filter({case (_, data) => data != null}).toMap
     }
   }
 

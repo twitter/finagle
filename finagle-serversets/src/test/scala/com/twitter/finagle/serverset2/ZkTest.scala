@@ -92,10 +92,10 @@ class ZkTest extends FunSuite {
     val v = zk.existsOf("/foo/bar")
     // An unobserved Var makes no side effect.
     assert(watchedZk.value.opq.isEmpty)
-    val ref = new AtomicReference[Op[Option[Data.Stat]]]
-    val o = v.observeTo(ref)
+    val ref = new AtomicReference[Activity.State[Option[Data.Stat]]]
+    val o = v.states.register(Witness(ref))
     assert(watchedZk.value.opq === Seq(ExistsWatch("/foo/bar")))
-    assert(ref.get === Op.Pending)
+    assert(ref.get === Activity.Pending)
     
     assert(timer.tasks.isEmpty)
     watchedZk.value.opq(0).res() = Throw(new KeeperException.ConnectionLoss(None))
@@ -103,11 +103,11 @@ class ZkTest extends FunSuite {
     tc.advance(10.milliseconds)
     timer.tick()
     assert(watchedZk.value.opq === Seq(ExistsWatch("/foo/bar"), ExistsWatch("/foo/bar")))
-    assert(ref.get === Op.Pending)
+    assert(ref.get === Activity.Pending)
     
     watchedZk.value.opq(1).res() = Throw(new KeeperException.SessionExpired(None))
     assert(watchedZk.value.opq === Seq(ExistsWatch("/foo/bar"), ExistsWatch("/foo/bar")))
-    val Op.Fail(exc) = ref.get
+    val Activity.Failed(exc) = ref.get
     assert(exc.isInstanceOf[KeeperException.SessionExpired])
   }}
   
@@ -117,30 +117,30 @@ class ZkTest extends FunSuite {
     val zk = new Zk(watchedZk, timer)
     
     val v = zk.childrenOf("/foo/bar")
-    val ref = new AtomicReference[Op[Set[String]]]
-    v.observeTo(ref)
-    assert(ref.get === Op.Pending)
+    val ref = new AtomicReference[Activity.State[Set[String]]]
+    v.states.register(Witness(ref))
+    assert(ref.get === Activity.Pending)
     
     val Seq(ew@ExistsWatch("/foo/bar")) = watchedZk.value.opq
     val ewwatchv = Var[WatchState](WatchState.Pending)
     ew.res() = Return(Watched(None, ewwatchv))
     assert(watchedZk.value.opq === Seq(ExistsWatch("/foo/bar")))
-    assert(ref.get === Op.Ok(Set.empty))
+    assert(ref.get === Activity.Ok(Set.empty))
 
     ewwatchv() = WatchState.Determined(NodeEvent.ChildrenChanged)
     val Seq(`ew`, ew2@ExistsWatch("/foo/bar")) = watchedZk.value.opq
-    assert(ref.get === Op.Ok(Set.empty))
+    assert(ref.get === Activity.Ok(Set.empty))
     val ew2watchv = Var[WatchState](WatchState.Pending)
     ew2.res() = Return(Watched(Some(Data.Stat(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)), ew2watchv))
     val Seq(`ew`, `ew2`, gcw@GetChildrenWatch("/foo/bar")) = watchedZk.value.opq
-    assert(ref.get === Op.Pending)
+    assert(ref.get === Activity.Pending)
     gcw.res() = Return(Watched(Node.Children(Seq("a", "b", "c"), Data.Stat(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)), Var.value(WatchState.Pending)))
-    assert(ref.get === Op.Ok(Set("a", "b", "c")))
+    assert(ref.get === Activity.Ok(Set("a", "b", "c")))
     assert(watchedZk.value.opq === Seq(ew, ew2, gcw))
 
     ew2watchv() = WatchState.Determined(NodeEvent.ChildrenChanged)
     val Seq(`ew`, `ew2`, `gcw`, ew3@ExistsWatch("/foo/bar")) = watchedZk.value.opq
     ew3.res() = Return(Watched(None, Var.value(WatchState.Pending)))
-    assert(ref.get === Op.Ok(Set.empty))
+    assert(ref.get === Activity.Ok(Set.empty))
   }}
 }
