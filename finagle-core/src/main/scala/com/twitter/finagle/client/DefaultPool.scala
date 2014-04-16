@@ -7,7 +7,7 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Timer, Duration}
 
-private[finagle] object DefaultPool {
+object DefaultPool {
   object Role {
     trait Pool extends Stack.Role
     object BufferingPool extends Pool

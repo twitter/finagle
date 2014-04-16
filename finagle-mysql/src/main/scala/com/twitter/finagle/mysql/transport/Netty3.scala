@@ -1,7 +1,9 @@
 package com.twitter.finagle.exp.mysql.transport
 
+import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.exp.mysql.{Request, Result}
 import com.twitter.finagle.netty3.{ChannelSnooper, Netty3Transporter}
+import com.twitter.finagle.Stack
 import com.twitter.util.NonFatal
 import java.util.logging.{Level, Logger}
 import org.jboss.netty.buffer.ChannelBuffer
@@ -73,10 +75,10 @@ object MysqlClientPipelineFactory extends ChannelPipelineFactory {
 
 /**
  * Responsible for the transport layer plumbing required to produce
- * a Transport[Packet, Packet]. The current implementation uses
+ * a Transporter[Packet, Packet]. The current implementation uses
  * Netty3.
  */
-object MysqlTransporter extends Netty3Transporter[Packet, Packet](
-  name = "mysql",
-  pipelineFactory = MysqlClientPipelineFactory
-)
+object MysqlTransporter {
+  def apply(params: Stack.Params): Transporter[Packet, Packet] =
+    Netty3Transporter(MysqlClientPipelineFactory, params)
+}
