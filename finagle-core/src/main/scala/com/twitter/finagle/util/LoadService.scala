@@ -89,7 +89,7 @@ private object ClassPath {
       return
 
     for (f <- dir.listFiles)
-      if (f.isDirectory())
+      if (f.isDirectory() && f.canRead())
         browseDir(f, loader, prefix + f.getName + "/", buf)
       else for (iface <- ifaceOfName(prefix + f.getName)) {
         val source = Source.fromFile(f, "UTF-8")
