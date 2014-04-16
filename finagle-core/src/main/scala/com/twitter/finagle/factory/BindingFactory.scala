@@ -2,10 +2,7 @@ package com.twitter.finagle.factory
 
 import com.twitter.finagle._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.tracing.Trace
-import com.twitter.util.{
-  Activity, Closable, Duration, Future, Promise, Return, Stopwatch, Throw, 
-  Time, Var}
+import com.twitter.util.{  Activity, Closable, Future, Promise,   Time, Var}
 import java.net.SocketAddress
 import scala.collection.immutable
 
@@ -14,14 +11,14 @@ import scala.collection.immutable
  * requests while it is pending.
  */
 private class DynNameFactory[Req, Rep](
-    name: Activity[Name], 
-    newService: (Name, ClientConnection) => Future[Service[Req, Rep]])
+    name: Activity[Name.Bound], 
+    newService: (Name.Bound, ClientConnection) => Future[Service[Req, Rep]])
   extends ServiceFactory[Req, Rep] {
 
   private sealed trait State
   private case class Pending(q: immutable.Queue[(ClientConnection, Promise[Service[Req, Rep]])])
     extends State
-  private case class Named(name: Name) extends State
+  private case class Named(name: Name.Bound) extends State
   private case class Failed(exc: Throwable) extends State
   private case class Closed() extends State
 
@@ -100,23 +97,22 @@ private class DynNameFactory[Req, Rep](
 }
 
 /**
- * A factory that routes to the local interpretation of the passed-in
- * [[com.twitter.finagle.PathName PathName]]. It calls `newFactory`
+ * A factory that routes to the local binding of the passed-in
+ * [[com.twitter.finagle.Name.Path Name.Path]]. It calls `newFactory`
  * to mint a new [[com.twitter.finagle.ServiceFactory
  * ServiceFactory]] for novel name evaluations.
  *
  * A two-level caching scheme is employed for efficiency:
  *
  * First, Name-trees are evaluated by the default evaluation
- * strategy, which produces a set of terminal
- * [[com.twitter.finagle.Name Names]]; these name-sets are cached
- * individually so that they can be reused. Should different
- * name-tree evaluations yield the same name-set, they will use the
- * same underlying (cached) factory.
+ * strategy, which produces a set of [[com.twitter.finagle.Name.Bound
+ * Name.Bound]]; these name-sets are cached individually so that they
+ * can be reused. Should different name-tree evaluations yield the
+ * same name-set, they will use the same underlying (cached) factory.
  *
  * Secondly, in order to avoid evaluating names unnecessarily, we
- * also cache the evaluation of a [[com.twitter.finagle.Namer
- * Namer]]. This is done to short-circuit the evaluation process most
+ * also cache the evaluation relative to a [[com.twitter.finagle.Dtab
+ * Dtab]]. This is done to short-circuit the evaluation process most
  * of the time (as we expect most requests to share a namer).
  *
  * @bug This is far too complicated, though it seems necessary for
@@ -124,25 +120,27 @@ private class DynNameFactory[Req, Rep](
  *
  * @bug 'isAvailable' has a funny definition.
  */
-private[finagle] class InterpreterFactory[Req, Rep](
-    path: PathName,
+private[finagle] class BindingFactory[Req, Rep](
+    path: Path,
     newFactory: Var[Addr] => ServiceFactory[Req, Rep],
     statsReceiver: StatsReceiver = NullStatsReceiver,
     maxNameCacheSize: Int = 8,
     maxNamerCacheSize: Int = 4)
   extends ServiceFactory[Req, Rep] {
-  private[this] val PathName(getNamer, tree) = path
+
+  private[this] val tree = NameTree.Leaf(path)
 
   private[this] val nameCache = 
-    new ServiceFactoryCache[Name, Req, Rep](
-      name => newFactory(name.bind()), 
+    new ServiceFactoryCache[Name.Bound, Req, Rep](
+      bound => newFactory(bound.addr), 
       statsReceiver.scope("namecache"), maxNameCacheSize)
 
-  private[this] val namerCache = {
-    val newFactory: Namer => ServiceFactory[Req, Rep] = { namer =>
-      val name: Activity[Name] = namer.bind(tree).map(_.eval) flatMap {
-        case None => Activity.exception(new Exception("Negative name"))
-        case Some(set) if set.isEmpty => Activity.exception(new Exception("Empty name"))
+  private[this] val dtabCache = {
+    val newFactory: Dtab => ServiceFactory[Req, Rep] = { dtab =>
+      val namer = dtab orElse Namer.global
+      val name: Activity[Name.Bound] = namer.bind(tree).map(_.eval) flatMap {
+        case None => Activity.exception(new NoBrokersAvailableException)
+        case Some(set) if set.isEmpty => Activity.exception(new NoBrokersAvailableException)
         case Some(set) if set.size == 1 => Activity.value(set.head)
         case Some(set) => Activity.value(Name.all(set))
       }
@@ -150,16 +148,16 @@ private[finagle] class InterpreterFactory[Req, Rep](
       new DynNameFactory(name, nameCache.apply)
     }
 
-    new ServiceFactoryCache[Namer, Req, Rep](
-      newFactory, statsReceiver.scope("namercache"), 
+    new ServiceFactoryCache[Dtab, Req, Rep](
+      newFactory, statsReceiver.scope("dtabcache"), 
       maxNamerCacheSize)
   }
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
-    namerCache(getNamer(), conn)
+    dtabCache(Dtab(), conn)
 
   def close(deadline: Time) =
-    Closable.sequence(namerCache, nameCache).close(deadline)
+    Closable.sequence(dtabCache, nameCache).close(deadline)
 
-  override def isAvailable = namerCache.isAvailable
+  override def isAvailable = dtabCache.isAvailable
 }

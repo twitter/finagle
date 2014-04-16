@@ -864,8 +864,12 @@ case class KetamaClientBuilder private[memcached] (
 ) {
 
   def dest(name: Name): KetamaClientBuilder = {
-    copy(_group = CacheNodeGroup(Group.fromVarAddr(name.bind())))
+    val Name.Bound(va) = name
+    copy(_group = CacheNodeGroup(Group.fromVarAddr(va)))
   }
+  
+  def dest(name: String): KetamaClientBuilder =
+    dest(Resolver.eval(name))
 
   @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "7.0.0")
   def group(group: Group[CacheNode]): KetamaClientBuilder = {

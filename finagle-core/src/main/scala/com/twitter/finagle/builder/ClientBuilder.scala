@@ -390,20 +390,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def group(
     group: Group[SocketAddress]
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
-    dest(new Name {
-      // Group doesn't support the abstraction of "not yet bound" so
-      // this is a bit of a hack
-      @volatile var first = true
-
-      def bind() = group.set map {
-        case newSet if first && newSet.isEmpty => Addr.Pending
-        case newSet =>
-          first = false
-          Addr.Bound(newSet)
-      }
-
-      val show = "unknown"
-    })
+    dest(Name.fromGroup(group))
 
   /**
    * Specify a load balancer.  The load balancer implements

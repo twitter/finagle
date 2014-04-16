@@ -21,21 +21,21 @@ object newZk extends GlobalFlag(
  * of /$/inet names.
  */
 class serverset extends Namer {
-  val whichZk = if (newZk()) "zk2" else "zk"
-  
+  private[this] val whichZk = if (newZk()) "zk2" else "zk"
+
   // We have to involve a serverset roundtrip here to return a tree.
   // We risk invalidate an otherwise valid tree when there is a bad
   // serverset on an Alt branch that would never be taken. A
   // potential solution to this conundrum is to introduce some form
   // of lazy evaluation of name trees.
-  def lookup(path: Path): Activity[NameTree[Either[Path, Name]]] = path match {
+  def lookup(path: Path): Activity[NameTree[Name]] = path match {
     case Path.Utf8(hosts, rest@_*) =>
-      val name = Name("%s!%s!/%s".format(whichZk, hosts, rest mkString "/"))
-      
+      val name@Name.Bound(va) = Resolver.eval("%s!%s!/%s".format(whichZk, hosts, rest mkString "/"))
+
       // We have to bind the name ourselves in order to know whether
       // it resolves negatively.
-      Activity(name.bind() map {
-        case Addr.Bound(_) => Activity.Ok(NameTree.Leaf(Right(name)))
+      Activity(va map {
+        case Addr.Bound(_) => Activity.Ok(NameTree.Leaf(name))
         case Addr.Neg => Activity.Ok(NameTree.Neg)
         case Addr.Pending => Activity.Pending
         case Addr.Failed(exc) => Activity.Failed(exc)

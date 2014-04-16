@@ -1,7 +1,8 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle._
-import com.twitter.finagle.factory.{RefcountedFactory, StatsFactoryWrapper, TimeoutFactory}
+import com.twitter.finagle.factory.{
+  BindingFactory, RefcountedFactory, StatsFactoryWrapper, TimeoutFactory}
 import com.twitter.finagle.filter.{ExceptionSourceFilter, MonitorFilter}
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.service._
@@ -10,6 +11,7 @@ import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.RollupStatsReceiver
 import com.twitter.finagle.tracing.{ClientDestTracingFilter, TracingFilter}
 import com.twitter.finagle.transport.Transport
+import com.twitter.util.Var
 
 private[finagle] object StackClient {
   /**
@@ -151,12 +153,21 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
 
   /** @inheritdoc */
   def newClient(dest: Name, label: String): ServiceFactory[Req, Rep] = {
+    val clientStack = stack ++ (endpointer +: nilStack)
     val param.Stats(stats) = params[param.Stats]
-    (stack ++ (endpointer +: nilStack)).make(params +
-      LoadBalancerFactory.Dest(dest.bind()) +
+    val clientParams = params + 
       param.Label(label) +
       param.Stats(new RollupStatsReceiver(stats))
-    )
+
+    dest match {
+      case Name.Bound(addr) =>
+        clientStack.make(clientParams + LoadBalancerFactory.Dest(addr))
+      case Name.Path(path) =>
+        val newStack: Var[Addr] => ServiceFactory[Req, Rep] = 
+          addr => clientStack.make(clientParams + LoadBalancerFactory.Dest(addr))
+
+        new BindingFactory(path, newStack, stats.scope("interpreter"))
+    }
   }
 }
 

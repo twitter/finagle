@@ -19,7 +19,7 @@ trait Namer { self =>
    * Translate a [[com.twitter.finagle.Path Path]] into a
    * [[com.twitter.finagle.NameTree NameTree]].
    */
-  def lookup(path: Path): Activity[NameTree[Either[Path, Name]]]
+  def lookup(path: Path): Activity[NameTree[Name]]
 
   /**
    * Compose this [[com.twitter.finagle.Namer Namer]] with `next`;
@@ -34,7 +34,7 @@ trait Namer { self =>
    * paths by looking them up in this namer. A recursion depth of up
    * to 100 is allowed.
    */
-  def bind(tree: NameTree[Path]): Activity[NameTree[Name]] =
+  def bind(tree: NameTree[Path]): Activity[NameTree[Name.Bound]] =
     Namer.bind(this, tree)
 
   /**
@@ -44,14 +44,14 @@ trait Namer { self =>
   def bindAndEval(tree: NameTree[Path]): Var[Addr] =
     bind(tree).map(_.eval).run flatMap {
       case Activity.Ok(None) => Var.value(Addr.Neg)
-      case Activity.Ok(Some(names)) => Name.all(names).bind()
+      case Activity.Ok(Some(names)) => Name.all(names).addr
       case Activity.Pending => Var.value(Addr.Pending)
       case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
     }
 }
 
 private case class FailingNamer(exc: Throwable) extends Namer {
-  def lookup(path: Path): Activity[NameTree[Either[Path, Name]]] =
+  def lookup(path: Path): Activity[NameTree[Name]] =
     Activity.exception(exc)
 }
 
@@ -85,41 +85,43 @@ object Namer  {
         }
     }
 
-    def lookup(path: Path): Activity[NameTree[Either[Path, Name]]] = path match {
+    def lookup(path: Path): Activity[NameTree[Name]] = path match {
       case Path.Utf8("$", "inet", "", IntegerString(port)) =>
-        Activity.value(Leaf(Right(Name.bound(new InetSocketAddress(port)))))
+        Activity.value(Leaf(Name.bound(new InetSocketAddress(port))))
 
       case Path.Utf8("$", "inet", host, IntegerString(port)) =>
-        Activity.value(Leaf(Right(Name.bound(new InetSocketAddress(host, port)))))
+        Activity.value(Leaf(Name.bound(new InetSocketAddress(host, port))))
 
       case Path.Utf8("$", "nil", _*) => Activity.value(Empty)
       case Path.Utf8("$", kind, rest@_*) => namerOfKind(kind).lookup(Path.Utf8(rest:_*))
       case _ => Activity.value(Neg)
     }
+    
+    override def toString = "Namer.global"
   }
 
   private object IntegerString {
     def unapply(s: String): Option[Int] =
       Try(s.toInt).toOption
   }
-  
+
   private object DoubleString {
     def unapply(s: String): Option[Double] =
       Try(s.toDouble).toOption
   }
-  
+
   private val MaxDepth = 100
 
-  private def bind(namer: Namer, tree: NameTree[Path]): Activity[NameTree[Name]] =
-    bind(namer, 0)(tree map { leaf => Left(leaf) })
+  private def bind(namer: Namer, tree: NameTree[Path]): Activity[NameTree[Name.Bound]] =
+    bind(namer, 0)(tree map { path => Name.Path(path) })
 
-  private def bind(namer: Namer, depth: Int)(tree: NameTree[Either[Path, Name]])
-  : Activity[NameTree[Name]] =
+  private def bind(namer: Namer, depth: Int)(tree: NameTree[Name])
+  : Activity[NameTree[Name.Bound]] =
     if (depth > MaxDepth)
       Activity.exception(new IllegalArgumentException("Max recursion level reached."))
     else tree match {
-      case Leaf(Left(p)) => namer.lookup(p) flatMap bind(namer, depth+1)
-      case Leaf(Right(n)) => Activity.value(Leaf(n))
+      case Leaf(Name.Path(path)) => namer.lookup(path) flatMap bind(namer, depth+1)
+      case Leaf(bound@Name.Bound(_)) => Activity.value(Leaf(bound))
       case Neg => Activity.value(Neg)
       case Empty => Activity.value(Empty)
       case Union() | Alt() => Activity.value(Neg)
@@ -132,29 +134,10 @@ object Namer  {
     }
 
   private case class OrElse(fst: Namer, snd: Namer) extends Namer {
-    def lookup(path: Path): Activity[NameTree[Either[Path, Name]]] =
+    def lookup(path: Path): Activity[NameTree[Name]] =
       (fst.lookup(path) join snd.lookup(path)) map {
         case (left, right) => NameTree.Alt(left, right)
       }
   }
-}
-
-/**
- * A name which is to be interpreted with the given namer, which in
- * turn may be thread- or request-local.
- *
- * A naïve client may simply bind() the name prior to each request
- * dispatch; however this will quickly become expensive since clients
- * would need to be created for each request. Instead,
- * [[com.twitter.finagle.factory.InterpreterFactory
- * InterpreterFactory]] should be used: it is capable of
- * interepreting such names efficiently on a per-request basis.
- */
-case class PathName(
-    getNamer: () => Namer, 
-    tree: NameTree[Path]) 
-  extends Name {
-  def bind(): Var[Addr] = getNamer().bindAndEval(tree)
-  def show: String = tree.show
 }
 

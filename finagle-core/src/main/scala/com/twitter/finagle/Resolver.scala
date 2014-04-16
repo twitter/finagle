@@ -129,10 +129,12 @@ object Resolver {
    */
   @deprecated("Use Resolver.eval", "6.7.x")
   def resolve(addr: String): Try[Group[SocketAddress]] =
-    if (addr startsWith "/")
-      throw new IllegalArgumentException("Resolver.resolve does not support logical names")
-    else
-      Try { eval(addr) } map { n => NameGroup(n) }
+    Try { eval(addr) } flatMap {
+        case Name.Path(_) => 
+          Throw(new IllegalArgumentException("Resolver.resolve does not support logical names"))
+        case bound@Name.Bound(_) => 
+          Return(NameGroup(bound))
+      }
 
   /**
    * Parse and evaluate the argument into a Name. Eval parses
@@ -151,7 +153,7 @@ object Resolver {
    * binding failures are deferred.
    */
   def eval(name: String): Name =
-    if (name startsWith "/") Name(Path.read(name))
+    if (name startsWith "/") Name(name)
     else {
       val (resolver, arg) = lex(name) match {
         case (Eq :: _) | (Bang :: _) =>
@@ -166,7 +168,7 @@ object Resolver {
         case ts => (InetResolver, delex(ts))
       }
 
-      EvaldName(resolver, arg, name)
+      Name.Bound(resolver.bind(arg), name)
     }
 
   /**
@@ -183,11 +185,6 @@ object Resolver {
 
     (eval(delex(rest)), label)
   }
-}
-
-private case class EvaldName(resolver: Resolver, arg: String, name: String) extends Name {
-  def bind() = resolver.bind(arg)
-  val show = name
 }
 
 private object ServerRegistry {

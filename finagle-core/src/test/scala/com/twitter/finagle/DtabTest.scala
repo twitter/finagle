@@ -10,7 +10,7 @@ import org.scalatest.junit.JUnitRunner
 class DtabTest extends FunSuite {
 
   def pathTree(t: String) = 
-    NameTree.read(t).map(Left(_))
+    NameTree.read(t).map(Name(_))
 
   def assertEquiv[T: Equiv](left: T, right: T) = assert(
     if (Equiv[T].equiv(left, right)) None
@@ -36,18 +36,13 @@ class DtabTest extends FunSuite {
   test("d1 ++ d2") {
     val d1 = Dtab.read("/foo => /bar")
     val d2 = Dtab.read("/foo=>/biz;/biz=>/$/inet//8080;/bar=>/$/inet//9090")
-
-    ((d1 ++ d2) orElse Namer.global).bindAndEval(NameTree.Leaf(Path.read("/foo"))).sample() match {
-      case Addr.Bound(s) if s.size == 1 =>
-        assert(s.head === new InetSocketAddress(8080))
-      case addr => fail("Invalid address "+addr)
+    
+    def assertEval(dtab: Dtab, path: Path, expect: Name*) {
+      assert((dtab orElse Namer.global).bind(NameTree.Leaf(path)).sample().eval === Some(expect.toSet))
     }
 
-    ((d2 ++ d1) orElse Namer.global).bindAndEval(NameTree.Leaf(Path.read("/foo"))).sample() match {
-      case Addr.Bound(s) if s.size == 1 =>
-        assert(s.head === new InetSocketAddress(9090))
-      case _ => fail()
-    }
+    assertEval(d1++d2, Path.read("/foo"), Name.bound(new InetSocketAddress(8080)))
+    assertEval(d2++d1, Path.read("/foo"), Name.bound(new InetSocketAddress(9090)))
   }
 
   test("Dtab.stripPrefix") {

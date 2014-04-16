@@ -216,12 +216,10 @@ case class DefaultClient[Req, Rep](
   }
 
   val newStack: Name => ServiceFactory[Req, Rep] = {
-    case name: PathName =>
-      new InterpreterFactory(
-        name, newStack0, 
-        statsReceiver.scope("interpreter"))
-    case name =>
-      newStack0(name.bind())
+    case Name.Path(path) =>
+      new BindingFactory(path, newStack0, statsReceiver.scope("interpreter"))
+    case Name.Bound(addr) =>
+      newStack0(addr)
   }
 
   def newClient(dest: Name, label: String) = copy(

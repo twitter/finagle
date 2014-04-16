@@ -167,11 +167,7 @@ class DefaultClientTest extends FunSuite with Eventually {
 
   test("Services should be able to be closed even if they can't be resolved") {
     new DefaultClientHelper {
-      val dest = new Name {
-        def bind(): Var[Addr] = Var(Addr.Pending)
-
-        val show = "test"
-      }
+      val dest = Name.Bound.singleton(Var.value(Addr.Pending))
       val svc = client.newService(dest, "test")
       val f = svc.close()
       eventually { assert(f.isDefined) }

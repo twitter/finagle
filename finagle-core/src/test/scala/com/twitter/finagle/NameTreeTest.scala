@@ -81,15 +81,18 @@ class NameTreeTest extends FunSuite {
       }
   }
 
-  test("NameTree.bindAndEval: infinite loop") {
+  test("NameTree.bind: infinite loop") {
     val dtab = Dtab.read("""
       /foo/bar => /bar/foo;
       /bar/foo => /foo/bar""")
 
-    val Addr.Failed(_: IllegalArgumentException) = 
-      dtab.bindAndEval(NameTree.read("/foo/bar")).sample()
+    intercept[IllegalArgumentException] {
+      dtab.bind(NameTree.read("/foo/bar")).sample()
+    }
   }
   
+  
+
   test("NameTree.eval") {
     val cases = Seq[(String, Option[Set[String]])](
       "~" -> None,

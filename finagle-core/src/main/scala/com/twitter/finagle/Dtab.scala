@@ -20,11 +20,11 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
   def apply(i: Int): Dentry = dentries0(i)
   def length = dentries0.length
 
-  def lookup(path: Path): Activity[NameTree[Either[Path, Name]]] = {
+  def lookup(path: Path): Activity[NameTree[Name]] = {
     val matches = dentries collect {
       case Dentry(prefix, dst) if path startsWith prefix =>
         val suff = path drop prefix.size
-        dst map { pfx => Left(pfx ++ suff) }
+        dst map { pfx => Name(pfx ++ suff) }
     }
 
     if (matches.nonEmpty)

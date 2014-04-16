@@ -1,64 +1,71 @@
 package com.twitter.finagle
 
-import collection.immutable
 import java.net.SocketAddress
 import com.twitter.util.Var
 import com.twitter.finagle.util.Showable
 
 /**
- * A name represents a logical entity. Names are opaque and may be
- * bound to a (dynamic) set of socket addresses which terminate the
- * name.
+ * Names identify network locations. They come in two varieties:
  *
- * Names may be created from strings of the form
+ *  1. [[com.twitter.finagle.Name.Bound Bound]] names are concrete.
+ *  They represent a changeable list of network endpoints
+ *  (represented by [[com.twitter.finagle.Addr Addr]]s).
  *
- * {{{
- * resolver!arg
- * }}}
- *
- * which asks the resolver to interpret the given argument. For
- * example `inet!localhost:9090` is a name which binds to the socket
- * address `localhost:9090`.
- *
- * Names that begin with the character `/` are ''path'' names. These
- * are abstract names that require interpretation by a
- * [[com.twitter.finagle.Dtab Dtab]].
+ *  2. [[com.twitter.finagle.Name.Path Path]] names are unbound
+ *  paths, representing an abstract location which must be resolved
+ *  by some context, usually the [[com.twitter.finagle.Dtab Dtab]].
  */
-trait Name extends SocketAddress {
-  /**
-   * Bind the name. The bound name is returned as a variable
-   * representation -- it is subject to change at any time.
-   */
-  def bind(): Var[Addr]
-  
-  @deprecated("Use 'show' instead", "6.13.x")
-  def reified = show
-
-  def show: String
-
-  override def toString = "Name("+show+")"
-
-  // A temporary bridge API to wait for some other changes to land.
-  // Do not use.
-  def tempAPI_toGroup: Group[SocketAddress] = NameGroup(this)
-}
+sealed trait Name
 
 object Name {
+  /**
+   * Path names comprise a [[com.twitter.finagle.Path Path]] denoting a
+   * network location.
+   */
+  case class Path(path: com.twitter.finagle.Path) extends Name
+
+  /**
+   * Bound names comprise a changeable [[com.twitter.finagle.Addr
+   * Addr]] which carries a host list of internet addresses.
+   *
+   * Equality of two Names is delegated to `id`. Two Bound instances
+   * are equal whenever their `id`s are.
+   */
+  class Bound private(val addr: Var[Addr], val id: Any) extends Name with Proxy {
+    def self = id
+
+    // Workaround for https://issues.scala-lang.org/browse/SI-4807
+    def canEqual(that: Any) = true
+  }
+
+  object Bound {
+    def apply(addr: Var[Addr], id: Any): Name.Bound = new Bound(addr, id)
+    def unapply(name: Name.Bound): Option[Var[Addr]] = Some(name.addr)
+
+    /**
+     * Create a singleton address, equal only to itself.
+     */
+    def singleton(addr: Var[Addr]): Name.Bound = Name.Bound(addr, new{})
+  }
 
   // So that we can print NameTree[Name]
   implicit val showable: Showable[Name] = new Showable[Name] {
-    def show(name: Name) = name.show
+    def show(name: Name) = name match {
+      case Path(path) => path.show
+      case bound@Bound(_) => bound.id.toString
+    }
   }
 
   /**
    * Create a pre-bound address.
    */
-  def bound(addrs: SocketAddress*): Name = BoundName(addrs.toSet)
+  def bound(addrs: SocketAddress*): Name.Bound = 
+    Name.Bound(Var.value(Addr.Bound(addrs:_*)), addrs.toSet)
 
-  /** 
+  /**
    * An always-empty name.
    */
-  val empty: Name = bound()
+  val empty: Name.Bound = bound()
 
   /**
    * Create a name from a group.
@@ -68,101 +75,66 @@ object Name {
    * addresses. Empty sets could indicate either pending or negative
    * resolutions.
    */
-  def fromGroup(g: Group[SocketAddress]): Name = g match {
-    case NameGroup(n) => n
-    case g =>
-      new Name {
-        def bind() = g.set map { newSet => Addr.Bound(newSet) }
-        val show = "unknown"
-      }
+  def fromGroup(g: Group[SocketAddress]): Name.Bound = g match {
+    case NameGroup(name) => name
+    case group => Name.Bound({
+       // Group doesn't support the abstraction of "not yet bound" so
+       // this is a bit of a hack
+       @volatile var first = true
+
+       group.set map {
+         case newSet if first && newSet.isEmpty => Addr.Pending
+         case newSet =>
+           first = false
+           Addr.Bound(newSet)
+       }
+     }, group)
   }
 
   /**
    * Create a path-based Name which is interpreted vis-à-vis
    * the current request-local delegation table.
    */
-  def apply(path: Path): Name = {
-    // TODO: avoid the extra allocation here 
-    // (orElse construction).
-    def getName() = Dtab() orElse Namer.global
-    val tree = NameTree.Leaf(path)
-    PathName(getName, tree)
-  }
+  def apply(path: com.twitter.finagle.Path): Name = 
+    Name.Path(path)
 
   /**
    * Create a path-based Name which is interpreted vis-à-vis
    * the current request-local delegation table.
    */
-  def apply(path: String): Name = Resolver.eval(path)
-
-  /**
-   * Create a name from a variable address.
-   */
-  def apply(va: Var[Addr]): Name = new Name {
-    def bind() = va
-    val show = "unknown"
-  }
+  def apply(path: String): Name =
+    Name.Path(com.twitter.finagle.Path.read(path))
 
   /**
    * Create a name representing the union of the passed-in
    * names.
    */
-  def all(names: Set[Name]): Name = 
+  def all(names: Set[Name.Bound]): Name.Bound = 
     if (names.isEmpty) empty
     else if (names.size == 1) names.head
-    else AllName(names)
-}
+    else {
+      val va = Var.collect(names map(_.addr)) map {
+        case addrs if addrs.exists({case Addr.Bound(_) => true; case _ => false}) =>
+          Addr.Bound((addrs flatMap {
+            case Addr.Bound(as) => as
+            case _ => Set.empty: Set[SocketAddress]
+          }).toSet)
+    
+        case addrs if addrs.forall(_ == Addr.Neg) => Addr.Neg
+        case addrs if addrs.forall({case Addr.Failed(_) => true; case _ => false}) =>
+          Addr.Failed(new Exception)
+    
+        case _ => Addr.Pending
+      }
+      
+      val id = names map { case bound@Name.Bound(_) => bound.id }
+      Name.Bound(va, id)
+    }
 
-private case class AllName(names: Set[Name]) extends Name {
-  assert(names.nonEmpty)
-
-  def bind() = Var.collect(names map(_.bind())) map {
-    case addrs if addrs.exists({case Addr.Bound(_) => true; case _ => false}) =>
-      Addr.Bound((addrs flatMap {
-        case Addr.Bound(as) => as
-        case _ => Set.empty: Set[SocketAddress]
-      }).toSet)
-
-    case addrs if addrs.forall(_ == Addr.Neg) => Addr.Neg
-    case addrs if addrs.forall({case Addr.Failed(_) => true; case _ => false}) =>
-      Addr.Failed(new Exception)
-
-    case _ => Addr.Pending
+  // A temporary bridge API to wait for some other changes to land.
+  // Do not use.
+  def DONOTUSE_nameToGroup(name: Name): Group[SocketAddress] = {
+    val bound@Name.Bound(_) = name
+    NameGroup(bound)
   }
-
-  def show = "union"
-}
-
-private case class BoundName(addrs: Set[SocketAddress]) extends Name {
-  private[this] val bound = Var.value(Addr.Bound(addrs))
-  def bind() = bound
-  val show = "bound"
-}
-
-/**
- * Represents a socket address that is partially resolved. The
- * residual path is stored in `path`, and must be passed along with
- * the client request.
- */
-private case class PartialSocketAddress(
-  sa: SocketAddress,
-  path: String
-) extends SocketAddress
-
-/**
- * Represents a name that is partial: bound addresses are
- * mapped to partial addresses storing the residual path.
- */
-private case class PartialName(
-  parent: Name, path: String
-) extends Name {
-  def bind(): Var[Addr] = parent.bind() map {
-    case Addr.Bound(sockaddrs) =>
-      val partial: Set[SocketAddress] =
-        sockaddrs map { sa => PartialSocketAddress(sa, path) }
-      Addr.Bound(partial)
-    case a => a
-  }
-
-  val show = "partial"
 }

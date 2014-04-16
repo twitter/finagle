@@ -3,7 +3,7 @@ package com.twitter.finagle.serverset2
 import collection.JavaConverters._
 import com.twitter.common.zookeeper.ServerSetImpl
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Addr, Resolver, WeightedSocketAddress}
+import com.twitter.finagle.{Addr, Resolver, Name, WeightedSocketAddress}
 import com.twitter.finagle.zookeeper.ZkInstance
 import com.twitter.thrift.Status._
 import com.twitter.util.{Duration, RandomSocket, Var}
@@ -43,7 +43,7 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
 
   test("end-to-end: service endpoint") {
     val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar")
-    val va = Resolver.eval("zk2!"+inst.zookeeperConnectstring+"!/foo/bar").bind()
+    val Name.Bound(va) = Resolver.eval("zk2!"+inst.zookeeperConnectstring+"!/foo/bar")
 
     eventually { assert(Var.sample(va) === Addr.Neg) }
 
@@ -59,8 +59,8 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
 
   test("end-to-end: additional endpoints") {
     val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar")
-    val va1 = Resolver.eval("zk2!"+inst.zookeeperConnectstring+"!/foo/bar").bind()
-    val va2 = Resolver.eval("zk2!"+inst.zookeeperConnectstring+"!/foo/bar!epep").bind()
+    val Name.Bound(va1) = Resolver.eval("zk2!"+inst.zookeeperConnectstring+"!/foo/bar")
+    val Name.Bound(va2) = Resolver.eval("zk2!"+inst.zookeeperConnectstring+"!/foo/bar!epep")
 
     eventually {
       assert(Var.sample(va1) === Addr.Neg)

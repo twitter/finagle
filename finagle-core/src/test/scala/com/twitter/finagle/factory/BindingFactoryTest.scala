@@ -15,18 +15,16 @@ import org.scalatest.mock.MockitoSugar
 import com.twitter.finagle.stats._
 
 @RunWith(classOf[JUnitRunner])
-class InterpreterFactoryTest extends FunSuite with MockitoSugar {
+class BindingFactoryTest extends FunSuite with MockitoSugar {
   def anonNamer() = new Namer {
-    def lookup(path: Path): Activity[NameTree[Either[Path, Name]]] =
+    def lookup(path: Path): Activity[NameTree[Name]] =
       Activity.value(NameTree.Neg)
   }
   
   trait Ctx {
     val imsr = new InMemoryStatsReceiver
 
-    var namer = Namer.global
-    val name = PathName(
-      () => namer, NameTree.read("/foo/bar"))
+    val path = Path.read("/foo/bar")
 
     var news = 0
     var closes = 0
@@ -44,15 +42,17 @@ class InterpreterFactoryTest extends FunSuite with MockitoSugar {
         }
       }
 
-    val factory = new InterpreterFactory(
-      name, newFactory,
+    val factory = new BindingFactory(
+      path, newFactory,
       statsReceiver = imsr,
       maxNamerCacheSize = 2, 
       maxNameCacheSize = 2)
 
-    def newWith(localNamer: Namer): Service[Unit, Var[Addr]] = {
-      namer = localNamer orElse Namer.global
-      Await.result(factory())
+    def newWith(localDtab: Dtab): Service[Unit, Var[Addr]] = {
+      Dtab.unwind {
+        Dtab() = localDtab
+        Await.result(factory())
+      }
     }
   }
 
@@ -131,27 +131,27 @@ class InterpreterFactoryTest extends FunSuite with MockitoSugar {
 @RunWith(classOf[JUnitRunner])
 class DynNameFactoryTest extends FunSuite with MockitoSugar {
   private trait Ctx {
-    val newService = mock[(Name, ClientConnection) => Future[Service[String, String]]]
+    val newService = mock[(Name.Bound, ClientConnection) => Future[Service[String, String]]]
     val svc = mock[Service[String, String]]
-    val (name, namew) = Activity[Name]()
+    val (name, namew) = Activity[Name.Bound]()
     val dyn = new DynNameFactory[String, String](name, newService)
   }
 
   test("queue requests until name is nonpending (ok)") (new Ctx {
-    when(newService(any[Name], any[ClientConnection])).thenReturn(Future.value(svc))
+    when(newService(any[Name.Bound], any[ClientConnection])).thenReturn(Future.value(svc))
 
     val f1, f2 = dyn()
     assert(!f1.isDefined)
     assert(!f2.isDefined)
 
-    namew.notify(Return(Name("/okay")))
+    namew.notify(Return(Name.empty))
 
     assert(f1.poll === Some(Return(svc)))
     assert(f2.poll === Some(Return(svc)))
   })
   
   test("queue requests until name is nonpending (fail)") (new Ctx {
-    when(newService(any[Name], any[ClientConnection])).thenReturn(Future.never)
+    when(newService(any[Name.Bound], any[ClientConnection])).thenReturn(Future.never)
 
     val f1, f2 = dyn()
     assert(!f1.isDefined)
@@ -165,7 +165,7 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
   })
   
   test("dequeue interrupted requests") (new Ctx {
-    when(newService(any[Name], any[ClientConnection])).thenReturn(Future.never)
+    when(newService(any[Name.Bound], any[ClientConnection])).thenReturn(Future.never)
     
     val f1, f2 = dyn()
     assert(!f1.isDefined)
@@ -181,7 +181,7 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
     }
     assert(f2.poll === None)
 
-    namew.notify(Return(Name("/okay")))
+    namew.notify(Return(Name.empty))
     assert(f2.poll === None)
   })
 } 
