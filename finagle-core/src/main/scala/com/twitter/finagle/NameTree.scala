@@ -225,16 +225,6 @@ object NameTree {
    * 
    * name       ::= path | '~' | '$'
    * 
-   * path       ::= '/' labels
-   * 
-   * labels     ::= label '/' label
-   *                label
-   * 
-   * label      ::= litlabel | hexlabel
-   * 
-   * hexlabel   ::= (\\x[a-f0-9][a-f0-9])+
-   * 
-   * litlabel   ::= [0-9A-Za-z:.#$%-]+
    * weight     ::= -?([0-9]++(\.[0-9]+*)?|[0-9]+*\.[0-9]++)([eE][+-]?[0-9]++)?[fFdD]?
    * }}}
    *
@@ -249,6 +239,8 @@ object NameTree {
    * {{{
    * Alt(Union(Leaf(Path(foo)),Leaf(Path(bar))),Leaf(Path(baz)),Empty)
    * }}}
+   *
+   * The production ``path`` is documented at [[com.twitter.finagle.Path$ Path.read]].
    *
    * @throws IllegalArgumentException when the string does not
    * represent a valid name tree.

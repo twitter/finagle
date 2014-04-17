@@ -99,11 +99,8 @@ object Path {
    * labels     ::= label '/' label
    *                label
    *
-   * label      ::= litlabel | hexlabel
+   * label      ::= (\\x[a-f0-9][a-f0-9]|[0-9A-Za-z:.#$%-_])+
    *
-   * hexlabel   ::= (\\x[a-f0-9][a-f0-9])+
-   *
-   * litlabel   ::= [0-9A-Za-z:.#$%-]+
    * }}}
    *
    * for example
