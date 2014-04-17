@@ -105,7 +105,7 @@ class ChannelTransport[In, Out](ch: Channel)
     p
   }
 
-  def isOpen = ch.isOpen
+  def isOpen = !failed.get && ch.isOpen
 
   def close(deadline: Time) = {
     if (ch.isOpen)
