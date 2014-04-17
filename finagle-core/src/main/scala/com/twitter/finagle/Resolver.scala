@@ -12,6 +12,15 @@ import scala.collection.mutable
  * variable address. Resolvers have an associated scheme
  * which is used for lookup so that names may be resolved
  * in a global context.
+ *
+ * These are loaded by Finagle through the 
+ * [[com.twitter.finagle.util.LoadService service loading mechanism]]. Thus, in
+ * order to implement a new resolver, a class implementing `Resolver` with a
+ * 0-arg constructor must be registered in a file named 
+ * `META-INF/services/com.twitter.finagle.Resolver` included in the classpath; see
+ * Oracle's
+ * [[http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html ServiceLoader]] 
+ * documentation for further details.
  */
 trait Resolver {
   val scheme: String

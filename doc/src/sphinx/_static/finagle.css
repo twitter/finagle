@@ -10,6 +10,12 @@ pre {
   background: #fdfdfd;
 }
 
+tt {
+    background-color: #fff;
+    color: #000;
+}
+
+
 .caption {
   padding: 10px 0 10px 10px;
   font-size: 0.9em;
@@ -58,6 +64,10 @@ ul {
   margin: 15px 0 15 px 0;
   list-style: none;
   line-height: 1.4;
+}
+
+ul li {
+    list-style: none;
 }
 
 ul li:before {

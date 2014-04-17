@@ -41,7 +41,8 @@ htmlhelp_basename = "finagle"
 extlinks = {
   'issue': ('https://github.com/twitter/finagle/issues/%s', 'issue #'),
   'ex': ('https://github.com/twitter/finagle/blob/finagle-example/src/main/scala/%s', 'Finagle example '),
-  'api': ('http://twitter.github.com/finagle/docs/#%s', 'Finagle API doc'),
+  'api': ('http://twitter.github.io/finagle/docs/#%s', ''),
+  'util': ('http://twitter.github.io/util/docs/#%s', ''),
   'src':("https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/%s", 'finagle-core github repo')
 }
 

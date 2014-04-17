@@ -48,6 +48,7 @@ User's guide
    ServicesAndFilters
    Servers
    Clients
+   Names
    Protocols
    Extending
    Metrics
