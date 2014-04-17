@@ -1,7 +1,7 @@
 package com.twitter.finagle.exp
 
 import com.twitter.app.GlobalFlag
-import com.twitter.concurrent.{BridgedThreadPoolScheduler, Scheduler}
+import com.twitter.concurrent.{BridgedThreadPoolScheduler, Scheduler, LocalScheduler}
 import com.twitter.finagle.stats.DefaultStatsReceiver
 import com.twitter.finagle.util.DefaultLogger
 import com.twitter.jvm.numProcs
@@ -11,7 +11,7 @@ import java.util.logging.{Level, Logger}
 object scheduler extends GlobalFlag(
   "local",
   "Which scheduler to use for futures "+
-  "<local> | <bridged>[:<num workers>] | <forkjoin>[:<num workers>]"
+  "<local> | <lifo> | <bridged>[:<num workers>] | <forkjoin>[:<num workers>]"
 )
 
 private[finagle] object FinagleScheduler {
@@ -65,6 +65,10 @@ private[finagle] object FinagleScheduler {
 
       case "forkjoin" :: Integer(numWorkers) :: Nil => switchToForkJoin(numWorkers)
       case "forkjoin" :: Nil => switchToForkJoin(numProcs().ceil.toInt)
+
+      case "lifo" :: Nil =>
+        log.info("Using LIFO local scheduler")
+        Scheduler.setUnsafe(new LocalScheduler(true))
 
       case "local" :: Nil => // do nothing
       case _ =>
