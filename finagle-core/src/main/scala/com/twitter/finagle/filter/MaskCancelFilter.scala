@@ -14,5 +14,4 @@ import com.twitter.util.{Future, Promise}
 class MaskCancelFilter[Req, Rep] extends SimpleFilter[Req, Rep] {
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] =
     service(req).masked
-
 }

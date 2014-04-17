@@ -30,8 +30,7 @@ trait MemcachedKetamaClient {
   def newKetamaClient(
     dest: String, keyHasher: KeyHasher = KeyHasher.KETAMA, ejectFailedHost: Boolean = true
   ): memcached.Client = {
-    val name = Resolver.eval(dest)
-    val va = name.bind()
+    val Name.Bound(va) = Resolver.eval(dest)
     val g = Group.fromVarAddr(va)
     newKetamaClient(g, keyHasher, ejectFailedHost)
   }
@@ -54,8 +53,7 @@ trait MemcachedKetamaClient {
   def newTwemcacheKetamaClient(
     dest: String, keyHasher: KeyHasher = KeyHasher.KETAMA, ejectFailedHost: Boolean = true
   ): memcached.TwemcacheClient = {
-    val n = Resolver.eval(dest)
-    val va = n.bind()
+    val Name.Bound(va) = Resolver.eval(dest)
     val g = Group.fromVarAddr(va)
     newTwemcacheKetamaClient(g, keyHasher, ejectFailedHost)
   }

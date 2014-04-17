@@ -6,6 +6,22 @@ import com.twitter.finagle.util.Throwables
 import com.twitter.util.{Future, Stopwatch, Throw, Return}
 import java.util.concurrent.atomic.AtomicInteger
 
+private[finagle] object StatsFilter {
+  object RequestStats extends Stack.Role
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.filter.StatsFilter]].
+   */
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Simple[ServiceFactory[Req, Rep]](RequestStats) {
+      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
+        val param.Stats(statsReceiver) = params[param.Stats]
+        if (statsReceiver.isNull) next
+        else new StatsFilter(statsReceiver) andThen next
+      }
+    }
+}
+
 /**
  * StatsFilter reports request statistics to the given receiver.
  *
@@ -65,12 +81,27 @@ class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
   }
 }
 
+private[finagle] object StatsServiceFactory {
+  object FactoryStats extends Stack.Role
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.StatsServiceFactory]].
+   */
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Simple[ServiceFactory[Req, Rep]](FactoryStats) {
+      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
+        val param.Stats(statsReceiver) = params[param.Stats]
+        if (statsReceiver.isNull) next
+        else new StatsServiceFactory(next, statsReceiver)
+      }
+    }
+}
+
 class StatsServiceFactory[Req, Rep](
-  factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver
-) extends ServiceFactoryProxy[Req, Rep](factory)
-{
-  private[this] val availableGauge = statsReceiver.addGauge("available"){
-    if (isAvailable) 1F
-    else 0F
+  factory: ServiceFactory[Req, Rep],
+  statsReceiver: StatsReceiver
+) extends ServiceFactoryProxy[Req, Rep](factory) {
+  private[this] val availableGauge = statsReceiver.addGauge("available") {
+    if (isAvailable) 1F else 0F
   }
 }

@@ -1,8 +1,23 @@
 package com.twitter.finagle.factory
 
-import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy, ClientConnection}
+import com.twitter.finagle.{ClientConnection, param, ServiceFactory, ServiceFactoryProxy, Stack, Stackable}
 import com.twitter.finagle.util.Throwables
 import com.twitter.finagle.stats.StatsReceiver
+
+private[finagle] object StatsFactoryWrapper {
+  object ServiceCreationStats extends Stack.Role
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.StatsFactoryWrapper]].
+   */
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Simple[ServiceFactory[Req, Rep]](ServiceCreationStats) {
+      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
+        val param.Stats(statsReceiver) = params[param.Stats]
+        new StatsFactoryWrapper(next, statsReceiver.scope("service_creation"))
+      }
+    }
+}
 
 /**
  * A [[com.twitter.finagle.ServiceFactoryProxy]] that tracks statistics on

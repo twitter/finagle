@@ -224,7 +224,7 @@ private[thrift] class TTwitterFilter(
     if (dtab.nonEmpty) {
       val delegations = new ArrayList[thrift.Delegation](dtab.size)
       for (Dentry(src, dst) <- dtab)
-        delegations.add(new thrift.Delegation(src, dst.reified))
+        delegations.add(new thrift.Delegation(src.show, dst.show))
 
       header.setDelegations(delegations)
     }
@@ -244,7 +244,8 @@ private[thrift] class TTwitterFilter(
   ) = {
     // Create a new span identifier for this request.
     val msg = new InputBuffer(request.message, protocolFactory)().readMessageBegin()
-    Trace.recordRpcname(serviceName, msg.name)
+    Trace.recordServiceName(serviceName)
+    Trace.recordRpc(msg.name)
 
     val thriftRequest =
       if (isUpgraded)

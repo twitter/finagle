@@ -7,13 +7,16 @@ import com.twitter.io.Buf
 import com.twitter.finagle.util.LoadService
 import java.net.InetSocketAddress
 
-private[serverset2] sealed trait ClientFactory[+T <: ZooKeeperClient] {
+private[serverset2] sealed trait Capability
+private[serverset2] object Reader extends Capability
+private[serverset2] object Writer extends Capability
+private[serverset2] object Multi extends Capability
+
+private[serverset2] trait ClientFactory[T <: ZooKeeperClient] {
+  val capabilities: Seq[Capability]
+  val priority: Int
   def newClient(config: ClientConfig): Watched[T]
 }
-
-private[serverset2] trait ReaderFactory extends ClientFactory[ZooKeeperReader]
-private[serverset2] trait WriterFactory extends ReaderFactory with ClientFactory[ZooKeeperRW]
-private[serverset2] trait MultiFactory extends WriterFactory with ClientFactory[ZooKeeperRWMulti]
 
 private[client] case class ClientConfig(
     val hosts: String,
@@ -65,7 +68,7 @@ private[serverset2] object ClientBuilder {
   private val DefaultConfig: ClientConfig = ClientConfig(
     hosts = "localhost:2181",
     sessionTimeout = 10.seconds,
-    statsReceiver = DefaultStatsReceiver,
+    statsReceiver = DefaultStatsReceiver.scope("zkclient"),
     readOnlyOK = false,
     sessionId = None,
     password = None
@@ -79,12 +82,12 @@ private[serverset2] object ClientBuilder {
   def get() = apply()
 }
 
-private[client] class ClientBuilder(
-    config: ClientConfig) {
-  private def resolve[T](fs: Seq[T]) = fs match {
+private[client] class ClientBuilder(config: ClientConfig) {
+  private def resolve[T <: ZooKeeperClient](cap: Capability) = LoadService[ClientFactory[T]]()
+      .filter(_.capabilities.contains(cap))
+      .sortBy(_.priority) match {
     case Seq() => throw new RuntimeException("No ZooKeeper ClientFactory Found")
-    case Seq(f) => f
-    case many => throw new RuntimeException("Multiple ZooKeeper ClientFactories Available")
+    case Seq(f, _*) => f
   }
 
   override def toString() = "ClientBuilder(%s)".format(config.toString)
@@ -97,27 +100,28 @@ private[client] class ClientBuilder(
    * Create a new ZooKeeperReader client.
    *
    * @return configured Watched[ZooKeeperReader]
-   * @throws RuntimeException if no matching, or multiple ReaderFactories are found.
+   * @throws RuntimeException if no matching ClientFactories are found.
    */
-  def reader(): Watched[ZooKeeperReader] = resolve(LoadService[ReaderFactory]()).newClient(config)
+  def reader(): Watched[ZooKeeperReader] =
+    resolve[ZooKeeperReader](Reader).newClient(config)
 
   /**
    * Create a new ZooKeeperRW client.
    *
    * @return configured Watched[ZooKeeperRW]
-   * @throws RuntimeException if no matching, or multiple WriterFactories are found.
+   * @throws RuntimeException if no matching ClientFactories are found.
    */
   def writer(): Watched[ZooKeeperRW] =
-    resolve(LoadService[WriterFactory]()).newClient(config)
+    resolve[ZooKeeperRW](Writer).newClient(config)
 
   /**
    * Create a new ZooKeeperRWMulti client.
    *
    * @return configured Watched[ZooKeeperRWMulti]
-   * @throws RuntimeException if no matching, or multiple MultiFactories are found.
+   * @throws RuntimeException if no matching ClientFactories are found.
    */
   def multi(): Watched[ZooKeeperRWMulti] =
-    resolve(LoadService[MultiFactory]()).newClient(config)
+    resolve[ZooKeeperRWMulti](Multi).newClient(config)
 
   /**
    * Configure builder with list of ZooKeeper servers in an ensemble.

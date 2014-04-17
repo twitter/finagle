@@ -181,13 +181,17 @@ private[thrift] class ThriftServerTracingFilter(
         val ds = header.getDelegationsIterator()
         while (ds.hasNext()) {
           val d = ds.next()
-          if (d.src != null && d.dst != null)
-            Dtab.delegate(d.src, d.dst)
+          if (d.src != null && d.dst != null) {
+            val src = Path.read(d.src)
+            val dst = NameTree.read(d.dst)
+            Dtab.delegate(Dentry(src, dst))
+          }
         }
       }
 
       val msg = new InputBuffer(request_, protocolFactory)().readMessageBegin()
-      Trace.recordRpcname(serviceName, msg.name)
+      Trace.recordServiceName(serviceName)
+      Trace.recordRpc(msg.name)
       Trace.record(Annotation.ServerRecv())
 
       if (header.contexts != null) {
@@ -233,7 +237,8 @@ private[thrift] class ThriftServerTracingFilter(
       } else {
         // request from client without tracing support
 
-        Trace.recordRpcname(serviceName, msg.name)
+        Trace.recordServiceName(serviceName)
+        Trace.recordRpc(msg.name)
 
         Trace.record(Annotation.ServerRecv())
         Trace.record("finagle.thrift.noUpgrade")

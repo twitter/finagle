@@ -72,7 +72,7 @@ case class DefaultServer[Req, Rep, In, Out](
       val handletimeFilter = new HandletimeFilter[Req, Rep](statsReceiver)
       val monitorFilter = new MonitorFilter[Req, Rep](
         reporter(name, None) andThen monitor andThen new SourceTrackingMonitor(logger, "server"))
-      val tracingFilter = new TracingFilter[Req, Rep](tracer)
+      val tracingFilter = new TracingFilter[Req, Rep](tracer, name)
       val jvmFilter= DefaultServer.newJvmFilter[Req, Rep]()
 
       val filter = handletimeFilter andThen // to measure total handle time

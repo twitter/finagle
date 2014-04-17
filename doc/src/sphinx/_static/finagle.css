@@ -1,5 +1,21 @@
 @import url("flasky.css");
 
+pre {
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border: 1px solid #eee;
+  padding: 10px 10px;
+  margin: 0px -10px;
+  background: #fdfdfd;
+}
+
+.caption {
+  padding: 10px 0 10px 10px;
+  font-size: 0.9em;
+  font-style: italic;
+}
+
 div.sphinxsidebar li {
   word-wrap: break-word;
 }

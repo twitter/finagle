@@ -1,6 +1,7 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.{  ClientConnection, Service, ServiceFactory, ServiceFactoryWrapper}
+import com.twitter.conversions.time._
+import com.twitter.finagle._
 import com.twitter.util.{Duration, Time, Timer, TimerTask, Try}
 
 private[finagle] object FailureAccrualFactory {
@@ -11,6 +12,31 @@ private[finagle] object FailureAccrualFactory {
         new FailureAccrualFactory(factory, numFailures, markDeadFor, timer)
     }
   }
+
+  object FailureAccrual extends Stack.Role
+
+  /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.service.FailFastFactory]].
+   * @param numFailures The number of consecutive failures before marking an endpoint as dead.
+   * @param markDeadFor The duration to mark an endpoint as dead.
+   */
+  case class Param(numFailures: Int, markDeadFor: Duration)
+  implicit object Param extends Stack.Param[Param] with Stack.Role {
+    val default = Param(5, 5.seconds)
+  }
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.FailureAccrualFactory]].
+   */
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Simple[ServiceFactory[Req, Rep]](FailureAccrual) {
+      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
+        val FailureAccrualFactory.Param(n, d) = params[FailureAccrualFactory.Param]
+        val param.Timer(timer) = params[param.Timer]
+        wrapper(n, d)(timer) andThen next
+      }
+    }
 }
 
 /**

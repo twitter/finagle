@@ -4,13 +4,13 @@ import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.finagle.builder.{Server, ServerBuilder}
 import com.twitter.finagle.Service
 import com.twitter.finagle.stream.{Stream, StreamResponse}
+import com.twitter.io.Charsets
 import com.twitter.util.{Future, Timer, JavaTimer}
 import com.twitter.conversions.time._
 import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpRequest, HttpResponseStatus}
-import org.jboss.netty.util.CharsetUtil
 import scala.util.Random
 
 /**
@@ -36,7 +36,7 @@ object StreamServer {
 
   private[this] def produce(r: Random, t: Timer) {
     t.schedule(1.second.fromNow) {
-      val m = copiedBuffer(r.nextInt.toString + "\n", CharsetUtil.UTF_8)
+      val m = copiedBuffer(r.nextInt.toString + "\n", Charsets.Utf8)
       messages.send(m) andThen produce(r, t)
     }
   }

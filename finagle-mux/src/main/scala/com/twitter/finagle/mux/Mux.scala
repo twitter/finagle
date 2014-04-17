@@ -5,7 +5,8 @@ import com.twitter.finagle.netty3._
 import com.twitter.finagle.pool.ReusingPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
-import com.twitter.util.{CloseAwaitably, Future, Promise, Return, Time}
+import com.twitter.finagle.transport.Transport
+import com.twitter.util.{Closable, CloseAwaitably, Future, Promise, Return, Time}
 import java.net.SocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
 
@@ -88,36 +89,17 @@ package exp {
     }
   }
 
-  private[finagle]
-  object MuxNetty3Stack extends Netty3Stack[Any, Any, ChannelBuffer, ChannelBuffer](
-    "mux",
-    mux.PipelineFactory,
-    (transport, statsReceiver) =>
-      new mux.ClientDispatcher(transport.cast[ChannelBuffer, ChannelBuffer], statsReceiver)
-  )
+  object MuxClient extends StackClient[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer](
+    StackClient.newStack.replace(StackClient.Role.Pool, ReusingPool.module[ChannelBuffer, ChannelBuffer]),
+    Stack.Params.empty
+  ) {
+    protected val newTransporter: Stack.Params => Transporter[ChannelBuffer, ChannelBuffer] = { prms =>
+      Netty3Transporter(mux.PipelineFactory, prms)
+    }
 
-  private[finagle]
-  object ReusingPoolModule
-    extends Stack.Simple[ServiceFactory[ChannelBuffer, ChannelBuffer]](StackClient.Role.ReusingPool)
-  {
-    def make(params: Stack.Params, nextFac: ServiceFactory[ChannelBuffer, ChannelBuffer]) = {
-      val StackClient.Stats(statsReceiver, _) = params[StackClient.Stats]
-      new ReusingPool(nextFac, statsReceiver.scope("reusingpool"))
+    protected val newDispatcher: Stack.Params => Dispatcher = { prms =>
+      val param.Stats(sr) = prms[param.Stats]
+      trans => new mux.ClientDispatcher(trans.cast[ChannelBuffer, ChannelBuffer], sr)
     }
   }
-
-  private[finagle]
-  class MuxClient(client: StackClient[ChannelBuffer, ChannelBuffer])
-    extends RichStackClient[ChannelBuffer, ChannelBuffer, MuxClient](client)
-  {
-    protected def newRichClient(client: StackClient[ChannelBuffer, ChannelBuffer]) =
-      new MuxClient(client)
-  }
-
-  object MuxClient extends MuxClient(new StackClient({
-    val reusingClientStack = StackClient.clientStack[ChannelBuffer, ChannelBuffer]
-      .replace(StackClient.Role.Pool, ReusingPoolModule)
-
-    reusingClientStack ++ (MuxNetty3Stack +: StackClient.nilStack)
-  }))
 }

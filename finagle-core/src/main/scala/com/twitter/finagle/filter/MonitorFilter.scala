@@ -1,7 +1,23 @@
 package com.twitter.finagle.filter
 
+import com.twitter.finagle._
+import com.twitter.finagle.util.{DefaultMonitor, ReporterFactory, LoadedReporterFactory}
 import com.twitter.util.{Monitor, Future}
-import com.twitter.finagle.{SimpleFilter, Service}
+
+private[finagle] object MonitorFilter {
+  object Monitoring extends Stack.Role
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.filter.MonitorFilter]].
+   */
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Simple[ServiceFactory[Req, Rep]](Monitoring) {
+      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
+        val param.Monitor(monitor) = params[param.Monitor]
+        new MonitorFilter(monitor) andThen next
+      }
+    }
+}
 
 /**
  * A [[com.twitter.finagle.Filter]] that handles exceptions (incl. raw) thrown

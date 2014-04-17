@@ -390,20 +390,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def group(
     group: Group[SocketAddress]
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
-    dest(new Name {
-      // Group doesn't support the abstraction of "not yet bound" so
-      // this is a bit of a hack
-      @volatile var first = true
-
-      def bind() = group.set map {
-        case newSet if first && newSet.isEmpty => Addr.Pending
-        case newSet =>
-          first = false
-          Addr.Bound(newSet)
-      }
-
-      val reified = "fail!"
-    })
+    dest(Name.fromGroup(group))
 
   /**
    * Specify a load balancer.  The load balancer implements
@@ -531,7 +518,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * The maximum number of connections that are allowed per host.
-   * Required.  Finagle guarantees to to never have more active
+   * Required.  Finagle guarantees to never have more active
    * connections than this limit.
    */
   def hostConnectionLimit(value: Int): ClientBuilder[Req, Rep, HasCluster, HasCodec, Yes] =
@@ -767,7 +754,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       name = config.nameOrDefault,
       pipelineFactory = codec.pipelineFactory,
       newChannel = newChannel,
-      newTransport = codec.newClientTransport(_, statsReceiver),
+      newTransport = (c: Channel) => codec.newClientTransport(c, statsReceiver),
       tlsConfig = config.tls map { case (e, v) => Netty3TransporterTLSConfig(e, v) },
       httpProxy = config.httpProxy,
       socksProxy = config.socksProxy,

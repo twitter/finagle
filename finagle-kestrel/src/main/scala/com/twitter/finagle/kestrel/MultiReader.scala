@@ -43,8 +43,10 @@ object MultiReader {
   }
 
   @deprecated("Use Var[Addr]-based `apply` method", "6.8.2")
-  def apply(cluster: Cluster[SocketAddress], queueName: String): ClusterMultiReaderBuilder =
-    apply(Name.fromGroup(Group.fromCluster(cluster)).bind(), queueName)
+  def apply(cluster: Cluster[SocketAddress], queueName: String): ClusterMultiReaderBuilder = {
+    val Name.Bound(va) = Name.fromGroup(Group.fromCluster(cluster))
+    apply(va, queueName)
+  }
 
   @deprecated("Use Var[Addr]-based `apply` method", "6.8.2")
   def apply(clients: Seq[Client], queueName: String): ReadHandle =

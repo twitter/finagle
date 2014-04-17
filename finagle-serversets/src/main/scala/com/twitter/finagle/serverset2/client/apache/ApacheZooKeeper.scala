@@ -9,6 +9,14 @@ import org.apache.zookeeper
 import org.apache.zookeeper.AsyncCallback._
 import scala.collection.JavaConverters._
 
+/**
+ * ZooKeeperClient implementation based on Apache ZooKeeper Library
+ *
+ * Provides Reader and Writer.
+ * No Multi support.
+ *
+ * @param zk Underlying Apache ZooKeeper client.
+ */
 private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeeper)
     extends ZooKeeperRW {
   private def fromZKData(data: Array[Byte]): Option[Buf] = data match {
@@ -262,7 +270,7 @@ private[serverset2] object ApacheZooKeeper {
       protected val underlying: ZooKeeperRW = zk
       protected val stats: StatsReceiver = config.statsReceiver
     }
-    if (com.twitter.finagle.serverset2.chatty()) {
+    if (com.twitter.finagle.serverset2.client.chatty()) {
       val logger = Logger.get(getClass)
       Watched(
         new ChattyRW {
@@ -276,7 +284,10 @@ private[serverset2] object ApacheZooKeeper {
   }
 }
 
-private[serverset2] class ApacheFactory private[client] extends WriterFactory {
+private class ApacheFactory extends ClientFactory[ZooKeeperRW] {
+  val capabilities: Seq[Capability] = Seq(Reader, Writer)
+  val priority: Int = 0
+
   def newClient(config: ClientConfig): Watched[ZooKeeperRW] =
     ApacheZooKeeper.newClient(config)
 }

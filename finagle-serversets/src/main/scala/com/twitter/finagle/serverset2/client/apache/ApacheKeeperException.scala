@@ -32,6 +32,11 @@ private[serverset2] object ApacheKeeperException {
     case -114 => Some(KeeperException.InvalidACL(path))
     case -115 => Some(KeeperException.AuthFailed(path))
     case -118 => Some(KeeperException.SessionMoved(path))
+    case -119 => Some(KeeperException.ReadOnly(path))
+    case -120 => Some(KeeperException.NewConfigNoQuorum(path))
+    case -121 => Some(KeeperException.ReconfigInProgress(path))
+    case -122 => Some(KeeperException.EphemeralOnLocalSession(path))
+    case -123 => Some(KeeperException.NoWatcher(path))
     case _ => Some(KeeperException.UnknownError(path))
   }
 }

@@ -7,6 +7,8 @@ client-server protocols. Thus in order to provide usable APIs for clients and
 servers, there are a number of Finagle subprojects that implement common
 protocols. A few of these protocol implementations are documented below.
 
+.. _thrift_and_scrooge:
+
 Thrift
 ------
 
@@ -32,12 +34,40 @@ the protocol with support for our internal infrastructure. Specifically, we tack
 on a request header containing Zipkin tracing info, Finagle ClientId strings, and
 Wily delegations. In order to maintain backwards compatibility, TTwitter clients
 perform protocol negotiation upon connection and will downgrade to raw TBinary
-Thrift if servers are not using the upgraded protocol.
+Thrift if servers are not using the upgraded protocol. By default, `finagle-thrift`
+uses the Thrift framed codec and the binary protocol for serialization.
 
-By default, Finagle uses the Thrift framed codec and the binary protocol for
-serialization. At Twitter, we use our open-source Thrift code-generator called
+Using finagle-thrift
+~~~~~~~~~~~~~~~~~~~~
+
+At Twitter, we use our open-source Thrift code-generator called
 `Scrooge <http://twitter.github.io/scrooge/>`_. Scrooge is written in Scala and
-can generate source code in Scala or Java.
+can generate source code in Scala or Java. Given the following IDL:
+
+.. literalinclude:: ../../../finagle-example/src/main/thrift/hello.thrift
+   :lines: 4-7
+
+Scrooge will generate code that can be used by `finagle-thrift` with the
+following rich APIs [#]_:
+
+.. _finagle_thrift_server:
+
+Serving the IDL:
+
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServer.scala#thriftserverapi
+
+.. _finagle_thrift_client:
+
+and the symmetric remote dispatch:
+
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftClient.scala#thriftclientapi
+
+Check out the `finagle-thrift` `API docs <http://twitter.github.io/finagle/docs/#com.twitter.finagle.Thrift$>`_
+for more info.
+
+.. [#] This API makes it difficult to wrap endpoints in Finagle
+       filters. We're still experimenting with how to make the `Service`
+       abstraction fit more cleanly into a world with IDLs.
 
 Mux
 ---

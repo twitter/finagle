@@ -2,19 +2,46 @@ package com.twitter.finagle.channel
 
 import com.twitter.collection.BucketGenerationalQueue
 import com.twitter.finagle.service.FailedService
+import com.twitter.finagle.{param, Stack, Stackable}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.{ConnectionRefusedException, SimpleFilter, Service, ClientConnection}
 import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy}
-
 import com.twitter.util.{Future, Duration}
 import java.util.concurrent.atomic.AtomicInteger
-import com.twitter.finagle.{ConnectionRefusedException, SimpleFilter, Service, ClientConnection}
 
 case class OpenConnectionsThresholds(
   lowWaterMark: Int,
   highWaterMark: Int,
-  idleTimeout: Duration
-) {
+  idleTimeout: Duration) {
   require(lowWaterMark <= highWaterMark, "lowWaterMark must be <= highWaterMark")
+}
+
+private[finagle] object IdleConnectionFilter {
+  object IdleConnectionAssasin extends Stack.Role
+
+  /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.channel.IdleConnectionFilter]].
+   */
+  case class Param(thres: Option[OpenConnectionsThresholds])
+  implicit object Param extends Stack.Param[Param] {
+    val default = Param(None)
+  }
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.channel.IdleConnectionFilter]].
+   */
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Simple[ServiceFactory[Req, Rep]](IdleConnectionAssasin) {
+      def make(params: Stack.Params, next: ServiceFactory[Req, Rep]) = {
+        params[IdleConnectionFilter.Param] match {
+          case IdleConnectionFilter.Param(Some(thres)) =>
+            val param.Stats(sr) = params[param.Stats]
+            new IdleConnectionFilter(next, thres, sr.scope("idle"))
+          case _ => next
+        }
+      }
+    }
 }
 
 /**

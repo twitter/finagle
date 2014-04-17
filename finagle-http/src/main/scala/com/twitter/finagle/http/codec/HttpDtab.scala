@@ -1,6 +1,6 @@
 package com.twitter.finagle.http.codec
 
-import com.twitter.finagle.{Dtab, Dentry}
+import com.twitter.finagle.{Dtab, Dentry, NameTree, Path}
 import org.jboss.netty.handler.codec.http.HttpMessage
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.base64.Base64
@@ -59,8 +59,10 @@ object HttpDtab {
     }
 
     for ((Dentry(prefix, dst), i) <- dtab.zipWithIndex) {
-      msg.headers.set(Prefix+indexstr(i)+"-A", encodeValue(prefix))
-      msg.headers.set(Prefix+indexstr(i)+"-B".format(i), encodeValue(dst.reified))
+      // TODO: now that we have a proper Dtab grammar,
+      // should just embed this directly instead.
+      msg.headers.set(Prefix+indexstr(i)+"-A", encodeValue(prefix.show))
+      msg.headers.set(Prefix+indexstr(i)+"-B".format(i), encodeValue(dst.show))
     }
   }
 
@@ -99,11 +101,12 @@ object HttpDtab {
       if (prefix(prefix.size-1) != 'a' || dest(dest.size-1) != 'b')
         return Dtab.empty
 
-      dentries(i) = 
-        try Dentry(
-          decodeValue(msg.headers.get(prefix)),
-          decodeValue(msg.headers.get(dest)))
-        catch {
+      dentries(i) =  
+        try {
+          val src = Path.read(decodeValue(msg.headers.get(prefix)))
+          val dst = NameTree.read(decodeValue(msg.headers.get(dest)))
+          Dentry(src, dst)
+        } catch {
           case _: IllegalArgumentException =>
             return Dtab.empty
         }

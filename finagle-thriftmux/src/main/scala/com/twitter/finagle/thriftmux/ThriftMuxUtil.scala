@@ -3,7 +3,7 @@ package com.twitter.finagle
 import org.jboss.netty.buffer.ChannelBuffer
 
 private object ThriftMuxUtil {
-  def bufferToArray(buf: ChannelBuffer): Array[Byte] = 
+  def bufferToArray(buf: ChannelBuffer): Array[Byte] =
     if (buf.hasArray && buf.arrayOffset == 0
         && buf.readableBytes == buf.array().length) {
       buf.array()

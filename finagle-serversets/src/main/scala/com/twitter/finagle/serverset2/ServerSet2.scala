@@ -7,7 +7,7 @@ import com.twitter.finagle.stats.{StatsReceiver, DefaultStatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Addr, Resolver}
 import com.twitter.io.Buf
-import com.twitter.util.{Closable, Memoize, Witness, Var}
+import com.twitter.util.{Activity, Closable, Memoize, Witness, Var}
 import java.net.SocketAddress
 import java.nio.charset.Charset
 import java.util.concurrent.atomic.AtomicInteger
@@ -61,10 +61,10 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
       // First, convert the Op-based serverset address to a
       // Var[Addr], filtering out only the endpoints we are
       // interested in.
-      val va = serverset.weightedOf(path) map {
-        case Op.Pending => Addr.Pending
-        case Op.Fail(exc) => Addr.Failed(exc)
-        case Op.Ok(eps) =>
+      val va = serverset.weightedOf(path).run map {
+        case Activity.Pending => Addr.Pending
+        case Activity.Failed(exc) => Addr.Failed(exc)
+        case Activity.Ok(eps) =>
           val sockaddrs = eps collect {
             case (Endpoint(`endpoint`, addr, _, Endpoint.Status.Alive, _), weight) =>
               WeightedSocketAddress(addr, weight): SocketAddress
@@ -156,20 +156,20 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
 }
 
 private[serverset2] trait ServerSet2 {
-  def entriesOf(path: String): Var[Op[Set[Entry]]]
-  def vectorsOf(path: String): Var[Op[Set[Vector]]]
+  def entriesOf(path: String): Activity[Set[Entry]]
+  def vectorsOf(path: String): Activity[Set[Vector]]
 
-  def weightedOf(path: String): Var[Op[Set[(Entry, Double)]]] = {
-    val vs = vectorsOf(path)
-    val es = entriesOf(path)
-    (es join vs) map {
-      case (Op.Pending, _) => Op.Pending
-      case (op@Op.Fail(exc), _) => op
-      case (Op.Ok(ents), Op.Ok(vecs)) =>
-        Op.Ok(ServerSet2.weighted(ents, vecs))
-      case (Op.Ok(ents), _) =>
-        Op.Ok(ents map (_ -> 1D))
-    }
+  def weightedOf(path: String): Activity[Set[(Entry, Double)]] = {
+    val vs = vectorsOf(path).run
+    val es = entriesOf(path).run
+    Activity((es join vs) map {
+      case (Activity.Pending, _) => Activity.Pending
+      case (f@Activity.Failed(_), _) => f
+      case (Activity.Ok(ents), Activity.Ok(vecs)) =>
+        Activity.Ok(ServerSet2.weighted(ents, vecs))
+      case (Activity.Ok(ents), _) =>
+        Activity.Ok(ents map (_ -> 1D))
+    })
   }
 }
 
@@ -191,8 +191,8 @@ private[serverset2] object ServerSet2 {
 }
 
 private[serverset2] class VarServerSet2(v: Var[ServerSet2]) extends ServerSet2 {
-  def entriesOf(path: String): Var[Op[Set[Entry]]] = v flatMap (_.entriesOf(path))
-  def vectorsOf(path: String): Var[Op[Set[Vector]]] = v flatMap (_.vectorsOf(path))
+  def entriesOf(path: String): Activity[Set[Entry]] = Activity(v flatMap (_.entriesOf(path).run))
+  def vectorsOf(path: String): Activity[Set[Vector]] = Activity(v flatMap (_.vectorsOf(path).run))
 }
 
 private[serverset2] object ZkServerSet2 {
@@ -205,13 +205,13 @@ private[serverset2] case class ZkServerSet2(zk: Zk) extends ServerSet2 {
 
   import ZkServerSet2._
 
-  private[this] def dataOf(path: String, p: String => Boolean) =
-    Op.flatMap(zk.childrenOf(path)) { paths =>
+  private[this] def dataOf(path: String, p: String => Boolean): Activity[Map[String, Buf]] =
+    zk.childrenOf(path) flatMap { paths =>
       zk.collectImmutableDataOf(paths filter p map (path+"/"+_))
     }
 
-  def entriesOf(path: String): Var[Op[Set[Entry]]] = {
-    Op.map(dataOf(path, _ startsWith EndpointPrefix)) { pathmap =>
+  def entriesOf(path: String): Activity[Set[Entry]] = {
+    dataOf(path, _ startsWith EndpointPrefix) map { pathmap =>
       val endpoints = pathmap flatMap {
         case (path, Buf.Utf8(data)) =>
           Entry.parseJson(path, data)
@@ -221,8 +221,8 @@ private[serverset2] case class ZkServerSet2(zk: Zk) extends ServerSet2 {
     }
   }
 
-  def vectorsOf(path: String): Var[Op[Set[Vector]]] =
-    Op.map(dataOf(path, _ startsWith VectorPrefix)) { pathmap =>
+  def vectorsOf(path: String): Activity[Set[Vector]] =
+    dataOf(path, _ startsWith VectorPrefix) map { pathmap =>
       val vectors = pathmap flatMap {
         case (_, Buf.Utf8(data)) => Vector.parseJson(data)
         case _ => None  // Invalid encoding

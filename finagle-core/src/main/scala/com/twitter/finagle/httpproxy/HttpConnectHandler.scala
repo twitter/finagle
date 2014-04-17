@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicReference
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http.{DefaultHttpRequest, DefaultHttpResponse, HttpClientCodec, HttpMethod, HttpResponseStatus, HttpVersion}
-import org.jboss.netty.util.CharsetUtil
 
 import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, InconsistentStateException}
 

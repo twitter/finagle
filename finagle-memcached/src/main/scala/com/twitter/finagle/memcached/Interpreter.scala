@@ -3,11 +3,11 @@ package com.twitter.finagle.memcached
 import com.twitter.finagle.memcached.protocol._
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer
-import org.jboss.netty.util.CharsetUtil
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.util.{Time, Future}
 import com.twitter.finagle.Service
 import com.twitter.finagle.memcached.util.{ParserUtils, AtomicMap}
+import com.twitter.io.Charsets
 
 /**
  * Evalutes a given Memcached operation and returns the result.
@@ -101,7 +101,7 @@ class Interpreter(map: AtomicMap[ChannelBuffer, Entry]) {
           val existing = data.get(key)
           existing match {
             case Some(entry) if entry.valid =>
-              val existingString = entry.value.toString(CharsetUtil.US_ASCII)
+              val existingString = entry.value.toString(Charsets.UsAscii)
               if (!existingString.isEmpty && !DigitsPattern.matcher(existingString).matches())
                 throw new ClientError("cannot increment or decrement non-numeric value")
 

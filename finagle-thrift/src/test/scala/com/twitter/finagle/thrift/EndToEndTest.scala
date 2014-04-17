@@ -61,10 +61,9 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
 
   testThrift("propagate Dtab") { (client, tracer) =>
     Dtab.unwind {
-      Dtab.delegate("/a", "/b")
-      Dtab.delegate("/b", "inet!google.com:80")
+      Dtab.read("/a=>/b; /b=>/$/inet/google.com/80")
       val clientDtab = Await.result(client.show_me_your_dtab())
-      assert(clientDtab === "Dtab(2)\n\t/a -> /b\n\t/b -> inet!google.com:80\n")
+      assert(clientDtab === "Dtab(2)\n\t/a -> /b\n\t/b -> /$/inet/google.com/80\n")
     }
   }
 

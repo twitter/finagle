@@ -2,9 +2,9 @@ package com.twitter.finagle.kestrel.unit
 
 import com.twitter.concurrent.Broker
 import com.twitter.finagle.kestrel._
+import com.twitter.io.Charsets
 import com.twitter.util.Await
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.util.CharsetUtil
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
@@ -62,7 +62,7 @@ class ReadHandleSpec extends SpecificationWithJUnit with Mockito {
       0 until N foreach { i =>
         val recvd = (buffered.messages?)
         recvd.isDefined must beTrue
-        Await.result(recvd).bytes.toString(CharsetUtil.UTF_8) must be_==(i.toString)
+        Await.result(recvd).bytes.toString(Charsets.Utf8) must be_==(i.toString)
       }
     }
 

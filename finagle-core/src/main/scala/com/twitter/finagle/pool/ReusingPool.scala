@@ -1,11 +1,25 @@
 package com.twitter.finagle.pool
 
-import com.twitter.finagle.{ClientConnection, Service, ServiceFactory,
-  ServiceFactoryProxy, ServiceProxy}
+import com.twitter.finagle._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.util.{Future, Return, Throw, Time, Promise}
 import java.util.concurrent.atomic.AtomicReference
 import scala.annotation.tailrec
+
+private[finagle] object ReusingPool {
+  object ReusingPool extends Stack.Role
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.pool.ReusingPool]].
+   */
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Simple[ServiceFactory[Req, Rep]](ReusingPool) {
+      def make(params: Stack.Params, next: ServiceFactory[Req, Rep]) = {
+        val param.Stats(sr) = params[param.Stats]
+        new ReusingPool(next, sr.scope("reusingpool"))
+      }
+  }
+}
 
 /**
  * A pool that maintains at most one service from the underlying
@@ -13,7 +27,7 @@ import scala.annotation.tailrec
  * factory fails or the current service is unavailable.
  */
 class ReusingPool[Req, Rep](
-  underlying: ServiceFactory[Req, Rep], 
+  underlying: ServiceFactory[Req, Rep],
   statsReceiver: StatsReceiver)
 extends ServiceFactoryProxy[Req, Rep](underlying) {
   private[this] object stats {

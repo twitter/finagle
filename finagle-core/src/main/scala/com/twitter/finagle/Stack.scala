@@ -55,6 +55,15 @@ sealed trait Stack[T] {
   }
 
   /**
+   * Replace any stack elements matching the argument role with a given
+   * [[com.twitter.finagle.Stackable]]. If no elements match the
+   * role, then an unmodified stack is returned. `replacement` must conform to
+   * typeclass [[com.twitter.finagle.CanStackFrom]].
+   */
+  def replace[U](targetRole: Role, replacement: U)(implicit csf: CanStackFrom[U, T]): Stack[T] =
+    replace(targetRole, csf.toStackable(targetRole, replacement))
+
+  /**
    * Traverse the stack, invoking `fn` on each element.
    */
   def foreach(fn: Stack[T] => Unit) {

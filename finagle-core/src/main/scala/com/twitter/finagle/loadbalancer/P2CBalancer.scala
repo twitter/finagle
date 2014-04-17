@@ -152,7 +152,7 @@ class P2CBalancer[Req, Rep](
   private[this] val removes = statsReceiver.counter("removes")
 
   @volatile private[this] var nodes: Nodes[Req, Rep] = initNodes
-
+  
   private[this] val availableGauge = statsReceiver.addGauge("available") {
     nodes.factories.count(_.isAvailable)
   }

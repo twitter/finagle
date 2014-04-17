@@ -6,11 +6,10 @@ import com.twitter.finagle.tracing.{
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.{Service, ContextHandler}
-import com.twitter.io.Buf
+import com.twitter.io.{Charsets, Buf}
 import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
 import java.net.InetSocketAddress
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.util.CharsetUtil
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify, when}
@@ -154,7 +153,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       new Answer[Future[ChannelBuffer]]() {
         def answer(invocation: InvocationOnMock) = {
           val traceId = ChannelBuffers.wrappedBuffer(
-            Trace.id.toString.getBytes(CharsetUtil.UTF_8))
+            Trace.id.toString.getBytes(Charsets.Utf8))
           Future.value(traceId)
         }
       }
@@ -169,7 +168,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     val respBuf = Await.result(resp)
     val respArr = new Array[Byte](respBuf.readableBytes)
     respBuf.readBytes(respArr)
-    val respStr = new String(respArr, CharsetUtil.UTF_8)
+    val respStr = new String(respArr, Charsets.Utf8)
     assert(respStr === id.toString)
   }
 

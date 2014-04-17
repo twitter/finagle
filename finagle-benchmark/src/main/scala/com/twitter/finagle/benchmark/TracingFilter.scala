@@ -18,7 +18,8 @@ class TracingFilterBenchmark extends SimpleBenchmark {
     def apply(req: Int) = {
       if (Trace.isActivelyTracing) {
         Trace.record(ServerRecv())
-        Trace.recordRpcname("testService", "testRpc")
+        Trace.recordServiceName("testService")
+        Trace.recordRpc("testRpc")
         Trace.record("this is a string message")
         Trace.record(Message("frog blast the vent core"))
         Trace.recordBinaries(Map("fingle" -> 22, "dingle" -> 3.1415f))
@@ -30,14 +31,14 @@ class TracingFilterBenchmark extends SimpleBenchmark {
       ret
     }
   }
-  val echoServiceWithFilter = new TracingFilter(NullTracer) andThen echoService
+  val echoServiceWithFilter = new TracingFilter(NullTracer, "echoService") andThen echoService
 
   // note the 0.0f sampleRate.  With zipkin tracer not sampling any requests, this should be as fast as
   // a bare service.
-  val echoServiceWithZipkin = new TracingFilter(ZipkinTracer.mk(sampleRate=0.0f)) andThen echoService
+  val echoServiceWithZipkin = new TracingFilter(ZipkinTracer.mk(sampleRate=0.0f), "echoService") andThen echoService
 
 
-  val echoWithDoubleZipkinBroadcast = new TracingFilter(BroadcastTracer(Seq(ZipkinTracer.mk(sampleRate=0.0f), ZipkinTracer.mk(sampleRate=0.0f)))) andThen echoService
+  val echoWithDoubleZipkinBroadcast = new TracingFilter(BroadcastTracer(Seq(ZipkinTracer.mk(sampleRate=0.0f), ZipkinTracer.mk(sampleRate=0.0f))), "echoService") andThen echoService
 
   def test(n: Int, service: Service[Int, Int]) {
     var i = 0

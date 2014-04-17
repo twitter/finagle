@@ -5,9 +5,9 @@ import java.util.concurrent.atomic.AtomicReference
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel._
-import org.jboss.netty.util.CharsetUtil
 
 import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, InconsistentStateException}
+import com.twitter.io.Charsets
 
 object SocksConnectHandler {
   // Throwables used as `cause` fields for ConnectionFailedExceptions.
@@ -88,7 +88,7 @@ class SocksConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress)
       case _ => // unresolved host
         // 0x03 == hostname
         buf.writeByte(0x03)
-        val hostnameBytes = addr.getHostName.getBytes(CharsetUtil.US_ASCII)
+        val hostnameBytes = addr.getHostName.getBytes(Charsets.UsAscii)
         buf.writeByte(hostnameBytes.size)
         buf.writeBytes(hostnameBytes)
     }

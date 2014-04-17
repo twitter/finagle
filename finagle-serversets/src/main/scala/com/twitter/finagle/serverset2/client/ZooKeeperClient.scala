@@ -122,7 +122,10 @@ private[serverset2] trait ZooKeeperWriter extends ZooKeeperClient {
    * @return a Future[String] containing the actual path of the created node.
    */
   def create(
-      path: String, data: Option[Buf], acl: Seq[Data.ACL], createMode: CreateMode): Future[String]
+      path: String,
+      data: Option[Buf],
+      acl: Seq[Data.ACL],
+      createMode: CreateMode): Future[String]
 
   /**
    * Delete the node with the given path. The call will succeed if such a node

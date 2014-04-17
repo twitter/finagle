@@ -6,9 +6,9 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
-  val libVersion = "6.13.1"
+  val libVersion = "6.14.0"
   val zkVersion = "3.3.4"
-  val utilVersion = "6.13.2"
+  val utilVersion = "6.14.0"
   val ostrichVersion = "9.4.2"
   val jacksonVersion = "2.2.2"
   val nettyLib = "io.netty" % "netty" % "3.8.1.Final"
@@ -502,7 +502,7 @@ object Finagle extends Build {
     base = file("doc"),
     settings = Project.defaultSettings ++ site.settings ++ site.sphinxSupport() ++ sharedSettings ++ Seq(
       scalacOptions in doc <++= (version).map(v => Seq("-doc-title", "Finagle", "-doc-version", v)),
-      includeFilter in Sphinx := ("*.html" | "*.png" | "*.js" | "*.css" | "*.gif" | "*.txt"),
+      includeFilter in Sphinx := ("*.html" | "*.png" | "*.svg" | "*.js" | "*.css" | "*.gif" | "*.txt"),
 
       // Workaround for sbt bug: Without a testGrouping for all test configs,
       // the wrong tests are run

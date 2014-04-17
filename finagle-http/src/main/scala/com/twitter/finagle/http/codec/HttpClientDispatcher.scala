@@ -1,5 +1,6 @@
 package com.twitter.finagle.http.codec
 
+import com.twitter.concurrent.AsyncMutex
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.http.{HttpTransport, Response}
 import com.twitter.finagle.netty3.ChannelBufferBuf
@@ -23,11 +24,13 @@ class HttpClientDispatcher[Req <: HttpRequest](
 
   private[this] val trans = new HttpTransport(transIn)
 
-  private[this] def chunkReader(done: Promise[Unit]) = new Reader {
-    private[this] var buf = Buf.Empty
+  private[this] def chunkReader(done: Promise[Unit]) = new Reader { self =>
+    private[this] val mu = new AsyncMutex
+    @volatile private[this] var buf = Buf.Empty
 
-    def read(n: Int): Future[Buf] = synchronized {
-      if (n == 0) {
+    // We don't want to rely on scheduler semantics for ordering.
+    def read(n: Int): Future[Buf] = mu.acquire() flatMap { permit =>
+      val readOp = if (n == 0) {
         Future.value(Buf.Empty)
       } else if (buf eq Buf.Eof) {
         done.setDone()
@@ -55,6 +58,8 @@ class HttpClientDispatcher[Req <: HttpRequest](
           done.updateIfEmpty(Throw(exc))
           Future.exception(exc)
       }
+
+      readOp ensure { permit.release() }
     }
 
     def discard() {
@@ -92,8 +97,8 @@ class HttpClientDispatcher[Req <: HttpRequest](
           done
 
         case invalid =>
-          Future.exception(
-            new IllegalArgumentException(
+          // We rely on the base class to satisfy p.
+          Future.exception(new IllegalArgumentException(
               "invalid message \"%s\"".format(invalid)))
       }
   }

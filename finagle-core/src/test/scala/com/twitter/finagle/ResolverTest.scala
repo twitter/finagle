@@ -32,8 +32,8 @@ class ResolverTest extends FunSuite {
   }
 
   test("resolve ServiceLoaded resolvers") {
-    val binding = Resolver.eval("test!xyz").bind()
-    Var.sample(binding) match {
+    val Name.Bound(addr) = Resolver.eval("test!xyz")
+    Var.sample(addr) match {
       case Addr.Bound(addrs) if addrs.size == 1 =>
         assert(addrs.head === TestAddr("xyz"))
       case _ => fail()
@@ -73,5 +73,10 @@ class ResolverTest extends FunSuite {
   test("Resolver.evalLabeled: Resolve empty string as label for unlabeled addresses") {
     val binding = Resolver.evalLabeled("test!xyz")
     assert(binding._2 === "test!xyz")
+  }
+  
+  test("Return equatable names") {
+    assert(Resolver.eval("test!xyz") === Resolver.eval("test!xyz"))
+    assert(Resolver.eval("test!xyz") != Resolver.eval("test!xxx"))
   }
 }
