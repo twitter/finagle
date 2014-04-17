@@ -30,36 +30,36 @@ class HttpClientDispatcher[Req <: HttpRequest](
 
     // We don't want to rely on scheduler semantics for ordering.
     def read(n: Int): Future[Buf] = mu.acquire() flatMap { permit =>
-      val readOp = if (n == 0) {
-        Future.value(Buf.Empty)
-      } else if (buf eq Buf.Eof) {
-        done.setDone()
+      val readOp = if (buf eq Buf.Eof) {
         Future.value(Buf.Eof)
       } else if (buf.length > 0) {
         val f = Future.value(buf.slice(0, n))
-        buf = buf.slice(n, buf.length)
+        buf = buf.slice(n, Int.MaxValue)
         f
       } else trans.read() flatMap {
+        // Buf is empty so set it to the result of trans.read()
         case chunk: HttpChunk if chunk.isLast =>
-          val f = Future.value(buf)
+          done.setDone()
           buf = Buf.Eof
-          f
+          Future.value(Buf.Eof)
 
         case chunk: HttpChunk =>
-          buf = buf concat ChannelBufferBuf(chunk.getContent)
-          val f = Future.value(buf.slice(0, n))
-          buf = buf.slice(n, Int.MaxValue)
+          // Read data -- return up to n bytes and save the rest
+          val cbb = ChannelBufferBuf(chunk.getContent)
+          val f = Future.value(cbb.slice(0, n))
+          buf = cbb.slice(n, Int.MaxValue)
           f
 
         case invalid =>
           val exc = new IllegalArgumentException(
             "invalid message \"%s\"".format(invalid))
-          trans.close()
-          done.updateIfEmpty(Throw(exc))
           Future.exception(exc)
       }
 
-      readOp ensure { permit.release() }
+      readOp onFailure { exc =>
+        trans.close()
+        done.updateIfEmpty(Throw(exc))
+      } ensure { permit.release() }
     }
 
     def discard() {
