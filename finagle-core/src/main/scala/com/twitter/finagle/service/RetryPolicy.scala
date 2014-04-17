@@ -1,8 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{
-  CancelledRequestException, ChannelClosedException, TimeoutException, WriteException}
+import com.twitter.finagle.{ChannelClosedException, Failure, TimeoutException, WriteException}
 import com.twitter.util.{
   TimeoutException => UtilTimeoutException, Duration, JavaSingleton, Throw, Try}
 import java.util.{concurrent => juc}
@@ -133,7 +132,9 @@ abstract class SimpleRetryPolicy[A](i: Int) extends RetryPolicy[A]
 object RetryPolicy extends JavaSingleton {
   object RetryableWriteException {
     def unapply(thr: Throwable): Option[Throwable] = thr match {
-      case WriteException(_: CancelledRequestException) => None
+      // We don't retry interruptions by default since they
+      // indicate that the request was discarded.
+      case Failure.InterruptedBy(_) => None
       case WriteException(exc) => Some(exc)
       case _ => None
     }
