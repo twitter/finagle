@@ -57,7 +57,36 @@
         <div id="allMembers">
         
 
-        
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.Name.Bound" data-isabs="false">
+      <a id="Bound:Bound"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Name$$Bound.html"><span class="name">Bound</span></a><span class="result"> extends Name with Proxy</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Bound names comprise a changeable com.twitter.finagle.Addr
+Addr which carries a host list of internet addresses.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.Name.Path" data-isabs="false">
+      <a id="Path:Path"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Name$$Path.html"><span class="name">Path</span></a><span class="params">(<span name="path">path: Path</span>)</span><span class="result"> extends Name with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Path names comprise a <a name="com.twitter.finagle.Path" class="extype" href="Path.html">Path</a> denoting a
+network location.</p>
+    </li></ol>
+            </div>
 
         
 
@@ -123,6 +152,43 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Name.Bound" data-isabs="false">
+      <a id="Bound:Bound"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Name$$Bound$.html"><span class="name">Bound</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.Name#DONOTUSE_nameToGroup" data-isabs="false">
+      <a id="DONOTUSE_nameToGroup(Name):Group[SocketAddress]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DONOTUSE_nameToGroup</span><span class="params">(<span name="name">name: <a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a></span>)</span><span class="result">: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.Name#all" data-isabs="false">
+      <a id="all(Set[Bound]):Bound"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">all</span><span class="params">(<span name="names">names: Set[<a name="com.twitter.finagle.Name.Bound" class="extype" href="Name$$Bound.html">Bound</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.Name.Bound" class="extype" href="Name$$Bound.html">Bound</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Create a name representing the union of the passed-in
+names.</p>
     </li><li visbl="pub" name="com.twitter.finagle.Name#apply" data-isabs="false">
       <a id="apply(String):Name"></a>
       <h4 class="signature">
@@ -134,7 +200,21 @@
         <span class="name">apply</span><span class="params">(<span name="path">path: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a pure path Name.</p>
+      <p class="shortcomment cmt">Create a path-based Name which is interpreted vis-à-vis
+the current request-local delegation table.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.Name#apply" data-isabs="false">
+      <a id="apply(Path):Name"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="path">path: <a name="com.twitter.finagle.Path" class="extype" href="Path.html">Path</a></span>)</span><span class="result">: <a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Create a path-based Name which is interpreted vis-à-vis
+the current request-local delegation table.</p>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -148,14 +228,14 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Name#bound" data-isabs="false">
-      <a id="bound(SocketAddress*):Name"></a>
+      <a id="bound(SocketAddress*):Bound"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">bound</span><span class="params">(<span name="addrs">addrs: <span name="java.net.SocketAddress" class="extype">SocketAddress</span>*</span>)</span><span class="result">: <a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a></span>
+        <span class="name">bound</span><span class="params">(<span name="addrs">addrs: <span name="java.net.SocketAddress" class="extype">SocketAddress</span>*</span>)</span><span class="result">: <a name="com.twitter.finagle.Name.Bound" class="extype" href="Name$$Bound.html">Bound</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Create a pre-bound address.</p>
@@ -174,6 +254,18 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Name#empty" data-isabs="false">
+      <a id="empty:Bound"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">empty</span><span class="result">: <a name="com.twitter.finagle.Name.Bound" class="extype" href="Name$$Bound.html">Bound</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">An always-empty name.</p>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -214,14 +306,14 @@
               
         </dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Name#fromGroup" data-isabs="false">
-      <a id="fromGroup(Group[SocketAddress]):Name"></a>
+      <a id="fromGroup(Group[SocketAddress]):Bound"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">fromGroup</span><span class="params">(<span name="g">g: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a></span>
+        <span class="name">fromGroup</span><span class="params">(<span name="g">g: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.Name.Bound" class="extype" href="Name$$Bound.html">Bound</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Create a name from a group.</p><div class="fullcomment"><div class="comment cmt"><p>Create a name from a group.
@@ -302,6 +394,18 @@ resolutions.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Name#showable" data-isabs="false">
+      <a id="showable:Showable[Name]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">showable</span><span class="result">: <a name="com.twitter.finagle.util.Showable" class="extype" href="util/Showable.html">Showable</a>[<a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a>]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">

@@ -21,7 +21,7 @@
 
       <h4 class="signature" id="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">sealed </span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
@@ -29,14 +29,17 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A name identifies an object. Names may be resolved from strings
-via <a name="com.twitter.finagle.Resolver" class="extype" href="Resolver.html">Resolver</a>s. Names are late
-bound via <code>bind</code>.</p><p>Names are typically used to identify service endpoints, and are
-used in trait <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a> to name
-destinations-- i.e. where client traffic terminates.
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Names identify network locations. They come in two varieties:</p><ol class="decimal"><li><a name="com.twitter.finagle.Name.Bound" class="extype" href="Name$$Bound.html">Bound</a> names are concrete.
+ They represent a changeable list of network endpoints
+ (represented by <a name="com.twitter.finagle.Addr" class="extype" href="Addr.html">Addr</a>s).</li></ol><p> 2. <a name="com.twitter.finagle.Name.Path" class="extype" href="Name$$Path.html">Path</a> names are unbound
+ paths, representing an abstract location which must be resolved
+ by some context, usually the <a name="com.twitter.finagle.Dtab" class="extype" href="Dtab.html">Dtab</a>.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+        </div><div class="toggleContainer block">
+          <span class="toggle">Known Subclasses</span>
+          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.Name.Bound" class="extype" href="Name$$Bound.html">Bound</a>, <a name="com.twitter.finagle.Name.Path" class="extype" href="Name$$Path.html">Path</a></div>
         </div></div>
     
 
@@ -64,40 +67,10 @@ destinations-- i.e. where client traffic terminates.
 
         
 
-        <div class="values members" id="values">
-              <h3>Abstract Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.Name#bind" data-isabs="true">
-      <a id="bind():Var[Addr]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">bind</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Var" class="extype">Var</span>[<a name="com.twitter.finagle.Addr" class="extype" href="Addr.html">Addr</a>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Bind the name.</p><div class="fullcomment"><div class="comment cmt"><p>Bind the name. The bound name is returned as a
-variable representation -- it is subject to change at
-any time.
-</p></div></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Name#reified" data-isabs="true">
-      <a id="reified:String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">reified</span><span class="result">: String</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">The reified version of the Name -- a resolvable string.</p>
-    </li></ol>
-            </div>
+        
 
         <div class="values members" id="values">
-              <h3>Concrete Value Members</h3>
+              <h3>Value Members</h3>
               <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
       <a id="!=(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -185,18 +158,6 @@ any time.
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Name#enter" data-isabs="false">
-      <a id="enter(String):Name"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">enter</span><span class="params">(<span name="path">path: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Name" class="extype" href="">Name</a></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Scope the name by the given path.</p>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -320,7 +281,7 @@ any time.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Name#toString" data-isabs="false">
+    </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -331,7 +292,7 @@ any time.
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Name" class="extype" href="">Name</a> → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">

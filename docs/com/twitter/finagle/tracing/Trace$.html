@@ -527,15 +527,15 @@ tracers in the stack.
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.Trace#recordRpcname" data-isabs="false">
-      <a id="recordRpcname(String,String):Unit"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.Trace#recordRpc" data-isabs="false">
+      <a id="recordRpc(String):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">recordRpcname</span><span class="params">(<span name="service">service: String</span>, <span name="rpc">rpc: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">recordRpc</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -548,6 +548,18 @@ tracers in the stack.
       </span>
       <span class="symbol">
         <span class="name">recordServerAddr</span><span class="params">(<span name="ia">ia: <span name="java.net.InetSocketAddress" class="extype">InetSocketAddress</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.Trace#recordServiceName" data-isabs="false">
+      <a id="recordServiceName(String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recordServiceName</span><span class="params">(<span name="serviceName">serviceName: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -772,6 +784,21 @@ code inside this to get proper tracing with all the correct fields filled in.
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> use setId() instead</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.Trace#recordRpcname" data-isabs="false">
+      <a id="recordRpcname(String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.13.x) Use recordRpc and recordServiceName">recordRpcname</span><span class="params">(<span name="service">service: String</span>, <span name="rpc">rpc: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.13.x)</i> Use recordRpc and recordServiceName</p></dd></dl></div>
     </li></ol>
             </div>
         </div>

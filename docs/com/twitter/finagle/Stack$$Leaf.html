@@ -412,6 +412,23 @@ configuration.
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Stack.Leaf" class="extype" href="">Leaf</a> → Product</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Stack#replace" data-isabs="false">
+      <a id="replace[U](Role,U)(CanStackFrom[U, T]):Stack[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">replace</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="targetRole">targetRole: <a name="com.twitter.finagle.Stack.Role" class="extype" href="Stack$$Role.html">Role</a></span>, <span name="replacement">replacement: U</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="csf">csf: <a name="com.twitter.finagle.CanStackFrom" class="extype" href="CanStackFrom.html">CanStackFrom</a>[U, T]</span>)</span><span class="result">: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[T]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Replace any stack elements matching the argument role with a given
+<a name="com.twitter.finagle.Stackable" class="extype" href="Stackable.html">Stackable</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Replace any stack elements matching the argument role with a given
+<a name="com.twitter.finagle.Stackable" class="extype" href="Stackable.html">Stackable</a>. If no elements match the
+role, then an unmodified stack is returned. <code>replacement</code> must conform to
+typeclass <a name="com.twitter.finagle.CanStackFrom" class="extype" href="CanStackFrom.html">CanStackFrom</a>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stack</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack#replace" data-isabs="false">
       <a id="replace(Role,Stackable[T]):Stack[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">

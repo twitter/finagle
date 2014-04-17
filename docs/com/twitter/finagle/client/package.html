@@ -85,6 +85,19 @@ connection pooling.</p>
       </span>
       </h4>
       <p class="shortcomment cmt">Transform a service factory stack.</p><div class="fullcomment"><div class="comment cmt"><p>Transform a service factory stack.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.client.package" class="extype" href="package$.html">package</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.client.Transporter" data-isabs="true">
+      <a id="Transporter:Transporter[In, Out]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Transporter.html"><span class="name">Transporter</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Transporters are simple functions from a <code>SocketAddress</code> to a
+<code>Future[Transport[In, Out]]</code>.</p>
     </li></ol>
             </div>
 
@@ -113,6 +126,18 @@ connection pooling.</p>
       </span>
       <span class="symbol">
         <a href="DefaultClient$.html"><span class="name">DefaultClient</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.client.DefaultPool" data-isabs="false">
+      <a id="DefaultPool:DefaultPool"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DefaultPool$.html"><span class="name">DefaultPool</span></a><span class="result"> extends Serializable</span>
       </span>
       </h4>
       

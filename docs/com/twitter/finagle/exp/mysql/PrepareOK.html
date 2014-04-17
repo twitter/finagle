@@ -25,7 +25,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">PrepareOK</span><span class="params">(<span name="statementId">statementId: <span name="scala.Int" class="extype">Int</span></span>, <span name="numOfCols">numOfCols: <span name="scala.Int" class="extype">Int</span></span>, <span name="numOfParams">numOfParams: <span name="scala.Int" class="extype">Int</span></span>, <span name="warningCount">warningCount: <span name="scala.Int" class="extype">Int</span></span>, <span name="columns">columns: Seq[<a name="com.twitter.finagle.exp.mysql.Field" class="extype" href="Field.html">Field</a>]</span>, <span name="params">params: Seq[<a name="com.twitter.finagle.exp.mysql.Field" class="extype" href="Field.html">Field</a>]</span>)</span><span class="result"> extends <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">PrepareOK</span><span class="params">(<span name="id">id: <span name="scala.Int" class="extype">Int</span></span>, <span name="numOfCols">numOfCols: <span name="scala.Int" class="extype">Int</span></span>, <span name="numOfParams">numOfParams: <span name="scala.Int" class="extype">Int</span></span>, <span name="warningCount">warningCount: <span name="scala.Int" class="extype">Int</span></span>, <span name="columns">columns: Seq[<a name="com.twitter.finagle.exp.mysql.Field" class="extype" href="Field.html">Field</a>]</span>, <span name="params">params: Seq[<a name="com.twitter.finagle.exp.mysql.Field" class="extype" href="Field.html">Field</a>]</span>)</span><span class="result"> extends <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
@@ -65,7 +65,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">PrepareOK</span><span class="params">(<span name="statementId">statementId: <span name="scala.Int" class="extype">Int</span></span>, <span name="numOfCols">numOfCols: <span name="scala.Int" class="extype">Int</span></span>, <span name="numOfParams">numOfParams: <span name="scala.Int" class="extype">Int</span></span>, <span name="warningCount">warningCount: <span name="scala.Int" class="extype">Int</span></span>, <span name="columns">columns: Seq[<a name="com.twitter.finagle.exp.mysql.Field" class="extype" href="Field.html">Field</a>]</span>, <span name="params">params: Seq[<a name="com.twitter.finagle.exp.mysql.Field" class="extype" href="Field.html">Field</a>]</span>)</span>
+        <span class="name">PrepareOK</span><span class="params">(<span name="id">id: <span name="scala.Int" class="extype">Int</span></span>, <span name="numOfCols">numOfCols: <span name="scala.Int" class="extype">Int</span></span>, <span name="numOfParams">numOfParams: <span name="scala.Int" class="extype">Int</span></span>, <span name="warningCount">warningCount: <span name="scala.Int" class="extype">Int</span></span>, <span name="columns">columns: Seq[<a name="com.twitter.finagle.exp.mysql.Field" class="extype" href="Field.html">Field</a>] = <span class="symbol">immutable.this.Nil</span></span>, <span name="params">params: Seq[<a name="com.twitter.finagle.exp.mysql.Field" class="extype" href="Field.html">Field</a>] = <span class="symbol">immutable.this.Nil</span></span>)</span>
       </span>
       </h4>
       
@@ -252,6 +252,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.PrepareOK" class="extype" href="">PrepareOK</a> → AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PrepareOK#id" data-isabs="false">
+      <a id="id:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">id</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -384,18 +396,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.PrepareOK" class="extype" href="">PrepareOK</a> → Product</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PrepareOK#statementId" data-isabs="false">
-      <a id="statementId:Int"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">statementId</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">

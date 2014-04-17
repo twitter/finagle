@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>FAQ &mdash; Finagle 6.13.1 documentation</title>
+    <title>FAQ &mdash; Finagle 6.14.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.13.1',
+        VERSION:     '6.14.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.13.1 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.14.0 documentation" href="index.html" />
     <link rel="next" title="Finagle changelog" href="changelog.html" />
     <link rel="prev" title="Metrics" href="Metrics.html" />
    
@@ -61,7 +61,7 @@
 <div class="section" id="general-finagle-faq">
 <h2>General Finagle FAQ<a class="headerlink" href="#general-finagle-faq" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="what-s-a-cancelledrequestexception">
-<h3>What&#8217;s a CancelledRequestException?<a class="headerlink" href="#what-s-a-cancelledrequestexception" title="Permalink to this headline">¶</a></h3>
+<span id="propagate-failure"></span><h3>What&#8217;s a CancelledRequestException?<a class="headerlink" href="#what-s-a-cancelledrequestexception" title="Permalink to this headline">¶</a></h3>
 <p>When a client connected to a Finagle server disconnects, the server raises
 a <em>cancellation</em> interrupt on the pending Future. This is done to
 conserve resources and avoid unnecessary work: the upstream
@@ -93,11 +93,11 @@ churn.</p>
 <p>to your sbt configuration, it will be able to pick up the libraries which are
 published externally, but not yet to maven central.</p>
 </div>
-<div class="section" id="how-do-i-change-my-timeouts-in-the-finagle-6-apis">
-<h3>How do I change my timeouts in the Finagle 6 APIs?<a class="headerlink" href="#how-do-i-change-my-timeouts-in-the-finagle-6-apis" title="Permalink to this headline">¶</a></h3>
-<p>We introduced a new, preferred API for constructing Finagle <tt class="docutils literal"><span class="pre">Client</span></tt>s and <tt class="docutils literal"><span class="pre">Server</span></tt>s.
+<div class="section" id="how-do-i-configure-clients-and-servers-with-finagle-6-apis">
+<span id="configuring-finagle6"></span><h3>How do I configure clients and servers with Finagle 6 APIs?<a class="headerlink" href="#how-do-i-configure-clients-and-servers-with-finagle-6-apis" title="Permalink to this headline">¶</a></h3>
+<p>As of <a class="reference internal" href="changelog.html"><em>6.x</em></a>, We introduced a new, preferred API for constructing Finagle <tt class="docutils literal"><span class="pre">Client</span></tt>s and <tt class="docutils literal"><span class="pre">Server</span></tt>s.
 Where the old API used <tt class="docutils literal"><span class="pre">ServerBuilder</span></tt>/<tt class="docutils literal"><span class="pre">ClientBuilder</span></tt> with Codecs, the new APIs use
-<tt class="docutils literal"><span class="pre">Proto.newClient</span></tt>.</p>
+<tt class="docutils literal"><span class="pre">Proto.newClient</span></tt> <a class="footnote-reference" href="#id2" id="id1">[1]</a>.</p>
 <p>Old APIs:</p>
 <div class="highlight-text"><div class="highlight"><pre>val client = ClientBuilder
   .codec(Http)
@@ -144,7 +144,18 @@ and a few details about the transport (ssl?  no ssl?), but that&#8217;s about it
 <p>Of course, there are some points where there are rough edges, and we haven&#8217;t
 figured out exactly what the right default should be.  We&#8217;re actively looking
 for input, and would love for the greater Finagle community to help us find good
-defaults.</p>
+defaults. We&#8217;ve also been experimenting with some new abstractions that should
+make configuration a lot more flexible. Stay tuned and of course reach out to
+the mailing list with any questions.</p>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Protocol implementors are encouraged to provide sensible
+defaults and leave room for application specific behavior
+to be built on top of the base layer via filters or
+synchronization mechanisms.</td></tr>
+</tbody>
+</table>
 </div>
 </div>
 <div class="section" id="mux-specific-faq">
@@ -219,7 +230,7 @@ is an implementation of the Thrift protocol built on top of Mux.</p>
 <li><a class="reference internal" href="#general-finagle-faq">General Finagle FAQ</a><ul>
 <li><a class="reference internal" href="#what-s-a-cancelledrequestexception">What&#8217;s a CancelledRequestException?</a></li>
 <li><a class="reference internal" href="#why-is-com-twitter-common-zookeeper-server-set-not-found">Why is com.twitter.common.zookeeper#server-set not found?</a></li>
-<li><a class="reference internal" href="#how-do-i-change-my-timeouts-in-the-finagle-6-apis">How do I change my timeouts in the Finagle 6 APIs?</a></li>
+<li><a class="reference internal" href="#how-do-i-configure-clients-and-servers-with-finagle-6-apis">How do I configure clients and servers with Finagle 6 APIs?</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#mux-specific-faq">Mux-specific FAQ</a><ul>

@@ -1,0 +1,415 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Extending Finagle &mdash; Finagle 6.14.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '6.14.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Finagle 6.14.0 documentation" href="index.html" />
+    <link rel="next" title="Metrics" href="Metrics.html" />
+    <link rel="prev" title="Protocols" href="Protocols.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="Metrics.html" title="Metrics"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Protocols.html" title="Protocols"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Finagle</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="extending-finagle">
+<h1>Extending Finagle<a class="headerlink" href="#extending-finagle" title="Permalink to this headline">¶</a></h1>
+<p>In this section we&#8217;ll examine the internals of Finagle clients and
+servers by outlining a typical process for integrating a new codec into
+the Finagle stack. Starting with the transport layer, we&#8217;ll build
+a simple client that can send strings over a network socket and a server
+capable of echoing strings received over the same socket.</p>
+<p>Note, this section aims to and exposes the nuts and bolts used to build
+Finagle clients and servers. These concepts aren&#8217;t particularly neccessary
+in understanding how to use them.</p>
+<p>If you haven&#8217;t yet, first read the <a class="reference internal" href="Quickstart.html"><em>quickstart</em></a>
+to understand some of Finagle&#8217;s core concepts
+(i.e. <a class="reference internal" href="Futures.html"><em>Futures</em></a>, <a class="reference internal" href="ServicesAndFilters.html"><em>Services and Filters</em></a>).</p>
+<p>The entire example is available, together with a self-contained script
+to launch sbt, in the Finagle git repository:</p>
+<div class="highlight-text"><div class="highlight"><pre>$ git clone https://github.com/twitter/finagle.git
+$ cd finagle/doc/src/sphinx/code/client-server-anatomy
+$ ./sbt run
+</pre></div>
+</div>
+<div class="section" id="transport-layer">
+<span id="transport-interface"></span><h2>Transport Layer<a class="headerlink" href="#transport-layer" title="Permalink to this headline">¶</a></h2>
+<p>Finagle represents the OSI transport layer as a typed stream that
+may be read from and written to asynchronously. The noteworthy methods
+in the interface are defined as such:</p>
+<div class="highlight-text"><div class="highlight"><pre>trait Transport[In, Out] {
+  def read(): Future[Out]
+  def write(req: In): Future[Unit]
+  ...
+}
+</pre></div>
+</div>
+<p>Most Transports are implemented using <a class="reference external" href="http://netty.io">Netty</a>
+for I/O multiplexing and protocol codecs.</p>
+</div>
+<div class="section" id="server-protocol">
+<h2>Server Protocol<a class="headerlink" href="#server-protocol" title="Permalink to this headline">¶</a></h2>
+<p>To frame data received over the network with respect to our
+protocol we use a <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html">Netty Channel Pipeline</a>.
+Our server pipeline defines a UTF-8 text-based newline delimited protocol:</p>
+<div class="highlight-text"><div class="highlight"><pre>object StringServerPipeline extends ChannelPipelineFactory {
+  def getPipeline = {
+    val pipeline = Channels.pipeline()
+    pipeline.addLast(&quot;line&quot;, new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter: _*))
+    pipeline.addLast(&quot;stringDecoder&quot;, new StringDecoder(CharsetUtil.UTF_8))
+    pipeline.addLast(&quot;stringEncoder&quot;, new StringEncoder(CharsetUtil.UTF_8))
+    pipeline
+  }
+}
+</pre></div>
+</div>
+</div>
+<div class="section" id="listener">
+<h2>Listener<a class="headerlink" href="#listener" title="Permalink to this headline">¶</a></h2>
+<p>The mechanics of listening over a network socket and
+translating our pipeline into a typed transport are defined by the
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/netty3/Netty3Listener.scala">Netty3Listener</a>.</p>
+<p>Together with our server pipeline, we can define such a listener:</p>
+<div class="highlight-text"><div class="highlight"><pre>object EchoListener extends Netty3Listener[String, String](
+  &quot;echoListener&quot;, StringServerPipeline
+)
+</pre></div>
+</div>
+<p>This implements the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/server/Listener.scala">Listener</a>
+interface that exposes a <cite>listen</cite> method:</p>
+<div class="highlight-text"><div class="highlight"><pre>def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] =&gt; Unit)
+</pre></div>
+</div>
+<p>That is, given a socket address to bind and listen, <cite>serveTransport</cite> is dispatched
+for each new connection established.</p>
+<p>For example, here is a simple echo server:</p>
+<div class="highlight-text"><div class="highlight"><pre>val address = new java.net.InetSocketAddress(&quot;localhost&quot;, 8080)
+val echoServer = EchoListener.listen(address) { transport =&gt;
+   transport.read() flatMap { transport.write(_) } ensure transport.close()
+ }
+</pre></div>
+</div>
+<p>We can now send requests over this socket and have them echoed back:</p>
+<div class="highlight-text"><div class="highlight"><pre>&gt; echo &quot;hello&quot; | nc localhost 8080
+&gt; hello
+</pre></div>
+</div>
+<p>The <cite>serveTransport</cite> function defined above is primitive. For example,
+it closes each connection after one read and write. Finagle provides tools
+to provision a transport with more sophisticated behavior.</p>
+</div>
+<div class="section" id="server-dispatcher">
+<h2>Server Dispatcher<a class="headerlink" href="#server-dispatcher" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/dispatch/ServerDispatcher.scala">server dispatcher</a>
+queues concurrent incoming requests and serially dispatches
+them over a Transport. The data read from the Transport
+is funneled through a service object and the resulting value
+is written back to the transport. Additionally, the
+server dispatcher drains existing requests before
+closing a transport.</p>
+<p>We could translate our <cite>serveTransport</cite> function to use this facility:</p>
+<div class="highlight-text"><div class="highlight"><pre>val service = new Service[String, String] {
+  def apply(request: String) = Future.value(request)
+}
+val serveTransport = (t: Transport[String, String]) =&gt;
+  new SerialServerDispatcher(t, service)
+val server = EchoListener.listen(address) { serveTransport(_) }
+</pre></div>
+</div>
+<p>A nice consequence of using a <a class="reference internal" href="ServicesAndFilters.html#services"><em>Service</em></a> to process
+data received over the transport is the ability to furnish our server with
+additional behavior via <a class="reference internal" href="ServicesAndFilters.html"><em>Filters</em></a>. This is exactly
+what Finagle&#8217;s default server implementation does.</p>
+</div>
+<div class="section" id="default-server">
+<h2>Default Server<a class="headerlink" href="#default-server" title="Permalink to this headline">¶</a></h2>
+<p>Finagle&#8217;s <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/server/DefaultServer.scala">DefaultServer</a>
+provides appropriate features for building a robust server.
+Using the listener and dispatcher defined above, we can define a DefaultServer:</p>
+<div class="highlight-text"><div class="highlight"><pre>object EchoServer extends DefaultServer[String, String, String, String](
+  &quot;echoServer&quot;, EchoListener, new SerialServerDispatcher(_, _)
+)
+</pre></div>
+</div>
+<p>Then serve our echo service:</p>
+<div class="highlight-text"><div class="highlight"><pre>val service = new Service[String, String] {
+  def apply(request: String) = Future.value(request)
+}
+Await.ready(EchoServer.serve(&quot;:8080&quot;, service))
+</pre></div>
+</div>
+</div>
+<div class="section" id="client-protocol">
+<h2>Client Protocol<a class="headerlink" href="#client-protocol" title="Permalink to this headline">¶</a></h2>
+<p>Again, we&#8217;ll use a <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html">Netty Channel Pipeline</a>
+to frame our network traffic. Our client pipeline defines a
+UTF-8 newline delimited protocol:</p>
+<div class="highlight-text"><div class="highlight"><pre>object StringClientPipeline extends ChannelPipelineFactory {
+  def getPipeline = {
+    val pipeline = Channels.pipeline()
+    pipeline.addLast(&quot;stringEncode&quot;, new StringEncoder(CharsetUtil.UTF_8))
+    pipeline.addLast(&quot;stringDecode&quot;, new StringDecoder(CharsetUtil.UTF_8))
+    pipeline.addLast(&quot;line&quot;, new DelimEncoder(&#39;\n&#39;))
+    pipeline
+  }
+}
+
+class DelimEncoder(delim: Char) extends SimpleChannelHandler {
+  override def writeRequested(ctx: ChannelHandlerContext, evt: MessageEvent) = {
+    val newMessage = evt.getMessage match {
+      case m: String =&gt; m + delim
+      case m =&gt; m
+    }
+    Channels.write(ctx, evt.getFuture, newMessage, evt.getRemoteAddress)
+  }
+}
+</pre></div>
+</div>
+</div>
+<div class="section" id="transporter">
+<h2>Transporter<a class="headerlink" href="#transporter" title="Permalink to this headline">¶</a></h2>
+<p>A <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/clients/Transporter.scala">Transporter</a> is responsible for connecting
+a <a class="reference internal" href="#transport-interface"><em>Transport</em></a> to a peer — it establishes a session. Our client uses a
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/netty3/client.scala">Netty3Transporter</a>, however
+the use of other Transporters is fully supported.</p>
+<div class="highlight-text"><div class="highlight"><pre>object StringClientTransporter extends Netty3Transporter[String, String](
+  name = &quot;StringClientTransporter&quot;,
+  pipelineFactory = StringClientPipeline)
+</pre></div>
+</div>
+</div>
+<div class="section" id="client-dispatcher">
+<h2>Client Dispatcher<a class="headerlink" href="#client-dispatcher" title="Permalink to this headline">¶</a></h2>
+<p>A client dispatcher turns a Transport (a stream of objects) into a Service
+(request-response pairs). It must manage all outstanding requests,
+pairing incoming responses to their respective requests.
+The simplest kind of dispatcher is called a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/dispatch/ClientDispatcher.scala">SerialClientDispatcher</a>,
+which allows only a single outstanding request (concurrent requests are queued) <a class="footnote-reference" href="#id3" id="id2">[1]</a>.</p>
+<p>Our client will employ the SerialClientDispatcher.</p>
+<table class="docutils footnote" frame="void" id="id3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td>Note that Finagle also includes a dispatcher that can
+pipeline requests, i.e., allow more than one outstanding request.
+It&#8217;s possible to create a custom dispatcher as well. For example,
+<a class="reference internal" href="Protocols.html"><em>Mux</em></a>, which support true multiplexing,
+defines a custom dispatcher.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="a-basic-client">
+<h2>A Basic Client<a class="headerlink" href="#a-basic-client" title="Permalink to this headline">¶</a></h2>
+<p>Given a defined transporter and request dispatching strategy, we can compose the
+two and create a client:</p>
+<div class="highlight-text"><div class="highlight"><pre>val sa = new java.net.InetSocketAddress(&quot;localhost&quot;, 8080)
+val sr = com.twitter.finagle.stats.NullStatsReceiver
+
+val bridge: Future[Service[String, String]] =
+  StringClientTransporter(sa, sr) map { transport =&gt;
+    new SerialClientDispatcher(transport)
+  }
+
+val client = new Service[String, String] {
+  def apply(req: String) = bridge flatMap { svc =&gt;
+    svc(req) ensure svc.close()
+  }
+}
+</pre></div>
+</div>
+<p>Finally, we can dispatch requests over our client,</p>
+<div class="highlight-text"><div class="highlight"><pre>val result = client(&quot;hello&quot;)
+println(Await.result(result))
+</pre></div>
+</div>
+<p>Assuming we have a server willing to listen, we can expect a response:</p>
+<div class="highlight-text"><div class="highlight"><pre>$ ./sbt run
+&gt; hello
+</pre></div>
+</div>
+</div>
+<div class="section" id="a-robust-client">
+<h2>A Robust Client<a class="headerlink" href="#a-robust-client" title="Permalink to this headline">¶</a></h2>
+<p>Our client is a Service, so we can supply additional
+behavior to make our client more robust using
+filters:</p>
+<div class="highlight-text"><div class="highlight"><pre>val retry = new RetryingFilter[String, String](
+  retryPolicy = RetryPolicy.tries(3),
+  timer = DefaultTimer.twitter
+)
+
+val timeout = new TimeoutFilter[String, String](
+  timeout = 3.seconds,
+  timer = DefaultTimer.twitter
+)
+
+val maskCancel = new MaskCancelFilter[String, String]
+</pre></div>
+</div>
+<p>Composing these filters <a class="footnote-reference" href="#id5" id="id4">[2]</a> with our basic client demonstrates
+the composable components used throughout finagle.</p>
+<div class="highlight-text"><div class="highlight"><pre>val newClient =
+  retry andThen
+  timeout andThen
+  maskCancel andThen client
+
+val result = newClient(&quot;hello&quot;)
+println(Await.result(result))
+</pre></div>
+</div>
+<p>This client is a good start, but we cannot dispatch concurrent requests
+to a single host, nor load balance over multiple hosts. A typical Finagle client
+affords us the ability to dispatch a large number of concurrent requests.</p>
+<table class="docutils footnote" frame="void" id="id5" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[2]</a></td><td>The use of the MaskCancelFilter in the example filter stack
+ensures that timeout exceptions don&#8217;t propagate to our
+bottom most service which, in this case, represents a dispatcher.
+Without this guarantee, the service would be closed after the first
+timeout exception. This becomes unnecessary when we wrap a DefaultClient
+with the same filters because the semantics of Service#close() change
+with respect to Finagle&#8217;s connection pool.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="default-client">
+<h2>Default Client<a class="headerlink" href="#default-client" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/client/DefaultClient.scala">DefaultClient</a>
+decorates a client with many prominent features including
+<a class="reference internal" href="Clients.html#id3"><em>load balancing</em></a> over multiple hosts
+and <a class="reference internal" href="Clients.html#watermark-pool"><em>connection pooling</em></a> per host.
+We can create a DefaultClient with the bridge defined above:</p>
+<div class="highlight-text"><div class="highlight"><pre>object EchoClient extends DefaultClient[String, String](
+  name = &quot;EchoClient&quot;,
+  endpointer = {
+    val bridge = Bridge[String, String, String, String](
+      StringClientTransporter, new SerialClientDispatcher(_)
+    )
+    (addr, stats) =&gt; bridge(addr, stats)
+  }
+)
+
+val client: Service[String, String] =
+  retry andThen
+  timeout andThen EchoClient.newService(&quot;localhost:8080&quot;)
+</pre></div>
+</div>
+<p>Armed with this new client, we can connect to a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Group.scala">Group</a> (multiple hosts).</p>
+<div class="highlight-text"><div class="highlight"><pre>client.newClient(Group[SocketAddress](
+  &quot;localhost:8080&quot;,
+  &quot;localhost:8081&quot;,
+  &quot;localhost:8082&quot;)): ServiceFactory[String, String]
+</pre></div>
+</div>
+<p>Requests sent to this client are load balanced across these
+hosts and each host maintains a connection pool, thus
+allowing concurrent dispatches.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
+  <img class="logo" src="_static/logo_small.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Extending Finagle</a><ul>
+<li><a class="reference internal" href="#transport-layer">Transport Layer</a></li>
+<li><a class="reference internal" href="#server-protocol">Server Protocol</a></li>
+<li><a class="reference internal" href="#listener">Listener</a></li>
+<li><a class="reference internal" href="#server-dispatcher">Server Dispatcher</a></li>
+<li><a class="reference internal" href="#default-server">Default Server</a></li>
+<li><a class="reference internal" href="#client-protocol">Client Protocol</a></li>
+<li><a class="reference internal" href="#transporter">Transporter</a></li>
+<li><a class="reference internal" href="#client-dispatcher">Client Dispatcher</a></li>
+<li><a class="reference internal" href="#a-basic-client">A Basic Client</a></li>
+<li><a class="reference internal" href="#a-robust-client">A Robust Client</a></li>
+<li><a class="reference internal" href="#default-client">Default Client</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Protocols.html" title="previous chapter">Protocols</a></li>
+      <li>Next: <a href="Metrics.html" title="next chapter">Metrics</a></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">&copy; Copyright 2014 Twitter, Inc.</div>
+  
+  </body>
+</html>

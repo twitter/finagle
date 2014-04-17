@@ -171,6 +171,18 @@
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.service.RetryPolicy#apply" data-isabs="false">
+      <a id="apply[A]((A) ⇒ Option[(Duration, RetryPolicy[A])]):RetryPolicy[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="f">f: (A) ⇒ <span name="scala.Option" class="extype">Option</span>[(<span name="com.twitter.util.Duration" class="extype">Duration</span>, <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A])]</span>)</span><span class="result">: <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Lifts a function of type A =&gt; Option[(Duration, RetryPolicy[A])] in the <code>RetryPolicy</code> type.</p>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -226,6 +238,33 @@ are retryable.
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.service.RetryPolicy#combine" data-isabs="false">
+      <a id="combine[A](RetryPolicy[A]*):RetryPolicy[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">combine</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="policies">policies: <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A]*</span>)</span><span class="result">: <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Combines multiple <code>RetryPolicy</code>s into a single combined <code>RetryPolicy</code>, with interleaved
+backoffs.</p><div class="fullcomment"><div class="comment cmt"><p>Combines multiple <code>RetryPolicy</code>s into a single combined <code>RetryPolicy</code>, with interleaved
+backoffs.  For a given value of <code>A</code>, each policy in <code>policies</code> is tried in order.  If all
+policies return <code>None</code>, then the combined <code>RetryPolicy</code> returns <code>None</code>.  If policy <code>P</code> returns
+<code>Some((D, P'))</code>, then the combined <code>RetryPolicy</code> returns <code>Some((D, P<i>))<code>, where </code>P</i></code> is a
+new combined <code>RetryPolicy</code> with the same sub-policies, with the exception of <code>P</code> replaced by
+<code>P'</code>.</p><p>The ordering of policies matters: earlier policies get a chance to handle the failure
+before later policies; a catch-all policy, if any, should be last.</p><p>As an example, let's say you combine two <code>RetryPolicy</code>s, <code>R1</code> and <code>R2</code>, where <code>R1</code> handles
+only exception <code>E1</code> with a backoff of <code>(10.milliseconds, 20.milliseconds, 30.milliseconds)</code>,
+while <code>R2</code> handles only exception <code>E2</code> with a backoff of <code>(15.milliseconds, 25.milliseconds)</code>.</p><p>If a sequence of exceptions, <code>(E2, E1, E1, E2)</code>, is fed in order to the combined retry policy,
+the backoffs seen will be <code>(15.milliseconds, 10.milliseconds, 20.milliseconds,
+25.milliseconds)</code>.</p><p>The maximum number of retries the combined policy could allow under the worst case scenario
+of exceptions is equal to the sum of the individual maximum retries of each subpolicy.  To
+put a cap on the combined maximum number of retries, you can call <code>limit</code> on the combined
+policy with a smaller cap.
+</p></div></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">

@@ -85,12 +85,12 @@ mysql binary protocol.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Client" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Client" data-isabs="true">
       <a id="Client:Client"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
         <a href="Client.html"><span class="name">Client</span></a><span class="result"> extends Closable</span>
@@ -109,18 +109,6 @@ mysql binary protocol.</p>
       </span>
       </h4>
       <p class="comment cmt">A ClientDispatcher that implements the mysql client/server protocol.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ClientError" data-isabs="false">
-      <a id="ClientError:ClientError"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ClientError.html"><span class="name">ClientError</span></a><span class="result"> extends Exception</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.CloseRequest" data-isabs="false">
       <a id="CloseRequest:CloseRequest"></a>
       <h4 class="signature">
@@ -202,7 +190,7 @@ and has a cmd byte associated with it.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ExecuteRequest.html"><span class="name">ExecuteRequest</span></a><span class="params">(<span name="ps">ps: PreparedStatement</span>, <span name="flags">flags: Byte</span>, <span name="iterationCount">iterationCount: Int</span>)</span><span class="result"> extends CommandRequest with Product with Serializable</span>
+        <a href="ExecuteRequest.html"><span class="name">ExecuteRequest</span></a><span class="params">(<span name="stmtId">stmtId: Int</span>, <span name="params">params: IndexedSeq[Any]</span>, <span name="hasNewParams">hasNewParams: Boolean</span>, <span name="flags">flags: Byte</span>)</span><span class="result"> extends CommandRequest with Product with Serializable</span>
       </span>
       </h4>
       <p class="comment cmt">Uses the binary protocol to build an execute request for
@@ -337,7 +325,7 @@ parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="PrepareOK.html"><span class="name">PrepareOK</span></a><span class="params">(<span name="statementId">statementId: Int</span>, <span name="numOfCols">numOfCols: Int</span>, <span name="numOfParams">numOfParams: Int</span>, <span name="warningCount">warningCount: Int</span>, <span name="columns">columns: Seq[Field]</span>, <span name="params">params: Seq[Field]</span>)</span><span class="result"> extends Result with Product with Serializable</span>
+        <a href="PrepareOK.html"><span class="name">PrepareOK</span></a><span class="params">(<span name="id">id: Int</span>, <span name="numOfCols">numOfCols: Int</span>, <span name="numOfParams">numOfParams: Int</span>, <span name="warningCount">warningCount: Int</span>, <span name="columns">columns: Seq[Field]</span>, <span name="params">params: Seq[Field]</span>)</span><span class="result"> extends Result with Product with Serializable</span>
       </span>
       </h4>
       
@@ -354,18 +342,20 @@ parameters.</p>
       </h4>
       <p class="comment cmt">Allocates a prepared statement on the server from the
 passed in query string.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PreparedStatement" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PreparedStatement" data-isabs="true">
       <a id="PreparedStatement:PreparedStatement"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="PreparedStatement.html"><span class="name">PreparedStatement</span></a><span class="params">(<span name="metadata">metadata: PrepareOK</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="PreparedStatement.html"><span class="name">PreparedStatement</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A PreparedStatement represents a parameterized
+sql statement which may be applied concurrently
+with varying parameters.</p>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.QueryRequest" data-isabs="false">
       <a id="QueryRequest:QueryRequest"></a>
       <h4 class="signature">
@@ -596,18 +586,6 @@ received from a mysql server.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ClientInternalGreet" data-isabs="false">
-      <a id="ClientInternalGreet:ClientInternalGreet"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="ClientInternalGreet$.html"><span class="name">ClientInternalGreet</span></a><span class="result"> extends Request with Product with Serializable</span>
-      </span>
-      </h4>
-      <p class="comment cmt">NOOP Request used internally by this client.</p>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.CloseStatementOK" data-isabs="false">
       <a id="CloseStatementOK:CloseStatementOK"></a>
       <h4 class="signature">
@@ -696,6 +674,18 @@ contains any warnings and the server status.</p>
       </span>
       </h4>
       <p class="comment cmt">Represents the column meta-data associated with a query.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Handshake" data-isabs="false">
+      <a id="Handshake:Handshake"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Handshake$.html"><span class="name">Handshake</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.HandshakeInit" data-isabs="false">
       <a id="HandshakeInit:HandshakeInit"></a>
       <h4 class="signature">

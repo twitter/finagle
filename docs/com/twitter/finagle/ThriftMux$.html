@@ -53,7 +53,7 @@ TestService.FutureIface client =
   ThriftMux.newIface(addr, TestService.FutureIface.<span class="kw">class</span>);
 </pre><p>Servers are also simple to expose:</p><p><code>TestService.FutureIface</code> must be implemented and passed
 into <code>serveIface</code>:</p><pre>
-ThriftMuxRichServer.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
+ThriftMux.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
   <span class="kw">def</span> query(x: <span class="std">String</span>) = Future.value(x)  <span class="cmt">// (echo service)</span>
 })
 </pre><p>By default, the thrift binary protocol is used; different protocol
@@ -596,7 +596,7 @@ service TestService {
 </pre><p>Scrooge will generate an interface, <code>TestService.FutureIface</code>,
 implementing the above IDL.</p><p><code>TestService.FutureIface</code> must be implemented and passed
 into <code>serveIface</code>:</p><pre>
-ThriftMuxRichServer.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
+ThriftMux.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
   <span class="kw">def</span> query(x: <span class="std">String</span>) = Future.value(x)  <span class="cmt">// (echo service)</span>
 })
 </pre><p>Note that this interface is discovered by reflection. Passing an
@@ -623,7 +623,7 @@ service TestService {
 </pre><p>Scrooge will generate an interface, <code>TestService.FutureIface</code>,
 implementing the above IDL.</p><p><code>TestService.FutureIface</code> must be implemented and passed
 into <code>serveIface</code>:</p><pre>
-ThriftMuxRichServer.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
+ThriftMux.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
   <span class="kw">def</span> query(x: <span class="std">String</span>) = Future.value(x)  <span class="cmt">// (echo service)</span>
 })
 </pre><p>Note that this interface is discovered by reflection. Passing an

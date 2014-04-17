@@ -190,7 +190,9 @@ a simple grammar: a scheme is followed by a bang, followed
 by an argument:
 	name := scheme ! arg
 The scheme is looked up from registered Resolvers, and the
-argument is passed in.</p><p>Eval throws exceptions upon failure to parse the name, or
+argument is passed in.</p><p>When <code>name</code> begins with the character '/' it is intepreted to be
+a logical name whose interpetation is subject to a
+<a name="com.twitter.finagle.Dtab" class="extype" href="Dtab.html">Dtab</a>.</p><p>Eval throws exceptions upon failure to parse the name, or
 on failure to scheme lookup. Since names are late bound,
 binding failures are deferred.
 </p></div></div>

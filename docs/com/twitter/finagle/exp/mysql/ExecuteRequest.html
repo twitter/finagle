@@ -25,7 +25,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">ExecuteRequest</span><span class="params">(<span name="ps">ps: <a name="com.twitter.finagle.exp.mysql.PreparedStatement" class="extype" href="PreparedStatement.html">PreparedStatement</a></span>, <span name="flags">flags: <span name="scala.Byte" class="extype">Byte</span></span>, <span name="iterationCount">iterationCount: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result"> extends <a name="com.twitter.finagle.exp.mysql.CommandRequest" class="extype" href="CommandRequest.html">CommandRequest</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">ExecuteRequest</span><span class="params">(<span name="stmtId">stmtId: <span name="scala.Int" class="extype">Int</span></span>, <span name="params">params: IndexedSeq[<span name="scala.Any" class="extype">Any</span>]</span>, <span name="hasNewParams">hasNewParams: <span name="scala.Boolean" class="extype">Boolean</span></span>, <span name="flags">flags: <span name="scala.Byte" class="extype">Byte</span></span>)</span><span class="result"> extends <a name="com.twitter.finagle.exp.mysql.CommandRequest" class="extype" href="CommandRequest.html">CommandRequest</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
@@ -68,7 +68,7 @@ a prepared statement.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ExecuteRequest</span><span class="params">(<span name="ps">ps: <a name="com.twitter.finagle.exp.mysql.PreparedStatement" class="extype" href="PreparedStatement.html">PreparedStatement</a></span>, <span name="flags">flags: <span name="scala.Byte" class="extype">Byte</span> = <span class="symbol">0</span></span>, <span name="iterationCount">iterationCount: <span name="scala.Int" class="extype">Int</span> = <span class="symbol">1</span></span>)</span>
+        <span class="name">ExecuteRequest</span><span class="params">(<span name="stmtId">stmtId: <span name="scala.Int" class="extype">Int</span></span>, <span name="params">params: IndexedSeq[<span name="scala.Any" class="extype">Any</span>] = <span name="scala.`package`.IndexedSeq.empty[Nothing]" class="defval">...</span></span>, <span name="hasNewParams">hasNewParams: <span name="scala.Boolean" class="extype">Boolean</span> = <span class="symbol">true</span></span>, <span name="flags">flags: <span name="scala.Byte" class="extype">Byte</span> = <span class="symbol">0</span></span>)</span>
       </span>
       </h4>
       
@@ -255,6 +255,18 @@ a prepared statement.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ExecuteRequest#hasNewParams" data-isabs="false">
+      <a id="hasNewParams:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hasNewParams</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ExecuteRequest#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
@@ -279,18 +291,6 @@ a prepared statement.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ExecuteRequest#iterationCount" data-isabs="false">
-      <a id="iterationCount:Int"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">iterationCount</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -327,6 +327,18 @@ a prepared statement.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ExecuteRequest#params" data-isabs="false">
+      <a id="params:IndexedSeq[Any]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">params</span><span class="result">: IndexedSeq[<span name="scala.Any" class="extype">Any</span>]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ExecuteRequest#productArity" data-isabs="false">
       <a id="productArity:Int"></a>
       <h4 class="signature">
@@ -375,18 +387,6 @@ a prepared statement.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.ExecuteRequest" class="extype" href="">ExecuteRequest</a> → Product</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ExecuteRequest#ps" data-isabs="false">
-      <a id="ps:PreparedStatement"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">ps</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.PreparedStatement" class="extype" href="PreparedStatement.html">PreparedStatement</a></span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.CommandRequest#seq" data-isabs="false">
       <a id="seq:Short"></a>
       <h4 class="signature">
@@ -399,6 +399,18 @@ a prepared statement.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.CommandRequest" class="extype" href="CommandRequest.html">CommandRequest</a> → <a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ExecuteRequest#stmtId" data-isabs="false">
+      <a id="stmtId:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stmtId</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -416,7 +428,7 @@ a prepared statement.
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">toPacket</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="transport/Packet.html">Packet</a></span>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Protocols &mdash; Finagle 6.13.1 documentation</title>
+    <title>Protocols &mdash; Finagle 6.14.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.13.1',
+        VERSION:     '6.14.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,9 +23,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.13.1 documentation" href="index.html" />
-    <link rel="next" title="Metrics" href="Metrics.html" />
-    <link rel="prev" title="Client Stack" href="ClientStack.html" />
+    <link rel="top" title="Finagle 6.14.0 documentation" href="index.html" />
+    <link rel="next" title="Extending Finagle" href="Extending.html" />
+    <link rel="prev" title="Clients" href="Clients.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -42,10 +42,10 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="Metrics.html" title="Metrics"
+          <a href="Extending.html" title="Extending Finagle"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="ClientStack.html" title="Client Stack"
+          <a href="Clients.html" title="Clients"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">Finagle</a> &raquo;</li> 
       </ul>
@@ -64,7 +64,7 @@ client-server protocols. Thus in order to provide usable APIs for clients and
 servers, there are a number of Finagle subprojects that implement common
 protocols. A few of these protocol implementations are documented below.</p>
 <div class="section" id="thrift">
-<h2>Thrift<a class="headerlink" href="#thrift" title="Permalink to this headline">¶</a></h2>
+<span id="thrift-and-scrooge"></span><h2>Thrift<a class="headerlink" href="#thrift" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="http://thrift.apache.org/">Apache Thrift</a> is an interface definition
 language. With its associated code generator(s) and binary communication
 protocol, Thrift facilitates the development of scalable RPC systems. By
@@ -84,11 +84,45 @@ the protocol with support for our internal infrastructure. Specifically, we tack
 on a request header containing Zipkin tracing info, Finagle ClientId strings, and
 Wily delegations. In order to maintain backwards compatibility, TTwitter clients
 perform protocol negotiation upon connection and will downgrade to raw TBinary
-Thrift if servers are not using the upgraded protocol.</p>
-<p>By default, Finagle uses the Thrift framed codec and the binary protocol for
-serialization. At Twitter, we use our open-source Thrift code-generator called
+Thrift if servers are not using the upgraded protocol. By default, <cite>finagle-thrift</cite>
+uses the Thrift framed codec and the binary protocol for serialization.</p>
+<div class="section" id="using-finagle-thrift">
+<h3>Using finagle-thrift<a class="headerlink" href="#using-finagle-thrift" title="Permalink to this headline">¶</a></h3>
+<p>At Twitter, we use our open-source Thrift code-generator called
 <a class="reference external" href="http://twitter.github.io/scrooge/">Scrooge</a>. Scrooge is written in Scala and
-can generate source code in Scala or Java.</p>
+can generate source code in Scala or Java. Given the following IDL:</p>
+<div class="highlight-text"><div class="highlight"><pre>service Hello {
+  string hi();
+}
+</pre></div>
+</div>
+<p>Scrooge will generate code that can be used by <cite>finagle-thrift</cite> with the
+following rich APIs <a class="footnote-reference" href="#id2" id="id1">[1]</a>:</p>
+<p id="finagle-thrift-server">Serving the IDL:</p>
+<div class="highlight-text"><div class="highlight"><pre>val server = Thrift.serveIface(&quot;localhost:8080&quot;, new Hello[Future] {
+  def hi() = Future.value(&quot;hi&quot;)
+})
+Await.ready(server)
+</pre></div>
+</div>
+<p id="finagle-thrift-client">and the symmetric remote dispatch:</p>
+<div class="highlight-text"><div class="highlight"><pre>val client = Thrift.newIface[Hello[Future]](&quot;localhost:8080&quot;)
+client.hi() onSuccess { response =&gt;
+  println(&quot;Received response: &quot; + response)
+}
+</pre></div>
+</div>
+<p>Check out the <cite>finagle-thrift</cite> <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Thrift$">API docs</a>
+for more info.</p>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>This API makes it difficult to wrap endpoints in Finagle
+filters. We&#8217;re still experimenting with how to make the <cite>Service</cite>
+abstraction fit more cleanly into a world with IDLs.</td></tr>
+</tbody>
+</table>
+</div>
 </div>
 <div class="section" id="mux">
 <h2>Mux<a class="headerlink" href="#mux" title="Permalink to this headline">¶</a></h2>
@@ -159,7 +193,10 @@ intelligent back-pressure, slow start, and GC-avoidance.</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Protocols</a><ul>
-<li><a class="reference internal" href="#thrift">Thrift</a></li>
+<li><a class="reference internal" href="#thrift">Thrift</a><ul>
+<li><a class="reference internal" href="#using-finagle-thrift">Using finagle-thrift</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#mux">Mux</a></li>
 </ul>
 </li>
@@ -167,8 +204,8 @@ intelligent back-pressure, slow start, and GC-avoidance.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="ClientStack.html" title="previous chapter">Client Stack</a></li>
-      <li>Next: <a href="Metrics.html" title="next chapter">Metrics</a></li>
+      <li>Previous: <a href="Clients.html" title="previous chapter">Clients</a></li>
+      <li>Next: <a href="Extending.html" title="next chapter">Extending Finagle</a></li>
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none">

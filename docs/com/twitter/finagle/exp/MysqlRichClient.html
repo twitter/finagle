@@ -29,8 +29,8 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A rich mysql client supplements a Client[Request, Result]
-with convenient mysql specific builder methods.
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Supplements a <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a> with convenient
+builder methods for constructing a mysql client.
 </p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a name="com.twitter.finagle.exp.MysqlRichClient" class="extype" href="">MysqlRichClient</a> with <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>]</dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
@@ -64,54 +64,10 @@ with convenient mysql specific builder methods.
 
         
 
-        <div class="values members" id="values">
-              <h3>Abstract Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.exp.MysqlRichClient#withCharset" data-isabs="true">
-      <a id="withCharset(Short):Client[Request, Result]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">withCharset</span><span class="params">(<span name="charset">charset: <span name="scala.Short" class="extype">Short</span></span>)</span><span class="result">: <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">The default character set used when establishing
-a new session.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.MysqlRichClient#withCredentials" data-isabs="true">
-      <a id="withCredentials(String,String):Client[Request, Result]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">withCredentials</span><span class="params">(<span name="u">u: String</span>, <span name="p">p: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Configure the client the given credentials.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.MysqlRichClient#withDatabase" data-isabs="true">
-      <a id="withDatabase(String):Client[Request, Result]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">withDatabase</span><span class="params">(<span name="db">db: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Initial database to use when this client
-establishes a new session.</p><div class="fullcomment"><div class="comment cmt"><p>Initial database to use when this client
-establishes a new session. This can be subsequently
-changed with a select db query.
-</p></div></div>
-    </li></ol>
-            </div>
+        
 
         <div class="values members" id="values">
-              <h3>Concrete Value Members</h3>
+              <h3>Value Members</h3>
               <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
       <a id="!=(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -297,8 +253,8 @@ changed with a select db query.
         <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: String</span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.Client" class="extype" href="mysql/Client.html">Client</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Creates a new rich mysql client terminated to the endpoint
-resolved by <code>dest</code>.</p>
+      <p class="shortcomment cmt">Creates a new <code>RichClient</code> connected to the logical
+destination described by <code>dest</code>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.exp.MysqlRichClient#newRichClient" data-isabs="false">
       <a id="newRichClient(Name,String):Client"></a>
       <h4 class="signature">
@@ -310,8 +266,12 @@ resolved by <code>dest</code>.</p>
         <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Name" class="extype" href="../Name.html">Name</a></span>, <span name="label">label: String</span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.Client" class="extype" href="mysql/Client.html">Client</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Creates a new rich mysql client connected to
-the destination described by <code>dest</code> and <code>label</code>.</p>
+      <p class="shortcomment cmt">Creates a new <code>RichClient</code> connected to the logical
+destination described by <code>dest</code> with the assigned
+<code>label</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new <code>RichClient</code> connected to the logical
+destination described by <code>dest</code> with the assigned
+<code>label</code>. The <code>label</code> is used to scope client stats.
+</p></div></div>
     </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
       <a id="notify():Unit"></a>
       <h4 class="signature">

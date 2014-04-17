@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Servers &mdash; Finagle 6.14.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '6.14.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Finagle 6.14.0 documentation" href="index.html" />
+    <link rel="next" title="Clients" href="Clients.html" />
+    <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="Clients.html" title="Clients"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ServicesAndFilters.html" title="Services &amp; Filters"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Finagle</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="servers">
+<h1>Servers<a class="headerlink" href="#servers" title="Permalink to this headline">¶</a></h1>
+<p>Finagle servers implement a simple <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Server.scala">interface:</a></p>
+<div class="highlight-text"><div class="highlight"><pre>def serve(
+  addr: SocketAddress,
+  factory: ServiceFactory[Req, Rep]
+): ListeningServer
+</pre></div>
+</div>
+<p>When given a <cite>SocketAddress</cite> and a <a class="reference internal" href="ServicesAndFilters.html#service-factory"><em>ServiceFactory</em></a>, a server returns a handle
+to a <cite>ListeningServer</cite>. The handle allows for management of server resources. The interface comes with
+variants that allow for serving a simple <cite>Service</cite> as well. Typical usage takes the form
+<tt class="docutils literal"><span class="pre">Protocol.serve(...)</span></tt>, for example:</p>
+<div class="highlight-text"><div class="highlight"><pre>val server = Http.serve(&quot;:8080&quot;, myService)
+Await.ready(server) // waits until the server resources are released
+</pre></div>
+</div>
+<p>However, <cite>finagle-thrift</cite> servers expose a rich API because their interfaces are defined
+via a thrift IDL. See the protocols section on <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><em>Thrift</em></a>
+for more details.</p>
+<div class="section" id="server-modules">
+<h2>Server Modules<a class="headerlink" href="#server-modules" title="Permalink to this headline">¶</a></h2>
+<p>Finagle servers are simple; they are designed to serve requests quickly. As such,
+Finagle minimally furnishes servers with additional behavior. More sophisticated
+behavior lives in the <a class="reference internal" href="Clients.html#finagle-clients"><em>clients</em></a>. However, the server does come
+with some useful modules to help owners observe and debug their servers. This includes
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/MonitorFilter.scala">Monitoring</a>,
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/tracing/TracingFilter.scal">Tracing</a>,
+and <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/StatsFilter.scala">Stats</a>.
+Additionally, Finagle servers <a class="reference internal" href="FAQ.html#propagate-failure"><em>propagate failure</em></a>.</p>
+</div>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<p>Prior to <a class="reference internal" href="changelog.html"><em>6.x</em></a>, the <cite>ServerBuilder</cite> was the primary method for configuring
+the modules inside a Finagle server. We&#8217;ve moved away from this model for various
+<a class="reference internal" href="FAQ.html#configuring-finagle6"><em>reasons</em></a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
+  <img class="logo" src="_static/logo_small.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Servers</a><ul>
+<li><a class="reference internal" href="#server-modules">Server Modules</a></li>
+<li><a class="reference internal" href="#configuration">Configuration</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="ServicesAndFilters.html" title="previous chapter">Services &amp; Filters</a></li>
+      <li>Next: <a href="Clients.html" title="next chapter">Clients</a></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">&copy; Copyright 2014 Twitter, Inc.</div>
+  
+  </body>
+</html>

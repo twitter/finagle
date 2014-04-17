@@ -80,14 +80,13 @@ for curtailing tail latencies in distributed systems.</p>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="MysqlClient.html"><span class="name">MysqlClient</span></a><span class="params">(<span name="handshake">handshake: Handshake</span>)</span><span class="result"> extends Client[Request, Result] with MysqlRichClient with Product with Serializable</span>
+        <a href="MysqlClient.html"><span class="name">MysqlClient</span></a><span class="result"> extends StackClientLike[Request, Result, Packet, Packet, MysqlClient] with MysqlRichClient</span>
       </span>
       </h4>
-      <p class="comment cmt">Brings all the pieces together and implements
-a mysql client in terms of a finagle DefaultClient.</p>
+      <p class="comment cmt">Wraps a mysql client with builder semantics.</p>
     </li><li visbl="pub" name="com.twitter.finagle.exp.MysqlRichClient" data-isabs="true">
       <a id="MysqlRichClient:MysqlRichClient"></a>
       <h4 class="signature">
@@ -99,8 +98,8 @@ a mysql client in terms of a finagle DefaultClient.</p>
         <a href="MysqlRichClient.html"><span class="name">MysqlRichClient</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
-      <p class="comment cmt">A rich mysql client supplements a Client[Request, Result]
-with convenient mysql specific builder methods.</p>
+      <p class="comment cmt">Supplements a <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a> with convenient
+builder methods for constructing a mysql client.</p>
     </li><li visbl="pub" name="com.twitter.finagle.exp.ThriftForwardingWarmUpFilter" data-isabs="false">
       <a id="ThriftForwardingWarmUpFilter:ThriftForwardingWarmUpFilter"></a>
       <h4 class="signature">
@@ -120,7 +119,31 @@ with convenient mysql specific builder methods.</p>
 
         <div class="values members" id="values">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.exp.MuxClient" data-isabs="false">
+              <ol><li visbl="pub" name="com.twitter.finagle.exp.HttpClient" data-isabs="false">
+      <a id="HttpClient:HttpClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpClient$.html"><span class="name">HttpClient</span></a><span class="result"> extends HttpClient</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.HttpServer" data-isabs="false">
+      <a id="HttpServer:HttpServer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpServer$.html"><span class="name">HttpServer</span></a><span class="result"> extends StackServer[HttpRequest, HttpResponse, Any, Any]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.MuxClient" data-isabs="false">
       <a id="MuxClient:MuxClient"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -128,7 +151,7 @@ with convenient mysql specific builder methods.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="MuxClient$.html"><span class="name">MuxClient</span></a><span class="result"> extends MuxClient</span>
+        <a href="MuxClient$.html"><span class="name">MuxClient</span></a><span class="result"> extends StackClient[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer]</span>
       </span>
       </h4>
       
@@ -155,19 +178,19 @@ with convenient mysql specific builder methods.</p>
         <a href="Mysql$.html"><span class="name">Mysql</span></a><span class="result"> extends MysqlClient</span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.exp.MysqlTracing" data-isabs="false">
-      <a id="MysqlTracing:MysqlTracing"></a>
+      <p class="comment cmt"></p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.MysqlStackClient" data-isabs="false">
+      <a id="MysqlStackClient:MysqlStackClient"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="MysqlTracing$.html"><span class="name">MysqlTracing</span></a><span class="result"> extends SimpleFilter[Request, Result]</span>
+        <a href="MysqlStackClient$.html"><span class="name">MysqlStackClient</span></a><span class="result"> extends StackClient[Request, Result, Packet, Packet]</span>
       </span>
       </h4>
-      <p class="comment cmt">Tracing filter for mysql client requests.</p>
+      <p class="comment cmt">Implements a mysql client in terms of a com.twitter.finagle.StackClient.</p>
     </li><li visbl="pub" name="com.twitter.finagle.exp.ThriftForwardingWarmUpFilter" data-isabs="false">
       <a id="ThriftForwardingWarmUpFilter:ThriftForwardingWarmUpFilter"></a>
       <h4 class="signature">
@@ -192,6 +215,18 @@ with convenient mysql specific builder methods.</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.exp.ThriftMuxServer" data-isabs="false">
+      <a id="ThriftMuxServer:ThriftMuxServer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftMuxServer$.html"><span class="name">ThriftMuxServer</span></a><span class="result"> extends ThriftMuxServerImpl with (Params) ⇒ StackServer[Array[Byte], Array[Byte], Any, Any]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A Thrift server served over <a name="com.twitter.finagle.mux" class="extype" href="../mux/package.html">mux</a>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql" data-isabs="false">
       <a id="mysql:mysql"></a>
       <h4 class="signature">

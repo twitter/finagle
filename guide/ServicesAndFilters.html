@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Services &amp; Filters &mdash; Finagle 6.13.1 documentation</title>
+    <title>Services &amp; Filters &mdash; Finagle 6.14.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.13.1',
+        VERSION:     '6.14.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.13.1 documentation" href="index.html" />
-    <link rel="next" title="Anatomy of a Server" href="ServerAnatomy.html" />
+    <link rel="top" title="Finagle 6.14.0 documentation" href="index.html" />
+    <link rel="next" title="Servers" href="Servers.html" />
     <link rel="prev" title="Concurrent Programming with Futures" href="Futures.html" />
    
   
@@ -42,7 +42,7 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="ServerAnatomy.html" title="Anatomy of a Server"
+          <a href="Servers.html" title="Servers"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="Futures.html" title="Concurrent Programming with Futures"
@@ -155,6 +155,19 @@ val retryWithTimeoutFilter: Filter[..] =
 <p>creates a filter that dispatches requests first through <cite>retryFilter</cite> and
 then <cite>timeoutFilter</cite>.</p>
 </div>
+<div class="section" id="servicefactory">
+<span id="service-factory"></span><h2>ServiceFactory<a class="headerlink" href="#servicefactory" title="Permalink to this headline">¶</a></h2>
+<p>In certain modules, it&#8217;s important to take into account the process of acquiring
+a <cite>Service</cite>. For example, a connection pool would need to play a significant role
+in the <cite>Service</cite> acquisition phase. The <cite>ServiceFactory</cite> exists for this exact reason.
+It produces <a href="#id2"><span class="problematic" id="id3">`</span></a>Service`s over which requests can be dispatched. Its definition:</p>
+<div class="highlight-text"><div class="highlight"><pre>abstract class ServiceFactory[-Req, +Rep]
+        extends (ClientConnection =&gt; Future[Service[Req, Rep]])
+</pre></div>
+</div>
+<p>Internally, Finagle makes heavy use of this. In Finagle&#8217;s client and server stacks, modules
+are lifted into ServiceFactories and then composed using the aforementioned combinators.</p>
+</div>
 </div>
 
 
@@ -180,6 +193,7 @@ then <cite>timeoutFilter</cite>.</p>
 <li><a class="reference internal" href="#services">Services</a></li>
 <li><a class="reference internal" href="#filters">Filters</a></li>
 <li><a class="reference internal" href="#composing-filters-and-services">Composing filters and services</a></li>
+<li><a class="reference internal" href="#servicefactory">ServiceFactory</a></li>
 </ul>
 </li>
 </ul>
@@ -187,7 +201,7 @@ then <cite>timeoutFilter</cite>.</p>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="Futures.html" title="previous chapter">Concurrent Programming with Futures</a></li>
-      <li>Next: <a href="ServerAnatomy.html" title="next chapter">Anatomy of a Server</a></li>
+      <li>Next: <a href="Servers.html" title="next chapter">Servers</a></li>
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none">

@@ -83,7 +83,7 @@
         <a href="ClientDestTracingFilter.html"><span class="name">ClientDestTracingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
       </span>
       </h4>
-      <p class="comment cmt">Filter for clients to record the remote address of the server.</p>
+      <p class="comment cmt"><a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> for clients to record the remote address of the server.</p>
     </li><li visbl="pub" name="com.twitter.finagle.tracing.ClientRequestTracingFilter" data-isabs="true">
       <a id="ClientRequestTracingFilter:ClientRequestTracingFilter[Req, Res]"></a>
       <h4 class="signature">
@@ -143,7 +143,8 @@
         <a href="ServerDestTracingProxy.html"><span class="name">ServerDestTracingProxy</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends ServiceFactoryProxy[Req, Rep]</span>
       </span>
       </h4>
-      
+      <p class="comment cmt"><a name="com.twitter.finagle.ServiceFactoryProxy" class="extype" href="../ServiceFactoryProxy.html">ServiceFactoryProxy</a> used to trace the local addr and
+server addr.</p>
     </li><li visbl="pub" name="com.twitter.finagle.tracing.SpanId" data-isabs="false">
       <a id="SpanId:SpanId"></a>
       <h4 class="signature">
@@ -343,6 +344,18 @@ can be overridden with a different <code>TraceId</code>.</p>
       </span>
       <span class="symbol">
         <a href="Tracer$.html"><span class="name">Tracer</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.debugTrace" data-isabs="false">
+      <a id="debugTrace:debugTrace"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="debugTrace$.html"><span class="name">debugTrace</span></a><span class="result"> extends GlobalFlag[Boolean]</span>
       </span>
       </h4>
       

@@ -270,6 +270,53 @@ zero-indexed. To implement a finite number of retries, implement a method like:
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.service.RetryPolicy#filter" data-isabs="false">
+      <a id="filter[B&lt;:A]((B) ⇒ Boolean):RetryPolicy[B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">filter</span><span class="tparams">[<span name="B">B &lt;: A</span>]</span><span class="params">(<span name="pred">pred: (B) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[B]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Creates a new <code>RetryPolicy</code> based on the current <code>RetryPolicy</code> in which values of <code>A</code>
+are first checked against a predicate function, and only if the predicate returns true
+will the value be passed on to the current <code>RetryPolicy</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new <code>RetryPolicy</code> based on the current <code>RetryPolicy</code> in which values of <code>A</code>
+are first checked against a predicate function, and only if the predicate returns true
+will the value be passed on to the current <code>RetryPolicy</code>.</p><p>The predicate function need not be a pure function, but can change its behavior over
+time.  For example, the predicate function's decision can be based upon backpressure
+signals supplied by things like failure rates or latency, which allows <code>RetryPolicy</code>s
+to dynamically reduce the number of retries in response to backpressure.</p><p>The predicate function is only called on the first failure in a chain. Any additional
+chained RetryPolicies returned by the current policy will then see additional failures
+unfiltered.  Contrast this will <code>filterEach</code>, which applies the filter to each <code>RetryPolicy</code>
+in the chain.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.service.RetryPolicy#filterEach" data-isabs="false">
+      <a id="filterEach[B&lt;:A]((B) ⇒ Boolean):RetryPolicy[B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">filterEach</span><span class="tparams">[<span name="B">B &lt;: A</span>]</span><span class="params">(<span name="pred">pred: (B) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[B]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Similar to <code>filter</code>, but the predicate is applied to each <code>RetryPolicy</code> in the chain
+returned by the current RetryPolicy.</p><div class="fullcomment"><div class="comment cmt"><p>Similar to <code>filter</code>, but the predicate is applied to each <code>RetryPolicy</code> in the chain
+returned by the current RetryPolicy.  For example, if the current <code>RetryPolicy</code> returns
+<code>Some((D, P'))</code> for value <code>E</code> (of type <code>A</code>), and the given predicate returns true for <code>E</code>,
+then the value returned from the filtering <code>RetryPolicy</code> will be <code>Some((D, P<i>))<code> where
+<code>P<i><code> is equal to </code>P'.filterEach(pred)<code>.</code></i></code></code></i></code></p><p>One example where this is useful is to dynamically and fractionally allow retries based
+upon backpressure signals.  If, for example, the predicate function returned true or false
+based upon a probability distribution computed from a backpressure signal, it could return
+true 50% of the time, giving you a 50% chance of performing a single retry, a 25% chance of
+performing 2 retries, 12.5% chance of performing 3 retries, etc.  This might be more
+desirable than just using <code>filter</code> where you end up with a 50% chance of no retries and
+50% chance of the full number of retries.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a></dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
       <h4 class="signature">
@@ -321,6 +368,25 @@ zero-indexed. To implement a finite number of retries, implement a method like:
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.service.RetryPolicy#limit" data-isabs="false">
+      <a id="limit(⇒ Int):RetryPolicy[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">limit</span><span class="params">(<span name="maxRetries">maxRetries: ⇒ <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Applies a dynamically chosen retry limit to an existing <code>RetryPolicy</code> that may allow for
+more retries.</p><div class="fullcomment"><div class="comment cmt"><p>Applies a dynamically chosen retry limit to an existing <code>RetryPolicy</code> that may allow for
+more retries.  When the returned <code>RetryPolicy</code> is first invoked, it will call the <code>maxRetries</code>
+by-name parameter to get the current maximum retries allowed.  Regardless of the number
+of retries that the underlying policy would allow, it is capped to be no greater than the
+number returned by <code>maxRetries</code> on the first failure in the chain.</p><p>Using a dynamically choosen retry limit allows for the retry count to be tuned at runtime
+based upon backpressure signals such as failure rate or request latency.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">

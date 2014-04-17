@@ -417,6 +417,43 @@ factories in one (when available).</p>
       </span>
       </h4>
       <p class="comment cmt">A ContextHandler is responsible for maintaining a context.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.Dentry" data-isabs="false">
+      <a id="Dentry:Dentry"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Dentry.html"><span class="name">Dentry</span></a><span class="params">(<span name="prefix">prefix: Path</span>, <span name="dst">dst: NameTree[Path]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Trait Dentry describes a delegation table entry.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.Dtab" data-isabs="false">
+      <a id="Dtab:Dtab"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Dtab.html"><span class="name">Dtab</span></a><span class="params">(<span name="dentries0">dentries0: IndexedSeq[Dentry]</span>)</span><span class="result"> extends IndexedSeq[Dentry] with Namer with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A Dtab--short for delegation table--comprises a sequence
+of delegation rules.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.DtabBuilder" data-isabs="false">
+      <a id="DtabBuilder:DtabBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="DtabBuilder.html"><span class="name">DtabBuilder</span></a><span class="result"> extends Builder[Dentry, Dtab]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.FactoryToService" data-isabs="false">
       <a id="FactoryToService:FactoryToService[Req, Rep]"></a>
       <h4 class="signature">
@@ -626,14 +663,40 @@ server.</p>
       <a id="Name:Name"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">sealed </span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
         <a href="Name.html"><span class="name">Name</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
-      <p class="comment cmt">A name identifies an object.</p>
+      <p class="comment cmt">Names identify network locations.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.NameTree" data-isabs="true">
+      <a id="NameTree:NameTree[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="NameTree.html"><span class="name">NameTree</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Name trees represent a composite T-typed name whose interpretation
+is subject to evaluation rules.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.Namer" data-isabs="true">
+      <a id="Namer:Namer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Namer.html"><span class="name">Namer</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A namer is a context in which a com.twitter.finagle.NameTree
+NameTree is bound.</p>
     </li><li visbl="pub" name="com.twitter.finagle.NoBrokersAvailableException" data-isabs="false">
       <a id="NoBrokersAvailableException:NoBrokersAvailableException"></a>
       <h4 class="signature">
@@ -694,6 +757,19 @@ server.</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.Path" data-isabs="false">
+      <a id="Path:Path"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Path.html"><span class="name">Path</span></a><span class="params">(<span name="elems">elems: Buf*</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A Path comprises a sequence of byte buffers naming a
+hierarchically-addressed object.</p>
     </li><li visbl="pub" name="com.twitter.finagle.ProxyAnnouncement" data-isabs="true">
       <a id="ProxyAnnouncement:ProxyAnnouncement"></a>
       <h4 class="signature">
@@ -1191,18 +1267,6 @@ into <code>serveIface</code>:</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.WeightedSocketAddress" data-isabs="false">
-      <a id="WeightedSocketAddress:WeightedSocketAddress"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="WeightedSocketAddress.html"><span class="name">WeightedSocketAddress</span></a><span class="params">(<span name="addr">addr: SocketAddress</span>, <span name="weight">weight: Double</span>)</span><span class="result"> extends SocketAddress with Product with Serializable</span>
-      </span>
-      </h4>
-      <p class="comment cmt">A SocketAddress with a weight.</p>
     </li><li visbl="pub" name="com.twitter.finagle.WriteException" data-isabs="true">
       <a id="WriteException:WriteException"></a>
       <h4 class="signature">
@@ -1358,6 +1422,30 @@ into <code>serveIface</code>:</p>
       </h4>
       <p class="comment cmt">A context is a piece of serializable metadata managed by a
 registered handler.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.Dentry" data-isabs="false">
+      <a id="Dentry:Dentry"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Dentry$.html"><span class="name">Dentry</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.Dtab" data-isabs="false">
+      <a id="Dtab:Dtab"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Dtab$.html"><span class="name">Dtab</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.FailResolver" data-isabs="false">
       <a id="FailResolver:FailResolver"></a>
       <h4 class="signature">
@@ -1598,6 +1686,32 @@ registered handler.</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.NameTree" data-isabs="false">
+      <a id="NameTree:NameTree"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="NameTree$.html"><span class="name">NameTree</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">The NameTree object comprises
+<a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a> types as well
+as binding and evaluation routines.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.Namer" data-isabs="false">
+      <a id="Namer:Namer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Namer$.html"><span class="name">Namer</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.NegResolver" data-isabs="false">
       <a id="NegResolver:NegResolver"></a>
       <h4 class="signature">
@@ -1646,6 +1760,18 @@ registered handler.</p>
       </span>
       </h4>
       <p class="comment cmt">An empty ListeningServer that can be used as a placeholder.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.Path" data-isabs="false">
+      <a id="Path:Path"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Path$.html"><span class="name">Path</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.Redis" data-isabs="false">
       <a id="Redis:Redis"></a>
       <h4 class="signature">
@@ -1814,7 +1940,7 @@ registered handler.</p>
         <a href="ThriftMuxServer$.html"><span class="name">ThriftMuxServer</span></a><span class="result"> extends ThriftMuxServerImpl</span>
       </span>
       </h4>
-      <p class="comment cmt">A server for thrift served over <a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a>.</p>
+      <p class="comment cmt">A server for Thrift served over <a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxer" data-isabs="false">
       <a id="ThriftMuxer:ThriftMuxer"></a>
       <h4 class="signature">
@@ -1827,6 +1953,30 @@ registered handler.</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.WeightedInetSocketAddress" data-isabs="false">
+      <a id="WeightedInetSocketAddress:WeightedInetSocketAddress"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="WeightedInetSocketAddress$.html"><span class="name">WeightedInetSocketAddress</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.WeightedSocketAddress" data-isabs="false">
+      <a id="WeightedSocketAddress:WeightedSocketAddress"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="WeightedSocketAddress$.html"><span class="name">WeightedSocketAddress</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A SocketAddress with a weight.</p>
     </li><li visbl="pub" name="com.twitter.finagle.WriteException" data-isabs="false">
       <a id="WriteException:WriteException"></a>
       <h4 class="signature">
@@ -2116,6 +2266,19 @@ registered handler.</p>
       </h4>
       <p class="comment cmt">Package netty3 implements the bottom finagle primitives:
 {{com.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.package.param" data-isabs="false">
+      <a id="param:param"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="package$$param$.html"><span class="name">param</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Defines common <a name="com.twitter.finagle.Stack.Param" class="extype" href="Stack$$Param.html">Param</a>'s shared between
+finagle clients and servers.</p>
     </li><li visbl="pub" name="com.twitter.finagle.pool" data-isabs="false">
       <a id="pool:pool"></a>
       <h4 class="signature">
@@ -2209,6 +2372,18 @@ registered handler.</p>
       </span>
       <span class="symbol">
         <a href="ssl/package.html"><span class="name">ssl</span></a>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.package.stack" data-isabs="false">
+      <a id="stack:stack"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="package$$stack$.html"><span class="name">stack</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       

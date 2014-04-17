@@ -31,7 +31,7 @@
       
       <div class="fullcommenttop" id="comment"><div class="comment cmt"><p><code>TestService.FutureIface</code> must be implemented and passed
 into <code>serveIface</code>:</p><pre>
-ThriftMuxServerImpl(..).serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
+ThriftMuxServerImpl(...).serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
   <span class="kw">def</span> query(x: <span class="std">String</span>) = Future.value(x)  <span class="cmt">// (echo service)</span>
 })
 </pre></div><div class="toggleContainer block">
@@ -498,7 +498,7 @@ service TestService {
 </pre><p>Scrooge will generate an interface, <code>TestService.FutureIface</code>,
 implementing the above IDL.</p><p><code>TestService.FutureIface</code> must be implemented and passed
 into <code>serveIface</code>:</p><pre>
-ThriftMuxServerImpl(..).serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
+ThriftMuxServerImpl(...).serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
   <span class="kw">def</span> query(x: <span class="std">String</span>) = Future.value(x)  <span class="cmt">// (echo service)</span>
 })
 </pre><p>Note that this interface is discovered by reflection. Passing an
@@ -525,7 +525,7 @@ service TestService {
 </pre><p>Scrooge will generate an interface, <code>TestService.FutureIface</code>,
 implementing the above IDL.</p><p><code>TestService.FutureIface</code> must be implemented and passed
 into <code>serveIface</code>:</p><pre>
-ThriftMuxServerImpl(..).serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
+ThriftMuxServerImpl(...).serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
   <span class="kw">def</span> query(x: <span class="std">String</span>) = Future.value(x)  <span class="cmt">// (echo service)</span>
 })
 </pre><p>Note that this interface is discovered by reflection. Passing an

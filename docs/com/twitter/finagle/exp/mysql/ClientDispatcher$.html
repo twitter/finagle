@@ -123,6 +123,20 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ClientDispatcher#apply" data-isabs="false">
+      <a id="apply(Transport[Packet, Packet],(HandshakeInit) ⇒ Try[HandshakeResponse]):Service[Request, Result]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="trans">trans: <a name="com.twitter.finagle.transport.Transport" class="extype" href="../../transport/Transport.html">Transport</a>[<a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="transport/Packet.html">Packet</a>, <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="transport/Packet.html">Packet</a>]</span>, <span name="handshake">handshake: (<a name="com.twitter.finagle.exp.mysql.HandshakeInit" class="extype" href="HandshakeInit.html">HandshakeInit</a>) ⇒ <span name="com.twitter.util.Try" class="extype">Try</span>[<a name="com.twitter.finagle.exp.mysql.HandshakeResponse" class="extype" href="HandshakeResponse.html">HandshakeResponse</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="../../Service.html">Service</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Creates a mysql client dispatcher with write-through caches for optimization.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a mysql client dispatcher with write-through caches for optimization.</p></div><dl class="paramcmts block"><dt class="param">trans</dt><dd class="cmt"><p>A transport that reads a writes logical mysql packets.</p></dd><dt class="param">handshake</dt><dd class="cmt"><p>A function that is responsible for facilitating
+the connection phase given a HandshakeInit.
+</p></dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
