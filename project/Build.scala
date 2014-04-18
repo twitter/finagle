@@ -31,6 +31,18 @@ object Finagle extends Build {
       ExclusionRule(organization = "org.scala-tools.testing"),
       ExclusionRule(organization = "org.mockito"))
 
+  lazy val publishM2Configuration =
+    TaskKey[PublishConfiguration]("publish-m2-configuration",
+      "Configuration for publishing to the .m2 repository.")
+
+  lazy val publishM2 =
+    TaskKey[Unit]("publish-m2",
+      "Publishes artifacts to the .m2 repository.")
+
+  lazy val m2Repo =
+    Resolver.file("publish-m2-local",
+      Path.userHome / ".m2" / "repository")
+
   val sharedSettings = Seq(
     version := libVersion,
     organization := "com.twitter",
@@ -47,6 +59,12 @@ object Finagle extends Build {
       "org.mockito" % "mockito-all" % "1.9.5" % "test"
     ),
     resolvers += "twitter-repo" at "http://maven.twttr.com",
+
+    publishM2Configuration <<= (packagedArtifacts, checksums in publish, ivyLoggingLevel) map { (arts, cs, level) =>
+      Classpaths.publishConfig(arts, None, resolverName = m2Repo.name, checksums = cs, logging = level)
+    },
+    publishM2 <<= Classpaths.publishTask(publishM2Configuration, deliverLocal),
+    otherResolvers += m2Repo,
 
     testOptions in Test <<= scalaVersion map {
       case "2.10" | "2.10.0" => Seq(Tests.Filter(_ => false))
