@@ -48,9 +48,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.scala-tools.testing</groupId>
-      <artifactId>specs_2.9.2</artifactId>
-      <version>1.6.9</version>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_2.9.2</artifactId>
+      <version>1.9.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
