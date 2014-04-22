@@ -211,7 +211,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-stats",
     libraryDependencies ++= Seq(
-      "com.twitter.common" % "metrics" % "0.0.9"
+      "com.twitter.common" % "metrics" % "0.0.25"
     ) ++ jacksonLibs
   ).dependsOn(finagleCore, finagleHttp)
 
@@ -247,7 +247,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-commons-stats",
-    libraryDependencies ++= Seq("com.twitter.common" % "stats" % "0.0.35")
+    libraryDependencies ++= Seq("com.twitter.common" % "stats" % "0.0.89")
   ).dependsOn(finagleCore)
 
   lazy val finagleServersets = Project(
@@ -261,12 +261,12 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       "commons-codec" % "commons-codec" % "1.5",
       util("zk-common"),
-      "com.twitter.common.zookeeper" % "server-set" % "1.0.69"
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.72"
     ) ++ jacksonLibs,
     excludeFilter in unmanagedSources := "ZkTest.scala",
     ivyXML :=
       <dependencies>
-        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.67">
+        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.72">
           <exclude org="com.google.guava" name="guava"/>
           <exclude org="com.twitter" name="finagle-core"/>
           <exclude org="com.twitter" name="finagle-thrift"/>
@@ -335,7 +335,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("hashing"),
       "com.google.guava" % "guava" % "16.0",
-      "com.twitter.common" % "zookeeper-testing" % "0.0.42" % "test"
+      "com.twitter.common" % "zookeeper-testing" % "0.0.43" % "test"
     ) ++ jacksonLibs
   ).dependsOn(finagleCore, finagleServersets)
 
