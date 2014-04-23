@@ -10,6 +10,11 @@ pre {
   background: #fdfdfd;
 }
 
+.figure img {
+  width: 100%;
+  height: auto;
+}
+
 tt {
     background-color: #fff;
     color: #000;
