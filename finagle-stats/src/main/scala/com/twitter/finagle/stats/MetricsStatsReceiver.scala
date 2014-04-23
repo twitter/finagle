@@ -59,7 +59,9 @@ class MetricsStatsReceiver(val registry: Metrics) extends StatsReceiverWithCumul
     registry.register(gauge)
   }
 
-  protected[this] def deregisterGauge(name: Seq[String]) {}
+  protected[this] def deregisterGauge(names: Seq[String]) {
+    registry.unregister(format(names))
+  }
 
   private[this] def format(names: Seq[String]) = names.mkString("/")
 }
