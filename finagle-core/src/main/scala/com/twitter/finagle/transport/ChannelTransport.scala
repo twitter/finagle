@@ -32,7 +32,11 @@ class ChannelTransport[In, Out](ch: Channel)
 
     close()
     closep.updateIfEmpty(Return(exc))
-    readq.fail(exc)
+    // Do not discard existing queue items. Doing so causes a race
+    // between reading off of the transport and a peer closing it.
+    // For example, in HTTP, a remote server may send its content in
+    // many chunks and then promptly close its connection.
+    readq.fail(exc, false)
   }
 
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
