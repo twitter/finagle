@@ -182,7 +182,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
       else
         "%s:%d".format(host, u.getPort)
     val withHost = config.headers.updated(HttpHeaders.Names.HOST, Seq(hostValue))
-    val userInfo =  u.getUserInfo
+    val userInfo =  uri.getUserInfo
     val updated =
       if (userInfo == null || userInfo.isEmpty)
         withHost
