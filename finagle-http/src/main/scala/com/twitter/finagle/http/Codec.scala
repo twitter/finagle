@@ -376,11 +376,16 @@ case class RichHttp[REQUEST <: Request](
 
       override def prepareConnFactory(
         underlying: ServiceFactory[REQUEST, Response]
-      ): ServiceFactory[REQUEST, Response] =
+      ): ServiceFactory[REQUEST, Response] = {
+        // Note: This is a horrible hack to ensure that close() calls from
+        // ExpiringService do not propagate until all chunks have been read
+        // Waiting on CSL-915 for a proper fix.
+        val delayedReleaseService = underlying map(new DelayedReleaseService(_))
         if (httpFactory._enableTracing)
-          new HttpClientTracingFilter[REQUEST, Response](config.serviceName) andThen underlying
+          new HttpClientTracingFilter[REQUEST, Response](config.serviceName) andThen delayedReleaseService
         else
-          underlying
+          delayedReleaseService
+       }
 
       override def newClientDispatcher(transport: Transport[Any, Any]) =
         new HttpClientDispatcher(transport)
