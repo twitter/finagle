@@ -10,7 +10,7 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultMonitor, DefaultTimer, DefaultLogger, ReporterFactory, LoadedReporterFactory}
 import com.twitter.jvm.Jvm
-import com.twitter.util.{CloseAwaitably, Duration, Monitor, Timer, Closable, Return, Throw, Time}
+import com.twitter.util.{CloseAwaitably, Closable, Duration, Future, Monitor, Return, Timer, Throw, Time}
 import java.net.SocketAddress
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
@@ -167,13 +167,15 @@ case class DefaultServer[Req, Rep, In, Out](
       def closeServer(deadline: Time) = closeAwaitably {
         // The order here is important: by calling underlying.close()
         // first, we guarantee that no further connections are
-        // created.
+        // created. We use Closable.make here to snapshot connections at
+        // the time of closing.
         //
         // Note: A draining state machine is implemented by the server
         // dispatcher, so we can simply call `close` on each connection here.
-        val closable = Closable.sequence(
-          underlying, factory, Closable.all(connections.asScala.toSeq:_*))
-        connections.clear()
+        val closeConns = Closable.make { deadline =>
+          Closable.all(connections.asScala.toSeq:_*).close(deadline)
+        }
+        val closable = Closable.sequence(underlying, factory, closeConns)
         closable.close(deadline)
       }
 

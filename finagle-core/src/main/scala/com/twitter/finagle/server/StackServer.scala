@@ -183,10 +183,12 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
       protected def closeServer(deadline: Time) = closeAwaitably {
         // The order here is important: by calling underlying.close()
         // first, we guarantee that no further connections are
-        // created.
-        val closable = Closable.sequence(
-          underlying, factory, Closable.all(connections.asScala.toSeq:_*))
-        connections.clear()
+        // created. We use Closable.make here to snapshot connections
+        // at the time of closing.
+        val closeConns = Closable.make { deadline =>
+          Closable.all(connections.asScala.toSeq:_*).close(deadline)
+        }
+        val closable = Closable.sequence(underlying, factory, closeConns)
         closable.close(deadline)
       }
 
