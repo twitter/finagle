@@ -5,7 +5,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.service.DelayedFactory
 import com.twitter.finagle.stats._
-import com.twitter.util.Var
+import com.twitter.util.{Future, Time, Var}
 import java.net.{SocketAddress, InetSocketAddress}
 import java.util.logging.{Level, Logger}
 
@@ -63,7 +63,7 @@ private[finagle] object LoadBalancerFactory {
         // TODO: load balancer consumes Var[Addr] directly,
         // or at least Var[SocketAddress]
         val g = Group.mutable[SocketAddress]()
-        dest observe {
+        val observation = dest observe {
           case Addr.Bound(sockaddrs) =>
             g() = sockaddrs
           case Addr.Failed(e) =>
@@ -118,7 +118,10 @@ private[finagle] object LoadBalancerFactory {
         val ready = dest.observeUntil(_ != Addr.Pending)
         val f = ready map (_ => balanced)
 
-        new Stack.Leaf(LoadBalancer, new DelayedFactory(f))
+        new Stack.Leaf(LoadBalancer, new DelayedFactory(f) {
+          override def close(deadline: Time) =
+            Future.join(observation.close(deadline), super.close(deadline)).unit
+        })
       }
     }
 }
