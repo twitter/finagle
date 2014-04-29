@@ -2,7 +2,7 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncMutex
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.http.{HttpTransport, Response}
+import com.twitter.finagle.http.Response
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.Dtab
@@ -17,12 +17,10 @@ import org.jboss.netty.handler.codec.http.{HttpChunk, HttpRequest, HttpResponse}
  * responses via `Reader`.
  */
 class HttpClientDispatcher[Req <: HttpRequest](
-  transIn: Transport[Any, Any]
-) extends GenSerialClientDispatcher[Req, Response, Any, Any](transIn) {
+  trans: Transport[Any, Any]
+) extends GenSerialClientDispatcher[Req, Response, Any, Any](trans) {
 
   import GenSerialClientDispatcher.wrapWriteException
-
-  private[this] val trans = new HttpTransport(transIn)
 
   private[this] def chunkReader(done: Promise[Unit]) = new Reader { self =>
     private[this] val mu = new AsyncMutex

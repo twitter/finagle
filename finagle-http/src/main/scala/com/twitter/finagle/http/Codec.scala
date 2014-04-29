@@ -137,11 +137,8 @@ case class Http(
         } else
           super.prepareConnFactory(underlying)
 
-      override def newClientTransport(
-        channel: Channel,
-        statsReceiver: StatsReceiver
-      ): Transport[Any,Any] =
-        new HttpTransport(super.newClientTransport(channel, statsReceiver))
+      override def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any,Any] =
+        new HttpTransport(super.newClientTransport(ch, statsReceiver))
 
       override def newClientDispatcher(transport: Transport[Any, Any]) =
         new DtabHttpDispatcher(transport)
@@ -386,6 +383,9 @@ case class RichHttp[REQUEST <: Request](
         else
           delayedReleaseService
        }
+
+      override def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any,Any] =
+        new HttpTransport(super.newClientTransport(ch, statsReceiver))
 
       override def newClientDispatcher(transport: Transport[Any, Any]) =
         new HttpClientDispatcher(transport)
