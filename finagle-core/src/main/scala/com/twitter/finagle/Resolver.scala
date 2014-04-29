@@ -13,13 +13,13 @@ import scala.collection.mutable
  * which is used for lookup so that names may be resolved
  * in a global context.
  *
- * These are loaded by Finagle through the 
+ * These are loaded by Finagle through the
  * [[com.twitter.finagle.util.LoadService service loading mechanism]]. Thus, in
  * order to implement a new resolver, a class implementing `Resolver` with a
- * 0-arg constructor must be registered in a file named 
+ * 0-arg constructor must be registered in a file named
  * `META-INF/services/com.twitter.finagle.Resolver` included in the classpath; see
  * Oracle's
- * [[http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html ServiceLoader]] 
+ * [[http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html ServiceLoader]]
  * documentation for further details.
  */
 trait Resolver {
@@ -139,9 +139,9 @@ object Resolver {
   @deprecated("Use Resolver.eval", "6.7.x")
   def resolve(addr: String): Try[Group[SocketAddress]] =
     Try { eval(addr) } flatMap {
-        case Name.Path(_) => 
+        case Name.Path(_) =>
           Throw(new IllegalArgumentException("Resolver.resolve does not support logical names"))
-        case bound@Name.Bound(_) => 
+        case bound@Name.Bound(_) =>
           Return(NameGroup(bound))
       }
 
@@ -188,8 +188,7 @@ object Resolver {
   private[finagle] def evalLabeled(addr: String): (Name, String) = {
     val (label, rest) = lex(addr) match {
       case El(n) :: Eq :: rest => (n, rest)
-      case Eq :: rest => ("", rest)
-      case rest => (addr, rest)
+      case rest => ("", rest)
     }
 
     (eval(delex(rest)), label)

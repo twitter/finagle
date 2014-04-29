@@ -2,6 +2,7 @@ package com.twitter.finagle.server
 
 import com.twitter.finagle._
 import com.twitter.finagle.filter._
+import com.twitter.finagle.param._
 import com.twitter.finagle.service.{StatsFilter, TimeoutFilter, FailingFactory}
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.{StatsReceiver, ServerStatsReceiver}
@@ -127,20 +128,18 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
   /** @inheritdoc */
   def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
     new ListeningServer with CloseAwaitably {
-      import com.twitter.finagle.param._
-
       // Ensure that we have performed global initialization.
       com.twitter.finagle.Init()
 
-      val Label(label) = params[Label]
       val Monitor(monitor) = params[Monitor]
       val Reporter(reporter) = params[Reporter]
-      val statsReceiver = params[Stats] match {
-        case Stats(`ServerStatsReceiver`) =>
-          val scope = ServerRegistry.nameOf(addr) getOrElse label
-          Stats(ServerStatsReceiver.scope(scope))
-        case sr => sr
-      }
+      val Stats(stats) = params[Stats]
+      val Label(label) = params[Label]
+      // For historical reasons, we have to respect the ServerRegistry
+      // for naming addresses (i.e. label=addr). Until we deprecate
+      // its usage, it takes precedence for identifying a server as
+      // it is the most recently set label.
+      val serverLabel = ServerRegistry.nameOf(addr) getOrElse label
 
       // Connection bookkeeping used to explicitly manage
       // connection resources per ListeningServer. Note, draining
@@ -159,17 +158,18 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
         val onClose = transport.onClose.map(_ => ())
       }
 
-      val newParams = params +
-        statsReceiver +
+      val serverParams = params +
+        Label(serverLabel) +
+        Stats(stats.scope(serverLabel)) +
         Monitor(reporter(label, None) andThen monitor)
 
       val serviceFactory = (stack ++ Stack.Leaf(Endpoint, factory))
-        .make(newParams)
+        .make(serverParams)
 
       // Listen over `addr` and serve traffic from incoming transports to
       // `serviceFactory` via `newDispatcher`.
-      val listener = newListener(newParams)
-      val dispatcher = newDispatcher(newParams)
+      val listener = newListener(serverParams)
+      val dispatcher = newDispatcher(serverParams)
       val underlying = listener.listen(addr) { transport =>
         serviceFactory(newConn(transport)) respond {
           case Return(service) =>
