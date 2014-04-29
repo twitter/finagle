@@ -261,7 +261,8 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       "commons-codec" % "commons-codec" % "1.5",
       util("zk-common"),
-      "com.twitter.common.zookeeper" % "server-set" % "1.0.72"
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.72",
+      "com.google.guava" % "guava" % "16.0"
     ) ++ jacksonLibs,
     excludeFilter in unmanagedSources := "ZkTest.scala",
     ivyXML :=
