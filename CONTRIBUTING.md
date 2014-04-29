@@ -33,6 +33,8 @@ semantics.
 We generally follow [Effective Scala][0], and the [Scala Style Guide][1].  When
 in doubt, look around the codebase and see how it's done elsewhere.
 
+Comments should be formatted to a width no greater than 80 columns.
+
 We adhere to a specific format for commit messages. Please write your commit
 messages along these guidelines:
 
