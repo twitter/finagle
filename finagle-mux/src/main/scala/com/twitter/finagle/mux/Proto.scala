@@ -1,12 +1,10 @@
 package com.twitter.finagle.mux
 
-import com.twitter.io.Charsets
-import com.twitter.finagle.tracing.{SpanId, TraceId, Flags}
-import com.twitter.util.{Duration, Time}
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.util.CharsetUtil
 import com.twitter.finagle.tracing.{SpanId, TraceId, Flags}
 import com.twitter.finagle.{Dtab, Dentry, NameTree, Path}
+import com.twitter.io.Charsets
+import com.twitter.util.{Duration, Time}
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 case class BadMessageException(why: String) extends Exception(why)
 
