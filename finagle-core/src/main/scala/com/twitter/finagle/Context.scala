@@ -2,9 +2,9 @@ package com.twitter.finagle
 
 import com.twitter.finagle.util.LoadService
 import com.twitter.finagle.tracing.TraceContext
-import com.twitter.util.{Local, NonFatal}
 import com.twitter.io.Buf
-import java.util.logging.Level
+import com.twitter.logging.Level
+import com.twitter.util.{Local, NonFatal}
 import java.nio.charset.Charset
 
 /**
@@ -31,7 +31,7 @@ object Context {
 
   for (h <- handlers) {
     val Buf.Utf8(key) = h.key
-    log.info("Context: added handler "+key)
+    log.log(Level.DEBUG, "Context: added handler "+key)
   }
 
   private[finagle] def keyBytes(key: Buf): Array[Byte] = {
@@ -69,8 +69,7 @@ object Context {
   def handle(key: Buf, buf: Buf) {
     try handlerOf(key).handle(buf) catch {
       case NonFatal(exc) =>
-        log.log(Level.WARNING,
-          "Exception while handling request context", exc)
+        log.log(Level.WARNING, "Exception while handling request context", exc)
     }
   }
 
