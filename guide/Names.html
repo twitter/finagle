@@ -1,0 +1,352 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Names and Naming in Finagle &mdash; Finagle 6.15.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '6.15.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Finagle 6.15.0 documentation" href="index.html" />
+    <link rel="next" title="Protocols" href="Protocols.html" />
+    <link rel="prev" title="Clients" href="Clients.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="Protocols.html" title="Protocols"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Clients.html" title="Clients"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Finagle</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="names-and-naming-in-finagle">
+<h1>Names and Naming in Finagle<a class="headerlink" href="#names-and-naming-in-finagle" title="Permalink to this headline">¶</a></h1>
+<p>Finagle uses <em>names*[</em>] to identify network locations. Names must be
+supplied when constructing a Finagle client through
+<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ClientBuilder">ClientBuilder.dest</a>
+or through implementations of <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Client">Client</a>.</p>
+<p>Names are represented by the data-type <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Name">Name</a> comprising two variants:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">case</span> <span class="pre">class</span> <span class="pre">Name.Bound(va:</span> <span class="pre">Var[Addr])</span></tt></dt>
+<dd>Identifies a set of network locations. <tt class="docutils literal"><span class="pre">Var[Addr]</span></tt> (see <a class="reference internal" href="#addr"><em>Addr</em></a>)
+represents a set of changeable Internet addresses &#8212; or host,
+port pairs &#8212; described below.</dd>
+<dt><tt class="docutils literal"><span class="pre">case</span> <span class="pre">class</span> <span class="pre">Name.Path(path:</span> <span class="pre">Path)</span></tt></dt>
+<dd>Represents a name denoted by a hierarchical <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Path">path</a>, represented by a sequence of byte
+strings.</dd>
+</dl>
+<p><a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Resolver$">Resolver.eval</a> parses strings
+into <cite>Names</cite>. Strings of the form</p>
+<div class="highlight-text"><div class="highlight"><pre>scheme!arg
+</pre></div>
+</div>
+<p>uses the given <em>scheme</em> to interpret <em>arg</em>; they always evaluate into
+instances of <cite>Name.Bound</cite>. For example,</p>
+<div class="highlight-text"><div class="highlight"><pre>inet!twitter.com:80
+</pre></div>
+</div>
+<p>Uses the <tt class="docutils literal"><span class="pre">inet</span></tt> resolver to interpret the address <tt class="docutils literal"><span class="pre">twitter.com:80</span></tt>. <cite>Inet</cite>,
+predictably, uses DNS for this job.</p>
+<p>The name</p>
+<div class="highlight-text"><div class="highlight"><pre>zk!myzkhost.mycompany.com:2181!/my/zk/path
+</pre></div>
+</div>
+<p>reads a <a class="reference external" href="http://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a> at the path <tt class="docutils literal"><span class="pre">/my/zk/path</span></tt> on the ZooKeeper ensemble
+named by <tt class="docutils literal"><span class="pre">myzkhost.mycompany.com:2181</span></tt>.</p>
+<p>When a scheme is absent, <cite>inet</cite> is used; thus</p>
+<div class="highlight-text"><div class="highlight"><pre>twitter.com:8080
+</pre></div>
+</div>
+<p>is equivalent to</p>
+<div class="highlight-text"><div class="highlight"><pre>inet!twitter.com:8080
+</pre></div>
+</div>
+<div class="section" id="paths">
+<h2>Paths<a class="headerlink" href="#paths" title="Permalink to this headline">¶</a></h2>
+<p>Names beginning with the character <tt class="docutils literal"><span class="pre">/</span></tt> are hierarchical <em>paths</em> in the
+tradition of Unix. They denote an abstract location &#8212; i.e. <em>what</em> you
+want. Path names must be bound by the current namespace in order to
+identify <em>where</em> the network location(s) are.</p>
+<p>The name</p>
+<div class="highlight-text"><div class="highlight"><pre>/s/crawler
+</pre></div>
+</div>
+<p>might denote the <tt class="docutils literal"><span class="pre">crawler</span></tt> service.</p>
+</div>
+<div class="section" id="interpreting-paths-with-delegation-tables">
+<h2>Interpreting Paths With Delegation Tables<a class="headerlink" href="#interpreting-paths-with-delegation-tables" title="Permalink to this headline">¶</a></h2>
+<p>A delegation table (or &#8220;dtab&#8221;) defines the namespace for a Finagle
+transaction. A dtab comprises an ordered list of delegations which
+together define how a path is interpreted. A delegation is a rewrite
+rule <tt class="docutils literal"><span class="pre">src</span> <span class="pre">=&gt;</span> <span class="pre">dest</span></tt>. When a name has <tt class="docutils literal"><span class="pre">src</span></tt> as a prefix, the prefix
+is replaced with <tt class="docutils literal"><span class="pre">dest</span></tt>; otherwise the rule does not apply.
+Delegations have the concrete syntax</p>
+<div class="highlight-text"><div class="highlight"><pre>src     =&gt;      dest
+</pre></div>
+</div>
+<p>where <tt class="docutils literal"><span class="pre">src</span></tt> and <tt class="docutils literal"><span class="pre">dest</span></tt> are paths. As an example, the delegation</p>
+<div class="highlight-text"><div class="highlight"><pre>/s      =&gt;      /s#/foo/bar
+</pre></div>
+</div>
+<p>rewrites the path</p>
+<div class="highlight-text"><div class="highlight"><pre>/s/crawler
+</pre></div>
+</div>
+<p>to</p>
+<div class="highlight-text"><div class="highlight"><pre>/s#/foo/bar/crawler
+</pre></div>
+</div>
+<p>Note that prefixes match on path <cite>components</cite>, not characters; e.g.
+<cite>/s</cite> is a prefix of <cite>/s/crawler</cite>, but not of <cite>/s#/foo/bar/crawler</cite>.</p>
+<p>Paths beginning with <tt class="docutils literal"><span class="pre">/$/</span></tt> are called &#8220;system paths.&#8221; They are interpreted
+specially by Finagle, similarly to resolver schemes. Paths of the form</p>
+<div class="highlight-text"><div class="highlight"><pre>/$/namer/path..
+</pre></div>
+</div>
+<p>uses the given <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Namer">Namer</a> to interpret the
+remaining path. This allows Finagle to translate paths into addresses. For
+example</p>
+<div class="highlight-text"><div class="highlight"><pre>/$/inet/localhost/8080
+</pre></div>
+</div>
+<p>is bound by Finagle to the Internet address <tt class="docutils literal"><span class="pre">localhost:8080</span></tt>. Similarly,</p>
+<div class="highlight-text"><div class="highlight"><pre>/$/com.twitter.serverset/zk.local.twitter.com:2181/foo/bar
+</pre></div>
+</div>
+<p>is the path describing the <a class="reference external" href="http://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a> <tt class="docutils literal"><span class="pre">/foo/bar</span></tt> on the ZooKeeper
+ensemble <tt class="docutils literal"><span class="pre">zk.local.twitter.com:2181</span></tt>.</p>
+<p>We use dtabs to define how logical names (e.g. <tt class="docutils literal"><span class="pre">/s/crawler</span></tt>)
+translate into addresses. Because rewriting is abstracted away, we can
+adapt a Finagle process to its environment by manipulating its dtab.
+For example, this allows us to define <tt class="docutils literal"><span class="pre">/s/crawler</span></tt> to mean one set
+of hosts when a process is running in a production setting, and
+another set of hosts when developing or testing. A more complete
+example follows.</p>
+<p>With the dtab</p>
+<div class="highlight-text"><div class="highlight"><pre>/zk#    =&gt;      /$/com.twitter.serverset;
+/zk     =&gt;      /zk#;
+/s##    =&gt;      /zk/zk.local.twitter.com:2181;
+/s#     =&gt;      /s##/prod;
+/s      =&gt;      /s#;
+</pre></div>
+</div>
+<p>the path</p>
+<div class="highlight-text"><div class="highlight"><pre>/s/crawler
+</pre></div>
+</div>
+<p>is rewritten thus:</p>
+<div class="highlight-text"><div class="highlight"><pre>1.      /s/crawler
+2.      /s#/crawler
+3.      /s##/prod/crawler
+4.      /zk/zk.local.twitter.com:2181/prod/crawler
+5.      /zk#/zk.local.twitter.com:2181/prod/crawler
+6.      /$/com.twitter.serverset/zk.local.twitter.com:2181/prod/crawler
+</pre></div>
+</div>
+<p>We&#8217;ve turned the path /s/crawler into the <a class="reference external" href="http://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a> <tt class="docutils literal"><span class="pre">/prod/crawler</span></tt>
+on <cite>zk.local.twitter.com:2181</cite>. We use the <tt class="docutils literal"><span class="pre">#</span></tt> character to denote
+handlers &#8212; the path <tt class="docutils literal"><span class="pre">/s#</span></tt> &#8220;handles&#8221; <tt class="docutils literal"><span class="pre">/s</span></tt> and so on. To
+see why this indirection is necessary, consider redefining <tt class="docutils literal"><span class="pre">/s</span></tt> by
+adding a prefix &#8212; a common namespacing operation. The entry</p>
+<div class="highlight-text"><div class="highlight"><pre>/s      =&gt;      /s/prefix
+</pre></div>
+</div>
+<p>would recurse; for example the name <tt class="docutils literal"><span class="pre">/s/crawler</span></tt> would be rewritten</p>
+<div class="highlight-text"><div class="highlight"><pre>/s/crawler
+/s/prefix/crawler
+/s/prefix/prefix/crawler
+...
+</pre></div>
+</div>
+<p>and so on. With <tt class="docutils literal"><span class="pre">/s#</span></tt>, we&#8217;d instead add</p>
+<div class="highlight-text"><div class="highlight"><pre>/s      =&gt;      /s#/prefix
+</pre></div>
+</div>
+<p>to get the desired effect</p>
+<div class="highlight-text"><div class="highlight"><pre>/s/crawler
+/s#/prefix/crawler
+...
+</pre></div>
+</div>
+<p>We can easily manipulate our Dtab to affect certain parts of the resolution.
+For example, if we wanted to use staging instances of services instead of their
+production ones, we&#8217;d append the delegation <tt class="docutils literal"><span class="pre">/s#</span> <span class="pre">=&gt;</span> <span class="pre">/s##/staging</span></tt> making the
+Dtab</p>
+<div class="highlight-text"><div class="highlight"><pre>/zk#  =&gt; /$/com.twitter.serverset;         (a)
+/zk   =&gt; /zk#;                             (b)
+/s##  =&gt; /zk/zk.local.twitter.com:2181;    (c)
+/s#   =&gt; /s##/prod;                        (d)
+/s    =&gt; /s#;                              (e)
+/s#   =&gt; /s##/staging;                     (f)
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">/s/crawler</span></tt> would then be rewritten as follows. Each step is
+labelled with the rule applied from the above Dtab.</p>
+<div class="highlight-text"><div class="highlight"><pre>    /s/crawler
+(e) /s#/crawler
+(f) /s##/staging/crawler
+(c) /zk/zk.local.twitter.com:2181/staging/crawler
+(b) /zk#/zk.local.twitter.com:2181/staging/crawler
+(a) /$/com.twitter.serverset/zk.local.twitter.com:2181/staging/crawler
+</pre></div>
+</div>
+<p>Simply adding a new delegation is sufficient. Later entries are
+attempted before earlier ones; if a rewrite rooted at a delegation
+fails to produce an address, rewriting resumes from the next matching
+delegation.</p>
+<p>The combined effect is a fallback mechanism &#8212; if the
+<tt class="docutils literal"><span class="pre">crawler</span></tt> exists in the staging environment, it is used; otherwise
+we fall back to its production definition.</p>
+<p>In the above example, if <tt class="docutils literal"><span class="pre">/staging/crawler</span></tt> did not exist on
+<tt class="docutils literal"><span class="pre">zk.local.twitter.com:2181</span></tt>, the search would backtrack from (a),
+producing the following set of rewrites:</p>
+<div class="highlight-text"><div class="highlight"><pre>    /s/crawler
+(e) /s#/crawler
+(f) /s##/staging/crawler
+  (c) /zk/zk.local.twitter.com:2181/staging/crawler
+  (b) /zk#/zk.local.twitter.com:2181/staging/crawler
+  (a) /$/com.twitter.serverset/zk.local.twitter.com:2181/staging/crawler
+(d) /s##/prod/crawler
+  (c) /zk/zk.local.twitter.com:2181/prod/crawler
+  (b) /zk#/zk.local.twitter.com:2181/prod/crawler
+  (a) /$/com.twitter.serverset/zk.local.twitter.com:2181/prod/crawler
+</pre></div>
+</div>
+<p>We now see that delegations provide a simple and flexible means by
+which to define a namespace. Its effect is similar to that of a Unix
+mount table: Names stand on their own, but the minutiae of binding is
+handled by the environment &#8212; i.e. the dtab.</p>
+<p>Delegations are passed between servers if a supported protocol is
+used. Thus a server alters the interpretation of names in the context
+of the <em>entire request graph</em>, allowing a server to affect downstream
+behavior for the current transaction. As an example a developer might
+want to replace an individual component in a distributed system with a
+development version of that component. This can be done by
+orchestrating the originator (for example, an HTTP frontend) to add a
+delegation expressing this override.</p>
+<p>Finagle has protocol support for delegation passing in <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><em>TTwitter</em></a>, <a class="reference internal" href="Protocols.html#mux"><em>Mux</em></a>, its variant <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.ThriftMux$">ThriftMux</a>, and <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Http$">HTTP</a>. When these protocols are used,
+delegations that are added dynamically to a request are in effect
+throughout the distributed request graph &#8212; i.e. scope of the
+namespace is a transaction. Delegations are added dynamically through
+the <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Dtab$">Dtab</a> API.</p>
+<p>(This is a powerful facility that should be used with care.)</p>
+</div>
+<div class="section" id="addr">
+<span id="id1"></span><h2>Addr<a class="headerlink" href="#addr" title="Permalink to this headline">¶</a></h2>
+<p><cite>Name.Bound</cite> comprises a <tt class="docutils literal"><span class="pre">Var[Addr]</span></tt>, representing a dynamically
+changing <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Addr">Addr</a>. (<a class="reference external" href="http://twitter.github.io/util/docs/#com.twitter.util.Var">Var</a> implements a form of self-adjusting
+computation); <tt class="docutils literal"><span class="pre">Addrs</span></tt> are in one of 3 states:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">Addr.Pending</span></tt></dt>
+<dd>The binding is still pending: perhaps because we are awaiting a DNS answer
+or Zookeeper operation completion.</dd>
+<dt><tt class="docutils literal"><span class="pre">Addr.Failed(cause:</span> <span class="pre">Throwable)</span></tt></dt>
+<dd>The binding failed with the given <tt class="docutils literal"><span class="pre">cause</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">Addr.Bound(addrs:</span> <span class="pre">Set[SocketAddress])</span></tt></dt>
+<dd>The binding succeeded with the given set of addresses, representing
+concrete endpoints.</dd>
+</dl>
+<p>We now see that a <tt class="docutils literal"><span class="pre">Var[Addr]</span></tt> is capable of representing a moving target,
+for example a dynamic <a class="reference external" href="http://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a>.</p>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[*]</td><td>A <cite>name</cite> identities <em>what</em> you want; an
+<cite>address</cite> is a <cite>location</cite>, identifying <cite>where</cite> an object resides.
+<cite>Binding</cite> is the process that turns names into addresses.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
+  <img class="logo" src="_static/logo_small.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Names and Naming in Finagle</a><ul>
+<li><a class="reference internal" href="#paths">Paths</a></li>
+<li><a class="reference internal" href="#interpreting-paths-with-delegation-tables">Interpreting Paths With Delegation Tables</a></li>
+<li><a class="reference internal" href="#addr">Addr</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Clients.html" title="previous chapter">Clients</a></li>
+      <li>Next: <a href="Protocols.html" title="next chapter">Protocols</a></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">&copy; Copyright 2014 Twitter, Inc.</div>
+  
+  </body>
+</html>

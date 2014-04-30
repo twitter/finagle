@@ -32,7 +32,14 @@
       <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A resolver binds a name, represented by a string, to a
 variable address. Resolvers have an associated scheme
 which is used for lookup so that names may be resolved
-in a global context.
+in a global context.</p><p>These are loaded by Finagle through the
+com.twitter.finagle.util.LoadService. Thus, in
+order to implement a new resolver, a class implementing <code>Resolver</code> with a
+0-arg constructor must be registered in a file named
+<code>META-INF/services/com.twitter.finagle.Resolver</code> included in the classpath; see
+Oracle's
+<a href="http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html">ServiceLoader</a>
+documentation for further details.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>

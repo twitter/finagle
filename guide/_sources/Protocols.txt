@@ -69,6 +69,8 @@ for more info.
        filters. We're still experimenting with how to make the `Service`
        abstraction fit more cleanly into a world with IDLs.
 
+.. _mux:
+
 Mux
 ---
 

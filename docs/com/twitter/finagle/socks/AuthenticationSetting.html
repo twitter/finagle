@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.builder.ServerConfig.CancelOnHangup</title>
+          <title>com.twitter.finagle.socks.AuthenticationSetting</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
@@ -12,26 +12,29 @@
       <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
-        <a title="Go to companion" href="ServerConfig$$CancelOnHangup.html"><img src="../../../../lib/object_to_class_big.png" /></a>
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.builder" class="extype" href="package.html">builder</a>.<a name="com.twitter.finagle.builder.ServerConfig" class="extype" href="ServerConfig$.html">ServerConfig</a></p>
-        <h1><a title="Go to companion" href="ServerConfig$$CancelOnHangup.html">CancelOnHangup</a></h1>
+        <img src="../../../../lib/class_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.socks" class="extype" href="package.html">socks</a></p>
+        <h1>AuthenticationSetting</h1>
       </div>
 
       <h4 class="signature" id="signature">
       <span class="modifier_kind">
-        <span class="modifier">implicit </span>
-        <span class="kind">object</span>
+        <span class="modifier">sealed abstract </span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">CancelOnHangup</span><span class="result"> extends <a name="com.twitter.finagle.Stack.Param" class="extype" href="../Stack$$Param.html">Param</a>[<a name="com.twitter.finagle.builder.ServerConfig.CancelOnHangup" class="extype" href="ServerConfig$$CancelOnHangup.html">CancelOnHangup</a>] with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">AuthenticationSetting</span><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <a name="com.twitter.finagle.Stack.Param" class="extype" href="../Stack$$Param.html">Param</a>[<a name="com.twitter.finagle.builder.ServerConfig.CancelOnHangup" class="extype" href="ServerConfig$$CancelOnHangup.html">CancelOnHangup</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+        </div><div class="toggleContainer block">
+          <span class="toggle">Known Subclasses</span>
+          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.socks.Unauthenticated" class="extype" href="Unauthenticated$.html">Unauthenticated</a>, <a name="com.twitter.finagle.socks.UsernamePassAuthenticationSetting" class="extype" href="UsernamePassAuthenticationSetting.html">UsernamePassAuthenticationSetting</a></div>
         </div></div>
     
 
@@ -45,7 +48,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.builder.ServerConfig.CancelOnHangup" class="in"><span>CancelOnHangup</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="com.twitter.finagle.Stack.Param" class="in"><span>Param</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.socks.AuthenticationSetting" class="in"><span>AuthenticationSetting</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -55,7 +58,22 @@
 
       <div id="template">
         <div id="allMembers">
-        
+        <div class="members" id="constructors">
+              <h3>Instance Constructors</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.socks.AuthenticationSetting#this" data-isabs="false">
+      <a id="this:AuthenticationSetting"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">AuthenticationSetting</span><span class="params">(<span name="typeByte">typeByte: <span name="scala.Byte" class="extype">Byte</span></span>)</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
 
         
 
@@ -150,18 +168,6 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerConfig.CancelOnHangup#default" data-isabs="false">
-      <a id="default:CancelOnHangup"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">default</span><span class="result">: <a name="com.twitter.finagle.builder.ServerConfig.CancelOnHangup" class="extype" href="ServerConfig$$CancelOnHangup.html">CancelOnHangup</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.builder.ServerConfig.CancelOnHangup" class="extype" href="">CancelOnHangup</a> → <a name="com.twitter.finagle.Stack.Param" class="extype" href="../Stack$$Param.html">Param</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -273,18 +279,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="prt" name="com.twitter.finagle.builder.ServerConfig.CancelOnHangup#readResolve" data-isabs="false">
-      <a id="readResolve():AnyRef"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">readResolve</span><span class="params">()</span><span class="result">: AnyRef</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -309,6 +303,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.socks.AuthenticationSetting#typeByte" data-isabs="false">
+      <a id="typeByte:Byte"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">typeByte</span><span class="result">: <span name="scala.Byte" class="extype">Byte</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -361,13 +367,7 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.Serializable" class="parent">
-              <h3>Inherited from <span name="scala.Serializable" class="extype">Serializable</span></h3>
-            </div><div name="java.io.Serializable" class="parent">
-              <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
-            </div><div name="com.twitter.finagle.Stack.Param" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.Stack.Param" class="extype" href="../Stack$$Param.html">Param</a>[<a name="com.twitter.finagle.builder.ServerConfig.CancelOnHangup" class="extype" href="ServerConfig$$CancelOnHangup.html">CancelOnHangup</a>]</h3>
-            </div><div name="scala.AnyRef" class="parent">
+        <div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">
               <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>

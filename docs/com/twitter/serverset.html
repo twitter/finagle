@@ -30,7 +30,11 @@
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>The serverset namer takes paths of the form</p><p>   hosts/path...</p><p>and returns a dynamic name representing its resolution into a tree
-of /$/inet names.
+of /$/inet names.</p><p>The namer synthesises nodes for each endpoint in the serverset.
+Endpoints names are delimited by the ':' character. For example</p><pre>
+/$/com.twitter.serverset/sdzookeeper.local.twitter.com:<span class="num">2181</span>/twitter/service/cuckoo/prod/read:http
+</pre><p>is the endpoint <code><code>http</code></code> of serverset <code><code>/twitter/service/cuckoo/prod/read</code></code> on
+the ensemble <code><code>sdzookeeper.local.twitter.com:2181</code></code>.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a name="com.twitter.finagle.Namer" class="extype" href="finagle/Namer.html">Namer</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>

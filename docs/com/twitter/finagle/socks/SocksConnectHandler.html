@@ -29,7 +29,8 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Handle connections through a SOCKS proxy.</p><p>See http://www.ietf.org/rfc/rfc1928.txt</p><p>SOCKS authentication is not implemented; we assume the proxy is provided by ssh -D.
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Handle connections through a SOCKS proxy.</p><p>See http://www.ietf.org/rfc/rfc1928.txt</p><p>Only username and password authentication is implemented;
+See https://tools.ietf.org/rfc/rfc1929.txt</p><p>We assume the proxy is provided by ssh -D.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span name="org.jboss.netty.channel.SimpleChannelHandler" class="extype">SimpleChannelHandler</span>, <span name="org.jboss.netty.channel.ChannelDownstreamHandler" class="extype">ChannelDownstreamHandler</span>, <span name="org.jboss.netty.channel.ChannelUpstreamHandler" class="extype">ChannelUpstreamHandler</span>, <span name="org.jboss.netty.channel.ChannelHandler" class="extype">ChannelHandler</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
@@ -66,7 +67,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">SocksConnectHandler</span><span class="params">(<span name="proxyAddr">proxyAddr: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>, <span name="addr">addr: <span name="java.net.InetSocketAddress" class="extype">InetSocketAddress</span></span>)</span>
+        <span class="name">SocksConnectHandler</span><span class="params">(<span name="proxyAddr">proxyAddr: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>, <span name="addr">addr: <span name="java.net.InetSocketAddress" class="extype">InetSocketAddress</span></span>, <span name="authenticationSettings">authenticationSettings: Seq[<a name="com.twitter.finagle.socks.AuthenticationSetting" class="extype" href="AuthenticationSetting.html">AuthenticationSetting</a>] = <span name="collection.this.Seq.apply[com.twitter.finagle.socks.Unauthenticated.type](Unauthenticated)" class="defval">...</span></span>)</span>
       </span>
       </h4>
       

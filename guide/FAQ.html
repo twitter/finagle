@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>FAQ &mdash; Finagle 6.14.0 documentation</title>
+    <title>FAQ &mdash; Finagle 6.15.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.14.0',
+        VERSION:     '6.15.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.14.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.15.0 documentation" href="index.html" />
     <link rel="next" title="Finagle changelog" href="changelog.html" />
     <link rel="prev" title="Metrics" href="Metrics.html" />
    
@@ -68,10 +68,10 @@ conserve resources and avoid unnecessary work: the upstream
 client may have timed the request out, for example. Interrupts on
 futures propagate, and so if that server is in turn waiting for a response
 from a downstream server it will cancel this pending request, and so on.</p>
-<p>This is the source of the <a class="reference external" href="http://twitter.github.com/finagle/docs/#com.twitter.finagle.CancelledRequestException">CancelledRequestException</a> &#8211;
+<p>This is the source of the <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.CancelledRequestException">CancelledRequestException</a> &#8211;
 when a Finagle client receives the cancellation interrupt while a request is pending, it
 fails that request with this exception.</p>
-<p>You can disable this behavior by using the <a class="reference external" href="http://twitter.github.com/finagle/docs/#com.twitter.finagle.filter.MaskCancelFilter">MaskCancelFilter</a>:</p>
+<p>You can disable this behavior by using the <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.filter.MaskCancelFilter">MaskCancelFilter</a>:</p>
 <div class="highlight-text"><div class="highlight"><pre>val service: Service[Req, Rep] = ...
 val masked = new MaskCancelFilter[Req, Rep]
 

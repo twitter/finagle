@@ -48,7 +48,19 @@
 
         <div class="types members" id="types">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.socks.SocksConnectHandler" data-isabs="false">
+              <ol><li visbl="pub" name="com.twitter.finagle.socks.AuthenticationSetting" data-isabs="true">
+      <a id="AuthenticationSetting:AuthenticationSetting"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="AuthenticationSetting.html"><span class="name">AuthenticationSetting</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.socks.SocksConnectHandler" data-isabs="false">
       <a id="SocksConnectHandler:SocksConnectHandler"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -60,6 +72,18 @@
       </span>
       </h4>
       <p class="comment cmt">Handle connections through a SOCKS proxy.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.socks.UsernamePassAuthenticationSetting" data-isabs="false">
+      <a id="UsernamePassAuthenticationSetting:UsernamePassAuthenticationSetting"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="UsernamePassAuthenticationSetting.html"><span class="name">UsernamePassAuthenticationSetting</span></a><span class="params">(<span name="username">username: String</span>, <span name="password">password: String</span>)</span><span class="result"> extends AuthenticationSetting with Product with Serializable</span>
+      </span>
+      </h4>
+      
     </li></ol>
             </div>
 
@@ -76,6 +100,18 @@
       </span>
       <span class="symbol">
         <a href="SocksConnectHandler$.html"><span class="name">SocksConnectHandler</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.socks.Unauthenticated" data-isabs="false">
+      <a id="Unauthenticated:Unauthenticated"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Unauthenticated$.html"><span class="name">Unauthenticated</span></a><span class="result"> extends AuthenticationSetting</span>
       </span>
       </h4>
       

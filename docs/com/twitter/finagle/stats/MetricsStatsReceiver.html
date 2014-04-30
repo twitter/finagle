@@ -25,13 +25,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">MetricsStatsReceiver</span><span class="result"> extends <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a></span>
+        <span class="name">MetricsStatsReceiver</span><span class="result"> extends <a name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" href="StatsReceiverWithCumulativeGauges.html">StatsReceiverWithCumulativeGauges</a></span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" href="StatsReceiverWithCumulativeGauges.html">StatsReceiverWithCumulativeGauges</a>, <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.stats.MetricsStatsReceiver" class="in"><span>MetricsStatsReceiver</span></li><li name="com.twitter.finagle.stats.StatsReceiver" class="in"><span>StatsReceiver</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.stats.MetricsStatsReceiver" class="in"><span>MetricsStatsReceiver</span></li><li name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="in"><span>StatsReceiverWithCumulativeGauges</span></li><li name="com.twitter.finagle.stats.StatsReceiver" class="in"><span>StatsReceiver</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -150,7 +150,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.stats.MetricsStatsReceiver#addGauge" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges#addGauge" data-isabs="false">
       <a id="addGauge(String*)(⇒ Float):Gauge"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -158,13 +158,24 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">addGauge</span><span class="params">(<span name="names">names: String*</span>)</span><span class="params">(<span name="f">f: ⇒ <span name="scala.Float" class="extype">Float</span></span>)</span><span class="result">: <a name="com.twitter.finagle.stats.Gauge" class="extype" href="Gauge.html">Gauge</a></span>
+        <span class="name">addGauge</span><span class="params">(<span name="name">name: String*</span>)</span><span class="params">(<span name="f">f: ⇒ <span name="scala.Float" class="extype">Float</span></span>)</span><span class="result">: <a name="com.twitter.finagle.stats.Gauge" class="extype" href="Gauge.html">Gauge</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Register a function to be periodically measured.</p><div class="fullcomment"><div class="comment cmt"><p>Register a function to be periodically measured. This measurement
-exists in perpetuity. If you call addGauge with the name of a gauge
-previously registered, it will just return the previous gauge.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stats.MetricsStatsReceiver" class="extype" href="">MetricsStatsReceiver</a> → <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a></dd></dl></div>
+      <p class="shortcomment cmt">Add the function <code><code>f<i> as a gauge with the given name. The
+returned gauge value is only weakly referenced by the
+StatsReceiver, and if garbage collected will cease to be a part
+of this measurement: thus, it needs to be retained by the
+caller. Immortal measurements are made with <code><code>provideGauge<i>. As
+with <code><code>provideGauge<i>, gauges with equal names are added
+together.
+</i></code></code></i></code></code></i></code></code></p><div class="fullcomment"><div class="comment cmt"><p>Add the function <code><code>f<i> as a gauge with the given name. The
+returned gauge value is only weakly referenced by the
+StatsReceiver, and if garbage collected will cease to be a part
+of this measurement: thus, it needs to be retained by the
+caller. Immortal measurements are made with <code><code>provideGauge<i>. As
+with <code><code>provideGauge<i>, gauges with equal names are added
+together.
+</i></code></code></i></code></code></i></code></code></p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" href="StatsReceiverWithCumulativeGauges.html">StatsReceiverWithCumulativeGauges</a> → <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a></dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -203,8 +214,8 @@ previously registered, it will just return the previous gauge.
         <span class="name">counter</span><span class="params">(<span name="names">names: String*</span>)</span><span class="result">: <a name="com.twitter.finagle.stats.Counter" class="extype" href="Counter.html">Counter</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Get a Counter with the description
-</p><div class="fullcomment"><div class="comment cmt"><p>Get a Counter with the description
+      <p class="shortcomment cmt">Create and register a counter inside the underlying Metrics library
+</p><div class="fullcomment"><div class="comment cmt"><p>Create and register a counter inside the underlying Metrics library
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stats.MetricsStatsReceiver" class="extype" href="">MetricsStatsReceiver</a> → <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.stats.StatsReceiver#counter0" data-isabs="false">
       <a id="counter0(String):Counter"></a>
@@ -219,6 +230,18 @@ previously registered, it will just return the previous gauge.
       </h4>
       <p class="shortcomment cmt">Get a Counter with the description.</p><div class="fullcomment"><div class="comment cmt"><p>Get a Counter with the description. This method is a convenience for Java program.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a></dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.stats.MetricsStatsReceiver#deregisterGauge" data-isabs="false">
+      <a id="deregisterGauge(Seq[String]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">deregisterGauge</span><span class="params">(<span name="names">names: Seq[String]</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stats.MetricsStatsReceiver" class="extype" href="">MetricsStatsReceiver</a> → <a name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" href="StatsReceiverWithCumulativeGauges.html">StatsReceiverWithCumulativeGauges</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -360,6 +383,20 @@ is helpful to check for a NullStatsReceiver.
 exists in perpetuity. Measurements under the same name are added
 together.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a></dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.stats.MetricsStatsReceiver#registerGauge" data-isabs="false">
+      <a id="registerGauge(Seq[String],⇒ Float):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">registerGauge</span><span class="params">(<span name="names">names: Seq[String]</span>, <span name="f">f: ⇒ <span name="scala.Float" class="extype">Float</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The StatsReceiver implements these.</p><div class="fullcomment"><div class="comment cmt"><p>The StatsReceiver implements these. They provide the cumulated
+gauges.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stats.MetricsStatsReceiver" class="extype" href="">MetricsStatsReceiver</a> → <a name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" href="StatsReceiverWithCumulativeGauges.html">StatsReceiverWithCumulativeGauges</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.stats.MetricsStatsReceiver#registry" data-isabs="false">
       <a id="registry:Metrics"></a>
       <h4 class="signature">
@@ -428,8 +465,8 @@ stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds
         <span class="name">stat</span><span class="params">(<span name="names">names: String*</span>)</span><span class="result">: <a name="com.twitter.finagle.stats.Stat" class="extype" href="Stat.html">Stat</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a Stat with the description
-</p><div class="fullcomment"><div class="comment cmt"><p>Create a Stat with the description
+      <p class="shortcomment cmt">Create and register a stat (histogram) inside the underlying Metrics library
+</p><div class="fullcomment"><div class="comment cmt"><p>Create and register a stat (histogram) inside the underlying Metrics library
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stats.MetricsStatsReceiver" class="extype" href="">MetricsStatsReceiver</a> → <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.stats.StatsReceiver#stat0" data-isabs="false">
       <a id="stat0(String):Stat"></a>
@@ -604,7 +641,9 @@ stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds
         </div>
 
         <div id="inheritedMembers">
-        <div name="com.twitter.finagle.stats.StatsReceiver" class="parent">
+        <div name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" href="StatsReceiverWithCumulativeGauges.html">StatsReceiverWithCumulativeGauges</a></h3>
+            </div><div name="com.twitter.finagle.stats.StatsReceiver" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a></h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
