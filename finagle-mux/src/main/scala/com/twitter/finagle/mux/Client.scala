@@ -42,6 +42,10 @@ private object Cap extends Enumeration {
   val Unknown, Yes, No = Value
 }
 
+object ClientDispatcher {
+  val ClientEnabledTraceMessage = "finagle.mux.clientEnabled"
+}
+
 /**
  * A ClientDispatcher for the mux protocol.
  */
@@ -150,23 +154,37 @@ private[finagle] class ClientDispatcher (
         ChannelBuffers.wrappedBuffer(bytes)
     }
 
+  /**
+   * Dispatch a request.
+   *
+   * @param req the buffer representation of the request to be dispatched
+   * @param traceWrite if true, tracing info will be recorded for the request.
+   * If case, no tracing will be performed.
+   */
   private def dispatch(
     req: ChannelBuffer,
     traceWrite: Boolean
   ): Future[ChannelBuffer] = {
     val p = new Promise[ChannelBuffer]
+    val couldDispatch = canDispatch
+
     val tag = reqs.map(p) getOrElse {
       return Future.exception(WriteException(new Exception("Exhausted tags")))
     }
 
-    val couldDispatch = canDispatch
-    val msg = if (couldDispatch == Cap.No) Treq(tag, Some(Trace.id), req) else {
-      val contexts = Context.emit() map { case (k, v) => (toCB(k), toCB(v)) }
-      Tdispatch(tag, contexts.toSeq, "", Dtab.baseDiff(), req)
-    }
+    val msg =
+      if (couldDispatch == Cap.No)
+        Treq(tag, Some(Trace.id), req)
+      else {
+        val contexts = Context.emit() map { case (k, v) => (toCB(k), toCB(v)) }
+        Tdispatch(tag, contexts.toSeq, "", Dtab.baseDiff(), req)
+      }
 
-    if (traceWrite)
+    if (traceWrite) {
+      // Record tracing info to track Mux adoption across clusters.
+      Trace.record(ClientDispatcher.ClientEnabledTraceMessage)
       Trace.record(Annotation.ClientSend())
+    }
 
     trans.write(encode(msg)) onFailure { case exc =>
       reqs.unmap(tag)
@@ -177,7 +195,10 @@ private[finagle] class ClientDispatcher (
           reqP.setException(cause)
         }
       }
+
       p onSuccess { _ =>
+        // Note: Client receipt is unconditional on `traceWrite`, so we do not
+        // need to guard this trace.
         Trace.record(Annotation.ClientRecv())
       }
     }
@@ -187,6 +208,9 @@ private[finagle] class ClientDispatcher (
         canDispatch = Cap.Yes
       } rescue {
         case ServerError(_) =>
+          // We've determined that the server cannot handle Tdispatch messages,
+          // so we fall back to a Treq and disable tracing in order to not
+          // double-count the request.
           canDispatch = Cap.No
           dispatch(req, false)
       }

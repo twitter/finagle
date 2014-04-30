@@ -36,9 +36,8 @@ class MuxContext extends ContextHandler {
 }
 
 private[mux] class ClientServerTest(canDispatch: Boolean)
-    extends FunSuite with OneInstancePerTest with MockitoSugar {
-  def buf(b: Byte*) = ChannelBuffers.wrappedBuffer(Array[Byte](b:_*))
-
+  extends FunSuite with OneInstancePerTest with MockitoSugar
+{
   val tracer = new BufferingTracer
   Trace.pushTracer(tracer)
   val clientToServer = new AsyncQueue[ChannelBuffer]
@@ -50,6 +49,8 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   val service = mock[Service[ChannelBuffer, ChannelBuffer]]
   val client = new ClientDispatcher(clientTransport, NullStatsReceiver)
   val server = new ServerDispatcher(serverTransport, service, canDispatch)
+
+  def buf(b: Byte*) = ChannelBuffers.wrappedBuffer(Array[Byte](b:_*))
 
   test("handle concurrent requests, handling out of order replies") {
     val p1, p2, p3 = new Promise[ChannelBuffer]
@@ -140,10 +141,14 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     val recs = tracer.toSeq.sortBy(_.timestamp)
     assert(recs match {
       case Seq(
+        Record(`id`, _, Annotation.Message(ClientDispatcher.ClientEnabledTraceMessage), None),
         Record(`id`, _, Annotation.ClientSend(), None),
         Record(`id`, _, Annotation.ServerRecv(), None),
+        Record(`id`, _, Annotation.Message(ServerDispatcher.ServerEnabledTraceMessage), None),
         Record(`id`, _, Annotation.ServerSend(), None),
-        Record(`id`, _, Annotation.ClientRecv(), None)) => true
+        Record(`id`, _, Annotation.ClientRecv(), None)
+      ) => true
+
       case _ => false
     })
   }

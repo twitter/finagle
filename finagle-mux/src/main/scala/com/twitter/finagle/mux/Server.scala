@@ -13,6 +13,10 @@ import scala.collection.JavaConverters._
 case class ClientHangupException(cause: Throwable) extends Exception(cause)
 case class ClientDiscardedRequestException(why: String) extends Exception(why)
 
+object ServerDispatcher {
+  val ServerEnabledTraceMessage = "finagle.mux.serverEnabled"
+}
+
 /**
  * A ServerDispatcher for the mux protocol.
  */
@@ -55,6 +59,9 @@ private[finagle] class ServerDispatcher(
           f respond {
             case Return(rep) =>
               pending.remove(tag)
+
+              // Record tracing info to track Mux adoption across clusters.
+              Trace.record(ServerDispatcher.ServerEnabledTraceMessage)
               Trace.record(Annotation.ServerSend())
               trans.write(encode(RdispatchOk(tag, Seq.empty, rep)))
             case Throw(exc) =>
@@ -71,6 +78,10 @@ private[finagle] class ServerDispatcher(
         for (traceId <- traceId)
           Trace.setId(traceId)
         Trace.record(Annotation.ServerRecv())
+
+        // Record tracing info to track Mux adoption across clusters.
+        Trace.record(ServerDispatcher.ServerEnabledTraceMessage)
+
         val f = service(req)
         pending.put(tag, f)
         f respond {
