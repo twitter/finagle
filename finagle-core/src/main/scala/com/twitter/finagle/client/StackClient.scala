@@ -1,6 +1,7 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle._
+import com.twitter.finagle.param._
 import com.twitter.finagle.factory.{
   BindingFactory, RefcountedFactory, StatsFactoryWrapper, TimeoutFactory}
 import com.twitter.finagle.filter.{ExceptionSourceFilter, MonitorFilter}
@@ -11,6 +12,7 @@ import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.RollupStatsReceiver
 import com.twitter.finagle.tracing.{ClientDestTracingFilter, TracingFilter}
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.util.Showable
 import com.twitter.util.Var
 
 private[finagle] object StackClient {
@@ -152,18 +154,27 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
   }
 
   /** @inheritdoc */
-  def newClient(dest: Name, label: String): ServiceFactory[Req, Rep] = {
+  def newClient(dest: Name, label0: String): ServiceFactory[Req, Rep] = {
+    val Stats(stats) = params[Stats]
+    val Label(label1) = params[Label]
+    // For historical reasons, we have two sources for identifying
+    // a client. The most recently set `label0` takes precedence.
+    val clientLabel = (label0, label1) match {
+      case ("", "") => Showable.show(dest)
+      case ("", l1) => l1
+      case (l0, l1) => l0
+    }
+
     val clientStack = stack ++ (endpointer +: nilStack)
-    val param.Stats(stats) = params[param.Stats]
-    val clientParams = params + 
-      param.Label(label) +
-      param.Stats(new RollupStatsReceiver(stats))
+    val clientParams = params +
+      Label(clientLabel) +
+      Stats(new RollupStatsReceiver(stats.scope(clientLabel)))
 
     dest match {
       case Name.Bound(addr) =>
         clientStack.make(clientParams + LoadBalancerFactory.Dest(addr))
       case Name.Path(path) =>
-        val newStack: Var[Addr] => ServiceFactory[Req, Rep] = 
+        val newStack: Var[Addr] => ServiceFactory[Req, Rep] =
           addr => clientStack.make(clientParams + LoadBalancerFactory.Dest(addr))
 
         new BindingFactory(path, newStack, stats.scope("interpreter"))

@@ -6,6 +6,7 @@ scala_library(name='scala',
     pants('3rdparty:jackson-core'),
     pants('3rdparty:jackson-databind'),
     pants('3rdparty:slf4j-api'),
+    pants('3rdparty:guava'),
     pants('finagle/finagle-core'),
     pants('util/util-core'),
     pants('util/util-zk-common')

@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-stats</artifactId>
   <packaging>jar</packaging>
-  <version>6.14.1-SNAPSHOT</version>
+  <version>6.15.1-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -18,7 +18,7 @@
     <dependency>
       <groupId>com.twitter.common</groupId>
       <artifactId>metrics</artifactId>
-      <version>0.0.22</version>
+      <version>0.0.25</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -48,20 +48,20 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.scala-tools.testing</groupId>
-      <artifactId>specs_2.9.2</artifactId>
-      <version>1.6.9</version>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_2.9.2</artifactId>
+      <version>1.9.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.14.1-SNAPSHOT</version>
+      <version>6.15.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-http</artifactId>
-      <version>6.14.1-SNAPSHOT</version>
+      <version>6.15.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

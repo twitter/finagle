@@ -19,6 +19,16 @@ object newZk extends GlobalFlag(
  *
  * and returns a dynamic name representing its resolution into a tree
  * of /$/inet names.
+ *
+ * The namer synthesises nodes for each endpoint in the serverset.
+ * Endpoints names are delimited by the ':' character. For example
+ *
+ * {{{
+ * /$/com.twitter.serverset/sdzookeeper.local.twitter.com:2181/twitter/service/cuckoo/prod/read:http
+ * }}}
+ *
+ * is the endpoint ``http`` of serverset ``/twitter/service/cuckoo/prod/read`` on
+ * the ensemble ``sdzookeeper.local.twitter.com:2181``.
  */
 class serverset extends Namer {
   private[this] val whichZk = if (newZk()) "zk2" else "zk"
@@ -30,7 +40,15 @@ class serverset extends Namer {
   // of lazy evaluation of name trees.
   def lookup(path: Path): Activity[NameTree[Name]] = path match {
     case Path.Utf8(hosts, rest@_*) =>
-      val name@Name.Bound(va) = Resolver.eval("%s!%s!/%s".format(whichZk, hosts, rest mkString "/"))
+      val spec = if (rest.nonEmpty && (rest.last contains ":")) {
+        val Array(name, endpoint) = rest.last.split(":", 2)
+        val path = rest.init :+ name
+        "%s!%s!/%s!%s".format(whichZk, hosts,  path mkString "/", endpoint)
+      } else {
+        "%s!%s!/%s".format(whichZk, hosts, rest mkString "/")
+      }
+
+      val name@Name.Bound(va) = Resolver.eval(spec)
 
       // We have to bind the name ourselves in order to know whether
       // it resolves negatively.

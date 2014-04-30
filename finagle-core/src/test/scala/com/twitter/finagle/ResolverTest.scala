@@ -72,9 +72,9 @@ class ResolverTest extends FunSuite {
 
   test("Resolver.evalLabeled: Resolve empty string as label for unlabeled addresses") {
     val binding = Resolver.evalLabeled("test!xyz")
-    assert(binding._2 === "test!xyz")
+    assert(binding._2.isEmpty)
   }
-  
+
   test("Return equatable names") {
     assert(Resolver.eval("test!xyz") === Resolver.eval("test!xyz"))
     assert(Resolver.eval("test!xyz") != Resolver.eval("test!xxx"))

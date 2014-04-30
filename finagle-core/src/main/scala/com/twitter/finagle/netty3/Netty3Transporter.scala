@@ -3,7 +3,7 @@ package com.twitter.finagle.netty3
 import com.twitter.finagle.channel.{ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.httpproxy.HttpConnectHandler
-import com.twitter.finagle.socks.{SocksProxyFlags, SocksConnectHandler}
+import com.twitter.finagle.socks.{SocksProxyFlags, SocksConnectHandler, Unauthenticated, UsernamePassAuthenticationSetting}
 import com.twitter.finagle.ssl.{Engine, SslConnectHandler}
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.{ChannelTransport, Transport}
@@ -204,6 +204,7 @@ case class Netty3Transporter[In, Out](
   tlsConfig: Option[Netty3TransporterTLSConfig] = None,
   httpProxy: Option[SocketAddress] = None,
   socksProxy: Option[SocketAddress] = SocksProxyFlags.socksProxy,
+  socksUsernameAndPassword: Option[(String,String)] = SocksProxyFlags.socksUsernameAndPassword,
   channelReaderTimeout: Duration = Duration.Top,
   channelWriterTimeout: Duration = Duration.Top,
   channelSnooper: Option[ChannelSnooper] = None,
@@ -262,7 +263,13 @@ case class Netty3Transporter[In, Out](
 
     (socksProxy, addr) match {
       case (Some(proxyAddr), (inetAddr : InetSocketAddress)) =>
-        pipeline.addFirst("socksConnect", new SocksConnectHandler(proxyAddr, inetAddr))
+        val authentication = socksUsernameAndPassword match {
+          case (Some((username, password))) =>
+            UsernamePassAuthenticationSetting(username, password)
+          case _ => Unauthenticated
+        }
+        pipeline.addFirst("socksConnect",
+          new SocksConnectHandler(proxyAddr, inetAddr, Seq(authentication)))
       case _ =>
     }
 

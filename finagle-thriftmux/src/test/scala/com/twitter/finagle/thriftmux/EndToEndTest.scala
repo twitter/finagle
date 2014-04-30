@@ -1,14 +1,15 @@
 package com.twitter.finagle.thriftmux
 
 import com.twitter.finagle._
+import com.twitter.finagle.builder.ServerBuilder
 import com.twitter.finagle.client.{DefaultClient, Bridge}
 import com.twitter.finagle.dispatch.{PipeliningDispatcher, SerialClientDispatcher}
 import com.twitter.finagle.server.DefaultServer
 import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftFramedTransporter, ThriftClientRequest}
-import com.twitter.finagle.thriftmux.thriftscala.TestService
+import com.twitter.finagle.thriftmux.thriftscala.{TestService, TestService$FinagleService}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.tracing.Annotation.{ServerRecv, ClientSend}
-import com.twitter.util.{Promise, Await, Future}
+import com.twitter.util.{Await, Future, Promise, RandomSocket}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -35,6 +36,27 @@ class EndToEndTest extends FunSuite {
       1 to 5 foreach { _ =>
         assert(Await.result(client.query("ok")) == "okok")
       }
+    }
+  }
+
+  test("ServerBuilder thriftmux server + Finagle thrift client") {
+    val address = RandomSocket()
+    val iface = new TestService.FutureIface {
+      def query(x: String) = Future.value(x+x)
+    }
+
+    val service = new TestService$FinagleService(iface, Thrift.protocolFactory)
+
+    val server = ServerBuilder()
+      .stack(exp.ThriftMuxServer)
+      .bindTo(address)
+      .name("ThriftMuxServer")
+      .build(service)
+
+    val client = Thrift.newIface[TestService.FutureIface]("localhost:" + address.getPort)
+
+    1 to 5 foreach { _ =>
+      assert(Await.result(client.query("ok")) == "okok")
     }
   }
 

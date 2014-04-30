@@ -22,7 +22,7 @@ case class ThriftMuxServerImpl(
       val converter = new Filter[ChannelBuffer, ChannelBuffer, Array[Byte], Array[Byte]] {
         def apply(request: ChannelBuffer, service: Service[Array[Byte], Array[Byte]]): Future[ChannelBuffer] = {
           val arr = ThriftMuxUtil.bufferToArray(request)
-          service(arr) map(ChannelBuffers.wrappedBuffer)
+          service(arr) map ChannelBuffers.wrappedBuffer
         }
       }
       // Need a HandleUncaughtApplicationExceptions filter here to maintain
@@ -68,110 +68,15 @@ package exp {
   /**
    * A [[com.twitter.finagle.server.StackServer]] for the ThriftMux protocol.
    */
-  private[finagle]
-  class ThriftMuxStackServer(
-      stack: Stack[ServiceFactory[ChannelBuffer, ChannelBuffer]],
-      params: Stack.Params)
-    extends StackServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer](
-      stack, params)
+  private[finagle] object ThriftMuxer
+    extends StackServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer]
   {
-    def this() = this(StackServer.newStack[ChannelBuffer, ChannelBuffer], Stack.Params.empty)
-
-    protected val newListener: Stack.Params => Listener[ChannelBuffer, ChannelBuffer] =
-      Function.const(ThriftMuxListener)
+    protected val newListener: Stack.Params => Listener[ChannelBuffer, ChannelBuffer] = { params =>
+      Netty3Listener[ChannelBuffer, ChannelBuffer](thriftmux.PipelineFactory, params)
+    }
 
     protected val newDispatcher: Stack.Params => Dispatcher =
       Function.const(new mux.ServerDispatcher(_, _, true))
-  }
-
-  private[finagle]
-  object ThriftMuxServerImpl {
-    /**
-     * Wraps a ChannelBuffer-typed [[com.twitter.finagle.server.StackServer]]
-     * to one typed on Array[Byte]. Used to translate Mux servers (which operate
-     * in terms of `ChannelBuffer`s) to servers that speak Thrift.
-     *
-     * TODO: Factor this into StackServer.scala if we ever encounter a need for
-     * this sort of wrapping when implementing other protocols atop Mux.
-     */
-    case class WrappedMuxStackServer(
-        underlying: StackServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer])
-      extends StackServer[Array[Byte], Array[Byte], Any, Any]
-    {
-      // This StackServer will proxy to `underlying`'s listener and dispatcher, so
-      // we provide null objects here.
-      protected val newListener: Stack.Params => Listener[Any, Any] =
-        Function.const(NullListener)
-
-      protected val newDispatcher: Stack.Params => Dispatcher =
-        Function.const((_: Any, _: Any) => Closable.nop)
-
-      /**
-       * @inheritdoc
-       */
-      override def configured[P: Stack.Param](p: P): StackServer[Array[Byte], Array[Byte], Any, Any] =
-        copy(underlying = underlying.configured(p))
-
-      /**
-       * @inheritdoc
-       */
-      override def serve(
-        addr: SocketAddress,
-        newService: ServiceFactory[Array[Byte], Array[Byte]]
-      ) = {
-        underlying.serve(addr, newService map { service =>
-          val converter = new Filter[ChannelBuffer, ChannelBuffer, Array[Byte], Array[Byte]] {
-            def apply(
-              request: ChannelBuffer,
-              service: Service[Array[Byte], Array[Byte]]
-            ): Future[ChannelBuffer] = {
-              val arr = ThriftMuxUtil.bufferToArray(request)
-              service(arr) map(ChannelBuffers.wrappedBuffer)
-            }
-          }
-
-          // Need a HandleUncaughtApplicationExceptions filter here to maintain
-          // the backward compatibility with non-mux thrift clients. Mux thrift
-          // clients get the same semantics as a side effect.
-          //
-          // TODO: Once we make TProtocolFactory a Param, don't hardcode it here.
-          val uncaughtExceptionsFilter =
-            new HandleUncaughtApplicationExceptions(Protocols.binaryFactory())
-
-          converter andThen uncaughtExceptionsFilter andThen service
-        })
-      }
-    }
-  }
-
-  /**
-   * $serverExample
-   *
-   * @define serverExampleObject ThriftMuxServerImpl(...)
-   */
-  private[finagle]
-  class ThriftMuxServerImpl(
-      server: StackServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer])
-    extends StackServerLike[
-      Array[Byte], Array[Byte], Any, Any, ThriftMuxServerImpl
-    ](ThriftMuxServerImpl.WrappedMuxStackServer(server))
-    with ThriftRichServer
-  {
-    protected val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
-
-    protected def newInstance(
-      server: StackServer[Array[Byte], Array[Byte], Any, Any]
-    ): ThriftMuxServerImpl = server match {
-      case ThriftMuxServerImpl.WrappedMuxStackServer(cbServer) =>
-        // Unwrap and pass through the ChannelBuffer-typed underlying server.
-        // The advantage of extracting in this way is to avoid having to layer
-        // additional ChannelBuffer<->Array[Byte] conversions.
-        new ThriftMuxServerImpl(cbServer)
-
-      case other => throw new UnsupportedOperationException(
-        "Cannot create a ThriftMuxServerImpl from a non-Mux underlying server"
-      )
-    }
   }
 
   /**
@@ -183,19 +88,68 @@ package exp {
    *
    * @define serverExampleObject ThriftMuxServer
    */
-  object ThriftMuxServer extends ThriftMuxServerImpl(new ThriftMuxStackServer)
+  private[finagle] class ThriftMuxServer(
+      muxer: StackServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer])
+    extends Server[Array[Byte], Array[Byte]]
+    with ThriftRichServer
+  {
+    // TODO: Make TProtocol definable via a Param.
+    protected val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
+
+    private[this] val bufToArrayFilter =
+      new Filter[ChannelBuffer, ChannelBuffer, Array[Byte], Array[Byte]] {
+        def apply(
+          request: ChannelBuffer, service: Service[Array[Byte], Array[Byte]]
+        ): Future[ChannelBuffer] = {
+          val arr = ThriftMuxUtil.bufferToArray(request)
+          service(arr) map ChannelBuffers.wrappedBuffer
+        }
+      }
+
+    def configured[P: Stack.Param](p: P): ThriftMuxServer =
+      new ThriftMuxServer(muxer.configured(p))
+
+    def serve(addr: SocketAddress, factory: ServiceFactory[Array[Byte], Array[Byte]]) = {
+      muxer.serve(addr, factory map { service =>
+        // Need a HandleUncaughtApplicationExceptions filter here to maintain
+        // the backward compatibility with non-mux thrift clients. Mux thrift
+        // clients get the same semantics as a side effect.
+        val uncaughtExceptionsFilter = new HandleUncaughtApplicationExceptions(protocolFactory)
+        bufToArrayFilter andThen uncaughtExceptionsFilter andThen service
+      })
+    }
+  }
+
+  /**
+   * A [[com.twitter.finagle.server.StackServer]] for use with
+   * the legacy [[com.twitter.finagle.builder.ServerBuilder]].
+   */
+  private[finagle] class ThriftMuxStackServer(underlying: ThriftMuxServer)
+    extends StackServer[Array[Byte], Array[Byte], Any, Any] {
+    // This StackServer's `serve` method proxies to `underlying`, so we do not
+    // need to provide an actual listener or dispatcher. In order to avoid
+    // failing silently, we throw if these vals are every referenced directly.
+    protected val newListener: Stack.Params => Listener[Any, Any] = { _ =>
+      throw new UnsupportedOperationException(
+        "`ThriftMuxStackServer.newListener` should not be referenced directly")
+    }
+
+    protected val newDispatcher: Stack.Params => Dispatcher = { _ =>
+      throw new UnsupportedOperationException(
+        "`ThriftMuxStackServer.newDispatcher` should not be referenced directly")
+    }
+
+    override def configured[P: Stack.Param](p: P) =
+      new ThriftMuxStackServer(underlying.configured(p))
+
+    override def serve(addr: SocketAddress, factory: ServiceFactory[Array[Byte], Array[Byte]]) =
+      underlying.serve(addr, factory)
+  }
+
+  // The API endpoint that works with the new apis and serverbuilder
+  object ThriftMuxServer extends ThriftMuxServer(ThriftMuxer)
     with (Stack.Params => StackServer[Array[Byte], Array[Byte], Any, Any])
   {
-    /**
-     * A [[com.twitter.finagle.server.StackServer]] factory function for use
-     * with [[com.twitter.finagle.builder.ServerBuilder]].
-     */
-    def apply(params: Stack.Params): StackServer[Array[Byte], Array[Byte], Any, Any] =
-      ThriftMuxServerImpl.WrappedMuxStackServer(
-        new ThriftMuxStackServer(
-          StackServer.newStack[ChannelBuffer, ChannelBuffer],
-          params
-        )
-      )
+    def apply(params: Stack.Params) = new ThriftMuxStackServer(ThriftMuxServer)
   }
 }

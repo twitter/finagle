@@ -122,7 +122,7 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
   }
 
   private object Upgrader {
-    private lazy val upNegotiationAck = {
+    val upNegotiationAck = {
       val buffer = new OutputBuffer(protocolFactory)
       buffer().writeMessageBegin(
         new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.REPLY, 0))

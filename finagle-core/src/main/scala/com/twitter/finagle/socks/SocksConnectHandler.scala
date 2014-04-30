@@ -9,6 +9,13 @@ import org.jboss.netty.channel._
 import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, InconsistentStateException}
 import com.twitter.io.Charsets
 
+sealed abstract class AuthenticationSetting(val typeByte: Byte)
+
+object Unauthenticated extends AuthenticationSetting(0x00)
+
+case class UsernamePassAuthenticationSetting(username: String, password: String)
+    extends AuthenticationSetting(0x02)
+
 object SocksConnectHandler {
   // Throwables used as `cause` fields for ConnectionFailedExceptions.
   private[socks] val InvalidInit = new Throwable("unexpected SOCKS version or authentication " +
@@ -16,6 +23,20 @@ object SocksConnectHandler {
 
   private[socks] val InvalidResponse = new Throwable("unexpected SOCKS version or response " +
     "status specified in connect response from proxy")
+
+  // Socks Version constants
+  private val Version1: Byte = 0x01
+  private val Version5: Byte = 0x05
+
+  // Socks IP Address Constants
+  private val IpV4Indicator: Byte = 0x01
+  private val IpV6Indicator: Byte = 0x04
+  private val HostnameIndicator: Byte = 0x03
+
+  // Socks communication constants
+  private val Connect: Byte = 0x01
+  private val Reserved: Byte = 0x00
+  private val SuccessResponse: Byte = 0x00
 }
 
 /**
@@ -23,22 +44,32 @@ object SocksConnectHandler {
  *
  * See http://www.ietf.org/rfc/rfc1928.txt
  *
- * SOCKS authentication is not implemented; we assume the proxy is provided by ssh -D.
+ * Only username and password authentication is implemented;
+ * See https://tools.ietf.org/rfc/rfc1929.txt
+ *
+ * We assume the proxy is provided by ssh -D.
  */
-class SocksConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress)
-  extends SimpleChannelHandler
-{
+class SocksConnectHandler(
+  proxyAddr: SocketAddress,
+  addr: InetSocketAddress,
+  authenticationSettings: Seq[AuthenticationSetting] = Seq(Unauthenticated))
+    extends SimpleChannelHandler {
+
   import SocksConnectHandler._
 
   object State extends Enumeration {
-    val START, CONNECTED, REQUESTED = Value
+    val Start, Connected, Requested, Authenticating = Value
   }
+
   import State._
 
-  private[this] var state = START
+  private[this] var state = Start
   private[this] val buf = ChannelBuffers.dynamicBuffer()
   private[this] val bytes = new Array[Byte](4)
   private[this] val connectFuture = new AtomicReference[ChannelFuture](null)
+  private[this] val authenticationMap =
+    authenticationSettings.map { setting => setting.typeByte -> setting }.toMap
+  private[this] val supportedTypes = authenticationMap.keys.toArray.sorted
 
   // following Netty's ReplayingDecoderBuffer, we throw this when we run out of bytes
   object ReplayError extends scala.Error
@@ -53,41 +84,38 @@ class SocksConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress)
   }
 
   private[this] def writeInit(ctx: ChannelHandlerContext) {
-    // 0x05 == version 5
-    // 0x01 == 1 authentication method
-    // 0x00 == no authentication required
-    write(ctx, ChannelBuffers.wrappedBuffer(Array[Byte](0x05, 0x01, 0x00)))
+    val buf = ChannelBuffers.dynamicBuffer(1024)
+    buf.writeByte(Version5)
+    buf.writeByte(supportedTypes.size.toByte)
+    buf.writeBytes(supportedTypes)
+
+    write(ctx, buf)
   }
 
-  private[this] def readInit(): Boolean = {
+  private[this] def readInit(): Option[AuthenticationSetting] = {
     checkReadableBytes(2)
     buf.readBytes(bytes, 0, 2)
-    // 0x05 == version 5
-    // 0x00 == no authentication required
-    bytes(0) == 0x05 && bytes(1) == 0x00
+    if (bytes(0) == Version5)
+      authenticationMap.get(bytes(1))
+    else
+      None
   }
 
   private[this] def writeRequest(ctx: ChannelHandlerContext) {
-    val buf = ChannelBuffers.buffer(1024)
-    // 0x05 == version 5
-    // 0x01 == connect
-    // 0x00 == reserved
-    buf.writeBytes(Array[Byte](0x05, 0x01, 0x00))
+    val buf = ChannelBuffers.dynamicBuffer(1024)
+    buf.writeBytes(Array[Byte](Version5, Connect, Reserved))
 
     addr.getAddress match {
       case v4Addr: Inet4Address =>
-        // 0x01 == IPv4
-        buf.writeByte(0x01)
+        buf.writeByte(IpV4Indicator)
         buf.writeBytes(v4Addr.getAddress)
 
       case v6Addr: Inet6Address =>
-        // 0x04 == IPv6
-        buf.writeByte(0x04)
+        buf.writeByte(IpV6Indicator)
         buf.writeBytes(v6Addr.getAddress)
 
       case _ => // unresolved host
-        // 0x03 == hostname
-        buf.writeByte(0x03)
+        buf.writeByte(HostnameIndicator)
         val hostnameBytes = addr.getHostName.getBytes(Charsets.UsAscii)
         buf.writeByte(hostnameBytes.size)
         buf.writeBytes(hostnameBytes)
@@ -97,22 +125,45 @@ class SocksConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress)
     write(ctx, buf)
   }
 
+  private[this]
+  def writeUserNameAndPass(ctx: ChannelHandlerContext, username: String, pass: String) {
+    val buf = ChannelBuffers.buffer(1024)
+    buf.writeByte(Version1)
+
+    // RFC does not specify an encoding. Assume UTF8
+    val usernameBytes = username.getBytes(Charsets.Utf8)
+    buf.writeByte(usernameBytes.size.toByte)
+    buf.writeBytes(usernameBytes)
+
+    val passBytes = pass.getBytes(Charsets.Utf8)
+    buf.writeByte(passBytes.size.toByte)
+    buf.writeBytes(passBytes)
+
+    write(ctx, buf)
+  }
+
+  private[this] def readAuthenticated() = {
+    checkReadableBytes(2)
+    buf.readBytes(bytes, 0, 2)
+
+    bytes(0) == Version1 && bytes(1) == SuccessResponse
+  }
+
   private[this] def readResponse(): Boolean = {
     checkReadableBytes(4)
     buf.readBytes(bytes, 0, 4)
-    // 0x05 == version 5
-    // 0x00 == succeeded
-    // 0x00 == reserved
-    if (bytes(0) == 0x05 && bytes(1) == 0x00 && bytes(2) == 0x00) {
+    if (bytes(0) == Version5 &&
+      bytes(1) == SuccessResponse &&
+      bytes(2) == Reserved) {
       bytes(3) match {
-        case 0x01 => // 0x01 == IPv4
+        case IpV4Indicator =>
           discardBytes(4)
 
-        case 0x03 => // 0x03 == hostname
+        case HostnameIndicator =>
           checkReadableBytes(1)
           discardBytes(buf.readUnsignedByte())
 
-        case 0x04 => // 0x04 == IPv6
+        case IpV6Indicator =>
           discardBytes(16)
       }
       discardBytes(2)
@@ -128,9 +179,8 @@ class SocksConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress)
   }
 
   private[this] def checkReadableBytes(numBytes: Int) {
-    if (buf.readableBytes < numBytes) {
+    if (buf.readableBytes < numBytes)
       throw ReplayError
-    }
   }
 
   override def connectRequested(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
@@ -183,13 +233,12 @@ class SocksConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress)
       def operationComplete(f: ChannelFuture) {
         if (f.isSuccess)
           SocksConnectHandler.super.channelConnected(ctx, e)
-
         else if (f.isCancelled)
           fail(ctx.getChannel, new ChannelClosedException(addr))
       }
     })
 
-    state = CONNECTED
+    state = Connected
     writeInit(ctx)
   }
 
@@ -204,15 +253,27 @@ class SocksConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress)
 
     try {
       state match {
-        case CONNECTED =>
-          if (readInit()) {
-            state = REQUESTED
-            writeRequest(ctx)
-          } else {
-            fail(e.getChannel, new ConnectionFailedException(InvalidInit, addr))
+        case Connected =>
+          readInit() match {
+            case Some(Unauthenticated) =>
+              state = Requested
+              writeRequest(ctx)
+            case Some(UsernamePassAuthenticationSetting(username,pass)) =>
+              state = Authenticating
+              writeUserNameAndPass(ctx, username, pass)
+            case None =>
+              fail(e.getChannel, new ConnectionFailedException(InvalidInit, addr))
           }
 
-        case REQUESTED =>
+        case Authenticating =>
+          if (readAuthenticated()) {
+            state = Requested
+            writeRequest(ctx)
+          } else {
+            fail(e.getChannel, new ConnectionFailedException(InvalidResponse, addr))
+          }
+
+        case Requested =>
           if (readResponse()) {
             ctx.getPipeline.remove(this)
             connectFuture.get.setSuccess()

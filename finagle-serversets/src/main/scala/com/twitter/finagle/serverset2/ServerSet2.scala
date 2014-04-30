@@ -11,6 +11,7 @@ import com.twitter.util.{Activity, Closable, Memoize, Witness, Var}
 import java.net.SocketAddress
 import java.nio.charset.Charset
 import java.util.concurrent.atomic.AtomicInteger
+import com.google.common.cache.{Cache, CacheBuilder, CacheLoader}
 
 object chatty extends GlobalFlag(false, "Log resolved ServerSet2 addresses")
 
@@ -30,15 +31,15 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
   def this() = this(DefaultStatsReceiver.scope("zk2"))
 
   val scheme = "zk2"
-  
+
   private[this] implicit val injectTimer = DefaultTimer.twitter
-  
+
   private[this] val sessionTimeout = 4.seconds
   private[this] val zkFactory = Zk.withTimeout(sessionTimeout)
   private[this] var cache = Map.empty[String, ServerSet2]
-  private[this] val epoch = Stabilizer.epochs(sessionTimeout)
+  private[this] val epoch = Stabilizer.epochs(sessionTimeout*4)
   private[this] val nsets = new AtomicInteger(0)
-  
+
   private[this] val gauges = Seq(
     statsReceiver.addGauge("session_cache_size") { synchronized(cache.size) },
     statsReceiver.addGauge("observed_serversets") { nsets.get() }
@@ -77,7 +78,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
       // The stabilizer ensures that we qualify removals by putting
       // them in a limbo state for at least one epoch.
       val stabilized = Stabilizer(va, epoch)
-      
+
       // Finally, we output a State, which is always a nonpending
       // address coupled with statistics from the stabilization
       // process.
@@ -155,13 +156,33 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
   }
 }
 
+private[serverset2] trait PathCache {
+  val entries: Cache[String, Set[Entry]]
+  val vectors: Cache[String, Option[Vector]]
+}
+
+private[serverset2] object PathCache {
+  def apply(maxSize: Int): PathCache = new PathCache {
+    val entries: Cache[String, Set[Entry]] = 
+      CacheBuilder.newBuilder()
+        .maximumSize(maxSize)
+        .build()
+
+    val vectors: Cache[String, Option[Vector]] = 
+      CacheBuilder.newBuilder()
+        .maximumSize(maxSize)
+        .build()
+  }
+}
+
 private[serverset2] trait ServerSet2 {
-  def entriesOf(path: String): Activity[Set[Entry]]
-  def vectorsOf(path: String): Activity[Set[Vector]]
+  def entriesOf(path: String, cache: PathCache): Activity[Set[Entry]]
+  def vectorsOf(path: String, cache: PathCache): Activity[Set[Vector]]
 
   def weightedOf(path: String): Activity[Set[(Entry, Double)]] = {
-    val vs = vectorsOf(path).run
-    val es = entriesOf(path).run
+    val cache = PathCache(16000)
+    val vs = vectorsOf(path, cache).run
+    val es = entriesOf(path, cache).run
     Activity((es join vs) map {
       case (Activity.Pending, _) => Activity.Pending
       case (f@Activity.Failed(_), _) => f
@@ -175,12 +196,12 @@ private[serverset2] trait ServerSet2 {
 
 private[serverset2] object ServerSet2 {
   val DefaultRetrying = 5.seconds
-  
+
   def apply(hosts: String): ServerSet2 = 
     apply(Zk.retrying(DefaultRetrying, () => Zk(hosts)))
 
   def apply(zk: Var[Zk]): ServerSet2 =
-     new VarServerSet2(zk map { zk => new ZkServerSet2(zk) } )
+     new VarServerSet2(zk map { zk => new ZkServerSet2(zk) })
 
   def weighted(ents: Set[Entry], vecs: Set[Vector]): Set[(Entry, Double)] = {
     ents map { ent =>
@@ -191,8 +212,10 @@ private[serverset2] object ServerSet2 {
 }
 
 private[serverset2] class VarServerSet2(v: Var[ServerSet2]) extends ServerSet2 {
-  def entriesOf(path: String): Activity[Set[Entry]] = Activity(v flatMap (_.entriesOf(path).run))
-  def vectorsOf(path: String): Activity[Set[Vector]] = Activity(v flatMap (_.vectorsOf(path).run))
+  def entriesOf(path: String, cache: PathCache): Activity[Set[Entry]] = 
+    Activity(v flatMap (_.entriesOf(path, cache).run))
+  def vectorsOf(path: String, cache: PathCache): Activity[Set[Vector]] = 
+    Activity(v flatMap (_.vectorsOf(path, cache).run))
 }
 
 private[serverset2] object ZkServerSet2 {
@@ -202,7 +225,6 @@ private[serverset2] object ZkServerSet2 {
 }
 
 private[serverset2] case class ZkServerSet2(zk: Zk) extends ServerSet2 {
-
   import ZkServerSet2._
 
   private[this] def dataOf(path: String, p: String => Boolean): Activity[Map[String, Buf]] =
@@ -210,21 +232,36 @@ private[serverset2] case class ZkServerSet2(zk: Zk) extends ServerSet2 {
       zk.collectImmutableDataOf(paths filter p map (path+"/"+_))
     }
 
-  def entriesOf(path: String): Activity[Set[Entry]] = {
+  def entriesOf(path: String, cache: PathCache): Activity[Set[Entry]] = {
     dataOf(path, _ startsWith EndpointPrefix) map { pathmap =>
       val endpoints = pathmap flatMap {
         case (path, Buf.Utf8(data)) =>
-          Entry.parseJson(path, data)
+          cache.entries.getIfPresent(path) match {
+            case null =>
+              val ents = Entry.parseJson(path, data)
+              val entset = ents.toSet
+              cache.entries.put(path, entset)
+              entset
+            case ent => ent
+          }
+
         case _ => None  // Invalid encoding
       }
       endpoints.toSet
     }
   }
 
-  def vectorsOf(path: String): Activity[Set[Vector]] =
+  def vectorsOf(path: String, cache: PathCache): Activity[Set[Vector]] =
     dataOf(path, _ startsWith VectorPrefix) map { pathmap =>
       val vectors = pathmap flatMap {
-        case (_, Buf.Utf8(data)) => Vector.parseJson(data)
+        case (path, Buf.Utf8(data)) => 
+          cache.vectors.getIfPresent(path) match {
+            case null =>
+              val vec = Vector.parseJson(data)
+              cache.vectors.put(path, vec)
+              vec
+            case vec =>  vec
+          }
         case _ => None  // Invalid encoding
       }
       vectors.toSet

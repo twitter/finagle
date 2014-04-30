@@ -5,6 +5,41 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.15.0
+~~~~~~~
+
+- `finagle-core`: Fixed DefaultClient to use the base close method
+- `finagle-core`: Fix a race condition when closing in DefaultServer
+- `finagle-serversets`: memoize path parses in ServerSet2
+- `finagle-mux`: remove references to org.jboss.netty.util.CharsetUtil
+- `finagle-http`: create HttpTransport in codec
+- `finagle-http`: fix basic authentication with special characters
+- `finagle-http`: temporary fix for prematurely expiring streaming responses
+- `finagle-core`: don't discard outstanding readq elements in ChannelTransport
+- `finagle-core`: Add Socks Proxy Authentication support
+- `finagle-doc`: fix image size in client stack figure.
+- `finagle-stats`: unregister cumulative gauges when all references have been collected
+- `finagle-core`: fix truncation in ChannelBufferBuf#slice()
+- `finagle-stats`: upgrade to the latest version of metrics
+- `finagle-stats`: Enable cumulative gauges in MetricsStatsReceiver
+- `finagle-mysql`: Move mysql testing out of finagle-mysql
+- `finagle-serversets`: serverset namer - synthesize nodes for each endpoint
+- `finagle-http`: fix HttpClientDispatcher
+- `finagle-core`: transport should be considered closed if it is failed
+- `finagle-core`: Improve the failure for cancelled requests in the ClientDispatcher
+- `finagle-core`: LocalScheduler - add LIFO option
+- `finagle-core`: don't join after interrupt in Exitguard.Unguard()
+- `finagle-serversets`: Replaces Op with Activity Problem
+- `finagle-mysql`: implement builder using StackClient.
+- `finagle-core`: Make LoadService not fail if a sub-dir is not readable
+- `finagle-core`: Make com.twitter.finagle.Name an ADT
+- `finagle-core`: curry `newDispatcher` in Stack{Client, Server}
+- `finagle-thriftmux`: Add a flag for enabling ThriftMux
+- `finagle-doc`: improved rastering of logos
+- `finagle-core`: Retry on com.twitter.util.TimeoutException
+- `finagle-core`: introduce ForkJoinScheduler
+- `finagle-serversets`: facade for ZooKeeper libraries
+
 6.14.0
 ~~~~~~~
 

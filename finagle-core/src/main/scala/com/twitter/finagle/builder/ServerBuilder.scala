@@ -81,11 +81,6 @@ object ServerConfig {
     })
   }
 
-  case class CancelOnHangup(yesOrNo: Boolean)
-  implicit object CancelOnHangup extends Stack.Param[CancelOnHangup] {
-    val default = CancelOnHangup(true)
-  }
-
   case class MonitorFactory(mFactory: (String, SocketAddress) => com.twitter.util.Monitor)
   implicit object MonitorFactory extends Stack.Param[MonitorFactory] {
     val default = MonitorFactory((_, _) => NullMonitor)
@@ -303,7 +298,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * This defaults to true.
    */
   def cancelOnHangup(yesOrNo: Boolean): This =
-    configured(CancelOnHangup(yesOrNo))
+    configured(MaskCancelFilter.Param(yesOrNo))
 
   def hostConnectionMaxIdleTime(howlong: Duration): This =
     configured(params[ExpiringService.Param].copy(idleTime = howlong))
@@ -372,23 +367,15 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   ): Server = new Server {
     val Label(label) = params[Label]
     val BindTo(addr) = params[BindTo]
-    val Stats(sr) = params[Stats]
+    val Stats(statsReceiver) = params[Stats]
     val Logger(logger) = params[Logger]
     val Daemonize(daemon) = params[Daemonize]
     val MonitorFactory(newMonitor) = params[MonitorFactory]
 
     val monitor = newMonitor(label, InetSocketAddressUtil.toPublic(addr)) andThen
       new SourceTrackingMonitor(logger, "server")
-    val statsReceiver = if (label.isEmpty) sr else sr.scope(label)
 
-    val server = mk(params) transformed { stk =>
-      params[CancelOnHangup] match {
-        case CancelOnHangup(false) => stk.replace(StackServer.Role.MaskCancel,
-          new MaskCancelFilter[Req, Rep])
-        case _ => stk
-      }
-    }
-
+    val server = mk(params)
     val listeningServer = server
       .configured(Monitor(monitor))
       .configured(Stats(statsReceiver))

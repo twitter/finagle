@@ -14,7 +14,7 @@ object TimeoutFilter {
    * [[com.twitter.finagle.service.TimeoutFilter]] module.
    */
   case class Param(timeout: Duration)
-  implicit object Param extends Stack.Param[Param] with Stack.Role {
+  implicit object Param extends Stack.Param[Param] {
     val default = Param(Duration.Top)
   }
 

@@ -95,7 +95,7 @@ object ClientConnection {
 
 /**
  * A simple proxy Service that forwards all calls to another Service.
- * This is is useful if you to wrap-but-modify an existing service.
+ * This is useful if you want to wrap-but-modify an existing service.
  */
 abstract class ServiceProxy[-Req, +Rep](val self: Service[Req, Rep])
   extends Service[Req, Rep] with Proxy

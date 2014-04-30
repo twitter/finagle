@@ -1,5 +1,6 @@
 package com.twitter.finagle.util
 
+import com.twitter.logging.Level
 import java.io.{IOException, File, InputStream}
 import java.net.{URI, URLClassLoader, URISyntaxException}
 import java.util.ServiceConfigurationError
@@ -178,6 +179,11 @@ object LoadService {
         throw new ServiceConfigurationError(
           ""+n+" not a subclass of "+iface.getName)
       }
+
+      DefaultLogger.log(
+        Level.DEBUG,
+        "LoadService: loaded instance of class %s for requested service %s".format(n, iface.getName)
+      )
       cls.newInstance().asInstanceOf[T]
     }
   }

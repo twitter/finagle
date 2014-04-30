@@ -6,10 +6,10 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
-  val libVersion = "6.14.0"
+  val libVersion = "6.15.0"
   val zkVersion = "3.3.4"
-  val utilVersion = "6.14.0"
-  val ostrichVersion = "9.4.2"
+  val utilVersion = "6.15.0"
+  val ostrichVersion = "9.5.0"
   val jacksonVersion = "2.2.2"
   val nettyLib = "io.netty" % "netty" % "3.8.1.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
@@ -31,6 +31,18 @@ object Finagle extends Build {
       ExclusionRule(organization = "org.scala-tools.testing"),
       ExclusionRule(organization = "org.mockito"))
 
+  lazy val publishM2Configuration =
+    TaskKey[PublishConfiguration]("publish-m2-configuration",
+      "Configuration for publishing to the .m2 repository.")
+
+  lazy val publishM2 =
+    TaskKey[Unit]("publish-m2",
+      "Publishes artifacts to the .m2 repository.")
+
+  lazy val m2Repo =
+    Resolver.file("publish-m2-local",
+      Path.userHome / ".m2" / "repository")
+
   val sharedSettings = Seq(
     version := libVersion,
     organization := "com.twitter",
@@ -47,6 +59,12 @@ object Finagle extends Build {
       "org.mockito" % "mockito-all" % "1.9.5" % "test"
     ),
     resolvers += "twitter-repo" at "http://maven.twttr.com",
+
+    publishM2Configuration <<= (packagedArtifacts, checksums in publish, ivyLoggingLevel) map { (arts, cs, level) =>
+      Classpaths.publishConfig(arts, None, resolverName = m2Repo.name, checksums = cs, logging = level)
+    },
+    publishM2 <<= Classpaths.publishTask(publishM2Configuration, deliverLocal),
+    otherResolvers += m2Repo,
 
     testOptions in Test <<= scalaVersion map {
       case "2.10" | "2.10.0" => Seq(Tests.Filter(_ => false))
@@ -193,7 +211,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-stats",
     libraryDependencies ++= Seq(
-      "com.twitter.common" % "metrics" % "0.0.9"
+      "com.twitter.common" % "metrics" % "0.0.25"
     ) ++ jacksonLibs
   ).dependsOn(finagleCore, finagleHttp)
 
@@ -229,7 +247,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-commons-stats",
-    libraryDependencies ++= Seq("com.twitter.common" % "stats" % "0.0.35")
+    libraryDependencies ++= Seq("com.twitter.common" % "stats" % "0.0.89")
   ).dependsOn(finagleCore)
 
   lazy val finagleServersets = Project(
@@ -243,12 +261,13 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       "commons-codec" % "commons-codec" % "1.5",
       util("zk-common"),
-      "com.twitter.common.zookeeper" % "server-set" % "1.0.69"
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.72",
+      "com.google.guava" % "guava" % "16.0"
     ) ++ jacksonLibs,
     excludeFilter in unmanagedSources := "ZkTest.scala",
     ivyXML :=
       <dependencies>
-        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.67">
+        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.72">
           <exclude org="com.google.guava" name="guava"/>
           <exclude org="com.twitter" name="finagle-core"/>
           <exclude org="com.twitter" name="finagle-thrift"/>
@@ -317,7 +336,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("hashing"),
       "com.google.guava" % "guava" % "16.0",
-      "com.twitter.common" % "zookeeper-testing" % "0.0.42" % "test"
+      "com.twitter.common" % "zookeeper-testing" % "0.0.43" % "test"
     ) ++ jacksonLibs
   ).dependsOn(finagleCore, finagleServersets)
 

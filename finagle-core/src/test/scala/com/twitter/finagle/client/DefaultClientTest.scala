@@ -4,7 +4,7 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle._
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.transport.{QueueTransport, Transport}
-import com.twitter.util.{Await, Future, MockTimer, Time, Var}
+import com.twitter.util.{Await, Future, MockTimer, Time, Var, Closable, Return}
 import com.twitter.util.TimeConversions.intToTimeableNumber
 import com.twitter.finagle.stats.{StatsReceiver, InMemoryStatsReceiver}
 import java.net.{SocketAddress, InetAddress, InetSocketAddress}
@@ -172,6 +172,24 @@ class DefaultClientTest extends FunSuite with Eventually {
       val f = svc.close()
       eventually { assert(f.isDefined) }
       assert(Await.result(f) === ())
+    }
+  }
+
+  test("Bound Vars should be closable") {
+    new DefaultClientHelper {
+      @volatile var closed = false
+
+      val dest = Name.Bound.singleton(Var.async(Addr.Bound(Seq.empty[SocketAddress]: _*)) { _ =>
+        Closable.make { _ =>
+          closed = true
+          Future.Done
+        }
+      })
+      val svc = client.newService(dest, "test")
+      assert(closed === false)
+      val f = svc.close()
+      eventually { assert(f.poll === Some(Return(()))) }
+      assert(closed === true)
     }
   }
 }

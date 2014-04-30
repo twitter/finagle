@@ -13,7 +13,7 @@ import com.twitter.finagle.stats.{
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.{
   DefaultMonitor, DefaultTimer, LoadedReporterFactory, ReporterFactory}
-import com.twitter.util.{Duration, Future, Monitor, Return, Timer, Throw, Var}
+import com.twitter.util.{Duration, Time, Future, Monitor, Return, Timer, Throw, Var}
 import java.net.{SocketAddress, InetSocketAddress}
 import java.util.logging.{Level, Logger}
 
@@ -203,8 +203,8 @@ case class DefaultClient[Req, Rep](
       // TODO: should we retain a count for the number of clients here?
 
       new DelayedFactory(f) {
-        override def close(after: Duration) =
-          Future.join(Seq(observation.close(after), super.close(after)))
+        override def close(deadline: Time) =
+          Future.join(observation.close(deadline), super.close(deadline)).unit
       }
     }
 
