@@ -32,7 +32,7 @@ trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
 /**
  * Tracing filter for mysql client requests.
  */
-class MysqlTracing(clientName: String) extends SimpleFilter[Request, Result] {
+private class MysqlTracing(clientName: String) extends SimpleFilter[Request, Result] {
   def apply(request: Request, service: Service[Request, Result]) = {
 
     Trace.recordServiceName(clientName)
