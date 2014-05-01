@@ -32,18 +32,31 @@ trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
 /**
  * Tracing filter for mysql client requests.
  */
-private object MysqlTracing extends SimpleFilter[Request, Result] {
+private class MysqlTracing(clientName: String) extends SimpleFilter[Request, Result] {
   def apply(request: Request, service: Service[Request, Result]) = {
+
+    Trace.recordServiceName(clientName)
+    
     request match {
-      case QueryRequest(sqlStatement) => Trace.recordBinary("mysql.query", sqlStatement)
-      case PrepareRequest(sqlStatement) => Trace.recordBinary("mysql.prepare", sqlStatement)
+      case QueryRequest(sqlStatement) => 
+        Trace.recordRpc("query")
+        Trace.recordBinary(clientName + ".query", sqlStatement)
+      case PrepareRequest(sqlStatement) => 
+        Trace.recordRpc("prepare")
+        Trace.recordBinary(clientName + ".prepare", sqlStatement)
       // TODO: save the prepared statement and put it in the executed request trace
-      case ExecuteRequest(id, _, _, _) => Trace.recordBinary("mysql.execute", id)
-      case _ => Trace.record("mysql." + request.getClass.getName)
+      case ExecuteRequest(id, _, _, _) => 
+        Trace.recordRpc("execute")
+        Trace.recordBinary(clientName + ".execute", id)
+      case _ => 
+        Trace.recordRpc(request.getClass.getName)
+        Trace.record("mysql." + request.getClass.getName)
     }
+    
     service(request)
   }
 }
+
 
 /**
  * Implements a mysql client in terms of a [[com.twitter.finagle.StackClient]].
@@ -56,7 +69,7 @@ object MysqlStackClient extends StackClient[Request, Result, Packet, Packet] {
     trans => mysql.ClientDispatcher(trans, Handshake(prms))
   }
   override def newClient(dest: Name, label: String): ServiceFactory[Request, Result] = {
-    MysqlTracing andThen super.newClient(dest, label)
+    new MysqlTracing(label) andThen super.newClient(dest, label)
   }
 }
 
