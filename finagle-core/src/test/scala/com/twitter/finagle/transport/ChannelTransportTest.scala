@@ -211,4 +211,22 @@ class ChannelTransportTest
     assert(Await.result(trans.onClose) === 
       ChannelException(exc, remoteAddress))
   }
+  
+  test("satisfy pending reads") {
+    val f = trans.read()
+    assert(!f.isDefined)
+    
+    sendUpstreamMessage("a")
+    sendUpstreamMessage("b")
+    val exc = new Exception("nope")
+    sendUpstream({
+      val e = mock[ExceptionEvent]
+      when(e.getCause).thenReturn(exc)
+      e
+    })
+    
+    assert(f.poll === Some(Return("a")))
+    assert(trans.read().poll === Some(Return("b")))
+    assert(trans.read().poll === Some(Throw(ChannelException(exc, remoteAddress))))
+  }
 }

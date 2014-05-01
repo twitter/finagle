@@ -155,6 +155,10 @@ private[thrift] class RawZipkinTracer(
         annotate(record, thrift.Constants.SERVER_RECV)
       case tracing.Annotation.Message(value) =>
         annotate(record, value)
+      case tracing.Annotation.Rpc(name: String) =>
+        mutate(record.traceId) { span => span.copy(_name = Some(name)) }
+      case tracing.Annotation.ServiceName(serviceName: String) =>
+        mutate(record.traceId) { span => span.copy(_serviceName = Some(serviceName)) }
       case tracing.Annotation.Rpcname(service: String, rpc: String) =>
         mutate(record.traceId) { span =>
           span.copy(_name = Some(rpc), _serviceName = Some(service))

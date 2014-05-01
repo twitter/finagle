@@ -39,6 +39,9 @@ object Annotation {
   case class ServerSend()                          extends Annotation
   case class ServerRecv()                          extends Annotation
   case class Message(content: String)              extends Annotation
+  case class ServiceName(service: String)          extends Annotation
+  case class Rpc(name: String)                     extends Annotation
+  @deprecated("Use ServiceName and Rpc", "6.13.x")
   case class Rpcname(service: String, rpc: String) extends Annotation
   case class ClientAddr(ia: InetSocketAddress)     extends Annotation
   case class ServerAddr(ia: InetSocketAddress)     extends Annotation

@@ -1638,7 +1638,7 @@ index 83ad938..583d7cd 100644
 +    SSL *ssl_ = J2P(ssl, SSL *);
 +    if (ssl_ == NULL) {
 +        tcn_ThrowException(e, "ssl is null");
-+        return;
++        return 0;
 +    }
 +
 +    UNREFERENCED(o);
@@ -1652,7 +1652,7 @@ index 83ad938..583d7cd 100644
 +    SSL *ssl_ = J2P(ssl, SSL *);
 +    if (ssl_ == NULL) {
 +        tcn_ThrowException(e, "ssl is null");
-+        return;
++        return 0;
 +    }
 +    const unsigned char *proto;
 +    unsigned int proto_len;

@@ -97,12 +97,13 @@ class ClientTest extends FunSuite with IntegrationClient {
     test("prepared statement") {
       val prepareQuery = "SELECT COUNT(*) AS 'numRecords' FROM `finagle-mysql-test` WHERE `name` LIKE ?"
       def extractRow(r: Result) = r.asInstanceOf[ResultSet].rows(0)
+      val ps = c.prepare(prepareQuery)
       for (i <- 0 to 10) {
         val randomIdx = math.floor(math.random * (allRecords.size-1)).toInt
         val recordName = allRecords(randomIdx).name
         val expectedRes = LongValue(allRecords.filter(_.name == recordName).size)
-        val tuple = c.prepareAndSelect(prepareQuery, recordName)(identity)
-        val row = Await.result(tuple)._2(0)
+        val res = ps.select(recordName)(identity)
+        val row = Await.result(res)(0)
         assert(row("numRecords").get === expectedRes)
       }
     }

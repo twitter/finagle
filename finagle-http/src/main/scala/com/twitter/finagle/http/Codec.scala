@@ -137,11 +137,8 @@ case class Http(
         } else
           super.prepareConnFactory(underlying)
 
-      override def newClientTransport(
-        channel: Channel,
-        statsReceiver: StatsReceiver
-      ): Transport[Any,Any] =
-        new HttpTransport(super.newClientTransport(channel, statsReceiver))
+      override def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any,Any] =
+        new HttpTransport(super.newClientTransport(ch, statsReceiver))
 
       override def newClientDispatcher(transport: Transport[Any, Any]) =
         new DtabHttpDispatcher(transport)
@@ -261,7 +258,8 @@ class HttpClientTracingFilter[Req <: HttpRequest, Res](serviceName: String)
     request.headers.add(Header.Flags, Trace.id.flags.toLong)
 
     if (Trace.isActivelyTracing) {
-      Trace.recordRpcname(serviceName, request.getMethod.getName)
+      Trace.recordServiceName(serviceName)
+      Trace.recordRpc(request.getMethod.getName)
       Trace.recordBinary("http.uri", stripParameters(request.getUri))
 
       Trace.record(Annotation.ClientSend())
@@ -316,7 +314,8 @@ class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String)
     // even if no trace id was passed from the client we log the annotations
     // with a locally generated id
     if (Trace.isActivelyTracing) {
-      Trace.recordRpcname(serviceName, request.getMethod.getName)
+      Trace.recordServiceName(serviceName)
+      Trace.recordRpc(request.getMethod.getName)
       Trace.recordBinary("http.uri", stripParameters(request.getUri))
 
       Trace.record(Annotation.ServerRecv())
@@ -374,11 +373,19 @@ case class RichHttp[REQUEST <: Request](
 
       override def prepareConnFactory(
         underlying: ServiceFactory[REQUEST, Response]
-      ): ServiceFactory[REQUEST, Response] =
+      ): ServiceFactory[REQUEST, Response] = {
+        // Note: This is a horrible hack to ensure that close() calls from
+        // ExpiringService do not propagate until all chunks have been read
+        // Waiting on CSL-915 for a proper fix.
+        val delayedReleaseService = underlying map(new DelayedReleaseService(_))
         if (httpFactory._enableTracing)
-          new HttpClientTracingFilter[REQUEST, Response](config.serviceName) andThen underlying
+          new HttpClientTracingFilter[REQUEST, Response](config.serviceName) andThen delayedReleaseService
         else
-          underlying
+          delayedReleaseService
+       }
+
+      override def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any,Any] =
+        new HttpTransport(super.newClientTransport(ch, statsReceiver))
 
       override def newClientDispatcher(transport: Transport[Any, Any]) =
         new HttpClientDispatcher(transport)

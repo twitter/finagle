@@ -3,7 +3,7 @@ package com.twitter.finagle.dispatch
 import com.twitter.concurrent.{AsyncSemaphore, Permit}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Service, WriteException}
+import com.twitter.finagle.{Service, Failure, WriteException}
 import com.twitter.util.{Future, Time, Promise, Throw, Return}
 import java.net.InetSocketAddress
 
@@ -38,7 +38,7 @@ abstract class GenSerialClientDispatcher[Req, Rep, In, Out](trans: Transport[In,
   private[this] def tryDispatch(req: Req, p: Promise[Rep]): Future[Unit] =
     p.isInterrupted match {
       case Some(intr) =>
-        p.setException(WriteException(intr))
+        p.setException(Failure.InterruptedBy(intr))
         Future.Done
       case None =>
         Trace.recordClientAddr(localAddress)

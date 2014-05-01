@@ -39,7 +39,7 @@ object Type {
   /**
    * Returns the sizeof the given parameter in
    * its MySQL binary representation. If the size
-   * is unknown -1 is returned.
+   * is unknown or the value is null, 0 is returned.
    */
   private[mysql] def sizeOf(any: Any): Int = any match {
     case b: Boolean     => 1
@@ -60,7 +60,9 @@ object Type {
     case RawValue(_, _, true, b)  =>
       Buffer.sizeOfLen(b.size) + b.size
     case null => 0
-    case _ => -1
+    // This is safe because unknown
+    // values are serialized as null.
+    case _ => 0
   }
 
   /**

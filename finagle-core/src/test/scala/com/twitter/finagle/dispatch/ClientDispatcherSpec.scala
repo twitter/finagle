@@ -1,7 +1,7 @@
 package com.twitter.finagle.dispatch
 
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.WriteException
+import com.twitter.finagle.{Failure, WriteException}
 import com.twitter.util.{Return, Throw, Promise, Future}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
@@ -79,7 +79,7 @@ class ClientDispatcherSpec extends SpecificationWithJUnit with Mockito {
         p0.setValue("ok")
         f0.poll must beSome(Return("ok"))
         f1.poll must beLike {
-          case Some(Throw(WriteException(`intr`))) => true
+          case Some(Throw(Failure.InterruptedBy(`intr`))) => true
         }
         there was one(trans).write(any)
       }

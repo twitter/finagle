@@ -3,7 +3,7 @@ package com.twitter.finagle.redis.protocol
 import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.protocol.commands._
 import com.twitter.finagle.redis.util._
-import org.jboss.netty.util.CharsetUtil
+import com.twitter.io.Charsets
 
 object RequireClientProtocol extends ErrorConversion {
   override def getException(msg: String) = new ClientError(msg)
@@ -389,9 +389,10 @@ object CommandBytes {
 
 
 class CommandCodec extends UnifiedProtocolCodec {
+
+  import RedisCodec._
   import com.twitter.finagle.redis.naggati.Encoder
   import com.twitter.finagle.redis.naggati.Stages._
-  import RedisCodec._
   import com.twitter.logging.Logger
 
   val log = Logger(getClass)
@@ -414,7 +415,7 @@ class CommandCodec extends UnifiedProtocolCodec {
 
   def decodeInlineRequest(c: Char) = readLine { line =>
     val listOfArrays = (c + line).split(' ').toList.map {
-      args => args.getBytes(CharsetUtil.UTF_8)
+      args => args.getBytes(Charsets.Utf8)
     }
     val cmd = commandDecode(listOfArrays)
     emit(cmd)

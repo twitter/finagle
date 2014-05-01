@@ -12,6 +12,15 @@ import scala.collection.mutable
  * variable address. Resolvers have an associated scheme
  * which is used for lookup so that names may be resolved
  * in a global context.
+ *
+ * These are loaded by Finagle through the
+ * [[com.twitter.finagle.util.LoadService service loading mechanism]]. Thus, in
+ * order to implement a new resolver, a class implementing `Resolver` with a
+ * 0-arg constructor must be registered in a file named
+ * `META-INF/services/com.twitter.finagle.Resolver` included in the classpath; see
+ * Oracle's
+ * [[http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html ServiceLoader]]
+ * documentation for further details.
  */
 trait Resolver {
   val scheme: String
@@ -129,10 +138,12 @@ object Resolver {
    */
   @deprecated("Use Resolver.eval", "6.7.x")
   def resolve(addr: String): Try[Group[SocketAddress]] =
-    if (addr startsWith "/")
-      throw new IllegalArgumentException("Resolver.resolve does not support logical names")
-    else
-      Try { eval(addr) } map { n => NameGroup(n) }
+    Try { eval(addr) } flatMap {
+        case Name.Path(_) =>
+          Throw(new IllegalArgumentException("Resolver.resolve does not support logical names"))
+        case bound@Name.Bound(_) =>
+          Return(NameGroup(bound))
+      }
 
   /**
    * Parse and evaluate the argument into a Name. Eval parses
@@ -142,13 +153,17 @@ object Resolver {
    * The scheme is looked up from registered Resolvers, and the
    * argument is passed in.
    *
+   * When `name` begins with the character '/' it is intepreted to be
+   * a logical name whose interpetation is subject to a
+   * [[com.twitter.finagle.Dtab Dtab]].
+   *
    * Eval throws exceptions upon failure to parse the name, or
    * on failure to scheme lookup. Since names are late bound,
    * binding failures are deferred.
    */
   def eval(name: String): Name =
     if (name startsWith "/") Name(name)
-    else new Name {
+    else {
       val (resolver, arg) = lex(name) match {
         case (Eq :: _) | (Bang :: _) =>
           throw new ResolverAddressInvalid(name)
@@ -162,9 +177,7 @@ object Resolver {
         case ts => (InetResolver, delex(ts))
       }
 
-      def bind() = resolver.bind(arg)
-
-      val reified = name
+      Name.Bound(resolver.bind(arg), name)
     }
 
   /**
@@ -175,8 +188,7 @@ object Resolver {
   private[finagle] def evalLabeled(addr: String): (Name, String) = {
     val (label, rest) = lex(addr) match {
       case El(n) :: Eq :: rest => (n, rest)
-      case Eq :: rest => ("", rest)
-      case rest => (addr, rest)
+      case rest => ("", rest)
     }
 
     (eval(delex(rest)), label)

@@ -1,12 +1,12 @@
 package com.twitter.finagle.memcached.unit.protocol.text.client
 
+import com.twitter.io.Charsets.Utf8
 import com.twitter.finagle.memcached.protocol
 import com.twitter.finagle.memcached.protocol.text.client.DecodingToResponse
 import com.twitter.finagle.memcached.protocol.text.{Tokens, StatLines}
 import com.twitter.finagle.memcached.protocol.{ClientError, Info => MCInfo, InfoLines, Stored, NonexistentCommand, NotFound, Exists}
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.util.CharsetUtil.UTF_8
 import org.specs.SpecificationWithJUnit
 
 class DecodingToResponseSpec extends SpecificationWithJUnit {
@@ -50,10 +50,10 @@ class DecodingToResponseSpec extends SpecificationWithJUnit {
         ilines.zipWithIndex.foreach { case(line, idx) =>
           val key = lines(idx)(0)
           val values = lines(idx).drop(1)
-          line.key.toString(UTF_8) mustEqual key
+          line.key.toString(Utf8) mustEqual key
           line.values.size mustEqual values.size
           line.values.zipWithIndex.foreach { case(token, tokIdx) =>
-            token.toString(UTF_8) mustEqual values(tokIdx)
+            token.toString(Utf8) mustEqual values(tokIdx)
           }
         }
       }

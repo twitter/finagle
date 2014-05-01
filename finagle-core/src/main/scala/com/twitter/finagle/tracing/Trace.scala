@@ -17,6 +17,9 @@ import com.twitter.finagle.Init
 import com.twitter.util.{Future, Duration, Time, Local, Stopwatch}
 import java.net.InetSocketAddress
 import scala.util.Random
+import com.twitter.app.GlobalFlag
+
+object debugTrace extends GlobalFlag(false, "Print all traces to the console.")
 
 /**
  * `Trace` maintains the state of the tracing stack
@@ -189,7 +192,8 @@ object Trace  {
     unwind {
       Trace.setId(Trace.nextId)
       Trace.recordBinary("finagle.version", Init.finagleVersion)
-      Trace.recordRpcname(service, rpc)
+      Trace.recordServiceName(service)
+      Trace.recordRpc(rpc)
       hostOpt map { Trace.recordServerAddr(_) }
       Trace.record(Annotation.ServerRecv())
       try f finally {
@@ -235,7 +239,10 @@ object Trace  {
    * tracers in the stack.
    */
   def record(rec: => Record) {
-    if (isActivelyTracing) uncheckedRecord(rec)
+    if (debugTrace())
+      System.err.println(rec)
+    if (isActivelyTracing)
+      uncheckedRecord(rec)
   }
 
   /**
@@ -267,11 +274,15 @@ object Trace  {
     * Convenience methods that construct records of different kinds.
     */
   def record(ann: Annotation) {
+    if (debugTrace())
+      System.err.println(Record(id, Time.now, ann, None))
     if (isActivelyTracing)
       uncheckedRecord(Record(id, Time.now, ann, None))
    }
 
   def record(ann: Annotation, duration: Duration) {
+    if (debugTrace())
+      System.err.println(Record(id, Time.now, ann, Some(duration)))
     if (isActivelyTracing)
       uncheckedRecord(Record(id, Time.now, ann, Some(duration)))
   }
@@ -284,8 +295,17 @@ object Trace  {
     record(Annotation.Message(message), duration)
   }
 
+  @deprecated("Use recordRpc and recordServiceName", "6.13.x")
   def recordRpcname(service: String, rpc: String) {
     record(Annotation.Rpcname(service, rpc))
+  }
+
+  def recordServiceName(serviceName: String) {
+    record(Annotation.ServiceName(serviceName))
+  }
+
+  def recordRpc(name: String) {
+    record(Annotation.Rpc(name))
   }
 
   def recordClientAddr(ia: InetSocketAddress) {

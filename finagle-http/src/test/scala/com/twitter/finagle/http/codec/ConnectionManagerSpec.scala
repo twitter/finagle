@@ -1,5 +1,6 @@
 package com.twitter.finagle.http.codec
 
+import com.twitter.finagle.http.HttpTransport
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Promise, Return, Future, Time}
 import java.nio.charset.Charset
@@ -44,7 +45,7 @@ class ConnectionManagerSpec extends SpecificationWithJUnit with Mockito {
     val trans = mock[Transport[Any, Any]]
     trans.close(any[Time]) returns Future.Done
     trans.close() returns Future.Done
-    val disp = new HttpClientDispatcher[HttpRequest](trans)
+    val disp = new HttpClientDispatcher[HttpRequest](new HttpTransport(trans))
 
     def perform(request: HttpRequest, response: HttpResponse, shouldMarkDead: Boolean) {
       val wp = new Promise[Unit]

@@ -80,7 +80,7 @@ private[serverset2] object Stabilizer {
           case Addr.Neg =>
             State(active, Set.empty, Addr.Neg)
 
-          case Addr.Pending | Addr.Failed(_) | Addr.Delegated(_) =>
+          case Addr.Pending | Addr.Failed(_) =>
             // If the last address is nonbound, we ignore it and
             // maintain our state; we cannot demote the active set
             // when nonbound, since that would eventually promote

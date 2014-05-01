@@ -1,24 +1,20 @@
 package com.twitter.finagle.netty3
 
 import com.twitter.finagle._
-import com.twitter.finagle.channel.{
-  ChannelRequestStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler
-}
+import com.twitter.finagle.channel.{ChannelRequestStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler}
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.ssl.{Engine, SslShutdownHandler}
 import com.twitter.finagle.stats.{ServerStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.{ChannelTransport, Transport}
-import com.twitter.finagle.util.{DefaultLogger, DefaultMonitor, DefaultTimer}
-import com.twitter.util.{CloseAwaitably, Duration, Future, Monitor, Promise, Timer, Time}
+import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
+import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Promise, Time}
 import java.net.SocketAddress
-import java.util.IdentityHashMap
 import java.util.concurrent.atomic.AtomicLong
-import java.util.logging.{Logger, Level}
+import java.util.IdentityHashMap
+import java.util.logging.Level
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel._
-import org.jboss.netty.channel.group.{
-  ChannelGroup, ChannelGroupFuture, ChannelGroupFutureListener, DefaultChannelGroup, DefaultChannelGroupFuture
-}
+import org.jboss.netty.channel.group._
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.{ReadTimeoutException, ReadTimeoutHandler}
@@ -32,16 +28,14 @@ import scala.collection.JavaConverters._
 case class Netty3ListenerTLSConfig(newEngine: () => Engine)
 
 object Netty3Listener {
-  val channelFactory: ServerChannelFactory =
-    new NioServerSocketChannelFactory(Executor, WorkerPool) {
-      override def releaseExternalResources() = ()  // no-op
-    }
+  import com.twitter.finagle.param._
+  import param._
 
   /**
    * Class Closer implements channel tracking and semi-graceful closing
    * of this group of channels.
    */
-  private class Closer(timer: Timer) {
+  private class Closer(timer: com.twitter.util.Timer) {
     val activeChannels = new DefaultChannelGroup
 
     private implicit val implicitTimer = timer
@@ -125,6 +119,73 @@ object Netty3Listener {
       new SslShutdownHandler(engine)
     )
   }
+
+  val channelFactory: ServerChannelFactory =
+    new NioServerSocketChannelFactory(Executor, WorkerPool) {
+      override def releaseExternalResources() = ()  // no-op
+    }
+
+  /**
+   * A [[com.twitter.finagle.Stack.Param]] used to configure
+   * the ServerChannelFactory for a `Listener`.
+   */
+  case class ChannelFactory(cf: ServerChannelFactory)
+  implicit object ChannelFactory extends Stack.Param[ChannelFactory] {
+    val default = ChannelFactory(channelFactory)
+  }
+
+  /**
+   * Constructs a `Listener[In, Out]` given a netty3 `ChannelPipelineFactory`
+   * responsible for framing a `Transport` stream. The `Listener` is configured
+   * via the passed in [[com.twitter.finagle.Stack.Param]]'s.
+   *
+   * @see [[com.twitter.finagle.server.Listener]]
+   * @see [[com.twitter.finagle.transport.Transport]]
+   * @see [[com.twitter.finagle.param]]
+   */
+  def apply[In, Out](
+    pipeline: ChannelPipelineFactory,
+    params: Stack.Params
+  ): Listener[In, Out] = {
+    val Label(label) = params[Label]
+    val Logger(logger) = params[Logger]
+    val Monitor(monitor) = params[Monitor]
+    val Stats(stats) = params[Stats]
+    val Timer(timer) = params[Timer]
+
+    // transport and listener params
+    val ChannelFactory(cf) = params[ChannelFactory]
+    val Netty3Timer(nettyTimer) = params[Netty3Timer]
+    val Listener.Backlog(backlog) = params[Listener.Backlog]
+    val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
+    val Transport.Liveness(readTimeout, writeTimeout, keepAlive) = params[Transport.Liveness]
+    val Transport.TLSEngine(engine) = params[Transport.TLSEngine]
+    val snooper = params[Transport.Verbose] match {
+      case Transport.Verbose(true) => Some(ChannelSnooper(label)(logger.log(Level.INFO, _, _)))
+      case _ => None
+    }
+
+    Netty3Listener[In, Out](label, pipeline, snooper, cf, bootstrapOptions = {
+      val o = new scala.collection.mutable.MapBuilder[String, Object, Map[String, Object]](Map())
+        o += "soLinger" -> (0: java.lang.Integer)
+        o += "reuseAddress" -> java.lang.Boolean.TRUE
+        o += "child.tcpNoDelay" -> java.lang.Boolean.TRUE
+        for (v <- backlog) o += "backlog" -> (v: java.lang.Integer)
+        for (v <- sendBufSize) o += "child.sendBufferSize" -> (v: java.lang.Integer)
+        for (v <- recvBufSize) o += "child.receiveBufferSize" -> (v: java.lang.Integer)
+        for (v <- keepAlive) o += "child.keepAlive" -> (v: java.lang.Boolean)
+        o.result()
+      },
+      channelReadTimeout = readTimeout,
+      channelWriteCompletionTimeout = writeTimeout,
+      tlsConfig = engine.map(Netty3ListenerTLSConfig),
+      timer = timer,
+      nettyTimer = nettyTimer,
+      statsReceiver = stats,
+      monitor = monitor,
+      logger = logger
+    )
+  }
 }
 
 /**
@@ -155,6 +216,8 @@ object Netty3Listener {
  * time to complete a write.
  *
  * @param tlsConfig When present, SSL is used to provide session security.
+ *
+ * @param monitor Currently unused. Maintained for API compatibility.
  */
 case class Netty3Listener[In, Out](
   name: String,
@@ -169,10 +232,10 @@ case class Netty3Listener[In, Out](
   channelReadTimeout: Duration = Duration.Top,
   channelWriteCompletionTimeout: Duration = Duration.Top,
   tlsConfig: Option[Netty3ListenerTLSConfig] = None,
-  timer: Timer = DefaultTimer.twitter,
+  timer: com.twitter.util.Timer = DefaultTimer.twitter,
   nettyTimer: org.jboss.netty.util.Timer = DefaultTimer,
   statsReceiver: StatsReceiver = ServerStatsReceiver,
-  monitor: Monitor = DefaultMonitor,
+  monitor: com.twitter.util.Monitor = NullMonitor,
   logger: java.util.logging.Logger = DefaultLogger
 ) extends Listener[In, Out] {
   import Netty3Listener._
@@ -239,8 +302,11 @@ case class Netty3Listener[In, Out](
       val closer = new Closer(timer)
 
       val newBridge = () => new ServerBridge(
-        serveTransport, monitor, logger,
-        scopedStatsReceiver, closer.activeChannels)
+        serveTransport,
+        logger,
+        scopedStatsReceiver,
+        closer.activeChannels
+      )
       val bootstrap = new ServerBootstrap(channelFactory)
       bootstrap.setOptions(bootstrapOptions.asJava)
       bootstrap.setPipelineFactory(
@@ -260,8 +326,7 @@ case class Netty3Listener[In, Out](
  */
 private[netty3] class ServerBridge[In, Out](
   serveTransport: Transport[In, Out] => Unit,
-  monitor: Monitor,
-  log: Logger,
+  log: java.util.logging.Logger,
   statsReceiver: StatsReceiver,
   channels: ChannelGroup
 ) extends SimpleChannelHandler {
@@ -296,7 +361,6 @@ private[netty3] class ServerBridge[In, Out](
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
     val cause = e.getCause
-    monitor.handle(cause)
 
     cause match {
       case e: ReadTimeoutException => readTimeoutCounter.incr()

@@ -1,7 +1,8 @@
 package com.twitter.finagle.http.codec
 
+import com.twitter.concurrent.AsyncMutex
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.http.{HttpTransport, Response}
+import com.twitter.finagle.http.Response
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.Dtab
@@ -16,45 +17,47 @@ import org.jboss.netty.handler.codec.http.{HttpChunk, HttpRequest, HttpResponse}
  * responses via `Reader`.
  */
 class HttpClientDispatcher[Req <: HttpRequest](
-  transIn: Transport[Any, Any]
-) extends GenSerialClientDispatcher[Req, Response, Any, Any](transIn) {
+  trans: Transport[Any, Any]
+) extends GenSerialClientDispatcher[Req, Response, Any, Any](trans) {
 
   import GenSerialClientDispatcher.wrapWriteException
 
-  private[this] val trans = new HttpTransport(transIn)
+  private[this] def chunkReader(done: Promise[Unit]) = new Reader { self =>
+    private[this] val mu = new AsyncMutex
+    @volatile private[this] var buf = Buf.Empty
 
-  private[this] def chunkReader(done: Promise[Unit]) = new Reader {
-    private[this] var buf = Buf.Empty
-
-    def read(n: Int): Future[Buf] = synchronized {
-      if (n == 0) {
-        Future.value(Buf.Empty)
-      } else if (buf eq Buf.Eof) {
-        done.setDone()
+    // We don't want to rely on scheduler semantics for ordering.
+    def read(n: Int): Future[Buf] = mu.acquire() flatMap { permit =>
+      val readOp = if (buf eq Buf.Eof) {
         Future.value(Buf.Eof)
       } else if (buf.length > 0) {
         val f = Future.value(buf.slice(0, n))
-        buf = buf.slice(n, buf.length)
+        buf = buf.slice(n, Int.MaxValue)
         f
       } else trans.read() flatMap {
+        // Buf is empty so set it to the result of trans.read()
         case chunk: HttpChunk if chunk.isLast =>
-          val f = Future.value(buf)
+          done.setDone()
           buf = Buf.Eof
-          f
+          Future.value(Buf.Eof)
 
         case chunk: HttpChunk =>
-          buf = buf concat ChannelBufferBuf(chunk.getContent)
-          val f = Future.value(buf.slice(0, n))
-          buf = buf.slice(n, Int.MaxValue)
+          // Read data -- return up to n bytes and save the rest
+          val cbb = ChannelBufferBuf(chunk.getContent)
+          val f = Future.value(cbb.slice(0, n))
+          buf = cbb.slice(n, Int.MaxValue)
           f
 
         case invalid =>
           val exc = new IllegalArgumentException(
             "invalid message \"%s\"".format(invalid))
-          trans.close()
-          done.updateIfEmpty(Throw(exc))
           Future.exception(exc)
       }
+
+      readOp onFailure { exc =>
+        trans.close()
+        done.updateIfEmpty(Throw(exc))
+      } ensure { permit.release() }
     }
 
     def discard() {
@@ -92,8 +95,8 @@ class HttpClientDispatcher[Req <: HttpRequest](
           done
 
         case invalid =>
-          Future.exception(
-            new IllegalArgumentException(
+          // We rely on the base class to satisfy p.
+          Future.exception(new IllegalArgumentException(
               "invalid message \"%s\"".format(invalid)))
       }
   }

@@ -10,6 +10,7 @@ import com.twitter.common.zookeeper.testing.ZooKeeperTestServer
 import com.twitter.concurrent.Spool
 import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
+import com.twitter.io.Charsets
 import com.twitter.finagle.{Group, MemcachedClient, Name, Resolver, WriteException}
 import com.twitter.finagle.builder.{Cluster, ClientBuilder}
 import com.twitter.finagle.memcached.{CacheNode, CacheNodeGroup, CachePoolCluster, CachePoolConfig,
@@ -21,7 +22,6 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.util.{Await, Duration, Future, Return, Throw}
-import org.jboss.netty.util.CharsetUtil
 import org.specs.SpecificationWithJUnit
 import scala.collection.mutable
 
@@ -60,14 +60,14 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.delete("foo"))
         Await.result(client.get("foo")) mustEqual None
         Await.result(client.set("foo", "bar"))
-        Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+        Await.result(client.get("foo")).get.toString(Charsets.Utf8) mustEqual "bar"
       }
 
       "get" in {
         Await.result(client.set("foo", "bar"))
         Await.result(client.set("baz", "boing"))
         val result = Await.result(client.get(Seq("foo", "baz", "notthere")))
-          .map { case (key, value) => (key, value.toString(CharsetUtil.UTF_8)) }
+          .map { case (key, value) => (key, value.toString(Charsets.Utf8)) }
         result mustEqual Map(
           "foo" -> "bar",
           "baz" -> "boing"
@@ -80,7 +80,7 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.set("bazs", "zyx"))
         val result = Await.result(client.gets(Seq("foos", "bazs", "somethingelse")))
           .map { case (key, (value, casUnique)) =>
-            (key, (value.toString(CharsetUtil.UTF_8), casUnique.toString(CharsetUtil.UTF_8)))
+            (key, (value.toString(Charsets.Utf8), casUnique.toString(Charsets.Utf8)))
           }
 
         result mustEqual Map(
@@ -92,22 +92,22 @@ class ClientSpec extends SpecificationWithJUnit {
       if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) "cas" in {
         Await.result(client.set("x", "y"))
         val Some((value, casUnique)) = Await.result(client.gets("x"))
-        value.toString(CharsetUtil.UTF_8) must be_==("y")
-        casUnique.toString(CharsetUtil.UTF_8) must be_==("1")
+        value.toString(Charsets.Utf8) must be_==("y")
+        casUnique.toString(Charsets.Utf8) must be_==("1")
 
         Await.result(client.cas("x", "z", "2")) must beFalse
         Await.result(client.cas("x", "z", casUnique)) must beTrue
         val res = Await.result(client.get("x"))
         res must beSomething
-        res.get.toString(CharsetUtil.UTF_8) must be_==("z")
+        res.get.toString(Charsets.Utf8) must be_==("z")
       }
 
       "append & prepend" in {
         Await.result(client.set("foo", "bar"))
         Await.result(client.append("foo", "rab"))
-        Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "barrab"
+        Await.result(client.get("foo")).get.toString(Charsets.Utf8) mustEqual "barrab"
         Await.result(client.prepend("foo", "rab"))
-        Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "rabbarrab"
+        Await.result(client.get("foo")).get.toString(Charsets.Utf8) mustEqual "rabbarrab"
       }
 
       "incr & decr" in {
@@ -203,7 +203,7 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.delete("foo"))
         Await.result(client.get("foo")) mustEqual None
         Await.result(client.set("foo", "bar"))
-        Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+        Await.result(client.get("foo")).get.toString(Charsets.Utf8) mustEqual "bar"
       }
 
       "using Name doesn't blow up" in {
@@ -213,7 +213,7 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.delete("foo"))
         Await.result(client.get("foo")) mustEqual None
         Await.result(client.set("foo", "bar"))
-        Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+        Await.result(client.get("foo")).get.toString(Charsets.Utf8) mustEqual "bar"
       }
 
       "using Group[InetSocketAddress] doesn't blow up" in {
@@ -225,7 +225,7 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.delete("foo"))
         Await.result(client.get("foo")) mustEqual None
         Await.result(client.set("foo", "bar"))
-        Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+        Await.result(client.get("foo")).get.toString(Charsets.Utf8) mustEqual "bar"
       }
 
       "using custom keys doesn't blow up" in {
@@ -236,7 +236,7 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.delete("foo"))
         Await.result(client.get("foo")) mustEqual None
         Await.result(client.set("foo", "bar"))
-        Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+        Await.result(client.get("foo")).get.toString(Charsets.Utf8) mustEqual "bar"
       }
 
       "even in future pool" in {
@@ -465,7 +465,7 @@ class ClientSpec extends SpecificationWithJUnit {
         client.delete("foo")()
         client.get("foo")() mustEqual None
         client.set("foo", "bar")()
-        client.get("foo")().get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+        client.get("foo")().get.toString(Charsets.Utf8) mustEqual "bar"
       }
 
       "many keys" in {
@@ -486,7 +486,7 @@ class ClientSpec extends SpecificationWithJUnit {
         (0 until count).foreach {
           n => {
             val c = client.clientOf("foo"+n)
-            c.get("foo"+n)().get.toString(CharsetUtil.UTF_8) mustEqual "bar"+n
+            c.get("foo"+n)().get.toString(Charsets.Utf8) mustEqual "bar"+n
           }
         }
       }
@@ -778,7 +778,7 @@ class ClientSpec extends SpecificationWithJUnit {
         (0 until count).foreach {
           n => {
             val c = client.clientOf("foo"+n)
-            c.get("foo"+n)().get.toString(CharsetUtil.UTF_8) mustEqual "bar"+n
+            c.get("foo"+n)().get.toString(Charsets.Utf8) mustEqual "bar"+n
           }
         }
       }
@@ -794,7 +794,7 @@ class ClientSpec extends SpecificationWithJUnit {
       client.delete("foo")()
       client.get("foo")() mustEqual None
       client.set("foo", "bar")()
-      client.get("foo")().get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+      client.get("foo")().get.toString(Charsets.Utf8) mustEqual "bar"
 
       val count = 100
       (0 until count).foreach{
@@ -806,7 +806,7 @@ class ClientSpec extends SpecificationWithJUnit {
       (0 until count).foreach {
         n => {
           val c = client.clientOf("foo"+n)
-          c.get("foo"+n)().get.toString(CharsetUtil.UTF_8) mustEqual "bar"+n
+          c.get("foo"+n)().get.toString(Charsets.Utf8) mustEqual "bar"+n
         }
       }
     }
@@ -818,7 +818,7 @@ class ClientSpec extends SpecificationWithJUnit {
       Await.result(client.delete("foo"))
       Await.result(client.get("foo")) mustEqual None
       Await.result(client.set("foo", "bar"))
-      Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+      Await.result(client.get("foo")).get.toString(Charsets.Utf8) mustEqual "bar"
     }
   }
 }

@@ -1,7 +1,9 @@
 package com.twitter.finagle.exp.mysql
 
-import com.twitter.util.{Return, StorageUnit, Throw, Try}
 import com.twitter.conversions.storage._
+import com.twitter.finagle.Stack
+import com.twitter.finagle.exp.mysql.Charset.Utf8_general_ci
+import com.twitter.util.{Return, StorageUnit, Throw, Try}
 
 class IncompatibleServerError(msg: String)
   extends Exception(msg)
@@ -15,6 +17,50 @@ case object IncompatibleCharset
   extends IncompatibleServerError(
     "This client is only compatible with UTF-8 and Latin-1 charset encoding"
   )
+
+object Handshake {
+  /**
+   * A class eligible for configuring a mysql client's credentials during
+   * the Handshake phase.
+   */
+  case class Credentials(username: Option[String], password: Option[String])
+  implicit object Credentials extends Stack.Param[Credentials] {
+    val default = Credentials(None, None)
+  }
+
+  /**
+   * A class eligible for configuring a mysql client's database during
+   * the Handshake phase.
+   */
+  case class Database(db: Option[String])
+  implicit object Database extends Stack.Param[Database] {
+    val default = Database(None)
+  }
+
+  /**
+   * A class eligible for configuring a mysql client's charset during
+   * the Handshake phase.
+   */
+  case class Charset(charset: Short)
+  implicit object Charset extends Stack.Param[Charset] {
+    val default = Charset(Utf8_general_ci)
+  }
+
+  /**
+   * Creates a Handshake from a collection of [[com.twitter.finagle.Stack.Params]].
+   */
+  def apply(prms: Stack.Params): Handshake = {
+    val Credentials(u, p) = prms[Credentials]
+    val Database(db) = prms[Database]
+    val Charset(cs) = prms[Charset]
+    Handshake(
+      username = u,
+      password = p,
+      database = db,
+      charset = cs
+    )
+  }
+}
 
 /**
  * Bridges a server handshake (HandshakeInit) with a
@@ -45,7 +91,7 @@ case class Handshake(
   password: Option[String] = None,
   database: Option[String] = None,
   clientCap: Capability = Capability.baseCap,
-  charset: Short = Charset.Utf8_general_ci,
+  charset: Short = Utf8_general_ci,
   maxPacketSize: StorageUnit = 1.gigabyte
 ) extends (HandshakeInit => Try[HandshakeResponse]) {
   import Capability._

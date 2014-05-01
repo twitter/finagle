@@ -41,7 +41,6 @@ object ExitGuard {
       case None => throw new IllegalStateException("unguard() called too many times")
       case Some((1, t)) =>
         t.interrupt()
-        t.join()
         None
       case Some((n, t)) =>
         Some((n-1, t))

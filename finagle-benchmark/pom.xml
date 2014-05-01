@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-benchmark</artifactId>
   <packaging>jar</packaging>
-  <version>6.13.2-SNAPSHOT</version>
+  <version>6.15.1-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -21,53 +21,58 @@
       <artifactId>caliper</artifactId>
       <version>0.5-rc1</version>
       <exclusions>
-        <!-- a more modern guava is provided through swift -->
         <exclusion>
           <groupId>com.google.guava</groupId>
           <artifactId>guava</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
+    <!-- Current version of caliper requires Guava 15 -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>15.0</version>
+    </dependency>
     <!-- project dependencies -->
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.13.2-SNAPSHOT</version>
+      <version>6.15.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-stats</artifactId>
-      <version>6.13.2-SNAPSHOT</version>
+      <version>6.15.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4</artifactId>
-      <version>6.13.2-SNAPSHOT</version>
+      <version>6.15.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-zipkin</artifactId>
-      <version>6.13.2-SNAPSHOT</version>
+      <version>6.15.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-swift</artifactId>
-      <version>6.13.2-SNAPSHOT</version>
+      <version>6.15.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift</artifactId>
-      <version>6.13.2-SNAPSHOT</version>
+      <version>6.15.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-memcached</artifactId>
-      <version>6.13.2-SNAPSHOT</version>
+      <version>6.15.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>scrooge-runtime</artifactId>
-      <version>3.13.1-SNAPSHOT</version>
+      <version>3.14.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
@@ -76,7 +81,7 @@
         <groupId>com.twitter</groupId>
         <artifactId>scrooge-maven-plugin</artifactId>
         <!-- this version must match the version from scrooge-gen.ivy.xml -->
-        <version>3.12.3</version>
+        <version>3.13.1</version>
       </plugin>
     </plugins>
   </build>

@@ -1,5 +1,13 @@
 junit_tests(name='scala',
   dependencies=[
+    pants(':core'),
+    pants(':defaultloader'),
+    pants(':serversets')
+  ]
+)
+
+junit_tests(name='core',
+  dependencies=[
     pants('3rdparty:junit'),
     pants('3rdparty:mockito-all'),
     pants('3rdparty:netty'),
@@ -14,9 +22,18 @@ junit_tests(name='scala',
     pants('finagle/finagle-test'),
     pants('finagle/finagle-serversets'),
     pants('util/util-core')
-  ],
-  sources=rglobs('*.scala'),
-  resources=[
-    pants('finagle/finagle-serversets/src/test/resources')
   ]
+)
+
+junit_tests(name='defaultloader',
+  dependencies=[pants(':core')],
+  sources=globs('com/twitter/finagle/serverset2/client/apache/*.scala')
+)
+
+junit_tests(name='serversets',
+  dependencies=[pants(':core')],
+  sources=globs(
+    'com/twitter/finagle/serverset2/*.scala',
+    'com/twitter/finagle/zookeeper/*.scala',
+  )
 )

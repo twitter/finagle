@@ -41,7 +41,7 @@ object Command {
 sealed trait Request {
   val seq: Short
   val cmd: Byte = Command.COM_NO_OP
-  val toPacket: Packet
+  def toPacket: Packet
 }
 
 /**
@@ -60,14 +60,6 @@ class SimpleCommandRequest(command: Byte, data: Array[Byte])
   extends CommandRequest(command) {
     val buf = Buffer(Buffer(Array(command)), Buffer(data))
     val toPacket = Packet(seq, buf)
-}
-
-/**
- * NOOP Request used internally by this client.
- */
-case object ClientInternalGreet extends Request {
-  val seq: Short = 0
-  override val toPacket = Packet(seq, Buffer(Buffer.EmptyByteArray))
 }
 
 /**
@@ -120,7 +112,7 @@ case class HandshakeResponse(
   override val seq: Short = 1
   lazy val hashPassword = encryptPassword(password.getOrElse(""), salt)
 
-  override val toPacket = {
+  def toPacket = {
     val fixedBodySize = 34
     val dbStrSize = database map { _.size + 1 } getOrElse(0)
     val packetBodySize = username.getOrElse("").size + hashPassword.size + dbStrSize + fixedBodySize
@@ -159,8 +151,12 @@ case class HandshakeResponse(
  * a prepared statement.
  * [[http://dev.mysql.com/doc/internals/en/com-stmt-execute.html]]
  */
-case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount: Int = 1)
-  extends CommandRequest(Command.COM_STMT_EXECUTE) {
+case class ExecuteRequest(
+  stmtId: Int,
+  params: IndexedSeq[Any] = IndexedSeq.empty,
+  hasNewParams: Boolean = true,
+  flags: Byte = 0
+) extends CommandRequest(Command.COM_STMT_EXECUTE) {
     private[this] val log = Logger.getLogger("finagle-mysql")
 
     private[this] def isNull(param: Any): Boolean = param match {
@@ -168,22 +164,16 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
       case _ => false
     }
 
-    private[this] def makeNullBitmap(parameters: List[Any]): Array[Byte] = {
+    private[this] def makeNullBitmap(parameters: IndexedSeq[Any]): Array[Byte] = {
       val bitmap = new Array[Byte]((parameters.size + 7) / 8)
-      @tailrec
-      def fill(params: List[Any], pos: Int): Array[Byte] = params match {
-        case Nil => bitmap
-        case param :: rest =>
-          if (isNull(param)) {
-            val bytePos = pos / 8
-            val bitPos = pos % 8
-            val byte = bitmap(bytePos)
-            bitmap(bytePos) = (byte | (1 << bitPos)).toByte
-          }
-          fill(rest, pos+1)
+      val ps = parameters.zipWithIndex
+      for ((p, idx) <- ps if isNull(p)) {
+        val bytePos = idx / 8
+        val bitPos = idx % 8
+        val byte = bitmap(bytePos)
+        bitmap(bytePos) = (byte | (1 << bitPos)).toByte
       }
-
-      fill(parameters, 0)
+      bitmap
     }
 
     private[this] def writeTypeCode(param: Any, writer: BufferWriter): Unit = {
@@ -199,18 +189,13 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
     }
 
     /**
-     * Returns sizeof all the parameters in the List.
+     * Returns sizeof all the parameters according to
+     * mysql binary encoding.
      */
-    @tailrec
-    private[this] def sizeOfParameters(parameters: List[Any], size: Int = 0): Int = parameters match {
-      case Nil => size
-      case p :: rest =>
-        val typeSize = Type.sizeOf(p)
-        // We can safely convert unknown sizes to 0 because
-        // any unknown type is being sent as NULL.
-        val sizeOfParam = if (typeSize == -1) 0 else typeSize
-        sizeOfParameters(rest, size + sizeOfParam)
-    }
+    private[this] def sizeOfParameters(parameters: IndexedSeq[Any]): Int =
+      parameters.foldLeft(0) { (sum, param) =>
+        sum + Type.sizeOf(param)
+      }
 
     /**
      * Writes the parameter into its MySQL binary representation.
@@ -235,32 +220,31 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
       case _  => writer
     }
 
-    override val toPacket = {
+    def toPacket = {
       val bw = BufferWriter(new Array[Byte](10))
       bw.writeByte(cmd)
-      bw.writeInt(ps.statementId)
+      bw.writeInt(stmtId)
       bw.writeByte(flags)
-      bw.writeInt(iterationCount)
+      bw.writeInt(1) // iteration count - always 1
 
-      val paramsList = ps.parameters.toList
-      val nullBytes = makeNullBitmap(paramsList)
-      val newParamsBound: Byte = if (ps.hasNewParameters) 1 else 0
+      val newParamsBound: Byte = if (hasNewParams) 1 else 0
 
       // convert parameters to binary representation.
-      val sizeOfParams = sizeOfParameters(paramsList)
+      val sizeOfParams = sizeOfParameters(params)
       val values = BufferWriter(new Array[Byte](sizeOfParams))
-      paramsList foreach { writeParam(_, values) }
+      params foreach { writeParam(_, values) }
 
-      // parameters are tagged on to the end of the buffer
-      // after types or initialBuffer depending if the prepared statement
-      // has new parameters.
-      val composite = if (ps.hasNewParameters) {
-        // only add type data if the prepared statement has new parameters.
-        val types = BufferWriter(new Array[Byte](ps.numberOfParams * 2))
-        paramsList foreach { writeTypeCode(_, types) }
-        Buffer(bw, Buffer(nullBytes), Buffer(Array(newParamsBound)), types, values)
+      // encode null values in bitmap
+      val nullBitmap = makeNullBitmap(params)
+
+      // parameters are appended to the end of the packet
+      // only if the statement has new parameters.
+      val composite = if (hasNewParams) {
+        val types = BufferWriter(new Array[Byte](params.size * 2))
+        params foreach { writeTypeCode(_, types) }
+        Buffer(bw, Buffer(nullBitmap), Buffer(Array(newParamsBound)), types, values)
       } else {
-        Buffer(bw, Buffer(nullBytes), Buffer(Array(newParamsBound)), values)
+        Buffer(bw, Buffer(nullBitmap), Buffer(Array(newParamsBound)), values)
       }
       Packet(seq, composite)
     }

@@ -9,6 +9,7 @@ import scala.collection.JavaConverters._
 class RequestBuilderSpec extends SpecificationWithJUnit {
   val URL0 = new URL("http://joe:blow@www.google.com:77/xxx?foo=bar#xxx")
   val URL1 = new URL("https://www.google.com/")
+  val URL2 = new URL("http://joe%40host.com:blow@www.google.com:77/xxx?foo=bar#xxx")
 
   val BODY0 = copiedBuffer("blah".getBytes)
   val FORM0 = Seq (
@@ -69,8 +70,10 @@ v3
       val req7 = RequestBuilder().url(URL1).buildPut(BODY0)
       val req8 = RequestBuilder().url(URL0).buildPost(BODY0)
       val req9 = RequestBuilder().url(URL1).buildPost(BODY0)
+      val req10 = RequestBuilder().url(URL2).buildPost(BODY0)
 
       val expected = "Basic am9lOmJsb3c="
+      val expectedSpecial = "Basic am9lQGhvc3QuY29tOmJsb3c="
       req0.headers.get(HttpHeaders.Names.AUTHORIZATION) must_== expected
       req1.headers.get(HttpHeaders.Names.AUTHORIZATION) must beNull
       req2.headers.get(HttpHeaders.Names.AUTHORIZATION) must_== expected
@@ -81,6 +84,7 @@ v3
       req7.headers.get(HttpHeaders.Names.AUTHORIZATION) must beNull
       req8.headers.get(HttpHeaders.Names.AUTHORIZATION) must_== expected
       req9.headers.get(HttpHeaders.Names.AUTHORIZATION) must beNull
+      req10.headers.get(HttpHeaders.Names.AUTHORIZATION) must_== expectedSpecial
     }
 
     "replace the empty path with /" in {

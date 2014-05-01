@@ -4,12 +4,12 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.ChannelClosedException
 import com.twitter.finagle.Service
 import com.twitter.finagle.{Codec, CodecFactory}
+import com.twitter.io.Charsets
 import com.twitter.util.{Await, Future}
 import java.net.InetSocketAddress
 import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 import org.jboss.netty.handler.codec.frame.{Delimiters, DelimiterBasedFrameDecoder}
 import org.jboss.netty.handler.codec.string.{StringEncoder, StringDecoder}
-import org.jboss.netty.util.CharsetUtil
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -29,8 +29,8 @@ class ServerChannelConfigCodec extends CodecFactory[String, String] {
           val pipeline = Channels.pipeline()
           pipeline.addLast("line",
             new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter: _*))
-          pipeline.addLast("stringDecoder", new StringDecoder(CharsetUtil.UTF_8))
-          pipeline.addLast("stringEncoder", new StringEncoder(CharsetUtil.UTF_8))
+          pipeline.addLast("stringDecoder", new StringDecoder(Charsets.Utf8))
+          pipeline.addLast("stringEncoder", new StringEncoder(Charsets.Utf8))
           pipeline
         }
       }
@@ -42,8 +42,8 @@ class ServerChannelConfigCodec extends CodecFactory[String, String] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline = {
           val pipeline = Channels.pipeline()
-          pipeline.addLast("stringEncode", new StringEncoder(CharsetUtil.UTF_8))
-          pipeline.addLast("stringDecode", new StringDecoder(CharsetUtil.UTF_8))
+          pipeline.addLast("stringEncode", new StringEncoder(Charsets.Utf8))
+          pipeline.addLast("stringDecode", new StringDecoder(Charsets.Utf8))
           pipeline
         }
       }

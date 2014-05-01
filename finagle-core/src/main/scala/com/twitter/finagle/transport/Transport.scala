@@ -1,7 +1,9 @@
 package com.twitter.finagle.transport
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.NoStacktrace
+import com.twitter.finagle.ssl.Engine
+import com.twitter.finagle.Stack
+import com.twitter.util.Duration
 import com.twitter.util.{Closable, Future, Promise, Time, Throw}
 import java.net.SocketAddress
 
@@ -58,6 +60,67 @@ trait Transport[In, Out] extends Closable { self =>
     def localAddress = self.localAddress
     def remoteAddress = self.remoteAddress
     def close(deadline: Time) = self.close(deadline)
+  }
+}
+
+/**
+ * A collection of [[com.twitter.finagle.Stack.Param]]'s useful for configuring
+ * a [[com.twitter.finagle.transport.Transport]].
+ *
+ * @define $param a [[com.twitter.finagle.Stack.Param]] used to configure
+ */
+private[finagle] object Transport {
+  /**
+   * $param the buffer sizes of a `Transport`.
+   *
+   * @param send An option indicating the size of the send buffer.
+   * If None, the implementation default is used.
+   *
+   * @param recv An option indicating the size of the receive buffer.
+   * If None, the implementation default is used.
+   */
+  case class BufferSizes(send: Option[Int], recv: Option[Int])
+  implicit object BufferSizes extends Stack.Param[BufferSizes] {
+    val default = BufferSizes(None, None)
+  }
+
+  /**
+   * $param the liveness of a `Transport`. These properties dictate the
+   * lifecycle of a `Transport` and ensure that it remains relevant.
+   *
+   * @param readTimeout A maximum duration a listener is allowed
+   * to read a request.
+   *
+   * @param writeTimeout A maximum duration a listener is allowed to
+   * write a response.
+   *
+   * @param keepAlive An option indicating if the keepAlive is on or off.
+   * If None, the implementation default is used.
+   */
+  case class Liveness(
+    readTimeout: Duration,
+    writeTimeout: Duration,
+    keepAlive: Option[Boolean]
+  )
+  implicit object Liveness extends Stack.Param[Liveness] {
+    val default = Liveness(Duration.Top, Duration.Top, None)
+  }
+
+  /**
+   * $param the verbosity of a `Transport`. Transport activity is
+   * written to [[com.twitter.finagle.param.Logger]].
+   */
+  case class Verbose(b: Boolean)
+  implicit object Verbose extends Stack.Param[Verbose] {
+    val default = Verbose(false)
+  }
+
+  /**
+   * $param the TLS engine for a `Transport`.
+   */
+  case class TLSEngine(e: Option[() => com.twitter.finagle.ssl.Engine])
+  implicit object TLSEngine extends Stack.Param[TLSEngine] {
+    val default = TLSEngine(None)
   }
 }
 

@@ -1,8 +1,7 @@
 package com.twitter.finagle.exp.mysql
 
 import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader, Packet}
-import com.twitter.concurrent.Spool
-import com.twitter.util.{NonFatal, Try, Return, Throw}
+import com.twitter.util.{Closable, NonFatal, Try}
 
 sealed trait Result
 
@@ -112,13 +111,6 @@ object EOF extends Decoder[EOF] {
 case class EOF(warnings: Short, serverStatus: Short) extends Result
 
 /**
- * Used internally to synthesize a response from
- * the server when sending a prepared statement
- * CloseRequest
- */
-object CloseStatementOK extends OK(0,0,0,0, "Internal Close OK")
-
-/**
  * Represents the column meta-data associated with a query.
  * Sent during ResultSet transmission and as part of the
  * meta-data associated with a Row.
@@ -193,18 +185,25 @@ object PrepareOK extends Decoder[PrepareOK] {
     val numParams = br.readUnsignedShort()
     br.skip(1)
     val warningCount = br.readUnsignedShort()
-    PrepareOK(stmtId, numCols, numParams, warningCount, Nil, Nil)
+    PrepareOK(stmtId, numCols, numParams, warningCount)
   }
 }
 
 case class PrepareOK(
-  statementId: Int,
+  id: Int,
   numOfCols: Int,
   numOfParams: Int,
   warningCount: Int,
-  columns: Seq[Field],
-  params: Seq[Field]
+  columns: Seq[Field] = Nil,
+  params: Seq[Field] = Nil
 ) extends Result
+
+/**
+ * Used internally to synthesize a response from
+ * the server when sending a prepared statement
+ * CloseRequest
+ */
+object CloseStatementOK extends OK(0,0,0,0, "Internal Close OK")
 
 /**
  * Resultset returned from the server containing field definitions and

@@ -89,13 +89,13 @@ object ClientConnection {
     def remoteAddress = unconnected
     def localAddress = unconnected
     def close(deadline: Time) = Future.Done
-    def onClose = new com.twitter.util.Promise[Unit]
+    def onClose = Future.never
   }
 }
 
 /**
  * A simple proxy Service that forwards all calls to another Service.
- * This is is useful if you to wrap-but-modify an existing service.
+ * This is useful if you want to wrap-but-modify an existing service.
  */
 abstract class ServiceProxy[-Req, +Rep](val self: Service[Req, Rep])
   extends Service[Req, Rep] with Proxy

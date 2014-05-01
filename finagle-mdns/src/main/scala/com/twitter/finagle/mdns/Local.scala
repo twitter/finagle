@@ -1,6 +1,6 @@
 package com.twitter.finagle.mdns
 
-import com.twitter.finagle.{Announcement, Announcer, Addr, Resolver}
+import com.twitter.finagle.{Announcement, Announcer, Addr, Resolver, Name}
 import com.twitter.util.{Future, Try, Var}
 import java.net.{InetSocketAddress, SocketAddress}
 
@@ -19,7 +19,7 @@ class LocalResolver extends Resolver {
   val scheme = "local"
 
   def bind(arg: String): Var[Addr]= {
-    val r = Resolver.eval(Local.mkAddr(arg))
-    r.bind()
+    val Name.Bound(va) = Resolver.eval(Local.mkAddr(arg))
+    va
   }
 }

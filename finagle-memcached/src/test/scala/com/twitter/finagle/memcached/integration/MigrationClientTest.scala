@@ -9,11 +9,11 @@ import com.twitter.finagle.memcached.CachePoolConfig
 import com.twitter.finagle.memcached.migration._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
+import com.twitter.io.Charsets
 import com.twitter.util._
 import java.io.ByteArrayOutputStream
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog
 import org.apache.zookeeper.server.{NIOServerCnxn, ZooKeeperServer}
-import org.jboss.netty.util.CharsetUtil
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{IntegrationPatience, Eventually}
 import org.scalatest.junit.JUnitRunner
@@ -124,9 +124,9 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
 
       assert(Await.result(migrationClient.get("foo")) == None)
       Await.result(migrationClient.set("foo", "bar"))
-      assert(Await.result(migrationClient.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(Await.result(migrationClient.get("foo")).get.toString(Charsets.Utf8) == "bar")
 
-      assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(Await.result(client1.get("foo")).get.toString(Charsets.Utf8) == "bar")
       assert(waitForEventualResult(() => Await.result(client2.get("foo")), None))
     }
 
@@ -146,10 +146,10 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
 
       assert(Await.result(migrationClient.get("foo")) == None)
       Await.result(migrationClient.set("foo", "bar"))
-      assert(Await.result(migrationClient.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(Await.result(migrationClient.get("foo")).get.toString(Charsets.Utf8) == "bar")
 
-      assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
-      assert(waitForEventualResult(() => Await.result(client2.get("foo")).map(_.toString(CharsetUtil.UTF_8)), Some("bar")))
+      assert(Await.result(client1.get("foo")).get.toString(Charsets.Utf8) == "bar")
+      assert(waitForEventualResult(() => Await.result(client2.get("foo")).map(_.toString(Charsets.Utf8)), Some("bar")))
     }
 
     test("dark read w/ read repair") {
@@ -167,13 +167,13 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
       eventually { Await.result(migrationClient.get("test")) }
 
       Await.result(client1.set("foo", "bar"))
-      assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(Await.result(client1.get("foo")).get.toString(Charsets.Utf8) == "bar")
       assert(Await.result(client2.get("foo")) == None)
 
-      assert(Await.result(migrationClient.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(Await.result(migrationClient.get("foo")).get.toString(Charsets.Utf8) == "bar")
 
-      assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
-      assert(waitForEventualResult(() => Await.result(client2.get("foo")).map(_.toString(CharsetUtil.UTF_8)), Some("bar")))
+      assert(Await.result(client1.get("foo")).get.toString(Charsets.Utf8) == "bar")
+      assert(waitForEventualResult(() => Await.result(client2.get("foo")).map(_.toString(Charsets.Utf8)), Some("bar")))
     }
 
     test("use new pool with fallback to old pool") {
@@ -191,12 +191,12 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
       eventually { Await.result(migrationClient.get("test")) }
 
       Await.result(client1.set("foo", "bar"))
-      assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(Await.result(client1.get("foo")).get.toString(Charsets.Utf8) == "bar")
       assert(Await.result(client2.get("foo")) == None)
 
-      assert(Await.result(migrationClient.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(Await.result(migrationClient.get("foo")).get.toString(Charsets.Utf8) == "bar")
 
-      assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(Await.result(client1.get("foo")).get.toString(Charsets.Utf8) == "bar")
       assert(waitForEventualResult(() => Await.result(client2.get("foo")), None))
     }
 
@@ -215,13 +215,13 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
       eventually { Await.result(migrationClient.get("test")) }
 
       Await.result(client1.set("foo", "bar"))
-      assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(Await.result(client1.get("foo")).get.toString(Charsets.Utf8) == "bar")
       assert(Await.result(client2.get("foo")) == None)
 
-      assert(Await.result(migrationClient.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
+      assert(Await.result(migrationClient.get("foo")).get.toString(Charsets.Utf8) == "bar")
 
-      assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
-      assert(waitForEventualResult(() => Await.result(client2.get("foo")).map(_.toString(CharsetUtil.UTF_8)), Some("bar")))
+      assert(Await.result(client1.get("foo")).get.toString(Charsets.Utf8) == "bar")
+      assert(waitForEventualResult(() => Await.result(client2.get("foo")).map(_.toString(Charsets.Utf8)), Some("bar")))
     }
   }
 }

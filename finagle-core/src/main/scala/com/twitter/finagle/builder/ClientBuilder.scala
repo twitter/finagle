@@ -176,6 +176,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   private val _tls                       : Option[(() => Engine, Option[String])] = None,
   private val _httpProxy                 : Option[SocketAddress]          = None,
   private val _socksProxy                : Option[SocketAddress]          = SocksProxyFlags.socksProxy,
+  private val _socksUsernameAndPassword  : Option[(String,String)]        = SocksProxyFlags.socksUsernameAndPassword,
   private val _failureAccrual            : Option[Timer => ServiceFactoryWrapper] = Some(FailureAccrualFactory.wrapper(5, 5.seconds)),
   private val _tracer                    : Tracer                        = NullTracer,
   private val _hostConfig                : ClientHostConfig              = new ClientHostConfig,
@@ -222,6 +223,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   val tls                       = _tls
   val httpProxy                 = _httpProxy
   val socksProxy                = _socksProxy
+  val socksUsernameAndPassword  = _socksUsernameAndPassword
   val failureAccrual            = _failureAccrual
   val tracer                    = _tracer
   val failFast                  = _failFast
@@ -257,6 +259,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
     "tls"                       -> _tls,
     "httpProxy"                 -> _httpProxy,
     "socksProxy"                -> _socksProxy,
+    "socksUsernameAndPassword"  -> _socksUsernameAndPassword,
     "failureAccrual"            -> _failureAccrual,
     "tracer"                    -> Some(_tracer),
     "failFast"                  -> failFast,
@@ -390,20 +393,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def group(
     group: Group[SocketAddress]
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
-    dest(new Name {
-      // Group doesn't support the abstraction of "not yet bound" so
-      // this is a bit of a hack
-      @volatile var first = true
-
-      def bind() = group.set map {
-        case newSet if first && newSet.isEmpty => Addr.Pending
-        case newSet =>
-          first = false
-          Addr.Bound(newSet)
-      }
-
-      val reified = "fail!"
-    })
+    dest(Name.fromGroup(group))
 
   /**
    * Specify a load balancer.  The load balancer implements
@@ -531,7 +521,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * The maximum number of connections that are allowed per host.
-   * Required.  Finagle guarantees to to never have more active
+   * Required.  Finagle guarantees to never have more active
    * connections than this limit.
    */
   def hostConnectionLimit(value: Int): ClientBuilder[Req, Rep, HasCluster, HasCodec, Yes] =
@@ -654,6 +644,13 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     withConfig(_.copy(_socksProxy = Some(socksProxy)))
 
   /**
+   * For the socks proxy use this username for authentication.
+   * socksPassword and socksProxy must be set as well
+   */
+  def socksUsernameAndPassword(socksUsernameAndPassword: (String,String)): This =
+    withConfig(_.copy(_socksUsernameAndPassword = Some(socksUsernameAndPassword)))
+
+  /**
    * Specifies a tracer that receives trace events.
    * See [[com.twitter.finagle.tracing]] for details.
    */
@@ -767,10 +764,11 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       name = config.nameOrDefault,
       pipelineFactory = codec.pipelineFactory,
       newChannel = newChannel,
-      newTransport = codec.newClientTransport(_, statsReceiver),
+      newTransport = (c: Channel) => codec.newClientTransport(c, statsReceiver),
       tlsConfig = config.tls map { case (e, v) => Netty3TransporterTLSConfig(e, v) },
       httpProxy = config.httpProxy,
       socksProxy = config.socksProxy,
+      socksUsernameAndPassword = config.socksUsernameAndPassword,
       channelReaderTimeout = config.readerIdleTimeout getOrElse Duration.Top,
       channelWriterTimeout = config.writerIdleTimeout getOrElse Duration.Top,
       channelSnooper = config.logger map { log =>

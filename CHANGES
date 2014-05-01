@@ -5,6 +5,73 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.15.0
+~~~~~~~
+
+- `finagle-core`: Fixed DefaultClient to use the base close method
+- `finagle-core`: Fix a race condition when closing in DefaultServer
+- `finagle-serversets`: memoize path parses in ServerSet2
+- `finagle-mux`: remove references to org.jboss.netty.util.CharsetUtil
+- `finagle-http`: create HttpTransport in codec
+- `finagle-http`: fix basic authentication with special characters
+- `finagle-http`: temporary fix for prematurely expiring streaming responses
+- `finagle-core`: don't discard outstanding readq elements in ChannelTransport
+- `finagle-core`: Add Socks Proxy Authentication support
+- `finagle-doc`: fix image size in client stack figure.
+- `finagle-stats`: unregister cumulative gauges when all references have been collected
+- `finagle-core`: fix truncation in ChannelBufferBuf#slice()
+- `finagle-stats`: upgrade to the latest version of metrics
+- `finagle-stats`: Enable cumulative gauges in MetricsStatsReceiver
+- `finagle-mysql`: Move mysql testing out of finagle-mysql
+- `finagle-serversets`: serverset namer - synthesize nodes for each endpoint
+- `finagle-http`: fix HttpClientDispatcher
+- `finagle-core`: transport should be considered closed if it is failed
+- `finagle-core`: Improve the failure for cancelled requests in the ClientDispatcher
+- `finagle-core`: LocalScheduler - add LIFO option
+- `finagle-core`: don't join after interrupt in Exitguard.Unguard()
+- `finagle-serversets`: Replaces Op with Activity Problem
+- `finagle-mysql`: implement builder using StackClient.
+- `finagle-core`: Make LoadService not fail if a sub-dir is not readable
+- `finagle-core`: Make com.twitter.finagle.Name an ADT
+- `finagle-core`: curry `newDispatcher` in Stack{Client, Server}
+- `finagle-thriftmux`: Add a flag for enabling ThriftMux
+- `finagle-doc`: improved rastering of logos
+- `finagle-core`: Retry on com.twitter.util.TimeoutException
+- `finagle-core`: introduce ForkJoinScheduler
+- `finagle-serversets`: facade for ZooKeeper libraries
+
+6.14.0
+~~~~~~~
+
+- `finagle-*`: Add com.twitter.io.Charsets and replace the use of org.jboss.netty.util.CharsetUtil
+- `finagle-benchmark`: Fix caliper failures due to new guava
+- `finagle-core`: Disable Monitor usage of in Netty3Listener
+- `finagle-core`: Enforce usage of c.t.finagle.util.DefaultLogger
+- `finagle-core`: Fix a Netty3Timer capitalization bug
+- `finagle-core`: Fixed unresolved promises in client dispatcher
+- `finagle-core`: Implement ServerBuilder in terms of StackServer.
+- `finagle-core`: Introduce 2-level caching in the name interpreter
+- `finagle-core`: Introduce Failure interface (internally)
+- `finagle-core`: Introduce StackServer
+- `finagle-core`: Introduce a flag for debug tracing
+- `finagle-core`: Make StackClient symmetric to StackServer
+- `finagle-core`: Parse names into trees; introduce separate evaluation.
+- `finagle-core`: Remove redundant Netty3Timer param def
+- `finagle-core`: Resolver.resolve throws IllegalArgumentException on logical name
+- `finagle-core`: RetryPolicy filter, limit, combine
+- `finagle-core`: Thread through NullReporterFactory in ServerBuilder.
+- `finagle-core`: Use DefaultLoadBalancerFactory
+- `finagle-core`: Use JDK6-friendly RuntimeException constructor in Failure
+- `finagle-doc`: README refresh
+- `finagle-doc`: Refresh client stack docs
+- `finagle-memcached`: Ketama memcache: accept weighted addresses
+- `finagle-mux`: Add server-side Stack wiring for Mux and ThriftMux
+- `finagle-mysql`: Proper prepared statement support.
+- `finagle-serversets`: Add Read-Only ZK support to zk2 Resolver
+- `finagle-serversets`: Zk2: deliver events serially in their own thread
+- `finagle-thrift`: workaround libthrift TBinaryProtocol.writeBinary bug
+- `finagle-zipkin`: Include service name in all traces
+
 6.13.1
 ~~~~~~~
 

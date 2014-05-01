@@ -1,8 +1,36 @@
 package com.twitter.finagle.factory
 
+import com.twitter.finagle._
 import com.twitter.util.{Future, Duration, Timer}
 
-import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy, ServiceTimeoutException, ClientConnection}
+private[finagle] object TimeoutFactory {
+  object ServiceTimeout extends Stack.Role
+
+  /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.factory.TimeoutFactory]].
+   */
+  case class Param(timeout: Duration)
+  implicit object Param extends Stack.Param[Param] {
+    val default = Param(Duration.Top)
+  }
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.factory.TimeoutFactory]].
+   */
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Simple[ServiceFactory[Req, Rep]](ServiceTimeout) {
+      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
+        val TimeoutFactory.Param(timeout) = params[TimeoutFactory.Param]
+        val param.Label(label) = params[param.Label]
+        val param.Timer(timer) = params[param.Timer]
+
+        val exc = new ServiceTimeoutException(timeout)
+        exc.serviceName = label
+        new TimeoutFactory(next, timeout, exc, timer)
+      }
+    }
+}
 
 /**
  * A factory wrapper that times out the service acquisition after the

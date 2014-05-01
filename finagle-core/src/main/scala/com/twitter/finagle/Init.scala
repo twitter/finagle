@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.exp.FinagleScheduler
+import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util.NonFatal
 import java.util.Properties
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
@@ -12,7 +13,7 @@ import java.util.logging.{Level, Logger}
  */
 private object Init {
   private val inited = new AtomicBoolean(false)
-  private val log = Logger.getLogger("finagle")
+  private val log = DefaultLogger
 
   // Used to record Finagle versioning in trace info.
   private val unknownVersion = "?"

@@ -4,9 +4,9 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.stream.{Stream, StreamResponse}
 import com.twitter.conversions.time._
+import com.twitter.io.Charsets
 import com.twitter.util.{Base64StringEncoder => Base64, Future}
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpVersion, HttpMethod, DefaultHttpRequest}
-import org.jboss.netty.util.CharsetUtil
 
 /**
  * This client connects to a Streaming HTTP service, prints 1000 messages, then disconnects.
@@ -48,7 +48,7 @@ object HosebirdClient {
         var messageCount = 0 // Wait for 1000 messages then shut down.
         streamResponse.messages foreach { buffer =>
           messageCount += 1
-          println(buffer.toString(CharsetUtil.UTF_8))
+          println(buffer.toString(Charsets.Utf8))
           println("--")
           if (messageCount == 1000) {
             client.close()

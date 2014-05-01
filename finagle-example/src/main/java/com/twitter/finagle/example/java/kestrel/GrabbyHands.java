@@ -1,13 +1,5 @@
 package com.twitter.finagle.example.java.kestrel;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.util.CharsetUtil;
-
 import com.twitter.finagle.ServiceFactory;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.kestrel.MultiReader;
@@ -18,8 +10,15 @@ import com.twitter.finagle.kestrel.protocol.Command;
 import com.twitter.finagle.kestrel.protocol.Kestrel;
 import com.twitter.finagle.kestrel.protocol.Response;
 import com.twitter.finagle.service.Backoff;
+import com.twitter.io.Charsets;
 import com.twitter.util.Duration;
 import com.twitter.util.JavaTimer;
+import org.jboss.netty.buffer.ChannelBuffers;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Demonstrates the use of {{com.twitter.finagel.kestrel.MultiReader}}
@@ -61,7 +60,7 @@ public class GrabbyHands {
 
     while (true) {
       ReadMessage m = handle.messages().syncWait();
-      System.out.println(m.bytes().toString(CharsetUtil.UTF_8));
+      System.out.println(m.bytes().toString(Charsets.Utf8()));
       System.out.println(ChannelBuffers.hexDump(m.bytes()));
       m.ack().sync();
     }

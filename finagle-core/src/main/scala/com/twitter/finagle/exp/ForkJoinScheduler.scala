@@ -1,6 +1,6 @@
 package com.twitter.finagle.exp
 
-import com.twitter.concurrent.Scheduler
+import com.twitter.concurrent.{LocalScheduler, Scheduler}
 import com.twitter.finagle.jsr166y.{ForkJoinPool, ForkJoinTask, ForkJoinWorkerThread}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.util.Awaitable.CanAwait
@@ -23,6 +23,9 @@ private class ForkJoinScheduler(
   private[this] val activeBlocks = new AtomicLong(0L)
   private[this] val threadsMade = statsReceiver.counter("threads_made")
   private[this] val threadCount = new AtomicLong(0L)
+  private[this] val splitCount = new AtomicLong(0L)
+  
+  private[this] val local = new LocalScheduler
 
   private[this] val threadFactory = new ForkJoinPool.ForkJoinWorkerThreadFactory {
     def newThread(pool: ForkJoinPool) = {
@@ -77,18 +80,19 @@ private class ForkJoinScheduler(
 
     // Returns an estimate of the total number of tasks stolen from one thread's 
     // work queue by another.
-    statsReceiver.addGauge("steals") { pool.getStealCount() }
+    statsReceiver.addGauge("steals") { pool.getStealCount() },
+    
+    // The number of tasks that were split off a local schedule.
+    statsReceiver.addGauge("splits") { splitCount.get }
   )
-  
 
   def submit(r: Runnable) {
-    val task = ForkJoinTask.adapt(r)
     Thread.currentThread() match {
       case t: ForkJoinWorkerThread if t.getPool eq pool => 
-        task.fork()
+        local.submit(r)
 
-      case _ => 
-        try pool.execute(task) catch {
+      case _ =>
+        try pool.execute(ForkJoinTask.adapt(r)) catch {
           // ForkJoin pools reject execution only when its internal
           // resources are exhausted. It is a serious, nonrecoverable
           // error.
@@ -101,6 +105,15 @@ private class ForkJoinScheduler(
   def blocking[T](f: => T)(implicit perm: CanAwait): T = {
     Thread.currentThread() match {
       case _: IsManagedThread =>
+        // Flush out our local scheduler before proceeding.
+        var n = 0
+        while (local.hasNext) {
+          ForkJoinTask.adapt(local.next()).fork()
+          n += 1
+        }
+        if (n > 0)
+          splitCount.addAndGet(n)
+
         var res: T = null.asInstanceOf[T]
         ForkJoinPool.managedBlock(new ForkJoinPool.ManagedBlocker {
           @volatile private[this] var ok = false
@@ -117,7 +130,9 @@ private class ForkJoinScheduler(
         })
         res
 
-      case _ => f      
+      case _ => 
+        // There's nothing we can do.
+        f
     }
   }
 
@@ -127,3 +142,4 @@ private class ForkJoinScheduler(
   def numDispatches = -1L
   def flush() = ()
 }
+

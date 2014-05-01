@@ -44,9 +44,9 @@ object HttpListener extends Netty3Listener[Any, Any](
   http.Http().server(ServerCodecConfig("httpserver", new SocketAddress{})).pipelineFactory
 )
 
-object HttpServer 
+object HttpServer
 extends DefaultServer[HttpRequest, HttpResponse, Any, Any](
-  "http", HttpListener, 
+  "http", HttpListener,
   {
     val dtab = new DtabFilter[HttpRequest, HttpResponse]
     val tracingFilter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("http")
@@ -71,26 +71,40 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
 }
 
 package exp {
-
-
   private[finagle]
-  object HttpNetty3Stack extends Netty3Stack[Any, Any, HttpRequest, HttpResponse](
-    "http",
-    http.Http()
-      .enableTracing(true)
-      .client(ClientCodecConfig("httpclient")).pipelineFactory,
-    (trans, _) => new HttpClientDispatcher(trans)
-  )
-
-  private[finagle]
-  class HttpClient(client: StackClient[HttpRequest, HttpResponse])
-      extends RichStackClient[HttpRequest, HttpResponse, HttpClient](client)
-      with HttpRichClient {
-    protected def newRichClient(client: StackClient[HttpRequest, HttpResponse]) =
+  class HttpClient(client: StackClient[HttpRequest, HttpResponse, Any, Any])
+    extends StackClientLike[HttpRequest, HttpResponse, Any, Any, HttpClient](client)
+    with HttpRichClient {
+    protected def newInstance(client: StackClient[HttpRequest, HttpResponse, Any, Any]) =
       new HttpClient(client)
   }
 
-  private[finagle]
-  object HttpClient extends HttpClient(new StackClient(HttpNetty3Stack))
+  object HttpClient extends HttpClient(new StackClient[HttpRequest, HttpResponse, Any, Any] {
+    protected val newTransporter: Stack.Params => Transporter[Any, Any] = { prms =>
+      val param.Label(label) = prms[param.Label]
+      val httpPipeline = http.Http().client(ClientCodecConfig(label)).pipelineFactory
+      Netty3Transporter(httpPipeline, prms)
+    }
 
+    protected val newDispatcher: Stack.Params => Dispatcher =
+      Function.const(new HttpClientDispatcher(_))
+  })
+
+  object HttpServer extends StackServer[HttpRequest, HttpResponse, Any, Any] {
+    protected val newListener: Stack.Params => Listener[Any, Any] = { prms =>
+      val param.Label(label) = prms[param.Label]
+      val httpPipeline = http.Http().server(ServerCodecConfig(label,
+        new SocketAddress{})).pipelineFactory
+      Netty3Listener(httpPipeline, prms)
+    }
+
+    protected val newDispatcher: Stack.Params => Dispatcher = {
+      val dtab = new DtabFilter[HttpRequest, HttpResponse]
+      val tracingFilter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("http")
+      Function.const((t, s) => new HttpServerDispatcher(
+        new HttpTransport(t),
+        tracingFilter andThen dtab andThen s
+      ))
+    }
+  }
 }
