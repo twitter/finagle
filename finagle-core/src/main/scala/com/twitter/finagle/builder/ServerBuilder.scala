@@ -297,8 +297,11 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * Cancel pending futures whenever the the connection is shut down.
    * This defaults to true.
    */
-  def cancelOnHangup(yesOrNo: Boolean): This =
-    configured(MaskCancelFilter.Param(yesOrNo))
+  def cancelOnHangup(yesOrNo: Boolean): This = {
+    // Note: We invert `yesOrNo` as the param here because the filter's
+    // cancellation-masking is the inverse operation of cancelling on hangup.
+    configured(MaskCancelFilter.Param(!yesOrNo))
+  }
 
   def hostConnectionMaxIdleTime(howlong: Duration): This =
     configured(params[ExpiringService.Param].copy(idleTime = howlong))
