@@ -234,6 +234,31 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
     rv
   }
 
+  def globPrefixWatch(pat: String): Future[Watched[Seq[String]]] = {
+    val (path, prefix) = try ZooKeeperReader.patToPathAndPrefix(pat) catch {
+      case NonFatal(exc) => return Future.exception(exc)
+    }
+
+    val watcher = new ApacheWatcher
+    val rv = new Promise[Watched[Seq[String]]]
+    val cb = new Children2Callback {
+      def processResult(
+          ret: Int,
+          path: String,
+          ctx: Object,
+          children: java.util.List[String],
+          stat: zookeeper.data.Stat) =
+        ApacheKeeperException(ret, Option(path)) match {
+          case None => 
+            val paths = ZooKeeperReader.processGlob(path, prefix, children)
+            rv.setValue(Watched(paths, watcher.state))
+          case Some(e) => rv.setException(e)
+        }
+    }
+    zk.getChildren(path, watcher, cb, null)
+    rv
+  }
+
   def sync(path: String): Future[Unit] = {
     val rv = new Promise[Unit]
     val cb = new VoidCallback {

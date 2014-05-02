@@ -102,12 +102,47 @@ private[serverset2] trait ZooKeeperReader extends ZooKeeperClient {
   def getChildrenWatch(path: String): Future[Watched[Node.Children]]
 
   /**
+   * Expand paths which match the prefix. e.g. in a tree /a/b/foo_1, 
+   * /a/b/bar_2, /a/b/foo_3, globPrefixWatch("/a/b/foo_") returns 
+   * /a/b/foo_1 and /a/b/foo_3.
+   */
+  def globPrefixWatch(pat: String): Future[Watched[Seq[String]]]
+
+  /**
    * Sync. Flushes channel between process and leader.
    *
    * @param path the path of the node to sync.
    * @return a Future[Unit]
    */
   def sync(path: String): Future[Unit]
+}
+
+object ZooKeeperReader {
+  def patToPathAndPrefix(pat: String): (String, String) = {
+    if (pat.isEmpty || pat(0) != '/')
+      throw new IllegalArgumentException("Invalid glob pattern")
+
+    val slash = pat.lastIndexOf('/')
+    if (slash < 0)
+      throw new IllegalArgumentException("Invalid prefix")
+
+    val path = if (slash == 0) "/" else pat.substring(0, slash)
+    val prefix = pat.substring(slash+1, pat.length)
+    
+    (path, prefix)
+  }
+
+  /** An implementation helper for ZooKeeperReader.glob */
+  def processGlob(path: String, prefix: String, children: java.util.List[String]): Seq[String] = {
+    val seq = Seq.newBuilder[String]
+    val iter = children.iterator()
+    while (iter.hasNext()) {
+      val el = iter.next()
+      if (el startsWith prefix)
+        seq += path+"/"+el
+    }
+    seq.result
+  }
 }
 
 private[serverset2] trait ZooKeeperWriter extends ZooKeeperClient {
