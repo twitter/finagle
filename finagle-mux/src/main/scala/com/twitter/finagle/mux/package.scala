@@ -123,6 +123,3 @@ reject requests or provide degraded service should the lease expire. This is
 used by servers to implement features like garbage collection avoidance.
 
  */
-package object mux {
-  type NewSession = Session => Session
-}

@@ -1,5 +1,6 @@
-package com.twitter.finagle.mux
+package com.twitter.finagle.mux.exp
 
+import com.twitter.finagle.mux.{RequestNackedException, ServerApplicationError, ClientDiscardedRequestException, MuxContext}
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.tracing.{
@@ -20,14 +21,14 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{OneInstancePerTest, FunSuite}
 
-class TestReceiver() extends Session with MockitoSugar {
+class MuxServiceImpl() extends MuxService with MockitoSugar {
   val service = mock[Service[Buf, Buf]]
   val receivedPing = new Promise[Unit]
   val receivedDrain = new Promise[Unit]
   val messages = new AsyncQueue[Buf]
 
   def apply(buf: Buf) = service(buf)
-  def message(buf: Buf) = {
+  def send(buf: Buf) = {
     messages.offer(buf)
     Future.Unit
   }
@@ -54,23 +55,23 @@ private[mux] class SessionTest(rolesReversed: Boolean) extends FunSuite with One
   val listenerTransport =
     new QueueTransport(writeq=listenerToConnector, readq=connectorToListener)
 
-  val listenerReceiver = new TestReceiver()
-  val connectorReceiver = new TestReceiver()
+  val listenerImpl = new MuxServiceImpl()
+  val connectorImpl = new MuxServiceImpl()
 
-  val connectorSender = new SenderSession(connectorTransport)
-  val listenerSender = new SenderSession(listenerTransport)
+  val connectorClientDispatcher = new ClientDispatcher(connectorTransport)
+  val listenerClientDispatcher = new ClientDispatcher(listenerTransport)
 
-  val connectorDispatcher = new SessionDispatcher(connectorTransport, connectorSender, connectorReceiver)
-  val listenerDispatcher = new SessionDispatcher(listenerTransport, listenerSender, listenerReceiver)
+  val connectorSession = new Session(connectorClientDispatcher, connectorImpl, connectorTransport)
+  val listenerSession = new Session(listenerClientDispatcher, listenerImpl, listenerTransport)
 
-  val (client, clientReceiver, server, serverReceiver) =
+  val (client, clientImpl, server, serverImpl) =
     if (rolesReversed) {
-      (listenerSender, listenerReceiver, connectorSender, connectorReceiver)
+      (listenerClientDispatcher, listenerImpl, connectorClientDispatcher, connectorImpl)
     } else {
-      (connectorSender, connectorReceiver, listenerSender, listenerReceiver)
+      (connectorClientDispatcher, connectorImpl, listenerClientDispatcher, listenerImpl)
     }
 
-  val service = serverReceiver.service
+  val service = serverImpl.service
 
   test("handle concurrent requests, handling out of order replies") {
     val p1, p2, p3 = new Promise[Buf]
@@ -103,7 +104,7 @@ private[mux] class SessionTest(rolesReversed: Boolean) extends FunSuite with One
 
   test("server respond to pings") {
     assert(client.ping().isDefined)
-    assert(serverReceiver.receivedPing.isDefined)
+    assert(serverImpl.receivedPing.isDefined)
   }
 
   test("server nacks new requests after draining") {
@@ -113,7 +114,7 @@ private[mux] class SessionTest(rolesReversed: Boolean) extends FunSuite with One
     val f1 = client(buf(1))
     verify(service)(buf(1))
     server.drain()
-    assert(clientReceiver.receivedDrain.isDefined)
+    assert(clientImpl.receivedDrain.isDefined)
     assert(f1.poll === None)
     assert(client(buf(2)).poll === Some(Throw(RequestNackedException)))
     verify(service, never)(buf(2))
@@ -245,42 +246,42 @@ private[mux] class SessionTest(rolesReversed: Boolean) extends FunSuite with One
   }
 
   test("Passes messages") {
-    val a = serverReceiver.messages.poll
-    val b = serverReceiver.messages.poll
-    val c = serverReceiver.messages.poll
+    val a = serverImpl.messages.poll
+    val b = serverImpl.messages.poll
+    val c = serverImpl.messages.poll
     assert(a.poll === None)
     assert(b.poll === None)
     assert(c.poll === None)
 
-    client.message(buf(1))
+    client.send(buf(1))
     assert(a.poll === Some(Return(buf(1))))
     assert(b.poll === None)
     assert(c.poll === None)
 
-    client.message(buf(2))
+    client.send(buf(2))
     assert(b.poll === Some(Return(buf(2))))
     assert(c.poll === None)
 
-    client.message(buf(3))
+    client.send(buf(3))
     assert(c.poll === Some(Return(buf(3))))
 
-    val x = clientReceiver.messages.poll
-    val y = clientReceiver.messages.poll
-    val z = clientReceiver.messages.poll
+    val x = clientImpl.messages.poll
+    val y = clientImpl.messages.poll
+    val z = clientImpl.messages.poll
     assert(x.poll === None)
     assert(y.poll === None)
     assert(z.poll === None)
 
-    server.message(buf(4))
+    server.send(buf(4))
     assert(x.poll === Some(Return(buf(4))))
     assert(y.poll === None)
     assert(z.poll === None)
 
-    server.message(buf(5))
+    server.send(buf(5))
     assert(y.poll === Some(Return(buf(5))))
     assert(z.poll === None)
 
-    server.message(buf(6))
+    server.send(buf(6))
     assert(z.poll === Some(Return(buf(6))))
 
   }

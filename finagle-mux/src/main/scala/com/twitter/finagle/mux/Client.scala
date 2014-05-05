@@ -1,6 +1,7 @@
 package com.twitter.finagle.mux
 
 import com.twitter.finagle.{Context, Dtab, Service, WriteException, NoStacktrace}
+import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.finagle.mux.lease.Acting
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.{Trace, Annotation}
@@ -144,16 +145,6 @@ private[finagle] class ClientDispatcher (
 
   def apply(req: ChannelBuffer): Future[ChannelBuffer] = dispatch(req, true)
 
-  private def toCB(buf: Buf) =
-    buf match {
-      case Buf.ByteArray(bytes, begin, end) =>
-        ChannelBuffers.wrappedBuffer(bytes, begin, end-begin)
-      case buf =>
-        val bytes = new Array[Byte](buf.length)
-        buf.write(bytes, 0)
-        ChannelBuffers.wrappedBuffer(bytes)
-    }
-
   /**
    * Dispatch a request.
    *
@@ -176,7 +167,9 @@ private[finagle] class ClientDispatcher (
       if (couldDispatch == Cap.No)
         Treq(tag, Some(Trace.id), req)
       else {
-        val contexts = Context.emit() map { case (k, v) => (toCB(k), toCB(v)) }
+        val contexts = Context.emit() map { case (k, v) =>
+          (BufChannelBuffer(k), BufChannelBuffer(v))
+        }
         Tdispatch(tag, contexts.toSeq, "", Dtab.baseDiff(), req)
       }
 
