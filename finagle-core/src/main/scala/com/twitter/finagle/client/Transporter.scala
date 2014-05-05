@@ -58,17 +58,12 @@ private[finagle] object Transporter {
   /**
    * $param a SocksProxy as the endpoint for a `Transporter`.
    */
-  case class SocksProxy(sa: Option[SocketAddress])
+  case class SocksProxy(sa: Option[SocketAddress], credentials: Option[(String, String)])
   implicit object SocksProxy extends Stack.Param[SocksProxy] {
-    val default = SocksProxy(SocksProxyFlags.socksProxy)
-  }
-
-  /**
-   * $param a SocksUsernameAndPassword, if Socks authentication is enabled
-   */
-  case class SocksUsernameAndPassword(sup: Option[(String, String)])
-  implicit object SocksUsernameAndPassword extends Stack.Param[SocksUsernameAndPassword] {
-    val default = SocksUsernameAndPassword(SocksProxyFlags.socksUsernameAndPassword)
+    val default = SocksProxy(
+      SocksProxyFlags.socksProxy,
+      SocksProxyFlags.socksUsernameAndPassword
+    )
   }
 
   /**

@@ -160,7 +160,7 @@ package object finagle {
     implicit object Tracer extends Stack.Param[Tracer] with Stack.Role {
       // Note, this is lazy to avoid potential failures during
       // static initialization.
-      val default = Tracer(tracing.DefaultTracer)
+      lazy val default = Tracer(tracing.DefaultTracer)
     }
   }
 

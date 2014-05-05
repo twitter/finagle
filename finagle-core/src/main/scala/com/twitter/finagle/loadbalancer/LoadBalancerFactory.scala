@@ -16,7 +16,11 @@ private[finagle] object LoadBalancerFactory {
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] per host
-   * [[com.twitter.finagle.stats.StatsReceiver]].
+   * [[com.twitter.finagle.stats.StatsReceiver]]. If the per-host StatsReceiver is
+   * not null, the load balancer will broadcast stats to it (scoped with the
+   * "host:port" pair) for each host in the destination. For clients with a
+   * large host sets in their destination, this can cause unmanageable
+   * memory pressure.
    */
   case class HostStats(hostStatsReceiver: StatsReceiver)
   implicit object HostStats extends Stack.Param[HostStats] {
@@ -84,7 +88,8 @@ private[finagle] object LoadBalancerFactory {
                 "%s:%d".format(ia.getHostName, ia.getPort)
               case other => other.toString
             }
-            val host = new RollupStatsReceiver(hostStatsReceiver.scope(scope))
+            val scoped = hostStatsReceiver.scope(label).scope(scope)
+            val host = new RollupStatsReceiver(scoped)
             BroadcastStatsReceiver(Seq(host, statsReceiver))
           }
 
@@ -92,14 +97,15 @@ private[finagle] object LoadBalancerFactory {
           val param.Reporter(reporter) = params[param.Reporter]
           val composite = reporter(label, Some(sockaddr)) andThen monitor
 
-          val endpointStack = next.make(params +
-            Transporter.EndpointAddr(sockaddr) +
+          val endpointStack = (sa: SocketAddress) => next.make(
+            params +
+            Transporter.EndpointAddr(sa) +
             param.Stats(stats) +
             param.Monitor(composite))
 
           sockaddr match {
-            case WeightedSocketAddress(sa, w) => (endpointStack, w)
-            case sa => (endpointStack, 1D)
+            case WeightedSocketAddress(sa, w) => (endpointStack(sa), w)
+            case sa => (endpointStack(sa), 1D)
           }
         }
 

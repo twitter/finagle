@@ -117,7 +117,7 @@ object Netty3Transporter {
     val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
     val Transporter.TLSHostname(tlsHostname) = params[Transporter.TLSHostname]
     val Transporter.HttpProxy(httpProxy) = params[Transporter.HttpProxy]
-    val Transporter.SocksProxy(socksProxy) = params[Transporter.SocksProxy]
+    val Transporter.SocksProxy(socksProxy, credentials) = params[Transporter.SocksProxy]
     val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
     val Transport.TLSEngine(tls) = params[Transport.TLSEngine]
     val Transport.Liveness(readerTimeout, writerTimeout, keepAlive) = params[Transport.Liveness]
@@ -129,6 +129,7 @@ object Netty3Transporter {
       tlsConfig = tls map { case engine => Netty3TransporterTLSConfig(engine, tlsHostname) },
       httpProxy = httpProxy,
       socksProxy = socksProxy,
+      socksUsernameAndPassword = credentials,
       channelReaderTimeout = readerTimeout,
       channelWriterTimeout = writerTimeout,
       channelOptions = {
