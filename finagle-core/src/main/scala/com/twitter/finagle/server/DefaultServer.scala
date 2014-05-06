@@ -165,18 +165,23 @@ case class DefaultServer[Req, Rep, In, Out](
       }
 
       def closeServer(deadline: Time) = closeAwaitably {
-        // The order here is important: by calling underlying.close()
-        // first, we guarantee that no further connections are
-        // created. We use Closable.make here to snapshot connections at
-        // the time of closing.
-        //
-        // Note: A draining state machine is implemented by the server
-        // dispatcher, so we can simply call `close` on each connection here.
-        val closeConns = Closable.make { deadline =>
-          Closable.all(connections.asScala.toSeq:_*).close(deadline)
-        }
-        val closable = Closable.sequence(underlying, factory, closeConns)
-        closable.close(deadline)
+        // Here be dragons
+        // We want to do four things here in this order:
+        // 1. close the listening socket
+        // 2. close the factory (not sure if ordering matters for this step)
+        // 3. drain pending requests for existing connections
+        // 4. close those connections when their requests complete
+        // closing `underlying` eventually calls Netty3Listener.close which has an
+        // interesting side-effect of synchronously closing #1
+        val ulClosed = underlying.close(deadline)
+
+        // However we don't want to wait on the above because it will only complete
+        // when #4 is finished.  So we ignore it and close everything else.  Note that
+        // closing the connections here will do #2 and drain them via the Dispatcher.
+        val everythingElse = Seq[Closable](factory) ++ connections.asScala.toSeq
+
+        // and once they're drained we can then wait on the listener physically closing them
+        Closable.all(everythingElse:_*).close(deadline) before ulClosed
       }
 
       def boundAddress = underlying.boundAddress
