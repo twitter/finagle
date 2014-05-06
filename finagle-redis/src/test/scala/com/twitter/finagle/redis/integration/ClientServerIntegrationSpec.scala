@@ -130,6 +130,21 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
         Await.result(client(Type(KEY))) mustEqual StatusReply("string")
         Await.result(client(Type("nosuchkey"))) mustEqual StatusReply("none")
       }
+      "MOVE" >> {
+        val fromDb = 14
+        val toDb   = 15
+        Await.result(client(Select(toDb))) mustEqual StatusReply("OK")
+        Await.result(client(Del(List(KEY)))) // only ensuring clean slate, reply doesn't matter
+        Await.result(client(Select(fromDb))) mustEqual StatusReply("OK")
+        Await.result(client(Set("MOO", "BAR"))) mustEqual StatusReply("OK")
+
+        Await.result(client(Move("", StringToChannelBuffer(toDb.toString)))) must throwA[ClientError]
+        Await.result(client(Move("MOO", StringToChannelBuffer("")))) must throwA[ClientError]
+        Await.result(client(Move(StringToChannelBuffer("MOO"),
+          StringToChannelBuffer(toDb.toString)))) mustEqual IntegerReply(1)
+        Await.result(client(Move(StringToChannelBuffer("MOO"),
+          StringToChannelBuffer(toDb.toString)))) mustEqual IntegerReply(0)
+      }
     }
 
     "Handle Sorted Set Commands" >> {
