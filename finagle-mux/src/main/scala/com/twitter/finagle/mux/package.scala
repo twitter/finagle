@@ -33,11 +33,14 @@ The tag's MSB is reserved for future use, making its current namespace
 The tag is otherwise arbitrary, and is chosen by the sender of the T
 message.
 
-Message-type numbering scheme is as follows. Message type 0 is
-reserved for future use. T messages have bit 7 (the MSB) set to 1, R
-messages set bit 7 to 0. Control messages set bit 6 to 1 and
-application messages set it to 0. This distinction allows proxies to
-be oblivious to parts of the protocol.
+Message types, interpreted as a two's complement, 1-byte integer are
+numbered as follows: positive numbers are T-messages; their negative
+complement is the corresponding R message. T-messages greater than 63
+(correspondingly R-messages smaller than -63) are session messages.
+The message number -128 is reserved for Rerr. All other messsages are
+application messages. Middle boxes may forward application messages
+indiscriminately. Because of an early implementation bug, two aliases
+exist: 127 is Rerr, and -62 is Tdiscarded.
 
 The protocol is full duplex: both the server and client may send T
 messages initiating an exchange.
