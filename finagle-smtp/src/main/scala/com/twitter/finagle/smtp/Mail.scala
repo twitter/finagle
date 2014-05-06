@@ -1,26 +1,28 @@
-package com.twitter.finagle
+package com.twitter.finagle.smtp
 
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.util.Future
+import com.twitter.finagle.Service
 
 /**
  * Simple mail service sending data to local SMTP server without error handling
  */
-object Mail extends Service [Email, List[(String,String)]]{
+
+object Mail extends Service [EmailMessage, List[(String,String)]]{
    lazy val send = ClientBuilder()
    .hosts("localhost:25")
    .codec(new StringCodec)
    .hostConnectionLimit(1)
    .build()
 
-     def apply(msg: Email) = msg match {
-     case Email(from, to, body) => {
+     def apply(msg: EmailMessage) = {
        val reqs = List(
          "EHLO",
-         "MAIL FROM: <" + from + ">",
-         "RCPT TO: <" + to + ">",
+         "MAIL FROM: <" + msg.from + ">",
+         "RCPT TO: <" + msg.to.mkString(",") + ">",
          "DATA",
-         body + "\n.",
+         msg.body.mkString("\r\n")
+           + "\r\n.",
          "QUIT"
        )
         val freqs = for (req <- reqs) yield send(req)
@@ -28,6 +30,5 @@ object Mail extends Service [Email, List[(String,String)]]{
         val fresps = Future.collect(freqs)
 
         fresps map {reqs zip _}
-     }
-   }
+      }
  }

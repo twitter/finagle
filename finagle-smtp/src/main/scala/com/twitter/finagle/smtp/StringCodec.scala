@@ -1,6 +1,6 @@
-package com.twitter.finagle
+package com.twitter.finagle.smtp
 
-import com.twitter.finagle.SimpleFilter
+import com.twitter.finagle.{Service,ServiceFactory, Codec, CodecFactory, SimpleFilter}
 import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
 import org.jboss.netty.handler.codec.frame.{DelimiterBasedFrameDecoder, Delimiters}
 import org.jboss.netty.util.CharsetUtil
