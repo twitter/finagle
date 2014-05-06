@@ -59,6 +59,11 @@ class NaggatiSpec extends SpecificationWithJUnit {
           "KEYS" >> {
             codec(wrap("KEYS h?llo\r\n")) mustEqual List(Keys("h?llo"))
           }
+          "MOVE" >> {
+            codec(wrap("MOVE\r\n")) must throwA[ClientError]
+            codec(wrap("MOVE boo\r\n")) must throwA[ClientError]
+            codec(wrap("MOVE boo moo \r\n")) mustEqual List(Move(boo, moo))
+          }
           "PERSIST" >> {
             codec(wrap("PERSIST\r\n")) must throwA[ClientError]
             codec(wrap("PERSIST foo\r\n")) mustEqual List(Persist("foo"))
