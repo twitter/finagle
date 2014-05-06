@@ -65,17 +65,16 @@ trait Keys { self: BaseClient =>
     }
 
   /**
-   *  Move key from the currently selected database to the specified destination
-   *  database. When key already exists in the destination database, or it does
-   *  not exist in the source database, it does nothing.
+   * Move key from the currently selected database to the specified destination
+   * database. When key already exists in the destination database, or it does
+   * not exist in the source database, it does nothing.
    *
-   *  @param key, db
-   *  @return true if key was moved.
-   *          false if key was not moved for any reason.
-   *  @see http://redis.io/commands/move
+   * @param key, db
+   * @return true if key was moved.
+   *         false if key was not moved for any reason.
    */
    def move(key: ChannelBuffer, db: ChannelBuffer): Future[JBoolean] =
-     doRequest(Move(key,db)) {
+     doRequest(Move(key, db)) {
        case IntegerReply(n) => Future.value(n == 1)
      }
 
