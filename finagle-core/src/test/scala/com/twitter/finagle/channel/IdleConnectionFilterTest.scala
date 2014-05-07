@@ -12,10 +12,9 @@ import org.mockito.Mockito
 import org.mockito.Matchers._
 import org.mockito.stubbing.Answer
 import org.mockito.invocation.InvocationOnMock
-import org.scalatest.matchers.ShouldMatchers
 
 @RunWith(classOf[JUnitRunner])
-class IdleConnectionFilterTest extends FunSuite with MockitoSugar with ShouldMatchers{
+class IdleConnectionFilterTest extends FunSuite with MockitoSugar{
 
   class helper {
     val service = mock[Service[String, String]]
