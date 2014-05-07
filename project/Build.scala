@@ -376,7 +376,6 @@ object Finagle extends Build {
       util("logging")
     ),
     testOptions in Test := Seq(Tests.Filter {
-      case "com.twitter.finagle.redis.protocol.integration.ClientServerIntegrationSpec" => false
       case "com.twitter.finagle.redis.integration.ClientSpec" => false
       case "com.twitter.finagle.redis.integration.BtreeClientSpec" => false
       case "com.twitter.finagle.redis.integration.ClientServerIntegrationSpec" => false
