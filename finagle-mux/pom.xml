@@ -29,6 +29,17 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>com.twitter.common</groupId>
+      <artifactId>stats-util</artifactId>
+      <version>0.0.42</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_2.9.2</artifactId>
       <version>1.9.1</version>
