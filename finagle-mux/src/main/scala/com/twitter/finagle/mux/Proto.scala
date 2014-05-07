@@ -30,16 +30,13 @@ private[finagle] object Message {
     val Tdrain = 64: Byte
     val Rdrain = -64: Byte
     val Tping = 65: Byte
-    val Rping = -65: Byte
+    val Rping = -63: Byte
 
-    val Tdiscarded = 66: Byte
-    val Tlease = 67: Byte
+    val Tdiscarded = -62: Byte
+    val Tlease = -61: Byte
 
-    val Rerr = -128: Byte
-
-    // Old implementation flukes.
-    val BAD_Tdiscarded = -62: Byte
-    val BAD_Rerr = 127: Byte
+    // Could be either:
+    val Rerr = 127: Byte
   }
 
   val MarkerTag = 0
@@ -218,19 +215,11 @@ private[finagle] object Message {
   case class Tping(tag: Int) extends EmptyMessage(Types.Tping)
   case class Rping(tag: Int) extends EmptyMessage(Types.Rping)
   case class Rerr(tag: Int, error: String) extends Message {
-    // Use the old Rerr type in a transition period so that we
-    // can be reasonably sure we remain backwards compatible with
-    // old servers.
-
-    val typ = Types.BAD_Rerr
+    val typ = Types.Rerr
     lazy val buf = encodeString(error)
   }
 
-  case class Tdiscarded(which: Int, why: String)
-      // Use the old Tdiscarded type in a transition period so that we
-      // can be reasonably sure we remain backwards compatible with
-      // old servers.
-      extends MarkerMessage(Types.BAD_Tdiscarded) {
+  case class Tdiscarded(which: Int, why: String) extends MarkerMessage(Types.Tdiscarded) {
     lazy val buf = ChannelBuffers.wrappedBuffer(
       ChannelBuffers.wrappedBuffer(
         Array[Byte]((which>>16 & 0xff).toByte, (which>>8 & 0xff).toByte, (which & 0xff).toByte)),
@@ -441,8 +430,8 @@ private[finagle] object Message {
       case Types.Rdrain => Rdrain(tag)
       case Types.Tping => Tping(tag)
       case Types.Rping => Rping(tag)
-      case Types.Rerr | Types.BAD_Rerr => Rerr(tag, decodeUtf8(buf))
-      case Types.Tdiscarded | Types.BAD_Tdiscarded => decodeTdiscarded(buf)
+      case Types.Rerr => Rerr(tag, decodeUtf8(buf))
+      case Types.Tdiscarded => decodeTdiscarded(buf)
       case Types.Tlease => decodeTlease(buf)
       case bad => throw BadMessageException("bad message type: %d [tag=%d]".format(bad, tag))
     }
