@@ -5,7 +5,8 @@ import javax.mail.Session
 import javax.mail.Message
 import java.util.Properties
 import org.apache.commons.mail.SimpleEmail
-import com.twitter.util.Future
+import com.twitter.util.{Await, Future}
+import com.twitter.finagle.Service
 
 /**
  * Simple SMTP client without error handling
@@ -38,10 +39,18 @@ object SimpleSMTPClient {
 
    val email3 = EmailMessage(commons)
 
-   Mail(email3) onSuccess {
+   /*Mail(email3) onSuccess {
      case resps => for ((req, resp) <- resps) println(req + "\n" + resp)
+   }*/
+
+   val send = Smtp.newService("localhost:25")
+   val res: Future[List[(String, String)]] = send(email3) onSuccess {
+    case resps => for ((req, resp) <- resps) println(req + "\n" + resp)
    }
 
    println("Sending email...") //this will be printed before the future returns
+
+   //blocking just for test purposes
+   Await.ready(res)
  }
  }
