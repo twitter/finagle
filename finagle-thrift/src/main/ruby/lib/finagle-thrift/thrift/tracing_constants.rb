@@ -15,4 +15,8 @@ require 'tracing_types'
 
     SERVER_RECV = %q"sr"
 
+    SERVER_ADDR = %q"sa"
+
+    CLIENT_ADDR = %q"ca"
+
 end

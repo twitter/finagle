@@ -131,6 +131,44 @@ module FinagleThrift
       ::Thrift::Struct.generate_accessors self
     end
 
+    # This struct serializes com.twitter.finagle.Context
+    class RequestContext
+      include ::Thrift::Struct, ::Thrift::Struct_Union
+      KEY = 1
+      VALUE = 2
+
+      FIELDS = {
+        KEY => {:type => ::Thrift::Types::STRING, :name => 'key', :binary => true},
+        VALUE => {:type => ::Thrift::Types::STRING, :name => 'value', :binary => true}
+      }
+
+      def struct_fields; FIELDS; end
+
+      def validate
+      end
+
+      ::Thrift::Struct.generate_accessors self
+    end
+
+    # Serializes an individual delegation.
+    class Delegation
+      include ::Thrift::Struct, ::Thrift::Struct_Union
+      SRC = 1
+      DST = 2
+
+      FIELDS = {
+        SRC => {:type => ::Thrift::Types::STRING, :name => 'src'},
+        DST => {:type => ::Thrift::Types::STRING, :name => 'dst'}
+      }
+
+      def struct_fields; FIELDS; end
+
+      def validate
+      end
+
+      ::Thrift::Struct.generate_accessors self
+    end
+
     # RequestHeader defines headers for the request. These carry the span data, and
     # a flag indicating whether the request is to be debugged.
     class RequestHeader
@@ -141,6 +179,9 @@ module FinagleThrift
       SAMPLED = 5
       CLIENT_ID = 6
       FLAGS = 7
+      CONTEXTS = 8
+      DEST = 9
+      DELEGATIONS = 10
 
       FIELDS = {
         TRACE_ID => {:type => ::Thrift::Types::I64, :name => 'trace_id'},
@@ -148,7 +189,10 @@ module FinagleThrift
         PARENT_SPAN_ID => {:type => ::Thrift::Types::I64, :name => 'parent_span_id', :optional => true},
         SAMPLED => {:type => ::Thrift::Types::BOOL, :name => 'sampled', :optional => true},
         CLIENT_ID => {:type => ::Thrift::Types::STRUCT, :name => 'client_id', :class => FinagleThrift::ClientId, :optional => true},
-        FLAGS => {:type => ::Thrift::Types::I64, :name => 'flags', :optional => true}
+        FLAGS => {:type => ::Thrift::Types::I64, :name => 'flags', :optional => true},
+        CONTEXTS => {:type => ::Thrift::Types::LIST, :name => 'contexts', :element => {:type => ::Thrift::Types::STRUCT, :class => FinagleThrift::RequestContext}},
+        DEST => {:type => ::Thrift::Types::STRING, :name => 'dest', :optional => true},
+        DELEGATIONS => {:type => ::Thrift::Types::LIST, :name => 'delegations', :element => {:type => ::Thrift::Types::STRUCT, :class => FinagleThrift::Delegation}, :optional => true}
       }
 
       def struct_fields; FIELDS; end
@@ -165,9 +209,11 @@ module FinagleThrift
     class ResponseHeader
       include ::Thrift::Struct, ::Thrift::Struct_Union
       SPANS = 1
+      CONTEXTS = 2
 
       FIELDS = {
-        SPANS => {:type => ::Thrift::Types::LIST, :name => 'spans', :element => {:type => ::Thrift::Types::STRUCT, :class => FinagleThrift::Span}}
+        SPANS => {:type => ::Thrift::Types::LIST, :name => 'spans', :element => {:type => ::Thrift::Types::STRUCT, :class => FinagleThrift::Span}},
+        CONTEXTS => {:type => ::Thrift::Types::LIST, :name => 'contexts', :element => {:type => ::Thrift::Types::STRUCT, :class => FinagleThrift::RequestContext}}
       }
 
       def struct_fields; FIELDS; end
