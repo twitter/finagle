@@ -344,10 +344,12 @@ object Finagle extends Build {
     id = "finagle-kestrel",
     base = file("finagle-kestrel"),
     settings = Project.defaultSettings ++
+      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
-    name := "finagle-kestrel"
-  ).dependsOn(finagleCore, finagleMemcached)
+    name := "finagle-kestrel",
+    libraryDependencies ++= scroogeLibs
+  ).dependsOn(finagleCore, finagleMemcached, finagleThrift)
 
 /*  notyet
   lazy val finagleProtobuf = Project(

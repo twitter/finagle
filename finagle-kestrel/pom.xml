@@ -45,5 +45,25 @@
       <artifactId>finagle-memcached</artifactId>
       <version>6.15.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>finagle-thrift</artifactId>
+      <version>6.15.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>scrooge-core</artifactId>
+      <version>3.14.2-SNAPSHOT</version>
+    </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.twitter</groupId>
+        <artifactId>scrooge-maven-plugin</artifactId>
+        <!-- this version must match the version from scrooge-gen.ivy.xml -->
+        <version>3.13.1</version>
+      </plugin>
+    </plugins>
+  </build>
 </project>

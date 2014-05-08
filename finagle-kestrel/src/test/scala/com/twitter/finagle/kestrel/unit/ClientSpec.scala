@@ -13,6 +13,8 @@ import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.finagle.kestrel._
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import com.twitter.finagle.thrift.ThriftClientRequest
+import com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Item
 
 // all this so we can spy() on a client.
 class MockClient extends Client {
@@ -137,6 +139,31 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
       service(open) returns promise
       service(closeAndOpen) returns promise
       service(abort) returns Future(Values(Seq()))
+
+      val rh = client.read(queueName)
+
+      wasInterrupted must beFalse
+      rh.close()
+      wasInterrupted must beTrue
+    }
+  }
+
+  "ThriftConnectedClient.read" should {
+    val queueName = "foo"
+    val clientFactory = mock[FinagledClientFactory]
+    val finagledClient = mock[FinagledClosableClient]
+    val client = new ThriftConnectedClient(clientFactory)
+
+    "interrupt current thrift request on close" in {
+      clientFactory.apply() returns Future(finagledClient)
+      val promise = new Promise[Seq[Item]]()
+
+      @volatile var wasInterrupted = false
+      promise.setInterruptHandler { case _cause =>
+        wasInterrupted = true
+      }
+
+      finagledClient.get(queueName, 1, Int.MaxValue, Int.MaxValue) returns promise
 
       val rh = client.read(queueName)
 
