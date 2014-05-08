@@ -49,7 +49,7 @@ class Netty3AssumptionsTest extends FunSuite{
 
     val latch = new CountDownLatch(1)
 
-    bootstrap.connect(addr){
+    /*bootstrap.connect(addr){
       case Ok(channel) =>
         assert(channel.isOpen)
         Channels.close(channel)
@@ -57,7 +57,7 @@ class Netty3AssumptionsTest extends FunSuite{
         latch.countDown()
       case wtf =>
         throw new Exception("connect attempt failed: "+wtf)
-    }
+    }*/
 
     assert(latch.await(1.second))
 
