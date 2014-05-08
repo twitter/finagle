@@ -157,7 +157,7 @@ class EndToEndTest extends FunSuite {
 
     1 to 5 foreach { _ =>
       clientId.asCurrent {
-        assert(Await.result(client.query("ok")) == clientId.name)
+        assert(Await.result(client.query("ok")) === clientId.name)
       }
     }
   }

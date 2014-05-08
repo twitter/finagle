@@ -1,19 +1,19 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle._
-import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.netty3.{Ok, Error, Cancelled}
+import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.util.ByteArrays
 import com.twitter.io.Buf
-import org.apache.thrift.protocol.{
-  TBinaryProtocol, TMessage, TMessageType, TProtocolFactory}
+import java.util.ArrayList
+import java.util.logging.{Logger, Level}
+import org.apache.thrift.protocol.{  TBinaryProtocol, TMessage, TMessageType, TProtocolFactory}
 import org.apache.thrift.transport.TMemoryInputTransport
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{
-  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent,
+  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent, 
   SimpleChannelDownstreamHandler}
-import java.util.ArrayList
 
 /**
  * ThriftClientFramedCodec implements a framed thrift transport that
@@ -166,6 +166,8 @@ private[thrift] class TTwitterFilter(
     protocolFactory: TProtocolFactory)
   extends SimpleFilter[ThriftClientRequest, Array[Byte]]
 {
+  private[this] val clientIdBuf = clientId map { id => Buf.Utf8(id.name) }
+
   /**
    * Produces an upgraded TTwitter ThriftClientRequest based on Trace,
    * ClientId, and Dtab state.
@@ -176,11 +178,10 @@ private[thrift] class TTwitterFilter(
     val header = new thrift.RequestHeader
 
     clientId match {
-      case opt@Some(clientId) =>
+      case Some(clientId) =>
         header.setClient_id(clientId.toThrift)
-        ClientId.set(opt)
 
-      case None => ClientId.clear()
+      case None => 
     }
 
     header.setSpan_id(Trace.id.spanId.toLong)
@@ -200,25 +201,35 @@ private[thrift] class TTwitterFilter(
       while (contexts.hasNext) {
         val (k, buf) = contexts.next()
 
-        // CSL-863: Pending further review of the Context mechanism's use of
-        // ThreadLocals, we supply the constructor-set ClientId as the value
-        // passed to ClientIdContext.
-        val vBuf: Buf =
-          (k == ClientIdContext.Key, clientId) match {
-            case (true, Some(clientId)) => Buf.Utf8(clientId.name)
-            case _ => buf
-          }
+        // Note: we need to skip the caller-provided client id here,
+        // since the existing value is derived from whatever code
+        // calls into here. This should never happen in practice;
+        // however if the ClientIdContext handler failed to load for
+        // some reason, a pass-through context would be used instead.
+        if (k == ClientIdContext.Key){
+          Logger.getLogger("finagle-thrift").log(Level.WARNING,
+            "ClientIdContext was emitted; make sure context handlers "+
+            "are installed properly")
+        } else {
+          val c = new thrift.RequestContext(
+            Buf.toByteBuffer(k), Buf.toByteBuffer(buf))
+          ctxs.add(i, c)
+          i += 1
+        }
+      }
+      
+      clientIdBuf match {
+        case Some(buf) =>
+          val ctx = new thrift.RequestContext(
+            Buf.toByteBuffer(ClientIdContext.Key), 
+            Buf.toByteBuffer(buf))
+          ctxs.add(i, ctx)
 
-        val c = new thrift.RequestContext(Buf.toByteBuffer(k), Buf.toByteBuffer(vBuf))
-        ctxs.add(i, c)
-        i += 1
+        case None => // skip
       }
 
       header.setContexts(ctxs)
     }
-
-    // Hygiene: Clear the current ClientId once contexts have been emitted.
-    ClientId.clear()
 
     val dtab = Dtab.baseDiff()
     if (dtab.nonEmpty) {
