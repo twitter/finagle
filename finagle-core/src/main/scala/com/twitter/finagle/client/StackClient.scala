@@ -184,7 +184,9 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
 
 /**
  * A [[com.twitter.finagle.Stack Stack]]-based client which preserves
- * `Like` client semantics.
+ * `Like` client semantics. This makes it appropriate for implementing rich
+ * clients, since the rich type can be preserved without having to drop down
+ * to StackClient[Req, Rep, In, Out] when making changes.
  */
 private[finagle]
 abstract class StackClientLike[Req, Rep, In, Out, Repr <: StackClientLike[Req, Rep, In, Out, Repr]](
@@ -194,8 +196,20 @@ abstract class StackClientLike[Req, Rep, In, Out, Repr <: StackClientLike[Req, R
 
   protected def newInstance(client: StackClient[Req, Rep, In, Out]): Repr
 
+  /**
+   * Creates a new `Repr` with an underlying StackClient where `p` has been
+   * added to the `params` used to configure this StackClient's `stack`.
+   */
   def configured[P: Stack.Param](p: P): Repr =
     newInstance(client.configured(p))
 
+  /**
+   * Creates a new `Repr` with an underlying StackClient where `f` has been
+   * applied to `stack`.
+   */
+  def transformed(f: Stack[ServiceFactory[Req, Rep]] => Stack[ServiceFactory[Req, Rep]]): Repr =
+    newInstance(client.transformed(f))
+
+  /** @inheritdoc */
   def newClient(dest: Name, label: String) = client.newClient(dest, label)
 }

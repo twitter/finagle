@@ -8,6 +8,8 @@ import com.twitter.finagle.http.filter.DtabFilter
 import com.twitter.finagle.http.{HttpServerTracingFilter, HttpClientTracingFilter}
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.server._
+import com.twitter.finagle.ssl.Ssl
+import com.twitter.finagle.transport.Transport
 import com.twitter.util.Future
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.handler.codec.http._
@@ -73,10 +75,21 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
 package exp {
   private[finagle]
   class HttpClient(client: StackClient[HttpRequest, HttpResponse, Any, Any])
-    extends StackClientLike[HttpRequest, HttpResponse, Any, Any, HttpClient](client)
-    with HttpRichClient {
+    extends StackClientLike[HttpRequest, HttpResponse, Any, Any, HttpClient](client) {
+
     protected def newInstance(client: StackClient[HttpRequest, HttpResponse, Any, Any]) =
       new HttpClient(client)
+
+    def withTls(cfg: Netty3TransporterTLSConfig): HttpClient =
+      configured((Transport.TLSEngine(Some(cfg.newEngine))))
+        .configured(Transporter.TLSHostname(cfg.verifyHost))
+        .transformed { stk => http.TlsFilter.module +: stk }
+
+    def withTls(hostname: String): HttpClient =
+      withTls(new Netty3TransporterTLSConfig({ () => Ssl.client() }, Some(hostname)))
+
+    def withTlsWithoutValidation(): HttpClient =
+      configured(Transport.TLSEngine(Some({ () => Ssl.clientWithoutCertificateValidation() })))
   }
 
   object HttpClient extends HttpClient(new StackClient[HttpRequest, HttpResponse, Any, Any] {
@@ -90,7 +103,19 @@ package exp {
       Function.const(new HttpClientDispatcher(_))
   })
 
-  object HttpServer extends StackServer[HttpRequest, HttpResponse, Any, Any] {
+  private[finagle]
+  class HttpServer(
+    server: StackServer[HttpRequest, HttpResponse, Any, Any]
+  ) extends StackServerLike[HttpRequest, HttpResponse, Any, Any, HttpServer](server) {
+    protected def newInstance(server: StackServer[HttpRequest, HttpResponse, Any, Any]) =
+      new HttpServer(server)
+
+    def withTls(cfg: Netty3ListenerTLSConfig): HttpServer =
+      configured(Transport.TLSEngine(Some(cfg.newEngine)))
+  }
+
+
+  object HttpServer extends HttpServer(new StackServer[HttpRequest, HttpResponse, Any, Any] {
     protected val newListener: Stack.Params => Listener[Any, Any] = { prms =>
       val param.Label(label) = prms[param.Label]
       val httpPipeline = http.Http().server(ServerCodecConfig(label,
@@ -106,5 +131,5 @@ package exp {
         tracingFilter andThen dtab andThen s
       ))
     }
-  }
+  })
 }
