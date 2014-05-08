@@ -14,7 +14,7 @@ class MinimumSetClusterTest extends FunSuite{
     val cluster = new MinimumSetCluster(minimum, dynamicCluster)
   }
 
-  test("initial set is union"){
+  test("MinimumSetCluster should initial set is union"){
     val h = new helper
     import h._
 
@@ -22,7 +22,7 @@ class MinimumSetClusterTest extends FunSuite{
     assert(cluster.snap._1 == Seq(1, 2, 3, 4))
   }
 
-  test("propagate uncensored updates"){
+  test("MinimumSetCluster should propagate uncensored updates"){
     val h = new helper
     import h._
 
@@ -32,7 +32,7 @@ class MinimumSetClusterTest extends FunSuite{
     assert(Await.result(updates).head == Cluster.Add(4))
   }
 
-  test("don't propagate censored updates"){
+  test("MinimumSetCluster should not propagate censored updates"){
     val h = new helper
     import h._
 

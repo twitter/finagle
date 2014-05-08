@@ -12,7 +12,7 @@ import com.twitter.finagle.Service
 
 @RunWith(classOf[JUnitRunner])
 class ServerDispatcherTest extends FunSuite with MockitoSugar {
-  test("dispatch one at a time") {
+  test("SerialServerDispatcher should dispatch one at a time") {
     val trans = mock[Transport[String, String]]
     when(trans.onClose) thenReturn  Future.never
     val service = mock[Service[String, String]]
@@ -66,7 +66,7 @@ class ServerDispatcherTest extends FunSuite with MockitoSugar {
     val disp = new SerialServerDispatcher(trans, service)
   }
 
-  test("interrupt on hangup while pending") {
+  test("SerialServerDispatcher should interrupt on hangup while pending") {
     val h = new helper
     import h._
 
@@ -79,7 +79,7 @@ class ServerDispatcherTest extends FunSuite with MockitoSugar {
     })
   }
 
-  test("interrupt while reading"){
+  test("SerialServerDispatcher should interrupt on hangup while reading"){
     val h = new helper
     import h._
 
@@ -93,7 +93,7 @@ class ServerDispatcherTest extends FunSuite with MockitoSugar {
     assert(replyp.interrupted == None)
   }
 
-  test("interrupt while draining"){
+  test("SerialServerDispatcher should interrupt on hangup while draining"){
     val h = new helper
     import h._
 
@@ -124,7 +124,7 @@ class ServerDispatcherTest extends FunSuite with MockitoSugar {
     verify(trans).read()
   }
 
-  test("drain while reading") {
+  test("SerialServerDispatcher should drain while reading") {
     val h = new helper2
     import h._
 
@@ -140,7 +140,7 @@ class ServerDispatcherTest extends FunSuite with MockitoSugar {
     verify(trans).read()
   }
 
-  test("drain while dispatching"){
+  test("SerialServerDispatcher should drain while dispatching"){
     val h = new helper2
     import h._
 

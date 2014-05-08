@@ -20,7 +20,7 @@ class ClusterTest extends FunSuite {
     val cluster2 = cluster1.map(a => WrappedInt(a))
   }
 
-  test("provide 1-1 mapping to the result cluster"){
+  test("Cluster map should provide 1-1 mapping to the result cluster"){
     val h = new helper
     import h._
 
@@ -38,7 +38,7 @@ class ClusterTest extends FunSuite {
     assert(set.size ==(0))
   }
 
-  test("remove mapped objects in the same order they were received (for each key)"){
+  test("Cluster map should remove mapped objects in the same order they were received (for each key)"){
     val h = new helper
     import h._
 
@@ -76,7 +76,7 @@ class ClusterTest extends FunSuite {
       assert(ch.value != changes(8).value)
   }
 
-  test("wait on cluster initialization"){
+  test("Cluster ready should wait on cluster initialization"){
     val cluster = new DynamicCluster[Int]()
     val ready = cluster.ready
     assert(!ready.isDefined)
@@ -86,14 +86,14 @@ class ClusterTest extends FunSuite {
     assert(ready.isDefined)
   }
 
-  test("always be defined on StaticCluster"){
+  test("Cluster ready should always be defined on StaticCluster"){
     val cluster = new StaticCluster[Int](Seq[Int](1, 2))
     assert(cluster.ready.isDefined)
   }
 
   // Cluster initialization should honor global timeout as well as timeout specified
   // together with the requests
-  test("honor timeout while waiting for cluster to initialize"){
+  test("Cluster ready should honor timeout while waiting for cluster to initialize"){
     val cluster = new DynamicCluster[SocketAddress](Seq[SocketAddress]()) //empty cluster
     val client = ClientBuilder()
         .cluster(cluster)

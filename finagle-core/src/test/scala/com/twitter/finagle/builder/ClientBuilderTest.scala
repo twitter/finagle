@@ -5,13 +5,18 @@ import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito.{verify, when}
 import org.mockito.Matchers
 import org.mockito.Matchers._
+import org.scalatest.junit.JUnitRunner
+import org.junit.runner.RunWith
+import org.scalatest.concurrent.Eventually._
+import scala.Some
+
 
 import com.twitter.finagle.integration.IntegrationBase
 import com.twitter.finagle.{WriteException, Service, ServiceFactory}
 import com.twitter.util._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import scala.Some
 
+@RunWith(classOf[JUnitRunner])
 class ClientBuilderTest extends FunSuite with MockitoSugar with IntegrationBase{
   trait ClientBuilderHelper {
     val preparedFactory = mock[ServiceFactory[String, String]]
@@ -48,7 +53,9 @@ class ClientBuilderTest extends FunSuite with MockitoSugar with IntegrationBase{
     new ClientBuilderHelper {
       val svc = ClientBuilder().hostConnectionLimit(1).codec(m.codec).hosts("").build()
       val f = svc.close()
-      //Await.result(f.isDefined)(5.seconds)
+      eventually{
+        f.isDefined
+      }
     }
   }
 

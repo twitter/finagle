@@ -12,7 +12,7 @@ class NonShrinkingClusterTest extends FunSuite{
     val outCluster = new NonShrinkingCluster(inCluster)
   }
 
-  test("delay Rem events"){
+  test("SkepticalClusterFilter should delay Rem events"){
     val h = new helper
     import h._
 
@@ -30,7 +30,7 @@ class NonShrinkingClusterTest extends FunSuite{
     assert(set.size == N)
   }
 
-  test("pass Rem events after receiving an Add"){
+  test("SkepticalClusterFilter should pass Rem events after receiving an Add"){
     val h = new helper
     import h._
 
@@ -54,7 +54,7 @@ class NonShrinkingClusterTest extends FunSuite{
     assert(set == after)
   }
 
-  test("cancel Rem changes when receiving an equal Add"){
+  test("SkepticalClusterFilter should cancel Rem changes when receiving an equal Add"){
     val h = new helper
     import h._
 

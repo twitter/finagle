@@ -17,7 +17,7 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar{
     val disp = new SerialClientDispatcher[String, String](trans)
   }
 
-  test("dispatch requests"){
+  test("ClientDispatcher should dispatch requests"){
     val h = new helper
     import h._
 
@@ -33,7 +33,7 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar{
     assert(f.poll == Some(Return("ok: one")))
   }
 
-  test("dispatch requests one-at-a-time"){
+  test("ClientDispatcher should dispatch requests one-at-a-time"){
     val h = new helper
     import h._
 
@@ -61,7 +61,7 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar{
     assert(p1.poll == Some(Return("ok: two")))
   }
 
-  test("close transport and cancel pending requests"){
+  test("ClientDispatcher should interrupt when close transport and cancel pending requests"){
     val h = new helper
     import h._
 
@@ -83,7 +83,7 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar{
     })
   }
 
-  test("ignore pending"){
+  test("ClientDispatcher should interrupt when ignore pending"){
     val h = new helper
     import h._
 
@@ -111,7 +111,7 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar{
     verify(trans).write(any[String])
   }
 
-  test("rewrite WriteExceptions"){
+  test("ClientDispatcher should rewrite WriteExceptions"){
     val h = new helper
     import h._
 
