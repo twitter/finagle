@@ -18,7 +18,7 @@ import com.twitter.finagle.ConnectionFailedException
 @RunWith(classOf[JUnitRunner])
 class SocksConnectHandlerTest extends FunSuite with MockitoSugar {
 
-  case class matchBuffer(x: Byte, xs: Byte*) extends Matcher[AnyRef] {
+  case class MatchBuffer(x: Byte, xs: Byte*) extends Matcher[AnyRef] {
     val a = Array(x, xs: _*)
 
     def apply(v: => AnyRef) = {
@@ -62,7 +62,7 @@ class SocksConnectHandlerTest extends FunSuite with MockitoSugar {
       verify(ctx, atLeastOnce()).sendDownstream(ec.capture)
       val e = ec.getValue
       assert(e.getMessage match {
-        case matchBuffer(x, xs: _*) => true
+        case MatchBuffer(x, xs: _*) => true
       })
     }
 
