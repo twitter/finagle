@@ -14,7 +14,7 @@ case class ThriftMuxClientImpl(
   muxer: Client[ChannelBuffer, ChannelBuffer],
   protocolFactory: TProtocolFactory = Protocols.binaryFactory()
 ) extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient {
-  protected val defaultClientName = "mux"
+  protected val defaultClientName = "thrift"
 
   def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
     muxer.newClient(dest, label) map { service =>

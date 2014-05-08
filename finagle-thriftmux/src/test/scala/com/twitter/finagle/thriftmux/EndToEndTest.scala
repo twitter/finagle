@@ -87,7 +87,7 @@ class EndToEndTest extends FunSuite {
 
     // TODO: temporary workaround to capture the ServerRecv record.
     object TestThriftMuxer extends DefaultServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer](
-      "mux", ThriftMuxListener,
+      "thrift", ThriftMuxListener,
       (trans, service) => Trace.unwind {
         Trace.pushTracer(tracer)
         new mux.ServerDispatcher(trans, service, true)

@@ -32,7 +32,7 @@ object ThriftMux
   with Server[Array[Byte], Array[Byte]] with ThriftRichServer
 {
   protected val protocolFactory = Protocols.binaryFactory()
-  protected val defaultClientName = "mux"
+  protected val defaultClientName = "thrift"
 
   def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
     ThriftMuxClient.newClient(dest, label)
