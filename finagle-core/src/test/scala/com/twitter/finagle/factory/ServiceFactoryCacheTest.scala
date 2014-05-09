@@ -2,13 +2,8 @@ package com.twitter.finagle.factory
 
 import com.twitter.finagle._
 import com.twitter.util.{Future, Time, Await}
-import java.net.SocketAddress
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
-import org.mockito.Matchers.any
-import org.mockito.Mockito.{never, times, verify, when}
-import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Answer
+import org.mockito.Mockito.never
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar

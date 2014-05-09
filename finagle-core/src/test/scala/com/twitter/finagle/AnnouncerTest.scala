@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Await, Closable, Future, Time}
-import java.net.{InetSocketAddress, SocketAddress}
+import com.twitter.util.{Await, Future}
+import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

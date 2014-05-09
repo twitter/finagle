@@ -7,7 +7,7 @@ import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.util.{Await, Future, MockTimer, Time, Var, Closable, Return}
 import com.twitter.util.TimeConversions.intToTimeableNumber
 import com.twitter.finagle.stats.{StatsReceiver, InMemoryStatsReceiver}
-import java.net.{SocketAddress, InetAddress, InetSocketAddress}
+import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.Eventually

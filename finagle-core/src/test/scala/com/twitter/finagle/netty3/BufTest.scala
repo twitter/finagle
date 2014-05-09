@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty3
 
-import com.twitter.util.{Await, Closable, Future, Time}
+import com.twitter.util.Time
 import com.twitter.io.Buf
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

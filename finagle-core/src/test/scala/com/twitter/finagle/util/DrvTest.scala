@@ -3,7 +3,6 @@ package com.twitter.finagle.util
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
 class DrvTest extends FunSuite {

@@ -8,7 +8,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
-import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
 class P2CBalancerTest extends FunSuite {

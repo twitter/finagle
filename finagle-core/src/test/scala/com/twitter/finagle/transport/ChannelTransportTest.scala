@@ -6,7 +6,7 @@ import java.net.SocketAddress
 import org.jboss.netty.channel._
 import org.junit.runner.RunWith
 import org.mockito.Mockito
-import org.mockito.Mockito.{never, times, verify, atLeast}
+import org.mockito.Mockito.{never, times, verify}
 import org.mockito.stubbing.OngoingStubbing
 import org.mockito.{Matchers, ArgumentCaptor}
 import org.scalatest.junit.JUnitRunner

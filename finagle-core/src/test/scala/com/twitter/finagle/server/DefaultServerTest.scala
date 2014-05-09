@@ -9,7 +9,7 @@ import com.twitter.finagle.dispatch._
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.util._
 import com.twitter.finagle.stats.StatsReceiver
-import java.net.{SocketAddress, InetAddress, InetSocketAddress}
+import java.net.{SocketAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{verify, when}

@@ -178,7 +178,6 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
 
   test("return NoBrokersAvailableException when empty") {
     val ctx = new Ctx
-    import ctx._
 
     val b = new HeapBalancer[Unit, LoadedFactory](Var.value(Set.empty))
     intercept[NoBrokersAvailableException] { Await.result(b()) }

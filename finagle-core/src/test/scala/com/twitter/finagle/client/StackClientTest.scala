@@ -2,7 +2,7 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle.param
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, Future, Time}
+import com.twitter.util.Future
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

@@ -1,8 +1,8 @@
 package com.twitter.finagle.pool
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{MockTimer, Service, ServiceFactory, WriteException}
-import com.twitter.util.{Await, Duration, Time, Future, Promise}
+import com.twitter.finagle.{MockTimer, Service, ServiceFactory}
+import com.twitter.util.{Await, Duration, Time, Future}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, times, verify, when}

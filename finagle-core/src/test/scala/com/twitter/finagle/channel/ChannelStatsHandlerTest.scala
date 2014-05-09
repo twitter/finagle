@@ -1,8 +1,8 @@
 package com.twitter.finagle.channel
 
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.TimeConversions.intToTimeableNumber
-import com.twitter.util.{Duration, Promise, Time}
+import com.twitter.util.{Promise, Time}
 import java.util.concurrent.atomic.AtomicLong
 import org.jboss.netty.channel._
 import org.junit.runner.RunWith

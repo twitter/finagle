@@ -3,8 +3,8 @@ package com.twitter.finagle
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import java.net.{SocketAddress, InetSocketAddress}
-import com.twitter.util.{Return, Throw, Var, Activity, Witness, Try}
+import java.net.InetSocketAddress
+import com.twitter.util.{Return, Throw, Activity, Witness, Try}
 
 @RunWith(classOf[JUnitRunner])
 class NamerTest extends FunSuite {
