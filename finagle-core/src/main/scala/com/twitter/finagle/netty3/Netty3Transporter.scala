@@ -88,8 +88,8 @@ object Netty3Transporter {
   }
 
   /**
-   * A [[com.twitter.finagle.Stack.Param]] used to configure
-   * the ServerChannelFactory for a `Listener`.
+   * A [[com.twitter.finagle.Stack.Param]] used to configure a netty3
+   * ChannelFactory.
    */
   case class ChannelFactory(cf: NettyChannelFactory)
   implicit object ChannelFactory extends Stack.Param[ChannelFactory] {
@@ -97,11 +97,20 @@ object Netty3Transporter {
   }
 
   /**
+   * A [[com.twitter.finagle.Stack.Param]] used to configure a transport
+   * factory, a function from a netty3 channel to a finagle Transport.
+   */
+  case class TransportFactory(newTransport: Channel => Transport[Any, Any])
+  implicit object TransportFactory extends Stack.Param[TransportFactory] {
+    val default = TransportFactory(new ChannelTransport(_))
+  }
+
+  /**
    * Constructs a `Transporter[In, Out]` given a netty3 `ChannelPipelineFactory`
    * responsible for framing a `Transport` stream. The `Transporter` is configured
    * via the passed in [[com.twitter.finagle.Stack.Param]]'s.
    *
-   * @see [[com.twitter.finagle.server.Listener]]
+   * @see [[com.twitter.finagle.client.Transporter]]
    * @see [[com.twitter.finagle.transport.Transport]]
    * @see [[com.twitter.finagle.param]]
    */
@@ -114,6 +123,7 @@ object Netty3Transporter {
 
     // transport and transporter params
     val ChannelFactory(cf) = params[ChannelFactory]
+    val TransportFactory(newTransport) = params[TransportFactory]
     val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
     val Transporter.TLSHostname(tlsHostname) = params[Transporter.TLSHostname]
     val Transporter.HttpProxy(httpProxy) = params[Transporter.HttpProxy]
@@ -126,6 +136,7 @@ object Netty3Transporter {
       label,
       pipelineFactory,
       newChannel = cf.newChannel(_),
+      newTransport = (ch: Channel) => newTransport(ch).cast[In, Out],
       tlsConfig = tls map { case engine => Netty3TransporterTLSConfig(engine, tlsHostname) },
       httpProxy = httpProxy,
       socksProxy = socksProxy,

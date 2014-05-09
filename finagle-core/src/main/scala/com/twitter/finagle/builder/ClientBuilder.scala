@@ -64,7 +64,7 @@ import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Level
 import javax.net.ssl.SSLContext
-import org.jboss.netty.channel.ChannelFactory
+import org.jboss.netty.channel.{Channel, ChannelFactory}
 import scala.annotation.implicitNotFound
 
 /**
@@ -333,12 +333,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       val Label(name) = ps[Label]
       val codec = codecFactory(ClientCodecConfig(name))
 
-      val prepFactory = new Stack.Simple[ServiceFactory[Req1, Rep1]](StackClient.Role.PrepFactory) {
-        def make(params: Params, next: ServiceFactory[Req1, Rep1]) = {
-          codec.prepareServiceFactory(next)
-        }
-      }
-
       val prepConn = new Stack.Simple[ServiceFactory[Req1, Rep1]](StackClient.Role.PrepConn) {
         def make(params: Params, next: ServiceFactory[Req1, Rep1]) = {
           val Stats(stats) = params[Stats]
@@ -358,15 +352,21 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       val newStack = {
         val stk = StackClient.newStack[Req1, Rep1]
           .replace(StackClient.Role.PrepConn, prepConn)
-          .replace(StackClient.Role.PrepFactory, prepFactory)
-        // respect request to disable failfast
+          .replace(StackClient.Role.PrepFactory, (next: ServiceFactory[Req1, Rep1]) =>
+            codec.prepareServiceFactory(next))
+
+        // respect the codec's request to disable failfast
         if (!codec.failFastOk) stk.remove(FailFastFactory.FailFast)
         else stk
       }
 
       new StackClient[Req1, Rep1, Any, Any](newStack, ps) {
-        protected val newTransporter: Stack.Params => Transporter[Any, Any] =
-          Netty3Transporter[Any, Any](codec.pipelineFactory, _)
+        protected val newTransporter: Stack.Params => Transporter[Any, Any] = { prms =>
+          val Stats(stats) = prms[Stats]
+          val newTransport = (ch: Channel) => codec.newClientTransport(ch, stats)
+          Netty3Transporter[Any, Any](codec.pipelineFactory,
+            prms + Netty3Transporter.TransportFactory(newTransport))
+        }
 
         protected val newDispatcher: Stack.Params => Dispatcher = { _ =>
           trans => codec.newClientDispatcher(trans)
