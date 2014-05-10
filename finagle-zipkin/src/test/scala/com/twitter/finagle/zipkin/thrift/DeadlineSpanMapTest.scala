@@ -1,17 +1,18 @@
 package com.twitter.finagle.zipkin.thrift
 
-import org.specs.SpecificationWithJUnit
-import org.specs.mock.Mockito
-import com.twitter.finagle.tracing.{TraceId, SpanId}
-import com.twitter.conversions.time._
-import com.twitter.finagle.stats.NullStatsReceiver
+import org.scalatest.mock.MockitoSugar
+import org.scalatest.FunSuite
 import com.twitter.finagle.MockTimer
-import com.twitter.util.Time
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.tracing.{SpanId, TraceId}
+import com.twitter.util.TimeControl
+import com.twitter.util.TimeConversions._
+import org.mockito.Mockito.verify
 
-class DeadlineSpanMapSpec extends SpecificationWithJUnit with Mockito {
+class DeadlineSpanMapTest extends FunSuite with MockitoSugar {
 
-  "DeadlineSpanMap" should {
-    "expire and log spans" in Time.withCurrentTimeFrozen { tc =>
+  test("DeadlineSpanMap should expire and log spans") {
+    tc: TimeControl =>
       val tracer = mock[RawZipkinTracer]
       val timer = new MockTimer
 
@@ -26,10 +27,8 @@ class DeadlineSpanMapSpec extends SpecificationWithJUnit with Mockito {
       timer.tick() // execute scheduled event
 
       // span must have been removed and logged
-      map.remove(traceId) mustEqual None
-      there was one(tracer).logSpan(span)
-
+      assert(map.remove(traceId) == None)
+      verify(tracer).logSpan(span)
       timer.stop()
-    }
   }
 }
