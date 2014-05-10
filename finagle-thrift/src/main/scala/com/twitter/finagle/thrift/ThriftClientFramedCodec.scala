@@ -206,18 +206,14 @@ private[thrift] class TTwitterFilter(
         // calls into here. This should never happen in practice;
         // however if the ClientIdContext handler failed to load for
         // some reason, a pass-through context would be used instead.
-        if (k == ClientIdContext.Key){
-          Logger.getLogger("finagle-thrift").log(Level.WARNING,
-            "ClientIdContext was emitted; make sure context handlers "+
-            "are installed properly")
-        } else {
+        if (k != ClientIdContext.Key){
           val c = new thrift.RequestContext(
             Buf.toByteBuffer(k), Buf.toByteBuffer(buf))
           ctxs.add(i, c)
           i += 1
         }
       }
-      
+
       clientIdBuf match {
         case Some(buf) =>
           val ctx = new thrift.RequestContext(
