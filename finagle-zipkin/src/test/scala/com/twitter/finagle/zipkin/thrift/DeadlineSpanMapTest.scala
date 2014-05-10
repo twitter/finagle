@@ -16,22 +16,23 @@ class DeadlineSpanMapTest extends FunSuite with MockitoSugar {
 
   test("DeadlineSpanMap should expire and log spans") {
     tc: TimeControl =>
-      val tracer = mock[RawZipkinTracer]
-      val timer = new MockTimer
+			val tracer = mock[RawZipkinTracer]
+			val timer = new MockTimer
 
-      val map = new DeadlineSpanMap(tracer, 1.milliseconds, NullStatsReceiver, timer)
-      val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
-      val f = { span: Span =>
-        span.copy(_name = Some("name"), _serviceName = Some("service"))
-      }
+			val map = new DeadlineSpanMap(tracer, 1.milliseconds, NullStatsReceiver, timer)
+			val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
+			val f = { span: Span =>
+				span.copy(_name = Some("name"), _serviceName = Some("service"))
+			}
 
-      val span = map.update(traceId)(f)
-      tc.advance(10.seconds) // advance timer
-      timer.tick() // execute scheduled event
+			val span = map.update(traceId)(f)
+			tc.advance(10.seconds) // advance timer
+			timer.tick() // execute scheduled event
 
-      // span must have been removed and logged
-      assert(map.remove(traceId) == None)
-      verify(tracer).logSpan(span)
-      timer.stop()
+			// span must have been removed and logged
+			assert(map.remove(traceId) == None)
+			verify(tracer).logSpan(span)
+
+			timer.stop()
   }
 }
