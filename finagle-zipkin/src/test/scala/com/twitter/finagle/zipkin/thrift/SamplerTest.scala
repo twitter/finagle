@@ -4,7 +4,10 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatest.FunSuite
 import com.twitter.finagle.tracing.{Annotation, Record, SpanId, TraceId}
 import com.twitter.util.Time
+import org.scalatest.junit.JUnitRunner
+import org.junit.runner.RunWith
 
+@RunWith(classOf[JUnitRunner])
 class SamplerTest extends FunSuite with MockitoSugar {
 
   class SamplerHelper {

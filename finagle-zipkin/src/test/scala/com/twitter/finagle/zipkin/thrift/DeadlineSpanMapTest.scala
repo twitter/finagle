@@ -8,7 +8,10 @@ import com.twitter.finagle.tracing.{SpanId, TraceId}
 import com.twitter.util.TimeControl
 import com.twitter.util.TimeConversions._
 import org.mockito.Mockito.verify
+import org.scalatest.junit.JUnitRunner
+import org.junit.runner.RunWith
 
+@RunWith(classOf[JUnitRunner])
 class DeadlineSpanMapTest extends FunSuite with MockitoSugar {
 
   test("DeadlineSpanMap should expire and log spans") {

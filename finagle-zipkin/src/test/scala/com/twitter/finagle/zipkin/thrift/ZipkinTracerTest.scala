@@ -3,11 +3,12 @@ package com.twitter.finagle.zipkin.thrift
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.FunSuite
 import org.mockito.Mockito.verify
-
 import com.twitter.util._
 import com.twitter.finagle.tracing._
+import org.scalatest.junit.JUnitRunner
+import org.junit.runner.RunWith
 
-
+@RunWith(classOf[JUnitRunner])
 class ZipkinTracerTest extends FunSuite with MockitoSugar {
   test("ZipkinTracer should handle sampling") {
     val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)

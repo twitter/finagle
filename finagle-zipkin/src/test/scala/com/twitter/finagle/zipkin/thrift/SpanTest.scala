@@ -4,7 +4,10 @@ import org.scalatest.FunSuite
 import com.twitter.util.Time
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceId}
 import com.twitter.util.TimeConversions._
+import org.scalatest.junit.JUnitRunner
+import org.junit.runner.RunWith
 
+@RunWith(classOf[JUnitRunner])
 class SpanTest extends FunSuite {
   test("Span should serialize properly") {
     val ann = ZipkinAnnotation(Time.now, "value", Endpoint(1, 2), Some(1.second))
