@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux.lease.exp
 
-import com.twitter.util.{Duration, Stopwatch, StorageUnit, Sleeper, ThreadSleeper}
+import com.twitter.util.{Duration, Stopwatch, StorageUnit, Time}
 import com.twitter.conversions.time.longToTimeableNumber
 import java.lang.management.GarbageCollectorMXBean
 
@@ -22,29 +22,17 @@ private[lease] trait Alarm {
  * it's ready to wake up.
  */
 private[lease] object Alarm {
-  private[lease] def arm(setup: () => Alarm, sleeper: Sleeper) {
-    val alarm = setup()
-    while (!alarm.finished)
-      sleeper.sleep(alarm.sleeptime)
-  }
-
   /**
    * `arm` requires that a function that returns an alarm be passed to it--
    * calling apply on the function should do setup, and then also return the
    * alarm we will use for figuring out how long to sleep and when to wake up.
    */
   def arm(setup: () => Alarm) {
-    arm(setup, ThreadSleeper)
+    val alarm = setup()
+    while (!alarm.finished)
+      Time.sleep(alarm.sleeptime)
   }
 
-  private[lease] def armAndExecute(setup: () => Alarm, fn: () => Unit, sleeper: Sleeper) {
-    val alarm = setup()
-    fn()
-    while (!alarm.finished) {
-      sleeper.sleep(alarm.sleeptime)
-      fn()
-    }
-  }
 
   /**
    * `armAndExecute` behaves similarly to `arm`, except that it interleaves the
@@ -53,8 +41,13 @@ private[lease] object Alarm {
    * immediately, and then for every time the alarm is found to not yet be ready
    * to finish, the alarm sleeps and also calls the function.
    */
-  def armAndExecute(setup: () => Alarm, fn: () => Unit) {
-    armAndExecute(setup, fn, ThreadSleeper)
+  private[lease] def armAndExecute(setup: () => Alarm, fn: () => Unit) {
+    val alarm = setup()
+    fn()
+    while (!alarm.finished) {
+      Time.sleep(alarm.sleeptime)
+      fn()
+    }
   }
 }
 

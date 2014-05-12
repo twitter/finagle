@@ -34,7 +34,6 @@ private[lease] trait ByteCounter {
 // It might be simpler to just make it an exponential moving average.
 private[lease] class WindowedByteCounter private[lease](
   val info: JvmInfo,
-  val sleeper: Sleeper,
   ctx: Context
 ) extends Thread("WindowedByteClock") with ByteCounter with Closable {
 
@@ -42,7 +41,7 @@ private[lease] class WindowedByteCounter private[lease](
 
   def this(
     info: JvmInfo
-  ) = this(info, ThreadSleeper, new Context(0))
+  ) = this(info, new Context(0))
 
   /*
    Should we be conservative wrt. count vs. usage?
@@ -72,6 +71,9 @@ private[lease] class WindowedByteCounter private[lease](
   @volatile var lastGc: Time = Time.now
   @volatile private[this] var running = true
 
+  // used to unflaky our tests--DO NOT USE
+  @volatile private[lease] var passCount: Int = 0
+
   /** @return allocation rate in bytes per second. */
   def rate(): Long = sum().inBytes / W.inSeconds
   private[this] def lastRate() = allocs(idx).inBytes * 100 / P.inMilliseconds
@@ -92,7 +94,7 @@ private[lease] class WindowedByteCounter private[lease](
     var prevUsed = info.used()
 
     while (running) {
-      sleeper.sleep(P)
+      Time.sleep(P)
 
       val curUsed = info.used()
       val curCount = info.generation()
@@ -115,6 +117,7 @@ private[lease] class WindowedByteCounter private[lease](
       }
 
       prevUsed = curUsed
+      passCount += 1
     }
   }
 

@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux.lease.exp
 
-import com.twitter.util.{Local, Sleeper, Time, MockTimer, TimerSleeper, StorageUnit}
+import com.twitter.util.{Local, Time, StorageUnit}
 import com.twitter.conversions.time.intToTimeableNumber
 import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
 import org.junit.runner.RunWith
@@ -30,16 +30,13 @@ class AlarmTest extends FunSuite with Eventually {
 
   test("DurationAlarm should work") {
     Time.withCurrentTimeFrozen { ctl =>
-      val timer = new MockTimer
-      val sleeper = new TimerSleeper(timer)
       val t = exec {
         Alarm.arm({ () =>
           new DurationAlarm(5.seconds)
-        }, sleeper)
+        })
       }
       assert(t.isAlive === true)
       ctl.advance(5.seconds)
-      timer.tick()
       t.join()
       assert(t.isAlive === false)
     }
@@ -47,16 +44,13 @@ class AlarmTest extends FunSuite with Eventually {
 
   test("MinAlarm should take the min time") {
     Time.withCurrentTimeFrozen { ctl =>
-      val timer = new MockTimer
-      val sleeper = new TimerSleeper(timer)
       val t = exec {
         Alarm.arm({ () =>
           new DurationAlarm(5.seconds) min new DurationAlarm(2.seconds)
-        }, sleeper)
+        })
       }
       assert(t.isAlive === true)
       ctl.advance(2.seconds)
-      timer.tick()
       t.join()
       assert(t.isAlive === false)
     }
@@ -64,19 +58,15 @@ class AlarmTest extends FunSuite with Eventually {
 
   test("Alarm should continue if not yet finished") {
     Time.withCurrentTimeFrozen { ctl =>
-      val timer = new MockTimer
-      val sleeper = new TimerSleeper(timer)
       val t = exec {
         Alarm.arm({ () =>
           new DurationAlarm(5.seconds) min new IntervalAlarm(1.second)
-        }, sleeper)
+        })
       }
       assert(t.isAlive === true)
       ctl.advance(2.seconds)
-      timer.tick()
       assert(t.isAlive === true)
       ctl.advance(3.seconds)
-      timer.tick()
       t.join()
       assert(t.isAlive === false)
     }
@@ -84,32 +74,25 @@ class AlarmTest extends FunSuite with Eventually {
 
   test("DurationAlarm should sleep until it's over") {
     Time.withCurrentTimeFrozen { ctl =>
-      val timer = new MockTimer
-      val sleeper = new TimerSleeper(timer)
-
-      Time.withCurrentTimeFrozen { ctl =>
-        @volatile var ctr = 0
-        val t = exec {
-          Alarm.armAndExecute({ () =>
-            new DurationAlarm(5.seconds)
-          }, { () =>
-            ctr += 1
-          }, sleeper)
-        }
-
-        assert(ctr === 1)
-        assert(t.isAlive === true)
-        ctl.advance(2.seconds)
-        timer.tick()
-
-        assert(ctr === 1)
-        assert(t.isAlive === true)
-        ctl.advance(3.seconds)
-        timer.tick()
-        t.join()
-        assert(t.isAlive === false)
-        assert(ctr === 2)
+      @volatile var ctr = 0
+      val t = exec {
+        Alarm.armAndExecute({ () =>
+          new DurationAlarm(5.seconds)
+        }, { () =>
+          ctr += 1
+        })
       }
+
+      assert(ctr === 1)
+      assert(t.isAlive === true)
+      ctl.advance(2.seconds)
+
+      assert(ctr === 1)
+      assert(t.isAlive === true)
+      ctl.advance(3.seconds)
+      t.join()
+      assert(t.isAlive === false)
+      assert(ctr === 2)
     }
   }
 
@@ -124,20 +107,16 @@ class AlarmTest extends FunSuite with Eventually {
     import h._
 
     Time.withCurrentTimeFrozen { ctl =>
-      val timer = new MockTimer
-      val sleeper = new TimerSleeper(timer)
-
       val t = exec {
         Alarm.arm({ () =>
           new GenerationAlarm(nfo) min new IntervalAlarm(1.second)
-        }, sleeper)
+        })
       }
 
       assert(t.isAlive === true)
 
       fakeBean.getCollectionCount = 1
       ctl.advance(1.second)
-      timer.tick()
 
       t.join()
       assert(t.isAlive === false)
@@ -146,21 +125,18 @@ class AlarmTest extends FunSuite with Eventually {
 
   test("PredicateAlarm") {
     Time.withCurrentTimeFrozen { ctl =>
-      val timer = new MockTimer
-      val sleeper = new TimerSleeper(timer)
       @volatile var bool = false
 
       val t = exec {
         Alarm.arm({ () =>
           new PredicateAlarm(() => bool) min new IntervalAlarm(1.second)
-        }, sleeper)
+        })
       }
 
       assert(t.isAlive === true)
 
       bool = true
       ctl.advance(1.second)
-      timer.tick()
 
       t.join()
       assert(t.isAlive === false)
@@ -179,8 +155,6 @@ class AlarmTest extends FunSuite with Eventually {
 
     Time.withCurrentTimeFrozen { ctl =>
       val ctr = new FakeByteCounter(1000000, Time.now, nfo)
-      val timer = new MockTimer
-      val sleeper = new TimerSleeper(timer)
       @volatile var bool = false
 
       val usage = new FakeMemoryUsage(0.bytes, 10.megabytes)
@@ -189,14 +163,13 @@ class AlarmTest extends FunSuite with Eventually {
       val t = exec {
         Alarm.arm({ () =>
           new BytesAlarm(ctr, () => 5.megabytes)
-        }, sleeper)
+        })
       }
 
       assert(t.isAlive === true)
 
       fakePool.setSnapshot(usage.copy(used = 5.megabytes))
       ctl.advance(100.milliseconds)
-      timer.tick()
 
       t.join()
       assert(t.isAlive === false)
@@ -240,8 +213,6 @@ class AlarmTest extends FunSuite with Eventually {
 
     Time.withCurrentTimeFrozen { ctl =>
       val ctr = new FakeByteCounter(1000000, Time.now, nfo)
-      val timer = new MockTimer
-      val sleeper = new TimerSleeper(timer)
       @volatile var bool = false
 
       val usage = new FakeMemoryUsage(0.bytes, 10.megabytes)
@@ -250,14 +221,13 @@ class AlarmTest extends FunSuite with Eventually {
       val t = exec {
         Alarm.arm({ () =>
           new PercentAlarm(ctr, 90)
-        }, sleeper)
+        })
       }
 
       assert(t.isAlive === true)
 
       fakePool.setSnapshot(usage.copy(used = 9.megabytes))
       ctl.advance(100.milliseconds)
-      timer.tick()
 
       t.join()
       assert(t.isAlive === false)
