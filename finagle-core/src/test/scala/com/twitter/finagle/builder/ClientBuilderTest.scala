@@ -45,7 +45,7 @@ class ClientBuilderTest extends FunSuite with MockitoSugar with IntegrationBase{
       preparedServicePromise() = Return(service)
 
       verify(service)("123")
-      assert(requestFuture.poll == Some(Return("321")))
+      assert(requestFuture.poll === Some(Return("321")))
     }
   }
 
@@ -67,7 +67,7 @@ class ClientBuilderTest extends FunSuite with MockitoSugar with IntegrationBase{
         .hostConnectionLimit(1)
         .codec(m.codec)
         .hosts(Seq(m.clientAddress))
-        .retries(2) // retries == total attempts :(
+        .retries(2) // retries === total attempts :(
         .reportTo(inMemory)
         .build()
 
@@ -79,8 +79,8 @@ class ClientBuilderTest extends FunSuite with MockitoSugar with IntegrationBase{
       val f = client("123")
 
       assert(f.isDefined)
-      assert(inMemory.counters(Seq("test", "tries", "requests")) == 1)
-      assert(inMemory.counters(Seq("test", "requests")) == 2)
+      assert(inMemory.counters(Seq("test", "tries", "requests")) === 1)
+      assert(inMemory.counters(Seq("test", "requests")) === 2)
     }
   }
 

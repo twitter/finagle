@@ -41,7 +41,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
     val f: Future[Service[String, String]] = factory()
     assert(f.isDefined)
     val proxied = Await.result(f)
-    assert(proxied("ok").poll == (Some(Return("ko"))))
+    assert(proxied("ok").poll === (Some(Return("ko"))))
     verify(service)("ok")
 
   }
@@ -66,7 +66,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
     assert(!didRun)
     verify(service, times(0)).close(any)
 
-    assert(f2().poll == Some(Throw(exc)))
+    assert(f2().poll === Some(Throw(exc)))
     assert(didRun)
     verify(service).close(any)
   }

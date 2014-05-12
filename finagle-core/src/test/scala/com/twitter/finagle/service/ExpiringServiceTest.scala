@@ -169,7 +169,7 @@ class ExpiringServiceTest extends FunSuite with MockitoSugar {
       assert(timer.tasks.size === 1)
 
       service(123)
-      assert(timer.tasks.size == 1)
+      assert(timer.tasks.size === 1)
       assert(!timer.tasks.head.isCancelled)
     }
   }

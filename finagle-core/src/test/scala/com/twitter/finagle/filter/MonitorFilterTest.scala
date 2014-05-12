@@ -38,10 +38,10 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase{
     import h._
 
     val f = service(123)
-    assert(f.poll == None)
+    assert(f.poll === None)
 
     reply() = Throw(exc)
-    assert(f.poll == Some(Throw(exc)))
+    assert(f.poll === Some(Throw(exc)))
     verify(monitor).handle(exc)
   }
 
@@ -52,7 +52,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase{
     when(underlying(any[Int])) thenThrow exc
 
     val f = service(123)
-    assert(f.poll == Some(Throw(exc)))
+    assert(f.poll === Some(Throw(exc)))
     verify(monitor).handle(exc)
   }
 
@@ -141,7 +141,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase{
     }
 
     preparedServicePromise() = Return(mockService)
-    assert(requestFuture.poll == Some(Throw(outer)))
+    assert(requestFuture.poll === Some(Throw(outer)))
 
     verify(monitor, times(0)).handle(inner)
     verify(monitor).handle(outer)

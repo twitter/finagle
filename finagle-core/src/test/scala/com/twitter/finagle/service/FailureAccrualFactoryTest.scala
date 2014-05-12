@@ -124,7 +124,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         when(underlyingService(123)) thenReturn Future.value(321)
 
         // A good dispatch!
-        assert(Await.result(service(123)) == 321)
+        assert(Await.result(service(123)) === 321)
 
         assert(factory.isAvailable)
         assert(service.isAvailable)

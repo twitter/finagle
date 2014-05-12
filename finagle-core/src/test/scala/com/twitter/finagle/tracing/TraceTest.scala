@@ -267,30 +267,30 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     val id = TraceId(Some(SpanId(12)), Some(SpanId(13)), SpanId(14), None, Flags(0L))
     val tracer = mock[Tracer]
     Trace.clear()
-    assert(Trace.isActivelyTracing == false) // no tracers, not tracing
+    assert(Trace.isActivelyTracing === false) // no tracers, not tracing
     Trace.setId(id)
     Trace.pushTracer(NullTracer)
-    assert(Trace.isActivelyTracing == false) // only the null tracer, still false
+    assert(Trace.isActivelyTracing === false) // only the null tracer, still false
     Trace.clear()
     Trace.setId(id)
     when(tracer.sampleTrace(any[TraceId])).thenReturn(None)
     Trace.pushTracer(tracer)
-    assert(Trace.isActivelyTracing == true) // tracer/id is None/None, default to trace
+    assert(Trace.isActivelyTracing === true) // tracer/id is None/None, default to trace
     Trace.setId(id.copy(_sampled = Some(false)))
-    assert(Trace.isActivelyTracing == false) // tracer/id is None/false, don't trace
+    assert(Trace.isActivelyTracing === false) // tracer/id is None/false, don't trace
     when(tracer.sampleTrace(any[TraceId])).thenReturn(Some(false))
-    assert(Trace.isActivelyTracing == false) // false/false, better not
+    assert(Trace.isActivelyTracing === false) // false/false, better not
     Trace.setId(id.copy(_sampled = Some(false), flags = Flags().setDebug))
-    assert(Trace.isActivelyTracing == true) // debug should force its way through
+    assert(Trace.isActivelyTracing === true) // debug should force its way through
     when(tracer.sampleTrace(any[TraceId])).thenReturn(Some(true))
     Trace.setId(id.copy(_sampled=Some(false)))
-    assert(Trace.isActivelyTracing == false) // true/false, prefer the trace id's opinion
+    assert(Trace.isActivelyTracing === false) // true/false, prefer the trace id's opinion
     Trace.setId(id.copy(_sampled = Some(true)))
-    assert(Trace.isActivelyTracing == true) // true/true better be true
+    assert(Trace.isActivelyTracing === true) // true/true better be true
     Trace.disable()
-    assert(Trace.isActivelyTracing == false) // disabled with true/true should be false
+    assert(Trace.isActivelyTracing === false) // disabled with true/true should be false
     Trace.enable()
     when(tracer.sampleTrace(any[TraceId])).thenReturn(Some(false))
-    assert(Trace.isActivelyTracing == true) // false/true again prefer the id's opinion
+    assert(Trace.isActivelyTracing === true) // false/true again prefer the id's opinion
   }
 }

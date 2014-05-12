@@ -126,7 +126,7 @@ class StabilizingAddrTest extends FunSuite {
 
       tc.advance(grace)
       timer.tick()
-      assert(stabilized == Addr.Bound(allAddrs))
+      assert(stabilized === Addr.Bound(allAddrs))
 
       healthStatus.mkHealthy()
       assert(healthStat === Healthy.id)

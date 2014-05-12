@@ -30,7 +30,7 @@ class DeadlineSpanMapTest extends FunSuite with MockitoSugar {
 			timer.tick() // execute scheduled event
 
 			// span must have been removed and logged
-			assert(map.remove(traceId) == None)
+			assert(map.remove(traceId) === None)
 			verify(tracer).logSpan(span)
 
 			timer.stop()

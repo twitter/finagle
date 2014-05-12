@@ -25,9 +25,9 @@ class NonShrinkingClusterTest extends FunSuite{
         case Cluster.Rem(elem) => set -= elem
       }
     }
-    assert(set.size == N)
+    assert(set.size === N)
     0 until N foreach { inCluster.del(_) }
-    assert(set.size == N)
+    assert(set.size === N)
   }
 
   test("SkepticalClusterFilter should pass Rem events after receiving an Add"){
@@ -47,11 +47,11 @@ class NonShrinkingClusterTest extends FunSuite{
       }
     }
 
-    assert(set == before)
+    assert(set === before)
     before foreach { inCluster.del(_) }
-    assert(set == before)
+    assert(set === before)
     after foreach { inCluster.add(_) }
-    assert(set == after)
+    assert(set === after)
   }
 
   test("SkepticalClusterFilter should cancel Rem changes when receiving an equal Add"){
@@ -67,15 +67,15 @@ class NonShrinkingClusterTest extends FunSuite{
       }
     }
     0 until N foreach { inCluster.add(_) }
-    assert(adds == N)
+    assert(adds === N)
 
     0 until N foreach { inCluster.del(_) }
-    assert(rems == 0)
+    assert(rems === 0)
 
     adds = 0
     0 until N foreach { inCluster.add(_) }
-    assert(adds == 0)
-    assert(rems == 0)
+    assert(adds === 0)
+    assert(rems === 0)
   }
 
 }

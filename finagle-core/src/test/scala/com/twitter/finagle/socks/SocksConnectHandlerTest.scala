@@ -65,19 +65,19 @@ class SocksConnectHandlerTest extends FunSuite with MockitoSugar {
       verify(ctx).sendUpstream(ec.capture)
       val e = ec.getValue
 
-      assert(e.getChannel == channel)
-      assert(e.getState == ChannelState.CONNECTED)
-      assert(e.getValue == remoteAddress)
+      assert(e.getChannel === channel)
+      assert(e.getState === ChannelState.CONNECTED)
+      assert(e.getValue === remoteAddress)
     }
 
     def checkDidClose() {
       val ec = ArgumentCaptor.forClass(classOf[DownstreamChannelStateEvent])
       verify(pipeline).sendDownstream(ec.capture)
       val e = ec.getValue
-      assert(e.getChannel == channel)
-      assert(e.getFuture == closeFuture)
-      assert(e.getState == ChannelState.OPEN)
-      assert(e.getValue == java.lang.Boolean.FALSE)
+      assert(e.getChannel === channel)
+      assert(e.getFuture === closeFuture)
+      assert(e.getState === ChannelState.OPEN)
+      assert(e.getValue === java.lang.Boolean.FALSE)
     }
   }
 
@@ -91,10 +91,10 @@ class SocksConnectHandlerTest extends FunSuite with MockitoSugar {
     verify(ctx).sendDownstream(ec.capture)
     val e = ec.getValue
 
-    assert(e.getChannel == channel)
+    assert(e.getChannel === channel)
     assert(e.getFuture != connectFuture) // this is proxied
-    assert(e.getState == ChannelState.CONNECTED)
-    assert(e.getValue == proxyAddress)
+    assert(e.getState === ChannelState.CONNECTED)
+    assert(e.getValue === proxyAddress)
 
   }
 
@@ -189,7 +189,7 @@ class SocksConnectHandlerTest extends FunSuite with MockitoSugar {
     assert(!connectFuture.isDone)
     e.getFuture.setFailure(exc)
     assert(connectFuture.isDone)
-    assert(connectFuture.getCause == exc)
+    assert(connectFuture.getCause === exc)
   }
 
   test("SocksConnectHandler should with username and password authentication when connect is successful do SOCKS negotiation") {
