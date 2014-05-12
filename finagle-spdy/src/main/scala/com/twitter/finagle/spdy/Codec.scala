@@ -35,7 +35,7 @@ class GenerateSpdyStreamId extends SimpleFilter[HttpRequest, HttpResponse] {
 }
 
 case class Spdy(
-    _version: SpdyVersion = SpdyVersion.SPDY_3,
+    _version: SpdyVersion = SpdyVersion.SPDY_3_1,
     _compressionLevel: Int = 6,
     _maxHeaderSize: StorageUnit = 16384.bytes,
     _maxRequestSize: StorageUnit = 5.megabytes,
