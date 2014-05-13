@@ -110,7 +110,17 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
    * used to configure this StackServer's `stack`.
    */
   def configured[P: Stack.Param](p: P): StackServer[Req, Rep, In, Out] =
-    new StackServer[Req, Rep, In, Out](stack, params + p) {
+    copy(params = params+p)
+
+  /**
+   * A copy constructor in lieu of defining StackServer as a
+   * case class.
+   */
+  def copy(
+    stack: Stack[ServiceFactory[Req, Rep]] = self.stack,
+    params: Stack.Params = self.params
+  ): StackServer[Req, Rep, In, Out] =
+    new StackServer[Req, Rep, In, Out](stack, params) {
       protected val newListener = self.newListener
       protected val newDispatcher = self.newDispatcher
     }

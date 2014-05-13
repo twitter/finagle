@@ -126,17 +126,24 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
    * Creates a new StackClient with `f` applied to `stack`.
    */
   def transformed(f: Stack[ServiceFactory[Req, Rep]] => Stack[ServiceFactory[Req, Rep]]) =
-    new StackClient[Req, Rep, In, Out](f(stack), params) {
-      protected val newTransporter = self.newTransporter
-      protected val newDispatcher = self.newDispatcher
-    }
+    copy(stack = f(stack))
 
   /**
    * Creates a new StackClient with `p` added to the `params`
    * used to configure this StackClient's `stack`.
    */
   def configured[P: Stack.Param](p: P): StackClient[Req, Rep, In, Out] =
-    new StackClient[Req, Rep, In, Out](stack, params + p) {
+    copy(params = params+p)
+
+  /**
+   * A copy constructor in lieu of defining StackClient as a
+   * case class.
+   */
+  def copy(
+    stack: Stack[ServiceFactory[Req, Rep]] = self.stack,
+    params: Stack.Params = self.params
+  ): StackClient[Req, Rep, In, Out] =
+    new StackClient[Req, Rep, In, Out](stack, params) {
       protected val newTransporter = self.newTransporter
       protected val newDispatcher = self.newDispatcher
     }
