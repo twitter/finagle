@@ -863,11 +863,19 @@ case class KetamaClientBuilder private[memcached] (
   numReps: Int = KetamaClient.DefaultNumReps
 ) {
 
-  def dest(name: Name): KetamaClientBuilder = {
+  def dest(
+    name: Name,
+    useOnlyResolvedAddress: Boolean = false
+  ): KetamaClientBuilder = {
     val Name.Bound(va) = name
-    copy(_group = CacheNodeGroup(Group.fromVarAddr(va)))
+    copy(
+      _group = CacheNodeGroup(
+        Group.fromVarAddr(va),
+        useOnlyResolvedAddress = useOnlyResolvedAddress
+      )
+    )
   }
-  
+
   def dest(name: String): KetamaClientBuilder =
     dest(Resolver.eval(name))
 
