@@ -391,7 +391,8 @@ object Finagle extends Build {
     settings = Project.defaultSettings ++
       sharedSettings
   ).settings(
-    name := "finagle-mux"
+    name := "finagle-mux",
+    libraryDependencies ++= Seq("com.twitter.common" % "stats-util" % "0.0.42")
   ).dependsOn(finagleCore)
 
   lazy val finagleThriftMux = Project(
