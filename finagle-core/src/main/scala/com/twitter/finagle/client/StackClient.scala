@@ -24,6 +24,7 @@ private[finagle] object StackClient {
     object Pool extends Stack.Role
     object RequestDraining extends Stack.Role
     object PrepFactory extends Stack.Role
+    /** PrepConn is special in that it's the first role before the `Endpoint` role */
     object PrepConn extends Stack.Role
   }
 
@@ -32,7 +33,7 @@ private[finagle] object StackClient {
    * Note that this is terminated by a [[com.twitter.finagle.service.FailingFactory]]:
    * users are expected to terminate it with a concrete service factory.
    *
- * @see [[com.twitter.finagle.service.ExpiringService]]
+   * @see [[com.twitter.finagle.service.ExpiringService]]
    * @see [[com.twitter.finagle.service.FailFastFactory]]
    * @see [[com.twitter.finagle.client.DefaultPool]]
    * @see [[com.twitter.finagle.service.TimeoutFilter]]
@@ -207,7 +208,7 @@ abstract class StackClientLike[Req, Rep, In, Out, Repr <: StackClientLike[Req, R
    * Creates a new `Repr` with an underlying StackClient where `f` has been
    * applied to `stack`.
    */
-  def transformed(f: Stack[ServiceFactory[Req, Rep]] => Stack[ServiceFactory[Req, Rep]]): Repr =
+  protected def transformed(f: Stack[ServiceFactory[Req, Rep]] => Stack[ServiceFactory[Req, Rep]]): Repr =
     newInstance(client.transformed(f))
 
   /** @inheritdoc */
