@@ -14,7 +14,7 @@ class ConcurrentRingBufferTest extends FunSuite {
       assert(b.tryPut(i)) 
 
     for (i <- 0 until N)
-      assert(b.tryGet() == Some(i))
+      assert(b.tryGet() === Some(i))
   }
 
   test("ConcurrentRingBuffer should not overwrite entries") {
@@ -32,7 +32,7 @@ class ConcurrentRingBufferTest extends FunSuite {
 
     for (i <- 0 until N * 100) {
      assert( b.tryPut(i)) 
-      assert(b.tryGet() == Some(i))
+      assert(b.tryGet() === Some(i))
     }
   }
 
@@ -44,11 +44,11 @@ class ConcurrentRingBufferTest extends FunSuite {
       assert(b.tryPut(i)) 
 
     for (i <- 0 until N) {
-     assert( b.tryGet() == Some(i))
+     assert( b.tryGet() === Some(i))
       b.tryPut(i * 2) 
     }
 
     for (i <- 0 until N)
-      assert(b.tryGet() == Some(i * 2))
+      assert(b.tryGet() === Some(i * 2))
   }
 }

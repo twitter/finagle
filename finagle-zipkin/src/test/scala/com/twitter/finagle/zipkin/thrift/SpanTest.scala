@@ -17,17 +17,17 @@ class SpanTest extends FunSuite {
     val tspan = span.toThrift
     assert(tspan.isSetAnnotations)
     val host = tspan.getAnnotations.get(0).getHost
-    assert(host.getService_name == "service")
-    assert(tspan.getAnnotations.get(0).getDuration == 1 * 1000 * 1000)
+    assert(host.getService_name === "service")
+    assert(tspan.getAnnotations.get(0).getDuration === 1 * 1000 * 1000)
     assert(tspan.isSetName)
-    assert(tspan.getName == "name")
+    assert(tspan.getName === "name")
     !tspan.isSetBinary_annotations
     assert(tspan.isSetId)
-    assert(tspan.getId == 123)
+    assert(tspan.getId === 123)
     assert(tspan.isSetParent_id)
-    assert(tspan.getParent_id == 123)
+    assert(tspan.getParent_id === 123)
     assert(tspan.isSetTrace_id)
-    assert(tspan.getTrace_id == 123)
+    assert(tspan.getTrace_id === 123)
     assert(tspan.isDebug)
   }
 }

@@ -37,10 +37,10 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar{
       val ec = ArgumentCaptor.forClass(classOf[DownstreamChannelStateEvent])
       verify(pipeline).sendDownstream(ec.capture)
       val e = ec.getValue
-      assert(e.getChannel == channel)
-      assert(e.getFuture == closeFuture)
-      assert(e.getState == ChannelState.OPEN)
-      assert(e.getValue == java.lang.Boolean.FALSE)
+      assert(e.getChannel === channel)
+      assert(e.getFuture === closeFuture)
+      assert(e.getState === ChannelState.OPEN)
+      assert(e.getValue === java.lang.Boolean.FALSE)
     }
   }
 
@@ -52,10 +52,10 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar{
     verify(ctx).sendDownstream(ec.capture)
     val e = ec.getValue
 
-    assert(e.getChannel == channel)
+    assert(e.getChannel === channel)
     assert(e.getFuture != connectFuture)  // this is proxied
-    assert(e.getState == ChannelState.CONNECTED)
-    assert(e.getValue == proxyAddress)
+    assert(e.getState === ChannelState.CONNECTED)
+    assert(e.getValue === proxyAddress)
   }
 
   test("HttpConnectHandler should upon connect propagate cancellation"){
@@ -108,8 +108,8 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar{
       verify(ctx, atLeastOnce).sendDownstream(ec.capture)
       val e = ec.getValue
       val req = e.getMessage.asInstanceOf[DefaultHttpRequest]
-      assert(req.getMethod == HttpMethod.CONNECT)
-      assert(req.getUri == "localhost:" + port)
+      assert(req.getMethod === HttpMethod.CONNECT)
+      assert(req.getUri === "localhost:" + port)
     }
 
     { // when connect response is received, propagate the connect and remove the handler
@@ -126,9 +126,9 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar{
       verify(ctx).sendUpstream(ec.capture)
       val e = ec.getValue
 
-      assert(e.getChannel == channel)
-      assert(e.getState == ChannelState.CONNECTED)
-      assert(e.getValue == remoteAddress)
+      assert(e.getChannel === channel)
+      assert(e.getState === ChannelState.CONNECTED)
+      assert(e.getValue === remoteAddress)
     }
   }
 
@@ -144,6 +144,6 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar{
     assert(!connectFuture.isDone)
     e.getFuture.setFailure(exc)
     assert(connectFuture.isDone)
-    assert(connectFuture.getCause == exc)
+    assert(connectFuture.getCause === exc)
   }
 }

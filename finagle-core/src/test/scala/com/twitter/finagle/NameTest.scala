@@ -30,7 +30,7 @@ class NameTest extends FunSuite {
     assert(Name.Bound(a1, id1) != Name.Bound(a1, id2))
 
     // It sucks that this is not symmetric, oh well.
-    assert(Name.Bound(a1, id1) == id1)
+    assert(Name.Bound(a1, id1) === id1)
     assert(Name.Bound(a1, id1) != id2)
   }
 

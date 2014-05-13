@@ -25,8 +25,8 @@ class InetSocketAddressUtilTest extends FunSuite {
       val boundIpv6Any = new InetSocketAddress(ipv6any, port1)
 
       assert(InetSocketAddressUtil.toPublic(mySockAddr) === mySockAddr)
-      assert(InetSocketAddressUtil.toPublic(boundSock) == mySockAddr)
-      assert(InetSocketAddressUtil.toPublic(boundIpv6Any) == mySockAddr)
+      assert(InetSocketAddressUtil.toPublic(boundSock) === mySockAddr)
+      assert(InetSocketAddressUtil.toPublic(boundIpv6Any) === mySockAddr)
 
       // It's ok if this test fails due to some future change, I just want to highlight it
       // to whoever re-implements toPublic in case they change the behavior

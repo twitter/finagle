@@ -36,7 +36,7 @@ class SamplerTest extends FunSuite with MockitoSugar {
     val sampler = new Sampler
     sampler.setSampleRate(0)
     for (i <- 1 until 100) {
-      assert(sampler.sampleTrace(TraceId(None, None, SpanId(i), None)) == Some(false))
+      assert(sampler.sampleTrace(TraceId(None, None, SpanId(i), None)) === Some(false))
     }
   }
 
@@ -44,21 +44,21 @@ class SamplerTest extends FunSuite with MockitoSugar {
     val sampler = new Sampler
     sampler.setSampleRate(1f)
     for (i <- 1 until 100) {
-      assert(sampler.sampleTrace(TraceId(None, None, SpanId(i), None)) == Some(true))
+      assert(sampler.sampleTrace(TraceId(None, None, SpanId(i), None)) === Some(true))
     }
   }
 
   test("Sampler should drop all by providing samplerate") {
     val sampler = new Sampler
     for (i <- 1 until 100) {
-      assert(sampler.sampleTrace(TraceId(None, None, SpanId(i), None), 0f) == Some(false))
+      assert(sampler.sampleTrace(TraceId(None, None, SpanId(i), None), 0f) === Some(false))
     }
   }
 
   test("Sampler should drop none by providing samplerate") {
     val sampler = new Sampler
     for (i <- 1 until 100) {
-      assert(sampler.sampleTrace(TraceId(None, None, SpanId(i), None), 1f) == Some(true))
+      assert(sampler.sampleTrace(TraceId(None, None, SpanId(i), None), 1f) === Some(true))
     }
   }
 

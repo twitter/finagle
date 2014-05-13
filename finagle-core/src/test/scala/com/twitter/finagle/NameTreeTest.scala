@@ -73,7 +73,7 @@ class NameTreeTest extends FunSuite {
     val trees = Seq.fill(100) { newTree(2) }
     for (tree <- trees)
       try { 
-        assert(splice(NameTree.read(tree.show)) == splice(tree))
+        assert(splice(NameTree.read(tree.show)) === splice(tree))
       } catch {
         case NonFatal(exc) =>
           fail("Exception %s while parsing %s: %s; spliced: %s".format(

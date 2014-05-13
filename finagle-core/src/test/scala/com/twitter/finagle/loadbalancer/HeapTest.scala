@@ -64,7 +64,7 @@ class HeapTest extends FunSuite{
       indices(input(N - i)) = N+1 - i
       val fixed = fixUp(heap, N+1 - i)
       1 to N+1 - i foreach { j =>
-        assert(indices(heap(j)) == j)
+        assert(indices(heap(j)) === j)
       }
     }
 
@@ -73,7 +73,7 @@ class HeapTest extends FunSuite{
       indices(heap(1)) = 1
       fixDown(heap, 1, N - i)
       1 to N-i foreach { j =>
-        assert(indices(heap(j)) == j)
+        assert(indices(heap(j)) === j)
       }
     }
   }

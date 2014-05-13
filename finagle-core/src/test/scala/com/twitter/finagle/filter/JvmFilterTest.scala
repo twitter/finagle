@@ -41,7 +41,7 @@ class JvmFilterTest extends FunSuite with MockitoSugar{
     import h._
 
     val trace = traced {
-      assert(filtered("ok").poll == None)
+      assert(filtered("ok").poll === None)
       verify(service).apply("ok")
       tc.advance(1.second)
       gcEvents ::= Gc(1, "pcopy", Time.now, 1.second)
@@ -49,7 +49,7 @@ class JvmFilterTest extends FunSuite with MockitoSugar{
       p.setValue("ko")
     }
 
-    assert(trace == Seq(
+    assert(trace === Seq(
       Record(
         Trace.id, 1.second.ago,
         Annotation.Message(Gc(1, "pcopy", 1.second.ago, 1.second).toString), Some(1.second))))
@@ -62,13 +62,13 @@ class JvmFilterTest extends FunSuite with MockitoSugar{
     val trace = traced {
       gcEvents ::= Gc(1, "pcopy", Time.now, 1.second)
       tc.advance(10.seconds)
-      assert(filtered("ok").poll == None)
+      assert(filtered("ok").poll === None)
       tc.advance(1.second)
       gcEvents ::= Gc(2, "pcopy", Time.now, 1.second)
       p.setValue("ko")
     }
 
-    assert(trace == Seq(
+    assert(trace === Seq(
       Record(
         Trace.id, Time.now,
         Annotation.Message(Gc(2, "pcopy", Time.now, 1.second).toString), Some(1.second))))

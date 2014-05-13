@@ -37,7 +37,7 @@ class AnnouncerTest extends FunSuite {
 
   test("provide a set of announcements") {
     Announcer.announce(addr, "test!xyz")
-    assert(Announcer.announcements == Set((addr, List("test!xyz"))))
+    assert(Announcer.announcements === Set((addr, List("test!xyz"))))
   }
 
   test("get an announcer instance") {
