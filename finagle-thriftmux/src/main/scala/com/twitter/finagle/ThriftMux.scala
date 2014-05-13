@@ -1,18 +1,47 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.thrift.{Protocols, ThriftClientRequest}
+import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientRequest}
 import java.net.SocketAddress
-import org.jboss.netty.buffer.ChannelBuffer
+import org.apache.thrift.protocol.TProtocolFactory
+
+class ThriftMuxImpl private[finagle](
+    clientId: Option[ClientId],
+    val protocolFactory: TProtocolFactory)
+  extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
+  with Server[Array[Byte], Array[Byte]] with ThriftRichServer
+{
+  protected val defaultClientName = "thrift"
+
+  private[this] val client =
+    new ThriftMuxClientImpl(protocolFactory = protocolFactory, clientId = clientId)
+  private[this] val server = new ThriftMuxServerImpl(protocolFactory = protocolFactory)
+
+  def newClient(
+    dest: Name,
+    label: String
+  ): ServiceFactory[ThriftClientRequest, Array[Byte]] = client.newClient(dest, label)
+
+  def serve(
+    addr: SocketAddress,
+    service: ServiceFactory[Array[Byte], Array[Byte]]
+  ): ListeningServer = server.serve(addr, service)
+
+  /**
+   * Produce a [[com.twitter.finagle.ThriftMuxImpl]] using the provided
+   * client ID.
+   */
+  def withClientId(clientId: ClientId) = new ThriftMuxImpl(Some(clientId), protocolFactory)
+}
 
 /**
- * ThriftMux is a client and server for thrift, using
- * [[com.twitter.finagle.mux]] as a transport. Rich interfaces are
- * provided to serve interfaces generated from a
- * [[http://thrift.apache.org/docs/idl/ thrift IDL]] directly from
- * [[https://github.com/twitter/scrooge Scrooge]] or
+ * The `ThriftMux` object is both a [[com.twitter.finagle.client.Client]] and a
+ * [[com.twitter.finagle.server.Server]] for the Thrift protocol served over
+ * [[com.twitter.finagle.mux]]. Rich interfaces are provided to adhere to those
+ * generated from a [[http://thrift.apache.org/docs/idl/ Thrift IDL]] by
+ * [[http://twitter.github.io/scrooge/ Scrooge]] or
  * [[https://github.com/mariusaeriksen/thrift-0.5.0-finagle thrift-finagle]].
  *
- * Clients can be created directly from an interface generated via
+ * Clients can be created directly from an interface generated from
  * a Thrift IDL:
  *
  * $clientExample
@@ -21,22 +50,10 @@ import org.jboss.netty.buffer.ChannelBuffer
  *
  * $serverExample
  *
- * By default, the thrift binary protocol is used; different protocol
+ * By default, the Thrift binary protocol is used. Different protocol
  * factories may be supplied by instantiating new clients or servers.
  *
  * @define clientExampleObject ThriftMux
  * @define serverExampleObject ThriftMux
  */
-object ThriftMux
-  extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
-  with Server[Array[Byte], Array[Byte]] with ThriftRichServer
-{
-  protected val protocolFactory = Protocols.binaryFactory()
-  protected val defaultClientName = "thrift"
-
-  def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
-    ThriftMuxClient.newClient(dest, label)
-
-  def serve(addr: SocketAddress, service: ServiceFactory[Array[Byte], Array[Byte]]) =
-    ThriftMuxServer.serve(addr, service)
-}
+object ThriftMux extends ThriftMuxImpl(None, Protocols.binaryFactory())

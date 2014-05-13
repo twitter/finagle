@@ -9,13 +9,32 @@ import org.apache.thrift.protocol.TProtocolFactory
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 /**
-  * $serverExample
-  *
-  * @define serverExampleObject ThriftMuxServerImpl(...)
-  */
-case class ThriftMuxServerImpl(
-  muxer: Server[ChannelBuffer, ChannelBuffer],
-  protocolFactory: TProtocolFactory = Protocols.binaryFactory()
+ * @define serverDescription
+ *
+ * A server for the Thrift protocol served over [[com.twitter.finagle.mux]].
+ * ThriftMuxServer is backwards-compatible with Thrift clients that use the
+ * framed transport and binary protocol. It switches to the backward-compatible
+ * mode when the first request is not recognized as a valid Mux message but can
+ * be successfully handled by the underlying Thrift service. Since a Thrift
+ * message that is encoded with the binary protocol starts with a header value of
+ * 0x800100xx, Mux does not confuse it with a valid Mux message (0x80 = -128 is
+ * an invalid Mux message type) and the server can reliably detect the non-Mux
+ * Thrift client and switch to the backwards-compatible mode.
+ *
+ * Note that the server is also compatible with non-Mux finagle-thrift clients.
+ * It correctly responds to the protocol up-negotiation request and passes the
+ * tracing information embedded in the thrift requests to Mux (which has native
+ * tracing support).
+ *
+ * $serverDescription
+ *
+ * $serverExample
+ *
+ * @define serverExampleObject ThriftMuxServerImpl(...)
+ */
+class ThriftMuxServerImpl(
+  muxer: Server[ChannelBuffer, ChannelBuffer] = ThriftMuxer,
+  protected val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
 ) extends Server[Array[Byte], Array[Byte]] with ThriftRichServer {
   def serve(addr: SocketAddress, newService: ServiceFactory[Array[Byte], Array[Byte]]) = {
     muxer.serve(addr, newService map { service =>
@@ -42,21 +61,7 @@ object ThriftMuxer extends DefaultServer[ChannelBuffer, ChannelBuffer, ChannelBu
 )
 
 /**
- * A server for Thrift served over [[com.twitter.finagle.mux]]. It's
- * also backward compatible with thrift clients that use framed
- * transport and binary protocol with strict write. It switches to the
- * backward-compatible mode when the first request is not recognized
- * as a valid mux message but can be successfully handled by the
- * underlying thrift server. Since a thrift message that is encoded
- * by binary protocol with strict write starts with a header
- * 0x800100xx, mux does not confuse it with a valid mux message (
- * 0x80 = -128 is an invalid mux message type) and the server can
- * reliably detect the non-mux thrift client and switch to the
- * backward-compatible mode afterwards. Note the server is also
- * compatible with Finagle thrift clients. It correctly responds to
- * the protocol up-negotiation request and passes the tracing
- * information embedded in the thrift requests to mux which has
- * native tracing support.
+ * $serverDescription
  *
  * $serverExample
  *
@@ -64,7 +69,7 @@ object ThriftMuxer extends DefaultServer[ChannelBuffer, ChannelBuffer, ChannelBu
  */
 object ThriftMuxServer extends ThriftMuxServerImpl(ThriftMuxer)
 
-package exp {
+package thriftmux.exp {
   /**
    * A [[com.twitter.finagle.server.StackServer]] for the ThriftMux protocol.
    */

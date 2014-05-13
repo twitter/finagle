@@ -129,35 +129,38 @@ class EndToEndTest extends FunSuite {
     }
   }
 
-  test("thriftmux server + Finagle thrift client: should not override externally-set ClientIds") {
-    val server = ThriftMux.serveIface(":*", new TestService.FutureIface {
-      def query(x: String) = Future.value(ClientId.current map { _.name } getOrElse(""))
-    })
-
-    val clientId = "test.service"
-    val otherClientId = ClientId("other.bar")
-    val client = Thrift
-      .withClientId(ClientId(clientId))
-      .newIface[TestService.FutureIface](server)
-
-    1 to 5 foreach { _ =>
-      otherClientId.asCurrent {
-        assert(Await.result(client.query("ok")) == clientId)
-      }
-    }
-  }
-
-  test("thriftmux server + thriftmux client: should not override externally-set ClientIds") {
+  test("thriftmux server + Finagle thrift client: ClientId should not be overridable externally") {
     val server = ThriftMux.serveIface(":*", new TestService.FutureIface {
       def query(x: String) = Future.value(ClientId.current map { _.name } getOrElse(""))
     })
 
     val clientId = ClientId("test.service")
-    val client = ThriftMux.newIface[TestService.FutureIface](server)
+    val otherClientId = ClientId("other.bar")
+    val client = Thrift
+      .withClientId(clientId)
+      .newIface[TestService.FutureIface](server)
 
     1 to 5 foreach { _ =>
-      clientId.asCurrent {
-        assert(Await.result(client.query("ok")) === clientId.name)
+      otherClientId.asCurrent {
+        assert(Await.result(client.query("ok")) == clientId.name)
+      }
+    }
+  }
+
+  test("thriftmux server + thriftmux client: ClientId should not be overridable externally") {
+    val server = ThriftMux.serveIface(":*", new TestService.FutureIface {
+      def query(x: String) = Future.value(ClientId.current map { _.name } getOrElse(""))
+    })
+
+    val clientId = ClientId("test.service")
+    val otherClientId = ClientId("other.bar")
+    val client = ThriftMux
+      .withClientId(clientId)
+      .newIface[TestService.FutureIface](server)
+
+    1 to 5 foreach { _ =>
+      otherClientId.asCurrent {
+        assert(Await.result(client.query("ok")) == clientId.name)
       }
     }
   }
@@ -193,7 +196,7 @@ class EndToEndTest extends FunSuite {
     assert(thrown.getMessage === "Internal error processing query: 'java.lang.Exception: sad panda'")
   }
 
-  test("thriftmux server + thrift client w/o protocal upgrade but w/ pipelined dispatch") {
+  test("thriftmux server + thrift client w/o protocol upgrade but w/ pipelined dispatch") {
     val nreqs = 5
     val servicePromises = Array.fill(nreqs)(new Promise[String])
     val requestReceived = Array.fill(nreqs)(new Promise[String])
@@ -229,6 +232,19 @@ class EndToEndTest extends FunSuite {
     }
   }
 
+  test("thriftmux client: should emit ClientId") {
+    val server = ThriftMux.serveIface(":*", new TestService.FutureIface {
+      def query(x: String) = {
+        Future.value(ClientId.current.map(_.name).getOrElse(""))
+      }
+    })
+
+    val client = ThriftMux.withClientId(ClientId("foo.bar"))
+      .newIface[TestService.FutureIface](server)
+
+    assert(Await.result(client.query("ok")) == "foo.bar")
+  }
+
 /* TODO: add back when sbt supports old-school thrift gen
   test("end-to-end finagle-thrift") {
     import com.twitter.finagle.thriftmux.thrift.TestService
@@ -255,6 +271,15 @@ class EndToEndTest extends FunSuite {
     })
 
     val client = ThriftMux.newIface[TestService.FutureIface](server)
+
+    assert(Await.result(client.query("ok")) == "okok")
+  }
+
+  test("StackClient- and StackServer-based ThriftMux client/server can talk to eachother") {
+    val server = exp.ThriftMuxServer.serveIface(":*", new TestService.FutureIface {
+      def query(x: String) = Future.value(x+x)
+    })
+    val client = exp.ThriftMuxClient.newIface[TestService.FutureIface](server)
 
     assert(Await.result(client.query("ok")) == "okok")
   }
