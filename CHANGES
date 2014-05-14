@@ -5,6 +5,40 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.16.0
+~~~~~~~
+
+- `finagle-core`: Add Stack#remove
+- `finagle-core`: Add a copy constructor to Stack{Client, Server}
+- `finagle-core`: Fixed a typo in scaladoc https://github.com/twitter/finagle/pull/264
+- `finagle-core`: Implement ClientBuilder in terms of StackClient
+- `finagle-core`: Invert the `cancelOnHangup` value passed to MaskCancelFilter.Param
+- `finagle-core`: Liberate Failure
+- `finagle-core`: Log all services loaded by c.t.finagle.util.LoadService
+- `finagle-core`: Minor c.t.app.ClassPath/c.t.f.util.LoadService cleanup
+- `finagle-core`: Properly close sockets on shutdown
+- `finagle-core`: Properly scope stats by label in Stack{Client,Server}
+- `finagle-core`: Remove `Stack{Server,Client}.transformed`
+- `finagle-core`: Scoped the RollupStatsReceiver carefully
+- `finagle-core`: Thread through Codec#newClientTransport in ClientBuilder
+- `finagle-core`: Update to netty-3.9.1.Final
+- `finagle-example`: Add Java Thrift client and server
+- `finagle-http`: Add Csv,Xls,Zip to finagle MediaType
+- `finagle-http`: Adds tls support to finagle 6 apis
+- `finagle-http`: Set the response content-length header to 0 in ExceptionFilter.
+- `finagle-kestrel`: Add Thrift support to Kestrel MultiReader in Finagle-Kestrel
+- `finagle-mux`: Cleaned up build information
+- `finagle-mux`: GC Avoidance primitives
+- `finagle-mux`: Move exp.MuxClient and exp.MuxServer
+- `finagle-mux`: Record tracing info when Mux is enabled
+- `finagle-mux`: Refactor Session to make closing a Session uniform
+- `finagle-mux`: Render mux clients leasable
+- `finagle-redis`: Added support for redis MOVE command.
+- `finagle-serversets`: Reduce the number of intermediate datastructures
+- `finagle-thriftmux`: Add ThriftMux.withClientId
+- `finagle-thriftmux`: Maintain legacy client and server names
+- `finagle-{core,thrift,mux}`: Clean up contexts, delimit Locals
+
 6.15.0
 ~~~~~~~
 
