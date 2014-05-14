@@ -9,7 +9,6 @@ import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.service._
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stack.nilStack
-import com.twitter.finagle.stats.RollupStatsReceiver
 import com.twitter.finagle.tracing.{ClientDestTracingFilter, TracingFilter}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.Showable
@@ -176,7 +175,7 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
     val clientStack = stack ++ (endpointer +: nilStack)
     val clientParams = params +
       Label(clientLabel) +
-      Stats(new RollupStatsReceiver(stats.scope(clientLabel)))
+      Stats(stats.scope(clientLabel))
 
     dest match {
       case Name.Bound(addr) =>

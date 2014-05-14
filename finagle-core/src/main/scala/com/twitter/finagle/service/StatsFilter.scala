@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle._
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver}
 import com.twitter.finagle.util.Throwables
 import com.twitter.util.{Future, Stopwatch, Throw, Return}
 import java.util.concurrent.atomic.AtomicInteger
@@ -17,7 +17,7 @@ private[finagle] object StatsFilter {
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
         val param.Stats(statsReceiver) = params[param.Stats]
         if (statsReceiver.isNull) next
-        else new StatsFilter(statsReceiver) andThen next
+        else new StatsFilter(new RollupStatsReceiver(statsReceiver)) andThen next
       }
     }
 }

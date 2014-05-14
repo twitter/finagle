@@ -88,8 +88,7 @@ private[finagle] object LoadBalancerFactory {
                 "%s:%d".format(ia.getHostName, ia.getPort)
               case other => other.toString
             }
-            val scoped = hostStatsReceiver.scope(label).scope(scope)
-            val host = new RollupStatsReceiver(scoped)
+            val host = hostStatsReceiver.scope(label).scope(scope)
             BroadcastStatsReceiver(Seq(host, statsReceiver))
           }
 
