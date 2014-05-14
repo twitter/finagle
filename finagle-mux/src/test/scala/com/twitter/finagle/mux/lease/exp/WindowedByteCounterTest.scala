@@ -166,7 +166,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually {
     }
   }
 
-  test("Keep track of last gc time") {
+  if (!sys.props.contains("SKIP_FLAKY")) test("Keep track of last gc time") {
     val h = new ByteCounterHelper{}
     import h._
 
