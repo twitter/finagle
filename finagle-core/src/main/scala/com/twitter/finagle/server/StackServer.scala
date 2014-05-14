@@ -5,7 +5,7 @@ import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
 import com.twitter.finagle.service.{StatsFilter, TimeoutFilter, FailingFactory}
 import com.twitter.finagle.stack.Endpoint
-import com.twitter.finagle.stats.{StatsReceiver, ServerStatsReceiver}
+import com.twitter.finagle.stats.ServerStatsReceiver
 import com.twitter.finagle.tracing.{TracingFilter, ServerDestTracingProxy}
 import com.twitter.finagle.transport.Transport
 import com.twitter.jvm.Jvm
@@ -85,9 +85,12 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
 
   /**
    * Creates a new StackServer with the default stack (StackServer#newStack)
-   * and empty params.
+   * and [[com.twitter.finagle.stats.ServerStatsReceiver]].
    */
-  def this() = this(StackServer.newStack[Req, Rep], Stack.Params.empty)
+  def this() = this(
+    StackServer.newStack[Req, Rep],
+    Stack.Params.empty + Stats(ServerStatsReceiver)
+  )
 
   /**
    * Defines a typed [[com.twitter.finagle.Listener]] for this server.
@@ -158,9 +161,13 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
         val onClose = transport.onClose.map(_ => ())
       }
 
+      val statsReceiver =
+        if (serverLabel.isEmpty) stats
+        else stats.scope(serverLabel)
+
       val serverParams = params +
         Label(serverLabel) +
-        Stats(stats.scope(serverLabel)) +
+        Stats(statsReceiver) +
         Monitor(reporter(label, None) andThen monitor)
 
       val serviceFactory = (stack ++ Stack.Leaf(Endpoint, factory))

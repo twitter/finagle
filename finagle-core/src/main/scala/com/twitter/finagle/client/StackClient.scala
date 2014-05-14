@@ -9,6 +9,7 @@ import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.service._
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stack.nilStack
+import com.twitter.finagle.stats.{ClientStatsReceiver, RollupStatsReceiver}
 import com.twitter.finagle.tracing.{ClientDestTracingFilter, TracingFilter}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.Showable
@@ -101,9 +102,12 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
 
   /**
    * Creates a new StackClient with the default stack (StackClient#newStack)
-   * and empty params.
+   * and [[com.twitter.finagle.stats.ClientStatsReceiver]].
    */
-  def this() = this(StackClient.newStack[Req, Rep], Stack.Params.empty)
+  def this() = this(
+    StackClient.newStack[Req, Rep],
+    Stack.Params.empty + Stats(ClientStatsReceiver)
+  )
 
   /**
    * Defines a typed [[com.twitter.finagle.Transporter]] for this client.

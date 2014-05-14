@@ -293,9 +293,10 @@ case class Netty3Listener[In, Out](
 
   def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] => Unit): ListeningServer =
     new ListeningServer with CloseAwaitably {
+      val serverLabel = ServerRegistry.nameOf(addr) getOrElse name
       val scopedStatsReceiver = statsReceiver match {
-        case ServerStatsReceiver =>
-          statsReceiver.scope(ServerRegistry.nameOf(addr) getOrElse name)
+        case ServerStatsReceiver if serverLabel.nonEmpty =>
+          statsReceiver.scope(serverLabel)
         case sr => sr
       }
 

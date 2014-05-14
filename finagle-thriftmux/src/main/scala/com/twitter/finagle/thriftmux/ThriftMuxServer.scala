@@ -1,12 +1,13 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.netty3.Netty3Listener
+import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.server._
 import com.twitter.finagle.thrift.{Protocols, HandleUncaughtApplicationExceptions}
 import com.twitter.util.{Closable, Future}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.{ChannelBuffer => CB, ChannelBuffers}
 
 /**
  * @define serverDescription
@@ -33,13 +34,13 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
  * @define serverExampleObject ThriftMuxServerImpl(...)
  */
 class ThriftMuxServerImpl(
-  muxer: Server[ChannelBuffer, ChannelBuffer] = ThriftMuxer,
+  muxer: Server[CB, CB] = ProtocolRecordingMuxServer,
   protected val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
 ) extends Server[Array[Byte], Array[Byte]] with ThriftRichServer {
   def serve(addr: SocketAddress, newService: ServiceFactory[Array[Byte], Array[Byte]]) = {
     muxer.serve(addr, newService map { service =>
-      val converter = new Filter[ChannelBuffer, ChannelBuffer, Array[Byte], Array[Byte]] {
-        def apply(request: ChannelBuffer, service: Service[Array[Byte], Array[Byte]]): Future[ChannelBuffer] = {
+      val converter = new Filter[CB, CB, Array[Byte], Array[Byte]] {
+        def apply(request: CB, service: Service[Array[Byte], Array[Byte]]): Future[CB] = {
           val arr = ThriftMuxUtil.bufferToArray(request)
           service(arr) map ChannelBuffers.wrappedBuffer
         }
@@ -54,30 +55,29 @@ class ThriftMuxServerImpl(
 }
 
 object ThriftMuxListener
-  extends Netty3Listener[ChannelBuffer, ChannelBuffer]("thrift", thriftmux.PipelineFactory)
+  extends Netty3Listener[CB, CB]("thrift", thriftmux.PipelineFactory)
 
-object ThriftMuxer extends DefaultServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer](
+object ProtocolRecordingMuxServer extends DefaultServer[CB, CB, CB, CB](
   "thrift", ThriftMuxListener, new mux.ServerDispatcher(_, _, true)
-)
+) {
+  private[this] val protocolCounter = statsReceiver.scope("protocol").counter("thriftmux")
 
-/**
- * $serverDescription
- *
- * $serverExample
- *
- * @define serverExampleObject ThriftMuxServer
- */
-object ThriftMuxServer extends ThriftMuxServerImpl(ThriftMuxer)
+  override def serve(addr: SocketAddress, newService: ServiceFactory[CB, CB]): ListeningServer = {
+    protocolCounter.incr()
+    super.serve(addr, newService)
+  }
+}
 
 package thriftmux.exp {
   /**
    * A [[com.twitter.finagle.server.StackServer]] for the ThriftMux protocol.
    */
-  private[finagle] object ThriftMuxer
-    extends StackServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer]
-  {
-    protected val newListener: Stack.Params => Listener[ChannelBuffer, ChannelBuffer] = { params =>
-      Netty3Listener[ChannelBuffer, ChannelBuffer](thriftmux.PipelineFactory, params)
+  private[finagle] object ThriftMuxer extends StackServer[CB, CB, CB, CB] {
+    protected val newListener: Stack.Params => Listener[CB, CB] = { params =>
+      val Stats(stats) = params[Stats]
+      stats.scope("protocol").counter("thriftmux").incr()
+
+      Netty3Listener[CB, CB](thriftmux.PipelineFactory, params)
     }
 
     protected val newDispatcher: Stack.Params => Dispatcher =
@@ -94,7 +94,7 @@ package thriftmux.exp {
    * @define serverExampleObject ThriftMuxServer
    */
   private[finagle] class ThriftMuxServer(
-      muxer: StackServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer])
+      muxer: StackServer[CB, CB, CB, CB])
     extends Server[Array[Byte], Array[Byte]]
     with ThriftRichServer
   {
@@ -102,10 +102,10 @@ package thriftmux.exp {
     protected val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
 
     private[this] val bufToArrayFilter =
-      new Filter[ChannelBuffer, ChannelBuffer, Array[Byte], Array[Byte]] {
+      new Filter[CB, CB, Array[Byte], Array[Byte]] {
         def apply(
-          request: ChannelBuffer, service: Service[Array[Byte], Array[Byte]]
-        ): Future[ChannelBuffer] = {
+          request: CB, service: Service[Array[Byte], Array[Byte]]
+        ): Future[CB] = {
           val arr = ThriftMuxUtil.bufferToArray(request)
           service(arr) map ChannelBuffers.wrappedBuffer
         }
@@ -115,7 +115,7 @@ package thriftmux.exp {
       new ThriftMuxServer(muxer.configured(p))
 
     def serve(addr: SocketAddress, factory: ServiceFactory[Array[Byte], Array[Byte]]) = {
-      muxer.serve(addr, factory map { service =>
+      muxer.configured(Label("thrift")).serve(addr, factory map { service =>
         // Need a HandleUncaughtApplicationExceptions filter here to maintain
         // the backward compatibility with non-mux thrift clients. Mux thrift
         // clients get the same semantics as a side effect.
@@ -130,7 +130,8 @@ package thriftmux.exp {
    * the legacy [[com.twitter.finagle.builder.ServerBuilder]].
    */
   private[finagle] class ThriftMuxStackServer(underlying: ThriftMuxServer)
-    extends StackServer[Array[Byte], Array[Byte], Any, Any] {
+    extends StackServer[Array[Byte], Array[Byte], Any, Any]
+  {
     // This StackServer's `serve` method proxies to `underlying`, so we do not
     // need to provide an actual listener or dispatcher. In order to avoid
     // failing silently, we throw if these vals are every referenced directly.

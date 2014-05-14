@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientRequest}
 import com.twitter.util.{Future, Local, Time}
 import org.apache.thrift.protocol.TProtocolFactory
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.{ChannelBuffer => CB, ChannelBuffers}
 
 /**
  * A [[com.twitter.finagle.client.Client]] for the Thrift protocol served over
@@ -14,7 +14,7 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
  * @define clientExampleObject ThriftMuxClientImpl(...)
  */
 class ThriftMuxClientImpl(
-  muxer: Client[ChannelBuffer, ChannelBuffer] = MuxClient,
+  muxer: Client[CB, CB] = ProtocolRecordingMuxClient,
   protected val protocolFactory: TProtocolFactory = Protocols.binaryFactory(),
   clientId: Option[ClientId] = None
 ) extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient {
@@ -48,13 +48,15 @@ class ThriftMuxClientImpl(
 }
 
 /**
- * A client for thrift served over [[com.twitter.finagle.mux]]
- *
- * $clientExample
- *
- * @define clientExampleObject ThriftMuxClient
+ * An extension of [[com.twitter.finagle.MuxClient]] that records a stat to
+ * track usage of the ThriftMux protocol.
  */
-object ThriftMuxClient extends ThriftMuxClientImpl(MuxClient)
+private[finagle] object ProtocolRecordingMuxClient extends MuxClient {
+  override def newClient(dest: Name, label: String): ServiceFactory[CB, CB] = {
+    statsReceiver.scope(label).scope("protocol").counter("thriftmux").incr()
+    super.newClient(dest, label)
+  }
+}
 
 package thriftmux.exp {
   /**
@@ -64,5 +66,5 @@ package thriftmux.exp {
    *
    * @define clientExampleObject ThriftMuxClient
    */
-  object ThriftMuxClient extends ThriftMuxClientImpl(MuxClient)
+  object ThriftMuxClient extends ThriftMuxClientImpl(ProtocolRecordingMuxClient)
 }

@@ -14,12 +14,14 @@ import org.jboss.netty.buffer.{ChannelBuffer => CB}
 object MuxTransporter extends Netty3Transporter[CB, CB](
   "mux", mux.PipelineFactory)
 
-object MuxClient extends DefaultClient[CB, CB](
+object MuxClient extends MuxClient
+class MuxClient extends DefaultClient[CB, CB](
   name = "mux",
   endpointer = (sa, sr) =>
     (mux.lease.LeasedBridge[CB, CB, CB, CB](
       MuxTransporter, new mux.ClientDispatcher(_, sr))(sa, sr)),
-  pool = (sr: StatsReceiver) => new ReusingPool(_, sr.scope("reusingpool")))
+  pool = (sr: StatsReceiver) => new ReusingPool(_, sr.scope("reusingpool"))
+)
 
 object MuxListener extends Netty3Listener[CB, CB]("mux", mux.PipelineFactory)
 object MuxServer extends DefaultServer[CB, CB, CB, CB](
