@@ -43,5 +43,8 @@ private[finagle] class ClientIdContext extends ContextHandler {
     }
   }
 
+  // It arguably doesn't make sense to pass through ClientIds, since
+  // they are meant to identify the immediate client of a downstream
+  // system.
   def emit(): Option[Buf] = ClientId.current map { id => Buf.Utf8(id.name) }
 }

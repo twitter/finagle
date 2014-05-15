@@ -151,7 +151,7 @@ private[thrift] class ThriftServerTracingFilter(
     buffer.toArray
   }
 
-  def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) = Trace.unwind {
+  def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) = {
     // What to do on exceptions here?
     if (isUpgraded) {
       val header = new thrift.RequestHeader
@@ -206,19 +206,14 @@ private[thrift] class ThriftServerTracingFilter(
       // precedence over the id provided by ClientIdContext.
       extractClientId(header) foreach { clientId => ClientId.set(Some(clientId)) }
 
-      try {
-        service(request_) map {
-          case response if response.isEmpty => response
-          case response =>
-            Trace.record(Annotation.ServerSend())
-            val responseHeader = new thrift.ResponseHeader
-            ByteArrays.concat(
-              OutputBuffer.messageToArray(responseHeader, protocolFactory),
-              response)
-        }
-      } finally {
-        ClientId.clear()
-        Dtab.clear()
+      service(request_) map {
+        case response if response.isEmpty => response
+        case response =>
+          Trace.record(Annotation.ServerSend())
+          val responseHeader = new thrift.ResponseHeader
+          ByteArrays.concat(
+            OutputBuffer.messageToArray(responseHeader, protocolFactory),
+            response)
       }
     } else {
       val buffer = new InputBuffer(request, protocolFactory)

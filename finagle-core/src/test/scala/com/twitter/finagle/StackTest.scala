@@ -34,6 +34,13 @@ class StackTest extends FunSuite {
     assert(stack.make(Stack.Params.empty) === Seq(30,1,2,3,4))
   }
 
+  test("Stack.remove") {
+    val stack = newStack()
+    val prms = Stack.Params.empty
+    assert(stack.remove(TestRole2).make(prms) === Seq(20,1,2,3,4))
+    assert(stack.remove(TestRole3).make(prms) === Seq(10,1,2,3,4))
+  }
+
   test("Stack.replace") {
     val stack = newStack().replace(TestRole2, new Stack.Simple[List[Int]](TestRole2) {
       def make(params: Stack.Params, next: List[Int]): List[Int] = 100 :: next

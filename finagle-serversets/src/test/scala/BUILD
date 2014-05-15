@@ -1,6 +1,6 @@
 junit_tests(name='scala',
   dependencies=[
-    pants(':core'),
+    pants(':client'),
     pants(':defaultloader'),
     pants(':serversets')
   ]
@@ -28,6 +28,11 @@ junit_tests(name='core',
 junit_tests(name='defaultloader',
   dependencies=[pants(':core')],
   sources=globs('com/twitter/finagle/serverset2/client/apache/*.scala')
+)
+
+junit_tests(name='client',
+  dependencies=[pants(':core')],
+  sources=globs('com/twitter/finagle/serverset2/client/*.scala')
 )
 
 junit_tests(name='serversets',

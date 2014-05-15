@@ -20,6 +20,7 @@ object Commands {
   val EXPIRE    = "EXPIRE"
   val EXPIREAT  = "EXPIREAT"
   val KEYS      = "KEYS"
+  val MOVE      = "MOVE"
   val PERSIST   = "PERSIST"
   val PEXPIRE   = "PEXPIRE"
   val PEXPIREAT = "PEXPIREAT"
@@ -140,6 +141,7 @@ object Commands {
     EXPIRE            -> {Expire(_)},
     EXPIREAT          -> {ExpireAt(_)},
     KEYS              -> {Keys(_)},
+    MOVE              -> {Move(_)},
     PERSIST           -> {Persist(_)},
     PEXPIRE           -> {PExpire(_)},
     PEXPIREAT         -> {PExpireAt(_)},
@@ -269,11 +271,13 @@ object Commands {
 }
 
 object CommandBytes {
+  // Key Commands
   val DEL               = StringToChannelBuffer("DEL")
   val EXISTS            = StringToChannelBuffer("EXISTS")
   val EXPIRE            = StringToChannelBuffer("EXPIRE")
   val EXPIREAT          = StringToChannelBuffer("EXPIREAT")
   val KEYS              = StringToChannelBuffer("KEYS")
+  val MOVE              = StringToChannelBuffer("MOVE")
   val PERSIST           = StringToChannelBuffer("PERSIST")
   val PEXPIRE           = StringToChannelBuffer("PEXPIRE")
   val PEXPIREAT         = StringToChannelBuffer("PEXPIREAT")

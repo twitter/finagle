@@ -50,6 +50,9 @@ private[serverset2] trait ChattyReader extends ChattyClient with ZooKeeperReader
   def getChildrenWatch(path: String): Future[Watched[Node.Children]] =
     printOp("getChildrenWatch", underlying.getChildrenWatch(path), path)
 
+  def globPrefixWatch(pat: String): Future[Watched[Seq[String]]] =
+    printOp("glob", underlying.globPrefixWatch(pat), pat)
+
   def getData(path: String): Future[Node.Data] =
     printOp("getData", underlying.getData(path), path)
 

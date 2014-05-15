@@ -71,6 +71,20 @@ object Keys {
   def apply(args: Seq[Array[Byte]]) = new Keys(ChannelBuffers.wrappedBuffer(args.head))
 }
 
+case class Move(key: ChannelBuffer, db: ChannelBuffer) extends StrictKeyCommand {
+  def command = Commands.MOVE
+  RequireClientProtocol(db != null && db.readableBytes > 0, "Database must be specified")
+  def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(Seq(CommandBytes.MOVE, key, db))
+}
+object Move {
+  def apply(args: Seq[Array[Byte]]) = {
+    val list = trimList(args, 2, "MOVE")
+    new Move(ChannelBuffers.wrappedBuffer(list(0)),
+      ChannelBuffers.wrappedBuffer(list(1)))
+  }
+}
+
 case class Persist(key: ChannelBuffer) extends StrictKeyCommand {
   def command = Commands.PERSIST
   def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.PERSIST, key))

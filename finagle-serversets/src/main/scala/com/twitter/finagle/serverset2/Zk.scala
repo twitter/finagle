@@ -90,8 +90,8 @@ private class Zk(watchedZk: Watched[ZooKeeperReader], timerIn: Timer) {
      op("existsOf", path) { zkr.existsWatch(path) }
    }
 
-   private val childrenWatchOp = Memoize { path: String =>
-     op("childrenWatchOp", path) { zkr.getChildrenWatch(path) }
+   private val globPrefixWatchOp = Memoize[String, Activity[Seq[String]]] { pat =>
+       op("globPrefixWatchOp", pat) { zkr.globPrefixWatch(pat) }
    }
 
   def close() = zkr.close()
@@ -104,22 +104,29 @@ private class Zk(watchedZk: Watched[ZooKeeperReader], timerIn: Timer) {
     existsWatchOp(path)
 
   /**
-   * A persistent version of getChildren: childrenOf returns a Activity
+   * A persistent version of glob: globOf returns a Activity
    * representing the current (best-effort) list of children for the
-   * given path.
+   * given path, under the given prefix. Note that paths returned are
+   * absolute.
    */
-  def childrenOf(path: String): Activity[Set[String]] =
+  def globOf(pat: String): Activity[Seq[String]] = {
+    val slash = pat.lastIndexOf('/')
+    if (slash < 0)
+      return Activity.exception(new IllegalArgumentException("Invalid pattern"))
+
+    val path = if (slash == 0) "/" else pat.substring(0, slash)
     existsOf(path) flatMap {
-      case None => Activity.value(Set.empty)
+      case None => Activity.value(Seq.empty)
       case Some(_) =>
-        childrenWatchOp(path) transform {
+        globPrefixWatchOp(pat) transform {
           case Activity.Pending => Activity.pending
-          case Activity.Ok(Node.Children(children, _)) => Activity.value(children.toSet)
+          case Activity.Ok(paths) => Activity.value(paths)
           // This can happen when exists() races with getChildren.
-          case Activity.Failed(KeeperException.NoNode(_)) => Activity.value(Set.empty)
+          case Activity.Failed(KeeperException.NoNode(_)) => Activity.value(Seq.empty)
           case Activity.Failed(exc) => Activity.exception(exc)
         }
     }
+  }
 
   private val immutableDataOf_ = Memoize { path: String =>
     Activity(Var.async[Activity.State[Buf]](Activity.Pending) { v =>
@@ -145,13 +152,11 @@ private class Zk(watchedZk: Watched[ZooKeeperReader], timerIn: Timer) {
   /**
    * Collect immutable data from a number of paths together.
    */
-  def collectImmutableDataOf(paths: Set[String]): Activity[Map[String, Buf]] = {
+  def collectImmutableDataOf(paths: Seq[String]): Activity[Seq[(String, Buf)]] = {
     def pathDataOf(path: String): Activity[(String, Buf)] =
       immutableDataOf(path).map(path -> _)
 
-    Activity.collect(paths map pathDataOf) map { pairs =>
-      pairs.filter({case (_, data) => data != null}).toMap
-    }
+    Activity.collect(paths map pathDataOf)
   }
 
   def addAuthInfo(scheme: String, auth: Buf): Future[Unit] = zkr.addAuthInfo(scheme, auth)
@@ -173,6 +178,8 @@ private class NullZooKeeperReader extends ZooKeeperReader {
 
   def getChildren(path: String): Future[Node.Children] = Future.never
   def getChildrenWatch(path: String): Future[Watched[Node.Children]] = Future.never
+  
+  def globPrefixWatch(pat: String): Future[Watched[Seq[String]]] = Future.never
 
   def getData(path: String): Future[Node.Data] = Future.never
   def getDataWatch(path: String): Future[Watched[Node.Data]] = Future.never

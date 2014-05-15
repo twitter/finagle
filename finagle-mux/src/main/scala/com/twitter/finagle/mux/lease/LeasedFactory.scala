@@ -1,7 +1,25 @@
 package com.twitter.finagle.mux.lease
 
-import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, ServiceProxy}
+import com.twitter.finagle._
 import com.twitter.util.{Future, Time}
+
+object LeasedFactory {
+  object Leased extends Stack.Role
+
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Simple[ServiceFactory[Req, Rep]](Leased) {
+      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
+        val mk: () => Future[Service[Req, Rep] with Acting] = { () =>
+          next() map {
+            // the warning is OK, this should go away when we fix the abstraction
+            case svc: Service[Req, Rep] with Acting => svc
+            case _ => throw new IllegalArgumentException("You are only permitted to pass Acting Services!")
+          }
+        }
+        new LeasedFactory(mk)
+      }
+    }
+}
 
 /**
  * LeasedFactory is used for bridging the gap between ServiceFactory#isAvailable

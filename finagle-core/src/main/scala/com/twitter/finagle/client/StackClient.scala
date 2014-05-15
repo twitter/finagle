@@ -9,7 +9,7 @@ import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.service._
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stack.nilStack
-import com.twitter.finagle.stats.RollupStatsReceiver
+import com.twitter.finagle.stats.{ClientStatsReceiver, RollupStatsReceiver}
 import com.twitter.finagle.tracing.{ClientDestTracingFilter, TracingFilter}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.Showable
@@ -24,6 +24,7 @@ private[finagle] object StackClient {
     object Pool extends Stack.Role
     object RequestDraining extends Stack.Role
     object PrepFactory extends Stack.Role
+    /** PrepConn is special in that it's the first role before the `Endpoint` role */
     object PrepConn extends Stack.Role
   }
 
@@ -32,7 +33,7 @@ private[finagle] object StackClient {
    * Note that this is terminated by a [[com.twitter.finagle.service.FailingFactory]]:
    * users are expected to terminate it with a concrete service factory.
    *
- * @see [[com.twitter.finagle.service.ExpiringService]]
+   * @see [[com.twitter.finagle.service.ExpiringService]]
    * @see [[com.twitter.finagle.service.FailFastFactory]]
    * @see [[com.twitter.finagle.client.DefaultPool]]
    * @see [[com.twitter.finagle.service.TimeoutFilter]]
@@ -101,9 +102,12 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
 
   /**
    * Creates a new StackClient with the default stack (StackClient#newStack)
-   * and empty params.
+   * and [[com.twitter.finagle.stats.ClientStatsReceiver]].
    */
-  def this() = this(StackClient.newStack[Req, Rep], Stack.Params.empty)
+  def this() = this(
+    StackClient.newStack[Req, Rep],
+    Stack.Params.empty + Stats(ClientStatsReceiver)
+  )
 
   /**
    * Defines a typed [[com.twitter.finagle.Transporter]] for this client.
@@ -125,17 +129,24 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
    * Creates a new StackClient with `f` applied to `stack`.
    */
   def transformed(f: Stack[ServiceFactory[Req, Rep]] => Stack[ServiceFactory[Req, Rep]]) =
-    new StackClient[Req, Rep, In, Out](f(stack), params) {
-      protected val newTransporter = self.newTransporter
-      protected val newDispatcher = self.newDispatcher
-    }
+    copy(stack = f(stack))
 
   /**
    * Creates a new StackClient with `p` added to the `params`
    * used to configure this StackClient's `stack`.
    */
   def configured[P: Stack.Param](p: P): StackClient[Req, Rep, In, Out] =
-    new StackClient[Req, Rep, In, Out](stack, params + p) {
+    copy(params = params+p)
+
+  /**
+   * A copy constructor in lieu of defining StackClient as a
+   * case class.
+   */
+  def copy(
+    stack: Stack[ServiceFactory[Req, Rep]] = self.stack,
+    params: Stack.Params = self.params
+  ): StackClient[Req, Rep, In, Out] =
+    new StackClient[Req, Rep, In, Out](stack, params) {
       protected val newTransporter = self.newTransporter
       protected val newDispatcher = self.newDispatcher
     }
@@ -168,7 +179,7 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
     val clientStack = stack ++ (endpointer +: nilStack)
     val clientParams = params +
       Label(clientLabel) +
-      Stats(new RollupStatsReceiver(stats.scope(clientLabel)))
+      Stats(stats.scope(clientLabel))
 
     dest match {
       case Name.Bound(addr) =>
@@ -184,7 +195,9 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
 
 /**
  * A [[com.twitter.finagle.Stack Stack]]-based client which preserves
- * `Like` client semantics.
+ * `Like` client semantics. This makes it appropriate for implementing rich
+ * clients, since the rich type can be preserved without having to drop down
+ * to StackClient[Req, Rep, In, Out] when making changes.
  */
 private[finagle]
 abstract class StackClientLike[Req, Rep, In, Out, Repr <: StackClientLike[Req, Rep, In, Out, Repr]](
@@ -194,8 +207,20 @@ abstract class StackClientLike[Req, Rep, In, Out, Repr <: StackClientLike[Req, R
 
   protected def newInstance(client: StackClient[Req, Rep, In, Out]): Repr
 
+  /**
+   * Creates a new `Repr` with an underlying StackClient where `p` has been
+   * added to the `params` used to configure this StackClient's `stack`.
+   */
   def configured[P: Stack.Param](p: P): Repr =
     newInstance(client.configured(p))
 
+  /**
+   * Creates a new `Repr` with an underlying StackClient where `f` has been
+   * applied to `stack`.
+   */
+  protected def transformed(f: Stack[ServiceFactory[Req, Rep]] => Stack[ServiceFactory[Req, Rep]]): Repr =
+    newInstance(client.transformed(f))
+
+  /** @inheritdoc */
   def newClient(dest: Name, label: String) = client.newClient(dest, label)
 }

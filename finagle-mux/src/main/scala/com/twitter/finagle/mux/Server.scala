@@ -13,6 +13,10 @@ import scala.collection.JavaConverters._
 case class ClientHangupException(cause: Throwable) extends Exception(cause)
 case class ClientDiscardedRequestException(why: String) extends Exception(why)
 
+object ServerDispatcher {
+  val ServerEnabledTraceMessage = "finagle.mux.serverEnabled"
+}
+
 /**
  * A ServerDispatcher for the mux protocol.
  */
@@ -43,25 +47,23 @@ private[finagle] class ServerDispatcher(
         val msg = Rerr(tag, "Tdispatch not enabled")
         trans.write(encode(msg))
       } else {
-        val save = Local.save()
-        try {
-          for ((k, v) <- contexts)
-            Context.handle(ChannelBufferBuf(k), ChannelBufferBuf(v))
-          Trace.record(Annotation.ServerRecv())
-          if (dtab.length > 0)
-            Dtab.delegate(dtab)
-          val f = service(req)
-          pending.put(tag, f)
-          f respond {
-            case Return(rep) =>
-              pending.remove(tag)
-              Trace.record(Annotation.ServerSend())
-              trans.write(encode(RdispatchOk(tag, Seq.empty, rep)))
-            case Throw(exc) =>
-              trans.write(encode(RdispatchError(tag, Seq.empty, exc.toString)))
-          }
-        } finally {
-          Local.restore(save)
+        for ((k, v) <- contexts)
+          Context.handle(ChannelBufferBuf(k), ChannelBufferBuf(v))
+        Trace.record(Annotation.ServerRecv())
+        if (dtab.length > 0)
+          Dtab.delegate(dtab)
+        val f = service(req)
+        pending.put(tag, f)
+        f respond {
+          case Return(rep) =>
+            pending.remove(tag)
+
+              // Record tracing info to track Mux adoption across clusters.
+              Trace.record(ServerDispatcher.ServerEnabledTraceMessage)
+            Trace.record(Annotation.ServerSend())
+            trans.write(encode(RdispatchOk(tag, Seq.empty, rep)))
+          case Throw(exc) =>
+            trans.write(encode(RdispatchError(tag, Seq.empty, exc.toString)))
         }
       }
 
@@ -71,6 +73,10 @@ private[finagle] class ServerDispatcher(
         for (traceId <- traceId)
           Trace.setId(traceId)
         Trace.record(Annotation.ServerRecv())
+
+        // Record tracing info to track Mux adoption across clusters.
+        Trace.record(ServerDispatcher.ServerEnabledTraceMessage)
+
         val f = service(req)
         pending.put(tag, f)
         f respond {
@@ -102,6 +108,7 @@ private[finagle] class ServerDispatcher(
 
   private[this] def loop(): Future[Nothing] =
     trans.read() flatMap { buf =>
+      val save = Local.save()
       try {
         val m = decode(buf)
         receive(m)
@@ -111,6 +118,8 @@ private[finagle] class ServerDispatcher(
           // We could just ignore this message, but in reality it
           // probably means something is really FUBARd.
           Future.exception(exc)
+      } finally {
+        Local.restore(save)
       }
     }
 

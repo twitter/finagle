@@ -2,7 +2,7 @@ package com.twitter.finagle.builder
 
 import com.twitter.finagle._
 import com.twitter.finagle.service.StatsFilter
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.finagle.integration.IntegrationBase
 import com.twitter.util.{Await, Promise, Return, Future, Time}
 import org.mockito.Matchers

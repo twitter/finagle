@@ -45,12 +45,23 @@ sealed trait Stack[T] {
     }
 
   /**
+   * Remove all nodes in the stack that match the `target` role.
+   * Leaf nodes are not removable.
+   */
+  def remove(target: Role): Stack[T] =
+    this match {
+      case Node(`target`, _, next) => next.remove(target)
+      case Node(role, mk, next) => Node(role, mk, next.remove(target))
+      case leaf@Leaf(_, _) => leaf
+    }
+
+  /**
    * Replace any stack elements matching the argument role with a given
    * [[com.twitter.finagle.Stackable Stackable]]. If no elements match the
    * role, then an unmodified stack is returned.
    */
-  def replace(targetRole: Role, replacement: Stackable[T]): Stack[T] = transform {
-    case n@Node(headRole, _, next) if headRole == targetRole => replacement +: next
+  def replace(target: Role, replacement: Stackable[T]): Stack[T] = transform {
+    case n@Node(`target`, _, next) => replacement +: next
     case stk => stk
   }
 
@@ -60,8 +71,8 @@ sealed trait Stack[T] {
    * role, then an unmodified stack is returned. `replacement` must conform to
    * typeclass [[com.twitter.finagle.CanStackFrom]].
    */
-  def replace[U](targetRole: Role, replacement: U)(implicit csf: CanStackFrom[U, T]): Stack[T] =
-    replace(targetRole, csf.toStackable(targetRole, replacement))
+  def replace[U](target: Role, replacement: U)(implicit csf: CanStackFrom[U, T]): Stack[T] =
+    replace(target, csf.toStackable(target, replacement))
 
   /**
    * Traverse the stack, invoking `fn` on each element.

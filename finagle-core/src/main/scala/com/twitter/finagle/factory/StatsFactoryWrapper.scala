@@ -2,7 +2,7 @@ package com.twitter.finagle.factory
 
 import com.twitter.finagle.{ClientConnection, param, ServiceFactory, ServiceFactoryProxy, Stack, Stackable}
 import com.twitter.finagle.util.Throwables
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver}
 
 private[finagle] object StatsFactoryWrapper {
   object ServiceCreationStats extends Stack.Role
@@ -14,7 +14,10 @@ private[finagle] object StatsFactoryWrapper {
     new Stack.Simple[ServiceFactory[Req, Rep]](ServiceCreationStats) {
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
         val param.Stats(statsReceiver) = params[param.Stats]
-        new StatsFactoryWrapper(next, statsReceiver.scope("service_creation"))
+        new StatsFactoryWrapper(
+          next,
+          new RollupStatsReceiver(statsReceiver.scope("service_creation"))
+        )
       }
     }
 }
