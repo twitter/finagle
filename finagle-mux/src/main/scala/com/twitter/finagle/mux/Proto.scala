@@ -273,6 +273,15 @@ private[finagle] object Message {
       else None
   }
 
+  object ControlMessage {
+    // TODO: Update this extractor in the event that we "fix" the control
+    // message flukes by removing backwards compatibility.
+    def unapply(m: Message): Option[Int] =
+      if (math.abs(m.typ) >= 64 || m.typ == Types.BAD_Tdiscarded)
+        Some(m.tag)
+      else None
+  }
+
   def decodeUtf8(buf: ChannelBuffer): String = 
     decodeUtf8(buf, buf.readableBytes)
 

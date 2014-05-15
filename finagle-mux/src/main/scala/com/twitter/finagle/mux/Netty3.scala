@@ -21,4 +21,3 @@ private[finagle] object PipelineFactory extends ChannelPipelineFactory {
     pipeline
   }
 }
-

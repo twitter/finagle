@@ -58,6 +58,33 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
             new DownstreamMessageEvent(e.getChannel, e.getFuture,
               ChannelBuffers.wrappedBuffer(responseHeader, rep), e.getRemoteAddress))
 
+        // Non-mux Clients can't handle T-type control messages, so we simulate responses.
+        case Message.Tdrain(tag) =>
+          e.getFuture.setSuccess()
+          super.messageReceived(ctx,
+            new UpstreamMessageEvent(
+              e.getChannel,
+              Message.encode(Message.Rdrain(tag)),
+              e.getRemoteAddress))
+
+        case Message.Tping(tag) =>
+          e.getFuture.setSuccess()
+          super.messageReceived(ctx,
+            new UpstreamMessageEvent(
+              e.getChannel,
+              Message.encode(Message.Rping(tag)),
+              e.getRemoteAddress))
+
+        case Message.ControlMessage(tag) =>
+          e.getFuture.setSuccess()
+          super.messageReceived(ctx,
+            new UpstreamMessageEvent(
+              e.getChannel,
+              Message.encode(
+                Message.Rerr(tag, "Unable to send Mux control message to non-Mux client")
+              ),
+              e.getRemoteAddress))
+
         case Message.RdispatchError(_, _, error) =>
           // OK to throw an exception here as ServerBridge take cares it
           // by logging the error and then closing the channel.
@@ -85,6 +112,33 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
         case Message.RdispatchOk(_, _, rep) =>
           super.writeRequested(ctx,
             new DownstreamMessageEvent(e.getChannel, e.getFuture, rep, e.getRemoteAddress))
+
+        // Non-mux Clients can't handle T-type control messages, so we simulate responses.
+        case Message.Tdrain(tag) =>
+          e.getFuture.setSuccess()
+          super.messageReceived(ctx,
+            new UpstreamMessageEvent(
+              e.getChannel,
+              Message.encode(Message.Rdrain(tag)),
+              e.getRemoteAddress))
+
+        case Message.Tping(tag) =>
+          e.getFuture.setSuccess()
+          super.messageReceived(ctx,
+            new UpstreamMessageEvent(
+              e.getChannel,
+              Message.encode(Message.Rping(tag)),
+              e.getRemoteAddress))
+
+        case Message.ControlMessage(tag) =>
+          e.getFuture.setSuccess()
+          super.messageReceived(ctx,
+            new UpstreamMessageEvent(
+              e.getChannel,
+              Message.encode(
+                Message.Rerr(tag, "Unable to send Mux control message to non-Mux client")
+              ),
+              e.getRemoteAddress))
 
         case Message.RdispatchError(_, _, error) =>
           // OK to throw an exception here as ServerBridge take cares it

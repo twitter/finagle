@@ -127,4 +127,21 @@ class ProtoTest extends FunSuite {
       decode(ChannelBuffers.wrappedBuffer(Array[Byte](0, 0, 0, 1)))
     } === BadMessageException("bad message type: 0 [tag=1]"))
   }
+
+  test("extract control messages") {
+    val tag = 0
+    val buf = ChannelBuffers.EMPTY_BUFFER
+
+    assert(ControlMessage.unapply(Treq(tag, None, buf)) === None)
+    assert(ControlMessage.unapply(RreqOk(0, buf)) === None)
+    assert(ControlMessage.unapply(Tdispatch(tag, Seq.empty, "", Dtab.empty, buf)) === None)
+    assert(ControlMessage.unapply(RdispatchOk(tag, Seq.empty, buf)) === None)
+
+    assert(ControlMessage.unapply(Tdrain(tag)) === Some(tag))
+    assert(ControlMessage.unapply(Rdrain(tag)) === Some(tag))
+    assert(ControlMessage.unapply(Tping(tag)) === Some(tag))
+    assert(ControlMessage.unapply(Rping(tag)) === Some(tag))
+    assert(ControlMessage.unapply(Tdiscarded(tag, "")) === Some(tag))
+    assert(ControlMessage.unapply(Tlease(0, 0L)) === Some(tag))
+  }
 }

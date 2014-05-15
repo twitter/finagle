@@ -147,6 +147,16 @@ class EndToEndTest extends FunSuite {
     }
   }
 
+  test("thriftmux server + Finagle thrift client: server.close()") {
+    new ThriftMuxTestServer {
+      val client = Thrift.newIface[TestService.FutureIface](server)
+
+      Await.result(client.query("ok"))
+      1 to 5 foreach { _ => client.query("ok") }
+      Await.result(server.close())
+    }
+  }
+
   test("thriftmux server + thriftmux client: ClientId should not be overridable externally") {
     val server = ThriftMux.serveIface(":*", new TestService.FutureIface {
       def query(x: String) = Future.value(ClientId.current map { _.name } getOrElse(""))
@@ -176,12 +186,22 @@ class EndToEndTest extends FunSuite {
     protected val protocolFactory = Protocols.binaryFactory()
   }
 
-  test("thriftmux server + thrift client w/o protocol upgrade") {
+  test("thriftmux server + Finagle thrift client w/o protocol upgrade") {
     new ThriftMuxTestServer {
       val client = OldPlainThriftClient.newIface[TestService.FutureIface](server)
       1 to 5 foreach { _ =>
         assert(Await.result(client.query("ok")) == "okok")
       }
+    }
+  }
+
+  test("thriftmux server + Finagle thrift client w/o protocol upgrade: server.close()") {
+    new ThriftMuxTestServer {
+      val client = OldPlainThriftClient.newIface[TestService.FutureIface](server)
+
+      Await.result(client.query("ok"))
+      1 to 5 foreach { _ => client.query("ok") }
+      Await.result(server.close())
     }
   }
 

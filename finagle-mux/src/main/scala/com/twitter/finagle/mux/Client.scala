@@ -57,7 +57,9 @@ private[finagle] class ClientDispatcher (
   import Message._
 
   @volatile private[this] var canDispatch: Cap.State = Cap.Unknown
+  @volatile private[this] var drained = false
 
+  private[this] val futureNackedException = Future.exception(RequestNackedException)
   private[this] val tags = TagSet()
   private[this] val reqs = TagMap[Promise[ChannelBuffer]](tags)
   private[this] val log = Logger.getLogger(getClass.getName)
@@ -98,6 +100,9 @@ private[finagle] class ClientDispatcher (
         p.setValue(ChannelBuffers.EMPTY_BUFFER)
     case Tping(tag) =>
       trans.write(encode(Rping(tag)))
+    case Tdrain(tag) =>
+      drained = true
+      trans.write(encode(Rdrain(tag)))
     case Tlease(unit, howMuch) =>
       Lease.parse(unit, howMuch) foreach { newLease =>
         lease = newLease
@@ -143,7 +148,11 @@ private[finagle] class ClientDispatcher (
     }
   }
 
-  def apply(req: ChannelBuffer): Future[ChannelBuffer] = dispatch(req, true)
+  def apply(req: ChannelBuffer): Future[ChannelBuffer] =
+    if (drained)
+      futureNackedException
+    else
+      dispatch(req, true)
 
   /**
    * Dispatch a request.
@@ -210,7 +219,7 @@ private[finagle] class ClientDispatcher (
     } else p
   }
 
-  override def isAvailable = trans.isOpen
+  override def isAvailable = !drained && trans.isOpen
 
   def isActive = !lease.expired
 
