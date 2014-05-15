@@ -295,6 +295,24 @@ false otherwise.
       </h4>
       <p class="shortcomment cmt">Returns all keys matching pattern</p><div class="fullcomment"><div class="comment cmt"><p>Returns all keys matching pattern</p></div><dl class="paramcmts block"><dt class="param">pattern</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>list of keys matching pattern
 </p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#move" data-isabs="false">
+      <a id="move(ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">move</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="db">db: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Move key from the currently selected database to the specified destination
+database.</p><div class="fullcomment"><div class="comment cmt"><p>Move key from the currently selected database to the specified destination
+database. When key already exists in the destination database, or it does
+not exist in the source database, it does nothing.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if key was moved.
+        false if key was not moved for any reason.
+</p></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">

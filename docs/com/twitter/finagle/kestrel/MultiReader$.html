@@ -25,7 +25,7 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">MultiReader</span><span class="result"> extends AnyRef</span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.15.1) Use MultiReaderMemcache or MultiReaderThrift instead">MultiReader</span><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       
@@ -46,7 +46,10 @@ the first message to arrive.</p><p>Var[Addr] example:</p><pre>
           .hostConnectionLimit(<span class="num">1</span>) <span class="cmt">/* etc... but do not set hosts or build */</span>
       .retryBackoffs(<span class="cmt">/* Stream[Duration], Timer; optional */</span>
       .build()
-</pre></div><div class="toggleContainer block">
+</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.15.1)</i> Use MultiReaderMemcache or MultiReaderThrift instead</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
@@ -140,18 +143,6 @@ the first message to arrive.</p><p>Var[Addr] example:</p><pre>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReader#apply" data-isabs="false">
-      <a id="apply(Var[Addr],String):ClusterMultiReaderBuilder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="va">va: <span name="com.twitter.util.Var" class="extype">Var</span>[<a name="com.twitter.finagle.Addr" class="extype" href="../Addr.html">Addr</a>]</span>, <span name="queueName">queueName: String</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="ClusterMultiReaderBuilder.html">ClusterMultiReaderBuilder</a></span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -427,6 +418,23 @@ feed in a {{java.util.Iterator&lt;ReadHandle&gt;}}
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.2)</i> Use Var[Addr]-based <code>apply</code> method</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReader#apply" data-isabs="false">
+      <a id="apply(Var[Addr],String):ClusterMultiReaderBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.15.1) Use MultiReaderMemcache.apply instead">apply</span><span class="params">(<span name="va">va: <span name="com.twitter.util.Var" class="extype">Var</span>[<a name="com.twitter.finagle.Addr" class="extype" href="../Addr.html">Addr</a>]</span>, <span name="queueName">queueName: String</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="ClusterMultiReaderBuilder.html">ClusterMultiReaderBuilder</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Create a Kestrel memcache protocol based builder
+</p><div class="fullcomment"><div class="comment cmt"><p>Create a Kestrel memcache protocol based builder
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.15.1)</i> Use MultiReaderMemcache.apply instead</p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReader#merge" data-isabs="false">
       <a id="merge(Cluster[ReadHandle]):ReadHandle"></a>
       <h4 class="signature">

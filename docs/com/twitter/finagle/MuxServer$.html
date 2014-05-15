@@ -174,6 +174,18 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.server.DefaultServer#configured" data-isabs="false">
+      <a id="configured:StackServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">configured</span><span class="result">: <span name="com.twitter.finagle.server.StackServer" class="extype">StackServer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.server.DefaultServer" class="extype" href="server/DefaultServer.html">DefaultServer</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -273,18 +285,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.server.DefaultServer" class="extype" href="server/DefaultServer.html">DefaultServer</a></dd></dl></div>
-    </li><li visbl="prt" name="com.twitter.finagle.server.DefaultServer#makeNewStack" data-isabs="false">
-      <a id="makeNewStack(StatsReceiver):(ServiceFactory[ChannelBuffer, ChannelBuffer]) ⇒ ServiceFactory[ChannelBuffer, ChannelBuffer]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">makeNewStack</span><span class="params">(<span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="stats/StatsReceiver.html">StatsReceiver</a></span>)</span><span class="result">: (<a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]) ⇒ <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.server.DefaultServer" class="extype" href="server/DefaultServer.html">DefaultServer</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.server.DefaultServer#maxConcurrentRequests" data-isabs="false">
       <a id="maxConcurrentRequests:Int"></a>
       <h4 class="signature">
@@ -561,18 +561,6 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
       </h4>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
 when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.server.DefaultServer#serveTransport" data-isabs="false">
-      <a id="serveTransport(ServiceFactory[ChannelBuffer, ChannelBuffer],Transport[ChannelBuffer, ChannelBuffer]):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">serveTransport</span><span class="params">(<span name="serviceFactory">serviceFactory: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>, <span name="transport">transport: <a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.server.DefaultServer" class="extype" href="server/DefaultServer.html">DefaultServer</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.server.DefaultServer#serviceTransport" data-isabs="false">
       <a id="serviceTransport:(Transport[ChannelBuffer, ChannelBuffer], Service[ChannelBuffer, ChannelBuffer]) ⇒ Closable"></a>
       <h4 class="signature">
@@ -582,6 +570,18 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
       </span>
       <span class="symbol">
         <span class="name">serviceTransport</span><span class="result">: (<a name="com.twitter.finagle.transport.Transport" class="extype" href="transport/Transport.html">Transport</a>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]) ⇒ <span name="com.twitter.util.Closable" class="extype">Closable</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.server.DefaultServer" class="extype" href="server/DefaultServer.html">DefaultServer</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.server.DefaultServer#stack" data-isabs="false">
+      <a id="stack:Stack[ServiceFactory[ChannelBuffer, ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stack</span><span class="result">: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[<a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.server.DefaultServer" class="extype" href="server/DefaultServer.html">DefaultServer</a></dd></dl></div>
@@ -642,6 +642,18 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
       </span>
       <span class="symbol">
         <span class="name">tracer</span><span class="result">: <a name="com.twitter.finagle.tracing.Tracer" class="extype" href="tracing/Tracer.html">Tracer</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.server.DefaultServer" class="extype" href="server/DefaultServer.html">DefaultServer</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.server.DefaultServer#underlying" data-isabs="false">
+      <a id="underlying:StackServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer] { ... /* 2 definitions in type refinement */ }"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">underlying</span><span class="result">: <span name="com.twitter.finagle.server.StackServer" class="extype">StackServer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>] { ... /* 2 definitions in type refinement */ }</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.server.DefaultServer" class="extype" href="server/DefaultServer.html">DefaultServer</a></dd></dl></div>

@@ -289,6 +289,18 @@ transparent to the user.
 used by the client, and consequently determines the {{Req}} and {{Rep}}
 type variables. One of the codec variations is required.
 </p></div></div>
+    </li><li visbl="prt" name="com.twitter.finagle.builder.ClientBuilder#configured" data-isabs="false">
+      <a id="configured[P, HasCluster1, HasCodec1, HasHostConnectionLimit1](P)(Param[P]):ClientBuilder[Req, Rep, HasCluster1, HasCodec1, HasHostConnectionLimit1]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>, <span name="HasCluster1">HasCluster1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasHostConnectionLimit1">HasHostConnectionLimit1</span>]</span><span class="params">(<span name="param">param: P</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a name="com.twitter.finagle.Stack.Param" class="extype" href="../Stack$$Param.html">Param</a>[P]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req, Rep, HasCluster1, HasCodec1, HasHostConnectionLimit1]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.builder.ClientBuilder#connectTimeout" data-isabs="false">
       <a id="connectTimeout(Duration):This"></a>
       <h4 class="signature">
@@ -309,14 +321,14 @@ as well as physical connection time.  Futures returned from
 {{factory()}} will always be satisfied within this timeout.
 </p></div></div>
     </li><li visbl="prt" name="com.twitter.finagle.builder.ClientBuilder#copy" data-isabs="false">
-      <a id="copy[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1](ClientConfig[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]):ClientBuilder[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]"></a>
+      <a id="copy[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1](Params,(Params) ⇒ StackClient[Req1, Rep1, Any, Any]):ClientBuilder[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">copy</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>, <span name="HasCluster1">HasCluster1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasHostConnectionLimit1">HasHostConnectionLimit1</span>]</span><span class="params">(<span name="config">config: <span name="com.twitter.finagle.builder.ClientConfig" class="extype">ClientConfig</span>[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]</span>
+        <span class="name">copy</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>, <span name="HasCluster1">HasCluster1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasHostConnectionLimit1">HasHostConnectionLimit1</span>]</span><span class="params">(<span name="ps">ps: <a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a></span>, <span name="newClient">newClient: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a>) ⇒ <span name="com.twitter.finagle.client.StackClient" class="extype">StackClient</span>[Req1, Rep1, <span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
@@ -419,8 +431,9 @@ which time the experimental option will go away.
       </span>
       </h4>
       <p class="shortcomment cmt">Marks a host dead on connection failure.</p><div class="fullcomment"><div class="comment cmt"><p>Marks a host dead on connection failure. The host remains dead
-until we succesfully connect.</p><p>Intermediate connection attempts *are* respected, but host
-availability is turned off during the reconnection period.
+until we succesfully connect. Intermediate connection attempts
+*are* respected, but host availability is turned off during the
+reconnection period.
 </p></div></div>
     </li><li visbl="pub" name="com.twitter.finagle.builder.ClientBuilder#failureAccrual" data-isabs="false">
       <a id="failureAccrual(ServiceFactoryWrapper):This"></a>
@@ -454,7 +467,7 @@ availability is turned off during the reconnection period.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">failureAccrualParams</span><span class="params">(<span name="params">params: (<span name="scala.Int" class="extype">Int</span>, <span name="com.twitter.util.Duration" class="extype">Duration</span>)</span>)</span><span class="result">: This</span>
+        <span class="name">failureAccrualParams</span><span class="params">(<span name="pair">pair: (<span name="scala.Int" class="extype">Int</span>, <span name="com.twitter.util.Duration" class="extype">Duration</span>)</span>)</span><span class="result">: This</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Use the given paramters for failure accrual.</p><div class="fullcomment"><div class="comment cmt"><p>Use the given paramters for failure accrual.  The first parameter
@@ -692,12 +705,10 @@ a strategy for choosing one from a set of hosts to service a request
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">loadBalancer</span><span class="params">(<span name="loadBalancer">loadBalancer: <a name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extype" href="../loadbalancer/LoadBalancerFactory.html">LoadBalancerFactory</a></span>)</span><span class="result">: This</span>
+        <span class="name">loadBalancer</span><span class="params">(<span name="lbf">lbf: <a name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extype" href="../loadbalancer/LoadBalancerFactory.html">LoadBalancerFactory</a></span>)</span><span class="result">: This</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Specify a load balancer.</p><div class="fullcomment"><div class="comment cmt"><p>Specify a load balancer.  The load balancer implements
-a strategy for choosing one from a set of hosts to service a request
-</p></div></div>
+      
     </li><li visbl="pub" name="com.twitter.finagle.builder.ClientBuilder#logger" data-isabs="false">
       <a id="logger(Logger):This"></a>
       <h4 class="signature">
@@ -903,12 +914,24 @@ If this is defined concurrently with httpProxy, the order in which they are appl
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">socksUsernameAndPassword</span><span class="params">(<span name="socksUsernameAndPassword">socksUsernameAndPassword: (String, String)</span>)</span><span class="result">: This</span>
+        <span class="name">socksUsernameAndPassword</span><span class="params">(<span name="credentials">credentials: (String, String)</span>)</span><span class="result">: This</span>
       </span>
       </h4>
       <p class="shortcomment cmt">For the socks proxy use this username for authentication.</p><div class="fullcomment"><div class="comment cmt"><p>For the socks proxy use this username for authentication.
 socksPassword and socksProxy must be set as well
 </p></div></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientBuilder#stack" data-isabs="false">
+      <a id="stack[Req1, Rep1]((Params) ⇒ StackClient[Req1, Rep1, Any, Any]):ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stack</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="mk">mk: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a>) ⇒ <span name="com.twitter.finagle.client.StackClient" class="extype">StackClient</span>[Req1, Rep1, <span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req1, Rep1, HasCluster, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="ClientConfig$$Yes.html">Yes</a>, HasHostConnectionLimit]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -1103,18 +1126,6 @@ completeness.</p>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="prt" name="com.twitter.finagle.builder.ClientBuilder#withConfig" data-isabs="false">
-      <a id="withConfig[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]((ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit]) ⇒ ClientConfig[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]):ClientBuilder[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">withConfig</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>, <span name="HasCluster1">HasCluster1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasHostConnectionLimit1">HasHostConnectionLimit1</span>]</span><span class="params">(<span name="f">f: (<span name="com.twitter.finagle.builder.ClientConfig" class="extype">ClientConfig</span>[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit]) ⇒ <span name="com.twitter.finagle.builder.ClientConfig" class="extype">ClientConfig</span>[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.builder.ClientBuilder#writerIdleTimeout" data-isabs="false">
       <a id="writerIdleTimeout(Duration):This"></a>
       <h4 class="signature">

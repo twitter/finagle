@@ -168,7 +168,10 @@
         <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="p">p: P</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a name="com.twitter.finagle.Stack.Param" class="extype" href="../Stack$$Param.html">Param</a>[P]</span>)</span><span class="result">: <a name="com.twitter.finagle.exp.MysqlClient" class="extype" href="MysqlClient.html">MysqlClient</a></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StackClientLike</dd></dl></div>
+      <p class="shortcomment cmt">Creates a new <code>Repr</code> with an underlying StackClient where <code>p</code> has been
+added to the <code>params</code> used to configure this StackClient's <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new <code>Repr</code> with an underlying StackClient where <code>p</code> has been
+added to the <code>params</code> used to configure this StackClient's <code>stack</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>StackClientLike</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -267,8 +270,7 @@
         <span class="name">newClient</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Name" class="extype" href="../Name.html">Name</a></span>, <span name="label">label: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
-The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>StackClientLike → <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a></dd></dl></div>
+      <p class="shortcomment cmt">@inheritdoc</p><div class="fullcomment"><div class="comment cmt"><p>@inheritdoc</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>StackClientLike → <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Client#newClient" data-isabs="false">
       <a id="newClient(String,String):ServiceFactory[Request, Result]"></a>
       <h4 class="signature">
@@ -425,6 +427,21 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.client.StackClientLike#transformed" data-isabs="false">
+      <a id="transformed((Stack[ServiceFactory[Request, Result]]) ⇒ Stack[ServiceFactory[Request, Result]]):MysqlClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">transformed</span><span class="params">(<span name="f">f: (<span name="com.twitter.finagle.Stack" class="extype">Stack</span>[<a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>]]) ⇒ <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[<a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.exp.MysqlClient" class="extype" href="MysqlClient.html">MysqlClient</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Creates a new <code>Repr</code> with an underlying StackClient where <code>f</code> has been
+applied to <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new <code>Repr</code> with an underlying StackClient where <code>f</code> has been
+applied to <code>stack</code>.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>StackClientLike</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">

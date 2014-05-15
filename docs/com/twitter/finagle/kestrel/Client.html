@@ -35,7 +35,7 @@
           <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.kestrel.ConnectedClient" class="extype" href="ConnectedClient.html">ConnectedClient</a></div>
+          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.kestrel.ClientBase" class="extype" href="ClientBase.html">ClientBase</a>, <a name="com.twitter.finagle.kestrel.ConnectedClient" class="extype" href="ConnectedClient.html">ConnectedClient</a>, <a name="com.twitter.finagle.kestrel.ThriftConnectedClient" class="extype" href="ThriftConnectedClient.html">ThriftConnectedClient</a></div>
         </div></div>
     
 
@@ -119,7 +119,9 @@ responsibility of the caller to release those resources directly.
       </h4>
       <p class="shortcomment cmt">Dequeue an item.</p><div class="fullcomment"><div class="comment cmt"><p>Dequeue an item.
 </p></div><dl class="paramcmts block"><dt class="param">waitUpTo</dt><dd class="cmt"><p>if the queue is empty, indicate to the Kestrel server how
-long to block the operation, waiting for something to arrive, before returning None
+long to block the operation, waiting for something to arrive, before
+returning None.
+0.seconds (the default) means no waiting, as opposed to infinite wait.
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.kestrel.Client#read" data-isabs="true">
       <a id="read(String):ReadHandle"></a>
@@ -152,7 +154,8 @@ that message to the kestrel server &amp; reading the next one.
       </h4>
       <p class="shortcomment cmt">Enqueue an item.</p><div class="fullcomment"><div class="comment cmt"><p>Enqueue an item.
 </p></div><dl class="paramcmts block"><dt class="param">expiry</dt><dd class="cmt"><p>how long the item is valid for (Kestrel will delete the item
-if it isn't dequeued in time).
+if it isn't dequeued in time).  Time.epoch (0) means the item will never
+expire.
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.kestrel.Client#write" data-isabs="true">
       <a id="write(String,Offer[ChannelBuffer]):Future[Throwable]"></a>
@@ -165,7 +168,12 @@ if it isn't dequeued in time).
         <span class="name">write</span><span class="params">(<span name="queueName">queueName: String</span>, <span name="offer">offer: <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Throwable]</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Write indefinitely to the given queue.</p><div class="fullcomment"><div class="comment cmt"><p>Write indefinitely to the given queue.  The given offer is
+synchronized on indefinitely, writing the items as they become
+available.  Unlike {{read}}, {{write}} does not reserve a
+connection.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a Future indicating client failure.
+</p></dd></dl></div>
     </li></ol>
             </div>
 

@@ -25,14 +25,16 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ClusterMultiReaderBuilder</span><span class="result"> extends AnyRef</span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.15.1) Use MultiReaderBuilderMemcache instead">ClusterMultiReaderBuilder</span><span class="result"> extends <a name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcacheBase" class="extype" href="MultiReaderBuilderMemcacheBase.html">MultiReaderBuilderMemcacheBase</a>[<a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="">ClusterMultiReaderBuilder</a>]</span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Factory for <a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a> instances.
-</p></div><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.15.1)</i> Use MultiReaderBuilderMemcache instead</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcacheBase" class="extype" href="MultiReaderBuilderMemcacheBase.html">MultiReaderBuilderMemcacheBase</a>[<a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="">ClusterMultiReaderBuilder</a>], <a name="com.twitter.finagle.kestrel.MultiReaderBuilder" class="extype" href="MultiReaderBuilder.html">MultiReaderBuilder</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>, <a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="">ClusterMultiReaderBuilder</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -46,7 +48,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="in"><span>ClusterMultiReaderBuilder</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="in"><span>ClusterMultiReaderBuilder</span></li><li name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcacheBase" class="in"><span>MultiReaderBuilderMemcacheBase</span></li><li name="com.twitter.finagle.kestrel.MultiReaderBuilder" class="in"><span>MultiReaderBuilder</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -58,7 +60,34 @@
         <div id="allMembers">
         
 
-        
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReaderBuilder#ClientBuilderBase" data-isabs="false">
+      <a id="ClientBuilderBase:ClientBuilderBase"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ClientBuilderBase</span><span class="result"> = <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="../builder/ClientBuilder.html">ClientBuilder</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>, <span name="scala.Nothing" class="extype">Nothing</span>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.MultiReaderBuilder" class="extype" href="MultiReaderBuilder.html">MultiReaderBuilder</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcacheBase#MemcacheClientBuilder" data-isabs="false">
+      <a id="MemcacheClientBuilder:MemcacheClientBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">MemcacheClientBuilder</span><span class="result"> = <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="../builder/ClientBuilder.html">ClientBuilder</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>, <span name="scala.Nothing" class="extype">Nothing</span>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcacheBase" class="extype" href="MultiReaderBuilderMemcacheBase.html">MultiReaderBuilderMemcacheBase</a></dd></dl></div>
+    </li></ol>
+            </div>
 
         
 
@@ -136,7 +165,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder#build" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReaderBuilder#build" data-isabs="false">
       <a id="build():ReadHandle"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -147,19 +176,40 @@
         <span class="name">build</span><span class="params">()</span><span class="result">: <a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder#clientBuilder" data-isabs="false">
-      <a id="clientBuilder(ClientBuilder[Command, Response, Nothing, Yes, Yes]):ClusterMultiReaderBuilder"></a>
+      <p class="shortcomment cmt">Constructs a merged ReadHandle over the members of the configured cluster.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a merged ReadHandle over the members of the configured cluster.
+The handle is updated as members are added or removed.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.MultiReaderBuilder" class="extype" href="MultiReaderBuilder.html">MultiReaderBuilder</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReaderBuilder#clientBuilder" data-isabs="false">
+      <a id="clientBuilder(ClientBuilderBase):ClusterMultiReaderBuilder"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clientBuilder</span><span class="params">(<span name="clientBuilder">clientBuilder: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="../builder/ClientBuilder.html">ClientBuilder</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>, <span name="scala.Nothing" class="extype">Nothing</span>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="">ClusterMultiReaderBuilder</a></span>
+        <span class="name">clientBuilder</span><span class="params">(<span name="clientBuilder">clientBuilder: ClientBuilderBase</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="">ClusterMultiReaderBuilder</a></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Specify the ClientBuilder used to generate client objects.</p><div class="fullcomment"><div class="comment cmt"><p>Specify the ClientBuilder used to generate client objects. <b>Do not</b> specify the
+hosts or cluster on the given ClientBuilder, and <b>do not</b> invoke <code>build()</code>
+on it. You must specify a codec and host
+connection limit, however.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.MultiReaderBuilder" class="extype" href="MultiReaderBuilder.html">MultiReaderBuilder</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReaderBuilder#clientId" data-isabs="false">
+      <a id="clientId(ClientId):ClusterMultiReaderBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clientId</span><span class="params">(<span name="clientId">clientId: <a name="com.twitter.finagle.thrift.ClientId" class="extype" href="../thrift/ClientId.html">ClientId</a></span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="">ClusterMultiReaderBuilder</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Specify the clientId to use, if applicable, for the default builder.</p><div class="fullcomment"><div class="comment cmt"><p>Specify the clientId to use, if applicable, for the default builder.
+If the default client builder is override using {{clientBuilder}} then
+this clientId has not effect.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.MultiReaderBuilder" class="extype" href="MultiReaderBuilder.html">MultiReaderBuilder</a></dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
@@ -186,7 +236,43 @@
         <span class="name">copy</span><span class="params">(<span name="config">config: <a name="com.twitter.finagle.kestrel.ClusterMultiReaderConfig" class="extype" href="ClusterMultiReaderConfig.html">ClusterMultiReaderConfig</a></span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="">ClusterMultiReaderBuilder</a></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="com.twitter.finagle.kestrel" class="extype" href="package.html">kestrel</a>] </dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder#copy" data-isabs="false">
+      <a id="copy(MultiReaderConfig[Command, Response]):ClusterMultiReaderBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">copy</span><span class="params">(<span name="config">config: <a name="com.twitter.finagle.kestrel.MultiReaderConfig" class="extype" href="MultiReaderConfig.html">MultiReaderConfig</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="">ClusterMultiReaderBuilder</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="com.twitter.finagle.kestrel" class="extype" href="package.html">kestrel</a>] </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="">ClusterMultiReaderBuilder</a> → <a name="com.twitter.finagle.kestrel.MultiReaderBuilder" class="extype" href="MultiReaderBuilder.html">MultiReaderBuilder</a></dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcacheBase#createClient" data-isabs="false">
+      <a id="createClient(ServiceFactory[Command, Response]):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">createClient</span><span class="params">(<span name="factory">factory: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.Client" class="extype" href="Client.html">Client</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="com.twitter.finagle.kestrel" class="extype" href="package.html">kestrel</a>] </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcacheBase" class="extype" href="MultiReaderBuilderMemcacheBase.html">MultiReaderBuilderMemcacheBase</a> → <a name="com.twitter.finagle.kestrel.MultiReaderBuilder" class="extype" href="MultiReaderBuilder.html">MultiReaderBuilder</a></dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcacheBase#defaultClientBuilder" data-isabs="false">
+      <a id="defaultClientBuilder:MemcacheClientBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">defaultClientBuilder</span><span class="result">: MemcacheClientBuilder</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="com.twitter.finagle.kestrel" class="extype" href="package.html">kestrel</a>] </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcacheBase" class="extype" href="MultiReaderBuilderMemcacheBase.html">MultiReaderBuilderMemcacheBase</a> → <a name="com.twitter.finagle.kestrel.MultiReaderBuilder" class="extype" href="MultiReaderBuilder.html">MultiReaderBuilder</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -298,7 +384,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder#retryBackoffs" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReaderBuilder#retryBackoffs" data-isabs="false">
       <a id="retryBackoffs(() ⇒ Stream[Duration],Timer):ClusterMultiReaderBuilder"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -309,7 +395,8 @@
         <span class="name">retryBackoffs</span><span class="params">(<span name="backoffs">backoffs: () ⇒ Stream[<span name="com.twitter.util.Duration" class="extype">Duration</span>]</span>, <span name="timer">timer: <span name="com.twitter.util.Timer" class="extype">Timer</span></span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="">ClusterMultiReaderBuilder</a></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Specify the stream of Durations and Timer used for retry backoffs.</p><div class="fullcomment"><div class="comment cmt"><p>Specify the stream of Durations and Timer used for retry backoffs.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.MultiReaderBuilder" class="extype" href="MultiReaderBuilder.html">MultiReaderBuilder</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -390,7 +477,19 @@
         <span class="name">withConfig</span><span class="params">(<span name="f">f: (<a name="com.twitter.finagle.kestrel.ClusterMultiReaderConfig" class="extype" href="ClusterMultiReaderConfig.html">ClusterMultiReaderConfig</a>) ⇒ <a name="com.twitter.finagle.kestrel.ClusterMultiReaderConfig" class="extype" href="ClusterMultiReaderConfig.html">ClusterMultiReaderConfig</a></span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="">ClusterMultiReaderBuilder</a></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="com.twitter.finagle.kestrel" class="extype" href="package.html">kestrel</a>] </dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.kestrel.MultiReaderBuilder#withConfig" data-isabs="false">
+      <a id="withConfig((MultiReaderConfig[Command, Response]) ⇒ MultiReaderConfig[Command, Response]):ClusterMultiReaderBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withConfig</span><span class="params">(<span name="f">f: (<a name="com.twitter.finagle.kestrel.MultiReaderConfig" class="extype" href="MultiReaderConfig.html">MultiReaderConfig</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>]) ⇒ <a name="com.twitter.finagle.kestrel.MultiReaderConfig" class="extype" href="MultiReaderConfig.html">MultiReaderConfig</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="">ClusterMultiReaderBuilder</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="com.twitter.finagle.kestrel" class="extype" href="package.html">kestrel</a>] </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.MultiReaderBuilder" class="extype" href="MultiReaderBuilder.html">MultiReaderBuilder</a></dd></dl></div>
     </li></ol>
             </div>
 
@@ -398,7 +497,11 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.AnyRef" class="parent">
+        <div name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcacheBase" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcacheBase" class="extype" href="MultiReaderBuilderMemcacheBase.html">MultiReaderBuilderMemcacheBase</a>[<a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="">ClusterMultiReaderBuilder</a>]</h3>
+            </div><div name="com.twitter.finagle.kestrel.MultiReaderBuilder" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.kestrel.MultiReaderBuilder" class="extype" href="MultiReaderBuilder.html">MultiReaderBuilder</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>, <a name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" class="extype" href="">ClusterMultiReaderBuilder</a>]</h3>
+            </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">
               <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>

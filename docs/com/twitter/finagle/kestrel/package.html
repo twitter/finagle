@@ -60,30 +60,30 @@
       </span>
       </h4>
       <p class="comment cmt">A friendly Kestrel client Interface.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" data-isabs="false">
-      <a id="ClusterMultiReaderBuilder:ClusterMultiReaderBuilder"></a>
+    </li><li visbl="prt" name="com.twitter.finagle.kestrel.ClientBase" data-isabs="true">
+      <a id="ClientBase:ClientBase[CommandExecutor, Reply, ItemId]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ClusterMultiReaderBuilder.html"><span class="name">ClusterMultiReaderBuilder</span></a><span class="result"> extends AnyRef</span>
+        <a href="ClientBase.html"><span class="name">ClientBase</span></a><span class="tparams">[<span name="CommandExecutor">CommandExecutor &lt;: Closable</span>, <span name="Reply">Reply</span>, <span name="ItemId">ItemId</span>]</span><span class="result"> extends Client</span>
       </span>
       </h4>
-      <p class="comment cmt">Factory for <a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a> instances.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.ClusterMultiReaderConfig" data-isabs="false">
-      <a id="ClusterMultiReaderConfig:ClusterMultiReaderConfig"></a>
+      <p class="comment cmt">Common base class for clients using different protocols</p>
+    </li><li visbl="prt" name="com.twitter.finagle.kestrel.CommandExecutorFactory" data-isabs="true">
+      <a id="CommandExecutorFactory:CommandExecutorFactory[U]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">case class</span>
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ClusterMultiReaderConfig.html"><span class="name">ClusterMultiReaderConfig</span></a><span class="params">(<span name="_va">_va: Var[Addr]</span>, <span name="_queueName">_queueName: String</span>, <span name="_clientBuilder">_clientBuilder: Option[ClientBuilder[Command, Response, Nothing, Yes, Yes]]</span>, <span name="_timer">_timer: Option[Timer]</span>, <span name="_retryBackoffs">_retryBackoffs: Option[() ⇒ Stream[Duration]]</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="CommandExecutorFactory.html"><span class="name">CommandExecutorFactory</span></a><span class="tparams">[<span name="U">U</span>]</span><span class="result"> extends Closable</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">Factory of command executors for <a name="com.twitter.finagle.kestrel.ClientBase" class="extype" href="ClientBase.html">ClientBase</a></p>
     </li><li visbl="prt" name="com.twitter.finagle.kestrel.ConnectedClient" data-isabs="false">
       <a id="ConnectedClient:ConnectedClient"></a>
       <h4 class="signature">
@@ -92,10 +92,34 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ConnectedClient.html"><span class="name">ConnectedClient</span></a><span class="result"> extends Client</span>
+        <a href="ConnectedClient.html"><span class="name">ConnectedClient</span></a><span class="result"> extends ClientBase[Service[Command, Response], Response, Unit]</span>
       </span>
       </h4>
       <p class="comment cmt">A Client representing a single TCP connection to a single server.</p>
+    </li><li visbl="prt" name="com.twitter.finagle.kestrel.FinagledClientFactory" data-isabs="false">
+      <a id="FinagledClientFactory:FinagledClientFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="FinagledClientFactory.html"><span class="name">FinagledClientFactory</span></a><span class="result"> extends CommandExecutorFactory[FinagledClosableClient]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Wrapper factory for creating FinagledClosableClients</p>
+    </li><li visbl="prt" name="com.twitter.finagle.kestrel.FinagledClosableClient" data-isabs="false">
+      <a id="FinagledClosableClient:FinagledClosableClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="FinagledClosableClient.html"><span class="name">FinagledClosableClient</span></a><span class="result"> extends FinagledClient with Closable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Extends FinagledClient with Closable</p>
     </li><li visbl="pub" name="com.twitter.finagle.kestrel.Interpreter" data-isabs="false">
       <a id="Interpreter:Interpreter"></a>
       <h4 class="signature">
@@ -120,6 +144,69 @@
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReaderBuilder" data-isabs="true">
+      <a id="MultiReaderBuilder:MultiReaderBuilder[Req, Rep, Builder]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MultiReaderBuilder.html"><span class="name">MultiReaderBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="Builder">Builder</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Factory for <a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a> instances.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcache" data-isabs="false">
+      <a id="MultiReaderBuilderMemcache:MultiReaderBuilderMemcache"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MultiReaderBuilderMemcache.html"><span class="name">MultiReaderBuilderMemcache</span></a><span class="result"> extends MultiReaderBuilderMemcacheBase[MultiReaderBuilderMemcache]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Factory for <a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a> instances using
+Kestrel's memcache protocol.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcacheBase" data-isabs="true">
+      <a id="MultiReaderBuilderMemcacheBase:MultiReaderBuilderMemcacheBase[Builder]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MultiReaderBuilderMemcacheBase.html"><span class="name">MultiReaderBuilderMemcacheBase</span></a><span class="tparams">[<span name="Builder">Builder</span>]</span><span class="result"> extends MultiReaderBuilder[Command, Response, Builder]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReaderBuilderThrift" data-isabs="false">
+      <a id="MultiReaderBuilderThrift:MultiReaderBuilderThrift"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MultiReaderBuilderThrift.html"><span class="name">MultiReaderBuilderThrift</span></a><span class="result"> extends MultiReaderBuilder[ThriftClientRequest, Array[Byte], MultiReaderBuilderThrift]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Factory for <a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a> instances using
+Kestrel's thrift protocol.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReaderConfig" data-isabs="false">
+      <a id="MultiReaderConfig:MultiReaderConfig[Req, Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="MultiReaderConfig.html"><span class="name">MultiReaderConfig</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="_va">_va: Var[Addr]</span>, <span name="_queueName">_queueName: String</span>, <span name="_clientId">_clientId: Option[ClientId]</span>, <span name="_clientBuilder">_clientBuilder: Option[ClientBuilder[Req, Rep, Nothing, Yes, Yes]]</span>, <span name="_timer">_timer: Option[Timer]</span>, <span name="_retryBackoffs">_retryBackoffs: Option[() ⇒ Stream[Duration]]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Multi reader configuration settings
+</p>
     </li><li visbl="pub" name="com.twitter.finagle.kestrel.ReadHandle" data-isabs="true">
       <a id="ReadHandle:ReadHandle"></a>
       <h4 class="signature">
@@ -157,6 +244,48 @@ an offer to acknowledge.</p>
       </span>
       </h4>
       
+    </li><li visbl="prt" name="com.twitter.finagle.kestrel.ThriftConnectedClient" data-isabs="false">
+      <a id="ThriftConnectedClient:ThriftConnectedClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftConnectedClient.html"><span class="name">ThriftConnectedClient</span></a><span class="result"> extends ClientBase[FinagledClosableClient, Seq[Item], Long]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A Client representing a single TCP connection to a single server using thrift.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" data-isabs="false">
+      <a id="ClusterMultiReaderBuilder:ClusterMultiReaderBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ClusterMultiReaderBuilder.html"><span class="name deprecated" title="Deprecated: (Since version 6.15.1) Use MultiReaderBuilderMemcache instead">ClusterMultiReaderBuilder</span></a><span class="result"> extends MultiReaderBuilderMemcacheBase[ClusterMultiReaderBuilder]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.15.1)</i> Use MultiReaderBuilderMemcache instead</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.ClusterMultiReaderConfig" data-isabs="false">
+      <a id="ClusterMultiReaderConfig:ClusterMultiReaderConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ClusterMultiReaderConfig.html"><span class="name deprecated" title="Deprecated: (Since version 6.15.1) Use MultiReaderConfig[Req, Rep] instead">ClusterMultiReaderConfig</span></a><span class="params">(<span name="_va">_va: Var[Addr]</span>, <span name="_queueName">_queueName: String</span>, <span name="_clientBuilder">_clientBuilder: Option[ClientBuilder[Command, Response, Nothing, Yes, Yes]]</span>, <span name="_timer">_timer: Option[Timer]</span>, <span name="_retryBackoffs">_retryBackoffs: Option[() ⇒ Stream[Duration]]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.15.1)</i> Use MultiReaderConfig[Req, Rep] instead</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -200,19 +329,32 @@ an offer to acknowledge.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReader" data-isabs="false">
-      <a id="MultiReader:MultiReader"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReaderMemcache" data-isabs="false">
+      <a id="MultiReaderMemcache:MultiReaderMemcache"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="MultiReader$.html"><span class="name">MultiReader</span></a><span class="result"> extends AnyRef</span>
+        <a href="MultiReaderMemcache$.html"><span class="name">MultiReaderMemcache</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       <p class="comment cmt">Read from multiple clients in round-robin fashion, &quot;grabby hands&quot;
-style.</p>
+style using Kestrel's memcache protocol.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReaderThrift" data-isabs="false">
+      <a id="MultiReaderThrift:MultiReaderThrift"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MultiReaderThrift$.html"><span class="name">MultiReaderThrift</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Read from multiple clients in round-robin fashion, &quot;grabby hands&quot;
+style using Kestrel's memcache protocol.</p>
     </li><li visbl="pub" name="com.twitter.finagle.kestrel.OutOfRetriesException" data-isabs="false">
       <a id="OutOfRetriesException:OutOfRetriesException"></a>
       <h4 class="signature">
@@ -261,6 +403,18 @@ style.</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.net" data-isabs="false">
+      <a id="net:net"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="net/package.html"><span class="name">net</span></a>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol" data-isabs="false">
       <a id="protocol:protocol"></a>
       <h4 class="signature">
@@ -276,7 +430,23 @@ style.</p>
     </li></ol>
             </div>
 
-        
+        <div class="values members" id="values">
+              <h3>Deprecated Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReader" data-isabs="false">
+      <a id="MultiReader:MultiReader"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MultiReader$.html"><span class="name deprecated" title="Deprecated: (Since version 6.15.1) Use MultiReaderMemcache or MultiReaderThrift instead">MultiReader</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Read from multiple clients in round-robin fashion, &quot;grabby hands&quot;
+style.</p>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

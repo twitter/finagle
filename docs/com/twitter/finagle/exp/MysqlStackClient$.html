@@ -184,6 +184,21 @@ pooling and load balancing.
 used to configure this StackClient's <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackClient with <code>p</code> added to the <code>params</code>
 used to configure this StackClient's <code>stack</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>StackClient</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.client.StackClient#copy" data-isabs="false">
+      <a id="copy(Stack[ServiceFactory[Request, Result]],Params):StackClient[Request, Result, Packet, Packet]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">copy</span><span class="params">(<span name="stack">stack: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[<a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>]] = <span class="symbol">self.stack</span></span>, <span name="params">params: <a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a> = <span class="symbol">self.params</span></span>)</span><span class="result">: <span name="com.twitter.finagle.client.StackClient" class="extype">StackClient</span>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>, <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="mysql/transport/Packet.html">Packet</a>, <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="mysql/transport/Packet.html">Packet</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">A copy constructor in lieu of defining StackClient as a
+case class.</p><div class="fullcomment"><div class="comment cmt"><p>A copy constructor in lieu of defining StackClient as a
+case class.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>StackClient</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">

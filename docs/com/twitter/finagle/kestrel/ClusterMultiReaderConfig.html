@@ -25,11 +25,14 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">ClusterMultiReaderConfig</span><span class="params">(<span name="_va">_va: <span name="com.twitter.util.Var" class="extype">Var</span>[<a name="com.twitter.finagle.Addr" class="extype" href="../Addr.html">Addr</a>]</span>, <span name="_queueName">_queueName: String</span>, <span name="_clientBuilder">_clientBuilder: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="../builder/ClientBuilder.html">ClientBuilder</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>, <span name="scala.Nothing" class="extype">Nothing</span>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>]]</span>, <span name="_timer">_timer: <span name="scala.Option" class="extype">Option</span>[<span name="com.twitter.util.Timer" class="extype">Timer</span>]</span>, <span name="_retryBackoffs">_retryBackoffs: <span name="scala.Option" class="extype">Option</span>[() ⇒ Stream[<span name="com.twitter.util.Duration" class="extype">Duration</span>]]</span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.15.1) Use MultiReaderConfig[Req, Rep] instead">ClusterMultiReaderConfig</span><span class="params">(<span name="_va">_va: <span name="com.twitter.util.Var" class="extype">Var</span>[<a name="com.twitter.finagle.Addr" class="extype" href="../Addr.html">Addr</a>]</span>, <span name="_queueName">_queueName: String</span>, <span name="_clientBuilder">_clientBuilder: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="../builder/ClientBuilder.html">ClientBuilder</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>, <span name="scala.Nothing" class="extype">Nothing</span>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>]]</span>, <span name="_timer">_timer: <span name="scala.Option" class="extype">Option</span>[<span name="com.twitter.util.Timer" class="extype">Timer</span>]</span>, <span name="_retryBackoffs">_retryBackoffs: <span name="scala.Option" class="extype">Option</span>[() ⇒ Stream[<span name="com.twitter.util.Duration" class="extype">Duration</span>]]</span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.15.1)</i> Use MultiReaderConfig[Req, Rep] instead</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
@@ -381,6 +384,19 @@
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.ClusterMultiReaderConfig#toMultiReaderConfig" data-isabs="false">
+      <a id="toMultiReaderConfig:MultiReaderConfig[Command, Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toMultiReaderConfig</span><span class="result">: <a name="com.twitter.finagle.kestrel.MultiReaderConfig" class="extype" href="MultiReaderConfig.html">MultiReaderConfig</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Convert to MultiReaderConfig[Command, Response] during deprecation
+</p>
     </li><li visbl="pub" name="com.twitter.finagle.kestrel.ClusterMultiReaderConfig#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">

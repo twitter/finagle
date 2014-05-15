@@ -29,79 +29,7 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Package mux implements a generic RPC multiplexer with a rich protocol.
-Mux is itself encoding independent, so it is meant to use as the
-transport for other RPC systems (eg. thrift). In OSI terminology, it
-is a pure session layer.</p><p>In the below description, all numeric values are unsigned and in
-big-endian byte order. The schema <i>size:4 body:10</i> defines the
-field size to be 4 bytes, followed by 10 bytes of the field body. The
-schema <i>key~4</i> defines the field key to be defined by 4 bytes
-intepreted as the size of the field, followed by that many bytes
-comprising the field itself--it is shorthand for <i>keysize:4 key:keysize</i>.
-Groups are denoted by parenthesis; <i>*</i> denotes reptition of the
-previous schema 0 or more times, while <code>{n}</code> indicates repetition
-exactly <i>n</i> times. Unspecified sizes consume the rest of the frame:
-they may be specified only as the last field in the message.</p><p>All strings  in Mux are Utf-8 encoded, and are never null-terminated.</p><h3>Message framing</h3><p>Messages in mux are framed with a 4-byte big-endian size header,
-followed by 1 byte describing the message type and a 3-byte tag; or,
-diagrammatically: <i>size:4 type:1 tag:3</i>. The remainder of the frame
-(size-4 bytes) contains the body. Its format depends on the
-message type, documented below.</p><p>The tag's MSB is reserved for future use, making its current namespace
-23 bits. Tag 0 designates a &quot;marker&quot; T message that expects no reply.
-The tag is otherwise arbitrary, and is chosen by the sender of the T
-message.</p><p>Message-type numbering scheme is as follows. Message type 0 is
-reserved for future use. T messages have bit 7 (the MSB) set to 1, R
-messages set bit 7 to 0. Control messages set bit 6 to 1 and
-application messages set it to 0. This distinction allows proxies to
-be oblivious to parts of the protocol.</p><p>The protocol is full duplex: both the server and client may send T
-messages initiating an exchange.</p><h3>Exchanges</h3><p>Messages are designated as &quot;T messages&quot; or &quot;R messages&quot;, T and R being
-stand-ins for transmit and receive. A T message initiates an exchange
-and is assigned a free tag by the sender. A reply is either an R
-message of the same type (Rx replies to Tx for some x), or an Rerr,
-indicating a session layer error. R messages are matched to their T
-messages by tag, and the reply concludes the exchange and frees the
-tag for future use. Implementations should reuse small tag numbers.</p><h3>Messages</h3><p><i>size:4 Tinit:1 tag:3 version:2 (key~4 value~4)*</i> reinitializes a
-session. Clients typically send this at the beginning of the session.
-When doing so, the sender may issue no more T messages until the
-corresponding <i>size:4 Rinit:1 version:2 (key~4 value~4)*</i> has been
-received. After the Rinit was received, all connection state has been
-reset (outstanding tags are invalidated) and the stream is resumed
-according to the newly negotiated parameters. Prior to the first
-Tinit, the session operates at version 1. Rinit's version field is the
-accepted version of the session (which may be lower than the one
-requested by Tinit).</p><p><i>size:4 Treq:1 tag:3 n:1 (key:1 value~1){n} body:</i> initiates the
-request described by its body. The request body is delivered to the
-application. The request header contains a number of key-value pairs
-that describe request metadata.</p><p>Keys for <i>Treq</i> messages are as follows:</p><ol class="decimal"><li><i>traceid</i>: a 24-byte value describing the full
-<a href="http://research.google.com/archive/papers/dapper-2010-1.pdf">Dapper</a> trace id
-assigned by the client. The value's format is <i>spanid:8 parentid:8 traceid:8</i>.</li></ol><p> 2. <i>traceflag</i>: a bitmask describing trace flags. Currently, the
-only defined flag is bit 0 which enables &quot;debug mode&quot;, asking the
-server to force trace sampling.</p><p><i>size:4 Tdispatch:1 tag:3 nc:2 (ckey~2 cval~2){nc} dst~2 nd:2
-(from~2 to~2){nd} body:</i> implements <i>destination dispatch</i>.
-Tdispatch messages carry a set of keyed request contexts, followed by
-a logical destination encoded as a UTF-8 string. A delegation table
-follows describing rewrite rules that apply to this request.</p><p><i>size:4 Rreq:1 status:1 body:</i> replies to a request. Status
-codes are as follows: 0=OK; the body contains the reply. 1=ERROR; the
-body contains a string describing the error. 2=NACK; a negative
-acknowledgment, the body contains a string describing the reason.</p><p><i>size:4 Rdispatch:1 status:1 nctx:2 (key~2 value~2){nctx} body:</i> replies
-to a Tdispatch request. Status codes are as in Rreq. Replies can include
-request contexts.</p><p><i>size:4 Rerr:1 why:</i> indicates that the corresponding T message
-produced an error. Rerr is specifically for server errors: the server
-failed to interpret or act on the message. The body carries a string
-describing the error.</p><p><i>size:4 Tdrain:1 tag:3</i> is a request sent by the server telling the
-client to stop sending new requests. A client acknowledges this with
-an Rdrain message.</p><p><i>size:4 Tping:1</i> is sent by either party to check the liveness of
-its peer; these should be responded to immediately with a Rping
-message.</p><p><i>size:4 Tdiscarded:1 tag:3 why:</i> is a marker message
-indicating that the Treq with the given tag has been discarded by the
-client. This can be used as a hint for early termination. Why is a
-string describing why the request was discarded. Note that it does
-not* free the server from the obligation of replying to the original
-Treq.</p><p><i>[4]size[1]Tlease[1]unit[8]howmuch</i> is a marker message indicating that a
-lease has been issued for <i>howmuch</i> unit. Unit '1' is reserved for duration in
-milliseconds. Whenever a lease has not been issued, a client can assume it holds
-an indefinite lease. Adhering to the lease is optional, but the server may
-reject requests or provide degraded service should the lease expire. This is
-used by servers to implement features like garbage collection avoidance.</p></div></div>
+      <div class="fullcommenttop" id="comment"></div>
     
 
       <div id="mbrsel">
@@ -156,30 +84,6 @@ used by servers to implement features like garbage collection avoidance.</p></di
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.mux.package#NewSession" data-isabs="false">
-      <a id="NewSession:(Session) ⇒ Session"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">type</span>
-      </span>
-      <span class="symbol">
-        <span class="name">NewSession</span><span class="result"> = (<a name="com.twitter.finagle.mux.Session" class="extype" href="Session.html">Session</a>) ⇒ <a name="com.twitter.finagle.mux.Session" class="extype" href="Session.html">Session</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.mux.package" class="extype" href="package$.html">package</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.mux.SenderSession" data-isabs="false">
-      <a id="SenderSession:SenderSession"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="SenderSession.html"><span class="name">SenderSession</span></a><span class="result"> extends Service[Buf, Buf] with Session with Closable</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.mux.ServerApplicationError" data-isabs="false">
       <a id="ServerApplicationError:ServerApplicationError"></a>
       <h4 class="signature">
@@ -204,32 +108,6 @@ used by servers to implement features like garbage collection avoidance.</p></di
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.mux.Session" data-isabs="true">
-      <a id="Session:Session"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="Session.html"><span class="name">Session</span></a><span class="result"> extends Service[Buf, Buf] with Closable</span>
-      </span>
-      </h4>
-      <p class="comment cmt">An interface representing the RPC, message-passing, pinging, and
-draining facilities provided by a mux session.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.mux.SessionDispatcher" data-isabs="false">
-      <a id="SessionDispatcher:SessionDispatcher"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="SessionDispatcher.html"><span class="name">SessionDispatcher</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      <p class="comment cmt">SessionDispatcher repeatedly calls recv() on transort, and dispatches the messages
-to the appropriate Session instance.</p>
     </li></ol>
             </div>
 
@@ -237,15 +115,15 @@ to the appropriate Session instance.</p>
 
         <div class="values members" id="values">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.mux.ExhaustedTagsException" data-isabs="false">
-      <a id="ExhaustedTagsException:ExhaustedTagsException"></a>
+              <ol><li visbl="pub" name="com.twitter.finagle.mux.ClientDispatcher" data-isabs="false">
+      <a id="ClientDispatcher:ClientDispatcher"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ExhaustedTagsException$.html"><span class="name">ExhaustedTagsException</span></a><span class="result"> extends Exception with WriteException with NoStacktrace</span>
+        <a href="ClientDispatcher$.html"><span class="name">ClientDispatcher</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       
@@ -258,6 +136,42 @@ to the appropriate Session instance.</p>
       </span>
       <span class="symbol">
         <a href="RequestNackedException$.html"><span class="name">RequestNackedException</span></a><span class="result"> extends Exception with WriteException with NoStacktrace</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.mux.ServerDispatcher" data-isabs="false">
+      <a id="ServerDispatcher:ServerDispatcher"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ServerDispatcher$.html"><span class="name">ServerDispatcher</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.mux.exp" data-isabs="false">
+      <a id="exp:exp"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="exp/package.html"><span class="name">exp</span></a>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.mux.lease" data-isabs="false">
+      <a id="lease:lease"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="lease/package.html"><span class="name">lease</span></a>
       </span>
       </h4>
       

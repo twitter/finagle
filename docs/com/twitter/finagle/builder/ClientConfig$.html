@@ -25,13 +25,13 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">ClientConfig</span><span class="result"> extends <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">ClientConfig</span><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.builder.ClientConfig" class="in"><span>ClientConfig</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.builder.ClientConfig" class="in"><span>ClientConfig</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -59,7 +59,55 @@
 
         <div class="types members" id="types">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig#FullySpecified" data-isabs="false">
+              <ol><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig.Daemonize" data-isabs="false">
+      <a id="Daemonize:Daemonize"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientConfig$$Daemonize.html"><span class="name">Daemonize</span></a><span class="params">(<span name="onOrOff">onOrOff: Boolean</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig.DestName" data-isabs="false">
+      <a id="DestName:DestName"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientConfig$$DestName.html"><span class="name">DestName</span></a><span class="params">(<span name="name">name: Name</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig.FailFast" data-isabs="false">
+      <a id="FailFast:FailFast"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientConfig$$FailFast.html"><span class="name">FailFast</span></a><span class="params">(<span name="onOrOff">onOrOff: Boolean</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig.FailureAccrualFac" data-isabs="false">
+      <a id="FailureAccrualFac:FailureAccrualFac"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientConfig$$FailureAccrualFac.html"><span class="name">FailureAccrualFac</span></a><span class="params">(<span name="fac">fac: (Timer) ⇒ ServiceFactoryWrapper</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig#FullySpecified" data-isabs="false">
       <a id="FullySpecified:FullySpecified[Req, Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -68,6 +116,42 @@
       </span>
       <span class="symbol">
         <span class="name">FullySpecified</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> = <span name="com.twitter.finagle.builder.ClientConfig" class="extype">ClientConfig</span>[Req, Rep, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="ClientConfig$$Yes.html">Yes</a>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="ClientConfig$$Yes.html">Yes</a>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="ClientConfig$$Yes.html">Yes</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig.GlobalTimeout" data-isabs="false">
+      <a id="GlobalTimeout:GlobalTimeout"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientConfig$$GlobalTimeout.html"><span class="name">GlobalTimeout</span></a><span class="params">(<span name="timeout">timeout: Duration</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig.MonitorFactory" data-isabs="false">
+      <a id="MonitorFactory:MonitorFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientConfig$$MonitorFactory.html"><span class="name">MonitorFactory</span></a><span class="params">(<span name="mFactory">mFactory: (String) ⇒ Monitor</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig.Retries" data-isabs="false">
+      <a id="Retries:Retries"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientConfig$$Retries.html"><span class="name">Retries</span></a><span class="params">(<span name="policy">policy: RetryPolicy[Try[Nothing]]</span>)</span><span class="result"> extends Product with Serializable</span>
       </span>
       </h4>
       
@@ -150,6 +234,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig.Daemonize" data-isabs="false">
+      <a id="Daemonize:Daemonize"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientConfig$$Daemonize$.html"><span class="name">Daemonize</span></a><span class="result"> extends Param[Daemonize] with Serializable</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig#DefaultName" data-isabs="false">
       <a id="DefaultName:String"></a>
       <h4 class="signature">
@@ -159,6 +255,90 @@
       </span>
       <span class="symbol">
         <span class="name">DefaultName</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig#DefaultParams" data-isabs="false">
+      <a id="DefaultParams:Params"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DefaultParams</span><span class="result">: <a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig.DestName" data-isabs="false">
+      <a id="DestName:DestName"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientConfig$$DestName$.html"><span class="name">DestName</span></a><span class="result"> extends Param[DestName] with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig.FailFast" data-isabs="false">
+      <a id="FailFast:FailFast"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientConfig$$FailFast$.html"><span class="name">FailFast</span></a><span class="result"> extends Param[FailFast] with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig.FailureAccrualFac" data-isabs="false">
+      <a id="FailureAccrualFac:FailureAccrualFac"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientConfig$$FailureAccrualFac$.html"><span class="name">FailureAccrualFac</span></a><span class="result"> extends Param[FailureAccrualFac] with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig.GlobalTimeout" data-isabs="false">
+      <a id="GlobalTimeout:GlobalTimeout"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientConfig$$GlobalTimeout$.html"><span class="name">GlobalTimeout</span></a><span class="result"> extends Param[GlobalTimeout] with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig.MonitorFactory" data-isabs="false">
+      <a id="MonitorFactory:MonitorFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientConfig$$MonitorFactory$.html"><span class="name">MonitorFactory</span></a><span class="result"> extends Param[MonitorFactory] with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig.Retries" data-isabs="false">
+      <a id="Retries:Retries"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientConfig$$Retries$.html"><span class="name">Retries</span></a><span class="result"> extends Param[Retries] with Serializable</span>
       </span>
       </h4>
       
@@ -276,6 +456,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig#nilClient" data-isabs="false">
+      <a id="nilClient[Req, Rep]:StackClient[Req, Rep, Any, Any]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">nilClient</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result">: <span name="com.twitter.finagle.client.StackClient" class="extype">StackClient</span>[Req, Rep, <span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
       <a id="notify():Unit"></a>
       <h4 class="signature">
@@ -300,18 +492,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="prt" name="com.twitter.finagle.builder.ClientConfig#readResolve" data-isabs="false">
-      <a id="readResolve():AnyRef"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">readResolve</span><span class="params">()</span><span class="result">: AnyRef</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -388,11 +568,7 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.Serializable" class="parent">
-              <h3>Inherited from <span name="scala.Serializable" class="extype">Serializable</span></h3>
-            </div><div name="java.io.Serializable" class="parent">
-              <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
-            </div><div name="scala.AnyRef" class="parent">
+        <div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">
               <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>

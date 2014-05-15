@@ -14,9 +14,9 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
-        <a title="Go to companion" href="DefaultServer$.html"><img src="../../../../lib/class_to_object_big.png" /></a>
+        <img src="../../../../lib/class_big.png" />
         <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.server" class="extype" href="package.html">server</a></p>
-        <h1><a title="Go to companion" href="DefaultServer$.html">DefaultServer</a></h1>
+        <h1>DefaultServer</h1>
       </div>
 
       <h4 class="signature" id="signature">
@@ -34,7 +34,7 @@
           <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <a name="com.twitter.finagle.Server" class="extype" href="../Server.html">Server</a>[Req, Rep], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.HttpServer" class="extype" href="../HttpServer$.html">HttpServer</a>, <a name="com.twitter.finagle.MemcachedServer" class="extype" href="../MemcachedServer$.html">MemcachedServer</a>, <a name="com.twitter.finagle.MuxServer" class="extype" href="../MuxServer$.html">MuxServer</a>, <a name="com.twitter.finagle.ThriftMuxer" class="extype" href="../ThriftMuxer$.html">ThriftMuxer</a></div>
+          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.HttpServer" class="extype" href="../HttpServer$.html">HttpServer</a>, <a name="com.twitter.finagle.MemcachedServer" class="extype" href="../MemcachedServer$.html">MemcachedServer</a>, <a name="com.twitter.finagle.MuxServer" class="extype" href="../MuxServer$.html">MuxServer</a>, <a name="com.twitter.finagle.ProtocolRecordingMuxServer" class="extype" href="../ProtocolRecordingMuxServer$.html">ProtocolRecordingMuxServer</a></div>
         </div></div>
     
 
@@ -192,6 +192,18 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.server.DefaultServer#configured" data-isabs="false">
+      <a id="configured:StackServer[Req, Rep, In, Out]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">configured</span><span class="result">: <span name="com.twitter.finagle.server.StackServer" class="extype">StackServer</span>[Req, Rep, In, Out]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -291,18 +303,6 @@
       </span>
       </h4>
       
-    </li><li visbl="prt" name="com.twitter.finagle.server.DefaultServer#makeNewStack" data-isabs="false">
-      <a id="makeNewStack(StatsReceiver):(ServiceFactory[Req, Rep]) ⇒ ServiceFactory[Req, Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">makeNewStack</span><span class="params">(<span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a></span>)</span><span class="result">: (<a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep]) ⇒ <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.server.DefaultServer#maxConcurrentRequests" data-isabs="false">
       <a id="maxConcurrentRequests:Int"></a>
       <h4 class="signature">
@@ -567,18 +567,6 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
       </h4>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
 when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="../Server.html">Server</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.server.DefaultServer#serveTransport" data-isabs="false">
-      <a id="serveTransport(ServiceFactory[Req, Rep],Transport[In, Out]):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">serveTransport</span><span class="params">(<span name="serviceFactory">serviceFactory: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep]</span>, <span name="transport">transport: <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[In, Out]</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.server.DefaultServer#serviceTransport" data-isabs="false">
       <a id="serviceTransport:(Transport[In, Out], Service[Req, Rep]) ⇒ Closable"></a>
       <h4 class="signature">
@@ -588,6 +576,18 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
       </span>
       <span class="symbol">
         <span class="name">serviceTransport</span><span class="result">: (<a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[In, Out], <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]) ⇒ <span name="com.twitter.util.Closable" class="extype">Closable</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.server.DefaultServer#stack" data-isabs="false">
+      <a id="stack:Stack[ServiceFactory[Req, Rep]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stack</span><span class="result">: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[<a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep]]</span>
       </span>
       </h4>
       
@@ -648,6 +648,18 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
       </span>
       <span class="symbol">
         <span class="name">tracer</span><span class="result">: <a name="com.twitter.finagle.tracing.Tracer" class="extype" href="../tracing/Tracer.html">Tracer</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.server.DefaultServer#underlying" data-isabs="false">
+      <a id="underlying:StackServer[Req, Rep, In, Out] { ... /* 2 definitions in type refinement */ }"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">underlying</span><span class="result">: <span name="com.twitter.finagle.server.StackServer" class="extype">StackServer</span>[Req, Rep, In, Out] { ... /* 2 definitions in type refinement */ }</span>
       </span>
       </h4>
       

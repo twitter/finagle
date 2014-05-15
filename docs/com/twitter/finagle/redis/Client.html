@@ -919,6 +919,24 @@ values with new values, just as regular SET.
 any operation at all even if just a single key already exists.
 </p></div><dl class="paramcmts block"><dt class="param">kv</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>1 if all keys were set, 0 if no keys were set.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/msetnx
 </p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#move" data-isabs="false">
+      <a id="move(ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">move</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="db">db: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Move key from the currently selected database to the specified destination
+database.</p><div class="fullcomment"><div class="comment cmt"><p>Move key from the currently selected database to the specified destination
+database. When key already exists in the destination database, or it does
+not exist in the source database, it does nothing.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if key was moved.
+        false if key was not moved for any reason.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Keys" class="extype" href="Keys.html">Keys</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">

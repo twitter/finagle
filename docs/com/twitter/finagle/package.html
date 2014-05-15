@@ -490,6 +490,18 @@ of delegation rules.</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.Failure" data-isabs="false">
+      <a id="Failure:Failure"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Failure.html"><span class="name">Failure</span></a><span class="params">(<span name="why">why: String</span>, <span name="cause">cause: Throwable</span>, <span name="flags">flags: Long</span>, <span name="sources">sources: Map[String, AnyRef]</span>, <span name="stacktrace">stacktrace: Array[StackTraceElement]</span>)</span><span class="result"> extends RuntimeException with NoStacktrace with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Base exception for all Finagle originated failures.</p>
     </li><li visbl="pub" name="com.twitter.finagle.Filter" data-isabs="true">
       <a id="Filter:Filter[ReqIn, RepOut, ReqOut, RepIn]"></a>
       <h4 class="signature">
@@ -656,6 +668,18 @@ server.</p>
       </span>
       <span class="symbol">
         <a href="MutableGroup.html"><span class="name">MutableGroup</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends Group[T]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.MuxClient" data-isabs="false">
+      <a id="MuxClient:MuxClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MuxClient.html"><span class="name">MuxClient</span></a><span class="result"> extends DefaultClient[ChannelBuffer, ChannelBuffer]</span>
       </span>
       </h4>
       
@@ -1163,26 +1187,38 @@ ServiceFactory.</p>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftMuxClientImpl.html"><span class="name">ThriftMuxClientImpl</span></a><span class="params">(<span name="muxer">muxer: Client[ChannelBuffer, ChannelBuffer]</span>, <span name="protocolFactory">protocolFactory: TProtocolFactory</span>)</span><span class="result"> extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient with Product with Serializable</span>
+        <a href="ThriftMuxClientImpl.html"><span class="name">ThriftMuxClientImpl</span></a><span class="result"> extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient</span>
       </span>
       </h4>
-      <p class="comment cmt">For example, this IDL:</p>
+      <p class="comment cmt">A com.twitter.finagle.client.Client for the Thrift protocol served over
+<a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a>.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxImpl" data-isabs="false">
+      <a id="ThriftMuxImpl:ThriftMuxImpl"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftMuxImpl.html"><span class="name">ThriftMuxImpl</span></a><span class="result"> extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient with Server[Array[Byte], Array[Byte]] with ThriftRichServer</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxServerImpl" data-isabs="false">
       <a id="ThriftMuxServerImpl:ThriftMuxServerImpl"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftMuxServerImpl.html"><span class="name">ThriftMuxServerImpl</span></a><span class="params">(<span name="muxer">muxer: Server[ChannelBuffer, ChannelBuffer]</span>, <span name="protocolFactory">protocolFactory: TProtocolFactory</span>)</span><span class="result"> extends Server[Array[Byte], Array[Byte]] with ThriftRichServer with Product with Serializable</span>
+        <a href="ThriftMuxServerImpl.html"><span class="name">ThriftMuxServerImpl</span></a><span class="result"> extends Server[Array[Byte], Array[Byte]] with ThriftRichServer</span>
       </span>
       </h4>
-      <p class="comment cmt"><code>TestService.FutureIface</code> must be implemented and passed
-into <code>serveIface</code>:</p>
+      <p class="comment cmt"></p>
     </li><li visbl="pub" name="com.twitter.finagle.ThriftRichClient" data-isabs="true">
       <a id="ThriftRichClient:ThriftRichClient"></a>
       <h4 class="signature">
@@ -1458,6 +1494,18 @@ registered handler.</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.Failure" data-isabs="false">
+      <a id="Failure:Failure"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Failure$.html"><span class="name">Failure</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Defines convenient methods for contructing and extracting failures.</p>
     </li><li visbl="pub" name="com.twitter.finagle.Filter" data-isabs="false">
       <a id="Filter:Filter"></a>
       <h4 class="signature">
@@ -1634,7 +1682,7 @@ registered handler.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="MuxClient$.html"><span class="name">MuxClient</span></a><span class="result"> extends DefaultClient[ChannelBuffer, ChannelBuffer]</span>
+        <a href="MuxClient$.html"><span class="name">MuxClient</span></a><span class="result"> extends MuxClient</span>
       </span>
       </h4>
       
@@ -1772,6 +1820,18 @@ as binding and evaluation routines.</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.ProtocolRecordingMuxServer" data-isabs="false">
+      <a id="ProtocolRecordingMuxServer:ProtocolRecordingMuxServer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ProtocolRecordingMuxServer$.html"><span class="name">ProtocolRecordingMuxServer</span></a><span class="result"> extends DefaultServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.Redis" data-isabs="false">
       <a id="Redis:Redis"></a>
       <h4 class="signature">
@@ -1900,23 +1960,12 @@ as binding and evaluation routines.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ThriftMux$.html"><span class="name">ThriftMux</span></a><span class="result"> extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient with Server[Array[Byte], Array[Byte]] with ThriftRichServer</span>
+        <a href="ThriftMux$.html"><span class="name">ThriftMux</span></a><span class="result"> extends ThriftMuxImpl</span>
       </span>
       </h4>
-      <p class="comment cmt">ThriftMux is a client and server for thrift, using
-<a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a> as a transport.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxClient" data-isabs="false">
-      <a id="ThriftMuxClient:ThriftMuxClient"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="ThriftMuxClient$.html"><span class="name">ThriftMuxClient</span></a><span class="result"> extends ThriftMuxClientImpl</span>
-      </span>
-      </h4>
-      <p class="comment cmt">A client for thrift served over <a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a></p>
+      <p class="comment cmt">The <code>ThriftMux</code> object is both a com.twitter.finagle.client.Client and a
+com.twitter.finagle.server.Server for the Thrift protocol served over
+<a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxListener" data-isabs="false">
       <a id="ThriftMuxListener:ThriftMuxListener"></a>
       <h4 class="signature">
@@ -1926,30 +1975,6 @@ as binding and evaluation routines.</p>
       </span>
       <span class="symbol">
         <a href="ThriftMuxListener$.html"><span class="name">ThriftMuxListener</span></a><span class="result"> extends Netty3Listener[ChannelBuffer, ChannelBuffer]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxServer" data-isabs="false">
-      <a id="ThriftMuxServer:ThriftMuxServer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="ThriftMuxServer$.html"><span class="name">ThriftMuxServer</span></a><span class="result"> extends ThriftMuxServerImpl</span>
-      </span>
-      </h4>
-      <p class="comment cmt">A server for Thrift served over <a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a>.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxer" data-isabs="false">
-      <a id="ThriftMuxer:ThriftMuxer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="ThriftMuxer$.html"><span class="name">ThriftMuxer</span></a><span class="result"> extends DefaultServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer]</span>
       </span>
       </h4>
       
@@ -2252,7 +2277,7 @@ as binding and evaluation routines.</p>
         <a href="mux/package.html"><span class="name">mux</span></a>
       </span>
       </h4>
-      <p class="comment cmt">Package mux implements a generic RPC multiplexer with a rich protocol.</p>
+      
     </li><li visbl="pub" name="com.twitter.finagle.netty3" data-isabs="false">
       <a id="netty3:netty3"></a>
       <h4 class="signature">
@@ -2437,6 +2462,18 @@ discrete messages delineated by HTTP chunks.</p>
       </h4>
       <p class="comment cmt">Please use the new interface, com.twitter.finagle.Thrift,
 for constructing thrift clients and servers.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.thriftmux" data-isabs="false">
+      <a id="thriftmux:thriftmux"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="thriftmux/package.html"><span class="name">thriftmux</span></a>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.topo" data-isabs="false">
       <a id="topo:topo"></a>
       <h4 class="signature">

@@ -25,14 +25,14 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ConnectedClient</span><span class="result"> extends <a name="com.twitter.finagle.kestrel.Client" class="extype" href="Client.html">Client</a></span>
+        <span class="name">ConnectedClient</span><span class="result"> extends <a name="com.twitter.finagle.kestrel.ClientBase" class="extype" href="ClientBase.html">ClientBase</a>[<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>], <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>, <span name="scala.Unit" class="extype">Unit</span>]</span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A Client representing a single TCP connection to a single server.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.kestrel.Client" class="extype" href="Client.html">Client</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.kestrel.ClientBase" class="extype" href="ClientBase.html">ClientBase</a>[<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>], <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>, <span name="scala.Unit" class="extype">Unit</span>], <a name="com.twitter.finagle.kestrel.Client" class="extype" href="Client.html">Client</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -46,7 +46,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.kestrel.ConnectedClient" class="in"><span>ConnectedClient</span></li><li name="com.twitter.finagle.kestrel.Client" class="in"><span>Client</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.kestrel.ConnectedClient" class="in"><span>ConnectedClient</span></li><li name="com.twitter.finagle.kestrel.ClientBase" class="in"><span>ClientBase</span></li><li name="com.twitter.finagle.kestrel.Client" class="in"><span>Client</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -69,7 +69,8 @@
         <span class="name">ConnectedClient</span><span class="params">(<span name="underlying">underlying: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>]</span>)</span>
       </span>
       </h4>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">underlying</dt><dd class="cmt"><p>a ServiceFactory[Command, Response].
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">underlying</dt><dd class="cmt"><p>a MemcacheClientFactory that wraps a
+  ServiceFactory[Command, Response].
 </p></dd></dl></div>
     </li></ol>
             </div>
@@ -167,7 +168,7 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.ConnectedClient#close" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.ClientBase#close" data-isabs="false">
       <a id="close():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -181,7 +182,7 @@
       <p class="shortcomment cmt">Close any consume resources such as TCP Connections.</p><div class="fullcomment"><div class="comment cmt"><p>Close any consume resources such as TCP Connections. This should will not
 release resources created by the from() and to() methods; it is the
 responsibility of the caller to release those resources directly.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.ConnectedClient" class="extype" href="">ConnectedClient</a> → <a name="com.twitter.finagle.kestrel.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.ClientBase" class="extype" href="ClientBase.html">ClientBase</a> → <a name="com.twitter.finagle.kestrel.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.kestrel.ConnectedClient#delete" data-isabs="false">
       <a id="delete(String):Future[Response]"></a>
       <h4 class="signature">
@@ -260,7 +261,9 @@ responsibility of the caller to release those resources directly.
       </h4>
       <p class="shortcomment cmt">Dequeue an item.</p><div class="fullcomment"><div class="comment cmt"><p>Dequeue an item.
 </p></div><dl class="paramcmts block"><dt class="param">waitUpTo</dt><dd class="cmt"><p>if the queue is empty, indicate to the Kestrel server how
-long to block the operation, waiting for something to arrive, before returning None
+long to block the operation, waiting for something to arrive, before
+returning None.
+0.seconds (the default) means no waiting, as opposed to infinite wait.
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.ConnectedClient" class="extype" href="">ConnectedClient</a> → <a name="com.twitter.finagle.kestrel.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
       <a id="getClass():java.lang.Class[_]"></a>
@@ -352,6 +355,22 @@ read.  Note that this does no buffering: we await acknowledment
 that message to the kestrel server &amp; reading the next one.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A read handle.
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.ConnectedClient" class="extype" href="">ConnectedClient</a> → <a name="com.twitter.finagle.kestrel.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.kestrel.ClientBase#read" data-isabs="false">
+      <a id="read((Response) ⇒ Try[Option[(ChannelBuffer, Unit)]],(Service[Command, Response]) ⇒ Future[Response],(Unit) ⇒ (Service[Command, Response]) ⇒ Future[Response],(Unit) ⇒ (Service[Command, Response]) ⇒ Future[Response]):ReadHandle"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">read</span><span class="params">(<span name="processResponse">processResponse: (<a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>) ⇒ <span name="com.twitter.util.Try" class="extype">Try</span>[<span name="scala.Option" class="extype">Option</span>[(<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="scala.Unit" class="extype">Unit</span>)]]</span>, <span name="openCommand">openCommand: (<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>]) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>]</span>, <span name="closeAndOpenCommand">closeAndOpenCommand: (<span name="scala.Unit" class="extype">Unit</span>) ⇒ (<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>]) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>]</span>, <span name="abortCommand">abortCommand: (<span name="scala.Unit" class="extype">Unit</span>) ⇒ (<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>]) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.ReadHandle" class="extype" href="ReadHandle.html">ReadHandle</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Read indefinitely from a underlying service</p><div class="fullcomment"><div class="comment cmt"><p>Read indefinitely from a underlying service</p></div><dl class="paramcmts block"><dt class="param">processResponse</dt><dd class="cmt"><p>function to process a raw reply into:
+  Return(Some()) successful read of a single item,
+  Return(None) successful read of zero items, or
+  Throw() invalid reply</p></dd><dt class="param">openCommand</dt><dd class="cmt"><p>the command to open a read</p></dd><dt class="param">closeAndOpenCommand</dt><dd class="cmt"><p>the command to ack and open a read</p></dd><dt class="param">abortCommand</dt><dd class="cmt"><p>the command to abort a read</p></dd><dt>returns</dt><dd class="cmt"><p>a ReadHandle
+</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.ClientBase" class="extype" href="ClientBase.html">ClientBase</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.kestrel.Client#readReliably" data-isabs="false">
       <a id="readReliably(String):ReadHandle"></a>
       <h4 class="signature">
@@ -398,7 +417,8 @@ ensure that we do not suffer a space leak for infinite retries.
       </h4>
       <p class="shortcomment cmt">Enqueue an item.</p><div class="fullcomment"><div class="comment cmt"><p>Enqueue an item.
 </p></div><dl class="paramcmts block"><dt class="param">expiry</dt><dd class="cmt"><p>how long the item is valid for (Kestrel will delete the item
-if it isn't dequeued in time).
+if it isn't dequeued in time).  Time.epoch (0) means the item will never
+expire.
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.ConnectedClient" class="extype" href="">ConnectedClient</a> → <a name="com.twitter.finagle.kestrel.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
@@ -469,7 +489,7 @@ if it isn't dequeued in time).
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.ConnectedClient#write" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.ClientBase#write" data-isabs="false">
       <a id="write(String,Offer[ChannelBuffer]):Future[Throwable]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -480,7 +500,12 @@ if it isn't dequeued in time).
         <span class="name">write</span><span class="params">(<span name="queueName">queueName: String</span>, <span name="offer">offer: <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Throwable]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.ConnectedClient" class="extype" href="">ConnectedClient</a> → <a name="com.twitter.finagle.kestrel.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
+      <p class="shortcomment cmt">Write indefinitely to the given queue.</p><div class="fullcomment"><div class="comment cmt"><p>Write indefinitely to the given queue.  The given offer is
+synchronized on indefinitely, writing the items as they become
+available.  Unlike {{read}}, {{write}} does not reserve a
+connection.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a Future indicating client failure.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.ClientBase" class="extype" href="ClientBase.html">ClientBase</a> → <a name="com.twitter.finagle.kestrel.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
     </li></ol>
             </div>
 
@@ -488,7 +513,9 @@ if it isn't dequeued in time).
         </div>
 
         <div id="inheritedMembers">
-        <div name="com.twitter.finagle.kestrel.Client" class="parent">
+        <div name="com.twitter.finagle.kestrel.ClientBase" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.kestrel.ClientBase" class="extype" href="ClientBase.html">ClientBase</a>[<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>], <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="protocol/Response.html">Response</a>, <span name="scala.Unit" class="extype">Unit</span>]</h3>
+            </div><div name="com.twitter.finagle.kestrel.Client" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.kestrel.Client" class="extype" href="Client.html">Client</a></h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
