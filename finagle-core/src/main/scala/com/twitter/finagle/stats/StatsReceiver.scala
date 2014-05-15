@@ -32,6 +32,13 @@ object StatsReceiver {
   private[StatsReceiver] var immortalGauges: List[Gauge] = Nil
 }
 
+/**
+ * An interface for recording metrics. Named
+ * [[com.twitter.finagle.stats.Counter Counters]],
+ * [[com.twitter.finagle.stats.Stat Stats]], and
+ * [[com.twitter.finagle.stats.Gauge Gauges]] can be accessed through the
+ * corresponding methods of this class.
+ */
 trait StatsReceiver {
   /**
    * Specifies the representative receiver.  This is in order to
@@ -142,27 +149,33 @@ trait StatsReceiver {
    * Prepend ``namespace'' to the names of this receiver.
    */
   def scope(namespace: String): StatsReceiver = {
-    val seqPrefix = Seq(namespace)
-    new NameTranslatingStatsReceiver(this) {
-      protected[this] def translate(name: Seq[String]) = seqPrefix ++ name
+    if (namespace == "") this
+    else {
+      val seqPrefix = Seq(namespace)
+      new NameTranslatingStatsReceiver(this) {
+        protected[this] def translate(name: Seq[String]) = seqPrefix ++ name
+      }
     }
   }
 
   /**
-   * Prepend a suffix value to the next scope
+   * Prepend a suffix value to the next scope.
    * stats.scopeSuffix("toto").scope("client").counter("adds") will generate
    * /client/toto/adds
    */
   def scopeSuffix(suffix: String): StatsReceiver = {
-    val self = this
-    new StatsReceiver {
-      val repr = self.repr
+    if (suffix == "") this
+    else {
+      val self = this
+      new StatsReceiver {
+        val repr = self.repr
 
-      def counter(names: String*) = self.counter(names: _*)
-      def stat(names: String*)    = self.stat(names: _*)
-      def addGauge(names: String*)(f: => Float) = self.addGauge(names: _*)(f)
+        def counter(names: String*) = self.counter(names: _*)
+        def stat(names: String*)    = self.stat(names: _*)
+        def addGauge(names: String*)(f: => Float) = self.addGauge(names: _*)(f)
 
-      override def scope(namespace: String) = self.scope(namespace).scope(suffix)
+        override def scope(namespace: String) = self.scope(namespace).scope(suffix)
+      }
     }
   }
 }
@@ -177,6 +190,12 @@ trait StatsReceiverProxy extends StatsReceiver {
   def addGauge(names: String*)(f: => Float) = self.addGauge(names:_*)(f)
 }
 
+/**
+ * A StatsReceiver receiver proxy that translates all counter, stat, and gauge
+ * names according to a `translate` function.
+ *
+ * @param self The underlying StatsReceiver to which translated names are passed
+ */
 abstract class NameTranslatingStatsReceiver(val self: StatsReceiver)
   extends StatsReceiver
 {
@@ -189,6 +208,11 @@ abstract class NameTranslatingStatsReceiver(val self: StatsReceiver)
   def addGauge(name: String*)(f: => Float) = self.addGauge(translate(name): _*)(f)
 }
 
+/**
+ * A noop StatsReceiver. Metrics are not recorded, making this receiver useful
+ * in unit tests and as defaults in situations where metrics are not strictly
+ * required.
+ */
 class NullStatsReceiver extends StatsReceiver with JavaSingleton {
   val repr = this
   override def isNull = true
@@ -200,20 +224,32 @@ class NullStatsReceiver extends StatsReceiver with JavaSingleton {
   def counter(name: String*) = NullCounter
   def stat(name: String*) = NullStat
   def addGauge(name: String*)(f: => Float) = NullGauge
-  
+
   override def toString = "NullStatsReceiver"
 }
 
 object NullStatsReceiver extends NullStatsReceiver
 
+/**
+ * A "default" StatsReceiver loaded by Finagle's
+ * [[com.twitter.finagle.util.LoadService]] mechanism.
+ */
 object DefaultStatsReceiver extends {
   val self: StatsReceiver = LoadedStatsReceiver
 } with StatsReceiverProxy
 
+/**
+ * A client-specific StatsReceiver. All stats recorded using this receiver
+ * are prefixed with the string "clnt".
+ */
 object ClientStatsReceiver extends {
   val self: StatsReceiver = LoadedStatsReceiver.scope("clnt")
 } with StatsReceiverProxy
 
+/**
+ * A server-specific StatsReceiver. All stats recorded using this receiver
+ * are prefixed with the string "srv".
+ */
 object ServerStatsReceiver extends {
   val self: StatsReceiver = LoadedStatsReceiver.scope("srv")
 } with StatsReceiverProxy
