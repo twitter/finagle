@@ -8,5 +8,8 @@ scala_library(name='scala',
     pants('util/util-codec'),
     pants('util/util-core'),
   ],
-  sources=rglobs('*.scala')
+  sources=rglobs('*.scala'),
+  provides=artifact(org='com.twitter',
+                    name='finagle-http',
+                    repo='pants-support/ivy:internal',),
 )

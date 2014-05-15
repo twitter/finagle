@@ -10,4 +10,7 @@ scala_library(name='scala',
     pants('util/util-core'),
   ],
   sources=rglobs('*.scala'),
+  provides=artifact(org='com.twitter',
+                    name='finagle-kestrel',
+                    repo='pants-support/ivy:internal',),
 )

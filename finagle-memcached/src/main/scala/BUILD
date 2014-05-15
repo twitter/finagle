@@ -20,4 +20,7 @@ scala_library(name='scala',
   resources=[
     pants('finagle/finagle-memcached/src/main/resources')
   ],
+  provides=artifact(org='com.twitter',
+                    name='finagle-memcached',
+                    repo='pants-support/ivy:internal',),
 )

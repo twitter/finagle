@@ -4,5 +4,8 @@ scala_library(name='scala',
     pants('util/util-core'),
     pants('util/util-logging')
   ],
-  sources=rglobs('*.scala')
+  sources=rglobs('*.scala'),
+  provides=artifact(org='com.twitter',
+                    name='finagle-redis',
+                    repo='pants-support/ivy:internal',),
 )
