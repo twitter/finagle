@@ -9,23 +9,42 @@ import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.client.{DefaultClient, Bridge}
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 
+//initial response types
+object resp {
+  type SmtpResponse = String
+  type SmtpResult = Seq[(Request, SmtpResponse)]
+}
+
+import resp._
+
+//temporarily using filter for everything to work
+object CommandFilter extends  Filter[Request, SmtpResult, String, String] {
+  override def apply(req: Request, send: Service[String, String]): Future[SmtpResult] = req match {
+    case SingleRequest(cmd) => {
+      send(cmd) map {resp => Seq((req, resp))}
+    }
+
+    case ComposedRequest(reqs) => {
+      val freqs = for (SingleRequest(cmd) <- reqs) yield send(cmd)
+      val fresps = Future.collect(freqs)
+      fresps map {resps => reqs zip resps}
+    }
+  }
+}
+
 /*Filter for parsing email and sending corresponding commands, then aggregating results*/
-object MailFilter extends Filter[EmailMessage, List[(String,String)], String, String]{
-  override def apply(msg: EmailMessage, send: Service[String, String]): Future[List[(String, String)]] = {
-    val reqs = List(
-      "EHLO",
-      "MAIL FROM: <" + msg.from + ">",
-      "RCPT TO: <" + msg.to.mkString(",") + ">",
-      "DATA",
-      msg.body.mkString("\r\n")
-        + "\r\n.",
-      "QUIT"
+object MailFilter extends Filter[EmailMessage, SmtpResult, Request, SmtpResult]{
+  override def apply(msg: EmailMessage, send: Service[Request, SmtpResult]): Future[SmtpResult] = {
+    val reqs = Seq[Request](
+      SingleRequest.Hello,
+      ComposedRequest.SendEmail(msg),
+      SingleRequest.Quit
     )
     val freqs = for (req <- reqs) yield send(req)
 
     val fresps = Future.collect(freqs)
 
-    fresps map {reqs zip _}
+    fresps.map(_.flatten) //compose result from several ones
   }
 }
 
@@ -55,19 +74,25 @@ object StringClientTransporter extends Netty3Transporter[String, String](
   pipelineFactory = StringClientPipeline)
 /*---*/
 
-object Smtp extends Client[EmailMessage, List[(String,String)]]{
-  val defaultClient = DefaultClient[String, String](
+
+object Smtp extends Client[Request, SmtpResult]{
+
+  val defaultClient = DefaultClient[String, String] (
     name = "smtp",
     endpointer = {
       val bridge = Bridge[String, String, String, String](
         StringClientTransporter, new SerialClientDispatcher(_)
       )
       (addr, stats) => bridge(addr, stats)
-    }
-  )
+    })
 
   override def newClient(dest: Name, label: String) = {
-    MailFilter andThen defaultClient.newClient(dest, label)
+    CommandFilter andThen defaultClient.newClient(dest, label)
   }
+}
 
+object SmtpSimple extends Client[EmailMessage, SmtpResult] {
+  override def newClient(dest: Name, label: String) = {
+    MailFilter andThen Smtp.newClient(dest, label)
+  }
 }

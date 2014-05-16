@@ -8,7 +8,7 @@ import java.util.Properties
 //case class Email(from: String, to: String, body: String)
 
 trait EmailMessage {
-  def from: String 
+  def from: String
   def to: Seq[String]
   def cc: Seq[String]
   def bcc: Seq[String]
