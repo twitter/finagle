@@ -195,7 +195,8 @@ class EndToEndTest extends FunSuite {
     }
   }
 
-  test("thriftmux server + Finagle thrift client w/o protocol upgrade: server.close()") {
+  if (!sys.props.contains("SKIP_FLAKY")) test("thriftmux server + Finagle thrift client w/o " +
+      "protocol upgrade: server.close()") {
     new ThriftMuxTestServer {
       val client = OldPlainThriftClient.newIface[TestService.FutureIface](server)
 
