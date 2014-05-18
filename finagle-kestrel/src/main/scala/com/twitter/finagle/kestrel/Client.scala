@@ -8,7 +8,10 @@ import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.{ServiceFactory, Service}
+import com.twitter.finagle.thrift.ThriftClientRequest
 import com.twitter.concurrent.{Offer, Broker}
+import com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Item
+import com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Kestrel.FinagledClient
 
 object ReadClosedException extends Exception
 object OutOfRetriesException extends Exception
