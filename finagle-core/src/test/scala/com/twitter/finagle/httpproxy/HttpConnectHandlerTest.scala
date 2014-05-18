@@ -13,11 +13,11 @@ import java.net.{SocketAddress, InetSocketAddress}
 import org.jboss.netty.handler.codec.http._
 
 @RunWith(classOf[JUnitRunner])
-class HttpConnectHandlerTest extends FunSuite with MockitoSugar{
-  class HttpConnectHandlerHelper{
+class HttpConnectHandlerTest extends FunSuite with MockitoSugar {
+  class HttpConnectHandlerHelper {
     val ctx = mock[ChannelHandlerContext]
     val channel = mock[Channel]
-    when(ctx.getChannel) thenReturn  channel
+    when(ctx.getChannel) thenReturn channel
     val pipeline = mock[ChannelPipeline]
     when(ctx.getPipeline) thenReturn pipeline
     when(channel.getPipeline) thenReturn pipeline
@@ -44,7 +44,7 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar{
     }
   }
 
-  test("HttpConnectHandler should upon connect wrap the downstream connect request"){
+  test("HttpConnectHandler should upon connect wrap the downstream connect request") {
     val h = new HttpConnectHandlerHelper
     import h._
 
@@ -53,12 +53,12 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar{
     val e = ec.getValue
 
     assert(e.getChannel === channel)
-    assert(e.getFuture != connectFuture)  // this is proxied
+    assert(e.getFuture != connectFuture) // this is proxied
     assert(e.getState === ChannelState.CONNECTED)
     assert(e.getValue === proxyAddress)
   }
 
-  test("HttpConnectHandler should upon connect propagate cancellation"){
+  test("HttpConnectHandler should upon connect propagate cancellation") {
     val h = new HttpConnectHandlerHelper
     import h._
 
@@ -71,7 +71,7 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar{
     assert(e.getFuture.isCancelled)
   }
 
-  test("HttpConnectHandler should when connect is successful not propagate success"){
+  test("HttpConnectHandler should when connect is successful not propagate success") {
     val h = new HttpConnectHandlerHelper
     import h._
 
@@ -81,7 +81,7 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar{
     verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
   }
 
-  test("HttpConnectHandler should when connect is successful propagate connection cancellation"){
+  test("HttpConnectHandler should when connect is successful propagate connection cancellation") {
     val h = new HttpConnectHandlerHelper
     import h._
 
@@ -94,7 +94,7 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar{
     checkDidClose()
   }
 
-  test("HttpConnectHandler should when connect is successful do HTTP CONNECT"){
+  test("HttpConnectHandler should when connect is successful do HTTP CONNECT") {
     val h = new HttpConnectHandlerHelper
     import h._
 
@@ -103,8 +103,9 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar{
     assert(!connectFuture.isDone)
     verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
 
-    { // send connect request
-    val ec = ArgumentCaptor.forClass(classOf[DownstreamMessageEvent])
+    {
+      // send connect request
+      val ec = ArgumentCaptor.forClass(classOf[DownstreamMessageEvent])
       verify(ctx, atLeastOnce).sendDownstream(ec.capture)
       val e = ec.getValue
       val req = e.getMessage.asInstanceOf[DefaultHttpRequest]
@@ -112,7 +113,8 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar{
       assert(req.getUri === "localhost:" + port)
     }
 
-    { // when connect response is received, propagate the connect and remove the handler
+    {
+      // when connect response is received, propagate the connect and remove the handler
       ch.handleUpstream(ctx, new UpstreamMessageEvent(
         channel,
         new DefaultHttpResponse(HttpVersion.HTTP_1_0, HttpResponseStatus.OK),
@@ -132,7 +134,7 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar{
     }
   }
 
-  test("HttpConnectHandler should propagate connection failure"){
+  test("HttpConnectHandler should propagate connection failure") {
     val h = new HttpConnectHandlerHelper
     import h._
 

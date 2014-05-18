@@ -34,7 +34,7 @@ class IdTest extends FunSuite {
 
   test("SpanId.toString: each bit must be correct") {
     for (b <- 0 until 64)
-      assert(hex(1<<b) === SpanId(1<<b).toString)
+      assert(hex(1 << b) === SpanId(1 << b).toString)
   }
 
   test("SpanId.toString: random") {

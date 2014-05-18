@@ -101,7 +101,7 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
   test("SslConnectHandler should when connect is succesful not propagate success") {
     val h = new helper2
     import h._
-    
+
     verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
   }
 
@@ -165,7 +165,7 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
   test("SslConnectHandler should propagate connection failure") {
     val h = new SslConnectHandlerHelper
     import h._
-    
+
     val ec = ArgumentCaptor.forClass(classOf[DownstreamChannelStateEvent])
     verify(ctx).sendDownstream(ec.capture)
     val e = ec.getValue
@@ -174,7 +174,7 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
     assert(!connectFuture.isDone)
     e.getFuture.setFailure(exc)
     assert(connectFuture.isDone)
-    assert(connectFuture.getCause == exc)
+    assert(connectFuture.getCause === exc)
   }
 
 }

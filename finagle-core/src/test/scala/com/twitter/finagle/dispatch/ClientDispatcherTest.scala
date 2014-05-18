@@ -11,19 +11,19 @@ import com.twitter.util.{Throw, Return, Promise, Future}
 import com.twitter.finagle.{WriteException, Failure}
 
 @RunWith(classOf[JUnitRunner])
-class ClientDispatcherTest extends FunSuite with MockitoSugar{
+class ClientDispatcherTest extends FunSuite with MockitoSugar {
   class ClientHelper {
     val trans = mock[Transport[String, String]]
     val disp = new SerialClientDispatcher[String, String](trans)
   }
 
-  test("ClientDispatcher should dispatch requests"){
+  test("ClientDispatcher should dispatch requests") {
     val h = new ClientHelper
     import h._
 
-    when(trans.write("one")) thenReturn  Future.value(())
+    when(trans.write("one")) thenReturn Future.value(())
     val p = new Promise[String]
-    when(trans.read()) thenReturn  p
+    when(trans.read()) thenReturn p
     val f = disp("one")
     verify(trans).write("one")
     verify(trans).read()
@@ -33,7 +33,7 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar{
     assert(f.poll === Some(Return("ok: one")))
   }
 
-  test("ClientDispatcher should dispatch requests one-at-a-time"){
+  test("ClientDispatcher should dispatch requests one-at-a-time") {
     val h = new ClientHelper
     import h._
 
@@ -61,13 +61,13 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar{
     assert(p1.poll === Some(Return("ok: two")))
   }
 
-  test("ClientDispatcher should interrupt when close transport and cancel pending requests"){
+  test("ClientDispatcher should interrupt when close transport and cancel pending requests") {
     val h = new ClientHelper
     import h._
 
-    when(trans.write(any[String])) thenReturn  Future.value(())
+    when(trans.write(any[String])) thenReturn Future.value(())
     val p0 = new Promise[String]
-    when(trans.read()) thenReturn  p0
+    when(trans.read()) thenReturn p0
     val f0 = disp("zero")
     val f1 = disp("one")
     verify(trans).write("zero")
@@ -81,13 +81,13 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar{
     assert(f0.poll === Some(Throw(intr)))
   }
 
-  test("ClientDispatcher should interrupt when ignore pending"){
+  test("ClientDispatcher should interrupt when ignore pending") {
     val h = new ClientHelper
     import h._
 
-    when(trans.write(any[String])) thenReturn  Future.value(())
+    when(trans.write(any[String])) thenReturn Future.value(())
     val p0 = new Promise[String]
-    when(trans.read()) thenReturn  p0
+    when(trans.read()) thenReturn p0
     val f0 = disp("zero")
     val f1 = disp("one")
     verify(trans).write("zero")
@@ -107,12 +107,12 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar{
     verify(trans).write(any[String])
   }
 
-  test("ClientDispatcher should rewrite WriteExceptions"){
+  test("ClientDispatcher should rewrite WriteExceptions") {
     val h = new ClientHelper
     import h._
 
     val exc = mock[Exception]
-    when(trans.write(any[String])) thenReturn  Future.exception(exc)
+    when(trans.write(any[String])) thenReturn Future.exception(exc)
     val resultOpt = disp("hello").poll
 
     assert(resultOpt.isDefined)

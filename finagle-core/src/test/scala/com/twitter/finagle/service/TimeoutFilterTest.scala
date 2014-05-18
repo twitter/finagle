@@ -53,7 +53,7 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
       intercept[java.util.concurrent.TimeoutException] {
         throw t.get
       }
-      intercept[IndividualRequestTimeoutException]{
+      intercept[IndividualRequestTimeoutException] {
         Await.result(res)
       }
     }

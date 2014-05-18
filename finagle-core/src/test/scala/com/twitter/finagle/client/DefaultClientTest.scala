@@ -23,8 +23,9 @@ class DefaultClientTest extends FunSuite with Eventually {
     val qIn = new AsyncQueue[Int]()
     val qOut = new AsyncQueue[Int]()
 
-    val transporter: (SocketAddress, StatsReceiver) => Future[Transport[Int, Int]] = { case (_, _) =>
-      Future.value(new QueueTransport(qIn, qOut))
+    val transporter: (SocketAddress, StatsReceiver) => Future[Transport[Int, Int]] = {
+      case (_, _) =>
+        Future.value(new QueueTransport(qIn, qOut))
     }
   }
 
@@ -35,30 +36,32 @@ class DefaultClientTest extends FunSuite with Eventually {
   trait SourcedExceptionDispatcherHelper extends DispatcherHelper {
     val dispatcher: Transport[Int, Int] => Service[Int, Int] = { _ =>
       Service.mk { _ =>
-        throw new SourcedException{}
+        throw new SourcedException {}
       }
     }
   }
 
-  trait ServiceHelper { self: QueueTransportHelper with DispatcherHelper =>
+  trait ServiceHelper {
+    self: QueueTransportHelper with DispatcherHelper =>
     val endPointer = Bridge[Int, Int, Int, Int](transporter, dispatcher)
     val name = "name"
-    val socket = new SocketAddress(){}
+    val socket = new SocketAddress() {}
     val client: Client[Int, Int]
     lazy val service: Service[Int, Int] = client.newService(Name.bound(socket), name)
   }
 
-  trait BaseClientHelper extends ServiceHelper { self: QueueTransportHelper with DispatcherHelper =>
+  trait BaseClientHelper extends ServiceHelper {
+    self: QueueTransportHelper with DispatcherHelper =>
     val client: Client[Int, Int] = DefaultClient[Int, Int](name, endPointer)
   }
 
   trait SourcedExceptionHelper extends QueueTransportHelper with
-      SourcedExceptionDispatcherHelper with
-      BaseClientHelper
+  SourcedExceptionDispatcherHelper with
+  BaseClientHelper
 
   class DefaultClientHelper extends QueueTransportHelper with
-      SerialDispatcherHelper with
-      BaseClientHelper
+  SerialDispatcherHelper with
+  BaseClientHelper
 
   test("DefaultClient should successfully add sourcedexception") {
     new SourcedExceptionHelper {
@@ -81,9 +84,9 @@ class DefaultClientTest extends FunSuite with Eventually {
   }
 
   trait TimeoutHelper extends TimingHelper with
-      QueueTransportHelper with
-      SerialDispatcherHelper with
-      ServiceHelper {
+  QueueTransportHelper with
+  SerialDispatcherHelper with
+  ServiceHelper {
     val pool = new DefaultPool[Int, Int](0, 1, timer = timer) // pool of size 1
   }
 
@@ -100,15 +103,15 @@ class DefaultClientTest extends FunSuite with Eventually {
       )
 
       Time.withCurrentTimeFrozen { control =>
-        val f1 = service(3)  // has a connection
-        val f2 = service(4)  // is queued
+        val f1 = service(3) // has a connection
+      val f2 = service(4) // is queued
 
         assert(!f1.isDefined)
         assert(!f2.isDefined)
 
         control.advance(rTimeout)
         timer.tick()
-        assert(f1.isDefined)  // times out
+        assert(f1.isDefined) // times out
         intercept[IndividualRequestTimeoutException] {
           Await.result(f1)
         }
@@ -126,12 +129,13 @@ class DefaultClientTest extends FunSuite with Eventually {
   }
 
   trait StatsHelper extends TimingHelper with
-      QueueTransportHelper with
-      SerialDispatcherHelper with
-      StatsReceiverHelper with
-      ServiceHelper {
+  QueueTransportHelper with
+  SerialDispatcherHelper with
+  StatsReceiverHelper with
+  ServiceHelper {
 
-    val pool = new DefaultPool[Int, Int](0, 1, timer = timer) // pool of size 1
+    val pool = new DefaultPool[Int, Int](0, 1, timer = timer)
+    // pool of size 1
     val client = new DefaultClient[Int, Int](
       name,
       endPointer,
@@ -170,8 +174,8 @@ class DefaultClientTest extends FunSuite with Eventually {
       val dest = Name.Bound.singleton(Var.value(Addr.Pending))
       val svc = client.newService(dest, "test")
       val f = svc.close()
-      eventually { assert(f.isDefined) }
-      assert(Await.result(f) === ())
+      eventually {assert(f.isDefined)}
+      assert(Await.result(f) ===())
     }
   }
 
@@ -188,7 +192,7 @@ class DefaultClientTest extends FunSuite with Eventually {
       val svc = client.newService(dest, "test")
       assert(closed === false)
       val f = svc.close()
-      eventually { assert(f.poll === Some(Return(()))) }
+      eventually {assert(f.poll === Some(Return(())))}
       assert(closed === true)
     }
   }

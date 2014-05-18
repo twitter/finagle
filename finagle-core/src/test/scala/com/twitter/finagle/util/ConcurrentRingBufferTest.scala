@@ -11,7 +11,7 @@ class ConcurrentRingBufferTest extends FunSuite {
     val b = new ConcurrentRingBuffer[Int](N)
 
     for (i <- 0 until N)
-      assert(b.tryPut(i)) 
+      assert(b.tryPut(i))
 
     for (i <- 0 until N)
       assert(b.tryGet() === Some(i))
@@ -22,8 +22,8 @@ class ConcurrentRingBufferTest extends FunSuite {
     val b = new ConcurrentRingBuffer[Int](N)
 
     for (i <- 0 until N)
-      assert(b.tryPut(i)) 
-    assert(!b.tryPut(0)) 
+      assert(b.tryPut(i))
+    assert(!b.tryPut(0))
   }
 
   test("ConcurrentRingBuffer should interleave puts and gets") {
@@ -31,7 +31,7 @@ class ConcurrentRingBufferTest extends FunSuite {
     val b = new ConcurrentRingBuffer[Int](N)
 
     for (i <- 0 until N * 100) {
-     assert( b.tryPut(i)) 
+      assert(b.tryPut(i))
       assert(b.tryGet() === Some(i))
     }
   }
@@ -41,11 +41,11 @@ class ConcurrentRingBufferTest extends FunSuite {
     val b = new ConcurrentRingBuffer[Int](N)
 
     for (i <- 0 until N)
-      assert(b.tryPut(i)) 
+      assert(b.tryPut(i))
 
     for (i <- 0 until N) {
-     assert( b.tryGet() === Some(i))
-      b.tryPut(i * 2) 
+      assert(b.tryGet() === Some(i))
+      b.tryPut(i * 2)
     }
 
     for (i <- 0 until N)

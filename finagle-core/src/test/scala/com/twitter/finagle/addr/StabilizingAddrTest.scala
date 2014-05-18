@@ -18,10 +18,10 @@ class MockHealth {
 }
 
 class Context {
-  val s1, s2, s3, s4, s5, s6, s7, s8, s9, s10 = new SocketAddress{}
-  val allAddrs = Set(s1,s2,s3,s4,s5,s6,s7,s8,s9,s10)
+  val s1, s2, s3, s4, s5, s6, s7, s8, s9, s10 = new SocketAddress {}
+  val allAddrs = Set(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10)
 
-  object addrs { 
+  object addrs {
     val broker = new Broker[Addr]
     val offer = broker.recv
     @volatile var set = Set.empty[SocketAddress]
@@ -46,13 +46,13 @@ class Context {
     grace,
     statsRecv.scope("testGroup"),
     timer)
-  
+
   @volatile var stabilized: Addr = Addr.Pending
   for (addr <- stabilizedAddr)
     stabilized = addr
-  
+
   addrs() = allAddrs
-  
+
   def assertStable() {
     assert(stabilized == Addr.Bound(addrs()))
   }
@@ -99,7 +99,7 @@ class StabilizingAddrTest extends FunSuite {
       assert(stabilized != Addr.Bound(addrs()))
       assert(stabilized === Addr.Bound(allAddrs))
       assert(limboSize === 1)
-      addrs() = addrs() -- Set(s1,s2,s3,s4)
+      addrs() = addrs() -- Set(s1, s2, s3, s4)
       assert(stabilized != Addr.Bound(addrs()))
       assert(stabilized === Addr.Bound(allAddrs))
       assert(limboSize === 5)
@@ -130,7 +130,7 @@ class StabilizingAddrTest extends FunSuite {
 
       healthStatus.mkHealthy()
       assert(healthStat === Healthy.id)
-      addrs() = Set(s1,s2,s3,s4)
+      addrs() = Set(s1, s2, s3, s4)
 
       tc.advance(grace)
       timer.tick()
@@ -144,9 +144,9 @@ class StabilizingAddrTest extends FunSuite {
       import ctx._
 
       healthStatus.mkHealthy()
-      
+
       addrs() = Set.empty
-      tc.advance(grace/2)
+      tc.advance(grace / 2)
       addrs() = Set(s5)
       tc.advance(grace)
       timer.tick()
@@ -178,17 +178,20 @@ class StabilizingAddrTest extends FunSuite {
       healthStatus.mkHealthy()
 
       assertStable()
-      addrs() = Set(s1,s2)
-      tc.advance(grace/2); timer.tick()
+      addrs() = Set(s1, s2)
+      tc.advance(grace / 2);
+      timer.tick()
       assert(stabilized === Addr.Bound(allAddrs))
       addrs.broker !! Addr.Neg
       assert(stabilized === Addr.Bound(allAddrs))
-      tc.advance(grace/2); timer.tick()
-      assert(stabilized === Addr.Bound(Set(s1,s2)))
-      tc.advance(grace/2); timer.tick()
+      tc.advance(grace / 2);
+      timer.tick()
+      assert(stabilized === Addr.Bound(Set(s1, s2)))
+      tc.advance(grace / 2);
+      timer.tick()
       assert(stabilized === Addr.Neg)
-      
-      addrs() = Set(s1,s2)
+
+      addrs() = Set(s1, s2)
       assertStable()
     }
   }

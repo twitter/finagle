@@ -7,7 +7,7 @@ import org.mockito.Matchers._
 import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
 import com.twitter.util.{Await, Future, Time}
 
-class BufferingPoolTest extends FunSuite with MockitoSugar{
+class BufferingPoolTest extends FunSuite with MockitoSugar {
   class Helper {
     val underlying = mock[ServiceFactory[Int, Int]]
     when(underlying.close(any[Time])) thenReturn Future.Done
@@ -19,11 +19,11 @@ class BufferingPoolTest extends FunSuite with MockitoSugar{
     val pool = new BufferingPool(underlying, N)
   }
 
-  test("BufferingPool should buffer exactly N items"){
+  test("BufferingPool should buffer exactly N items") {
     val h = new Helper
     import h._
 
-    val n2 = for (_ <- 0 until N*2) yield Await.result(pool())
+    val n2 = for (_ <- 0 until N * 2) yield Await.result(pool())
     verify(service, times(0)).close(any[Time])
     verify(underlying, times(N * 2)).apply(any[ClientConnection])
     for (s <- n2 take N)
@@ -39,26 +39,26 @@ class BufferingPoolTest extends FunSuite with MockitoSugar{
     verify(service, times(N)).close(any[Time])
   }
 
-  test("BufferingPool should drain services on close"){
+  test("BufferingPool should drain services on close") {
     val h = new Helper
     import h._
 
     val ns = for (_ <- 0 until N) yield Await.result(pool())
     verify(service, times(0)).close(any[Time])
-    for (s <- ns take (N-1)) s.close()
+    for (s <- ns take (N - 1)) s.close()
     pool.close()
-    verify(service, times(N-1)).close(any[Time])
-    ns(N-1).close()
+    verify(service, times(N - 1)).close(any[Time])
+    ns(N - 1).close()
     verify(service, times(N)).close(any[Time])
 
     // Bypass buffer after drained.
     val s = Await.result(pool())
-    verify(underlying, times(N+1)).apply(any[ClientConnection])
+    verify(underlying, times(N + 1)).apply(any[ClientConnection])
     s.close()
-    verify(service, times(N+1)).close(any[Time])
+    verify(service, times(N + 1)).close(any[Time])
   }
 
-  test("BufferingPool should give back unhealthy services immediately"){
+  test("BufferingPool should give back unhealthy services immediately") {
     val h = new Helper
     import h._
     val unhealthy = mock[Service[Int, Int]]
@@ -71,7 +71,7 @@ class BufferingPoolTest extends FunSuite with MockitoSugar{
     verify(unhealthy).close(any[Time])
   }
 
-  test("BufferingPool should skip unhealthy services"){
+  test("BufferingPool should skip unhealthy services") {
     val h = new Helper
     import h._
 

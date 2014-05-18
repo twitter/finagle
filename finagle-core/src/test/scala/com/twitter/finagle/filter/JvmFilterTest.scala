@@ -15,11 +15,11 @@ import com.twitter.util.{TimeControl, Future, Promise, Time}
 
 
 @RunWith(classOf[JUnitRunner])
-class JvmFilterTest extends FunSuite with MockitoSugar{
+class JvmFilterTest extends FunSuite with MockitoSugar {
   class JvmHelper {
-    var gcEvents = Nil : List[Gc]
+    var gcEvents = Nil: List[Gc]
     val jvm = mock[Jvm]
-    when(jvm.monitorGcs(any[com.twitter.util.Duration])) thenReturn { since:Time => gcEvents.takeWhile(_.timestamp > since) }
+    when(jvm.monitorGcs(any[com.twitter.util.Duration])) thenReturn { since: Time => gcEvents.takeWhile(_.timestamp > since)}
     val mkFilter = new MkJvmFilter(jvm)
     val filter = mkFilter[String, String]()
     val service = mock[Service[String, String]]
@@ -36,7 +36,7 @@ class JvmFilterTest extends FunSuite with MockitoSugar{
     }
   }
 
-  test("JvmFilter should Record overlapping Gcs"){ tc:TimeControl =>
+  test("JvmFilter should Record overlapping Gcs") { tc: TimeControl =>
     val h = new JvmHelper
     import h._
 
@@ -55,7 +55,7 @@ class JvmFilterTest extends FunSuite with MockitoSugar{
         Annotation.Message(Gc(1, "pcopy", 1.second.ago, 1.second).toString), Some(1.second))))
   }
 
-  test("JvmFilter should Not record nonoverlapping Gcs"){ tc:TimeControl =>
+  test("JvmFilter should Not record nonoverlapping Gcs") { tc: TimeControl =>
     val h = new JvmHelper
     import h._
 

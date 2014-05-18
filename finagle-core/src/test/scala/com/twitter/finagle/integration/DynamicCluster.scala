@@ -23,7 +23,7 @@ class DynamicCluster[U](initial: Seq[U])
   }
 
 
-  private[this] def performChange (change: Cluster.Change[U]) = synchronized {
+  private[this] def performChange(change: Cluster.Change[U]) = synchronized {
     val newTail = new Promise[Spool[Cluster.Change[U]]]
     s() = Return(change *:: newTail)
     s = newTail

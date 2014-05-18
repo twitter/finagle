@@ -48,23 +48,23 @@ class ChannelClosingHandlerTest extends FunSuite with MockitoSugar {
     verify(channel, times(1)).close()
   }
 
-  test("ChannelClosingHandler should delay closing until it has been opened before channel has been opened"){
+  test("ChannelClosingHandler should delay closing until it has been opened before channel has been opened") {
     val h = new ChannelHelper
     import h._
 
     handler.close()
-    verify(channel,times(0)).close()
+    verify(channel, times(0)).close()
 
     handler.channelOpen(ctx, e)
     verify(channel, times(1)).close()
   }
 
-  test("ChannelClosingHandler should delay closing until it has been opened before channel has been attached"){
+  test("ChannelClosingHandler should delay closing until it has been opened before channel has been attached") {
     val h = new ChannelHelper
     import h._
 
     handler.close()
-    verify(channel,times(0)).close()
+    verify(channel, times(0)).close()
 
     handler.beforeAdd(ctx)
     verify(channel, times(1)).close()

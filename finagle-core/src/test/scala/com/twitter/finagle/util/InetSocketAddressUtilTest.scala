@@ -42,7 +42,7 @@ class InetSocketAddressUtilTest extends FunSuite {
   test("parseHosts") {
     assert(InetSocketAddressUtil.parseHosts("").isEmpty)
     assert(InetSocketAddressUtil.parseHosts(",").isEmpty)
-    intercept[IllegalArgumentException] { InetSocketAddressUtil.parseHosts("gobble-d-gook") }
+    intercept[IllegalArgumentException] {InetSocketAddressUtil.parseHosts("gobble-d-gook")}
 
     assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1) === Seq(new InetSocketAddress("127.0.0.1", port1)))
     assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1) === Seq(new InetSocketAddress("127.0.0.1", port1)))

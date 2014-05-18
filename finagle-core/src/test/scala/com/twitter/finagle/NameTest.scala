@@ -13,9 +13,9 @@ class NameTest extends FunSuite {
     val n = Name.fromGroup(g)
 
     var addr: Addr = Addr.Pending
-    n.addr observe { addr = _ }
+    n.addr observe {addr = _}
     assert(addr === Addr.Pending)
-    val set = Set(new SocketAddress{}, new SocketAddress{})
+    val set = Set(new SocketAddress {}, new SocketAddress {})
     g() = set
 
     val Addr.Bound(s2) = addr
@@ -23,7 +23,7 @@ class NameTest extends FunSuite {
   }
 
   test("Name.Bound maintains equality as per 'id'") {
-    val id1, id2 = new{}
+    val id1, id2 = new {}
     val a1, a2 = Var(Addr.Pending)
 
     assert(Name.Bound(a1, id1) === Name.Bound(a2, id1))

@@ -8,19 +8,19 @@ import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
 class TraceContextTest
-    extends FunSuite
-    with BeforeAndAfter with OneInstancePerTest {
+  extends FunSuite
+  with BeforeAndAfter with OneInstancePerTest {
 
-  before { Trace.clear() }
-  after { Trace.clear() }
+  before {Trace.clear()}
+  after {Trace.clear()}
 
   def longs(seed: Long) = {
     val rng = new Random(seed)
-    Seq.fill(10) { rng.nextLong() }
+    Seq.fill(10) {rng.nextLong()}
   }
 
   def spanIds(seed: Long): Seq[Option[SpanId]] =
-    None +: (longs(seed) map(l => Some(SpanId(l))))
+    None +: (longs(seed) map (l => Some(SpanId(l))))
 
   val traceIds = for {
     traceId <- spanIds(1L)

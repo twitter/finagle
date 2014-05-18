@@ -7,7 +7,7 @@ import com.twitter.util.{Await, Promise, Future}
 import org.mockito.Mockito.{verify, when}
 import org.mockito.Matchers._
 
-class CloseOnReleaseServiceTest extends FunSuite with MockitoSugar{
+class CloseOnReleaseServiceTest extends FunSuite with MockitoSugar {
 
   class Helper {
     val service = mock[Service[Any, Any]]
@@ -17,7 +17,7 @@ class CloseOnReleaseServiceTest extends FunSuite with MockitoSugar{
     val wrapper = new CloseOnReleaseService(service)
   }
 
-  test("only call release on the underlying service once"){
+  test("only call release on the underlying service once") {
     val h = new Helper
     import h._
 
@@ -28,12 +28,12 @@ class CloseOnReleaseServiceTest extends FunSuite with MockitoSugar{
     assert(!service.isAvailable)
   }
 
-  test("throw a write exception if we attempt to use a released service"){
+  test("throw a write exception if we attempt to use a released service") {
     val h = new Helper
     import h._
 
     wrapper.close()
-    intercept[WriteException]{
+    intercept[WriteException] {
       Await.result(wrapper(132))
     }
   }

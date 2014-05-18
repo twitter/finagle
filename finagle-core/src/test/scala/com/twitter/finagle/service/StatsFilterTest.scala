@@ -31,13 +31,13 @@ class StatsFilterTest extends FunSuite {
     val res = statsService("foo")
     assert(res.isDefined)
     assert(Await.ready(res).poll.get.isThrow)
-    val sourced = receiver.counters.keys.filter { _.exists(_ == "sourcedfailures") }
+    val sourced = receiver.counters.keys.filter {_.exists(_ == "sourcedfailures")}
     assert(sourced.size === 1)
-    assert(sourced.toSeq(0).exists(_.indexOf("bogus") >=0))
-    val unsourced = receiver.counters.keys.filter { _.exists(_ == "failures") }
+    assert(sourced.toSeq(0).exists(_.indexOf("bogus") >= 0))
+    val unsourced = receiver.counters.keys.filter {_.exists(_ == "failures")}
     assert(unsourced.size === 1)
-    assert(unsourced.toSeq(0).exists { s => s.indexOf("RequestException") >= 0 })
-    assert(unsourced.toSeq(0).exists { s => s.indexOf("WriteException") >= 0 })
+    assert(unsourced.toSeq(0).exists { s => s.indexOf("RequestException") >= 0})
+    assert(unsourced.toSeq(0).exists { s => s.indexOf("WriteException") >= 0})
   }
 
   test("don't report BackupRequestLost exceptions") {

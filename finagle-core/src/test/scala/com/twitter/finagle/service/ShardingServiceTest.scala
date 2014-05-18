@@ -35,11 +35,11 @@ class ShardingServiceTest extends FunSuite with MockitoSugar {
     val unshardableReq = new MockRequest
     val reply = Future.value("hello")
   }
-  
-  test("ShardingService should distribute requests between two shards"){
+
+  test("ShardingService should distribute requests between two shards") {
     val h = new ShardingServiceHelper
     import h._
-    
+
     val reqB = new ShardingRequest(2L)
     val serviceForB = mock[Service[MockRequest, String]]
     when(serviceForB.close(any)) thenReturn Future.Done
@@ -57,23 +57,23 @@ class ShardingServiceTest extends FunSuite with MockitoSugar {
     verify(serviceForB).apply(reqB)
   }
 
-  test("ShardingService should thenReturn an exception if the shard picked is unavailable"){
+  test("ShardingService should thenReturn an exception if the shard picked is unavailable") {
     val h = new ShardingServiceHelper
     import h._
-    
+
     when(distributor.nodeForHash(1L)) thenReturn serviceForA
     when(serviceForA.isAvailable) thenReturn false
-    intercept[ShardNotAvailableException]{
+    intercept[ShardNotAvailableException] {
       Await.result(service(reqA))
     }
     verify(serviceForA, times(0)).apply(reqA)
   }
 
-  test("ShardingService should thenReturn an unshardable if the request is not shardable"){
+  test("ShardingService should thenReturn an unshardable if the request is not shardable") {
     val h = new ShardingServiceHelper
     import h._
-    
-    intercept[NotShardableException]{
+
+    intercept[NotShardableException] {
       Await.result(service(unshardableReq))
     }
     verify(distributor, times(0)).nodeForHash(anyLong)

@@ -64,16 +64,16 @@ class StatsReceiverTest extends FunSuite {
   test("StatsReceiver time") {
     val receiver = spy(new InMemoryStatsReceiver)
 
-    receiver.time("er", "mah", "gerd") { () }
+    receiver.time("er", "mah", "gerd") {()}
     verify(receiver, times(1)).stat("er", "mah", "gerd")
 
-    receiver.time(TimeUnit.NANOSECONDS, "er", "mah", "gerd") { () }
+    receiver.time(TimeUnit.NANOSECONDS, "er", "mah", "gerd") {()}
     verify(receiver, times(2)).stat("er", "mah", "gerd")
 
     val stat = receiver.stat("er", "mah", "gerd")
     verify(receiver, times(3)).stat("er", "mah", "gerd")
 
-    receiver.time(TimeUnit.DAYS, stat) { () }
+    receiver.time(TimeUnit.DAYS, stat) {()}
     verify(receiver, times(3)).stat("er", "mah", "gerd")
   }
 
@@ -126,10 +126,10 @@ class StatsReceiverTest extends FunSuite {
       .build()
 
     // generate com.twitter.finagle.IndividualRequestTimeoutException
-    intercept[IndividualRequestTimeoutException] { Await.result(client("hi")) }
+    intercept[IndividualRequestTimeoutException] {Await.result(client("hi"))}
     Await.ready(server.close())
     // generate com.twitter.finagle.WriteException$$anon$1
-    intercept[WriteException] { Await.result(client("hi")) }
+    intercept[WriteException] {Await.result(client("hi"))}
 
     val requestFailures = mem.counters(Seq("client", "failures"))
     val serviceCreationFailures =

@@ -8,11 +8,11 @@ import scala.collection.mutable.HashMap
 
 
 @RunWith(classOf[JUnitRunner])
-class HeapTest extends FunSuite{
+class HeapTest extends FunSuite {
   class Helper {
     val N = 100
-    val heap = new Array[Int](N+1)
-    val input = (new Random).shuffle(Seq(0 until 100:_*)).toArray
+    val heap = new Array[Int](N + 1)
+    val input = (new Random).shuffle(Seq(0 until 100: _*)).toArray
     val indices = new HashMap[Int, Int]
     val indexer = new Heap.Indexer[Int] {
       def apply(v: Int, i: Int) {
@@ -22,48 +22,48 @@ class HeapTest extends FunSuite{
     val ops = Heap[Int](math.Ordering.Int, indexer)
   }
 
-  test("heap should produce valid heaps"){
+  test("heap should produce valid heaps") {
     val h = new Helper
     import h._
     import h.ops._
 
     N to 1 by -1 foreach { i =>
-      heap(N+1 - i) = input(N - i)
-      fixUp(heap, N+1 - i)
+      heap(N + 1 - i) = input(N - i)
+      fixUp(heap, N + 1 - i)
       assert(isValid(heap, 1, N + 1 - i))
     }
   }
 
-  test("provide sorted output (heapsort)"){
+  test("provide sorted output (heapsort)") {
     val h = new Helper
     import h._
     import h.ops._
 
     N to 1 by -1 foreach { i =>
-      heap(N+1 - i) = input(N - i)
-      fixUp(heap, N+1 - i)
+      heap(N + 1 - i) = input(N - i)
+      fixUp(heap, N + 1 - i)
       val copy = heap.clone()
-      val ordered = new Array[Int](N+1 - i)
-      0 until (N+1 - i) foreach { j =>
+      val ordered = new Array[Int](N + 1 - i)
+      0 until (N + 1 - i) foreach { j =>
         ordered(j) = copy(1)
-        copy(1) = copy(N+1 - i - j)
-        fixDown(copy, 1, N+1 - i - j)
+        copy(1) = copy(N + 1 - i - j)
+        fixDown(copy, 1, N + 1 - i - j)
       }
 
-      assert(ordered.toSeq ==((input take (N - i + 1) sorted) toSeq))
+      assert(ordered.toSeq === ((input take (N - i + 1) sorted) toSeq))
     }
   }
 
-  test("correctly maintain indices"){
+  test("correctly maintain indices") {
     val h = new Helper
     import h._
     import h.ops._
 
     N to 1 by -1 foreach { i =>
-      heap(N+1 - i) = input(N - i)
-      indices(input(N - i)) = N+1 - i
-      val fixed = fixUp(heap, N+1 - i)
-      1 to N+1 - i foreach { j =>
+      heap(N + 1 - i) = input(N - i)
+      indices(input(N - i)) = N + 1 - i
+      val fixed = fixUp(heap, N + 1 - i)
+      1 to N + 1 - i foreach { j =>
         assert(indices(heap(j)) === j)
       }
     }
@@ -72,7 +72,7 @@ class HeapTest extends FunSuite{
       heap(1) = heap(N - i + 1)
       indices(heap(1)) = 1
       fixDown(heap, 1, N - i)
-      1 to N-i foreach { j =>
+      1 to N - i foreach { j =>
         assert(indices(heap(j)) === j)
       }
     }

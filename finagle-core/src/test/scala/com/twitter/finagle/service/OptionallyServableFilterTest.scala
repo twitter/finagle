@@ -37,7 +37,7 @@ class OptionallyServableFilterTest extends FunSuite with MockitoSugar {
 
     when(fn.apply(request)) thenReturn Future.value(false)
 
-    intercept[NotServableException]{
+    intercept[NotServableException] {
       Await.result(service(request))
     }
     verify(underlying, times(0)).apply(any[String])

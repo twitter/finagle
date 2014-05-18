@@ -11,6 +11,7 @@ import org.scalatest.concurrent.Eventually._
 import com.twitter.finagle.integration.IntegrationBase
 import com.twitter.finagle.{WriteException, Service, ServiceFactory}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.util.{Return, Future, Time, Promise}
 
 @RunWith(classOf[JUnitRunner])
 class ClientBuilderTest extends FunSuite with MockitoSugar with IntegrationBase {

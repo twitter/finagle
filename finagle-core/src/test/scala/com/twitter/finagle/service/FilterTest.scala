@@ -8,7 +8,7 @@ import com.twitter.finagle.{Service, Filter}
 import com.twitter.util.{Throw, Try, Await, Future}
 
 @RunWith(classOf[JUnitRunner])
-class FilterTest extends FunSuite{
+class FilterTest extends FunSuite {
   class FilterHelper {
     val stringToInt =
       new Filter[Int, Int, String, String] {
@@ -23,7 +23,7 @@ class FilterTest extends FunSuite{
       }
   }
 
-  test("filters should compose when it's all chill"){
+  test("filters should compose when it's all chill") {
     val h = new FilterHelper
     import h._
 
@@ -36,10 +36,10 @@ class FilterTest extends FunSuite{
     val result = (filter andThen service)(123)
 
     assert(Await.ready(result).poll.get.isReturn)
-    assert(Await.result(result) ==(123 * 2))
+    assert(Await.result(result) == (123 * 2))
   }
 
-  test("filters should compose when synchronous exceptions are thrown with simple composition"){
+  test("filters should compose when synchronous exceptions are thrown with simple composition") {
     val h = new FilterHelper
     import h._
 
@@ -51,10 +51,10 @@ class FilterTest extends FunSuite{
       }
     }
 
-    assert(Try(Await.result(intToString.andThen(exceptionThrowingService)("1"), 1.second))== Throw(e))
+    assert(Try(Await.result(intToString.andThen(exceptionThrowingService)("1"), 1.second)) == Throw(e))
   }
 
-  test("filters should compose when synchronous exceptions are thrown with transitive composition"){
+  test("filters should compose when synchronous exceptions are thrown with transitive composition") {
     val h = new FilterHelper
     import h._
 
@@ -67,9 +67,9 @@ class FilterTest extends FunSuite{
     }
 
     assert(Try(Await.result(stringToInt.andThen(
-      intToString.andThen(exceptionThrowingService))(1), 1.second))== Throw(e))
+      intToString.andThen(exceptionThrowingService))(1), 1.second)) == Throw(e))
     assert(Try(Await.result(stringToInt.andThen(
-      intToString).andThen(exceptionThrowingService)(1), 1.second))== Throw(e))
+      intToString).andThen(exceptionThrowingService)(1), 1.second)) == Throw(e))
   }
 
 }

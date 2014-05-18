@@ -40,7 +40,7 @@ class EndToEndTest extends FunSuite {
     cluster.del(server.localAddress)
     assert(!response.isDefined)
     constRes.setValue("foo")
-    assert(Await.result(response) == "foo")
+    assert(Await.result(response) === "foo")
   }
 
   test("Finagle client should queue requests while waiting for cluster to initialize") {
@@ -76,7 +76,7 @@ class EndToEndTest extends FunSuite {
 
     cluster.ready.map { _ =>
       0 until 5 foreach { i =>
-        assert(Await.result(responses(i)) == i.toString)
+        assert(Await.result(responses(i)) === i.toString)
       }
     }
     thread.start()

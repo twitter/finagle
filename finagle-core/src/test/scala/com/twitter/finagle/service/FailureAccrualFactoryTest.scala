@@ -254,13 +254,13 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
     Time.withCurrentTimeFrozen { timeControl =>
 
-      assert(Await.result(service(123)) == 321)
-      assert(Await.result(service(123)) == 321)
+      assert(Await.result(service(123)) === 321)
+      assert(Await.result(service(123)) === 321)
       assert(factory.isAvailable)
       assert(service.isAvailable)
 
       // Now fail:
-      assert(Await.result(service(123)) == 321)
+      assert(Await.result(service(123)) === 321)
       assert(!service.isAvailable)
 
       verify(underlyingService, times(3))(123)

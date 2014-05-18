@@ -2,7 +2,7 @@ package com.twitter.finagle.factory
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.{ClientConnection, MockTimer, Service, ServiceFactory,
-  ServiceTimeoutException, TimeoutException}
+ServiceTimeoutException, TimeoutException}
 import com.twitter.util.{Await, Future, Promise, Return, Time}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{verify, when}
@@ -17,7 +17,7 @@ class TimeoutFactoryTest extends FunSuite with MockitoSugar {
     when(underlying.close(any[Time])).thenReturn(Future.Done)
     val promise = new Promise[Service[String, String]] {
       @volatile var interrupted: Option[Throwable] = None
-      setInterruptHandler { case exc => interrupted = Some(exc) }
+      setInterruptHandler { case exc => interrupted = Some(exc)}
     }
     when(underlying(any[ClientConnection])).thenReturn(promise)
     val timeout = 1.second

@@ -7,7 +7,7 @@ import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.{ChannelTransport, Transport}
 import java.net.SocketAddress
 import org.jboss.netty.channel.{Channel, ChannelFactory, ChannelPipeline,
-  ChannelPipelineFactory, Channels, DefaultChannelConfig}
+ChannelPipelineFactory, Channels, DefaultChannelConfig}
 import org.mockito.Matchers._
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
@@ -42,8 +42,8 @@ trait IntegrationBase extends FunSuite with MockitoSugar {
       }
     }
     when(codec.newClientTransport(any[Channel], any[StatsReceiver])) thenAnswer {
-      new Answer[ChannelTransport[Any,Any]] {
-        def answer(invocation: InvocationOnMock): ChannelTransport[Any,Any] = invocation.getArguments match {
+      new Answer[ChannelTransport[Any, Any]] {
+        def answer(invocation: InvocationOnMock): ChannelTransport[Any, Any] = invocation.getArguments match {
           case args: Array[Object] =>
             new ChannelTransport[Any, Any](args.head.asInstanceOf[Channel])
         }
@@ -58,7 +58,7 @@ trait IntegrationBase extends FunSuite with MockitoSugar {
       }
     }
 
-    val clientAddress = new SocketAddress{}
+    val clientAddress = new SocketAddress {}
 
     // Pipeline
     val clientPipelineFactory = mock[ChannelPipelineFactory]
@@ -66,11 +66,11 @@ trait IntegrationBase extends FunSuite with MockitoSugar {
     when(clientPipelineFactory.getPipeline) thenReturn channelPipeline
     when(codec.pipelineFactory) thenReturn clientPipelineFactory
 
-/*
-    val codec = new Codec[String, String] {
-      def pipelineFactory = clientPipelineFactory
-    }
-*/
+    /*
+        val codec = new Codec[String, String] {
+          def pipelineFactory = clientPipelineFactory
+        }
+    */
     // Channel
     val channelFactory = mock[ChannelFactory]
     val channel = mock[Channel]

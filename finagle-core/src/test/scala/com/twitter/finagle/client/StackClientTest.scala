@@ -15,7 +15,7 @@ class StackClientTest extends FunSuite with StringClient {
       .configured(param.Stats(sr))
   }
 
-  test("client stats are scoped to label") (new Ctx {
+  test("client stats are scoped to label")(new Ctx {
     // use dest when no label is set
     client.newService("inet!localhost:8080")
     assert(sr.counters(Seq("inet!localhost:8080", "loadbalancer", "adds")) === 1)

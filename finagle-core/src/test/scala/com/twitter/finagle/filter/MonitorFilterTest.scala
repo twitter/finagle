@@ -15,7 +15,7 @@ import java.net.InetSocketAddress
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 
 @RunWith(classOf[JUnitRunner])
-class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase{
+class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase {
 
   class MockMonitor extends Monitor {
     def handle(cause: Throwable) = false
@@ -56,7 +56,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase{
 
   class MockSourcedException(underlying: Throwable, name: String)
     extends RuntimeException(underlying) with SourcedException {
-    def this(name:String) = this(null, name)
+    def this(name: String) = this(null, name)
     serviceName = name
   }
 
@@ -71,7 +71,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase{
     mockLogger.addHandler(new StreamHandler())
   }
 
-  test("MonitorFilter should when attached to a server, report source for sourced exceptions"){
+  test("MonitorFilter should when attached to a server, report source for sourced exceptions") {
     val h = new Helper
     import h._
 
@@ -94,7 +94,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase{
       .hostConnectionLimit(1)
       .build()
 
-      when(service(any[String])) thenThrow  outer // make server service throw the mock exception
+    when(service(any[String])) thenThrow outer // make server service throw the mock exception
 
 
     try {
@@ -111,7 +111,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase{
       Matchers.eq(outer))
   }
 
-  test("MonitorFilter should when attached to a client, report source for sourced exceptions"){
+  test("MonitorFilter should when attached to a client, report source for sourced exceptions") {
     val h = new Helper
     import h._
 
@@ -124,7 +124,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase{
       preparedFactory.asInstanceOf[ServiceFactory[Any, Nothing]]
 
     val m = new MockChannel
-    when(m.codec.prepareConnFactory(any[ServiceFactory[String,String]])) thenReturn preparedFactory
+    when(m.codec.prepareConnFactory(any[ServiceFactory[String, String]])) thenReturn preparedFactory
 
     val client = m.clientBuilder
       .monitor(_ => monitor)
@@ -144,8 +144,6 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase{
     verify(monitor, times(0)).handle(inner)
     verify(monitor).handle(outer)
   }
-
-
 
 
 }
