@@ -4,12 +4,11 @@ import com.twitter.finagle._
 import com.twitter.finagle.channel.{ChannelRequestStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler}
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.ssl.{Engine, SslShutdownHandler}
-import com.twitter.finagle.stats.{ServerStatsReceiver, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{ServerStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.{ChannelTransport, Transport}
 import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Promise, Time}
 import java.net.SocketAddress
-import java.util.concurrent.atomic.AtomicLong
 import java.util.IdentityHashMap
 import java.util.logging.Level
 import org.jboss.netty.bootstrap.ServerBootstrap

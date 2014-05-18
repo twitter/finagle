@@ -251,7 +251,6 @@ private[finagle] object Message {
   }
 
   case class Tlease(unit: Byte, howLong: Long) extends MarkerMessage(Types.Tlease) {
-    import Tlease._
 
     lazy val buf = {
       val b = ChannelBuffers.buffer(9)

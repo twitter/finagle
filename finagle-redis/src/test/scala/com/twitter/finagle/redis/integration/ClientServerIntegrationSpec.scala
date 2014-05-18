@@ -1,12 +1,11 @@
 package com.twitter.finagle.redis.integration
 
-import com.twitter.conversions.time._
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.redis._
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util._
-import com.twitter.util.{Await, Future, Time}
+import com.twitter.util.{Await, Future}
 import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.Ignore

@@ -7,7 +7,7 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.io.Charsets
 import com.twitter.util.Await
 import org.specs.SpecificationWithJUnit
-import com.twitter.finagle.thrift.{ClientId, ThriftClientFramedCodec}
+import com.twitter.finagle.thrift.ClientId
 
 class ClientSpec extends SpecificationWithJUnit {
   "ConnectedClient" should {

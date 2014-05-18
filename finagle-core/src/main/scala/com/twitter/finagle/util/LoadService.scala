@@ -1,7 +1,7 @@
 package com.twitter.finagle.util
 
 import com.twitter.logging.Level
-import java.io.{IOException, File, InputStream}
+import java.io.{IOException, File}
 import java.net.{URI, URLClassLoader, URISyntaxException}
 import java.util.ServiceConfigurationError
 import java.util.jar.JarFile

@@ -52,14 +52,14 @@ import com.twitter.finagle.filter.ExceptionSourceFilter
 import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, WeightedLoadBalancerFactory}
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.service._
-import com.twitter.finagle.ssl.{Engine, Ssl}
+import com.twitter.finagle.ssl.Ssl
 import com.twitter.finagle.stack.nilStack
-import com.twitter.finagle.stats.{NullStatsReceiver, ClientStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.NullTracer
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
 import com.twitter.util.TimeConversions._
-import com.twitter.util.{Duration, Future, NullMonitor, Time, Var, Try}
+import com.twitter.util.{Duration, Future, NullMonitor, Time, Try}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Level

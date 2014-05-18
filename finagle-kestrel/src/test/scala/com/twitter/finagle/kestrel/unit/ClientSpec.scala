@@ -13,8 +13,6 @@ import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.finagle.kestrel._
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.thrift.ThriftClientRequest
-import com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Item
 
 // all this so we can spy() on a client.
 class MockClient extends Client {
