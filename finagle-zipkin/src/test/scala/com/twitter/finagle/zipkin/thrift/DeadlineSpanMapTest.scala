@@ -3,11 +3,13 @@ package com.twitter.finagle.zipkin.thrift
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.FunSuite
 import com.twitter.finagle.MockTimer
+import com.twitter.util.TimeConversions._
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing.{SpanId, TraceId}
 import org.mockito.Mockito.verify
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
+import com.twitter.util.TimeControl
 
 @RunWith(classOf[JUnitRunner])
 class DeadlineSpanMapTest extends FunSuite with MockitoSugar {
