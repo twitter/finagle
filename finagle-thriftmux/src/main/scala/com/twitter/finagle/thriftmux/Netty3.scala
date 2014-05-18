@@ -5,6 +5,7 @@ import com.twitter.finagle.mux.{BadMessageException, Message}
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.thrift.thrift.{ResponseHeader, RequestHeader, UpgradeReply}
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceContext, TraceId}
+import com.twitter.io.Buf
 import com.twitter.util.{Try, Return, Throw, NonFatal}
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.atomic.AtomicInteger

@@ -1,6 +1,8 @@
 package com.twitter.finagle.mux.lease.exp
 
-import com.twitter.common.quantity.Amount
+import com.twitter.common.quantity.{Amount, Data, Time => CommonTime}
+import com.twitter.common.stats.WindowedApproxHistogram
+import com.twitter.common.util.Clock
 import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
 import com.twitter.finagle.util.DefaultTimer

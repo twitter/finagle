@@ -6,9 +6,9 @@ import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.tracing.{
   Annotation, BufferingTracer, Flags, Record, SpanId, Trace, TraceId}
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.finagle.Service
+import com.twitter.finagle.{Service, ContextHandler}
 import com.twitter.io.{Charsets, Buf}
-import com.twitter.util.{Await, Future, Promise, Return, Throw}
+import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}

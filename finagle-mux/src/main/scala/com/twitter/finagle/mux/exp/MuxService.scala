@@ -2,7 +2,7 @@ package com.twitter.finagle.mux.exp
 
 import com.twitter.finagle.Service
 import com.twitter.io.Buf
-import com.twitter.util.Future
+import com.twitter.util.{Closable, Future}
 
 /**
  * A MuxService provides the RPC, message-passing, pinging, and

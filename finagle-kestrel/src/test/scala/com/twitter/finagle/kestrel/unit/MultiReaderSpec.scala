@@ -5,6 +5,7 @@ import _root_.java.nio.charset.Charset
 import _root_.java.util.concurrent._
 import com.google.common.cache.{LoadingCache, CacheLoader, CacheBuilder}
 import com.twitter.concurrent.{Broker, Spool}
+import com.twitter.conversions.time._
 import com.twitter.finagle.{Addr, ClientConnection, Service, ServiceFactory}
 import com.twitter.finagle.builder.{ClientConfig, ClientBuilder, Cluster}
 import com.twitter.finagle.kestrel._

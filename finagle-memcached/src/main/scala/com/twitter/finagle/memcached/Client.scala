@@ -6,10 +6,10 @@ import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 import _root_.java.net.{SocketAddress, InetSocketAddress}
 import _root_.java.util.{Map => JMap}
 
-import com.twitter.concurrent.Broker
+import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig}
+import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig, StaticCluster}
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._

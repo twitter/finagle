@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.client._
+import com.twitter.finagle.dispatch.SerialServerDispatcher
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.HttpTransport
 import com.twitter.finagle.http.filter.DtabFilter

@@ -1,7 +1,9 @@
 package com.twitter.finagle.mux.lease.exp
 
 import com.twitter.util._
+import com.twitter.util.Local.Context
 import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
+import com.twitter.conversions.time.intToTimeableNumber
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.Eventually
 import org.scalatest.FunSuite

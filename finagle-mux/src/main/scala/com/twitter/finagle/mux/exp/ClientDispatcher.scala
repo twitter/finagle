@@ -3,13 +3,16 @@ package com.twitter.finagle.mux.exp
 import com.twitter.finagle.{Context, Dtab, NoStacktrace, WriteException}
 import com.twitter.finagle.mux._
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
-import com.twitter.finagle.tracing.{Trace, Annotation}
+import com.twitter.finagle.tracing.{Trace, Annotation, TraceId}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
-import com.twitter.util.{Future, Promise, Return, Throw, Time}
+import com.twitter.util.{Closable, Future, Local, Promise, Return, Throw, Time, Try, Var}
+import java.net.SocketAddress
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Logger
-import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import scala.collection.JavaConverters._
 
 object ClientDispatcher {
   object ExhaustedTagsException extends Exception("Exhausted tags")

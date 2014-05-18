@@ -4,7 +4,7 @@ import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.server._
 import com.twitter.finagle.thrift.{Protocols, HandleUncaughtApplicationExceptions}
-import com.twitter.util.Future
+import com.twitter.util.{Closable, Future}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
 import org.jboss.netty.buffer.{ChannelBuffer => CB, ChannelBuffers}
