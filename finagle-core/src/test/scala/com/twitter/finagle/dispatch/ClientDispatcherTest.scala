@@ -12,13 +12,13 @@ import com.twitter.finagle.{WriteException, Failure}
 
 @RunWith(classOf[JUnitRunner])
 class ClientDispatcherTest extends FunSuite with MockitoSugar{
-  class helper {
+  class DispatchHelper {
     val trans = mock[Transport[String, String]]
     val disp = new SerialClientDispatcher[String, String](trans)
   }
 
   test("ClientDispatcher should dispatch requests"){
-    val h = new helper
+    val h = new DispatchHelper
     import h._
 
     when(trans.write("one")) thenReturn  Future.value(())
@@ -34,7 +34,7 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar{
   }
 
   test("ClientDispatcher should dispatch requests one-at-a-time"){
-    val h = new helper
+    val h = new DispatchHelper
     import h._
 
     when(trans.write(any[String])) thenReturn Future.value(())
@@ -62,7 +62,7 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar{
   }
 
   test("ClientDispatcher should interrupt when close transport and cancel pending requests"){
-    val h = new helper
+    val h = new DispatchHelper
     import h._
 
     when(trans.write(any[String])) thenReturn  Future.value(())
@@ -82,7 +82,7 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar{
   }
 
   test("ClientDispatcher should interrupt when ignore pending"){
-    val h = new helper
+    val h = new DispatchHelper
     import h._
 
     when(trans.write(any[String])) thenReturn  Future.value(())
@@ -108,7 +108,7 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar{
   }
 
   test("ClientDispatcher should rewrite WriteExceptions"){
-    val h = new helper
+    val h = new DispatchHelper
     import h._
 
     val exc = mock[Exception]

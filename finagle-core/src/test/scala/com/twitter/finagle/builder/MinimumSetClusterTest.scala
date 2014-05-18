@@ -7,7 +7,7 @@ import com.twitter.util.Await
 
 @RunWith(classOf[JUnitRunner])
 class MinimumSetClusterTest extends FunSuite{
-  class helper {
+  class ClusterHelper {
     val dynamicCluster = new ClusterInt()
     val minimum = Set(1,2,3)
 
@@ -15,7 +15,7 @@ class MinimumSetClusterTest extends FunSuite{
   }
 
   test("MinimumSetCluster should initial set is union"){
-    val h = new helper
+    val h = new ClusterHelper
     import h._
 
     dynamicCluster.add(4)
@@ -23,7 +23,7 @@ class MinimumSetClusterTest extends FunSuite{
   }
 
   test("MinimumSetCluster should propagate uncensored updates"){
-    val h = new helper
+    val h = new ClusterHelper
     import h._
 
     val (_, updates) = cluster.snap
@@ -33,7 +33,7 @@ class MinimumSetClusterTest extends FunSuite{
   }
 
   test("MinimumSetCluster should not propagate censored updates"){
-    val h = new helper
+    val h = new ClusterHelper
     import h._
 
     val (_, updates) = cluster.snap

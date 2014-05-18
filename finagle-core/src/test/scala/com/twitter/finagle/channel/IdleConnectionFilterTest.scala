@@ -16,7 +16,7 @@ import org.mockito.invocation.InvocationOnMock
 @RunWith(classOf[JUnitRunner])
 class IdleConnectionFilterTest extends FunSuite with MockitoSugar{
 
-  class helper {
+  class ChannelHelper {
     val service = mock[Service[String, String]]
     when(service.close(any)) thenReturn Future.Done
     val underlying = ServiceFactory.const(service)
@@ -44,7 +44,7 @@ class IdleConnectionFilterTest extends FunSuite with MockitoSugar{
   }
 
     test("IdleConnectionFilter should count connections"){
-      val h = new helper
+      val h = new ChannelHelper
       import h._
 
       assert(filter.openConnections === 0)
@@ -55,7 +55,7 @@ class IdleConnectionFilterTest extends FunSuite with MockitoSugar{
     }
 
     test("IdleConnectionFilter should refuse connection if above highWaterMark"){
-      val h = new helper
+      val h = new ChannelHelper
       import h._
 
       assert(filter.openConnections === 0)
@@ -74,7 +74,7 @@ class IdleConnectionFilterTest extends FunSuite with MockitoSugar{
     }
 
     test("IdleConnectionFilter should try to close an idle connection if above lowerWaterMark"){
-      val h = new helper
+      val h = new ChannelHelper
       import h._
 
       val spyFilter = Mockito.spy(new IdleConnectionFilter(underlying, threshold))
@@ -91,7 +91,7 @@ class IdleConnectionFilterTest extends FunSuite with MockitoSugar{
     }
 
     test("IdleConnectionFilter should don't close connections not yet answered by the server (long processing requests)"){
-      val h = new helper
+      val h = new ChannelHelper
       import h._
 
       var t = Time.now
@@ -131,7 +131,7 @@ class IdleConnectionFilterTest extends FunSuite with MockitoSugar{
     }
 
     test("IdleConnectionFilter should close an idle connection to accept a new one"){
-      val h = new helper
+      val h = new ChannelHelper
       import h._
 
       var t = Time.now

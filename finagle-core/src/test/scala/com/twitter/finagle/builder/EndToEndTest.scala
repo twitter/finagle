@@ -9,7 +9,7 @@ import java.net.{SocketAddress, InetSocketAddress}
 import com.twitter.finagle.integration.{DynamicCluster, StringCodec}
 
 @RunWith(classOf[JUnitRunner])
-class EndToEndTest extends FunSuite{
+class EndToEndTest extends FunSuite {
 
   test("Finagle client should handle pending request after a host is deleted from cluster") {
     val constRes = new Promise[String]
@@ -40,10 +40,10 @@ class EndToEndTest extends FunSuite{
     cluster.del(server.localAddress)
     assert(!response.isDefined)
     constRes.setValue("foo")
-    assert(Await.result(response) ==("foo"))
+    assert(Await.result(response) == "foo")
   }
 
-  test("Finagle client should queue requests while waiting for cluster to initialize"){
+  test("Finagle client should queue requests while waiting for cluster to initialize") {
     val echo = new Service[String, String] {
       def apply(request: String) = Future.value(request)
     }
@@ -76,7 +76,7 @@ class EndToEndTest extends FunSuite{
 
     cluster.ready.map { _ =>
       0 until 5 foreach { i =>
-        assert(Await.result(responses(i)) ==(i.toString))
+        assert(Await.result(responses(i)) == i.toString)
       }
     }
     thread.start()

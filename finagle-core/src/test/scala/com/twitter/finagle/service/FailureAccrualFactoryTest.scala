@@ -38,26 +38,24 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     val h = new Helper
     import h._
 
-    Time.withCurrentTimeFrozen {
-      timeControl =>
+    Time.withCurrentTimeFrozen { timeControl =>
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      assert(factory.isAvailable)
+      assert(service.isAvailable)
 
-        intercept[Exception] {
-          Await.result(service(123))
-        }
-        intercept[Exception] {
-          Await.result(service(123))
-        }
-        assert(factory.isAvailable)
-        assert(service.isAvailable)
+      // Now fail:
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      assert(!factory.isAvailable)
+      assert(!service.isAvailable)
 
-        // Now fail:
-        intercept[Exception] {
-          Await.result(service(123))
-        }
-        assert(!factory.isAvailable)
-        assert(!service.isAvailable)
-
-        verify(underlyingService, times(3))(123)
+      verify(underlyingService, times(3))(123)
     }
   }
 
@@ -65,34 +63,33 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     val h = new Helper
     import h._
 
-    Time.withCurrentTimeFrozen {
-      timeControl =>
-        intercept[Exception] {
-          Await.result(service(123))
-        }
-        intercept[Exception] {
-          Await.result(service(123))
-        }
-        intercept[Exception] {
-          Await.result(service(123))
-        }
-        assert(!factory.isAvailable)
-        assert(!service.isAvailable)
+    Time.withCurrentTimeFrozen { timeControl =>
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      assert(!factory.isAvailable)
+      assert(!service.isAvailable)
 
-        timeControl.advance(10.seconds)
-        timer.tick()
+      timeControl.advance(10.seconds)
+      timer.tick()
 
-        // Healthy again!
-        assert(factory.isAvailable)
-        assert(service.isAvailable)
+      // Healthy again!
+      assert(factory.isAvailable)
+      assert(service.isAvailable)
 
-        // But after one bad dispatch, mark it again unhealthy.
-        intercept[Exception] {
-          Await.result(service(123))
-        }
+      // But after one bad dispatch, mark it again unhealthy.
+      intercept[Exception] {
+        Await.result(service(123))
+      }
 
-        assert(!factory.isAvailable)
-        assert(!service.isAvailable)
+      assert(!factory.isAvailable)
+      assert(!service.isAvailable)
     }
   }
 
@@ -100,52 +97,51 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     val h = new Helper
     import h._
 
-    Time.withCurrentTimeFrozen {
-      timeControl =>
-        intercept[Exception] {
-          Await.result(service(123))
-        }
-        intercept[Exception] {
-          Await.result(service(123))
-        }
-        intercept[Exception] {
-          Await.result(service(123))
-        }
-        assert(!factory.isAvailable)
-        assert(!service.isAvailable)
+    Time.withCurrentTimeFrozen { timeControl =>
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      assert(!factory.isAvailable)
+      assert(!service.isAvailable)
 
-        timeControl.advance(10.seconds)
-        timer.tick()
+      timeControl.advance(10.seconds)
+      timer.tick()
 
-        // Healthy again!
-        assert(factory.isAvailable)
-        assert(service.isAvailable)
+      // Healthy again!
+      assert(factory.isAvailable)
+      assert(service.isAvailable)
 
-        when(underlyingService(123)) thenReturn Future.value(321)
+      when(underlyingService(123)) thenReturn Future.value(321)
 
-        // A good dispatch!
-        assert(Await.result(service(123)) === 321)
+      // A good dispatch!
+      assert(Await.result(service(123)) === 321)
 
-        assert(factory.isAvailable)
-        assert(service.isAvailable)
+      assert(factory.isAvailable)
+      assert(service.isAvailable)
 
-        // Counts are now reset.
-        when(underlyingService(123)) thenReturn Future.exception(new Exception)
-        intercept[Exception] {
-          Await.result(service(123))
-        }
-        assert(factory.isAvailable)
-        assert(service.isAvailable)
-        intercept[Exception] {
-          Await.result(service(123))
-        }
-        assert(factory.isAvailable)
-        assert(service.isAvailable)
-        intercept[Exception] {
-          Await.result(service(123))
-        }
-        assert(!factory.isAvailable)
-        assert(!service.isAvailable)
+      // Counts are now reset.
+      when(underlyingService(123)) thenReturn Future.exception(new Exception)
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      assert(factory.isAvailable)
+      assert(service.isAvailable)
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      assert(factory.isAvailable)
+      assert(service.isAvailable)
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      assert(!factory.isAvailable)
+      assert(!service.isAvailable)
     }
   }
 
@@ -202,31 +198,30 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     val h = new BrokenFactoryHelper
     import h._
 
-    Time.withCurrentTimeFrozen {
-      timeControl =>
-        assert(factory.isAvailable)
-        intercept[Exception] {
-          Await.result(factory())
-        }
-        assert(factory.isAvailable)
-        intercept[Exception] {
-          Await.result(factory())
-        }
-        assert(factory.isAvailable)
-        intercept[Exception] {
-          Await.result(factory())
-        }
-        assert(!factory.isAvailable)
+    Time.withCurrentTimeFrozen { timeControl =>
+      assert(factory.isAvailable)
+      intercept[Exception] {
+        Await.result(factory())
+      }
+      assert(factory.isAvailable)
+      intercept[Exception] {
+        Await.result(factory())
+      }
+      assert(factory.isAvailable)
+      intercept[Exception] {
+        Await.result(factory())
+      }
+      assert(!factory.isAvailable)
     }
   }
 
   class CustomizedFactory {
     class CustomizedFailureAccrualFactory(
-                                           underlying: ServiceFactory[Int, Int],
-                                           numFailures: Int,
-                                           markDeadFor: Duration,
-                                           timer: Timer
-                                           ) extends FailureAccrualFactory[Int, Int](underlying, numFailures, markDeadFor, timer) {
+      underlying: ServiceFactory[Int, Int],
+      numFailures: Int,
+      markDeadFor: Duration,
+      timer: Timer
+      ) extends FailureAccrualFactory[Int, Int](underlying, numFailures, markDeadFor, timer) {
       override def isSuccess(response: Try[Int]): Boolean = {
         response match {
           case Throw(_) => false
@@ -252,23 +247,21 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     verify(underlying)()
   }
 
-  test("a customized factory should become unavailable"){
+  test("a customized factory should become unavailable") {
     val h = new CustomizedFactory
     import h._
 
     Time.withCurrentTimeFrozen { timeControl =>
-
-      assert(Await.result(service(123))==321)
-      assert(Await.result(service(123))==321)
+      assert(Await.result(service(123)) == 321)
+      assert(Await.result(service(123)) == 321)
       assert(factory.isAvailable)
       assert(service.isAvailable)
 
       // Now fail:
-      assert(Await.result(service(123)) ==321)
+      assert(Await.result(service(123)) == 321)
       assert(!service.isAvailable)
 
       verify(underlyingService, times(3))(123)
     }
   }
-
 }
