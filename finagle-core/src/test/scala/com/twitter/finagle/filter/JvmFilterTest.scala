@@ -16,7 +16,7 @@ import com.twitter.util.{TimeControl, Future, Promise, Time}
 
 @RunWith(classOf[JUnitRunner])
 class JvmFilterTest extends FunSuite with MockitoSugar{
-  class helper {
+  class JvmHelper {
     var gcEvents = Nil : List[Gc]
     val jvm = mock[Jvm]
     when(jvm.monitorGcs(any[com.twitter.util.Duration])) thenReturn { since:Time => gcEvents.takeWhile(_.timestamp > since) }
@@ -37,7 +37,7 @@ class JvmFilterTest extends FunSuite with MockitoSugar{
   }
 
   test("JvmFilter should Record overlapping Gcs"){ tc:TimeControl =>
-    val h = new helper
+    val h = new JvmHelper
     import h._
 
     val trace = traced {
@@ -56,7 +56,7 @@ class JvmFilterTest extends FunSuite with MockitoSugar{
   }
 
   test("JvmFilter should Not record nonoverlapping Gcs"){ tc:TimeControl =>
-    val h = new helper
+    val h = new JvmHelper
     import h._
 
     val trace = traced {

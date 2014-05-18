@@ -8,21 +8,17 @@ import org.mockito.Matchers._
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.Eventually._
-import scala.Some
-
-
 import com.twitter.finagle.integration.IntegrationBase
 import com.twitter.finagle.{WriteException, Service, ServiceFactory}
-import com.twitter.util._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 
 @RunWith(classOf[JUnitRunner])
-class ClientBuilderTest extends FunSuite with MockitoSugar with IntegrationBase{
+class ClientBuilderTest extends FunSuite with MockitoSugar with IntegrationBase {
   trait ClientBuilderHelper {
     val preparedFactory = mock[ServiceFactory[String, String]]
     val preparedServicePromise = new Promise[Service[String, String]]
-    when(preparedFactory()) thenReturn  preparedServicePromise
-    when(preparedFactory.close(any[Time])) thenReturn  Future.Done
+    when(preparedFactory()) thenReturn preparedServicePromise
+    when(preparedFactory.close(any[Time])) thenReturn Future.Done
     when(preparedFactory.map(Matchers.any())) thenReturn
       preparedFactory.asInstanceOf[ServiceFactory[Any, Nothing]]
 
@@ -30,7 +26,7 @@ class ClientBuilderTest extends FunSuite with MockitoSugar with IntegrationBase{
     when(m.codec.prepareConnFactory(any[ServiceFactory[String, String]])) thenReturn preparedFactory
   }
 
-  test("ClientBuilder should invoke prepareConnFactory on connection"){
+  test("ClientBuilder should invoke prepareConnFactory on connection") {
     new ClientBuilderHelper {
       val client = m.build()
       val requestFuture = client("123")
@@ -49,17 +45,17 @@ class ClientBuilderTest extends FunSuite with MockitoSugar with IntegrationBase{
     }
   }
 
-  test("ClientBuilder should close properly"){
+  test("ClientBuilder should close properly") {
     new ClientBuilderHelper {
       val svc = ClientBuilder().hostConnectionLimit(1).codec(m.codec).hosts("").build()
       val f = svc.close()
-      eventually{
+      eventually {
         f.isDefined
       }
     }
   }
 
-  test("ClientBuilder should collect stats on 'tries' for retrypolicy"){
+  test("ClientBuilder should collect stats on 'tries' for retrypolicy") {
     new ClientBuilderHelper {
       val inMemory = new InMemoryStatsReceiver
       val client = ClientBuilder()

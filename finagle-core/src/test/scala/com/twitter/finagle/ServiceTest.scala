@@ -1,6 +1,5 @@
 package com.twitter.finagle
 
-import com.twitter.util._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
@@ -58,10 +57,9 @@ class ServiceTest extends FunSuite with MockitoSugar {
 
     verify(service, times(0)).close(any)
     var didRun = false
-    val f2 = factory flatMap {
-      _ =>
-        didRun = true
-        Future.exception(exc)
+    val f2 = factory flatMap { _ =>
+      didRun = true
+      Future.exception(exc)
     }
     assert(!didRun)
     verify(service, times(0)).close(any)

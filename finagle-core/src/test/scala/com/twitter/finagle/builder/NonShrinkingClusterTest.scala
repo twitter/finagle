@@ -6,14 +6,14 @@ import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
 class NonShrinkingClusterTest extends FunSuite{
-  class helper {
+  class ClusterHelper {
     val N = 10
     val inCluster = new ClusterInt()
     val outCluster = new NonShrinkingCluster(inCluster)
   }
 
-  test("SkepticalClusterFilter should delay Rem events"){
-    val h = new helper
+  test("NonShrinkingClusterTest should delay Rem events"){
+    val h = new ClusterHelper
     import h._
 
     0 until N foreach { inCluster.add(_) }
@@ -30,8 +30,8 @@ class NonShrinkingClusterTest extends FunSuite{
     assert(set.size === N)
   }
 
-  test("SkepticalClusterFilter should pass Rem events after receiving an Add"){
-    val h = new helper
+  test("NonShrinkingClusterTest should pass Rem events after receiving an Add"){
+    val h = new ClusterHelper
     import h._
 
     val before = (0 until N).toSet
@@ -54,8 +54,8 @@ class NonShrinkingClusterTest extends FunSuite{
     assert(set === after)
   }
 
-  test("SkepticalClusterFilter should cancel Rem changes when receiving an equal Add"){
-    val h = new helper
+  test("NonShrinkingClusterTest should cancel Rem changes when receiving an equal Add"){
+    val h = new ClusterHelper
     import h._
 
     val (_, changes) = outCluster.snap

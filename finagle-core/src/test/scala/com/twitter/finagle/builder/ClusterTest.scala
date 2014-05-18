@@ -14,14 +14,14 @@ import com.twitter.finagle.GlobalRequestTimeoutException
 class ClusterTest extends FunSuite {
   case class WrappedInt(val value: Int)
 
-  class helper {
+  class ClusterHelper {
     val N = 10
     val cluster1 = new DynamicCluster[Int]()
     val cluster2 = cluster1.map(a => WrappedInt(a))
   }
 
   test("Cluster map should provide 1-1 mapping to the result cluster"){
-    val h = new helper
+    val h = new ClusterHelper
     import h._
 
     0 until N foreach { cluster1.add(_) }
@@ -39,7 +39,7 @@ class ClusterTest extends FunSuite {
   }
 
   test("Cluster map should remove mapped objects in the same order they were received (for each key)"){
-    val h = new helper
+    val h = new ClusterHelper
     import h._
 
     val changes = mutable.Queue[Cluster.Change[WrappedInt]]()
