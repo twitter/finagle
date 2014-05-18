@@ -16,7 +16,6 @@ package com.twitter.finagle
  * }
  * }}}
  */
-private[finagle]
 final case class Failure private[finagle](
   why: String,
   cause: Throwable = null,

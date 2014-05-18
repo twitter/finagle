@@ -22,14 +22,12 @@ class ClientIdContextTest extends FunSuite
     val Some(buf) = handler.emit()
     ClientId.clear()
     handler.handle(buf)
-
     assert(ClientId.current === Some(clientId))
   }
 
   test("Emit/handle a None ClientId") {
     ClientId.set(None)
     assert(handler.emit() === None)
-
     ClientId.clear()
     handler.handle(Buf.Empty)
     assert(ClientId.current === None)

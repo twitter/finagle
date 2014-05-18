@@ -220,21 +220,20 @@ private[serverset2] class VarServerSet2(v: Var[ServerSet2]) extends ServerSet2 {
 
 private[serverset2] object ZkServerSet2 {
   private val Utf8 = Charset.forName("UTF-8")
-  private val EndpointPrefix = "member_"
-  private val VectorPrefix = "vector_" 
+  private val EndpointGlob = "/member_"
+  private val VectorGlob = "/vector_" 
 }
 
 private[serverset2] case class ZkServerSet2(zk: Zk) extends ServerSet2 {
   import ZkServerSet2._
 
-  private[this] def dataOf(path: String, p: String => Boolean): Activity[Map[String, Buf]] =
-    zk.childrenOf(path) flatMap { paths =>
-      zk.collectImmutableDataOf(paths filter p map (path+"/"+_))
-    }
+  private[this] def dataOf(pat: String): Activity[Seq[(String, Buf)]] =
+    zk.globOf(pat) flatMap zk.collectImmutableDataOf
 
   def entriesOf(path: String, cache: PathCache): Activity[Set[Entry]] = {
-    dataOf(path, _ startsWith EndpointPrefix) map { pathmap =>
+    dataOf(path+EndpointGlob) map { pathmap =>
       val endpoints = pathmap flatMap {
+        case (_, null) => None // no data
         case (path, Buf.Utf8(data)) =>
           cache.entries.getIfPresent(path) match {
             case null =>
@@ -252,7 +251,7 @@ private[serverset2] case class ZkServerSet2(zk: Zk) extends ServerSet2 {
   }
 
   def vectorsOf(path: String, cache: PathCache): Activity[Set[Vector]] =
-    dataOf(path, _ startsWith VectorPrefix) map { pathmap =>
+    dataOf(path+VectorGlob) map { pathmap =>
       val vectors = pathmap flatMap {
         case (path, Buf.Utf8(data)) => 
           cache.vectors.getIfPresent(path) match {

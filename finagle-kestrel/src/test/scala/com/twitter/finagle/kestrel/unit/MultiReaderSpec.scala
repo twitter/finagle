@@ -38,7 +38,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
       val va: Var[Return[ISet[ReadHandle]]] = Var.value(Return(handles.toSet))
 
       "always grab the first available message" in {
-        val handle = MultiReader.merge(va)
+        val handle = MultiReaderHelper.merge(va)
 
         val messages = new ArrayBuffer[ReadMessage]
         handle.messages foreach { messages += _ }
@@ -76,13 +76,13 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
 
       "propagate closes" in {
         handles foreach { h => there was no(h).close() }
-        val handle = MultiReader.merge(va)
+        val handle = MultiReaderHelper.merge(va)
         handle.close()
         handles foreach { h => there was one(h).close() }
       }
 
       "propagate errors when everything's errored out" in {
-        val handle = MultiReader.merge(va)
+        val handle = MultiReaderHelper.merge(va)
         val e = handle.error.sync()
         handles foreach { h =>
           e.isDefined must beFalse

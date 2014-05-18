@@ -5,7 +5,7 @@ import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
 import com.twitter.finagle.service.{StatsFilter, TimeoutFilter, FailingFactory}
 import com.twitter.finagle.stack.Endpoint
-import com.twitter.finagle.stats.{StatsReceiver, ServerStatsReceiver}
+import com.twitter.finagle.stats.ServerStatsReceiver
 import com.twitter.finagle.tracing.{TracingFilter, ServerDestTracingProxy}
 import com.twitter.finagle.transport.Transport
 import com.twitter.jvm.Jvm
@@ -85,9 +85,12 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
 
   /**
    * Creates a new StackServer with the default stack (StackServer#newStack)
-   * and empty params.
+   * and [[com.twitter.finagle.stats.ServerStatsReceiver]].
    */
-  def this() = this(StackServer.newStack[Req, Rep], Stack.Params.empty)
+  def this() = this(
+    StackServer.newStack[Req, Rep],
+    Stack.Params.empty + Stats(ServerStatsReceiver)
+  )
 
   /**
    * Defines a typed [[com.twitter.finagle.Listener]] for this server.
@@ -110,7 +113,17 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
    * used to configure this StackServer's `stack`.
    */
   def configured[P: Stack.Param](p: P): StackServer[Req, Rep, In, Out] =
-    new StackServer[Req, Rep, In, Out](stack, params + p) {
+    copy(params = params+p)
+
+  /**
+   * A copy constructor in lieu of defining StackServer as a
+   * case class.
+   */
+  def copy(
+    stack: Stack[ServiceFactory[Req, Rep]] = self.stack,
+    params: Stack.Params = self.params
+  ): StackServer[Req, Rep, In, Out] =
+    new StackServer[Req, Rep, In, Out](stack, params) {
       protected val newListener = self.newListener
       protected val newDispatcher = self.newDispatcher
     }
@@ -148,9 +161,13 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
         val onClose = transport.onClose.map(_ => ())
       }
 
+      val statsReceiver =
+        if (serverLabel.isEmpty) stats
+        else stats.scope(serverLabel)
+
       val serverParams = params +
         Label(serverLabel) +
-        Stats(stats.scope(serverLabel)) +
+        Stats(statsReceiver) +
         Monitor(reporter(label, None) andThen monitor)
 
       val serviceFactory = (stack ++ Stack.Leaf(Endpoint, factory))
@@ -171,15 +188,23 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
       }
 
       protected def closeServer(deadline: Time) = closeAwaitably {
-        // The order here is important: by calling underlying.close()
-        // first, we guarantee that no further connections are
-        // created. We use Closable.make here to snapshot connections
-        // at the time of closing.
-        val closeConns = Closable.make { deadline =>
-          Closable.all(connections.asScala.toSeq:_*).close(deadline)
-        }
-        val closable = Closable.sequence(underlying, factory, closeConns)
-        closable.close(deadline)
+        // Here be dragons
+        // We want to do four things here in this order:
+        // 1. close the listening socket
+        // 2. close the factory (not sure if ordering matters for this step)
+        // 3. drain pending requests for existing connections
+        // 4. close those connections when their requests complete
+        // closing `underlying` eventually calls Netty3Listener.close which has an
+        // interesting side-effect of synchronously closing #1
+        val ulClosed = underlying.close(deadline)
+
+        // However we don't want to wait on the above because it will only complete
+        // when #4 is finished.  So we ignore it and close everything else.  Note that
+        // closing the connections here will do #2 and drain them via the Dispatcher.
+        val everythingElse = Seq[Closable](factory) ++ connections.asScala.toSeq
+
+        // and once they're drained we can then wait on the listener physically closing them
+        Closable.all(everythingElse:_*).close(deadline) before ulClosed
       }
 
       def boundAddress = underlying.boundAddress

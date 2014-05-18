@@ -25,13 +25,7 @@ private object ClassPath {
   /**
    * Information about a classpath entry.
    */
-  case class Info(path: String, iface: String, lines: Seq[String]) {
-    val name = (path take (path.length - 6)).replace('/', '.')
-    val packageName = {
-      val i = name.lastIndexOf('.')
-      if (i < 0) "" else name.substring(0, i)
-    }
-  }
+  case class Info(path: String, iface: String, lines: Seq[String])
 
   /**
    * Browse the given classloader recursively from
@@ -77,7 +71,7 @@ private object ClassPath {
     if (!(f.exists() && f.canRead()))
       return
 
-   if (f.isDirectory)
+    if (f.isDirectory)
       browseDir(f, loader, "", buf)
     else
       browseJar(f, loader, buf)

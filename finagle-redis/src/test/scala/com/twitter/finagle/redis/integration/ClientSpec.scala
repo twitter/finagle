@@ -127,6 +127,19 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.pTtl(foo)) map (_ must beLessThanOrEqualTo(20000L))
       }
 
+      "move" in {
+        val fromDb = 14
+        val toDb   = 15
+        Await.result(client.select(toDb))
+        Await.result(client.del(Seq(foo)))
+        Await.result(client.select(fromDb))
+
+        Await.result(client.move(foo, bar)) mustEqual false
+        Await.result(client.set(foo, bar))
+        Await.result(client.move(foo, StringToChannelBuffer(toDb.toString))) mustEqual true
+        Await.result(client.del(Seq(foo)))
+      }
+
       // Once the scan/hscan pull request gets merged into Redis master,
       // the tests can be uncommented.
       // "scan" in {

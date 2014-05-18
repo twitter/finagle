@@ -6,12 +6,12 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
-  val libVersion = "6.15.0"
+  val libVersion = "6.16.0"
   val zkVersion = "3.3.4"
-  val utilVersion = "6.15.0"
+  val utilVersion = "6.16.0"
   val ostrichVersion = "9.5.0"
   val jacksonVersion = "2.2.2"
-  val nettyLib = "io.netty" % "netty" % "3.8.1.Final"
+  val nettyLib = "io.netty" % "netty" % "3.9.1.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonLibs = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
@@ -344,10 +344,12 @@ object Finagle extends Build {
     id = "finagle-kestrel",
     base = file("finagle-kestrel"),
     settings = Project.defaultSettings ++
+      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
-    name := "finagle-kestrel"
-  ).dependsOn(finagleCore, finagleMemcached)
+    name := "finagle-kestrel",
+    libraryDependencies ++= scroogeLibs
+  ).dependsOn(finagleCore, finagleMemcached, finagleThrift)
 
 /*  notyet
   lazy val finagleProtobuf = Project(
@@ -376,7 +378,6 @@ object Finagle extends Build {
       util("logging")
     ),
     testOptions in Test := Seq(Tests.Filter {
-      case "com.twitter.finagle.redis.protocol.integration.ClientServerIntegrationSpec" => false
       case "com.twitter.finagle.redis.integration.ClientSpec" => false
       case "com.twitter.finagle.redis.integration.BtreeClientSpec" => false
       case "com.twitter.finagle.redis.integration.ClientServerIntegrationSpec" => false
@@ -390,7 +391,8 @@ object Finagle extends Build {
     settings = Project.defaultSettings ++
       sharedSettings
   ).settings(
-    name := "finagle-mux"
+    name := "finagle-mux",
+    libraryDependencies ++= Seq("com.twitter.common" % "stats-util" % "0.0.42")
   ).dependsOn(finagleCore)
 
   lazy val finagleThriftMux = Project(

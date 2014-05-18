@@ -50,7 +50,9 @@ class NoBrokersAvailableException(
 }
 
 class RetryFailureException(cause: Throwable)        extends RequestException(cause)
-class CancelledRequestException                      extends RequestException
+class CancelledRequestException extends RequestException {
+  override def getMessage = "request cancelled"
+}
 class TooManyWaitersException                        extends RequestException
 class CancelledConnectionException(cause: Throwable) extends RequestException(cause) {
   def this() = this(null)

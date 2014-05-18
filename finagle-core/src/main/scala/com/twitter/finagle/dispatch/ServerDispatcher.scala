@@ -33,7 +33,9 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
     trans.read() flatMap { req =>
       val p = new Promise[Rep]
       if (state.compareAndSet(Idle, p)) {
-        p.become(dispatch(req))
+        val save = Local.save()
+        try p.become(dispatch(req))
+        finally Local.restore(save)
         p
       } else Eof
     } flatMap { rep =>

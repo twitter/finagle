@@ -11,4 +11,7 @@ object MediaType {
   val Rss           = "application/rss+xml"
   val WwwForm       = "application/x-www-form-urlencoded"
   val Xml           = "application/xml"
+  val Csv           = "application/csv"
+  val Xls           = "application/vnd.ms-excel"
+  val Zip           = "application/zip"
 }

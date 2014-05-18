@@ -11,6 +11,7 @@ class ExceptionFilterSpec extends SpecificationWithJUnit {
   val service = new Service[Request, Response] {
     def apply(request: Request): Future[Response] = {
       request.response.write("hello")
+      request.response.contentLength = 5
       if (request.params.get("exception").isDefined)
         throw new Exception
       else if (request.params.get("throw").isDefined)
@@ -30,6 +31,7 @@ class ExceptionFilterSpec extends SpecificationWithJUnit {
       val response = Await.result(filter(request))
       response.status        must_== Status.Ok
       response.contentString must_== "hello"
+      response.contentLength must beSome(5)
     }
 
     "handle exception" in {
@@ -39,6 +41,7 @@ class ExceptionFilterSpec extends SpecificationWithJUnit {
       val response = Await.result(filter(request))
       response.status        must_== Status.InternalServerError
       response.contentString must_== ""
+      response.contentLength must beSome(0)
     }
 
     "handle throw" in {
@@ -48,6 +51,7 @@ class ExceptionFilterSpec extends SpecificationWithJUnit {
       val response = Await.result(filter(request))
       response.status        must_== Status.InternalServerError
       response.contentString must_== ""
+      response.contentLength must beSome(0)
     }
 
     "handle cancel" in {
@@ -57,6 +61,7 @@ class ExceptionFilterSpec extends SpecificationWithJUnit {
       val response = Await.result(filter(request))
       response.statusCode    must_== 499
       response.contentString must_== ""
+      response.contentLength must beSome(0)
     }
   }
 }

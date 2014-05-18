@@ -92,7 +92,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
           }
         }
 
-        "the client does not admit concurrent requests" in {
+        if (!sys.props.contains("SKIP_FLAKY")) "the client does not admit concurrent requests" in {
           val clientRes = Await.result(client(httpRequest), 1.second)
           client(httpRequest).poll must beLike {
             case Some(Throw(_: TooManyConcurrentRequestsException)) => true

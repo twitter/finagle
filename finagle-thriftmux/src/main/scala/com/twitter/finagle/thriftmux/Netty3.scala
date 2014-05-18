@@ -6,7 +6,7 @@ import com.twitter.finagle.thrift._
 import com.twitter.finagle.thrift.thrift.{ResponseHeader, RequestHeader, UpgradeReply}
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceContext, TraceId}
 import com.twitter.io.Buf
-import com.twitter.util.NonFatal
+import com.twitter.util.{Try, Return, Throw, NonFatal}
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.atomic.AtomicInteger
 import org.apache.thrift.protocol.{TProtocolFactory, TMessage, TMessageType}
@@ -149,12 +149,33 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
 
     override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
       val buf = e.getMessage.asInstanceOf[ChannelBuffer]
-      try {
-        Message.decode(buf.duplicate())
-        ctx.getPipeline.remove(this)
-        super.messageReceived(ctx, e)
-      } catch {
-        case exc: BadMessageException =>
+      Try { Message.decode(buf.duplicate()) } match {
+        // We assume that a bad message decode indicates an old-style
+        // session. Due to Mux message numbering, a binary-encoded
+        // thrift frame corresponds to an Rerr message with tag
+        // 65537. Note that in this context, an R-message is never
+        // valid.
+        //
+        // Binary-encoded thrift messages have the format
+        //
+        //     header:4 n:4 method:n seqid:4
+        //
+        // The header is
+        //
+        //     0x80010000 | type
+        //
+        // where the type of CALL is 1; the type of ONEWAY is 4. This makes 
+        // the first four bytes of a CALL message 0x80010001.
+        //
+        // Mux messages begin with
+        //
+        //     Type:1 tag:3
+        //
+        // Rerr is type 0x80, so we see the above thrift header
+        // Rerr corresponds to (tag=0x010001).
+        //
+        // The hazards of protocol multiplexing.
+        case Throw(_: BadMessageException) | Return(Message.Rerr(65537, _)) | Return(Message.Rerr(65540, _))=>
           // Add a ChannelHandler to serialize the requests since we may
           // deal with a client that pipelines requests
           ctx.getPipeline.addBefore(ctx.getName, "request_serializer", new RequestSerializer(1))
@@ -169,6 +190,12 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
                 Message.encode(Message.Tdispatch(Message.MinTag, Seq.empty, "", Dtab.empty, buf)),
                 e.getRemoteAddress))
           }
+
+        case Return(_) =>
+          ctx.getPipeline.remove(this)
+          super.messageReceived(ctx, e)
+
+        case Throw(exc) => throw exc
       }
     }
   }
