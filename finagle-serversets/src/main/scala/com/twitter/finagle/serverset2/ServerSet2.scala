@@ -11,7 +11,7 @@ import com.twitter.util.{Activity, Closable, Memoize, Witness, Var}
 import java.net.SocketAddress
 import java.nio.charset.Charset
 import java.util.concurrent.atomic.AtomicInteger
-import com.google.common.cache.{Cache, CacheBuilder, CacheLoader}
+import com.google.common.cache.{Cache, CacheBuilder}
 
 object chatty extends GlobalFlag(false, "Log resolved ServerSet2 addresses")
 

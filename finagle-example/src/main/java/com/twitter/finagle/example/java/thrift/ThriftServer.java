@@ -6,7 +6,6 @@ import com.twitter.finagle.example.thriftscala.Hello;
 import com.twitter.util.Await;
 import com.twitter.util.Future;
 import com.twitter.util.TimeoutException;
-import java.lang.InterruptedException;
 
 public class ThriftServer {
   public static class HelloImpl implements Hello.FutureIface {

@@ -5,7 +5,6 @@ import com.twitter.finagle.example.thriftscala.Hello;
 import com.twitter.util.Await;
 import com.twitter.util.Function;
 import com.twitter.util.Future;
-import java.lang.Exception;
 import scala.runtime.BoxedUnit;
 
 public class ThriftClient {

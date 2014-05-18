@@ -10,6 +10,7 @@ import scala.Some
 
 @RunWith(classOf[JUnitRunner])
 class ServiceTest extends FunSuite with MockitoSugar {
+
   test("ServiceProxy should proxy all requests") {
     val service = mock[Service[String, String]]
     when(service.close(any)) thenReturn Future.Done
@@ -40,7 +41,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
     val f: Future[Service[String, String]] = factory()
     assert(f.isDefined)
     val proxied = Await.result(f)
-    assert(proxied("ok").poll === (Some(Return("ko"))))
+    assert(proxied("ok").poll === Some(Return("ko")))
     verify(service)("ok")
 
   }
@@ -51,19 +52,19 @@ class ServiceTest extends FunSuite with MockitoSugar {
     when(service.close(any)) thenReturn Future.Done
     val factory = new ServiceFactory[String, String] {
       def apply(conn: ClientConnection) = Future.value(service)
-
       def close(deadline: Time) = Future.Done
     }
 
     verify(service, times(0)).close(any)
+
     var didRun = false
     val f2 = factory flatMap { _ =>
       didRun = true
       Future.exception(exc)
     }
+
     assert(!didRun)
     verify(service, times(0)).close(any)
-
     assert(f2().poll === Some(Throw(exc)))
     assert(didRun)
     verify(service).close(any)

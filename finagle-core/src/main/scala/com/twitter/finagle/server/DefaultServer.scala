@@ -8,7 +8,7 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultMonitor, DefaultTimer, DefaultLogger, ReporterFactory, LoadedReporterFactory}
 import com.twitter.finagle.{param, Stack}
 import com.twitter.finagle.{Server, Service, ServiceFactory, ListeningServer}
-import com.twitter.util.{Closable, Duration, Future, Monitor, Timer}
+import com.twitter.util.{Closable, Duration, Monitor, Timer}
 import java.net.SocketAddress
 
 /*

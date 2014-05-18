@@ -9,7 +9,7 @@ import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.service._
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stack.nilStack
-import com.twitter.finagle.stats.{ClientStatsReceiver, RollupStatsReceiver}
+import com.twitter.finagle.stats.ClientStatsReceiver
 import com.twitter.finagle.tracing.{ClientDestTracingFilter, TracingFilter}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.Showable

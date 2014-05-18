@@ -5,18 +5,15 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.httpproxy.HttpConnectHandler
 import com.twitter.finagle.socks.{SocksProxyFlags, SocksConnectHandler, Unauthenticated, UsernamePassAuthenticationSetting}
 import com.twitter.finagle.ssl.{Engine, SslConnectHandler}
-import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.{ChannelTransport, Transport}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{Stack, Service, ServiceFactory, WriteException, CancelledConnectionException}
-import com.twitter.util.TimeConversions._
+import com.twitter.finagle.{Stack, WriteException, CancelledConnectionException}
 import com.twitter.util.{Future, Promise, Duration, NonFatal, Stopwatch}
 import java.net.{InetSocketAddress, SocketAddress}
-import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.TimeUnit
 import java.util.IdentityHashMap
-import org.jboss.netty.channel.ChannelHandler
-import org.jboss.netty.channel.socket.nio.{NioWorkerPool, NioClientSocketChannelFactory}
+import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 import org.jboss.netty.channel.{ChannelFactory => NettyChannelFactory, _}
 import org.jboss.netty.handler.timeout.IdleStateHandler
 import scala.collection.JavaConverters._
@@ -74,7 +71,6 @@ private[netty3] class ChannelConnector[In, Out](
 
 object Netty3Transporter {
   import com.twitter.finagle.param._
-  import param._
 
   val defaultChannelOptions: Map[String, Object] = Map(
     "tcpNoDelay" -> java.lang.Boolean.TRUE,

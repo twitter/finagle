@@ -7,7 +7,7 @@ import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.util.ByteArrays
 import com.twitter.io.Buf
 import java.util.ArrayList
-import java.util.logging.{Logger, Level}
+import java.util.logging.Logger
 import org.apache.thrift.protocol.{  TBinaryProtocol, TMessage, TMessageType, TProtocolFactory}
 import org.apache.thrift.transport.TMemoryInputTransport
 import org.jboss.netty.buffer.ChannelBuffers

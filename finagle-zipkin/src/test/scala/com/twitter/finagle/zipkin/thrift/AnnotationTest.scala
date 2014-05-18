@@ -11,6 +11,7 @@ class AnnotationTest extends FunSuite {
   test("ZipkinAnnotation should serialize properly") {
 		val ann = ZipkinAnnotation(Time.fromSeconds(123), "value", Endpoint(123, 123), Some(1.second))
 		val tann = ann.toThrift
+
 		assert(tann.isSetHost)
 		assert(tann.host.ipv4 === ann.endpoint.ipv4)
 		assert(tann.host.port === ann.endpoint.port)
