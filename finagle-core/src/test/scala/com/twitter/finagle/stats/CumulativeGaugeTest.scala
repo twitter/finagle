@@ -39,7 +39,7 @@ class CumulativeGaugeTest extends FunSuite with MockitoSugar{
     System.gc()
 
     // We have to incite some action for the weakref GC to take place.
-    assert(gauge.getValue === (1.0f))
+    assert(gauge.getValue === 1.0f)
     verify(gauge, times(0)).deregister()
   }
 
@@ -52,7 +52,7 @@ class CumulativeGaugeTest extends FunSuite with MockitoSugar{
     System.gc()
 
     // We have to incite some action for the weakref GC to take place.
-    assert(gauge.getValue === (0.0f))
+    assert(gauge.getValue === 0.0f)
     verify(gauge).deregister()
   }
   

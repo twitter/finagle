@@ -32,21 +32,21 @@ class AsyncLatchTest extends FunSuite {
     latch await {
       count0 += 1
     }
-    assert(count0 === (0))
+    assert(count0 === 0)
     latch.decr()
-    assert(count0 === (1))
-    assert(count1 === (0))
+    assert(count0 === 1)
+    assert(count1 === 0)
 
     latch.incr()
     latch await {
       count1 += 1
     }
-    assert(count0 === (1))
-    assert(count1 === (0))
+    assert(count0 === 1)
+    assert(count1 === 0)
 
     latch.decr()
-    assert(count0 === (1))
-    assert(count1 === (1))
+    assert(count0 === 1)
+    assert(count1 === 1)
   }
 
   test("when count>0, AsyncLatch should return count on increment") {

@@ -63,7 +63,7 @@ class DefaultServerTest extends FunSpec with MockitoSugar {
       val clientTransport = new QueueTransport(qOut, qIn)
 
       val mockConnHandle = mock[Closable]
-      when(mockConnHandle.close(any[Time])) thenReturn(Future.Done)
+      when(mockConnHandle.close(any[Time])) thenReturn Future.Done
 
       val serviceTransport: (Transport[Try[Int], Try[Int]], Service[Try[Int], Try[Int]]) => Closable =
         (_, _) => mockConnHandle
@@ -73,8 +73,8 @@ class DefaultServerTest extends FunSpec with MockitoSugar {
       val socket = new InetSocketAddress(InetAddressUtil.Loopback, port).asInstanceOf[SocketAddress]
       val factory = mock[ServiceFactory[Try[Int], Try[Int]]]
       val service = Service.mk[Try[Int], Try[Int]] { Future.value }
-      when(factory(any[ClientConnection])) thenReturn(Future.value(service))
-      when(factory.close(any[Time])) thenReturn(Future.Done)
+      when(factory(any[ClientConnection])) thenReturn Future.value(service)
+      when(factory.close(any[Time])) thenReturn Future.Done
       val listeningServer: ListeningServer = server.serve(socket, factory)
 
       assert(clientTransport.write(Return(3)).isDefined === true)
@@ -92,7 +92,7 @@ class DefaultServerTest extends FunSpec with MockitoSugar {
       val clientTransport = new QueueTransport(qOut, qIn)
 
       val mockConnHandle = mock[Closable]
-      when(mockConnHandle.close(any[Time])) thenReturn(Future.Done)
+      when(mockConnHandle.close(any[Time])) thenReturn Future.Done
 
       val serviceTransport: (Transport[Try[Int], Try[Int]], Service[Try[Int], Try[Int]]) => Closable =
         new SerialServerDispatcher(_, _)

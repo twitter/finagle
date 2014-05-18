@@ -23,7 +23,7 @@ class RetryingFilterTest extends FunSpec with MockitoSugar {
   trait TriesFixture {
     val stats = mock[StatsReceiver]
     val retriesStat = mock[Stat]
-    when(stats.stat("retries")) thenReturn (retriesStat)
+    when(stats.stat("retries")) thenReturn retriesStat
 
     val service = mock[Service[Int, Int]]
     when(service.close(anyObject[Time])) thenReturn Future.Done
@@ -34,7 +34,7 @@ class RetryingFilterTest extends FunSpec with MockitoSugar {
   class PolicyFixture(policy: RetryPolicy[Try[Nothing]]) {
     val stats = mock[StatsReceiver]
     val retriesStat = mock[Stat]
-    when(stats.stat("retries")) thenReturn (retriesStat)
+    when(stats.stat("retries")) thenReturn retriesStat
 
     val filter = new RetryingFilter[Int, Int](policy, timer, stats)
     val service = mock[Service[Int, Int]]
@@ -218,7 +218,7 @@ class RetryingFilterTest extends FunSpec with MockitoSugar {
     it("Backoff.exponential with upper limit") {
       val backoffs = (Backoff.exponential(1.seconds, 2) take 5) ++ Backoff.const(32.seconds)
         assert((backoffs take 10).force.toSeq === (0 until 10 map {
-          i => (math.min(1 << i, 32)).seconds }))
+          i => math.min(1 << i, 32).seconds }))
     }
 
     it("Backoff.linear") {

@@ -13,7 +13,6 @@ class ServiceTest extends FunSuite{
     val exceptionThrowingService = new Service[Int, Int] {
       def apply(request: Int) = {
         throw e
-        Future.value(request + 1)
       }
     }
 

@@ -7,7 +7,6 @@ import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import org.scalatest.mock.MockitoSugar
 import com.twitter.finagle.{IndividualRequestTimeoutException, Service, MockTimer}
-import scala.Some
 
 @RunWith(classOf[JUnitRunner])
 class TimeoutFilterTest extends FunSuite with MockitoSugar {

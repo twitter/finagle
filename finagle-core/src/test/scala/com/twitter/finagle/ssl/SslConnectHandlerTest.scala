@@ -46,10 +46,10 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
       val ec = ArgumentCaptor.forClass(classOf[DownstreamChannelStateEvent])
       verify(pipeline).sendDownstream(ec.capture)
       val e = ec.getValue
-      assert(e.getChannel === (channel))
-      assert(e.getFuture === (closeFuture))
-      assert(e.getState === (ChannelState.OPEN))
-      assert(e.getValue === (java.lang.Boolean.FALSE))
+      assert(e.getChannel === channel)
+      assert(e.getFuture === closeFuture)
+      assert(e.getState === ChannelState.OPEN)
+      assert(e.getValue === java.lang.Boolean.FALSE)
     }
 
   }
@@ -62,10 +62,10 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
     verify(ctx).sendDownstream(ec.capture)
     val e = ec.getValue
 
-    assert(e.getChannel === (channel))
-    assert(e.getFuture != (connectFuture)) // this is proxied
-    assert(e.getState === (ChannelState.CONNECTED))
-    assert(e.getValue === (remoteAddress))
+    assert(e.getChannel === channel)
+    assert(e.getFuture != connectFuture) // this is proxied
+    assert(e.getState === ChannelState.CONNECTED)
+    assert(e.getValue === remoteAddress)
   }
 
   test("SslConnectHandler should upon connect propagate cancellation") {
@@ -136,9 +136,9 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
     verify(ctx).sendUpstream(ec.capture)
     val e = ec.getValue
 
-    e.getChannel === (channel)
-    e.getState === (ChannelState.CONNECTED)
-    e.getValue === (remoteAddress)
+    assert(e.getChannel === channel)
+    assert(e.getState === ChannelState.CONNECTED)
+    assert(e.getValue === remoteAddress)
   }
 
   test("SslConnectHandler should when connect is succesful when handshake is successful verify") {
@@ -158,7 +158,7 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
     when(verifier(any[SSLSession])) thenReturn Some(e)
     handshakeFuture.setSuccess()
     assert(connectFuture.isDone)
-    assert(connectFuture.getCause === (e))
+    assert(connectFuture.getCause === e)
     checkDidClose()
   }
 
@@ -174,7 +174,7 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
     assert(!connectFuture.isDone)
     e.getFuture.setFailure(exc)
     assert(connectFuture.isDone)
-    assert(connectFuture.getCause ==(exc))
+    assert(connectFuture.getCause == exc)
   }
 
 }

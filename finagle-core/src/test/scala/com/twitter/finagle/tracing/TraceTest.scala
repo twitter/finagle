@@ -44,7 +44,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     Trace.setId(Trace.nextId)
     assert(Trace.id match {
       case TraceId(Some(traceId), Some(parentId), _, None, Flags(0))
-        if (traceId == topId.traceId && parentId == topId.spanId) => true
+        if traceId == topId.traceId && parentId == topId.spanId => true
       case _ => false
     })
   }

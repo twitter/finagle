@@ -54,8 +54,8 @@ class StatsFilterTest extends FunSuite {
       assert(receiver.gauges(Seq("pending"))() === 1.0)
       promise.setException(BackupRequestLost)
       assert(!receiver.counters.keys.exists(_ contains "failure"))
-      assert(!(receiver.counters.contains(Seq("requests"))))
-      assert(!(receiver.counters.contains(Seq("success"))))
+      assert(!receiver.counters.contains(Seq("requests")))
+      assert(!receiver.counters.contains(Seq("success")))
       assert(receiver.gauges(Seq("pending"))() === 0.0)
     }
   }

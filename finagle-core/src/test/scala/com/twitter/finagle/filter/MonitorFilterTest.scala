@@ -7,11 +7,9 @@ import org.scalatest.mock.MockitoSugar
 import org.mockito.{Matchers, Mockito}
 import org.mockito.Matchers._
 import org.mockito.Mockito.{times, verify, when}
-
 import com.twitter.finagle.{ServiceFactory, ChannelException, SourcedException, Service}
 import com.twitter.finagle.integration.{StringCodec, IntegrationBase}
 import com.twitter.util._
-import scala.Some
 import java.util.logging.{Level, StreamHandler, Logger}
 import java.net.InetSocketAddress
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}

@@ -10,7 +10,6 @@ import org.mockito.Mockito.{times, verify}
 import org.mockito.Mockito
 import org.mockito.Matchers._
 import com.twitter.finagle.MockTimer
-import scala.Some
 
 @RunWith(classOf[JUnitRunner])
 class CacheTest extends FunSuite with MockitoSugar {
@@ -29,7 +28,7 @@ class CacheTest extends FunSuite with MockitoSugar {
     import h._
 
     objects foreach { cache.put(_) }
-    assert(cache.size === (5))
+    assert(cache.size === 5)
     objects take 5 foreach { obj =>
       verify(evictor)(obj)
     }
@@ -40,7 +39,7 @@ class CacheTest extends FunSuite with MockitoSugar {
     import h._
 
     objects take 5 foreach { cache.put(_) }
-    (objects take(5)).reverse foreach { x => assert(cache.get() === Some(x)) }
+    (objects take 5).reverse foreach { x => assert(cache.get() === Some(x)) }
   }
 
   test("Cache(5, 5.seconds) should return None when empty") {
@@ -86,7 +85,7 @@ class CacheTest extends FunSuite with MockitoSugar {
     verify(evictor, times(0))(objects(0))
     verify(evictor, times(0))(objects(1))
     verify(evictor, times(0))(objects(2))
-    cache.size === (3)
+    assert(cache.size === 3)
   }
 
   test("Cache(5, 5.seconds) should evictAll evicts all items") {
@@ -94,11 +93,11 @@ class CacheTest extends FunSuite with MockitoSugar {
     import h._
 
     objects take 5 foreach { cache.put(_) }
-    cache.size === (5)
+    assert(cache.size === 5)
     verify(evictor, times(0))(any)
     cache.evictAll()
     objects take 5 foreach { verify(evictor)(_) }
-    assert(cache.size ==(0))
+    assert(cache.size == 0)
   }
 
   test("Cache(5, 5.seconds) should keep a timer only when cache is nonempty") {

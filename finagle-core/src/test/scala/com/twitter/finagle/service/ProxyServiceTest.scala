@@ -24,11 +24,11 @@ class ProxyServiceTest extends FunSuite with MockitoSugar {
     val future = mock[Future[Int]]
     when(underlying(123)) thenReturn future
 
-    assert(proxy(123)==(future))
+    assert(proxy(123)== future)
     verify(underlying)(123)
 
     when(underlying.isAvailable) thenReturn false
-    assert(proxy.isAvailable ==(false))
+    assert(proxy.isAvailable == false)
     verify(underlying).isAvailable
 
     proxy.close()
@@ -56,8 +56,8 @@ class ProxyServiceTest extends FunSuite with MockitoSugar {
     assert(f123.isDefined) 
     assert(f321.isDefined) 
 
-    assert(Await.result(f123) ==(111))
-    assert(Await.result(f321) ==(222))
+    assert(Await.result(f123) == 111)
+    assert(Await.result(f321) == 222)
   }
 
   test("ProxyService should fail requests when underlying service provision fails"){

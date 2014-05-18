@@ -33,9 +33,9 @@ class ClusterTest extends FunSuite {
         case Cluster.Rem(elem) => set -= elem
       }
     }
-    assert(set.size ==(N))
+    assert(set.size == N)
     0 until N foreach { cluster1.del(_) }
-    assert(set.size ==(0))
+    assert(set.size == 0)
   }
 
   test("Cluster map should remove mapped objects in the same order they were received (for each key)"){

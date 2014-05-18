@@ -12,7 +12,7 @@ class HeapTest extends FunSuite{
   class Helper {
     val N = 100
     val heap = new Array[Int](N+1)
-    val input = (new Random).shuffle(Seq((0 until 100):_*)).toArray
+    val input = (new Random).shuffle(Seq(0 until 100:_*)).toArray
     val indices = new HashMap[Int, Int]
     val indexer = new Heap.Indexer[Int] {
       def apply(v: Int, i: Int) {

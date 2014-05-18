@@ -6,7 +6,6 @@ import org.junit.runner.RunWith
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.Matchers._
-import scala.Some
 
 @RunWith(classOf[JUnitRunner])
 class ServiceTest extends FunSuite with MockitoSugar {
