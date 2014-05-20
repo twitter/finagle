@@ -140,6 +140,21 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.del(Seq(foo)))
       }
 
+      "dump" in {
+        Await.result(client.set(foo, bar))
+        val unsignedBytesToInts = (-32, -63, -124)
+        Await.result(client.dump(foo)) match {
+          case Some(bytes) => bytes must containInOrder(0x00, 0x03, 0x62, 0x61, 0x72, 0x06, 0x00,
+                                                         0x70, 0x53, 0x21, unsignedBytesToInts._1,
+                                                         0x1B, 0x33, unsignedBytesToInts._2,
+                                                         unsignedBytesToInts._3)
+          case None        => fail("Some bytes expected")
+        }
+
+        Await.result(client.del(List(foo)))
+        Await.result(client.dump(foo)) must beNone
+      }
+
       // Once the scan/hscan pull request gets merged into Redis master,
       // the tests can be uncommented.
       // "scan" in {
