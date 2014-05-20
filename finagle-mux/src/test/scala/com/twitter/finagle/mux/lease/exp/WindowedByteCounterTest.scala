@@ -136,7 +136,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually {
     }
   }
 
-  test("Doing a gc should make us roll over, and should not count the gc") {
+  if (!sys.props.contains("SKIP_FLAKY")) test("Doing a gc should make us roll over, and should not count the gc") {
     val h = new ByteCounterHelper{}
     import h._
 
