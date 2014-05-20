@@ -54,7 +54,8 @@ import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.service._
 import com.twitter.finagle.ssl.{Engine, Ssl}
 import com.twitter.finagle.stack.nilStack
-import com.twitter.finagle.stats.{NullStatsReceiver, ClientStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{
+  NullStatsReceiver, ClientStatsReceiver, StatsReceiver, RollupStatsReceiver}
 import com.twitter.finagle.tracing.NullTracer
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
@@ -809,7 +810,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     params[Retries] match {
       case Retries(policy) if params.contains[Retries] =>
         val Label(label) = params[Label]
-        val stats = new StatsFilter[Req, Rep](statsReceiver.scope("tries"))
+        val stats = new StatsFilter[Req, Rep](new RollupStatsReceiver(statsReceiver.scope("tries")))
         val retries = new RetryingFilter[Req, Rep](policy, timer, statsReceiver)
         stats andThen retries
       case _ => identityFilter
