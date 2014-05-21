@@ -58,7 +58,6 @@ class EndToEndTest extends FunSuite {
 
     val cbService = ClientBuilder()
       .stack(ThriftMuxClient.withClientId(ClientId("test.service")))
-      .hostConnectionLimit(1) // irrelevent but ClientBuilder forces us
       .dest("localhost:" + address.getPort)
       .build()
 

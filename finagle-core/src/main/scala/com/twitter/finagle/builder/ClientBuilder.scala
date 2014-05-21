@@ -323,7 +323,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def codec[Req1, Rep1](
     codecFactory: CodecFactory[Req1, Rep1]#Client
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
-    stack({ prms =>
+    _stack({ prms =>
       val Label(name) = prms[Label]
       val Timer(timer) = params[Timer]
       val codec = codecFactory(ClientCodecConfig(name))
@@ -380,6 +380,12 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       }
     })
 
+  /** Used internally by `codec` to require hostConnectionLimit */
+  private[this] def _stack[Req1, Rep1](
+    mk: Stack.Params => Client[Req1, Rep1]
+  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
+    copy(params, mk)
+
   /**
    * Overrides the stack and [[com.twitter.finagle.Client]] that will be used
    * by this builder. The `mk` function is passed the state of configuration
@@ -387,10 +393,12 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * may be used by the client created by `mk`, it is up to the discretion of
    * the client and protocol implementation. For example, most of connection pool
    * parameters (hostConnectionLimit, etc) don't apply to [[com.twitter.finagle.ThriftMux]].
+   * For this reason, the builder assumes that hostConnectionLimit is irrelevant
+   * when using `stack`.
    */
   def stack[Req1, Rep1](
     mk: Stack.Params => Client[Req1, Rep1]
-  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
+  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, Yes] =
     copy(params, mk)
 
   @deprecated("Use tcpConnectTimeout instead", "5.0.1")
