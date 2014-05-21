@@ -81,7 +81,7 @@ class CommandToEncoding extends OneToOneEncoder {
     case Cas(key, flags, expiry, value, casUnique) =>
       TokensWithData(Seq(CAS, key, flags.toString, expiry.inSeconds.toString), value, Some(casUnique))
     case Get(keys) =>
-      encode(ctx, ch, Gets(keys))
+      Tokens(Seq[ChannelBuffer](GET) ++ keys)
     case Gets(keys) =>
       Tokens(Seq[ChannelBuffer](GETS) ++ keys)
     case Getv(keys) =>
