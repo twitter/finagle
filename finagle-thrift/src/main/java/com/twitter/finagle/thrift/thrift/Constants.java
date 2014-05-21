@@ -38,4 +38,12 @@ public class Constants {
 
   public static final String CLIENT_ADDR = "ca";
 
+  public static final String CLIENT_SEND_FRAGMENT = "csf";
+
+  public static final String CLIENT_RECV_FRAGMENT = "crf";
+
+  public static final String SERVER_SEND_FRAGMENT = "ssf";
+
+  public static final String SERVER_RECV_FRAGMENT = "srf";
+
 }

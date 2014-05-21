@@ -28,10 +28,15 @@ diagrammatically: ''size:4 type:1 tag:3''. The remainder of the frame
 (size-4 bytes) contains the body. Its format depends on the
 message type, documented below.
 
-The tag's MSB is reserved for future use, making its current namespace
-23 bits. Tag 0 designates a "marker" T message that expects no reply.
-The tag is otherwise arbitrary, and is chosen by the sender of the T
-message.
+Tag 0 designates a "marker" T message that expects no reply. Some
+messages may be split into an ordered sequence of fragments. Tag MSB=0
+denotes the last message in such a sequence, making the tag namespace
+23 bits. The tag is otherwise arbitrary, and is chosen by the sender
+of the T message.
+
+Currently, only Tdispatch and Rdispatch messages may be split into an
+ordered sequence of fragments. TdispatchError message ends a Tdispatch
+sequence and an Rerr ends an Rdispatch sequence.
 
 Message types, interpreted as a two's complement, 1-byte integer are
 numbered as follows: positive numbers are T-messages; their negative

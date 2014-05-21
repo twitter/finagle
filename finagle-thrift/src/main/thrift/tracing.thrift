@@ -28,6 +28,10 @@ const string SERVER_SEND = "ss"
 const string SERVER_RECV = "sr"
 const string SERVER_ADDR = "sa"
 const string CLIENT_ADDR = "ca"
+const string CLIENT_SEND_FRAGMENT = "csf"
+const string CLIENT_RECV_FRAGMENT = "crf"
+const string SERVER_SEND_FRAGMENT = "ssf"
+const string SERVER_RECV_FRAGMENT = "srf"
 
 // this represents a host and port in a network
 struct Endpoint {

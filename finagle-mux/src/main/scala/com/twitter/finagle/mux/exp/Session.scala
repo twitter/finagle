@@ -1,6 +1,7 @@
 package com.twitter.finagle.mux.exp
 
-import com.twitter.finagle.{Context, ListeningServer, MuxListener, MuxTransporter}
+import com.twitter.concurrent.{Spool, SpoolSource}
+import com.twitter.finagle.{Dtab, Context, ListeningServer, MuxListener, MuxTransporter}
 import com.twitter.finagle.mux._
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import com.twitter.finagle.stats.ClientStatsReceiver
@@ -71,9 +72,11 @@ class Session private[finagle](
   trans: Transport[ChannelBuffer, ChannelBuffer]
 ) extends Closable {
   import Message._
+  import Spool.*::
 
   private[this] val log = Logger.getLogger(getClass.getName)
   private[this] val pending = new ConcurrentHashMap[Int, Future[_]]
+  private[this] val incoming = new ConcurrentHashMap[Int, SpoolSource[Buf]].asScala
 
   def client: MuxService = clientDispatcher
   def close(deadline: Time) =
@@ -88,54 +91,54 @@ class Session private[finagle](
 
   private[this] def dispatch(message: Message) {
     message match {
-      // A one-way message
-      case Treq(MarkerTag, None, buf) =>
+      // One-way message
+      case Tdispatch(tag, contexts, /*ignore*/_dst, dtab, buf) if tag == MarkerTag =>
+        for ((k, v) <- contexts)
+          Context.handle(ChannelBufferBuf(k), ChannelBufferBuf(v))
+        if (dtab.length > 0)
+          Dtab.delegate(dtab)
+
         service.send(ChannelBufferBuf(buf))
 
-      case Tdispatch(tag, contexts, _dst, _dtab, req) =>
-        if (clientDispatcher.isDraining()) {
-          trans.write(encode(RdispatchNack(tag, Seq.empty)))
+      // RPC
+      case Tdispatch(tag, contexts, /*ignore*/_dst, dtab, req) =>
+        val masked = tag & MaxTag
+        if (clientDispatcher.isDraining && !incoming.contains(masked)) {
+          trans.write(encode(RdispatchNack(masked, Seq.empty)))
         } else {
           for ((k, v) <- contexts)
             Context.handle(ChannelBufferBuf(k), ChannelBufferBuf(v))
-          Trace.record(Annotation.ServerRecv())
-          val f = service(ChannelBufferBuf(req))
-          pending.put(tag, f)
-          f respond {
-            case Return(rsp) =>
-              pending.remove(tag)
-              Trace.record(Annotation.ServerSend())
-              trans.write(encode(RdispatchOk(tag, Seq.empty, BufChannelBuffer(rsp))))
-            case Throw(exc) =>
-              trans.write(encode(RdispatchError(tag, Seq.empty, exc.toString)))
-          }
-        }
+          if (dtab.length > 0)
+            Dtab.delegate(dtab)
 
-      case Treq(tag, traceId, req) =>
-        if (clientDispatcher.isDraining()) {
-          trans.write(encode(RreqNack(tag)))
-          return
-        }
-        val saved = Trace.state
-        try {
-          for (traceId <- traceId)
-            Trace.setId(traceId)
-          Trace.record(Annotation.ServerRecv())
-          val f = service(ChannelBufferBuf(req))
-          pending.put(tag, f)
-          f respond {
-            case Return(rsp) =>
-              pending.remove(tag)
-              Trace.record(Annotation.ServerSend())
-              trans.write(encode(RreqOk(tag, BufChannelBuffer(rsp))))
-            case Throw(exc) =>
-              trans.write(encode(RreqError(tag, exc.toString)))
+          val source = incoming.getOrElseUpdate(masked, {
+            val source = new SpoolSource[Buf]
+            val head = source()
+            val f = head flatMap { service(_) }
+            pending.put(masked, f)
+            f respond { rsp => writeResponseFragments(masked, rsp) }
+            source
+          })
+
+          if ((tag & TagMSB) == 0) {
+            incoming.remove(masked)
+            Trace.record(Annotation.ServerRecv())
+            source.offerAndClose(ChannelBufferBuf(req))
+          } else {
+            Trace.record(Annotation.ServerRecvFragment())
+            source.offer(ChannelBufferBuf(req))
           }
-        } finally {
-          Trace.state = saved
         }
 
       case Tdiscarded(tag, why) =>
+        val exc = new ClientDiscardedRequestException(why)
+
+        // Note: we abuse Tdiscarded and fail any streaming request
+        // associated with `tag`.  A future revision of the protocol
+        // should solve this with a status byte in Tdispatch.
+        for (source <- incoming.remove(tag))
+          source.raise(exc)
+
         pending.get(tag) match {
           case null => ()
           case f => f.raise(new ClientDiscardedRequestException(why))
@@ -157,6 +160,63 @@ class Session private[finagle](
 
       case rmsg@Rmessage(tag) =>
         clientDispatcher.recv(rmsg)
+    }
+  }
+
+  private[this] def writeResponseFragments(
+    masked: Int,
+    rsp: Try[Spool[Buf]]
+  ) {
+    def continue(buf: Buf): ChannelBuffer =
+      encode(RdispatchOk(masked | TagMSB, Seq.empty, BufChannelBuffer(buf)))
+
+    def terminal(buf: Buf): ChannelBuffer =
+      encode(RdispatchOk(masked, Seq.empty, BufChannelBuffer(buf)))
+
+    def error(exc: Throwable): ChannelBuffer =
+      encode(RdispatchError(masked, Seq.empty, exc.toString))
+
+    def loop(s: Spool[Buf]) { s match {
+      case Spool.Empty =>
+        pending.remove(masked)
+        Trace.record(Annotation.ServerSend())
+        trans.write(terminal(Buf.Empty))
+
+      case buf *:: Future(Return(Spool.Empty)) =>
+        pending.remove(masked)
+        Trace.record(Annotation.ServerSend())
+        trans.write(terminal(buf))
+
+      case buf *:: Future(Return(tail)) =>
+        Trace.record(Annotation.ServerSendFragment())
+        trans.write(continue(buf)) onSuccess { case () =>
+          loop(tail)
+        }
+
+      case buf *:: deferred =>
+        Trace.record(Annotation.ServerSendFragment())
+        trans.write(continue(buf)) onSuccess { case () =>
+          deferred respond {
+            case Return(tail) =>
+              loop(tail)
+            case Throw(exc) =>
+              pending.remove(masked)
+              trans.write(error(exc))
+          }
+        }
+    }}
+
+    rsp match {
+      case Return(Spool.Empty) =>
+        pending.remove(masked)
+        trans.write(error(new Exception("Server returned an empty sequence")))
+
+      case Return(s) =>
+        loop(s)
+
+      case Throw(exc) =>
+        pending.remove(masked)
+        trans.write(error(exc))
     }
   }
 
