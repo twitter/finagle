@@ -41,6 +41,9 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
       extractRows(rs).map(f)
   }
 
+  def selectFirst[T](sql: String)(f: Row => T): Future[Option[T]] =
+    select[T](sql)(f) map { rows => rows.headOption }
+
   def prepare(sql: String): Future[PreparedStatement] = for {
     name <- parse(sql)
   } yield new PreparedStatementImpl(name)
@@ -215,5 +218,8 @@ trait PreparedStatement {
     case ResultSet(rows) => rows.map(f)
     case OK(_) => throw Errors.client("Select query expected")
   }
+
+  def selectFirst[T](params: Any*)(f: Row => T): Future[Option[T]] =
+    select[T](params:_*)(f) map { rows => rows.headOption }
 
 }
