@@ -1,36 +1,54 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientRequest}
 import java.net.SocketAddress
+import com.twitter.finagle.stats.{ClientStatsReceiver, ServerStatsReceiver}
 import org.apache.thrift.protocol.TProtocolFactory
 
-class ThriftMuxImpl private[finagle](
-    clientId: Option[ClientId],
-    val protocolFactory: TProtocolFactory)
-  extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
+/**
+ * A default implementation of both ThriftMux clients and servers.
+ * This class can't be instantiated, see [[com.twitter.finagle.ThriftMux]]
+ * for the default instance.
+ */
+class ThriftMuxLike private[finagle](
+  client: ThriftMuxClientLike,
+  server: ThriftMuxServerLike
+) extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
   with Server[Array[Byte], Array[Byte]] with ThriftRichServer
 {
-  protected val defaultClientName = "thrift"
+  protected lazy val defaultClientName = {
+    val Label(label) = client.params[Label]
+    label
+  }
 
-  private[this] val client =
-    new ThriftMuxClientImpl(protocolFactory = protocolFactory, clientId = clientId)
-  private[this] val server = new ThriftMuxServerImpl(protocolFactory = protocolFactory)
+  override protected lazy val stats = {
+    val Stats(sr) = client.params[Stats]
+    sr
+  }
 
-  def newClient(
-    dest: Name,
-    label: String
-  ): ServiceFactory[ThriftClientRequest, Array[Byte]] = client.newClient(dest, label)
+  // TODO: this should probably be threaded through via Stack.Params
+  protected val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
 
+
+  /** @inheritdoc */
+  def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
+    client.newClient(dest, label)
+
+  /** @inheritdoc */
   def serve(
     addr: SocketAddress,
     service: ServiceFactory[Array[Byte], Array[Byte]]
   ): ListeningServer = server.serve(addr, service)
 
   /**
-   * Produce a [[com.twitter.finagle.ThriftMuxImpl]] using the provided
+   * Produce a [[com.twitter.finagle.ThriftMuxLike]] using the provided
    * client ID.
    */
-  def withClientId(clientId: ClientId) = new ThriftMuxImpl(Some(clientId), protocolFactory)
+  def withClientId(clientId: ClientId) = new ThriftMuxLike(
+    client.withClientId(clientId),
+    server
+  )
 }
 
 /**
@@ -50,10 +68,20 @@ class ThriftMuxImpl private[finagle](
  *
  * $serverExample
  *
- * By default, the Thrift binary protocol is used. Different protocol
- * factories may be supplied by instantiating new clients or servers.
+ * This object does not expose any configuration options. Both clients and servers
+ * are instantiated with sane defaults. Clients are labeled with the "clnt/thrift"
+ * prefix and servers with "srv/thrift". If you'd like more configuration, see the
+ * [[com.twitter.finagle.ThriftMuxServer]] and [[com.twitter.finagle.ThriftMuxClient]]
+ * objects.
  *
  * @define clientExampleObject ThriftMux
  * @define serverExampleObject ThriftMux
  */
-object ThriftMux extends ThriftMuxImpl(None, Protocols.binaryFactory())
+object ThriftMux extends ThriftMuxLike(
+  ThriftMuxClient
+    .configured(Stats(ClientStatsReceiver))
+    .configured(Label("thrift")),
+  ThriftMuxServer
+    .configured(Stats(ServerStatsReceiver))
+    .configured(Label("thrift"))
+)

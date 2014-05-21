@@ -1,9 +1,9 @@
 package com.twitter.finagle
 
-import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.{ChannelBuffer => CB}
 
 private object ThriftMuxUtil {
-  def bufferToArray(buf: ChannelBuffer): Array[Byte] =
+  def bufferToArray(buf: CB): Array[Byte] =
     if (buf.hasArray && buf.arrayOffset == 0
         && buf.readableBytes == buf.array().length) {
       buf.array()
@@ -18,4 +18,13 @@ private object ThriftMuxUtil {
       case cause: ClassNotFoundException =>
         throw new IllegalArgumentException("Iface is not a valid thrift iface", cause)
     }
+
+  object ProtocolRecorder extends Stack.Role
+  val protocolRecorder = new Stack.Simple[ServiceFactory[CB, CB]](ProtocolRecorder) {
+    def make(params: Stack.Params, next: ServiceFactory[CB, CB]) = {
+      val param.Stats(stats) = params[param.Stats]
+      stats.scope("protocol").counter("thriftmux").incr()
+      next
+    }
+  }
 }

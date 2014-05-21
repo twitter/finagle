@@ -2,6 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.ThriftClientRequest
+import com.twitter.finagle.util.Showable
 import com.twitter.util.{Future, NonFatal}
 import java.lang.reflect.{Constructor, Method}
 import java.net.SocketAddress
@@ -121,6 +122,7 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   protected val protocolFactory: TProtocolFactory
   /** The client name used when group isn't named. */
   protected val defaultClientName: String
+  protected lazy val stats: StatsReceiver = ClientStatsReceiver
 
   private val thriftFinagleClientParamTypes =
     Seq(classOf[Service[_, _]], classOf[TProtocolFactory])
@@ -195,9 +197,12 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   def newIface[Iface](name: Name, label: String, cls: Class[_]): Iface = {
     val clsName = cls.getName
     lazy val underlying = newClient(name, label).toService
-    lazy val stats =
-      if (label.nonEmpty) ClientStatsReceiver.scope(label)
-      else ClientStatsReceiver.scope(defaultClientName)
+    lazy val clientLabel = (label, defaultClientName) match {
+      case ("", "") => Showable.show(name)
+      case ("", l1) => l1
+      case (l0, l1) => l0
+    }
+    lazy val sr = stats.scope(clientLabel)
 
     def tryThriftFinagleClient: Option[Iface] =
       for {
@@ -210,21 +215,21 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
       for {
         clientCls  <- findClass[Iface](clsName + "$FinagleClient")
         cons       <- findConstructor(clientCls, scrooge3FinagleClientParamTypes: _*)
-      } yield cons.newInstance(underlying, protocolFactory, "", stats)
+      } yield cons.newInstance(underlying, protocolFactory, "", sr)
 
     def tryScrooge3FinagledClient: Option[Iface] =
       for {
         baseName   <- findRootWithSuffix(clsName, "$FutureIface")
         clientCls  <- findClass[Iface](baseName + "$FinagledClient")
         cons       <- findConstructor(clientCls, scrooge3FinagleClientParamTypes: _*)
-      } yield cons.newInstance(underlying, protocolFactory, "", stats)
+      } yield cons.newInstance(underlying, protocolFactory, "", sr)
 
     def tryScrooge2Client: Option[Iface] =
       for {
         baseName   <- findRootWithSuffix(clsName, "$FutureIface")
         clientCls  <- findClass[Iface](baseName + "$FinagledClient")
         cons       <- findConstructor(clientCls, scrooge2FinagleClientParamTypes: _*)
-      } yield cons.newInstance(underlying, protocolFactory, None, stats)
+      } yield cons.newInstance(underlying, protocolFactory, None, sr)
 
     def trySwiftClient: Option[Iface] =
       for {

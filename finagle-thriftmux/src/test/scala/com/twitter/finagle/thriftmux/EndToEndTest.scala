@@ -1,10 +1,13 @@
 package com.twitter.finagle.thriftmux
 
 import com.twitter.finagle._
-import com.twitter.finagle.builder.ServerBuilder
+import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.client.{DefaultClient, Bridge}
+import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.dispatch.{PipeliningDispatcher, SerialClientDispatcher}
-import com.twitter.finagle.server.DefaultServer
+import com.twitter.finagle.netty3.Netty3Listener
+import com.twitter.finagle.server.StackServer
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftFramedTransporter, ThriftClientRequest}
 import com.twitter.finagle.thriftmux.thriftscala.{TestService, TestService$FinagleService}
 import com.twitter.finagle.tracing._
@@ -39,7 +42,7 @@ class EndToEndTest extends FunSuite {
     }
   }
 
-  test("ServerBuilder thriftmux server + Finagle thrift client") {
+  test("ServerBuilder thriftmux server + ClientBuilder thriftmux client") {
     val address = RandomSocket()
     val iface = new TestService.FutureIface {
       def query(x: String) = Future.value(x+x)
@@ -48,12 +51,18 @@ class EndToEndTest extends FunSuite {
     val service = new TestService$FinagleService(iface, Thrift.protocolFactory)
 
     val server = ServerBuilder()
-      .stack(exp.ThriftMuxServer)
+      .stack(ThriftMuxServer)
       .bindTo(address)
       .name("ThriftMuxServer")
       .build(service)
 
-    val client = Thrift.newIface[TestService.FutureIface]("localhost:" + address.getPort)
+    val cbService = ClientBuilder()
+      .stack(ThriftMuxClient.withClientId(ClientId("test.service")))
+      .hostConnectionLimit(1) // irrelevent but ClientBuilder forces us
+      .dest("localhost:" + address.getPort)
+      .build()
+
+    val client = new TestService.FinagledClient(cbService, Thrift.protocolFactory)
 
     1 to 5 foreach { _ =>
       assert(Await.result(client.query("ok")) == "okok")
@@ -85,15 +94,20 @@ class EndToEndTest extends FunSuite {
       def sampleTrace(traceId: TraceId): Option[Boolean] = None
     }
 
+    object ThriftMuxListener extends Netty3Listener[ChannelBuffer, ChannelBuffer](
+      "thrift", thriftmux.PipelineFactory)
+
     // TODO: temporary workaround to capture the ServerRecv record.
-    object TestThriftMuxer extends DefaultServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer](
-      "thrift", ThriftMuxListener,
-      (trans, service) => Trace.unwind {
+    object TestThriftMuxer extends StackServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer] {
+      val newListener = Function.const(ThriftMuxListener)_
+      val newDispatcher: Stack.Params => Dispatcher =
+      Function.const((trans, service) => Trace.unwind {
         Trace.pushTracer(tracer)
         new mux.ServerDispatcher(trans, service, true)
-      }
-    )
-    object TestThriftMuxServer extends ThriftMuxServerImpl(TestThriftMuxer)
+      })_
+    }
+
+    object TestThriftMuxServer extends ThriftMuxServerLike(TestThriftMuxer)
 
     val testService = new TestService.FutureIface {
       def query(x: String) = Future.value(x + x)
@@ -279,29 +293,47 @@ class EndToEndTest extends FunSuite {
   }
 */
 
-  test("StackClient-based ThriftMux client properly creates clients") {
-    new ThriftMuxTestServer {
-      val client = exp.ThriftMuxClient.newIface[TestService.FutureIface](server)
-      assert(Await.result(client.query("ok")) == "okok")
+  test("ThriftMux servers and clients should export protocol stats") {
+    val iface = new TestService.FutureIface {
+      def query(x: String) = Future.value(x+x)
     }
-  }
+    val mem = new InMemoryStatsReceiver
+    val label = Label("foobar")
+    val sr = Stats(mem)
+    val server = ThriftMuxServer
+      .configured(sr)
+      .configured(label)
+      .serveIface(":*", iface)
 
-  test("StackServer-based ThriftMux server properly creates servers") {
-    val server = exp.ThriftMuxServer.serveIface(":*", new TestService.FutureIface {
-      def query(x: String) = Future.value(x+x)
-    })
-
-    val client = ThriftMux.newIface[TestService.FutureIface](server)
-
-    assert(Await.result(client.query("ok")) == "okok")
-  }
-
-  test("StackClient- and StackServer-based ThriftMux client/server can talk to eachother") {
-    val server = exp.ThriftMuxServer.serveIface(":*", new TestService.FutureIface {
-      def query(x: String) = Future.value(x+x)
-    })
-    val client = exp.ThriftMuxClient.newIface[TestService.FutureIface](server)
+    val client = ThriftMuxClient
+      .configured(sr)
+      .configured(label)
+      .newIface[TestService.FutureIface](server)
 
     assert(Await.result(client.query("ok")) == "okok")
+    assert(mem.counters(Seq("foobar", "protocol", "thriftmux")) === 2)
+  }
+
+  test("ThriftMuxClients are properly labeled and scoped") {
+    new ThriftMuxTestServer {
+      val mem = new InMemoryStatsReceiver
+      val label = Label("foobar")
+      val sr = Stats(mem)
+      val base = ThriftMuxClient.configured(sr)
+
+      def assertStats(prefix: String, iface: TestService.FutureIface) {
+        assert(Await.result(iface.query("ok")) == "okok")
+        // These stats are exported by scrooge generated code.
+        assert(mem.counters(Seq(prefix, "query", "requests")) === 1)
+        assert(mem.counters(Seq(prefix, "query", "success")) === 1)
+      }
+
+      // non-labeled client inherits destination as label
+      assertStats(server.toString, base.newIface[TestService.FutureIface](server))
+
+      // labeled via configured
+      assertStats("client1", base.configured(Label("client1"))
+        .newIface[TestService.FutureIface](server))
+    }
   }
 }
