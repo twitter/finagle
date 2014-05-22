@@ -240,16 +240,24 @@ object DefaultStatsReceiver extends {
 
 /**
  * A client-specific StatsReceiver. All stats recorded using this receiver
- * are prefixed with the string "clnt".
+ * are prefixed with the string "clnt" by default.
  */
-object ClientStatsReceiver extends {
-  val self: StatsReceiver = LoadedStatsReceiver.scope("clnt")
-} with StatsReceiverProxy
+object ClientStatsReceiver extends StatsReceiverProxy {
+  @volatile private[this] var _self: StatsReceiver = LoadedStatsReceiver.scope("clnt")
+  def self: StatsReceiver = _self
+  def setRootScope(rootScope: String) {
+    _self = LoadedStatsReceiver.scope(rootScope)
+  }
+}
 
 /**
  * A server-specific StatsReceiver. All stats recorded using this receiver
- * are prefixed with the string "srv".
+ * are prefixed with the string "srv" by default.
  */
-object ServerStatsReceiver extends {
-  val self: StatsReceiver = LoadedStatsReceiver.scope("srv")
-} with StatsReceiverProxy
+object ServerStatsReceiver extends StatsReceiverProxy {
+  @volatile private[this] var _self: StatsReceiver = LoadedStatsReceiver.scope("srv")
+  def self: StatsReceiver = _self
+  def setRootScope(rootScope: String) {
+    _self = LoadedStatsReceiver.scope(rootScope)
+  }
+}
