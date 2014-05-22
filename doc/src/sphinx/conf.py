@@ -47,7 +47,6 @@ extlinks = {
 }
 
 rst_epilog = '''
-.. include:: /links.txt
 .. _Finagle Examples: https://github.com/twitter/finagle/tree/finagle-example
 '''
 
