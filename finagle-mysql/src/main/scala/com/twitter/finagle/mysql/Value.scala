@@ -57,14 +57,20 @@ object TimestampValue {
 
   /**
    * Value extractor for java.sql.Timestamp
+   * Returns timestamp in UTC, to match what is inserted into database
    */
   def unapply(v: Value): Option[Timestamp] = v match {
     case RawValue(t, Charset.Binary, false, bytes)
       if (t == Type.Timestamp || t == Type.DateTime) =>
         val str = new String(bytes, Charset(Charset.Binary))
         if (str == Zero.toString) Some(Zero)
-        else Some(Timestamp.valueOf(str))
-
+        else {
+          val cal = Calendar.getInstance()
+          val ts = Timestamp.valueOf(str)
+          val offset = cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)
+          val utcTimeStamp = new Timestamp(ts.getTime + offset)
+          Some(utcTimeStamp)
+        }
     case RawValue(t, Charset.Binary, true, bytes)
       if (t == Type.Timestamp || t == Type.DateTime) =>
         Some(fromBytes(bytes))
