@@ -8,6 +8,8 @@ import org.mockito.Mockito.{times, verify, when}
 import org.mockito.Matchers._
 import com.twitter.util._
 import scala.Some
+import org.mockito.invocation.InvocationOnMock
+import org.mockito.stubbing.Answer
 
 @RunWith(classOf[JUnitRunner])
 class ServiceTest extends FunSuite with MockitoSugar {
@@ -19,16 +21,25 @@ class ServiceTest extends FunSuite with MockitoSugar {
 
     val proxied = new ServiceProxy(service) {}
 
+    when(service.apply(any[String])) thenAnswer {
+      new Answer[Future[String]] {
+        override def answer(invocation: InvocationOnMock) = {
+          if(proxied.isAvailable) service("ok")
+          else Future("service is not available")
+        }
+      }
+    }
+
     verify(service, times(0)).close(any)
     verify(service, times(0)).isAvailable
     verify(service, times(0))(any[String])
 
-    proxied.close()
+    proxied.close(Time.now)
     verify(service).close(any)
     assert(!proxied.isAvailable)
     verify(service).isAvailable
 
-    proxied("ok")
+    assert(Await.result(proxied("ok")) === "service is not available")
     verify(service)("ok")
   }
 
@@ -42,9 +53,9 @@ class ServiceTest extends FunSuite with MockitoSugar {
     val f: Future[Service[String, String]] = factory()
     assert(f.isDefined)
     val proxied = Await.result(f)
+
     assert(proxied("ok").poll === Some(Return("ko")))
     verify(service)("ok")
-
   }
 
   test("ServiceFactory.flatMap should release underlying service on failure") {
