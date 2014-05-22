@@ -104,10 +104,11 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
 
       @volatile var nlimbo = 0
       @volatile var size = 0
-      val gauges = Seq(
-        scoped.addGauge("limbo") { nlimbo },
-        scoped.addGauge("size") { size }
-      )
+      
+      // The lifetimes of these gauges need to be managed if we 
+      // ever de-memoize addrOf.
+      scoped.provideGauge("limbo") { nlimbo }
+      scoped.provideGauge("size") { size }
 
       Var.async(Addr.Pending: Addr) { u =>
         nsets.incrementAndGet()
