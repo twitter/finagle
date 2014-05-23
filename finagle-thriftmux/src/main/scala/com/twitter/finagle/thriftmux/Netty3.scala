@@ -3,7 +3,8 @@ package com.twitter.finagle.thriftmux
 import com.twitter.finagle.{mux, Dtab, ThriftMuxUtil}
 import com.twitter.finagle.mux.{BadMessageException, Message}
 import com.twitter.finagle.thrift._
-import com.twitter.finagle.thrift.thrift.{ResponseHeader, RequestHeader, UpgradeReply}
+import com.twitter.finagle.thrift.thrift.{
+  ResponseHeader, RequestContext, RequestHeader, UpgradeReply}
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceContext, TraceId}
 import com.twitter.io.Buf
 import com.twitter.util.{Try, Return, Throw, NonFatal}
@@ -12,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.apache.thrift.protocol.{TProtocolFactory, TMessage, TMessageType}
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.jboss.netty.channel._
+import scala.collection.mutable.ArrayBuffer
 
 private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
   extends ChannelPipelineFactory
@@ -26,6 +28,9 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
   private class TTwitterToMux extends SimpleChannelHandler {
     import TTwitterToMux._
 
+    private[this] def contextStructToKVTuple(c: RequestContext): (ChannelBuffer, ChannelBuffer) =
+      (ChannelBuffers.wrappedBuffer(c.getKey), ChannelBuffers.wrappedBuffer(c.getValue))
+
     private[this] def thriftToMux(req: ChannelBuffer): Message.Tdispatch = {
       val header = new RequestHeader
       val request_ = InputBuffer.peelMessage(ThriftMuxUtil.bufferToArray(req), header, protocolFactory)
@@ -39,10 +44,18 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
       )
 
       val clientIdOpt = Option(header.client_id) map { _.name }
-      val contexts = Seq(TraceContext.newKVTuple(traceId), ClientIdContext.newKVTuple(clientIdOpt))
+      val contextBuf = ArrayBuffer.empty[(ChannelBuffer, ChannelBuffer)]
+      contextBuf += TraceContext.newKVTuple(traceId)
+      contextBuf += ClientIdContext.newKVTuple(clientIdOpt)
+      if (header.contexts != null) {
+        val iter = header.contexts.iterator()
+        while (iter.hasNext) {
+          contextBuf += contextStructToKVTuple(iter.next())
+        }
+      }
 
       Message.Tdispatch(
-        Message.MinTag, contexts, "", Dtab.empty, ChannelBuffers.wrappedBuffer(request_))
+        Message.MinTag, contextBuf.toSeq, "", Dtab.empty, ChannelBuffers.wrappedBuffer(request_))
     }
 
     override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent)  {
