@@ -67,7 +67,7 @@ with ShouldMatchers {
     assert(None === recv1.gauges.get(Seq("hi")))
     assert(None === recv1.gauges.get(Seq("scopeA", "hi")))
 
-    val gaugeA = broadcastA.addGauge("hi") {5f}
+    val gaugeA = broadcastA.addGauge("hi") { 5f }
     assert(5f === recv1.gauges(Seq("hi"))())
     assert(5f === recv1.gauges(Seq("scopeA", "hi"))())
 

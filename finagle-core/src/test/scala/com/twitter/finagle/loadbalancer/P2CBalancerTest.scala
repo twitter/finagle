@@ -63,7 +63,7 @@ class P2CBalancerTest extends FunSuite {
 
   def newBal(fs: Var[Traversable[LoadedFactory]],
     statsReceiver: StatsReceiver = NullStatsReceiver) =
-    new P2CBalancer(fs map { fs => fs map (_.tup)},
+    new P2CBalancer(fs map { fs => fs map (_.tup) },
       rng = Rng(12345L), statsReceiver = statsReceiver)
 
   def assertEven(fs: Traversable[LoadedFactory]) {
@@ -75,21 +75,21 @@ class P2CBalancerTest extends FunSuite {
   }
 
   test("Balances evenly when weights=i") {
-    val init = Vector.tabulate(N) { i => new LoadedFactory(i, i + 1)}
+    val init = Vector.tabulate(N) { i => new LoadedFactory(i, i + 1) }
     val bal = newBal(Var.value(init))
     for (_ <- 0 until R) bal()
     assertEven(init)
   }
 
   test("Balances evenly when weights=1") {
-    val init = Vector.tabulate(N) { i => new LoadedFactory(i, 1)}
+    val init = Vector.tabulate(N) { i => new LoadedFactory(i, 1) }
     val bal = newBal(Var.value(init))
     for (_ <- 0 until R) bal()
     assertEven(init)
   }
 
   test("Balances evenly when weights=0") {
-    val init = Vector.tabulate(N) { i => new LoadedFactory(i, 0)}
+    val init = Vector.tabulate(N) { i => new LoadedFactory(i, 0) }
     val bal = newBal(Var.value(init))
     for (_ <- 0 until R) bal()
     assertEven(init)
@@ -97,7 +97,7 @@ class P2CBalancerTest extends FunSuite {
 
   test("Balance evenly when load varies") {
     val rng = Rng(12345L)
-    val init = Vector.tabulate(N) { i => LoadedFactory(i, i + 1)}
+    val init = Vector.tabulate(N) { i => LoadedFactory(i, i + 1) }
     var pending = Set[Service[Unit, Int]]()
     val bal = newBal(Var.value(init))
 
@@ -119,7 +119,7 @@ class P2CBalancerTest extends FunSuite {
   }
 
   test("Dynamically incorporates updates") {
-    val init = Vector.tabulate(N) { i => LoadedFactory(i, 1)}
+    val init = Vector.tabulate(N) { i => LoadedFactory(i, 1) }
     val vec = Var(init)
     val bal = newBal(vec)
 
@@ -143,7 +143,7 @@ class P2CBalancerTest extends FunSuite {
   }
 
   test("Skip downed nodes; revive them") {
-    val init = Vector.tabulate(N) { i => new LoadedFactory(i, 1)}
+    val init = Vector.tabulate(N) { i => new LoadedFactory(i, 1) }
     val bal = newBal(Var.value(init))
 
     var byIndex = new mutable.HashMap[Int, mutable.Set[Closable]]
@@ -185,18 +185,18 @@ class P2CBalancerTest extends FunSuite {
   test("Handle empty vectors") {
     val vec = Var(Vector.empty[LoadedFactory])
     val bal = newBal(vec)
-    intercept[NoBrokersAvailableException] {Await.result(bal())}
+    intercept[NoBrokersAvailableException] { Await.result(bal()) }
 
     vec() :+= new LoadedFactory(0, 1)
     for (_ <- 0 until R) Await.result(bal())
     assert(vec().head.load === R)
 
     vec() = Vector.empty
-    intercept[NoBrokersAvailableException] {Await.result(bal())}
+    intercept[NoBrokersAvailableException] { Await.result(bal()) }
   }
 
   test("Balance all-downed nodes.") {
-    val init = Vector.tabulate(N) { i => new LoadedFactory(i, 1)}
+    val init = Vector.tabulate(N) { i => new LoadedFactory(i, 1) }
     val bal = newBal(Var.value(init))
 
     for (_ <- 0 until R) bal()
@@ -252,7 +252,7 @@ class P2CBalancerTest extends FunSuite {
     vec()(0).available = false
     assert(stats.available === 1)
 
-    val svcs = Seq.fill(R) {Await.result(bal())}
+    val svcs = Seq.fill(R) { Await.result(bal()) }
     assert(stats.load === R)
     assert(vec()(0).load === 0)
     assert(vec()(1).load === R)

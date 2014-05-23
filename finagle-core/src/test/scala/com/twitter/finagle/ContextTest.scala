@@ -22,7 +22,7 @@ class MyContext extends ContextHandler {
 @RunWith(classOf[JUnitRunner])
 class ContextTest extends FunSuite {
   def contextMap = {
-    Context.emit() map { case (Buf.Utf8(k), v) => k -> v} toMap
+    Context.emit() map { case (Buf.Utf8(k), v) => k -> v } toMap
   }
 
   def assertPassthru(key: String) {

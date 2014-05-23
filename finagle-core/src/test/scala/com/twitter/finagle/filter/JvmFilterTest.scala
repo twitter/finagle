@@ -19,7 +19,7 @@ class JvmFilterTest extends FunSuite with MockitoSugar {
   class JvmHelper {
     var gcEvents = Nil: List[Gc]
     val jvm = mock[Jvm]
-    when(jvm.monitorGcs(any[com.twitter.util.Duration])) thenReturn { since: Time => gcEvents.takeWhile(_.timestamp > since)}
+    when(jvm.monitorGcs(any[com.twitter.util.Duration])) thenReturn { since: Time => gcEvents.takeWhile(_.timestamp > since) }
     val mkFilter = new MkJvmFilter(jvm)
     val filter = mkFilter[String, String]()
     val service = mock[Service[String, String]]

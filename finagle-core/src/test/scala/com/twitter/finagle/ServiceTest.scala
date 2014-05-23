@@ -24,7 +24,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
     when(service.apply(any[String])) thenAnswer {
       new Answer[Future[String]] {
         override def answer(invocation: InvocationOnMock) = {
-          if(proxied.isAvailable) service("ok")
+          if (proxied.isAvailable) service("ok")
           else Future("service is not available")
         }
       }

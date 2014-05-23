@@ -43,7 +43,7 @@ class NameTreeTest extends FunSuite {
     }
 
     def newPath(): NameTree[Path] = {
-      val elems = Seq.fill(1 + rng.nextInt(10)) {pick(words)}
+      val elems = Seq.fill(1 + rng.nextInt(10)) { pick(words) }
       NameTree.Leaf(Path.Utf8(elems: _*))
     }
 
@@ -62,15 +62,15 @@ class NameTreeTest extends FunSuite {
         case 0 => newLeaf()
 
         case 1 =>
-          val trees = Seq.fill(1 + rng.nextInt(3)) {newTree(depth - 1)}
+          val trees = Seq.fill(1 + rng.nextInt(3)) { newTree(depth - 1) }
           NameTree.Union(trees: _*)
 
         case 2 =>
-          val trees = Seq.fill(1 + rng.nextInt(3)) {newTree(depth - 1)}
+          val trees = Seq.fill(1 + rng.nextInt(3)) { newTree(depth - 1) }
           NameTree.Alt(trees: _*)
       }
 
-    val trees = Seq.fill(100) {newTree(2)}
+    val trees = Seq.fill(100) { newTree(2) }
     for (tree <- trees)
       try {
         assert(splice(NameTree.read(tree.show)) === splice(tree))
@@ -109,7 +109,7 @@ class NameTreeTest extends FunSuite {
 
     for ((tree, res) <- cases) {
       val expect = res map { set =>
-        set map { el: String => Path.read(el)}
+        set map { el: String => Path.read(el) }
       }
 
       assert(NameTree.read(tree).eval === expect)

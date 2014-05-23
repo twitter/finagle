@@ -27,7 +27,7 @@ class CacheTest extends FunSuite with MockitoSugar {
     val h = new CacheHelper
     import h._
 
-    objects foreach {cache.put(_)}
+    objects foreach { cache.put(_) }
     assert(cache.size === 5)
     objects take 5 foreach { obj =>
       verify(evictor)(obj)
@@ -38,8 +38,8 @@ class CacheTest extends FunSuite with MockitoSugar {
     val h = new CacheHelper
     import h._
 
-    objects take 5 foreach {cache.put(_)}
-    (objects take 5).reverse foreach { x => assert(cache.get() === Some(x))}
+    objects take 5 foreach { cache.put(_) }
+    (objects take 5).reverse foreach { x => assert(cache.get() === Some(x)) }
   }
 
   test("Cache(5, 5.seconds) should return None when empty") {
@@ -92,11 +92,11 @@ class CacheTest extends FunSuite with MockitoSugar {
     val h = new CacheHelper
     import h._
 
-    objects take 5 foreach {cache.put(_)}
+    objects take 5 foreach { cache.put(_) }
     assert(cache.size === 5)
     verify(evictor, times(0))(any)
     cache.evictAll()
-    objects take 5 foreach {verify(evictor)(_)}
+    objects take 5 foreach { verify(evictor)(_) }
     assert(cache.size === 0)
   }
 

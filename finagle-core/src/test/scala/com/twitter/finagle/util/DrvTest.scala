@@ -24,7 +24,7 @@ class DrvTest extends FunSuite {
   }
 
   test("Drv.newVose(equal distribution)") {
-    val Drv.Aliased(aliased, prob) = Drv.newVose(Seq.fill(10) {0.1})
+    val Drv.Aliased(aliased, prob) = Drv.newVose(Seq.fill(10) { 0.1 })
     assert(prob forall (_ == 1.0))
   }
 

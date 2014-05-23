@@ -136,7 +136,7 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
 
       verify(underlying, times(3))()
 
-      ss foreach { s => when(s.isAvailable).thenReturn(true)}
+      ss foreach { s => when(s.isAvailable).thenReturn(true) }
 
       fs foreach { f =>
         timeControl.advance(5.second)
@@ -144,7 +144,7 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
       }
 
       assert(timer.tasks.size === 1)
-      ss foreach { s => verify(s, never()).close(any[Time])}
+      ss foreach { s => verify(s, never()).close(any[Time]) }
 
       timer.tick()
 

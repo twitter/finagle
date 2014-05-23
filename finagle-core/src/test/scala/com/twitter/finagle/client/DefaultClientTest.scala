@@ -174,7 +174,7 @@ class DefaultClientTest extends FunSuite with Eventually {
       val dest = Name.Bound.singleton(Var.value(Addr.Pending))
       val svc = client.newService(dest, "test")
       val f = svc.close()
-      eventually {assert(f.isDefined)}
+      eventually { assert(f.isDefined) }
       assert(Await.result(f) ===())
     }
   }
@@ -192,7 +192,7 @@ class DefaultClientTest extends FunSuite with Eventually {
       val svc = client.newService(dest, "test")
       assert(closed === false)
       val f = svc.close()
-      eventually {assert(f.poll === Some(Return(())))}
+      eventually { assert(f.poll === Some(Return(()))) }
       assert(closed === true)
     }
   }

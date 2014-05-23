@@ -90,7 +90,7 @@ class RetryingFilterTest extends FunSpec with MockitoSugar {
         new TriesFixture {
           val replyPromise = new Promise[Int] {
             @volatile var interrupted: Option[Throwable] = None
-            setInterruptHandler { case exc => interrupted = Some(exc)}
+            setInterruptHandler { case exc => interrupted = Some(exc) }
           }
           when(service(123)) thenReturn replyPromise
 
@@ -194,7 +194,7 @@ class RetryingFilterTest extends FunSpec with MockitoSugar {
         new PolicyFixture(policy) {
           val replyPromise = new Promise[Int] {
             @volatile var interrupted: Option[Throwable] = None
-            setInterruptHandler { case exc => interrupted = Some(exc)}
+            setInterruptHandler { case exc => interrupted = Some(exc) }
           }
           when(service(123)) thenReturn replyPromise
 
@@ -214,7 +214,7 @@ class RetryingFilterTest extends FunSpec with MockitoSugar {
   describe("Backoff") {
     it("Backoff.exponential") {
       val backoffs = Backoff.exponential(1.seconds, 2) take 10
-      assert(backoffs.force.toSeq === (0 until 10 map { i => (1 << i).seconds}))
+      assert(backoffs.force.toSeq === (0 until 10 map { i => (1 << i).seconds }))
     }
 
     it("Backoff.exponential with upper limit") {
@@ -227,12 +227,12 @@ class RetryingFilterTest extends FunSpec with MockitoSugar {
     it("Backoff.linear") {
       val backoffs = Backoff.linear(2.seconds, 10.seconds) take 10
       assert(backoffs.head === 2.seconds)
-      assert(backoffs.tail.force.toSeq === (1 until 10 map { i => 2.seconds + 10.seconds * i}))
+      assert(backoffs.tail.force.toSeq === (1 until 10 map { i => 2.seconds + 10.seconds * i }))
     }
 
     it("Backoff.const") {
       val backoffs = Backoff.const(10.seconds) take 10
-      assert(backoffs.force.toSeq === (0 until 10 map { _ => 10.seconds}))
+      assert(backoffs.force.toSeq === (0 until 10 map { _ => 10.seconds }))
     }
   }
 }

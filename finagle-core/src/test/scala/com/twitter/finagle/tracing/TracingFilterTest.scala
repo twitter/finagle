@@ -13,7 +13,7 @@ import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class TracingFilterTest extends FunSuite with MockitoSugar with BeforeAndAfter {
-  before {Trace.clear()}
+  before { Trace.clear() }
 
   val service = mock[Service[Int, Int]]
   when(service(any[Int])).thenReturn(Future.value(4))

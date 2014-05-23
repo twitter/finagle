@@ -11,12 +11,12 @@ class TraceContextTest
   extends FunSuite
   with BeforeAndAfter with OneInstancePerTest {
 
-  before {Trace.clear()}
-  after {Trace.clear()}
+  before { Trace.clear() }
+  after { Trace.clear() }
 
   def longs(seed: Long) = {
     val rng = new Random(seed)
-    Seq.fill(10) {rng.nextLong()}
+    Seq.fill(10) { rng.nextLong() }
   }
 
   def spanIds(seed: Long): Seq[Option[SpanId]] =

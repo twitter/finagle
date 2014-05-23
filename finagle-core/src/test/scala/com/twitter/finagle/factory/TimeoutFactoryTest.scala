@@ -17,7 +17,7 @@ class TimeoutFactoryTest extends FunSuite with MockitoSugar {
     when(underlying.close(any[Time])).thenReturn(Future.Done)
     val promise = new Promise[Service[String, String]] {
       @volatile var interrupted: Option[Throwable] = None
-      setInterruptHandler { case exc => interrupted = Some(exc)}
+      setInterruptHandler { case exc => interrupted = Some(exc) }
     }
     when(underlying(any[ClientConnection])).thenReturn(promise)
     val timeout = 1.second

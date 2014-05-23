@@ -18,13 +18,13 @@ class CumulativeGaugeTest extends FunSuite with MockitoSugar {
     val gauge = Mockito.spy(new TestGauge)
     verify(gauge, times(0)).register()
 
-    gauge.addGauge {0.0f}
+    gauge.addGauge { 0.0f }
     verify(gauge).register()
   }
 
   test("a CumulativeGauge with size = 1 should deregister when all gauges are removed") {
     val gauge = Mockito.spy(new TestGauge)
-    var added = gauge.addGauge {1.0f}
+    var added = gauge.addGauge { 1.0f }
     verify(gauge, times(0)).deregister()
 
     added.remove()
@@ -33,7 +33,7 @@ class CumulativeGaugeTest extends FunSuite with MockitoSugar {
 
   test("a CumulativeGauge with size = 1 should not deregister after a System.gc when there are still valid references to the gauge") {
     val gauge = Mockito.spy(new TestGauge)
-    var added = gauge.addGauge {1.0f}
+    var added = gauge.addGauge { 1.0f }
     verify(gauge, times(0)).deregister()
 
     System.gc()
@@ -45,7 +45,7 @@ class CumulativeGaugeTest extends FunSuite with MockitoSugar {
 
   test("a CumulativeGauge with size = 1 should deregister after a System.gc when no references are held onto") {
     val gauge = Mockito.spy(new TestGauge)
-    var added = gauge.addGauge {1.0f}
+    var added = gauge.addGauge { 1.0f }
     verify(gauge, times(0)).deregister()
 
     added = null
@@ -59,14 +59,14 @@ class CumulativeGaugeTest extends FunSuite with MockitoSugar {
   test("a CumulativeGauge should sum values across all registered gauges") {
     val gauge = Mockito.spy(new TestGauge)
 
-    0 until 100 foreach { _ => gauge.addGauge {10.0f}}
+    0 until 100 foreach { _ => gauge.addGauge { 10.0f } }
     assert(gauge.getValue === (10.0f * 100))
   }
 
   test("a CumulativeGauge should discount gauges once removed") {
     val gauge = Mockito.spy(new TestGauge)
 
-    val underlying = 0 until 100 map { _ => gauge.addGauge {10.0f}}
+    val underlying = 0 until 100 map { _ => gauge.addGauge { 10.0f } }
     assert(gauge.getValue === (10.0f * 100))
     underlying(0).remove()
     assert(gauge.getValue === (10.0f * 99))

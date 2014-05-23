@@ -8,7 +8,7 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class TracingLogHandlerTest extends FunSuite with BeforeAndAfter {
-  before {Trace.clear()}
+  before { Trace.clear() }
 
   test("TracingLogHandler: send messages to Tracer") {
     val tracer = new BufferingTracer()

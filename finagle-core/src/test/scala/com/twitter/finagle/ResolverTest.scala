@@ -24,11 +24,11 @@ case class ConstResolver(a: Addr) extends Resolver {
 @RunWith(classOf[JUnitRunner])
 class ResolverTest extends FunSuite {
   test("reject bad names") {
-    intercept[ResolverAddressInvalid] {Resolver.eval("!foo!bar")}
+    intercept[ResolverAddressInvalid] { Resolver.eval("!foo!bar") }
   }
 
   test("reject unknown resolvers") {
-    intercept[ResolverNotFoundException] {Resolver.eval("unknown!foobar")}
+    intercept[ResolverNotFoundException] { Resolver.eval("unknown!foobar") }
   }
 
   test("resolve ServiceLoaded resolvers") {

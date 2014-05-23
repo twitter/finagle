@@ -14,7 +14,7 @@ class ChanTest extends FunSuite {
     val l = new CountDownLatch(1)
     val b = new CyclicBarrier(2)
 
-    val p = Proc[Thread] { t => threads += t; l.countDown(); b.await()}
+    val p = Proc[Thread] { t => threads += t; l.countDown(); b.await() }
 
     val t0 = new Thread {
       override def run() {
@@ -40,7 +40,7 @@ class ChanTest extends FunSuite {
   }
 
   test("Proc should swallow exceptions") {
-    val p = Proc[Int] { _ => throw new RuntimeException}
+    val p = Proc[Int] { _ => throw new RuntimeException }
     assert((p ! 4) ===())
   }
 

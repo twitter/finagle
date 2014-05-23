@@ -31,11 +31,11 @@ class NamerTest extends FunSuite {
           case Path.Utf8(elems@_*) =>
             val p = Path.Utf8(elems: _*)
             acts.get(p) match {
-              case Some((a, _)) => a map { tree => tree.map(Name(_))}
+              case Some((a, _)) => a map { tree => tree.map(Name(_)) }
               case None =>
                 val tup@(act, _) = Activity[NameTree[Path]]()
                 acts += p -> tup
-                act map { tree => tree.map(Name(_))}
+                act map { tree => tree.map(Name(_)) }
             }
           case _ => Activity.value(NameTree.Neg)
         }
@@ -47,7 +47,7 @@ class NamerTest extends FunSuite {
   }
 
   def assertEval(res: Activity[NameTree[Name.Bound]], ias: InetSocketAddress*) {
-    assert(res.sample().eval === Some((ias map { ia => Name.bound(ia)}).toSet))
+    assert(res.sample().eval === Some((ias map { ia => Name.bound(ia) }).toSet))
   }
 
   test("NameTree.bind: union")(new Ctx {
