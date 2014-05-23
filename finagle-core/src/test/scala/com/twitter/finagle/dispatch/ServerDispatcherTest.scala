@@ -21,7 +21,7 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     when(trans.write(any[String])).thenReturn(writep)
   }
 
-  test("Dispatch one at a time") (new Ctx {
+  test("Dispatch one at a time")(new Ctx {
     val service = mock[Service[String, String]]
     when(service.close(any[Time])).thenReturn(Future.Done)
     val disp = new SerialServerDispatcher(trans, service)
@@ -47,8 +47,8 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
 
     verify(trans, times(2)).read()
   })
-  
-  test("Delimit com.twitter.util.Local") (new Ctx {
+
+  test("Delimit com.twitter.util.Local")(new Ctx {
     val l = new Local[String]
     var ncall = 0
 
@@ -90,8 +90,8 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     val disp = new SerialServerDispatcher(trans, service)
   }
 
-  
-  test("interrupt on hangup: while pending") (new Ictx {
+
+  test("interrupt on hangup: while pending")(new Ictx {
     readp.setValue("ok")
     verify(service).apply("ok")
     assert(!replyp.interrupted.isDefined)
@@ -99,7 +99,7 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     assert(replyp.interrupted.isDefined)
   })
 
-  test("interrupt on hangup: while reading") (new Ictx {
+  test("interrupt on hangup: while reading")(new Ictx {
     verify(trans).read()
     onClose.setValue(new Exception)
     assert(!replyp.interrupted.isDefined)
@@ -110,8 +110,8 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     verify(trans).close()
     verify(service).close(any[Time])
   })
-  
-  test("interrupt on hangup: while draining") (new Ictx {
+
+  test("interrupt on hangup: while draining")(new Ictx {
     readp.setValue("ok")
     verify(service).apply("ok")
     replyp.setValue("yes")
@@ -138,8 +138,8 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     val disp = new SerialServerDispatcher(trans, service)
     verify(trans).read()
   }
-  
-  test("drain: while reading") (new Dctx {
+
+  test("drain: while reading")(new Dctx {
     disp.close(Time.now)
     verify(trans).close(any[Time])
     verify(service, times(0)).close(any[Time])
@@ -152,12 +152,12 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     verify(trans).read()
   })
 
-  test("drain: while dispatching") (new Dctx {
+  test("drain: while dispatching")(new Dctx {
     val servicep = new Promise[String]
     when(service(any[String])).thenReturn(servicep)
     readp.setValue("ok")
     verify(service).apply("ok")
-  
+
     disp.close(Time.now)
     verify(service, times(0)).close(any[Time])
     verify(trans, times(0)).close()
@@ -166,7 +166,7 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     verify(trans).write("yes")
     verify(service, times(0)).close(any[Time])
     verify(trans, times(0)).close()
-  
+
     writep.setDone()
     verify(trans).close()
     onClose.setValue(new Exception("closed!"))

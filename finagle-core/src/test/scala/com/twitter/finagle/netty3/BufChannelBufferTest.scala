@@ -13,7 +13,8 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
-  private[this] val CAPACITY = 4096 // Must be even
+  private[this] val CAPACITY = 4096
+  // Must be even
   private[this] val BLOCK_SIZE = 128
   private[this] var seed: Long = 0
   private[this] var random: Random = null
@@ -37,8 +38,9 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
   test("reader index boundary check 1") {
     try {
       buffer.writerIndex(0)
-    } catch { case e: IndexOutOfBoundsException =>
-      fail()
+    } catch {
+      case e: IndexOutOfBoundsException =>
+        fail()
     }
     intercept[IndexOutOfBoundsException] {
       buffer.readerIndex(-1)
@@ -48,8 +50,9 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
   test("reader index boundary check 2") {
     try {
       buffer.writerIndex(buffer.capacity())
-    } catch { case e: IndexOutOfBoundsException =>
-      fail()
+    } catch {
+      case e: IndexOutOfBoundsException =>
+        fail()
     }
     intercept[IndexOutOfBoundsException] {
       buffer.readerIndex(buffer.capacity() + 1)
@@ -59,8 +62,9 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
   test("reader index boundary check 3") {
     try {
       buffer.writerIndex(CAPACITY / 2)
-    } catch { case e: IndexOutOfBoundsException =>
-      fail()
+    } catch {
+      case e: IndexOutOfBoundsException =>
+        fail()
     }
     intercept[IndexOutOfBoundsException] {
       buffer.readerIndex(CAPACITY * 3 / 2)
@@ -84,8 +88,9 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
     try {
       buffer.writerIndex(CAPACITY)
       buffer.readerIndex(CAPACITY)
-    } catch { case e: IndexOutOfBoundsException =>
-      fail()
+    } catch {
+      case e: IndexOutOfBoundsException =>
+        fail()
     }
     intercept[IndexOutOfBoundsException] {
       buffer.writerIndex(buffer.capacity() + 1)
@@ -96,8 +101,9 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
     try {
       buffer.writerIndex(CAPACITY)
       buffer.readerIndex(CAPACITY / 2)
-    } catch { case e: IndexOutOfBoundsException =>
-      fail()
+    } catch {
+      case e: IndexOutOfBoundsException =>
+        fail()
     }
     intercept[IndexOutOfBoundsException] {
       buffer.writerIndex(CAPACITY / 4)
@@ -184,7 +190,7 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
 
   test("getByteArray boundary check 3") {
     val dst = new Array[Byte](4)
-    val bcb = new BufChannelBuffer(Buf.ByteArray(1,2,3,4))
+    val bcb = new BufChannelBuffer(Buf.ByteArray(1, 2, 3, 4))
     intercept[IndexOutOfBoundsException] {
       bcb.getBytes(0, dst, -1, 4)
     }
@@ -198,7 +204,7 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
 
   test("getByteArray boundary check 4") {
     val dst = new Array[Byte](4)
-    val bcb = new BufChannelBuffer(Buf.ByteArray(1,2,3,4))
+    val bcb = new BufChannelBuffer(Buf.ByteArray(1, 2, 3, 4))
     intercept[IndexOutOfBoundsException] {
       bcb.getBytes(0, dst, 1, 4)
     }
@@ -263,7 +269,7 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
     dst.position(1)
     dst.limit(3)
 
-    val bcb = new BufChannelBuffer(Buf.ByteArray(1,2,3,4))
+    val bcb = new BufChannelBuffer(Buf.ByteArray(1, 2, 3, 4))
     bcb.getBytes(1, dst)
 
     assert(3 === dst.position())
@@ -287,7 +293,7 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
     dst.position(1)
     dst.limit(3)
 
-    val bcb = new BufChannelBuffer(Buf.ByteArray(1,2,3,4))
+    val bcb = new BufChannelBuffer(Buf.ByteArray(1, 2, 3, 4))
     bcb.getBytes(1, dst)
 
     assert(3 === dst.position())
@@ -1369,7 +1375,7 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
   }
 
   test("indexOf") {
-    val bcb = new BufChannelBuffer(Buf.ByteArray(1,2,3,2,1))
+    val bcb = new BufChannelBuffer(Buf.ByteArray(1, 2, 3, 2, 1))
 
     assertEquals(-1, bcb.indexOf(1, 4, 1: Byte))
     assertEquals(-1, bcb.indexOf(4, 1, 1: Byte))

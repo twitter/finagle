@@ -89,7 +89,7 @@ class DelayedFactoryTest extends FunSuite {
       assert(!factory.isAvailable)
       val f = factory.close()
       assert(f.isDefined)
-      assert(Await.result(f) === ())
+      assert(Await.result(f) ===())
       assert(underlying.isAvailable)
       completeFuture()
       assert(!underlying.isAvailable)
@@ -101,7 +101,7 @@ class DelayedFactoryTest extends FunSuite {
       assert(!factory.isAvailable)
       val f = factory.close()
       assert(f.isDefined)
-      assert(Await.result(f) === ())
+      assert(Await.result(f) ===())
       completeFuture()
     }
   }

@@ -20,7 +20,7 @@ class StatsFactoryWrapperTest extends FunSuite with MockitoSugar {
     val receiver = new InMemoryStatsReceiver
     val statsFac = new StatsFactoryWrapper(underlying, receiver)
 
-    when(underlying(any[ClientConnection])) thenReturn(Future.exception(t))
+    when(underlying(any[ClientConnection])) thenReturn Future.exception(t)
 
     intercept[Throwable] {
       Await.result(statsFac(ClientConnection.nil))

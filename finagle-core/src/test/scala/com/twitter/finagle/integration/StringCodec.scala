@@ -35,7 +35,7 @@ class StringCodec extends CodecFactory[String, String] {
       }
 
       override def prepareConnFactory(factory: ServiceFactory[String, String]) =
-        (new AddNewlineFilter) andThen factory
+        new AddNewlineFilter andThen factory
     }
   }
 

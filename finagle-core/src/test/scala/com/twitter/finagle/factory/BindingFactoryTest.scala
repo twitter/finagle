@@ -1,14 +1,10 @@
 package com.twitter.finagle.factory
 
 import com.twitter.finagle._
-import com.twitter.util.{Await, Future, Time, Var, Activity, Promise, Throw, Return}
-import java.net.SocketAddress
+import com.twitter.util.{Await, Future, Time, Var, Activity, Throw, Return}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
-import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.{never, times, verify, when}
-import org.mockito.stubbing.Answer
-import org.mockito.invocation.InvocationOnMock
+import org.mockito.Mockito.when
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
@@ -20,7 +16,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar {
     def lookup(path: Path): Activity[NameTree[Name]] =
       Activity.value(NameTree.Neg)
   }
-  
+
   trait Ctx {
     val imsr = new InMemoryStatsReceiver
 
@@ -29,7 +25,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar {
     var news = 0
     var closes = 0
 
-    val newFactory: Var[Addr] => ServiceFactory[Unit, Var[Addr]] = 
+    val newFactory: Var[Addr] => ServiceFactory[Unit, Var[Addr]] =
       addr => new ServiceFactory[Unit, Var[Addr]] {
         news += 1
         def apply(conn: ClientConnection) = Future.value(new Service[Unit, Var[Addr]] {
@@ -45,7 +41,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar {
     val factory = new BindingFactory(
       path, newFactory,
       statsReceiver = imsr,
-      maxNamerCacheSize = 2, 
+      maxNamerCacheSize = 2,
       maxNameCacheSize = 2)
 
     def newWith(localDtab: Dtab): Service[Unit, Var[Addr]] = {
@@ -56,7 +52,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("Caches namers") (new Ctx {
+  test("Caches namers")(new Ctx {
 
     val n1 = Dtab.read("/foo/bar=>/$/inet//1")
     val n2 = Dtab.read("/foo/bar=>/$/inet//2")
@@ -91,7 +87,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar {
     assert(closes === 2)
   })
 
-  test("Caches names") (new Ctx {
+  test("Caches names")(new Ctx {
     val n1 = Dtab.read("/foo/bar=>/$/inet//1; /bar/baz=>/$/nil")
     val n2 = Dtab.read("/foo/bar=>/$/inet//1")
     val n3 = Dtab.read("/foo/bar=>/$/inet//2")
@@ -117,11 +113,11 @@ class BindingFactoryTest extends FunSuite with MockitoSugar {
     Await.result(newWith(n3).close())
     assert(news === 3)
     assert(closes === 1)
-    
+
     Await.result(newWith(n1).close())
     assert(news === 4)
     assert(closes === 2)
-            
+
     Await.result(newWith(n2).close())
     assert(news === 4)
     assert(closes === 2)
@@ -137,7 +133,7 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
     val dyn = new DynNameFactory[String, String](name, newService)
   }
 
-  test("queue requests until name is nonpending (ok)") (new Ctx {
+  test("queue requests until name is nonpending (ok)")(new Ctx {
     when(newService(any[Name.Bound], any[ClientConnection])).thenReturn(Future.value(svc))
 
     val f1, f2 = dyn()
@@ -149,31 +145,31 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
     assert(f1.poll === Some(Return(svc)))
     assert(f2.poll === Some(Return(svc)))
   })
-  
-  test("queue requests until name is nonpending (fail)") (new Ctx {
+
+  test("queue requests until name is nonpending (fail)")(new Ctx {
     when(newService(any[Name.Bound], any[ClientConnection])).thenReturn(Future.never)
 
     val f1, f2 = dyn()
     assert(!f1.isDefined)
     assert(!f2.isDefined)
-    
+
     val exc = new Exception
     namew.notify(Throw(exc))
-    
+
     assert(f1.poll === Some(Throw(exc)))
     assert(f2.poll === Some(Throw(exc)))
   })
-  
-  test("dequeue interrupted requests") (new Ctx {
+
+  test("dequeue interrupted requests")(new Ctx {
     when(newService(any[Name.Bound], any[ClientConnection])).thenReturn(Future.never)
-    
+
     val f1, f2 = dyn()
     assert(!f1.isDefined)
     assert(!f2.isDefined)
-    
+
     val exc = new Exception
     f1.raise(exc)
-    
+
     f1.poll match {
       case Some(Throw(cce: CancelledConnectionException)) =>
         assert(cce.getCause === exc)

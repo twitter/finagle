@@ -80,16 +80,16 @@ class StatsReceiverTest extends FunSuite {
   test("StatsReceiver timeFuture") {
     val receiver = spy(new InMemoryStatsReceiver)
 
-    Await.ready((receiver.timeFuture("2", "chainz") { Future.Unit }), 1.second)
+    Await.ready(receiver.timeFuture("2", "chainz") { Future.Unit }, 1.second)
     verify(receiver, times(1)).stat("2", "chainz")
 
-    Await.ready((receiver.timeFuture(TimeUnit.MINUTES, "2", "chainz") { Future.Unit }), 1.second)
+    Await.ready(receiver.timeFuture(TimeUnit.MINUTES, "2", "chainz") { Future.Unit }, 1.second)
     verify(receiver, times(2)).stat("2", "chainz")
 
     val stat = receiver.stat("2", "chainz")
     verify(receiver, times(3)).stat("2", "chainz")
 
-    Await.result((receiver.timeFuture(TimeUnit.HOURS, stat) { Future.Unit }), 1.second)
+    Await.result(receiver.timeFuture(TimeUnit.HOURS, stat) { Future.Unit }, 1.second)
     verify(receiver, times(3)).stat("2", "chainz")
   }
 

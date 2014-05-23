@@ -13,7 +13,7 @@ class RetryPolicyTest extends FunSpec {
   def getBackoffs(
     policy: RetryPolicy[Try[Nothing]],
     exceptions: Stream[Exception]
-  ): Stream[Duration] =
+    ): Stream[Duration] =
     exceptions match {
       case Stream.Empty => Stream.empty
       case e #:: tail =>

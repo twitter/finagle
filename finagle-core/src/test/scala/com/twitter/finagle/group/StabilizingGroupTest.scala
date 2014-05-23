@@ -4,13 +4,10 @@ import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Group, MockTimer}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Duration, Time, Timer, TimerTask}
+import com.twitter.util.Time
 import org.junit.runner.RunWith
-import org.scalatest.concurrent.Eventually._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.time._
 import StabilizingGroup.State._
 
 class MockHealth {
@@ -51,7 +48,7 @@ class StabilizingGroupTest extends FunSuite {
       timer.tick()
       assert(stableGroup() === sourceGroup())
 
-      sourceGroup.update(sourceGroup() -- Set(1,2,3,4))
+      sourceGroup.update(sourceGroup() -- Set(1, 2, 3, 4))
       assert(limboSize === 4)
       tc.advance(grace)
       timer.tick()
@@ -73,7 +70,7 @@ class StabilizingGroupTest extends FunSuite {
       assert(stableGroup() != sourceGroup())
       assert(stableGroup() === (1 to 10).toSet)
       assert(limboSize === 1)
-      sourceGroup.update(sourceGroup() -- Set(1,2,3,4))
+      sourceGroup.update(sourceGroup() -- Set(1, 2, 3, 4))
       assert(stableGroup() != sourceGroup())
       assert(stableGroup() === (1 to 10).toSet)
       assert(limboSize === 5)
@@ -104,11 +101,11 @@ class StabilizingGroupTest extends FunSuite {
 
       healthStatus.mkHealthy()
       assert(healthStat === Healthy.id)
-      sourceGroup.update(sourceGroup() ++ Set(1,2,3,4))
+      sourceGroup.update(sourceGroup() ++ Set(1, 2, 3, 4))
 
       tc.advance(grace)
       timer.tick()
-      assert(stableGroup() === Set(1,2,3,4))
+      assert(stableGroup() === Set(1, 2, 3, 4))
     }
   }
 
@@ -120,7 +117,7 @@ class StabilizingGroupTest extends FunSuite {
       healthStatus.mkHealthy()
 
       sourceGroup() --= (1 to 10).toSet
-      tc.advance(grace/2)
+      tc.advance(grace / 2)
       sourceGroup() += 5
       tc.advance(grace)
       timer.tick()

@@ -98,7 +98,7 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar {
           case _ => false
         }
       }
-      verify(underlying).apply()  // nothing new
+      verify(underlying).apply() // nothing new
     }
   }
 

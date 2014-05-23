@@ -75,9 +75,9 @@ class DefaultPoolTest extends FunSuite {
       val c6 = Await.result(factory())
 
       // should not throw exceptions
-      assert(Await.result(c4(())) === ())
-      assert(Await.result(c5(())) === ())
-      assert(Await.result(c6(())) === ())
+      assert(Await.result(c4(())) ===())
+      assert(Await.result(c5(())) ===())
+      assert(Await.result(c6(())) ===())
     }
   }
 }
