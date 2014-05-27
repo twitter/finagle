@@ -1,6 +1,6 @@
 package com.twitter.finagle.exp.mysql
 
-import java.util.Calendar
+import java.util.{Calendar, TimeZone}
 import java.sql.{Date, Timestamp, Time}
 import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader, BufferWriter}
 
@@ -89,6 +89,7 @@ object TimestampValue {
 
   /**
    * Creates a Timestamp from a Mysql binary representation.
+   * We standardize on representing timestamps in UTC.
    * Invalid DATETIME or TIMESTAMP values are converted to
    * the “zero” value ('0000-00-00 00:00:00').
    * @param An array of bytes representing a TIMESTAMP written in the
@@ -124,7 +125,7 @@ object TimestampValue {
       nano = br.readInt()
     }
 
-    val cal = Calendar.getInstance
+    val cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
     cal.set(year, month-1, day, hour, min, sec)
 
     val ts = new Timestamp(0)

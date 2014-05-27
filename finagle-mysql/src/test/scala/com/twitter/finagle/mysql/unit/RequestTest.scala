@@ -196,7 +196,12 @@ class ExecuteRequestTest extends FunSuite {
     test("java.sql.Timestamp") {
       val raw = RawValue(Type.Timestamp, Charset.Binary, true, br.readLengthCodedBytes())
       val TimestampValue(ts) = raw
-      assert(ts === timestamp)
+
+      val cal = Calendar.getInstance()
+      val offset = cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)
+      val utcTimeStamp = new Timestamp(timestamp.getTime + offset)
+  
+      assert(ts === utcTimeStamp)
     }
 
     test("java.sql.Date") {
@@ -208,7 +213,12 @@ class ExecuteRequestTest extends FunSuite {
     test("java.util.Date") {
       val raw = RawValue(Type.DateTime, Charset.Binary, true, br.readLengthCodedBytes())
       val TimestampValue(dt) = raw
-      assert(dt.getTime === datetime.getTime)
+
+      val cal = Calendar.getInstance()
+      val offset = cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)
+      val utcDateTime = new Date(datetime.getTime + offset)
+
+      assert(dt.getTime === utcDateTime.getTime)
     }
   }
 }
