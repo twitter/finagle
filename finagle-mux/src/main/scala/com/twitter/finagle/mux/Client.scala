@@ -179,7 +179,7 @@ private[finagle] class ClientDispatcher (
         val contexts = Context.emit() map { case (k, v) =>
           (BufChannelBuffer(k), BufChannelBuffer(v))
         }
-        Tdispatch(tag, contexts.toSeq, "", Dtab.baseDiff(), req)
+        Tdispatch(tag, contexts.toSeq, "", Dtab.local, req)
       }
 
     if (traceWrite) {

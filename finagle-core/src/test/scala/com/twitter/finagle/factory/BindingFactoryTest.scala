@@ -2,20 +2,32 @@ package com.twitter.finagle.factory
 
 import com.twitter.finagle._
 import com.twitter.util.{Await, Future, Time, Var, Activity, Promise, Throw, Return}
-import java.net.SocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.{never, times, verify, when}
 import org.mockito.stubbing.Answer
 import org.mockito.invocation.InvocationOnMock
-import org.scalatest.FunSuite
+import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import com.twitter.finagle.stats._
 
 @RunWith(classOf[JUnitRunner])
-class BindingFactoryTest extends FunSuite with MockitoSugar {
+class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter {
+  var saveBase: Dtab = Dtab.empty
+  before {
+    saveBase = Dtab.base
+    Dtab.base = Dtab.read("""
+      /test1010=>/$/inet//1010
+    """)
+  }
+  
+  after {
+    Dtab.base = saveBase
+  }
+
   def anonNamer() = new Namer {
     def lookup(path: Path): Activity[NameTree[Name]] =
       Activity.value(NameTree.Neg)
@@ -50,11 +62,20 @@ class BindingFactoryTest extends FunSuite with MockitoSugar {
 
     def newWith(localDtab: Dtab): Service[Unit, Var[Addr]] = {
       Dtab.unwind {
-        Dtab() = localDtab
+        Dtab.local = localDtab
         Await.result(factory())
       }
     }
   }
+  
+  test("Uses Dtab.base") (new Ctx {
+    val n1 = Dtab.read("/foo/bar=>/test1010")
+    val s1 = newWith(n1)
+    val v1 = Await.result(s1(()))
+    assert(v1.sample() === Addr.Bound(new InetSocketAddress(1010)))
+
+    s1.close()
+  })
 
   test("Caches namers") (new Ctx {
 

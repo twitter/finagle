@@ -2,7 +2,7 @@ package com.twitter.finagle.thrift
 
 import com.twitter.util.{Await, Throw, Future, Time}
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Span, Millis, Seconds}
@@ -12,7 +12,17 @@ import com.twitter.test._
 import java.io.{StringWriter, PrintWriter}
 
 @RunWith(classOf[JUnitRunner])
-class EndToEndTest extends FunSuite with ThriftTest with Eventually {
+class EndToEndTest extends FunSuite with ThriftTest with Eventually with BeforeAndAfter {
+  var saveBase: Dtab = Dtab.empty
+  before {
+    saveBase = Dtab.base
+    Dtab.base = Dtab.read("/foo=>/bar; /baz=>/biz")
+  }
+  
+  after {
+    Dtab.base = saveBase
+  }
+
   type Iface = B.ServiceIface
   def ifaceManifest = implicitly[ClassManifest[B.ServiceIface]]
 
@@ -28,8 +38,12 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
     def show_me_your_dtab() = Future {
       val stringer = new StringWriter
       val printer = new PrintWriter(stringer)
-      Dtab.baseDiff().print(printer)
+      Dtab.local.print(printer)
       stringer.toString
+    }
+    
+    def show_me_your_dtab_size() = Future {
+      Dtab.local.length
     }
   }
 
@@ -65,6 +79,11 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
       val clientDtab = Await.result(client.show_me_your_dtab())
       assert(clientDtab === "Dtab(2)\n\t/a -> /b\n\t/b -> /$/inet/google.com/80\n")
     }
+  }
+
+  testThrift("(don't) propagate Dtab") { (client, tracer) =>
+    val dtabSize = Await.result(client.show_me_your_dtab_size())
+    assert(dtabSize === 0)
   }
 
   test("JSON is broken (before we upgrade)") {

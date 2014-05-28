@@ -53,7 +53,7 @@ class ClientDispatcher private[exp](
     val contexts = Context.emit().map({ case (k, v) =>
       (BufChannelBuffer(k), BufChannelBuffer(v))
     }).toSeq
-    trans.write(encode(Tdispatch(MarkerTag, contexts, "", Dtab.baseDiff(), BufChannelBuffer(buf))))
+    trans.write(encode(Tdispatch(MarkerTag, contexts, "", Dtab.local, BufChannelBuffer(buf))))
   }
 
   /**
@@ -135,7 +135,7 @@ class ClientDispatcher private[exp](
     val contexts = Context.emit().map({ case (k, v) =>
       (BufChannelBuffer(k), BufChannelBuffer(v))
     }).toSeq
-    val dtab = Dtab.baseDiff()
+    val dtab = Dtab.local
     val traceId = Some(Trace.id)
 
     def terminal(content: Buf): ChannelBuffer =

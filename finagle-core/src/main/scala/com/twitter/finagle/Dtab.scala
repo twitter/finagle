@@ -19,6 +19,7 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
 
   def apply(i: Int): Dentry = dentries0(i)
   def length = dentries0.length
+  override def isEmpty = length == 0
 
   def lookup(path: Path): Activity[NameTree[Name]] = {
     val matches = dentries collect {
@@ -41,10 +42,22 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
     Dtab(dentries0 :+ dentry)
 
   /**
+   * Java API for '+'
+   */
+  def append(dentry: Dentry): Dtab = this + dentry
+
+  /**
    * Construct a new Dtab with the given dtab appended.
    */
-  def ++(dtab: Dtab): Dtab =
-    Dtab(dentries0 ++ dtab.dentries0)
+  def ++(dtab: Dtab): Dtab = {
+    if (dtab.isEmpty) this
+    else Dtab(dentries0 ++ dtab.dentries0)
+  }
+
+  /**
+   * Java API for '++'
+   */
+  def concat(dtab: Dtab): Dtab = this ++ dtab
 
   /**
    * Efficiently removes prefix `prefix` from `dtab`.
@@ -110,35 +123,56 @@ object Dentry {
   val nop: Dentry = Dentry(Path.Utf8("/"), NameTree.Neg)
 }
 
+/**
+ * Object Dtab manages 'base' and 'local' Dtabs.
+ */
 object Dtab {
+  /**
+   * An empty delegation table.
+   */
   val empty: Dtab = Dtab(Vector.empty)
 
+  /**
+   * The base, or "system", or "global", delegation table applies to
+   * every request in this process. It is generally set at process
+   * startup, and not changed thereafter.
+   */
   @volatile var base: Dtab = empty
+  
+  /**
+   * Java API for ``base_=``
+   */
+  def setBase(dtab: Dtab) { base = dtab }
 
   private[this] val l = new Local[Dtab]
 
-  def apply(): Dtab = l() getOrElse base
-  def update(dtab: Dtab) { l() = dtab }
-  def clear() { l.clear() }
+  /**
+   * The local, or "per-request", delegation table applies to the
+   * current [[com.twitter.util.Local Local]] scope which is usually
+   * defined on a per-request basis. Finagle uses the Dtab
+   * ``Dtab.base ++ Dtab.local`` to bind
+   * [[com.twitter.finagle.Name.Path Paths]].
+   *
+   * Local's scope is dictated by [[com.twitter.util.Local Local]].
+   *
+   * The local dtab is serialized into outbound requests when
+   * supported protocols are used. (Http, Thrift via TTwitter, Mux,
+   * and ThriftMux are among these.) The upshot is that ``local`` is
+   * defined for the entire request graph, so that a local dtab
+   * defined here will apply to downstream services as well.
+   */
+  def local: Dtab = l() getOrElse Dtab.empty
+  def local_=(dtab: Dtab) { l() = dtab }
+
+  /**
+   * Java API for ``local_=``
+   */
+  def setLocal(dtab: Dtab) { local = dtab }
 
   def unwind[T](f: => T): T = {
     val save = l()
     try f finally l.set(save)
   }
-
-  def delegate(dentry: Dentry) {
-    this() = this() + dentry
-  }
-
-  def delegate(dtab: Dtab) {
-    this() = this() ++ dtab
-  }
-
-  /**
-   * Retrieve the difference between the base dtab
-   * and the current local dtab.
-   */
-  def baseDiff(): Dtab = this().stripPrefix(base)
 
   /**
    * Parse a Dtab from string `s` with concrete syntax

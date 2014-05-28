@@ -11,11 +11,21 @@ import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class EndToEndTest extends FunSuite {
+class EndToEndTest extends FunSuite with BeforeAndAfter {
+  var saveBase: Dtab = Dtab.empty
+  before {
+    saveBase = Dtab.base
+    Dtab.base = Dtab.read("/foo=>/bar; /baz=>/biz")
+  }
+  
+  after {
+    Dtab.base = saveBase
+  }
+
   type HttpService = Service[HttpRequest, HttpResponse]
   type RichHttpService = Service[Request, Response]
 
@@ -60,7 +70,7 @@ class EndToEndTest extends FunSuite {
         def apply(request: HttpRequest) = {
           val stringer = new StringWriter
           val printer = new PrintWriter(stringer)
-          Dtab.baseDiff().print(printer)
+          Dtab.local.print(printer)
           val response = Response(request)
           response.contentString = stringer.toString
           Future.value(response)
@@ -70,11 +80,31 @@ class EndToEndTest extends FunSuite {
       val client = connect(service)
 
       Dtab.unwind {
-        Dtab.delegate(Dtab.read("/a=>/b; /c=>/d"))
+        Dtab.local ++= Dtab.read("/a=>/b; /c=>/d")
 
         val res = Response(Await.result(client(Request("/"))))
         assert(res.contentString === "Dtab(2)\n\t/a => /b\n\t/c => /d\n")
       }
+
+      client.close()
+    }
+
+    test(name + ": (no) dtab") {
+      val service = new HttpService {
+        def apply(request: HttpRequest) = {
+          val stringer = new StringWriter
+          val printer = new PrintWriter(stringer)
+          
+          val response = Response(request)
+          response.contentString = "%d".format(Dtab.local.length)
+          Future.value(response)
+        }
+      }
+
+      val client = connect(service)
+
+      val res = Response(Await.result(client(Request("/"))))
+      assert(res.contentString === "0")
 
       client.close()
     }

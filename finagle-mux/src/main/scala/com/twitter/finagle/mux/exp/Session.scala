@@ -96,7 +96,7 @@ class Session private[finagle](
         for ((k, v) <- contexts)
           Context.handle(ChannelBufferBuf(k), ChannelBufferBuf(v))
         if (dtab.length > 0)
-          Dtab.delegate(dtab)
+          Dtab.local ++= dtab
 
         service.send(ChannelBufferBuf(buf))
 
@@ -109,7 +109,7 @@ class Session private[finagle](
           for ((k, v) <- contexts)
             Context.handle(ChannelBufferBuf(k), ChannelBufferBuf(v))
           if (dtab.length > 0)
-            Dtab.delegate(dtab)
+            Dtab.local ++= dtab
 
           val source = incoming.getOrElseUpdate(masked, {
             val source = new SpoolSource[Buf]

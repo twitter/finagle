@@ -13,7 +13,7 @@ class DtabFilter[Req <: HttpMessage, Rep <: HttpMessage]
   def apply(req: Req, service: Service[Req, Rep]) = {
     val dtab = HttpDtab.read(req)
     if (dtab.isEmpty) service(req) else Dtab.unwind {
-      Dtab.delegate(dtab)
+      Dtab.local ++= dtab
       HttpDtab.clear(req)
       service(req)
     }
