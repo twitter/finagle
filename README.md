@@ -16,7 +16,7 @@ protocols.
 For extensive documentation, please see the
 [user guide](http://twitter.github.io/finagle/guide/) and
 [API documentation](http://twitter.github.io/finagle/docs/#com.twitter.finagle.package)
-websites. Documentation improves are always welcome, so feel free to send
+websites. Documentation improvements are always welcome, so feel free to send
 patches our way.
 
 If your organization is using Finagle, consider adding a link to our
