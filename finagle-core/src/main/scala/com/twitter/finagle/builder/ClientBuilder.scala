@@ -709,23 +709,13 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
       ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
   ): ServiceFactory[Req, Rep] = {
-    import LoadBalancerFactory.HostStats
-
     val Label(label) = params[Label]
     val Daemonize(daemon) = params[Daemonize]
     val Logger(logger) = params[Logger]
     val DestName(dest) = params[DestName]
     val MonitorFactory(mFactory) = params[MonitorFactory]
-    val Stats(stats) = params[Stats]
-    val HostStats(hostStats) = params[HostStats]
-
-    // Note, we push the responsibility of scoping the statsReceivers to the client
-    // implementations. We maintain historical behavior of enabling per host
-    // stats if no host stats receiver was set.
-    val hostStatsReceiver = if (params.contains[HostStats]) hostStats else stats
 
     val clientParams = params +
-      HostStats(hostStatsReceiver) +
       Monitor(mFactory(label))
 
     val factory = mk(clientParams).newClient(dest, label)
