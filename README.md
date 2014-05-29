@@ -19,6 +19,9 @@ For extensive documentation, please see the
 websites. Documentation improves are always welcome, so feel free to send
 patches our way.
 
+If your organization is using Finagle, consider adding a link to our
+[list of adopters](https://github.com/twitter/finagle/blob/master/ADOPTERS.md).
+
 ## Contributing
 
 See [CONTRIBUTING.md](https://github.com/twitter/finagle/blob/master/CONTRIBUTING.md)
