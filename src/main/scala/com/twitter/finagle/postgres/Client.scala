@@ -178,6 +178,45 @@ class Row(val fields: IndexedSeq[String], val vals: IndexedSeq[Value[Any]]) {
   override def toString = "{ fields='" + fields.toString + "', rows='" + vals.toString + "'}"
 }
 
+/**
+ * A row reader that implements _Reader Monad_ pattern and allows
+ * to build simple and reusable readers over Postgres Row entity.
+ *
+ * @tparam A readers' output type
+ */
+trait RowReader[A] { self =>
+  def apply(row: Row): A
+
+  def flatMap[B](fn: A => RowReader[B]) = new RowReader[B] {
+    def apply(row: Row) = fn(self(row))(row)
+  }
+
+  def map[B](fn: A => B) = new RowReader[B] {
+    def apply(row: Row) = fn(self(row))
+  }
+}
+
+/**
+ * A reader that reads ''name''-specified field from row.
+ * This reader reads _required_ value or fail if the specified
+ * field does not exists in the row.
+ */
+object RequiredField {
+  def apply[A](name: String)(implicit mf: Manifest[A]) = new RowReader[A] {
+    def apply(row: Row): A = row.get[A](name)
+  }
+}
+
+/**
+ * A reader that reads an optional ''name''-specified field from row.
+ * This reader reads an ''Option'' of specified field.
+ */
+object OptionalField {
+  def apply[A](name: String)(implicit mf: Manifest[A]) = new RowReader[Option[A]] {
+    def apply(row: Row): Option[A] = row.getOption[A](name)
+  }
+}
+
 sealed trait QueryResponse
 
 case class OK(affectedRows: Int) extends QueryResponse
