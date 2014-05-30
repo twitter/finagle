@@ -81,7 +81,9 @@ class EndToEndTest extends FunSuite {
   test("ServerBuilder thriftmux server + ClientBuilder thriftmux client") {
     val address = RandomSocket()
     val iface = new TestService.FutureIface {
-      def query(x: String) = Future.value(x+x)
+      def query(x: String) =
+        if (x.isEmpty) Future.value(ClientId.current map { _.name } getOrElse(""))
+        else Future.value(x+x)
     }
 
     val service = new TestService$FinagleService(iface, Thrift.protocolFactory)
@@ -92,8 +94,9 @@ class EndToEndTest extends FunSuite {
       .name("ThriftMuxServer")
       .build(service)
 
+    val clientId = "test.service"
     val cbService = ClientBuilder()
-      .stack(ThriftMuxClient.withClientId(ClientId("test.service")))
+      .stack(ThriftMuxClient.withClientId(ClientId(clientId)))
       .dest("localhost:" + address.getPort)
       .build()
 
@@ -102,6 +105,7 @@ class EndToEndTest extends FunSuite {
     1 to 5 foreach { _ =>
       assert(Await.result(client.query("ok")) === "okok")
     }
+    assert(Await.result(client.query("")) === clientId)
   }
 
   test("thriftmux server + Finagle thrift client: propagate Contexts") {

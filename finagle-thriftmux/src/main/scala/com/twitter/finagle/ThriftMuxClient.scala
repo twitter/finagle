@@ -14,7 +14,7 @@ import org.jboss.netty.buffer.{ChannelBuffer => CB, ChannelBuffers}
  */
 class ThriftMuxClientLike private[finagle](
   muxer: StackClient[CB, CB, CB, CB],
-  clientId: Option[ClientId] = None
+  clientId: Option[ClientId]
 ) extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
   with (Stack.Params => Client[ThriftClientRequest, Array[Byte]]) {
 
@@ -51,7 +51,7 @@ class ThriftMuxClientLike private[finagle](
    * muxer.
    */
   def apply(params: Stack.Params): Client[ThriftClientRequest, Array[Byte]] =
-    new ThriftMuxClientLike(muxer.copy(params = params))
+    new ThriftMuxClientLike(muxer.copy(params = params), clientId)
 
   /**
    * Create a new ThriftMuxClientLike with `p` added to the
@@ -107,4 +107,6 @@ private[finagle] object ThriftMuxClientStack {
  * @define clientExampleObject ThriftMuxClient
  */
 object ThriftMuxClient extends ThriftMuxClientLike(
-  exp.MuxClient.copy(ThriftMuxClientStack(), Stack.Params.empty))
+  exp.MuxClient.copy(ThriftMuxClientStack(), Stack.Params.empty),
+  None
+)
