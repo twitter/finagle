@@ -12,9 +12,9 @@ class DtabFilter[Req <: HttpMessage, Rep <: HttpMessage]
 
   def apply(req: Req, service: Service[Req, Rep]) = {
     val dtab = HttpDtab.read(req)
+    HttpDtab.clear(req)
     if (dtab.isEmpty) service(req) else Dtab.unwind {
       Dtab.local ++= dtab
-      HttpDtab.clear(req)
       service(req)
     }
   }
