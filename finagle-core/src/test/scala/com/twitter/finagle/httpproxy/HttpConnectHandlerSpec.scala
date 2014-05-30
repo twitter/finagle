@@ -82,6 +82,7 @@ class HttpConnectHandlerSpec extends SpecificationWithJUnit with Mockito {
           val req = e.getMessage.asInstanceOf[DefaultHttpRequest]
           req.getMethod must_== HttpMethod.CONNECT
           req.getUri must_== "localhost:443"
+          req.headers().get("Host") must_== "localhost:443"
         }
 
         { // when connect response is received, propagate the connect and remove the handler
