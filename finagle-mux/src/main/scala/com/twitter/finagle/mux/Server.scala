@@ -4,7 +4,7 @@ import com.twitter.finagle.{Context, Dtab, Service, WriteException}
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.netty3.ChannelBufferBuf
-import com.twitter.finagle.util.DefaultLogger
+import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
 import com.twitter.util.{Closable, Future, Local, Promise, Return, Throw, Time}
 import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
@@ -140,6 +140,10 @@ private[finagle] class ServerDispatcher(
     trans.close()
   }
 
+  trans.onClose ensure {
+    service.close()
+  }
+
   private[this] val closing = new AtomicBoolean(false)
   private[this] val closep = new Promise[Unit]
 
@@ -174,7 +178,11 @@ private[finagle] class ServerDispatcher(
 
       // Tdrain is the only T-typed message that servers ever send, so we don't
       // need to allocate a distinct tag to differentiate messages.
-      trans.write(encode(Tdrain(1))).map(Function.const(closep))
+      trans.write(encode(Tdrain(1))) before {
+        closep.within(DefaultTimer.twitter, deadline - Time.now) transform { _ =>
+          trans.close()
+        }
+      }
     }
   }
 }

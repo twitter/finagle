@@ -71,14 +71,15 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
             new DownstreamMessageEvent(e.getChannel, e.getFuture,
               ChannelBuffers.wrappedBuffer(responseHeader, rep), e.getRemoteAddress))
 
-        // Non-mux Clients can't handle T-type control messages, so we simulate responses.
-        case Message.Tdrain(tag) =>
+        case Message.RdispatchNack(_, _) =>
+          // The only mechanism for negative acknowledgement afforded by non-Mux
+          // clients is to tear down the connection.
+          Channels.close(e.getChannel)
+
+        case Message.Tdrain(_) =>
+          // Ignore Tdrains because they are advisory and non-Mux clients
+          // cannot handle them.
           e.getFuture.setSuccess()
-          super.messageReceived(ctx,
-            new UpstreamMessageEvent(
-              e.getChannel,
-              Message.encode(Message.Rdrain(tag)),
-              e.getRemoteAddress))
 
         case Message.Tping(tag) =>
           e.getFuture.setSuccess()
@@ -126,15 +127,18 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
           super.writeRequested(ctx,
             new DownstreamMessageEvent(e.getChannel, e.getFuture, rep, e.getRemoteAddress))
 
-        // Non-mux Clients can't handle T-type control messages, so we simulate responses.
-        case Message.Tdrain(tag) =>
-          e.getFuture.setSuccess()
-          super.messageReceived(ctx,
-            new UpstreamMessageEvent(
-              e.getChannel,
-              Message.encode(Message.Rdrain(tag)),
-              e.getRemoteAddress))
+        case Message.RdispatchNack(_, _) =>
+          // The only mechanism for negative acknowledgement afforded by non-Mux
+          // clients is to tear down the connection.
+          Channels.close(e.getChannel)
 
+        case Message.Tdrain(_) =>
+          // Ignore Tdrains because they are advisory and non-Mux clients
+          // cannot handle them.
+          e.getFuture.setSuccess()
+
+        // Non-mux clients can't handle T-type control messages, so we
+        // simulate responses.
         case Message.Tping(tag) =>
           e.getFuture.setSuccess()
           super.messageReceived(ctx,
@@ -242,7 +246,7 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
         // Rerr corresponds to (tag=0x010001).
         //
         // The hazards of protocol multiplexing.
-        case Throw(_: BadMessageException) | Return(Message.Rerr(65537, _)) | Return(Message.Rerr(65540, _))=>
+        case Throw(_: BadMessageException) | Return(Message.Rerr(65537, _)) | Return(Message.Rerr(65540, _)) =>
           // Add a ChannelHandler to serialize the requests since we may
           // deal with a client that pipelines requests
           ctx.getPipeline.addBefore(ctx.getName, "request_serializer", new RequestSerializer(1))

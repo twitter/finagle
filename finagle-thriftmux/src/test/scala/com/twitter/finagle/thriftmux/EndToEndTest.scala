@@ -167,7 +167,7 @@ class EndToEndTest extends FunSuite {
     val testService = new TestService.FutureIface {
       def query(x: String) = Future.value(x + x)
     }
-    val server = TestThriftMuxServer.serveIface(":*", testService)
+   val server = TestThriftMuxServer.serveIface(":*", testService)
     val client = Thrift.newIface[TestService.FutureIface](server)
     var p: Future[String] = null
     Trace.unwind {
@@ -220,9 +220,11 @@ class EndToEndTest extends FunSuite {
     new ThriftMuxTestServer {
       val client = Thrift.newIface[TestService.FutureIface](server)
 
-      Await.result(client.query("ok"))
-      1 to 5 foreach { _ => client.query("ok") }
+      assert(Await.result(client.query("ok")) == "okok")
       Await.result(server.close())
+      intercept[ChannelWriteException] {
+        Await.result(client.query("ok"))
+      }
     }
   }
 
@@ -264,14 +266,15 @@ class EndToEndTest extends FunSuite {
     }
   }
 
-  if (!sys.props.contains("SKIP_FLAKY")) test("thriftmux server + Finagle thrift client w/o " +
-      "protocol upgrade: server.close()") {
+  test("thriftmux server + Finagle thrift client w/o protocol upgrade: server.close()") {
     new ThriftMuxTestServer {
       val client = OldPlainThriftClient.newIface[TestService.FutureIface](server)
 
-      Await.result(client.query("ok"))
-      1 to 5 foreach { _ => client.query("ok") }
+      assert(Await.result(client.query("ok")) == "okok")
       Await.result(server.close())
+      intercept[ChannelWriteException] {
+        Await.result(client.query("ok"))
+      }
     }
   }
 
