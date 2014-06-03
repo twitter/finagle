@@ -21,9 +21,9 @@ object SingleRequest {
   def ExpandMailingList(list: String) = SingleRequest("EXPN " + list)
 }
 
-case class ComposedRequest(requests: Seq[SingleRequest]) extends Request
+private[smtp] case class ComposedRequest(requests: Seq[SingleRequest]) extends Request
 
-object ComposedRequest {
+private[smtp] object ComposedRequest {
   def SendEmail(msg: EmailMessage) = ComposedRequest(Seq(
     SingleRequest.AddFrom(msg.from),
     SingleRequest.AddRecipients(msg.to),

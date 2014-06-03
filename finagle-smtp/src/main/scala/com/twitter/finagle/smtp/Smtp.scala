@@ -11,21 +11,20 @@ import com.twitter.finagle.dispatch.SerialClientDispatcher
 
 //initial response types
 object resp {
-  type SmtpResponse = String
-  type SmtpResult = Seq[(Request, SmtpResponse)]
+  type Result = Seq[(Request, Reply)]
 }
 
 import resp._
 
-//temporarily using filter for everything to work
-object CommandFilter extends  Filter[Request, SmtpResult, String, String] {
-  override def apply(req: Request, send: Service[String, String]): Future[SmtpResult] = req match {
+/*Filter for potentially sending sequences of requests*/
+object CommandFilter extends  Filter[Request, Result, Request, Reply] {
+  override def apply(req: Request, send: Service[Request, Reply]): Future[Result] = req match {
     case SingleRequest(cmd) => {
-      send(cmd) map {resp => Seq((req, resp))}
+      send(req) map {resp => Seq((req, resp))}
     }
 
     case ComposedRequest(reqs) => {
-      val freqs = for (SingleRequest(cmd) <- reqs) yield send(cmd)
+      val freqs = for (req <- reqs) yield send(req)
       val fresps = Future.collect(freqs)
       fresps map {resps => reqs zip resps}
     }
@@ -33,8 +32,8 @@ object CommandFilter extends  Filter[Request, SmtpResult, String, String] {
 }
 
 /*Filter for parsing email and sending corresponding commands, then aggregating results*/
-object MailFilter extends Filter[EmailMessage, SmtpResult, Request, SmtpResult]{
-  override def apply(msg: EmailMessage, send: Service[Request, SmtpResult]): Future[SmtpResult] = {
+object MailFilter extends Filter[EmailMessage, Result, Request, Result]{
+  override def apply(msg: EmailMessage, send: Service[Request, Result]): Future[Result] = {
     val reqs = Seq[Request](
       SingleRequest.Hello,
       ComposedRequest.SendEmail(msg),
@@ -48,40 +47,13 @@ object MailFilter extends Filter[EmailMessage, SmtpResult, Request, SmtpResult]{
   }
 }
 
-/*Temporary classes for string protocol*/
-object StringClientPipeline extends ChannelPipelineFactory {
-  def getPipeline = {
-    val pipeline = Channels.pipeline()
-    pipeline.addLast("stringEncode", new StringEncoder(CharsetUtil.UTF_8))
-    pipeline.addLast("stringDecode", new StringDecoder(CharsetUtil.UTF_8))
-    pipeline.addLast("line", new DelimEncoder('\n'))
-    pipeline
-  }
-}
+object Smtp extends Client[Request, Result]{
 
-class DelimEncoder(delim: Char) extends SimpleChannelHandler {
-  override def writeRequested(ctx: ChannelHandlerContext, evt: MessageEvent) = {
-    val newMessage = evt.getMessage match {
-      case m: String => m + delim
-      case m => m
-    }
-    Channels.write(ctx, evt.getFuture, newMessage, evt.getRemoteAddress)
-  }
-}
-
-object StringClientTransporter extends Netty3Transporter[String, String](
-  name = "StringClientTransporter",
-  pipelineFactory = StringClientPipeline)
-/*---*/
-
-
-object Smtp extends Client[Request, SmtpResult]{
-
-  val defaultClient = DefaultClient[String, String] (
+  val defaultClient = DefaultClient[Request, Reply] (
     name = "smtp",
     endpointer = {
-      val bridge = Bridge[String, String, String, String](
-        StringClientTransporter, new SerialClientDispatcher(_)
+      val bridge = Bridge[String, Reply, Request, Reply](
+        SmtpTransporter, new SmtpClientDispatcher(_)
       )
       (addr, stats) => bridge(addr, stats)
     })
@@ -91,7 +63,7 @@ object Smtp extends Client[Request, SmtpResult]{
   }
 }
 
-object SmtpSimple extends Client[EmailMessage, SmtpResult] {
+object SmtpSimple extends Client[EmailMessage, Result] {
   override def newClient(dest: Name, label: String) = {
     MailFilter andThen Smtp.newClient(dest, label)
   }

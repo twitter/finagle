@@ -41,10 +41,10 @@ object SimpleSMTPClient {
    val email3 = EmailMessage(commons)
 
    val send = SmtpSimple.newService("localhost:25")
-   val res: Future[SmtpResult] = send(email3)
+   val res: Future[Result] = send(email3)
 
    .onSuccess {
-     case resps => for ((SingleRequest(req), resp) <- resps) println(req + "\n" + resp)
+     case resps => for ((SingleRequest(req), resp) <- resps) println(req + "\n" + resp.info)
    }
    .onFailure {
      case ex => ex.printStackTrace()
