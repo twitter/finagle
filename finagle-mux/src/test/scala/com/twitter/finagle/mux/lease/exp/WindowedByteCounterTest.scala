@@ -80,7 +80,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually {
     }
   }
 
-  test("ByteCounter should accurately measure rate") {
+  if (!sys.props.contains("SKIP_FLAKY")) test("ByteCounter should accurately measure rate") {
     val h = new ByteCounterHelper{}
     import h._
 
