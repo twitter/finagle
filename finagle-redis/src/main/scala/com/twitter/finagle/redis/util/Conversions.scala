@@ -130,7 +130,3 @@ object ReplyFormat {
   private val EmptyMBulkReplyString = List(BytesToString(RedisCodec.NIL_VALUE_BA.array))
   private val EmptyBulkReplyChannelBuffer = List(RedisCodec.NIL_VALUE_BA)
 }
-
-object ChannelBufferToBytes {
-  def apply(channelBuff: ChannelBuffer): Seq[Byte] = channelBuff.array.toList
-}

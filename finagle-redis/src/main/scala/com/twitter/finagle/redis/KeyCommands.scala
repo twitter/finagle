@@ -2,7 +2,7 @@ package com.twitter.finagle.redis
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util.{ChannelBufferToBytes, ReplyFormat}
+import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.util.{Future, Time}
 import org.jboss.netty.buffer.ChannelBuffer
 
@@ -22,12 +22,11 @@ trait Keys { self: BaseClient =>
    * Serialize the value stored at key in a Redis-specific format and
    * returns it to the user
    * @param key
-   * @return a sequence containing the bytes from the Redis-specific
-   *  serialization process
+   * @return bytes, or none if the key did not exist
    */
-  def dump(key: ChannelBuffer): Future[Option[Seq[Byte]]] =
+  def dump(key: ChannelBuffer): Future[Option[ChannelBuffer]] =
     doRequest(Dump(key)) {
-      case BulkReply(message) => Future.value(Some(ChannelBufferToBytes(message)))
+      case BulkReply(message) => Future.value(Some(message))
       case EmptyBulkReply()   => Future.value(None)
     }
 

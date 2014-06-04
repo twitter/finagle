@@ -141,13 +141,11 @@ class ClientSpec extends SpecificationWithJUnit {
       }
 
       "dump" in {
-        Await.result(client.set(foo, bar))
-        val unsignedBytesToInts = (-32, -63, -124)
-        Await.result(client.dump(foo)) match {
-          case Some(bytes) => bytes must containInOrder(0x00, 0x03, 0x62, 0x61, 0x72, 0x06, 0x00,
-                                                         0x70, 0x53, 0x21, unsignedBytesToInts._1,
-                                                         0x1B, 0x33, unsignedBytesToInts._2,
-                                                         unsignedBytesToInts._3)
+        val kv = (StringToChannelBuffer("mykey"), StringToChannelBuffer("10"))
+        Await.result(client.set(kv._1, kv._2))
+        val expectedBytes: Array[Byte] = Array(0, -64, 10, 6, 0, -8, 114, 63, -59, -5, -5, 95, 40)
+        Await.result(client.dump(kv._1)) match {
+          case Some(bytes) => bytes.array must haveTheSameElementsAs(expectedBytes)
           case None        => fail("Some bytes expected")
         }
 
