@@ -2,6 +2,8 @@ package com.twitter.finagle.thriftmux
 
 import com.twitter.finagle.{mux, Dtab, ThriftMuxUtil}
 import com.twitter.finagle.mux.{BadMessageException, Message}
+import com.twitter.finagle.netty3.Conversions._
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.thrift.thrift.{
   ResponseHeader, RequestContext, RequestHeader, UpgradeReply}
@@ -15,7 +17,14 @@ import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.jboss.netty.channel._
 import scala.collection.mutable.ArrayBuffer
 
-private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
+/**
+ * A [[org.jboss.netty.channel.ChannelPipelineFactory]] that records the number
+ * of open ThriftMux and non-Mux downgraded connections in a pair of
+ * [[java.util.concurrent.atomic.AtomicInteger AtomicIntegers]].
+ */
+private[finagle] class PipelineFactory(
+    statsReceiver: StatsReceiver = NullStatsReceiver,
+    protocolFactory: TProtocolFactory = Protocols.binaryFactory())
   extends ChannelPipelineFactory
 {
   case class UnexpectedRequestException(err: String) extends Exception(err)
@@ -33,7 +42,11 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
 
     private[this] def thriftToMux(req: ChannelBuffer): Message.Tdispatch = {
       val header = new RequestHeader
-      val request_ = InputBuffer.peelMessage(ThriftMuxUtil.bufferToArray(req), header, protocolFactory)
+      val request_ = InputBuffer.peelMessage(
+        ThriftMuxUtil.bufferToArray(req),
+        header,
+        protocolFactory
+      )
       val sampled = if (header.isSetSampled) Some(header.isSampled) else None
       val traceId = TraceId(
         if (header.isSetTrace_id) Some(SpanId(header.getTrace_id)) else None,
@@ -246,7 +259,15 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
         // Rerr corresponds to (tag=0x010001).
         //
         // The hazards of protocol multiplexing.
-        case Throw(_: BadMessageException) | Return(Message.Rerr(65537, _)) | Return(Message.Rerr(65540, _)) =>
+        case Throw(_: BadMessageException) | Return(Message.Rerr(65537, _)) | Return(Message.Rerr(65540, _))=>
+          // Increment ThriftMux connection count stats and wire up a callback to
+          // decrement on channel closure.
+          downgradedConnects.incr()
+          downgradedConnectionCount.incrementAndGet()
+          ctx.getChannel.getCloseFuture() onSuccessOrFailure {
+            downgradedConnectionCount.decrementAndGet()
+          }
+
           // Add a ChannelHandler to serialize the requests since we may
           // deal with a client that pipelines requests
           ctx.getPipeline.addBefore(ctx.getName, "request_serializer", new RequestSerializer(1))
@@ -263,6 +284,14 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
           }
 
         case Return(_) =>
+          // Increment ThriftMux connection count stats and wire up a callback to
+          // decrement on channel closure.
+          thriftmuxConnects.incr()
+          thriftMuxConnectionCount.incrementAndGet()
+          ctx.getChannel.getCloseFuture() onSuccessOrFailure {
+            thriftMuxConnectionCount.decrementAndGet()
+          }
+
           ctx.getPipeline.remove(this)
           super.messageReceived(ctx, e)
 
@@ -271,11 +300,19 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
     }
   }
 
+  private[this] val downgradedConnectionCount = new AtomicInteger
+  private[this] val thriftMuxConnectionCount = new AtomicInteger
+
+  private[this] val thriftmuxConnects = statsReceiver.counter("connects")
+  private[this] val downgradedConnects = statsReceiver.counter("downgraded_connects")
+  private[this] val downgradedConnectionGauge =
+    statsReceiver.addGauge("downgraded_connections") { downgradedConnectionCount.get() }
+  private[this] val thriftmuxConnectionGauge =
+    statsReceiver.addGauge("connections") { thriftMuxConnectionCount.get() }
+
   def getPipeline() = {
     val pipeline = mux.PipelineFactory.getPipeline()
     pipeline.addLast("upgrader", new Upgrader)
     pipeline
   }
 }
-
-private[finagle] object PipelineFactory extends PipelineFactory(Protocols.binaryFactory())

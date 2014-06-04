@@ -150,7 +150,7 @@ class EndToEndTest extends FunSuite {
     }
 
     object ThriftMuxListener extends Netty3Listener[ChannelBuffer, ChannelBuffer](
-      "thrift", thriftmux.PipelineFactory)
+      "thrift", new thriftmux.PipelineFactory)
 
     // TODO: temporary workaround to capture the ServerRecv record.
     object TestThriftMuxer extends StackServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer] {
