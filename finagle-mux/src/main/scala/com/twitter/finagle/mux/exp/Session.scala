@@ -1,7 +1,8 @@
 package com.twitter.finagle.mux.exp
 
 import com.twitter.concurrent.{Spool, SpoolSource}
-import com.twitter.finagle.{Dtab, Context, ListeningServer, MuxListener, MuxTransporter}
+import com.twitter.finagle.
+  {Dtab, CancelledRequestException, Context, ListeningServer, MuxListener, MuxTransporter}
 import com.twitter.finagle.mux._
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import com.twitter.finagle.stats.ClientStatsReceiver
@@ -240,7 +241,7 @@ class Session private[finagle](
   loop() onFailure { case cause =>
     // We know that if we have a failure, we cannot from this point forward
     // insert new entries in the pending map.
-    val exc = ClientHangupException(cause)
+    val exc = new CancelledRequestException(cause)
     for ((_, f) <- pending.asScala)
       f.raise(exc)
     pending.clear()

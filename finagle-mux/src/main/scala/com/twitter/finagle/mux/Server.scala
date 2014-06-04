@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux
 
-import com.twitter.finagle.{Context, Dtab, Service, WriteException}
+import com.twitter.finagle.{CancelledRequestException, Context, Dtab, Service, WriteException}
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.netty3.ChannelBufferBuf
@@ -12,7 +12,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import scala.collection.JavaConverters._
 
-case class ClientHangupException(cause: Throwable) extends Exception(cause)
+/**
+ * Indicates that a client requested that a given request be discarded.
+ */
 case class ClientDiscardedRequestException(why: String) extends Exception(why)
 
 object ServerDispatcher {
@@ -132,7 +134,7 @@ private[finagle] class ServerDispatcher(
   loop() onFailure { case cause =>
     // We know that if we have a failure, we cannot from this point forward
     // insert new entries in the pending map.
-    val exc = ClientHangupException(cause)
+    val exc = new CancelledRequestException(cause)
     for ((_, f) <- pending.asScala)
       f.raise(exc)
     pending.clear()
