@@ -53,7 +53,7 @@
     <dependency>
       <groupId>com.twitter.common</groupId>
       <artifactId>zookeeper-testing</artifactId>
-      <version>0.0.43</version>
+      <version>0.0.46</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -65,7 +65,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>16.0</version>
+      <version>16.0.1</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>

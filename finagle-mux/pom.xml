@@ -31,7 +31,7 @@
     <dependency>
       <groupId>com.twitter.common</groupId>
       <artifactId>stats-util</artifactId>
-      <version>0.0.42</version>
+      <version>0.0.49</version>
       <exclusions>
         <exclusion>
           <groupId>com.google.guava</groupId>
