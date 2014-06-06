@@ -144,4 +144,22 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar {
       assert(failfast.isAvailable === underlying.isAvailable)
     }
   }
+
+  test("fails simultaneous requests properly") {
+    Time.withCurrentTimeFrozen { tc =>
+      val ctx = newCtx()
+      import ctx._
+
+      val pp2 = failfast()
+      val e = new Exception
+      p() = Throw(e)
+
+      assert(pp.poll === Some(Throw(e)))
+      assert(pp2.poll === Some(Throw(e)))
+
+      intercept[FailedFastException] {
+        failfast().poll.get.get
+      }
+    }
+  }
 }
