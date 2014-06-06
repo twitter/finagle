@@ -52,7 +52,7 @@ object Finagle extends Build {
       "org.scalatest" %% "scalatest" %"1.9.1" % "test",
       "org.scala-tools.testing" %% "specs" % "1.6.9" % "test" cross CrossVersion.binaryMapped {
         case "2.9.2" => "2.9.1"
-        case "2.10.0" => "2.10"
+        case "2.10.4" => "2.10"
         case x => x
       },
       "junit" % "junit" % "4.10" % "test",
@@ -67,7 +67,7 @@ object Finagle extends Build {
     otherResolvers += m2Repo,
 
     testOptions in Test <<= scalaVersion map {
-      case "2.10" | "2.10.0" => Seq(Tests.Filter(_ => false))
+      case "2.10" | "2.10.4" => Seq(Tests.Filter(_ => false))
       case _ => Seq()
     },
     javaOptions in Test := Seq("-DSKIP_FLAKY=1"),
@@ -81,6 +81,10 @@ object Finagle extends Build {
 
     scalacOptions ++= Seq("-encoding", "utf8"),
     scalacOptions += "-deprecation",
+    scalacOptions <+= scalaVersion.map { 
+      case "2.10" | "2.10.4" => "-language:_"
+      case _ => ""
+    },
     javacOptions ++= Seq("-source", "1.6", "-target", "1.6"),
     javacOptions in doc := Seq("-source", "1.6"),
 
