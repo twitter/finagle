@@ -42,7 +42,7 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
   }
 
   def selectFirst[T](sql: String)(f: Row => T): Future[Option[T]] =
-    select[T](sql)(f) map { rows => rows.headOption }
+    select[T](sql)(f) flatMap { rows => Future.value(rows.headOption) }
 
   def prepare(sql: String): Future[PreparedStatement] = for {
     name <- parse(sql)
