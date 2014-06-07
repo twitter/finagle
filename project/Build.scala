@@ -81,9 +81,9 @@ object Finagle extends Build {
 
     scalacOptions ++= Seq("-encoding", "utf8"),
     scalacOptions += "-deprecation",
-    scalacOptions <+= scalaVersion.map { 
-      case "2.10" | "2.10.4" => "-language:_"
-      case _ => ""
+    scalacOptions <++= scalaVersion.map { 
+      case "2.10" | "2.10.4" => Seq("-language:_")
+      case _ => Seq.empty[String]
     },
     javacOptions ++= Seq("-source", "1.6", "-target", "1.6"),
     javacOptions in doc := Seq("-source", "1.6"),
