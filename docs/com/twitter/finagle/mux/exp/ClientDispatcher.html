@@ -137,18 +137,34 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.mux.exp.ClientDispatcher#apply" data-isabs="false">
-      <a id="apply(Buf):Future[Buf]"></a>
+      <a id="apply(Spool[Buf]):Future[Spool[Buf]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="buf">buf: <span name="com.twitter.io.Buf" class="extype">Buf</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="com.twitter.io.Buf" class="extype">Buf</span>]</span>
+        <span class="name">apply</span><span class="params">(<span name="req">req: <span name="com.twitter.concurrent.Spool" class="extype">Spool</span>[<span name="com.twitter.io.Buf" class="extype">Buf</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="com.twitter.concurrent.Spool" class="extype">Spool</span>[<span name="com.twitter.io.Buf" class="extype">Buf</span>]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Dispatches an RPC to the remote endpoint.</p><div class="fullcomment"><div class="comment cmt"><p>Dispatches an RPC to the remote endpoint.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.mux.exp.ClientDispatcher" class="extype" href="">ClientDispatcher</a> → <a name="com.twitter.finagle.Service" class="extype" href="../../Service.html">Service</a> → Function1</dd></dl></div>
+      <p class="shortcomment cmt">Transmits a sequenced request and receives a sequenced response.</p><div class="fullcomment"><div class="comment cmt"><p>Transmits a sequenced request and receives a sequenced response.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.mux.exp.ClientDispatcher" class="extype" href="">ClientDispatcher</a> → <a name="com.twitter.finagle.mux.exp.MuxService" class="extype" href="MuxService.html">MuxService</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.mux.exp.MuxService#apply" data-isabs="false">
+      <a id="apply(Buf):Future[Buf]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="req">req: <span name="com.twitter.io.Buf" class="extype">Buf</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="com.twitter.io.Buf" class="extype">Buf</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Transmits a request as a single message, and receives a single
+message response.</p><div class="fullcomment"><div class="comment cmt"><p>Transmits a request as a single message, and receives a single
+message response. If more than a single message is received, an
+exception is thrown.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.mux.exp.MuxService" class="extype" href="MuxService.html">MuxService</a> → <a name="com.twitter.finagle.Service" class="extype" href="../../Service.html">Service</a> → Function1</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">

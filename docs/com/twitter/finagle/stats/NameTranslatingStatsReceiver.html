@@ -29,7 +29,9 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A StatsReceiver receiver proxy that translates all counter, stat, and gauge
+names according to a <code>translate</code> function.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
@@ -68,7 +70,8 @@
         <span class="name">NameTranslatingStatsReceiver</span><span class="params">(<span name="self">self: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a></span>)</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">self</dt><dd class="cmt"><p>The underlying StatsReceiver to which translated names are passed
+</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -414,8 +417,7 @@ are only reported once per receiver.
         <span class="name">scopeSuffix</span><span class="params">(<span name="suffix">suffix: String</span>)</span><span class="result">: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Prepend a suffix value to the next scope
-stats.</p><div class="fullcomment"><div class="comment cmt"><p>Prepend a suffix value to the next scope
+      <p class="shortcomment cmt">Prepend a suffix value to the next scope.</p><div class="fullcomment"><div class="comment cmt"><p>Prepend a suffix value to the next scope.
 stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds&quot;) will generate
 /client/toto/adds
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a></dd></dl></div>
@@ -430,7 +432,8 @@ stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds
         <span class="name">self</span><span class="result">: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">The underlying StatsReceiver to which translated names are passed
+</p>
     </li><li visbl="pub" name="com.twitter.finagle.stats.NameTranslatingStatsReceiver#stat" data-isabs="false">
       <a id="stat(String*):Stat"></a>
       <h4 class="signature">

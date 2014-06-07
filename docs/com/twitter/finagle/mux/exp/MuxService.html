@@ -69,19 +69,19 @@ Session in turn exposes a MuxService client for sending messages.
 
         <div class="values members" id="values">
               <h3>Abstract Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.Service#apply" data-isabs="true">
-      <a id="apply(Buf):Future[Buf]"></a>
+              <ol><li visbl="pub" name="com.twitter.finagle.mux.exp.MuxService#apply" data-isabs="true">
+      <a id="apply(Spool[Buf]):Future[Spool[Buf]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="request">request: <span name="com.twitter.io.Buf" class="extype">Buf</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="com.twitter.io.Buf" class="extype">Buf</span>]</span>
+        <span class="name">apply</span><span class="params">(<span name="req">req: <span name="com.twitter.concurrent.Spool" class="extype">Spool</span>[<span name="com.twitter.io.Buf" class="extype">Buf</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="com.twitter.concurrent.Spool" class="extype">Spool</span>[<span name="com.twitter.io.Buf" class="extype">Buf</span>]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">This is the method to override/implement to create your own Service.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Service.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Service" class="extype" href="../../Service.html">Service</a> → Function1</dd></dl></div>
+      <p class="shortcomment cmt">Transmits a request as a sequence of messages, and receives
+response as a sequence of messages.</p>
     </li><li visbl="pub" name="com.twitter.finagle.mux.exp.MuxService#drain" data-isabs="true">
       <a id="drain():Future[Unit]"></a>
       <h4 class="signature">
@@ -93,7 +93,7 @@ Session in turn exposes a MuxService client for sending messages.
         <span class="name">drain</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">A notification that the caller is draining requests.</p>
     </li><li visbl="pub" name="com.twitter.finagle.mux.exp.MuxService#ping" data-isabs="true">
       <a id="ping():Future[Unit]"></a>
       <h4 class="signature">
@@ -105,7 +105,7 @@ Session in turn exposes a MuxService client for sending messages.
         <span class="name">ping</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Send a ping to the other party.</p>
     </li><li visbl="pub" name="com.twitter.finagle.mux.exp.MuxService#send" data-isabs="true">
       <a id="send(Buf):Future[Unit]"></a>
       <h4 class="signature">
@@ -117,7 +117,7 @@ Session in turn exposes a MuxService client for sending messages.
         <span class="name">send</span><span class="params">(<span name="buf">buf: <span name="com.twitter.io.Buf" class="extype">Buf</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Transmit a one-way message.</p>
     </li></ol>
             </div>
 
@@ -195,6 +195,22 @@ Session in turn exposes a MuxService client for sending messages.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.mux.exp.MuxService#apply" data-isabs="false">
+      <a id="apply(Buf):Future[Buf]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="req">req: <span name="com.twitter.io.Buf" class="extype">Buf</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="com.twitter.io.Buf" class="extype">Buf</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Transmits a request as a single message, and receives a single
+message response.</p><div class="fullcomment"><div class="comment cmt"><p>Transmits a request as a single message, and receives a single
+message response. If more than a single message is received, an
+exception is thrown.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.mux.exp.MuxService" class="extype" href="">MuxService</a> → <a name="com.twitter.finagle.Service" class="extype" href="../../Service.html">Service</a> → Function1</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">

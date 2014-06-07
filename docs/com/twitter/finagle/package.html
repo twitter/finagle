@@ -113,6 +113,18 @@ useful documentation and resources for using Finagle.</p></div></div>
       </span>
       </h4>
       <p class="comment cmt">An abstract class version of the above for java compatibility.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.AbstractResolver" data-isabs="true">
+      <a id="AbstractResolver:AbstractResolver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="AbstractResolver.html"><span class="name">AbstractResolver</span></a><span class="result"> extends Resolver</span>
+      </span>
+      </h4>
+      <p class="comment cmt">An abstract class version of Resolver for java compatibility.</p>
     </li><li visbl="pub" name="com.twitter.finagle.Addr" data-isabs="true">
       <a id="Addr:Addr"></a>
       <h4 class="signature">
@@ -495,10 +507,10 @@ of delegation rules.</p>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
-        <span class="kind">case class</span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Failure.html"><span class="name">Failure</span></a><span class="params">(<span name="why">why: String</span>, <span name="cause">cause: Throwable</span>, <span name="flags">flags: Long</span>, <span name="sources">sources: Map[String, AnyRef]</span>, <span name="stacktrace">stacktrace: Array[StackTraceElement]</span>)</span><span class="result"> extends RuntimeException with NoStacktrace with Product with Serializable</span>
+        <a href="Failure.html"><span class="name">Failure</span></a><span class="result"> extends RuntimeException with NoStacktrace</span>
       </span>
       </h4>
       <p class="comment cmt">Base exception for all Finagle originated failures.</p>
@@ -1182,43 +1194,43 @@ ServiceFactory.</p>
       </span>
       </h4>
       <p class="comment cmt">Client and server for <a href="http://thrift.apache.org">Apache Thrift</a>.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxClientImpl" data-isabs="false">
-      <a id="ThriftMuxClientImpl:ThriftMuxClientImpl"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxClientLike" data-isabs="false">
+      <a id="ThriftMuxClientLike:ThriftMuxClientLike"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftMuxClientImpl.html"><span class="name">ThriftMuxClientImpl</span></a><span class="result"> extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient</span>
+        <a href="ThriftMuxClientLike.html"><span class="name">ThriftMuxClientLike</span></a><span class="result"> extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient with (Params) ⇒ Client[ThriftClientRequest, Array[Byte]]</span>
       </span>
       </h4>
-      <p class="comment cmt">A com.twitter.finagle.client.Client for the Thrift protocol served over
+      <p class="comment cmt">A <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a> for the Thrift protocol served over
 <a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a>.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxImpl" data-isabs="false">
-      <a id="ThriftMuxImpl:ThriftMuxImpl"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxLike" data-isabs="false">
+      <a id="ThriftMuxLike:ThriftMuxLike"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftMuxImpl.html"><span class="name">ThriftMuxImpl</span></a><span class="result"> extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient with Server[Array[Byte], Array[Byte]] with ThriftRichServer</span>
+        <a href="ThriftMuxLike.html"><span class="name">ThriftMuxLike</span></a><span class="result"> extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient with Server[Array[Byte], Array[Byte]] with ThriftRichServer</span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxServerImpl" data-isabs="false">
-      <a id="ThriftMuxServerImpl:ThriftMuxServerImpl"></a>
+      <p class="comment cmt">A default implementation of both ThriftMux clients and servers.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxServerLike" data-isabs="false">
+      <a id="ThriftMuxServerLike:ThriftMuxServerLike"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftMuxServerImpl.html"><span class="name">ThriftMuxServerImpl</span></a><span class="result"> extends Server[Array[Byte], Array[Byte]] with ThriftRichServer</span>
+        <a href="ThriftMuxServerLike.html"><span class="name">ThriftMuxServerLike</span></a><span class="result"> extends Server[Array[Byte], Array[Byte]] with ThriftRichServer with (Params) ⇒ Server[Array[Byte], Array[Byte]]</span>
       </span>
       </h4>
-      <p class="comment cmt"></p>
+      <p class="comment cmt">A server for the Thrift protocol served over <a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.ThriftRichClient" data-isabs="true">
       <a id="ThriftRichClient:ThriftRichClient"></a>
       <h4 class="signature">
@@ -1481,7 +1493,7 @@ registered handler.</p>
         <a href="Dtab$.html"><span class="name">Dtab</span></a><span class="result"> extends Serializable</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">Object Dtab manages 'base' and 'local' Dtabs.</p>
     </li><li visbl="pub" name="com.twitter.finagle.FailResolver" data-isabs="false">
       <a id="FailResolver:FailResolver"></a>
       <h4 class="signature">
@@ -1820,18 +1832,6 @@ as binding and evaluation routines.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.ProtocolRecordingMuxServer" data-isabs="false">
-      <a id="ProtocolRecordingMuxServer:ProtocolRecordingMuxServer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="ProtocolRecordingMuxServer$.html"><span class="name">ProtocolRecordingMuxServer</span></a><span class="result"> extends DefaultServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer]</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.Redis" data-isabs="false">
       <a id="Redis:Redis"></a>
       <h4 class="signature">
@@ -1960,24 +1960,36 @@ as binding and evaluation routines.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ThriftMux$.html"><span class="name">ThriftMux</span></a><span class="result"> extends ThriftMuxImpl</span>
+        <a href="ThriftMux$.html"><span class="name">ThriftMux</span></a><span class="result"> extends ThriftMuxLike</span>
       </span>
       </h4>
       <p class="comment cmt">The <code>ThriftMux</code> object is both a com.twitter.finagle.client.Client and a
 com.twitter.finagle.server.Server for the Thrift protocol served over
 <a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a>.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxListener" data-isabs="false">
-      <a id="ThriftMuxListener:ThriftMuxListener"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxClient" data-isabs="false">
+      <a id="ThriftMuxClient:ThriftMuxClient"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ThriftMuxListener$.html"><span class="name">ThriftMuxListener</span></a><span class="result"> extends Netty3Listener[ChannelBuffer, ChannelBuffer]</span>
+        <a href="ThriftMuxClient$.html"><span class="name">ThriftMuxClient</span></a><span class="result"> extends ThriftMuxClientLike</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A client for thrift served over <a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a></p>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxServer" data-isabs="false">
+      <a id="ThriftMuxServer:ThriftMuxServer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftMuxServer$.html"><span class="name">ThriftMuxServer</span></a><span class="result"> extends ThriftMuxServerLike</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A Thrift server served over <a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.WeightedInetSocketAddress" data-isabs="false">
       <a id="WeightedInetSocketAddress:WeightedInetSocketAddress"></a>
       <h4 class="signature">
@@ -2462,18 +2474,6 @@ discrete messages delineated by HTTP chunks.</p>
       </h4>
       <p class="comment cmt">Please use the new interface, com.twitter.finagle.Thrift,
 for constructing thrift clients and servers.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.thriftmux" data-isabs="false">
-      <a id="thriftmux:thriftmux"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a href="thriftmux/package.html"><span class="name">thriftmux</span></a>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.topo" data-isabs="false">
       <a id="topo:topo"></a>
       <h4 class="signature">

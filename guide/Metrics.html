@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.16.0 documentation</title>
+    <title>Metrics &mdash; Finagle 6.17.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.16.0',
+        VERSION:     '6.17.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.16.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.17.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -89,18 +89,22 @@ They are also useful in diagnosing what contributes to request latency.</p>
 <dt><strong>failures</strong></dt>
 <dd>a counter of the number of times any exception has been thrown</dd>
 <dt><strong>sourcedfailures/&lt;source_service_name&gt;{/&lt;exception_name&gt;}+</strong></dt>
-<dd>a counter of the number of times a specific SourcedException has been thrown</dd>
+<dd>a counter of the number of times a specific SourcedException or sourced
+Failure has been thrown</dd>
 <dt><strong>sourcedfailures/&lt;source_service_name&gt;</strong></dt>
-<dd>a counter of the number of times any SourcedException has been thrown from this service</dd>
+<dd>a counter of the number of times any SourcedException or sourced Failure has
+been thrown from this service</dd>
 <dt><strong>sourcedfailures</strong></dt>
-<dd>a counter of the number of times any SourcedException has been thrown</dd>
+<dd>a counter of the number of times any SourcedException or sourced Failure has
+been thrown</dd>
 </dl>
 </div>
 <div class="section" id="statsfactorywrapper">
 <h3>StatsFactoryWrapper<a class="headerlink" href="#statsfactorywrapper" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>failures/&lt;exception_class_name&gt;</strong></dt>
-<dd>a counter of the number of times a service factory has failed with this specific exception</dd>
+<dd>a counter of the number of times a service factory has failed with this
+specific exception</dd>
 <dt><strong>failures</strong></dt>
 <dd>a counter of the number of times a service factory has failed</dd>
 </dl>
@@ -188,6 +192,8 @@ this should be the number of servers that would be missing if we only used the m
 <div class="section" id="failfastfactory">
 <h3>FailFastFactory<a class="headerlink" href="#failfastfactory" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
+<dt><strong>marked_dead</strong></dt>
+<dd>a counter of how many times the FailFastFactory has been marked dead</dd>
 <dt><strong>unhealthy_for_ms</strong></dt>
 <dd>a gauge of how long the FailFastFactory has been retrying for this failure</dd>
 <dt><strong>unhealthy_num_tries</strong></dt>

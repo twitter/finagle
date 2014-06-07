@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.Client</title>
+          <title>com.twitter.finagle.AbstractResolver</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link type="text/css" media="screen" rel="stylesheet" href="../../../lib/template.css" />
@@ -14,35 +14,25 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
-        <img src="../../../lib/trait_big.png" />
+        <img src="../../../lib/class_big.png" />
         <p id="owner"><a name="com" class="extype" href="../../package.html">com</a>.<a name="com.twitter" class="extype" href="../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="package.html">finagle</a></p>
-        <h1>Client</h1>
+        <h1>AbstractResolver</h1>
       </div>
 
       <h4 class="signature" id="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">Client</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends AnyRef</span>
+        <span class="name">AbstractResolver</span><span class="result"> extends <a name="com.twitter.finagle.Resolver" class="extype" href="Resolver.html">Resolver</a></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>RPC clients with <code>Req</code>-typed requests and <code>Rep</code> typed replies.
-RPC destinations are represented by names. Names are bound
-for each request.</p><p>Clients are implemented by the various protocol packages in
-finagle, for example com.twitter.finagle.Http:</p><pre>
-<span class="kw">object</span> Http <span class="kw">extends</span> Client[HttpRequest, HttpResponse] ...
-
-<span class="kw">val</span> service: Service[HttpRequest, HttpResponse] =
-  Http.newService(<span class="lit">"google.com:80"</span>)
-</pre></div><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>An abstract class version of Resolver for java compatibility.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
-        </div><div class="toggleContainer block">
-          <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.client.DefaultClient" class="extype" href="client/DefaultClient.html">DefaultClient</a>, <a name="com.twitter.finagle.Http" class="extype" href="Http$.html">Http</a>, <a name="com.twitter.finagle.exp.HttpClient" class="extype" href="exp/HttpClient$.html">HttpClient</a>, <a name="com.twitter.finagle.HttpClient" class="extype" href="HttpClient$.html">HttpClient</a>, <a name="com.twitter.finagle.exp.HttpClient" class="extype" href="exp/HttpClient.html">HttpClient</a>, <a name="com.twitter.finagle.Memcached" class="extype" href="Memcached$.html">Memcached</a>, <a name="com.twitter.finagle.MemcachedClient" class="extype" href="MemcachedClient$.html">MemcachedClient</a>, <a name="com.twitter.finagle.Mux" class="extype" href="Mux$.html">Mux</a>, <a name="com.twitter.finagle.MuxClient" class="extype" href="MuxClient.html">MuxClient</a>, <a name="com.twitter.finagle.MuxClient" class="extype" href="MuxClient$.html">MuxClient</a>, <a name="com.twitter.finagle.exp.Mysql" class="extype" href="exp/Mysql$.html">Mysql</a>, <a name="com.twitter.finagle.exp.MysqlClient" class="extype" href="exp/MysqlClient.html">MysqlClient</a>, <a name="com.twitter.finagle.exp.MysqlStackClient" class="extype" href="exp/MysqlStackClient$.html">MysqlStackClient</a>, <a name="com.twitter.finagle.Redis" class="extype" href="Redis$.html">Redis</a>, <a name="com.twitter.finagle.RedisClient" class="extype" href="RedisClient$.html">RedisClient</a>, <a name="com.twitter.finagle.Thrift" class="extype" href="Thrift$.html">Thrift</a>, <a name="com.twitter.finagle.thrift.ThriftClient" class="extype" href="thrift/ThriftClient.html">ThriftClient</a>, <a name="com.twitter.finagle.ThriftImpl" class="extype" href="ThriftImpl.html">ThriftImpl</a>, <a name="com.twitter.finagle.ThriftMux" class="extype" href="ThriftMux$.html">ThriftMux</a>, <a name="com.twitter.finagle.ThriftMuxClient" class="extype" href="ThriftMuxClient$.html">ThriftMuxClient</a>, <a name="com.twitter.finagle.ThriftMuxClientLike" class="extype" href="ThriftMuxClientLike.html">ThriftMuxClientLike</a>, <a name="com.twitter.finagle.ThriftMuxLike" class="extype" href="ThriftMuxLike.html">ThriftMuxLike</a></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.Resolver" class="extype" href="Resolver.html">Resolver</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -56,7 +46,7 @@ finagle, for example com.twitter.finagle.Http:</p><pre>
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.Client" class="in"><span>Client</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.AbstractResolver" class="in"><span>AbstractResolver</span></li><li name="com.twitter.finagle.Resolver" class="in"><span>Resolver</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -66,25 +56,51 @@ finagle, for example com.twitter.finagle.Http:</p><pre>
 
       <div id="template">
         <div id="allMembers">
-        
+        <div class="members" id="constructors">
+              <h3>Instance Constructors</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.AbstractResolver#this" data-isabs="false">
+      <a id="this:AbstractResolver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">AbstractResolver</span><span class="params">()</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
 
         
 
         <div class="values members" id="values">
               <h3>Abstract Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.Client#newClient" data-isabs="true">
-      <a id="newClient(Name,String):ServiceFactory[Req, Rep]"></a>
+              <ol><li visbl="pub" name="com.twitter.finagle.Resolver#bind" data-isabs="true">
+      <a id="bind(String):Var[Addr]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newClient</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a></span>, <span name="label">label: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[Req, Rep]</span>
+        <span class="name">bind</span><span class="params">(<span name="arg">arg: String</span>)</span><span class="result">: <span name="com.twitter.util.Var" class="extype">Var</span>[<a name="com.twitter.finagle.Addr" class="extype" href="Addr.html">Addr</a>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
-The label is used to display stats, etc.</p></div></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Resolver" class="extype" href="Resolver.html">Resolver</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Resolver#scheme" data-isabs="true">
+      <a id="scheme:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">scheme</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Resolver" class="extype" href="Resolver.html">Resolver</a></dd></dl></div>
     </li></ol>
             </div>
 
@@ -264,56 +280,6 @@ The label is used to display stats, etc.</p></div></div>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Client#newClient" data-isabs="false">
-      <a id="newClient(String,String):ServiceFactory[Req, Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">newClient</span><span class="params">(<span name="dest">dest: String</span>, <span name="label">label: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[Req, Rep]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
-The label is used to display stats, etc.</p></div></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Client#newClient" data-isabs="false">
-      <a id="newClient(String):ServiceFactory[Req, Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">newClient</span><span class="params">(<span name="dest">dest: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[Req, Rep]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.Client#newService" data-isabs="false">
-      <a id="newService(String):Service[Req, Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">newService</span><span class="params">(<span name="dest">dest: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[Req, Rep]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.Client#newService" data-isabs="false">
-      <a id="newService(Name,String):Service[Req, Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">newService</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a></span>, <span name="label">label: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[Req, Rep]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
-The label is used to display stats, etc.</p></div></div>
     </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
       <a id="notify():Unit"></a>
       <h4 class="signature">
@@ -412,42 +378,29 @@ The label is used to display stats, etc.</p></div></div>
 
         <div class="values members" id="values">
               <h3>Deprecated Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.Client#newClient" data-isabs="false">
-      <a id="newClient(Group[SocketAddress]):ServiceFactory[Req, Rep]"></a>
+              <ol><li visbl="pub" name="com.twitter.finagle.Resolver#resolve" data-isabs="false">
+      <a id="resolve(String):Try[Group[SocketAddress]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names">newClient</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[Req, Rep]</span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use Resolver.bind">resolve</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: <span name="com.twitter.util.Try" class="extype">Try</span>[<a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Resolver" class="extype" href="Resolver.html">Resolver</a></dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use destination names</p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Client#newService" data-isabs="false">
-      <a id="newService(Group[SocketAddress]):Service[Req, Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names">newService</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[Req, Rep]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use destination names</p></dd></dl></div>
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use Resolver.bind</p></dd></dl></div>
     </li></ol>
             </div>
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.AnyRef" class="parent">
+        <div name="com.twitter.finagle.Resolver" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.Resolver" class="extype" href="Resolver.html">Resolver</a></h3>
+            </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">
               <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>

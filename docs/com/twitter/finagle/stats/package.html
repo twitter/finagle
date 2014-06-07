@@ -155,7 +155,8 @@
         <a href="NameTranslatingStatsReceiver.html"><span class="name">NameTranslatingStatsReceiver</span></a><span class="result"> extends StatsReceiver</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A StatsReceiver receiver proxy that translates all counter, stat, and gauge
+names according to a <code>translate</code> function.</p>
     </li><li visbl="pub" name="com.twitter.finagle.stats.NullStatsReceiver" data-isabs="false">
       <a id="NullStatsReceiver:NullStatsReceiver"></a>
       <h4 class="signature">
@@ -167,7 +168,7 @@
         <a href="NullStatsReceiver.html"><span class="name">NullStatsReceiver</span></a><span class="result"> extends StatsReceiver with JavaSingleton</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A noop StatsReceiver.</p>
     </li><li visbl="pub" name="com.twitter.finagle.stats.OstrichExporter" data-isabs="false">
       <a id="OstrichExporter:OstrichExporter"></a>
       <h4 class="signature">
@@ -252,7 +253,7 @@ names you pass.</p>
         <a href="StatsReceiver.html"><span class="name">StatsReceiver</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">An interface for recording metrics.</p>
     </li><li visbl="pub" name="com.twitter.finagle.stats.StatsReceiverProxy" data-isabs="true">
       <a id="StatsReceiverProxy:StatsReceiverProxy"></a>
       <h4 class="signature">
@@ -346,7 +347,7 @@ StatsReceivers (n).</p>
         <a href="ClientStatsReceiver$.html"><span class="name">ClientStatsReceiver</span></a><span class="result"> extends StatsReceiverProxy</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A client-specific StatsReceiver.</p>
     </li><li visbl="pub" name="com.twitter.finagle.stats.DefaultStatsReceiver" data-isabs="false">
       <a id="DefaultStatsReceiver:DefaultStatsReceiver"></a>
       <h4 class="signature">
@@ -358,7 +359,8 @@ StatsReceivers (n).</p>
         <a href="DefaultStatsReceiver$.html"><span class="name">DefaultStatsReceiver</span></a><span class="result"> extends StatsReceiverProxy</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A &quot;default&quot; StatsReceiver loaded by Finagle's
+com.twitter.finagle.util.LoadService mechanism.</p>
     </li><li visbl="pub" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver" data-isabs="false">
       <a id="JavaLoggerStatsReceiver:JavaLoggerStatsReceiver"></a>
       <h4 class="signature">
@@ -419,7 +421,7 @@ all service-loadable receivers and broadcasts stats to them.</p>
         <a href="ServerStatsReceiver$.html"><span class="name">ServerStatsReceiver</span></a><span class="result"> extends StatsReceiverProxy</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A server-specific StatsReceiver.</p>
     </li><li visbl="pub" name="com.twitter.finagle.stats.StatsReceiver" data-isabs="false">
       <a id="StatsReceiver:StatsReceiver"></a>
       <h4 class="signature">

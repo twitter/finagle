@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.ThriftMuxClientImpl</title>
+          <title>com.twitter.finagle.ThriftMuxClient</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link type="text/css" media="screen" rel="stylesheet" href="../../../lib/template.css" />
@@ -12,46 +12,42 @@
       <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
       <div id="definition">
-        <img src="../../../lib/class_big.png" />
+        <img src="../../../lib/object_big.png" />
         <p id="owner"><a name="com" class="extype" href="../../package.html">com</a>.<a name="com.twitter" class="extype" href="../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="package.html">finagle</a></p>
-        <h1>ThriftMuxClientImpl</h1>
+        <h1>ThriftMuxClient</h1>
       </div>
 
       <h4 class="signature" id="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">ThriftMuxClientImpl</span><span class="result"> extends <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]] with <a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a></span>
+        <span class="name">ThriftMuxClient</span><span class="result"> extends <a name="com.twitter.finagle.ThriftMuxClientLike" class="extype" href="ThriftMuxClientLike.html">ThriftMuxClientLike</a></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A com.twitter.finagle.client.Client for the Thrift protocol served over
-<a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a>.</p><p>For example, this IDL:</p><pre>
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A client for thrift served over <a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a></p><p>For example, this IDL:</p><pre>
 service TestService {
   string query(<span class="num">1</span>: string x)
 }
 </pre><p>compiled with Scrooge, generates the interface
 <code>TestService.FutureIface</code>. This is then passed
 into <code>newIface</code>:</p><pre>
-ThriftMuxClientImpl(...).newIface[TestService.FutureIface](
+ThriftMuxClient.newIface[TestService.FutureIface](
   addr, classOf[TestService.FutureIface])
 </pre><p>However note that the Scala compiler can insert the latter
 <code>Class</code> for us, for which another variant of <code>newIface</code> is
 provided:</p><pre>
-ThriftMuxClientImpl(...).newIface[TestService.FutureIface](addr)
+ThriftMuxClient.newIface[TestService.FutureIface](addr)
 </pre><p>In Java, we need to provide the class object:</p><pre>
 TestService.FutureIface client =
-  ThriftMuxClientImpl(...).newIface(addr, TestService.FutureIface.<span class="kw">class</span>);
+  ThriftMuxClient.newIface(addr, TestService.FutureIface.<span class="kw">class</span>);
 </pre></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a>, <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
-        </div><div class="toggleContainer block">
-          <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.thriftmux.exp.ThriftMuxClient" class="extype" href="thriftmux/exp/ThriftMuxClient$.html">ThriftMuxClient</a></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.ThriftMuxClientLike" class="extype" href="ThriftMuxClientLike.html">ThriftMuxClientLike</a>, (<a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a>) ⇒ <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]], <a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a>, <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -65,7 +61,7 @@ TestService.FutureIface client =
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.ThriftMuxClientImpl" class="in"><span>ThriftMuxClientImpl</span></li><li name="com.twitter.finagle.ThriftRichClient" class="in"><span>ThriftRichClient</span></li><li name="com.twitter.finagle.Client" class="in"><span>Client</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.ThriftMuxClient" class="in"><span>ThriftMuxClient</span></li><li name="com.twitter.finagle.ThriftMuxClientLike" class="in"><span>ThriftMuxClientLike</span></li><li name="scala.Function1" class="in"><span>Function1</span></li><li name="com.twitter.finagle.ThriftRichClient" class="in"><span>ThriftRichClient</span></li><li name="com.twitter.finagle.Client" class="in"><span>Client</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -75,22 +71,7 @@ TestService.FutureIface client =
 
       <div id="template">
         <div id="allMembers">
-        <div class="members" id="constructors">
-              <h3>Instance Constructors</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.ThriftMuxClientImpl#this" data-isabs="false">
-      <a id="this:ThriftMuxClientImpl"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">ThriftMuxClientImpl</span><span class="params">(<span name="muxer">muxer: <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>] = <span class="symbol">ProtocolRecordingMuxClient</span></span>, <span name="protocolFactory">protocolFactory: <span name="org.apache.thrift.protocol.TProtocolFactory" class="extype">TProtocolFactory</span> = <span name="com.twitter.finagle.thrift.Protocols.binaryFactory(com.twitter.finagle.thrift.Protocols.binaryFactory$default$1, com.twitter.finagle.thrift.Protocols.binaryFactory$default$2, com.twitter.finagle.thrift.Protocols.binaryFactory$default$3, com.twitter.finagle.thrift.Protocols.binaryFactory$default$4)" class="defval">...</span></span>, <span name="clientId">clientId: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.thrift.ClientId" class="extype" href="thrift/ClientId.html">ClientId</a>] = <span class="symbol">scala.None</span></span>)</span>
-      </span>
-      </h4>
-      
-    </li></ol>
-            </div>
+        
 
         
 
@@ -158,6 +139,36 @@ TestService.FutureIface client =
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.Function1#andThen" data-isabs="false">
+      <a id="andThen[A]((Client[ThriftClientRequest, Array[Byte]]) ⇒ A):(Params) ⇒ A"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]) ⇒ A</span>)</span><span class="result">: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a>) ⇒ A</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxClientLike#apply" data-isabs="false">
+      <a id="apply(Params):Client[ThriftClientRequest, Array[Byte]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="params">params: <a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a></span>)</span><span class="result">: <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Create a new ThriftMuxClientLike with <code>params</code> used to configure the
+muxer.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new ThriftMuxClientLike with <code>params</code> used to configure the
+muxer. This makes <code>ThriftMuxClientLike</code> compatible with the legacy
+<a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="builder/ClientBuilder.html">ClientBuilder</a>. However, keep in mind
+that many of the ClientBuilder parameters are not applicable to the
+muxer.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMuxClientLike" class="extype" href="ThriftMuxClientLike.html">ThriftMuxClientLike</a> → Function1</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -185,18 +196,45 @@ TestService.FutureIface client =
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="prt" name="com.twitter.finagle.ThriftMuxClientImpl#defaultClientName" data-isabs="false">
+    </li><li visbl="pub" name="scala.Function1#compose" data-isabs="false">
+      <a id="compose[A]((A) ⇒ Params):(A) ⇒ Client[ThriftClientRequest, Array[Byte]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (A) ⇒ <a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a></span>)</span><span class="result">: (A) ⇒ <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxClientLike#configured" data-isabs="false">
+      <a id="configured[P](P)(Param[P]):ThriftMuxClientLike"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="p">p: P</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a name="com.twitter.finagle.Stack.Param" class="extype" href="Stack$$Param.html">Param</a>[P]</span>)</span><span class="result">: <a name="com.twitter.finagle.ThriftMuxClientLike" class="extype" href="ThriftMuxClientLike.html">ThriftMuxClientLike</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Create a new ThriftMuxClientLike with <code>p</code> added to the
+parameters used to configure the <code>muxer</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new ThriftMuxClientLike with <code>p</code> added to the
+parameters used to configure the <code>muxer</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMuxClientLike" class="extype" href="ThriftMuxClientLike.html">ThriftMuxClientLike</a></dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.ThriftMuxClientLike#defaultClientName" data-isabs="false">
       <a id="defaultClientName:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">defaultClientName</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+        <span class="name">defaultClientName</span><span class="result">: String</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">The client name used when group isn't named.</p><div class="fullcomment"><div class="comment cmt"><p>The client name used when group isn't named.</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMuxClientImpl" class="extype" href="">ThriftMuxClientImpl</a> → <a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMuxClientLike" class="extype" href="ThriftMuxClientLike.html">ThriftMuxClientLike</a> → <a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -284,7 +322,7 @@ TestService.FutureIface client =
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxClientImpl#newClient" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxClientLike#newClient" data-isabs="false">
       <a id="newClient(Name,String):ServiceFactory[ThriftClientRequest, Array[Byte]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -296,7 +334,7 @@ TestService.FutureIface client =
       </span>
       </h4>
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
-The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMuxClientImpl" class="extype" href="">ThriftMuxClientImpl</a> → <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
+The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMuxClientLike" class="extype" href="ThriftMuxClientLike.html">ThriftMuxClientLike</a> → <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Client#newClient" data-isabs="false">
       <a id="newClient(String,String):ServiceFactory[ThriftClientRequest, Array[Byte]]"></a>
       <h4 class="signature">
@@ -461,7 +499,22 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="prt" name="com.twitter.finagle.ThriftMuxClientImpl#protocolFactory" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxClientLike#params" data-isabs="false">
+      <a id="params:Params"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">params</span><span class="result">: <a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The <a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a> used to configure
+the stack.</p><div class="fullcomment"><div class="comment cmt"><p>The <a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a> used to configure
+the stack.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMuxClientLike" class="extype" href="ThriftMuxClientLike.html">ThriftMuxClientLike</a></dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.ThriftMuxClientLike#protocolFactory" data-isabs="false">
       <a id="protocolFactory:TProtocolFactory"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -472,7 +525,34 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <span class="name">protocolFactory</span><span class="result">: <span name="org.apache.thrift.protocol.TProtocolFactory" class="extype">TProtocolFactory</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMuxClientImpl" class="extype" href="">ThriftMuxClientImpl</a> → <a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMuxClientLike" class="extype" href="ThriftMuxClientLike.html">ThriftMuxClientLike</a> → <a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxClientLike#stack" data-isabs="false">
+      <a id="stack:Stack[ServiceFactory[ChannelBuffer, ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stack</span><span class="result">: <span name="com.twitter.finagle.Stack" class="extype">Stack</span>[<a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a> stack that requests
+are dispatched through.</p><div class="fullcomment"><div class="comment cmt"><p>The <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a> stack that requests
+are dispatched through.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMuxClientLike" class="extype" href="ThriftMuxClientLike.html">ThriftMuxClientLike</a></dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.ThriftMuxClientLike#stats" data-isabs="false">
+      <a id="stats:StatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stats</span><span class="result">: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="stats/StatsReceiver.html">StatsReceiver</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMuxClientLike" class="extype" href="ThriftMuxClientLike.html">ThriftMuxClientLike</a> → <a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -485,7 +565,7 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
+    </li><li visbl="pub" name="scala.Function1#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -496,7 +576,7 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1 → AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -542,6 +622,21 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxClientLike#withClientId" data-isabs="false">
+      <a id="withClientId(ClientId):ThriftMuxClientLike"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withClientId</span><span class="params">(<span name="clientId">clientId: <a name="com.twitter.finagle.thrift.ClientId" class="extype" href="thrift/ClientId.html">ClientId</a></span>)</span><span class="result">: <a name="com.twitter.finagle.ThriftMuxClientLike" class="extype" href="ThriftMuxClientLike.html">ThriftMuxClientLike</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Produce a <a name="com.twitter.finagle.ThriftMuxClientLike" class="extype" href="ThriftMuxClientLike.html">ThriftMuxClientLike</a> using the provided
+client ID.</p><div class="fullcomment"><div class="comment cmt"><p>Produce a <a name="com.twitter.finagle.ThriftMuxClientLike" class="extype" href="ThriftMuxClientLike.html">ThriftMuxClientLike</a> using the provided
+client ID.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMuxClientLike" class="extype" href="ThriftMuxClientLike.html">ThriftMuxClientLike</a></dd></dl></div>
     </li></ol>
             </div>
 
@@ -620,7 +715,11 @@ by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
         </div>
 
         <div id="inheritedMembers">
-        <div name="com.twitter.finagle.ThriftRichClient" class="parent">
+        <div name="com.twitter.finagle.ThriftMuxClientLike" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.ThriftMuxClientLike" class="extype" href="ThriftMuxClientLike.html">ThriftMuxClientLike</a></h3>
+            </div><div name="scala.Function1" class="parent">
+              <h3>Inherited from (<a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a>) ⇒ <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</h3>
+            </div><div name="com.twitter.finagle.ThriftRichClient" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a></h3>
             </div><div name="com.twitter.finagle.Client" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</h3>

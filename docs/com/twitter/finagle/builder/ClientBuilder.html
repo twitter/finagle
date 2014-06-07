@@ -321,14 +321,14 @@ as well as physical connection time.  Futures returned from
 {{factory()}} will always be satisfied within this timeout.
 </p></div></div>
     </li><li visbl="prt" name="com.twitter.finagle.builder.ClientBuilder#copy" data-isabs="false">
-      <a id="copy[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1](Params,(Params) ⇒ StackClient[Req1, Rep1, Any, Any]):ClientBuilder[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]"></a>
+      <a id="copy[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1](Params,(Params) ⇒ Client[Req1, Rep1]):ClientBuilder[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">copy</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>, <span name="HasCluster1">HasCluster1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasHostConnectionLimit1">HasHostConnectionLimit1</span>]</span><span class="params">(<span name="ps">ps: <a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a></span>, <span name="newClient">newClient: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a>) ⇒ <span name="com.twitter.finagle.client.StackClient" class="extype">StackClient</span>[Req1, Rep1, <span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]</span>
+        <span class="name">copy</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>, <span name="HasCluster1">HasCluster1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasHostConnectionLimit1">HasHostConnectionLimit1</span>]</span><span class="params">(<span name="ps">ps: <a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a></span>, <span name="newClient">newClient: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a>) ⇒ <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a>[Req1, Rep1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
@@ -921,17 +921,26 @@ If this is defined concurrently with httpProxy, the order in which they are appl
 socksPassword and socksProxy must be set as well
 </p></div></div>
     </li><li visbl="pub" name="com.twitter.finagle.builder.ClientBuilder#stack" data-isabs="false">
-      <a id="stack[Req1, Rep1]((Params) ⇒ StackClient[Req1, Rep1, Any, Any]):ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit]"></a>
+      <a id="stack[Req1, Rep1]((Params) ⇒ Client[Req1, Rep1]):ClientBuilder[Req1, Rep1, HasCluster, Yes, Yes]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">stack</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="mk">mk: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a>) ⇒ <span name="com.twitter.finagle.client.StackClient" class="extype">StackClient</span>[Req1, Rep1, <span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req1, Rep1, HasCluster, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="ClientConfig$$Yes.html">Yes</a>, HasHostConnectionLimit]</span>
+        <span class="name">stack</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="mk">mk: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a>) ⇒ <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a>[Req1, Rep1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req1, Rep1, HasCluster, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="ClientConfig$$Yes.html">Yes</a>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="ClientConfig$$Yes.html">Yes</a>]</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Overrides the stack and <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a> that will be used
+by this builder.</p><div class="fullcomment"><div class="comment cmt"><p>Overrides the stack and <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a> that will be used
+by this builder. The <code>mk</code> function is passed the state of configuration
+when <code>build</code> is called. There is no guarantee that all the builder parameters
+may be used by the client created by <code>mk</code>, it is up to the discretion of
+the client and protocol implementation. For example, most of connection pool
+parameters (hostConnectionLimit, etc) don't apply to com.twitter.finagle.ThriftMux.
+For this reason, the builder assumes that hostConnectionLimit is irrelevant
+when using <code>stack</code>.
+</p></div></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">

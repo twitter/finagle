@@ -29,7 +29,10 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A noop StatsReceiver. Metrics are not recorded, making this receiver useful
+in unit tests and as defaults in situations where metrics are not strictly
+required.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span name="com.twitter.util.JavaSingleton" class="extype">JavaSingleton</span>, <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div><div class="toggleContainer block">
@@ -414,8 +417,7 @@ are only reported once per receiver.
         <span class="name">scopeSuffix</span><span class="params">(<span name="suffix">suffix: String</span>)</span><span class="result">: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Prepend a suffix value to the next scope
-stats.</p><div class="fullcomment"><div class="comment cmt"><p>Prepend a suffix value to the next scope
+      <p class="shortcomment cmt">Prepend a suffix value to the next scope.</p><div class="fullcomment"><div class="comment cmt"><p>Prepend a suffix value to the next scope.
 stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds&quot;) will generate
 /client/toto/adds
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a></dd></dl></div>

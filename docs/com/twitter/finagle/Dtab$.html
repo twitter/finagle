@@ -29,7 +29,8 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Object Dtab manages 'base' and 'local' Dtabs.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
@@ -123,18 +124,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Dtab#apply" data-isabs="false">
-      <a id="apply():Dtab"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">apply</span><span class="params">()</span><span class="result">: <a name="com.twitter.finagle.Dtab" class="extype" href="Dtab.html">Dtab</a></span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -158,20 +147,11 @@
         <span class="name">base</span><span class="result">: <a name="com.twitter.finagle.Dtab" class="extype" href="Dtab.html">Dtab</a></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.Dtab#baseDiff" data-isabs="false">
-      <a id="baseDiff():Dtab"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">baseDiff</span><span class="params">()</span><span class="result">: <a name="com.twitter.finagle.Dtab" class="extype" href="Dtab.html">Dtab</a></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Retrieve the difference between the base dtab
-and the current local dtab.</p>
+      <p class="shortcomment cmt">The base, or &quot;system&quot;, or &quot;global&quot;, delegation table applies to
+every request in this process.</p><div class="fullcomment"><div class="comment cmt"><p>The base, or &quot;system&quot;, or &quot;global&quot;, delegation table applies to
+every request in this process. It is generally set at process
+startup, and not changed thereafter.
+</p></div></div>
     </li><li visbl="pub" name="com.twitter.finagle.Dtab#canBuildFrom" data-isabs="false">
       <a id="canBuildFrom:CanBuildFrom[TraversableOnce[Dentry], Dentry, Dtab]"></a>
       <h4 class="signature">
@@ -181,18 +161,6 @@ and the current local dtab.</p>
       </span>
       <span class="symbol">
         <span class="name">canBuildFrom</span><span class="result">: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[TraversableOnce[<a name="com.twitter.finagle.Dentry" class="extype" href="Dentry.html">Dentry</a>], <a name="com.twitter.finagle.Dentry" class="extype" href="Dentry.html">Dentry</a>, <a name="com.twitter.finagle.Dtab" class="extype" href="Dtab.html">Dtab</a>]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.Dtab#clear" data-isabs="false">
-      <a id="clear():Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">clear</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -211,30 +179,6 @@ and the current local dtab.</p>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Dtab#delegate" data-isabs="false">
-      <a id="delegate(Dtab):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">delegate</span><span class="params">(<span name="dtab">dtab: <a name="com.twitter.finagle.Dtab" class="extype" href="Dtab.html">Dtab</a></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.Dtab#delegate" data-isabs="false">
-      <a id="delegate(Dentry):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">delegate</span><span class="params">(<span name="dentry">dentry: <a name="com.twitter.finagle.Dentry" class="extype" href="Dentry.html">Dentry</a></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.Dtab#empty" data-isabs="false">
       <a id="empty:Dtab"></a>
       <h4 class="signature">
@@ -246,7 +190,7 @@ and the current local dtab.</p>
         <span class="name">empty</span><span class="result">: <a name="com.twitter.finagle.Dtab" class="extype" href="Dtab.html">Dtab</a></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">An empty delegation table.</p>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -322,6 +266,41 @@ and the current local dtab.</p>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Dtab#local" data-isabs="false">
+      <a id="local:Dtab"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">local</span><span class="result">: <a name="com.twitter.finagle.Dtab" class="extype" href="Dtab.html">Dtab</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The local, or &quot;per-request&quot;, delegation table applies to the
+current com.twitter.util.Local scope which is usually
+defined on a per-request basis.</p><div class="fullcomment"><div class="comment cmt"><p>The local, or &quot;per-request&quot;, delegation table applies to the
+current com.twitter.util.Local scope which is usually
+defined on a per-request basis. Finagle uses the Dtab
+<code><code>Dtab.base ++ Dtab.local</code></code> to bind
+<a name="com.twitter.finagle.Name.Path" class="extype" href="Name$$Path.html">Path</a>.</p><p>Local's scope is dictated by com.twitter.util.Local.</p><p>The local dtab is serialized into outbound requests when
+supported protocols are used. (Http, Thrift via TTwitter, Mux,
+and ThriftMux are among these.) The upshot is that <code><code>local</code></code> is
+defined for the entire request graph, so that a local dtab
+defined here will apply to downstream services as well.
+</p></div></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Dtab#local_=" data-isabs="false">
+      <a id="local_=(Dtab):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: local_$eq">local_=</span><span class="params">(<span name="dtab">dtab: <a name="com.twitter.finagle.Dtab" class="extype" href="Dtab.html">Dtab</a></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -397,6 +376,32 @@ com.twitter.finagle.Dentry$</p></div></div>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Dtab#setBase" data-isabs="false">
+      <a id="setBase(Dtab):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setBase</span><span class="params">(<span name="dtab">dtab: <a name="com.twitter.finagle.Dtab" class="extype" href="Dtab.html">Dtab</a></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Java API for <code><code>base_=</code></code>
+</p>
+    </li><li visbl="pub" name="com.twitter.finagle.Dtab#setLocal" data-isabs="false">
+      <a id="setLocal(Dtab):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setLocal</span><span class="params">(<span name="dtab">dtab: <a name="com.twitter.finagle.Dtab" class="extype" href="Dtab.html">Dtab</a></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Java API for <code><code>local_=</code></code>
+</p>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -430,18 +435,6 @@ com.twitter.finagle.Dentry$</p></div></div>
       </span>
       <span class="symbol">
         <span class="name">unwind</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="f">f: ⇒ T</span>)</span><span class="result">: T</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.Dtab#update" data-isabs="false">
-      <a id="update(Dtab):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">update</span><span class="params">(<span name="dtab">dtab: <a name="com.twitter.finagle.Dtab" class="extype" href="Dtab.html">Dtab</a></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       

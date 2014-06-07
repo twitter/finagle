@@ -29,7 +29,9 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A server-specific StatsReceiver. All stats recorded using this receiver
+are prefixed with the string &quot;srv&quot; by default.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a name="com.twitter.finagle.stats.StatsReceiverProxy" class="extype" href="StatsReceiverProxy.html">StatsReceiverProxy</a>, <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
@@ -384,8 +386,7 @@ are only reported once per receiver.
         <span class="name">scopeSuffix</span><span class="params">(<span name="suffix">suffix: String</span>)</span><span class="result">: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Prepend a suffix value to the next scope
-stats.</p><div class="fullcomment"><div class="comment cmt"><p>Prepend a suffix value to the next scope
+      <p class="shortcomment cmt">Prepend a suffix value to the next scope.</p><div class="fullcomment"><div class="comment cmt"><p>Prepend a suffix value to the next scope.
 stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds&quot;) will generate
 /client/toto/adds
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a></dd></dl></div>
@@ -394,13 +395,25 @@ stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">self</span><span class="result">: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stats.ServerStatsReceiver" class="extype" href="">ServerStatsReceiver</a> → <a name="com.twitter.finagle.stats.StatsReceiverProxy" class="extype" href="StatsReceiverProxy.html">StatsReceiverProxy</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.stats.ServerStatsReceiver#setRootScope" data-isabs="false">
+      <a id="setRootScope(String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setRootScope</span><span class="params">(<span name="rootScope">rootScope: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.stats.StatsReceiverProxy#stat" data-isabs="false">
       <a id="stat(String*):Stat"></a>
       <h4 class="signature">

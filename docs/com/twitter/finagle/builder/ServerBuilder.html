@@ -344,14 +344,14 @@ This defaults to true.
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li visbl="prt" name="com.twitter.finagle.builder.ServerBuilder#copy" data-isabs="false">
-      <a id="copy[Req1, Rep1, HasCodec1, HasBindTo1, HasName1](Params,(Params) ⇒ StackServer[Req1, Rep1, Any, Any]):ServerBuilder[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]"></a>
+      <a id="copy[Req1, Rep1, HasCodec1, HasBindTo1, HasName1](Params,(Params) ⇒ Server[Req1, Rep1]):ServerBuilder[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">copy</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasBindTo1">HasBindTo1</span>, <span name="HasName1">HasName1</span>]</span><span class="params">(<span name="ps">ps: <a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a></span>, <span name="newServer">newServer: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a>) ⇒ <span name="com.twitter.finagle.server.StackServer" class="extype">StackServer</span>[Req1, Rep1, <span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]</span>
+        <span class="name">copy</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasBindTo1">HasBindTo1</span>, <span name="HasName1">HasName1</span>]</span><span class="params">(<span name="ps">ps: <a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a></span>, <span name="newServer">newServer: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a>) ⇒ <a name="com.twitter.finagle.Server" class="extype" href="../Server.html">Server</a>[Req1, Rep1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
@@ -674,17 +674,23 @@ False by default.
       </h4>
       
     </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#stack" data-isabs="false">
-      <a id="stack[Req1, Rep1]((Params) ⇒ StackServer[Req1, Rep1, Any, Any]):ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName]"></a>
+      <a id="stack[Req1, Rep1]((Params) ⇒ Server[Req1, Rep1]):ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">stack</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="mk">mk: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a>) ⇒ <span name="com.twitter.finagle.server.StackServer" class="extype">StackServer</span>[Req1, Rep1, <span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req1, Rep1, <a name="com.twitter.finagle.builder.ServerConfig.Yes" class="extype" href="ServerConfig$$Yes.html">Yes</a>, HasBindTo, HasName]</span>
+        <span class="name">stack</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="mk">mk: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a>) ⇒ <a name="com.twitter.finagle.Server" class="extype" href="../Server.html">Server</a>[Req1, Rep1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req1, Rep1, <a name="com.twitter.finagle.builder.ServerConfig.Yes" class="extype" href="ServerConfig$$Yes.html">Yes</a>, HasBindTo, HasName]</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Overrides the stack and <a name="com.twitter.finagle.Server" class="extype" href="../Server.html">Server</a> that will be used
+by this builder.</p><div class="fullcomment"><div class="comment cmt"><p>Overrides the stack and <a name="com.twitter.finagle.Server" class="extype" href="../Server.html">Server</a> that will be used
+by this builder. The <code>mk</code> function is passed the state of configuration
+when <code>build</code> is called. There is no guarantee that all the builder parameters
+may be used by the server created by <code>mk</code>, it is up to the discretion of
+the server and protocol implementation.
+</p></div></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
