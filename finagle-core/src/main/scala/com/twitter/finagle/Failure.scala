@@ -16,14 +16,19 @@ package com.twitter.finagle
  * }
  * }}}
  */
-final case class Failure private[finagle](
-  why: String,
-  cause: Throwable = null,
-  flags: Long = Failure.Flag.None,
+final class Failure private[finagle](
+  private[finagle] val why: String,
+  val cause: Throwable = null,
+  val flags: Long = Failure.Flag.None,
   sources: Map[String, Object] = Map(),
-  stacktrace: Array[StackTraceElement] = Failure.NoStacktrace
+  val stacktrace: Array[StackTraceElement] = Failure.NoStacktrace
 ) extends RuntimeException(why, cause) with NoStacktrace {
   import Failure._
+
+  /**
+   * Returns a source for a given key, if it exists.
+   */
+  def getSource(key: String): Option[Object] = sources.get(key)
 
   /**
    * Creates a new Failure with the given key value pair prepended to sources.
@@ -45,13 +50,23 @@ final case class Failure private[finagle](
       copy(flags = toggle(on, flags, Flag.Retryable))
     }
 
-  override def toString = "Failure(%s, flags=0x%02x)".format(why, flags)
-  override def getStackTrace() = stacktrace
+  override def toString: String =
+    "Failure(%s, flags=0x%02x)\nsources=%s".format(why, flags, sources.toString)
+
+  override def getStackTrace(): Array[StackTraceElement] = stacktrace
   override def printStackTrace(p: java.io.PrintWriter) {
     p.println(this)
     for (te <- stacktrace)
       p.println("\tat %s".format(te))
   }
+
+  def copy(
+    why: String = why,
+    cause: Throwable = cause,
+    flags: Long = flags,
+    sources: Map[String, Object] = sources,
+    stacktrace: Array[StackTraceElement] = stacktrace
+  ): Failure = new Failure(why, cause, flags, sources, stacktrace)
 }
 
 /**
@@ -60,6 +75,12 @@ final case class Failure private[finagle](
 object Failure {
   private val NoStacktrace =
     Array(new StackTraceElement("com.twitter.finagle", "NoStacktrace", null, -1))
+
+  object Sources {
+    val ServiceName = "service name"
+  }
+
+  def unapply(exc: Failure): Option[(Throwable, Long)] = Some((exc.cause, exc.flags))
 
   /**
    * Failure attributes are distinguished by flags.
@@ -92,7 +113,7 @@ object Failure {
    */
   trait Injections {
     val flag: Long
-    def apply(why: String, cause: Throwable = null): Failure = Failure(why, cause, flag)
+    def apply(why: String, cause: Throwable = null): Failure = new Failure(why, cause, flag)
     def apply(cause: Throwable): Failure = apply(cause.getMessage, cause)
   }
 
@@ -103,8 +124,8 @@ object Failure {
   trait Extractions {
     val flag: Long
     def unapply(exc: Throwable): Option[Throwable] = exc match {
-      case f@Failure(_, null, fs, _, _) if isSet(fs, flag) => Some(f)
-      case Failure(_, cause, fs, _, _) if isSet(fs, flag) => Some(cause)
+      case f@Failure(null, fs) if isSet(fs, flag) => Some(f)
+      case Failure(cause, fs) if isSet(fs, flag) => Some(cause)
       case _ => None
     }
   }
@@ -115,7 +136,7 @@ object Failure {
   object Cause extends Injections {
     val flag = Flag.None
     def unapply(exc: Throwable): Option[Throwable] = exc match {
-      case Failure(_, cause, _, _, _) if cause != null => Some(cause)
+      case Failure(cause, _) if cause != null => Some(cause)
       case _ => None
     }
   }

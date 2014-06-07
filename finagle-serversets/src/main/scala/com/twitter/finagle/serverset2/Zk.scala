@@ -216,6 +216,8 @@ private[serverset2] object Zk extends FnZkFactory(
         .reader(),
       DefaultTimer.twitter)) {
 
+  val user: String = System.getProperty("user.name", "unknown")
+  val authInfo: String = "%s:%s".format(user, user)
   val nil: Zk = new Zk(Watched(new NullZooKeeperReader, Var(WatchState.Pending)), Timer.Nil)
 
   def retrying(
@@ -230,14 +232,17 @@ private[serverset2] object Zk extends FnZkFactory(
         return
       zk.close()
       zk = newZk()
-      u() = zk
-      val whenUnhealthy =
-        zk.state.changes.filter { _ == WatchState.SessionState(SessionState.Expired) }.toFuture()
-      whenUnhealthy onSuccess { _ =>
+      val ready = zk.state.changes.filter(_ == WatchState.SessionState(SessionState.SyncConnected))
+      ready.toFuture().onSuccess { _ =>
+        zk.addAuthInfo("digest", Buf.Utf8(authInfo))
+      }
+      val expired = zk.state.changes.filter(_ == WatchState.SessionState(SessionState.Expired))
+      expired.toFuture().onSuccess { _ =>
         timer.doLater(backoff) {
           reconnect()
         }
       }
+      u() = zk
     }
 
     reconnect()

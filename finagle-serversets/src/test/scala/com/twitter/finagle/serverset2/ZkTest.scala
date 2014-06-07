@@ -8,6 +8,7 @@ import com.twitter.io.Buf
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
 import org.junit.runner.RunWith
+import org.scalatest.concurrent.Eventually._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
@@ -48,6 +49,10 @@ private object ZkOp {
   case class Close(deadline: Time) extends ZkOp {
     type Res = Unit
   }
+
+  case class AddAuthInfo(scheme: String, auth: Buf) extends ZkOp {
+    type Res = Unit
+  }
 }
 
 private class OpqueueZkReader(
@@ -80,7 +85,8 @@ private class OpqueueZkReader(
   def sync(path: String) = enqueue(Sync(path))
   def close(deadline: Time) = enqueue(Close(deadline))
 
-  def addAuthInfo(scheme: String, auth: Buf): Future[Unit] = Future.never
+  def addAuthInfo(scheme: String, auth: Buf) =
+    enqueue(AddAuthInfo(scheme, auth))
 
   def getACL(path: String): Future[Node.ACL] = Future.never
 }
@@ -141,12 +147,48 @@ class ZkTest extends FunSuite {
     val Seq(`ew`, `ew2`, gw@GlobWatch("/foo/bar/*")) = watchedZk.value.opq
     assert(ref.get === Activity.Pending)
     gw.res() = Return(Watched(Seq("/foo/bar/a", "/foo/bar/b", "/foo/bar/c"), Var.value(WatchState.Pending)))
-    assert(ref.get=== Activity.Ok(Seq("/foo/bar/a", "/foo/bar/b", "/foo/bar/c")))
+    assert(ref.get === Activity.Ok(Seq("/foo/bar/a", "/foo/bar/b", "/foo/bar/c")))
     assert(watchedZk.value.opq === Seq(ew, ew2, gw))
 
     ew2watchv() = WatchState.Determined(NodeEvent.ChildrenChanged)
     val Seq(`ew`, `ew2`, `gw`, ew3@ExistsWatch("/foo/bar")) = watchedZk.value.opq
     ew3.res() = Return(Watched(None, Var.value(WatchState.Pending)))
     assert(ref.get === Activity.Ok(Seq.empty))
+  }}
+
+  test("factory authenticates and closes on expiry") { Time.withCurrentTimeFrozen { tc =>
+    val authInfo = "%s:%s".format(System.getProperty("user.name"), System.getProperty("user.name"))
+    val timer = new MockTimer
+    val zkState: Var[WatchState] with Updatable[WatchState] = Var(WatchState.Pending)
+    val watchedZk = Watched(new OpqueueZkReader(), zkState)
+    val zk = Zk.retrying(5.seconds, () => new Zk(watchedZk, timer), timer)
+
+    zk.changes.respond {
+      case _ => ()
+    }
+
+    zkState() = WatchState.SessionState(SessionState.SyncConnected)
+    eventually {
+      assert(watchedZk.value.opq === Seq(AddAuthInfo("digest", Buf.Utf8(authInfo))))
+    }
+
+    zkState() = WatchState.SessionState(SessionState.Expired)
+    tc.advance(5.seconds)
+    timer.tick()
+    eventually {
+      assert(watchedZk.value.opq === Seq(
+        AddAuthInfo("digest", Buf.Utf8(authInfo)),
+        Close(Time.Bottom)
+      ))
+    }
+
+    zkState() = WatchState.SessionState(SessionState.SyncConnected)
+    eventually {
+      assert(watchedZk.value.opq === Seq(
+        AddAuthInfo("digest", Buf.Utf8(authInfo)),
+        Close(Time.Bottom),
+        AddAuthInfo("digest", Buf.Utf8(authInfo))
+      ))
+    }
   }}
 }

@@ -154,7 +154,7 @@ private[finagle] class BindingFactory[Req, Rep](
   }
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
-    dtabCache(Dtab(), conn)
+    dtabCache(Dtab.base ++ Dtab.local, conn)
 
   def close(deadline: Time) =
     Closable.sequence(dtabCache, nameCache).close(deadline)

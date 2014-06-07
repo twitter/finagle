@@ -13,7 +13,10 @@ scala_library(name='scala',
     pants('util/util-app'),
     pants('util/util-logging'),
   ],
-  sources=rglobs('*.scala')
+  sources=rglobs('*.scala'),
+  provides=artifact(org='com.twitter',
+                    name='finagle-stress',
+                    repo='pants-support/ivy:internal',),
 )
 
 benchmark(name='bench',

@@ -7,5 +7,8 @@ scala_library(name='scala',
   sources=rglobs('*.scala'),
   resources=[
     pants('finagle/finagle-mdns/src/main/resources')
-  ]
+  ],
+  provides=artifact(org='com.twitter',
+                    name='finagle-mdns',
+                    repo='pants-support/ivy:internal',),
 )

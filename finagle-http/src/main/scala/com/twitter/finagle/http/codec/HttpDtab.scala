@@ -69,9 +69,9 @@ object HttpDtab {
   def read(msg: HttpMessage): Dtab = {
     // Common case: no actual overrides.
     var keys: ArrayBuffer[String] = null
-    val names = msg.headers.names.iterator()
-    while (names.hasNext()) {
-      val key = names.next().toLowerCase
+    val headers = msg.headers.iterator()
+    while (headers.hasNext()) {
+      val key = headers.next().getKey().toLowerCase
       if (key startsWith Prefix) {
         if (keys == null) keys = ArrayBuffer[String]()
         keys += key

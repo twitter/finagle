@@ -1,7 +1,6 @@
 scala_library(name='scala',
   dependencies=[
     pants('3rdparty:netty'),
-    pants('finagle/finagle-core/src/main/java'),
     pants('util/util-app'),
     pants('util/util-collection'),
     pants('util/util-core'),
@@ -10,4 +9,8 @@ scala_library(name='scala',
     pants('util/util-logging')
   ],
   sources=rglobs('*.scala'),
+  java_sources=[pants('finagle/finagle-core/src/main/java')],
+  provides=artifact(org='com.twitter',
+                    name='finagle-core',
+                    repo='pants-support/ivy:internal',),
 )

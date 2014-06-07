@@ -5,5 +5,8 @@ scala_library(name='scala',
     pants('3rdparty/jvm/com/twitter/common:stats-util'),
     pants('util/util-core'),
   ],
-  sources=rglobs('*.scala')
+  sources=rglobs('*.scala'),
+  provides=artifact(org='com.twitter',
+                    name='finagle-mux',
+                    repo='pants-support/ivy:internal',),
 )

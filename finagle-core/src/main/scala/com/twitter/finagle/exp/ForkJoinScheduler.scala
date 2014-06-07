@@ -139,6 +139,7 @@ private class ForkJoinScheduler(
   // We can't provide useful/cheap implementations of these.
   def usrTime = -1L
   def cpuTime = -1L
+  def wallTime = -1L
   def numDispatches = -1L
   def flush() = ()
 }

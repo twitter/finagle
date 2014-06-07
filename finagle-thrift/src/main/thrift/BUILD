@@ -1,3 +1,3 @@
-thrift_library(name='thrift',
+java_thrift_library(name='thrift',
   sources=rglobs('*.thrift')
 )

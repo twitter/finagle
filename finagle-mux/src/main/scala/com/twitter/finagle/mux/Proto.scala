@@ -2,7 +2,7 @@ package com.twitter.finagle.mux
 
 import com.twitter.finagle.tracing.{SpanId, TraceId, Flags}
 import com.twitter.finagle.{Dtab, Dentry, NameTree, Path}
-import com.twitter.io.Charsets
+import com.twitter.io.{Charsets, Buf}
 import com.twitter.util.{Duration, Time}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
@@ -45,7 +45,8 @@ private[finagle] object Message {
   val MarkerTag = 0
   val MinTag = 1
   val MaxTag = (1<<23)-1
-  
+  val TagMSB = (1<<23)
+
   private def mkByte(b: Byte) =
     ChannelBuffers.unmodifiableBuffer(ChannelBuffers.wrappedBuffer(Array(b)))
 
@@ -273,6 +274,15 @@ private[finagle] object Message {
       else None
   }
 
+  object ControlMessage {
+    // TODO: Update this extractor in the event that we "fix" the control
+    // message flukes by removing backwards compatibility.
+    def unapply(m: Message): Option[Int] =
+      if (math.abs(m.typ) >= 64 || m.typ == Types.BAD_Tdiscarded)
+        Some(m.tag)
+      else None
+  }
+
   def decodeUtf8(buf: ChannelBuffer): String = 
     decodeUtf8(buf, buf.readableBytes)
 
@@ -449,7 +459,7 @@ private[finagle] object Message {
   }
 
   def encode(m: Message): ChannelBuffer = {
-    if (m.tag < MarkerTag || m.tag > MaxTag)
+    if (m.tag < MarkerTag || (m.tag & ~TagMSB) > MaxTag)
       throw new BadMessageException("invalid tag number %d".format(m.tag))
 
     val head = Array[Byte](

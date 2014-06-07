@@ -34,6 +34,11 @@ trait Resolver {
     }
 }
 
+/**
+ * An abstract class version of Resolver for java compatibility.
+ */
+abstract class AbstractResolver extends Resolver
+
 object InetResolver extends Resolver {
   val scheme = "inet"
 

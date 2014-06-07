@@ -6,5 +6,8 @@ scala_library(name='scala',
     pants('finagle/finagle-thrift'),
     pants('util/util-core')
   ],
-  sources=rglobs('*.scala')
+  sources=rglobs('*.scala'),
+  provides=artifact(org='com.twitter',
+                    name='finagle-thriftmux',
+                    repo='pants-support/ivy:internal',),
 )

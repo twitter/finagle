@@ -1,6 +1,6 @@
 package com.twitter.finagle.builder
 
-import com.twitter.finagle._
+import com.twitter.finagle.{Server => FinagleServer, _}
 import com.twitter.finagle.channel.IdleConnectionFilter
 import com.twitter.finagle.channel.OpenConnectionsThresholds
 import com.twitter.finagle.dispatch.ExpiringServerDispatcher
@@ -65,12 +65,9 @@ object ServerConfig {
   sealed abstract trait Yes
   type FullySpecified[Req, Rep] = ServerConfig[Req, Rep, Yes, Yes, Yes]
 
-  def nilServer[Req, Rep] = new StackServer[Req, Rep, Any, Any](nilStack, Stack.Params.empty) {
-    protected val newListener: Stack.Params => Listener[Any, Any] =
-      Function.const(NullListener)
-
-    protected val newDispatcher: Stack.Params => Dispatcher =
-      Function.const((_: Any, _: Any) => Closable.nop)
+  def nilServer[Req, Rep] = new FinagleServer[Req, Rep] {
+    def serve(addr: SocketAddress, service: ServiceFactory[Req, Rep]): ListeningServer =
+      NullServer
   }
 
   // params specific to ServerBuilder
@@ -148,7 +145,7 @@ private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName
  */
 class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   params: Stack.Params,
-  mk: Stack.Params => StackServer[Req, Rep, Any, Any]
+  mk: Stack.Params => FinagleServer[Req, Rep]
 ) {
   import ServerConfig._
   import com.twitter.finagle.param._
@@ -164,7 +161,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
   protected def copy[Req1, Rep1, HasCodec1, HasBindTo1, HasName1](
     ps: Stack.Params,
-    newServer: Stack.Params => StackServer[Req1, Rep1, Any, Any]
+    newServer: Stack.Params => FinagleServer[Req1, Rep1]
   ): ServerBuilder[Req1, Rep1, HasCodec1, HasBindTo1, HasName1] =
     new ServerBuilder(ps, newServer)
 
@@ -195,9 +192,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
           codec.prepareConnFactory(next)
       )
       new StackServer[Req1, Rep1, Any, Any](newStack, ps) {
-        protected val newListener: Stack.Params => Listener[Any, Any] = { prms =>
-          Netty3Listener(codec.pipelineFactory, prms)
-        }
+        protected val newListener: Stack.Params => Listener[Any, Any] =
+          Netty3Listener(codec.pipelineFactory, _)
 
         protected val newDispatcher: Stack.Params => Dispatcher = { _ =>
           // TODO: Expiration logic should be installed using ExpiringService
@@ -218,8 +214,15 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       }
     })
 
+  /**
+   * Overrides the stack and [[com.twitter.finagle.Server]] that will be used
+   * by this builder. The `mk` function is passed the state of configuration
+   * when `build` is called. There is no guarantee that all the builder parameters
+   * may be used by the server created by `mk`, it is up to the discretion of
+   * the server and protocol implementation.
+   */
   def stack[Req1, Rep1](
-    mk: Stack.Params => StackServer[Req1, Rep1, Any, Any]
+    mk: Stack.Params => FinagleServer[Req1, Rep1]
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
     copy(params, mk)
 
@@ -370,7 +373,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   ): Server = new Server {
     val Label(label) = params[Label]
     val BindTo(addr) = params[BindTo]
-    val Stats(statsReceiver) = params[Stats]
     val Logger(logger) = params[Logger]
     val Daemonize(daemon) = params[Daemonize]
     val MonitorFactory(newMonitor) = params[MonitorFactory]
@@ -378,12 +380,11 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     val monitor = newMonitor(label, InetSocketAddressUtil.toPublic(addr)) andThen
       new SourceTrackingMonitor(logger, "server")
 
-    val server = mk(params)
-    val listeningServer = server
-      .configured(Monitor(monitor))
-      .configured(Stats(statsReceiver))
-      .configured(Reporter(NullReporterFactory))
-      .serve(addr, serviceFactory)
+    val serverParams = params +
+      Monitor(monitor) +
+      Reporter(NullReporterFactory)
+
+    val listeningServer = mk(serverParams).serve(addr, serviceFactory)
 
     val closed = new AtomicBoolean(false)
 
@@ -415,9 +416,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * completeness.
    */
   def unsafeBuild(service: Service[Req, Rep]): Server = {
-    if (mk(params).stack.tails.size == 1)
-      throw new IncompleteSpecification("No codec was specified")
-
     if (!params.contains[BindTo])
       throw new IncompleteSpecification("No bindTo was specified")
 

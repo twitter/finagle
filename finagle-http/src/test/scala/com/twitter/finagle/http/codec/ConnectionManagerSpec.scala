@@ -60,7 +60,12 @@ class ConnectionManagerSpec extends SpecificationWithJUnit with Mockito {
       there was one(trans).read()
       f.isDefined must beFalse
       rp.setValue(response)
-      f.poll must beSome(Return(response))
+      f.poll match {
+        case Some(Return(r: HttpResponse)) =>
+          r.version must_== response.getProtocolVersion
+          r.status must_== response.getStatus
+        case _ => fail()
+      }
 
       if (shouldMarkDead)
         there was one(trans).close()

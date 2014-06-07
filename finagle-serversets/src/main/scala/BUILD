@@ -14,5 +14,8 @@ scala_library(name='scala',
   sources=rglobs('*.scala'),
   resources=[
     pants('finagle/finagle-serversets/src/main/resources')
-  ]
+  ],
+  provides=artifact(org='com.twitter',
+                    name='finagle-serversets',
+                    repo='pants-support/ivy:internal',),
 )

@@ -354,6 +354,7 @@ class ClientSpec extends SpecificationWithJUnit {
       }
     }
 
+    if (!sys.props.contains("SKIP_FLAKY"))
     "Cache specific cluster" in {
       "add and remove" in {
         // the cluster initially must have 5 members
