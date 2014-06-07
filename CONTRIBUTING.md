@@ -50,5 +50,33 @@ messages along these guidelines:
     Result
     After your change, what will change?
 
+## Documentation
+
+Finagle uses [Sphinx][2] to generate its user guide via the built-in Sphinx
+support in the [sbt-site plugin][3]. You'll need to [install Sphinx][4] on your
+system before you can build the site locally.
+
+Once you've got Sphinx installed, you can make changes to the [RST][5] files in
+the `doc/src/sphinx` directory and then build the site with the following
+command:
+
+``` bash
+./sbt 'project finagle-doc' make-site
+```
+
+You can then view the site locally at `doc/target/site/index.html`.
+
+Please note that sbt-site currently will not work with the Python 3 version of
+Sphinx. It's also hard-coded to call an executable named `sphinx-build`, which
+on some systems may be the name of the Python 3 version, with the Python 2
+version named `sphinx-build2`. If the site build process crashes with a "Failed
+to build Sphinx html documentation", this is likely to be the problem. The
+simplest solution is to create a symbolic link to `sphinx-build2` named
+`sphinx-build` somewhere on your path.
+
 [0]: http://twitter.github.io/effectivescala/
 [1]: http://docs.scala-lang.org/style/scaladoc.html
+[2]: http://sphinx-doc.org/
+[3]: https://github.com/sbt/sbt-site
+[4]: http://sphinx-doc.org/install.html
+[5]: http://docutils.sourceforge.net/rst.html
