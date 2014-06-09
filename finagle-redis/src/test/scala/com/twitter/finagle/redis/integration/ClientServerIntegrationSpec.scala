@@ -68,6 +68,13 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
         Await.result(client(Del(null:List[ChannelBuffer]))) must throwA[ClientError]
         Await.result(client(Del(List[ChannelBuffer]()))) must throwA[ClientError]
       }
+      "DUMP" >>  {
+        val kv = (StringToChannelBuffer("mykey"), StringToChannelBuffer("10"))
+        Await.result(client(Set(kv._1, kv._2))) mustEqual StatusReply("OK")
+        Await.result(client(Dump(kv._1))) must haveClass[BulkReply]
+        Await.result(client(Del(List(kv._1)))) mustEqual IntegerReply(1)
+        Await.result(client(Dump(kv._1))) mustEqual EmptyBulkReply()
+      }
       "EXISTS" >> {
         Await.result(client(Exists(KEY))) mustEqual IntegerReply(1)
         Await.result(client(Exists("nosuchkey"))) mustEqual IntegerReply(0)

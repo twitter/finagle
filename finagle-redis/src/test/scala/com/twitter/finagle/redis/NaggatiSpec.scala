@@ -38,6 +38,10 @@ class NaggatiSpec extends SpecificationWithJUnit {
             codec(wrap("DEL foo bar\r\n")) mustEqual List(Del(List(foo, bar)))
             codec(wrap("DEL\r\n")) must throwA[ClientError]
           }
+          "DUMP" >> {
+            codec(wrap("DUMP\r\n")) must throwA[ClientError]
+            codec(wrap("DUMP baz\r\n")) mustEqual List(Dump(baz))
+          }
           "EXISTS" >> {
             codec(wrap("EXISTS\r\n")) must throwA[ClientError]
             codec(wrap("EXISTS foo\r\n")) mustEqual List(Exists(foo))

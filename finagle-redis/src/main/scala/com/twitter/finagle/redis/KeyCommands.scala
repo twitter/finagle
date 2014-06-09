@@ -6,7 +6,6 @@ import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.util.{Future, Time}
 import org.jboss.netty.buffer.ChannelBuffer
 
-
 trait Keys { self: BaseClient =>
 
   /**
@@ -17,6 +16,18 @@ trait Keys { self: BaseClient =>
   def del(keys: Seq[ChannelBuffer]): Future[JLong] =
     doRequest(Del(keys)) {
       case IntegerReply(n) => Future.value(n)
+    }
+
+  /**
+   * Serialize the value stored at key in a Redis-specific format and
+   * returns it to the user
+   * @param key
+   * @return bytes, or none if the key did not exist
+   */
+  def dump(key: ChannelBuffer): Future[Option[ChannelBuffer]] =
+    doRequest(Dump(key)) {
+      case BulkReply(message) => Future.value(Some(message))
+      case EmptyBulkReply()   => Future.value(None)
     }
 
   /**
