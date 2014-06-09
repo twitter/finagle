@@ -11,5 +11,8 @@ scala_library(name='scala',
     pants('finagle/finagle-exception/src/main/thrift:thrift-scala'),
   ],
   sources=rglobs('*.scala'),
-  resources=pants('finagle/finagle-exception/src/main/resources')
+  resources=pants('finagle/finagle-exception/src/main/resources'),
+  provides=artifact(org='com.twitter',
+                    name='finagle-exception',
+                    repo='pants-support/ivy:internal',),
 )

@@ -28,6 +28,9 @@ import org.apache.thrift.protocol.*;
 
 // No additional import required for struct/union.
 
+/**
+ * Serializes an individual delegation.
+ */
 public class Delegation implements TBase<Delegation, Delegation._Fields>, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("Delegation");
 

@@ -184,7 +184,7 @@ private[thrift] class ThriftServerTracingFilter(
           if (d.src != null && d.dst != null) {
             val src = Path.read(d.src)
             val dst = NameTree.read(d.dst)
-            Dtab.delegate(Dentry(src, dst))
+            Dtab.local += Dentry(src, dst)
           }
         }
       }

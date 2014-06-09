@@ -93,6 +93,26 @@ class StatsReceiverTest extends FunSuite {
     verify(receiver, times(3)).stat("2", "chainz")
   }
 
+  test("StatsReceiver.scope: prefix stats by a scope string") {
+    val receiver = new InMemoryStatsReceiver
+    val scoped = receiver.scope("foo")
+    receiver.counter("bar").incr()
+    scoped.counter("baz").incr()
+
+    assert(receiver.counters(Seq("bar")) === 1)
+    assert(receiver.counters(Seq("foo", "baz")) === 1)
+  }
+
+  test("StatsReceiver.scope: don't prefix with the empty string") {
+    val receiver = new InMemoryStatsReceiver
+    val scoped = receiver.scope("")
+    receiver.counter("bar").incr()
+    scoped.counter("baz").incr()
+
+    assert(receiver.counters(Seq("bar")) === 1)
+    assert(receiver.counters(Seq("baz")) === 1)
+  }
+
   test("Scoped equality") {
     val sr = new InMemoryStatsReceiver
     assert(sr === sr)

@@ -4,5 +4,8 @@ scala_library(name='scala',
     pants('finagle/finagle-core'),
     pants('util/util-core')
   ],
-  sources=rglobs('*.scala')
+  sources=rglobs('*.scala'),
+  provides=artifact(org='com.twitter',
+                    name='finagle-testers',
+                    repo='pants-support/ivy:internal',),
 )

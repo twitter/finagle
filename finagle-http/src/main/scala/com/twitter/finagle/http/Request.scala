@@ -22,7 +22,8 @@ abstract class Request extends Message with HttpRequestProxy {
 
   def isRequest = true
 
-  lazy val params: ParamMap = new RequestParamMap(this)
+  def params: ParamMap = _params
+  private[this] lazy val _params: ParamMap = new RequestParamMap(this)
 
   def method: HttpMethod           = getMethod
   def method_=(method: HttpMethod) = setMethod(method)

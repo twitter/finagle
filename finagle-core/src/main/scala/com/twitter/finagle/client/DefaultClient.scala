@@ -74,18 +74,17 @@ case class DefaultClient[Req, Rep](
   loadBalancer: WeightedLoadBalancerFactory = DefaultBalancerFactory
 ) extends Client[Req, Rep] {
   com.twitter.finagle.Init()
-  val globalStatsReceiver = new RollupStatsReceiver(statsReceiver)
   private[this] val log = Logger.getLogger(getClass.getName)
 
   /** Bind a socket address to a well-formed stack */
   val bindStack: SocketAddress => ServiceFactory[Req, Rep] = sa => {
-    val hostStats = if (hostStatsReceiver.isNull) globalStatsReceiver else {
+    val hostStats = if (hostStatsReceiver.isNull) statsReceiver else {
       val host = new RollupStatsReceiver(hostStatsReceiver.scope(
         sa match {
          case ia: InetSocketAddress => "%s:%d".format(ia.getHostName, ia.getPort)
          case other => other.toString
         }))
-      BroadcastStatsReceiver(Seq(host, globalStatsReceiver))
+      BroadcastStatsReceiver(Seq(host, statsReceiver))
     }
 
     val lifetimeLimited: Transformer[Req, Rep] = {
@@ -160,7 +159,7 @@ case class DefaultClient[Req, Rep](
     val traced: Transformer[Req, Rep] = new TracingFilter[Req, Rep](tracer, name) andThen _
 
     val observed: Transformer[Req, Rep] =
-      new StatsFactoryWrapper(_, globalStatsReceiver.scope("service_creation"))
+      new StatsFactoryWrapper(_, statsReceiver.scope("service_creation"))
 
     val noBrokersException = new NoBrokersAvailableException(name)
 

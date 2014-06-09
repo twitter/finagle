@@ -36,6 +36,7 @@ class ThriftClientFinagleServerTest extends FunSuite with BeforeAndAfter with On
     }
 
     def show_me_your_dtab() = Future.value("")
+    def show_me_your_dtab_size() = Future.value(0)
   }
 
   val server = ServerBuilder()

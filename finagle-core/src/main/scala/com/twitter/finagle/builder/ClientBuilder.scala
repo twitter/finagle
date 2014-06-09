@@ -54,7 +54,8 @@ import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.service._
 import com.twitter.finagle.ssl.{Engine, Ssl}
 import com.twitter.finagle.stack.nilStack
-import com.twitter.finagle.stats.{NullStatsReceiver, ClientStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{
+  NullStatsReceiver, ClientStatsReceiver, StatsReceiver, RollupStatsReceiver}
 import com.twitter.finagle.tracing.NullTracer
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
@@ -103,17 +104,10 @@ object ClientConfig {
   type FullySpecified[Req, Rep] = ClientConfig[Req, Rep, Yes, Yes, Yes]
   val DefaultName = "client"
 
-  def nilClient[Req, Rep] = new StackClient[Req, Rep, Any, Any](nilStack, Stack.Params.empty) {
-    val newTransporter: Stack.Params => Transporter[Any, Any] =
-      Function.const(new Transporter[Any, Any] {
-        def apply(sa: SocketAddress) = Future.exception(new Exception("unimplemented"))
-      })
-
-    val newDispatcher: Stack.Params => Dispatcher = { _ =>
-      trans => Service.mk[Req, Rep](Function.const(
-        Future.exception(new Exception("unimplemented"))
-      ))
-    }
+  def nilClient[Req, Rep] = new Client[Req, Rep] {
+    def newClient(dest: Name, label: String): ServiceFactory[Req, Rep] =
+      ServiceFactory(() => Future.value(Service.mk[Req, Rep](_ => Future.exception(
+        new Exception("unimplemented")))))
   }
 
   // params specific to ClientBuilder
@@ -185,7 +179,7 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
 
 class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle](
   params: Stack.Params,
-  mk: Stack.Params => StackClient[Req, Rep, Any, Any]
+  mk: Stack.Params => Client[Req, Rep]
 ) {
   import ClientConfig._
   import com.twitter.finagle.param._
@@ -201,7 +195,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   protected def copy[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1](
     ps: Stack.Params,
-    newClient: Stack.Params => StackClient[Req1, Rep1, Any, Any]
+    newClient: Stack.Params => Client[Req1, Rep1]
   ): ClientBuilder[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1] =
     new ClientBuilder(ps, newClient)
 
@@ -329,8 +323,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def codec[Req1, Rep1](
     codecFactory: CodecFactory[Req1, Rep1]#Client
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
-    stack({ ps =>
-      val Label(name) = ps[Label]
+    _stack({ prms =>
+      val Label(name) = prms[Label]
+      val Timer(timer) = params[Timer]
       val codec = codecFactory(ClientCodecConfig(name))
 
       val prepConn = new Stack.Simple[ServiceFactory[Req1, Rep1]](StackClient.Role.PrepConn) {
@@ -349,34 +344,61 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         }
       }
 
-      val newStack = {
-        val stk = StackClient.newStack[Req1, Rep1]
+      val clientStack = {
+        val stack = StackClient.newStack[Req1, Rep1]
           .replace(StackClient.Role.PrepConn, prepConn)
           .replace(StackClient.Role.PrepFactory, (next: ServiceFactory[Req1, Rep1]) =>
             codec.prepareServiceFactory(next))
 
-        // respect the codec's request to disable failfast
-        if (!codec.failFastOk) stk.remove(FailFastFactory.FailFast)
-        else stk
+        // transform stack wrt. failure accrual
+        val newStack =
+          if (prms.contains[FailureAccrualFac]) {
+            val FailureAccrualFac(fac) = prms[FailureAccrualFac]
+            stack.replace(FailureAccrualFactory.FailureAccrual, (next: ServiceFactory[Req1, Rep1]) =>
+              fac(timer) andThen next)
+          } else {
+            stack
+          }
+
+        // disable failFast if the codec requests it or it is
+        // disabled via the ClientBuilder paramater.
+        val FailFast(failFast) = prms[FailFast]
+        if (!codec.failFastOk || !failFast) newStack.remove(FailFastFactory.FailFast)
+        else newStack
       }
 
-      new StackClient[Req1, Rep1, Any, Any](newStack, ps) {
-        protected val newTransporter: Stack.Params => Transporter[Any, Any] = { prms =>
-          val Stats(stats) = prms[Stats]
+      new StackClient[Req1, Rep1, Any, Any](clientStack, prms) {
+        protected val newTransporter: Stack.Params => Transporter[Any, Any] = { ps =>
+          val Stats(stats) = ps[Stats]
           val newTransport = (ch: Channel) => codec.newClientTransport(ch, stats)
           Netty3Transporter[Any, Any](codec.pipelineFactory,
-            prms + Netty3Transporter.TransportFactory(newTransport))
+            ps + Netty3Transporter.TransportFactory(newTransport))
         }
 
-        protected val newDispatcher: Stack.Params => Dispatcher = { _ =>
-          trans => codec.newClientDispatcher(trans)
-        }
+        protected val newDispatcher: Stack.Params => Dispatcher =
+          Function.const(trans => codec.newClientDispatcher(trans))
       }
     })
 
-  def stack[Req1, Rep1](
-    mk: Stack.Params => StackClient[Req1, Rep1, Any, Any]
+  /** Used internally by `codec` to require hostConnectionLimit */
+  private[this] def _stack[Req1, Rep1](
+    mk: Stack.Params => Client[Req1, Rep1]
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
+    copy(params, mk)
+
+  /**
+   * Overrides the stack and [[com.twitter.finagle.Client]] that will be used
+   * by this builder. The `mk` function is passed the state of configuration
+   * when `build` is called. There is no guarantee that all the builder parameters
+   * may be used by the client created by `mk`, it is up to the discretion of
+   * the client and protocol implementation. For example, most of connection pool
+   * parameters (hostConnectionLimit, etc) don't apply to [[com.twitter.finagle.ThriftMux]].
+   * For this reason, the builder assumes that hostConnectionLimit is irrelevant
+   * when using `stack`.
+   */
+  def stack[Req1, Rep1](
+    mk: Stack.Params => Client[Req1, Rep1]
+  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, Yes] =
     copy(params, mk)
 
   @deprecated("Use tcpConnectTimeout instead", "5.0.1")
@@ -687,41 +709,16 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
       ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
   ): ServiceFactory[Req, Rep] = {
-    import LoadBalancerFactory.HostStats
-
     val Label(label) = params[Label]
     val Daemonize(daemon) = params[Daemonize]
     val Logger(logger) = params[Logger]
-    val Timer(timer) = params[Timer]
     val DestName(dest) = params[DestName]
     val MonitorFactory(mFactory) = params[MonitorFactory]
-    val Stats(stats) = params[Stats]
-    val HostStats(hostStats) = params[HostStats]
 
-    // transform stack wrt. failure modules
-    val client = mk(params) transformed { stack =>
-      val stk = if (params.contains[FailureAccrualFac]) {
-        val FailureAccrualFac(fac) = params[FailureAccrualFac]
-        stack.replace(FailureAccrualFactory.FailureAccrual, (next: ServiceFactory[Req, Rep]) =>
-          fac(timer) andThen next)
-      } else {
-        stack
-      }
+    val clientParams = params +
+      Monitor(mFactory(label))
 
-      val FailFast(failFast) = params[FailFast]
-      if (!failFast) stk.remove(FailFastFactory.FailFast)
-      else stk
-    }
-
-    // Note, we push the responsibility of scoping the statsReceivers to the client
-    // implementations. We maintain historical behavior of enabling per host
-    // stats if no host stats receiver was set.
-    val hostStatsReceiver = if (params.contains[HostStats]) hostStats else stats
-
-    val factory = client
-      .configured(HostStats(hostStatsReceiver))
-      .configured(Monitor(mFactory(label)))
-      .newClient(dest, label)
+    val factory = mk(clientParams).newClient(dest, label)
 
     if (!daemon) ExitGuard.guard()
     new ServiceFactoryProxy[Req, Rep](factory) {
@@ -790,9 +787,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     if (!params.contains[DestName])
       throw new IncompleteSpecification("No destination was specified")
 
-    if (mk(params).stack.tails.size == 1)
-      throw new IncompleteSpecification("No codec was specified")
-
     this.asInstanceOf[ClientBuilder[Req, Rep, Yes, Yes, Yes]]
   }
 
@@ -814,7 +808,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     params[Retries] match {
       case Retries(policy) if params.contains[Retries] =>
         val Label(label) = params[Label]
-        val stats = new StatsFilter[Req, Rep](statsReceiver.scope("tries"))
+        val stats = new StatsFilter[Req, Rep](new RollupStatsReceiver(statsReceiver.scope("tries")))
         val retries = new RetryingFilter[Req, Rep](policy, timer, statsReceiver)
         stats andThen retries
       case _ => identityFilter

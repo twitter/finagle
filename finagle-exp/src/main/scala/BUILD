@@ -5,7 +5,10 @@ scala_library(name='scala',
     pants('finagle/finagle-thrift'),
     pants('util/util-core'),
   ],
-  sources=rglobs('com/twitter/finagle/exp/*.scala')
+  sources=rglobs('com/twitter/finagle/exp/*.scala'),
+  provides=artifact(org='com.twitter',
+                    name='finagle-exp',
+                    repo='pants-support/ivy:internal',),
 )
 
 benchmark(name='benchmark',

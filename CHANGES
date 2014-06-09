@@ -5,6 +5,44 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.17.0
+~~~~~~~
+
+- `finagle`: Add list of Finagle adopters
+- `finagle`: Upgrade third-party dependencies
+- `finagle-core`: Add `Addr.Neg` to the user guide's list of Addr types
+- `finagle-core`: Added Failure support for sourcing to finagle
+- `finagle-core`: ClientBuilder should turn per-host stats off by default (matching new Client building API).
+- `finagle-core`: Implement DefaultServer in terms of StackServer
+- `finagle-core`: Improve the Dtab API
+- `finagle-core`: Prevent scoping stats with the empty-string
+- `finagle-core`: Rolls up the /tries scope properly
+- `finagle-core`: ServerStatsReceiver and ClientStatsReceiver can now update their root scope
+- `finagle-core`: fix race case in DelayedFactory
+- `finagle-core`: introduce AbstractResolver
+- `finagle-core`: remove need for hostConnectionLimit when using ClientBuilder#stack
+- `finagle-core`: widen to type for ServerBuilder#stack
+- `finagle-core`: widen type of ClientBuilder#stack
+- `finagle-doc`: Removed a line from conf.py
+- `finagle-http`: DtabFilter should always clear dtab headers
+- `finagle-http`: add HOST header for CONNECT method
+- `finagle-http`: scala 2.10 compatible tests
+- `finagle-memcached`: filter out one more cancelling request exception in failure accrual
+- `finagle-memcached`: remove empty test
+- `finagle-mux`: Improve Mux server close behavior, control messages to non-Mux clients
+- `finagle-mux`: Marked a gc test as flaky
+- `finagle-mux`: Modifies MuxService to essentially be a Service[Spool[Buf], Spool[Buf]] Problem
+- `finagle-mux`: Rm ClientHangupException in favor of CancelledRequestException
+- `finagle-mysql`: Retrieving a timestamp from the DB nw creates a timestamp in UTC
+- `finagle-mysql`: fix for issue where time was not being returned in UTC for binary protocol
+- `finagle-serversets`: Prevent gauges from being garbage collected
+- `finagle-thrift`: Blackhole control messages sent to non-mux Thrift clients
+- `finagle-thriftmux`: Add per-connection protocol-usage stats
+- `finagle-thriftmux`: Add stats to identify ThriftMux clients and servers
+- `finagle-thriftmux`: Propagate Contexts from non-ThriftMux clients
+- `finagle-thriftmux`: add ClientBuilder#stack compatibility and make APIs symmetric
+- `finagle-thriftmux`: pass along ClientId with ClientBuilder API
+
 6.16.0
 ~~~~~~~
 

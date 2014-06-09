@@ -9,5 +9,8 @@ scala_library(name='scala',
   sources=rglobs('*.scala'),
   resources=[
     pants('finagle/finagle-ostrich4/src/main/resources')
-  ]
+  ],
+  provides=artifact(org='com.twitter',
+                    name='finagle-ostrich4',
+                    repo='pants-support/ivy:internal',),
 )

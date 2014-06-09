@@ -30,6 +30,7 @@ class FinagleClientThriftServerSpec extends SpecificationWithJUnit {
             Future.Void
           }
           def show_me_your_dtab() = ""
+          def show_me_your_dtab_size() = 0
         }
 
         val (thriftServerAddr, thriftServer) = {

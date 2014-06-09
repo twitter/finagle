@@ -16,8 +16,23 @@ protocols.
 For extensive documentation, please see the
 [user guide](http://twitter.github.io/finagle/guide/) and
 [API documentation](http://twitter.github.io/finagle/docs/#com.twitter.finagle.package)
-websites. Documentation improves are always welcome, so feel free to send
-patches our way.
+websites. Documentation improvements are always welcome, so please send patches
+our way.
+
+## Adopters
+
+The following are a few of the companies that are using Finagle:
+
+* [Foursquare](https://foursquare.com/)
+* [Pinterest](https://www.pinterest.com/)
+* [SoundCloud](https://soundcloud.com/)
+* [Tumblr](https://www.tumblr.com/)
+* [Twitter](https://twitter.com/)
+
+For a more complete list, please see
+[our adopter page](https://github.com/twitter/finagle/blob/master/ADOPTERS.md).
+If your organization is using Finagle, consider adding a link there and sending
+us a pull request!
 
 ## Contributing
 

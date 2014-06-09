@@ -293,6 +293,9 @@ computation); ``Addrs`` are in one of 3 states:
 	The binding is still pending: perhaps because we are awaiting a DNS answer
 	or Zookeeper operation completion.
 
+``Addr.Neg``
+	The binding was negative, meaning that the destination does not exist.
+
 ``Addr.Failed(cause: Throwable)``
 	The binding failed with the given ``cause``.
 
