@@ -1,60 +1,41 @@
 package com.twitter.finagle.smtp
 
-trait Reply {
-  val firstDigit: Char
-  val secondDigit: Char
-  val thirdDigit: Char
+trait UnspecifiedReply {
+  val code: Int
   val info: String
-  def getCode: Int =  (StringBuilder.newBuilder + firstDigit + secondDigit + thirdDigit).toInt
-  val isValid = true
-  override def toString = StringBuilder.newBuilder + firstDigit + secondDigit + thirdDigit + " " + info
+}
+
+object Reply {
+  val REPLY_TYPE_SPECIFIED = 1
+}
+
+trait Reply extends UnspecifiedReply {
+  val code = Reply.REPLY_TYPE_SPECIFIED
 }
 
 trait Error extends Exception with Reply
 
-case class UnknownReply(info: String) extends Error {
-  val firstDigit = '0'
-  val secondDigit = '0'
-  val thirdDigit = '0'
-  override val isValid = false
-}
-case class UnknownReplyCodeError(firstDigit: Char, secondDigit: Char, thirdDigit: Char, info: String) extends Error {
-  override val isValid = false
+//used in cases when you need just to return something
+case object EmptyReply extends Reply {
+  val info = ""
 }
 
-/*Differentiating by first digit*/
-trait PositiveCompletionReply extends Reply {
-  val firstDigit = '2'
+case class InvalidReply(content: String) extends Error {
+  val info = content
 }
+case class UnknownReplyCodeError(override val code: Int, info: String) extends Error
 
-trait PositiveIntermediateReply extends Reply {
-  val firstDigit = '3'
-}
+/*Differentiating by success*/
+trait PositiveCompletionReply extends Reply
+trait PositiveIntermediateReply extends Reply
+trait TransientNegativeCompletionReply extends Error
+trait PermanentNegativeCompletionReply extends Error
 
-trait TransientNegativeCompletionReply extends Error {
-  val firstDigit = '4'
-}
-
-trait PermanentNegativeCompletionReply extends Error {
-  val firstDigit = '5'
-}
-
-/*Differentiating by second digit*/
-trait SyntaxReply extends Reply {
-  val secondDigit = '0'
-}
-
-trait InformationReply extends Reply {
-  val secondDigit = '1'
-}
-
-trait ConnectionsReply extends Reply {
-  val secondDigit = '2'
-}
-
-trait MailSystemReply extends Reply {
-  val secondDigit = '5'
-}
+/*Differentiating by context*/
+trait SyntaxReply extends Reply
+trait InformationReply extends Reply
+trait ConnectionsReply extends Reply
+trait MailSystemReply extends Reply
 
 /*Replies by groups*/
 trait SyntaxErrorReply extends PermanentNegativeCompletionReply with SyntaxReply
@@ -68,109 +49,46 @@ trait ActionErrorReply extends TransientNegativeCompletionReply with MailSystemR
 
 
 /*Syntax errors*/
-case class SyntaxError(inf: String) extends SyntaxErrorReply {
-  val info = inf
-  val thirdDigit = '0'
-}
-case class ArgumentSyntaxError(inf: String) extends SyntaxErrorReply {
-  val info = inf
-  val thirdDigit = '1'
-}
-case class CommandNotImplemented(inf: String) extends SyntaxErrorReply {
-  val info = inf
-  val thirdDigit = '2'
-}
-case class BadCommandSequence(inf: String) extends SyntaxErrorReply {
-  val info = inf
-  val thirdDigit = '3'
-}
-case class ParameterNotImplemented(inf: String) extends SyntaxErrorReply {
-  val info = inf
-  val thirdDigit = '4'
-}
+case class SyntaxError(info: String) extends SyntaxErrorReply
+case class ArgumentSyntaxError(info: String) extends SyntaxErrorReply
+case class CommandNotImplemented(info: String) extends SyntaxErrorReply
+case class BadCommandSequence(info: String) extends SyntaxErrorReply
+case class ParameterNotImplemented(info: String) extends SyntaxErrorReply
 
 /*System information*/
-case class SystemStatus(inf: String) extends SystemInfoReply {
-  val info = inf
-  val thirdDigit = '1'
-}
-case class Help(inf: String) extends SystemInfoReply {
-  val info = inf
-  val thirdDigit = '4'
-}
+case class SystemStatus(info: String) extends SystemInfoReply
+case class Help(info: String) extends SystemInfoReply
 
 /*Service information*/
-case class ServiceReady(inf: String) extends ServiceInfoReply {
-  val info = inf
-  val thirdDigit = '0'
-}
-case class ClosingTransmission(inf: String) extends ServiceInfoReply {
-  val info = inf
-  val thirdDigit = '1'
-}
-case class ServiceNotAvailable(inf: String) extends NotAvailableReply {
-  val info = inf
-  val thirdDigit = '1'
-}
+case class ServiceReady(info: String) extends ServiceInfoReply
+case class ClosingTransmission(info: String) extends ServiceInfoReply
+case class ServiceNotAvailable(info: String) extends NotAvailableReply
 
 /*Mail system successes*/
-case class OK(inf: String) extends MailOkReply {
-  val info = inf
-  val thirdDigit = '0'
-}
-case class TempUserNotLocal(inf: String) extends MailOkReply {
-  val info = inf
-  val thirdDigit = '1'
-}
-case class TempUserNotVerified(inf: String) extends MailOkReply {
-  val info = inf
-  val thirdDigit = '2'
-}
-case class StartInput(inf: String) extends MailIntermediateReply {
-  val info = inf
-  val thirdDigit = '4'
-}
+case class OK(info: String) extends MailOkReply
+
+//for greeting with extensions
+case class Extension(info: String) extends MailOkReply
+
+case class AvailableExtensions(info: String, ext: Seq[Extension], last: OK) extends MailOkReply
+
+//Greeting contains ServiceReady message and whatever is received next
+case class Greeting(info: String, ext: Reply) extends ServiceInfoReply
+
+case class TempUserNotLocal(info: String) extends MailOkReply
+case class TempUserNotVerified(info: String) extends MailOkReply
+case class StartInput(info: String) extends MailIntermediateReply
 
 /*Mail system errors*/
-case class MailboxUnavailableError(inf: String) extends MailErrorReply {
-  val info = inf
-  val thirdDigit = '0'
-}
-case class UserNotLocalError(inf: String) extends MailErrorReply {
-  val info = inf
-  val thirdDigit = '1'
-}
-case class InsufficientStorageError(inf: String) extends MailErrorReply {
-  val info = inf
-  val thirdDigit = '2'
-}
-case class InvalidMailboxName(inf: String) extends MailErrorReply {
-  val info = inf
-  val thirdDigit = '3'
-}
-case class TransactionFailed(inf: String) extends MailErrorReply {
-  val info = inf
-  val thirdDigit = '4'
-}
-case class AddressNotRecognized(inf: String) extends MailErrorReply {
-  val info = inf
-  val thirdDigit = '5'
-}
+case class MailboxUnavailableError(info: String) extends MailErrorReply
+case class UserNotLocalError(info: String) extends MailErrorReply
+case class InsufficientStorageError(info: String) extends MailErrorReply
+case class InvalidMailboxName(info: String) extends MailErrorReply
+case class TransactionFailed(info: String) extends MailErrorReply
+case class AddressNotRecognized(info: String) extends MailErrorReply
 
 /*Errors in performing requested action*/
-case class TempMailboxUnavailable(inf: String) extends ActionErrorReply {
-  val info = inf
-  val thirdDigit = '0'
-}
-case class ProcessingError(inf: String) extends ActionErrorReply {
-  val info = inf
-  val thirdDigit = '1'
-}
-case class TempInsufficientStorage(inf: String) extends ActionErrorReply {
-  val info = inf
-  val thirdDigit = '2'
-}
-case class ParamsAccommodationError(inf: String) extends ActionErrorReply {
-  val info = inf
-  val thirdDigit = '5'
-}
+case class TempMailboxUnavailable(info: String) extends ActionErrorReply
+case class ProcessingError(info: String) extends ActionErrorReply
+case class TempInsufficientStorage(info: String) extends ActionErrorReply
+case class ParamsAccommodationError(info: String) extends ActionErrorReply
