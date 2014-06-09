@@ -1,8 +1,9 @@
 package com.twitter.finagle.factory
 
-import com.twitter.finagle.{ClientConnection, param, ServiceFactory, ServiceFactoryProxy, Stack, Stackable}
+import com.twitter.finagle._
 import com.twitter.finagle.util.Throwables
 import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver}
+import com.twitter.util.{Future, Stopwatch, Return, Throw}
 
 private[finagle] object StatsFactoryWrapper {
   object ServiceCreationStats extends Stack.Role
@@ -32,8 +33,16 @@ class StatsFactoryWrapper[Req, Rep](
   extends ServiceFactoryProxy[Req, Rep](self)
 {
   private[this] val failureStats = statsReceiver.scope("failures")
+  private[this] val latencyStat = statsReceiver.stat("service_acquisition_latency_ms")
 
-  override def apply(conn: ClientConnection) = super.apply(conn) onFailure { e =>
-    failureStats.counter(Throwables.mkString(e): _*).incr()
+  override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
+    val elapsed = Stopwatch.start()
+    super.apply(conn) respond {
+      case Throw(t) =>
+        failureStats.counter(Throwables.mkString(t): _*).incr()
+        latencyStat.add(elapsed().inMilliseconds)
+      case Return(_) =>
+        latencyStat.add(elapsed().inMilliseconds)
+    }
   }
 }
