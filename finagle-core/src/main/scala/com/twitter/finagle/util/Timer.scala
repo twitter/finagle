@@ -1,8 +1,7 @@
 package com.twitter.finagle.util
 
 import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.util.{Time, Duration, TimerTask, Timer => UtilTimer}
-import java.util.Collections
+import com.twitter.util.{Timer => UtilTimer, _}
 import java.util.concurrent.TimeUnit
 import org.jboss.netty.util.HashedWheelTimer
 import org.jboss.netty.{util => nu}
@@ -14,19 +13,21 @@ import org.jboss.netty.{util => nu}
 class TimerFromNettyTimer(underlying: nu.Timer) extends UtilTimer {
   def schedule(when: Time)(f: => Unit): TimerTask = {
     val timeout = underlying.newTimeout(new nu.TimerTask {
+      val saved = Local.save()
       def run(to: nu.Timeout) {
-        if (!to.isCancelled) f
+        if (!to.isCancelled) runInContext(saved, f)
       }
     }, math.max(0, (when - Time.now).inMilliseconds), TimeUnit.MILLISECONDS)
     toTimerTask(timeout)
   }
 
   def schedule(when: Time, period: Duration)(f: => Unit): TimerTask = new TimerTask {
+    val saved = Local.save()
     var isCancelled = false
     var ref: TimerTask = schedule(when) { loop() }
 
     def loop() {
-      f
+      runInContext(saved, f)
       synchronized {
         if (!isCancelled) ref = schedule(period.fromNow) { loop() }
       }
@@ -44,6 +45,11 @@ class TimerFromNettyTimer(underlying: nu.Timer) extends UtilTimer {
 
   private[this] def toTimerTask(task: nu.Timeout) = new TimerTask {
     def cancel() { task.cancel() }
+  }
+
+  private[this] def runInContext(saved: Local.Context, f: => Unit): Unit = {
+    Local.restore(saved)
+    Monitor(f)
   }
 }
 

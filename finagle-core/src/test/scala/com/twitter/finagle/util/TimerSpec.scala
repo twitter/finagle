@@ -1,7 +1,8 @@
 package com.twitter.finagle.util
 
+import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
-import com.twitter.util.TimerTask
+import com.twitter.util.{NullMonitor, Monitor, Time, TimerTask}
 import java.util.Collections
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
@@ -35,6 +36,38 @@ class TimerSpec extends SpecificationWithJUnit with Mockito {
       taskCaptor.getValue.run(firstTimeout)
 
       there was atMostOne(timer).newTimeout(any, any, any)
+    }
+
+    "Use the monitor in context when handling exceptions" in {
+      class CustomMonitoredException extends Exception
+      sealed trait TimerStatus
+      object Success extends TimerStatus
+      object ExceptionHandled extends TimerStatus
+      object ExceptionNotHandled extends TimerStatus
+
+      val statuses = new Broker[TimerStatus]
+      val monitor = new Monitor {
+        override def handle(exc: Throwable): Boolean = exc match {
+          case _: CustomMonitoredException => statuses ! ExceptionHandled; true
+          case _                           => statuses ! ExceptionNotHandled; false
+        }
+      }
+      Monitor.set(NullMonitor)
+
+      val timer = new nu.HashedWheelTimer(10, TimeUnit.MILLISECONDS)
+      timer.start()
+      val t = new TimerFromNettyTimer(timer)
+
+      monitor { t.schedule(Time.now) { statuses ! Success } }
+      statuses.?? must beEqualTo(Success)
+
+      monitor { t.schedule(Time.now) { throw new CustomMonitoredException } }
+      statuses.?? must beEqualTo(ExceptionHandled)
+
+      monitor { t.schedule(Time.now) { throw new Exception } }
+      statuses.?? must beEqualTo(ExceptionNotHandled)
+
+      t.stop()
     }
   }
 }
