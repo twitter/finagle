@@ -7,7 +7,7 @@ import com.twitter.finagle.stats.{StatsReceiver, DefaultStatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Addr, Resolver}
 import com.twitter.io.Buf
-import com.twitter.util.{Activity, Closable, Memoize, Witness, Var}
+import com.twitter.util.{Activity, Future, Closable, Memoize, Witness, Var}
 import java.net.SocketAddress
 import java.nio.charset.Charset
 import java.util.concurrent.atomic.AtomicInteger
@@ -110,7 +110,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
       scoped.provideGauge("limbo") { nlimbo }
       scoped.provideGauge("size") { size }
 
-      Var.async(Addr.Pending: Addr) { u =>
+      val stabilizedVa = Var.async(Addr.Pending: Addr) { u =>
         nsets.incrementAndGet()
 
         var lastu: Addr = Addr.Pending
@@ -138,6 +138,22 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
           }
         }
       }
+      
+      // Kick off resolution eagerly. This isn't needed to comply to
+      // the resolver interface, but users of ServerSetv1 have come
+      // to rely on this behavior in order to ensure that their
+      // clients are ready to serve traffic.
+      //
+      // This should be removed once we have a better mechanism for
+      // dealing with client readiness.
+      //
+      // In order to prevent this from holding on to a discarded
+      // serverset resolution in perpetuity, we close the observation
+      // after 5 minutes.
+      val c = stabilizedVa.changes respond { _ => /*ignore*/() }
+      Future.sleep(5.minutes) before { c.close() }
+
+      stabilizedVa
   }
 
   def addrOf(hosts: String, path: String, endpoint: Option[String]): Var[Addr] = 
