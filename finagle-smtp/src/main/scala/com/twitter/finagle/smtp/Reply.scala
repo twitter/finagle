@@ -5,18 +5,22 @@ trait UnspecifiedReply {
   val info: String
 }
 
-object Reply {
+object ReplyCode {
   val REPLY_TYPE_SPECIFIED = 1
+  val INVALID_REPLY_CODE = -1
 }
 
 trait Reply extends UnspecifiedReply {
-  val code = Reply.REPLY_TYPE_SPECIFIED
+  val code = ReplyCode.REPLY_TYPE_SPECIFIED
 }
 
-trait Error extends Exception with Reply
+trait Error extends Exception with Reply {
+  override val code = ReplyCode.INVALID_REPLY_CODE
+}
 
 //used in cases when you need just to return something
 case object EmptyReply extends Reply {
+  override val code = ReplyCode.INVALID_REPLY_CODE
   val info = ""
 }
 

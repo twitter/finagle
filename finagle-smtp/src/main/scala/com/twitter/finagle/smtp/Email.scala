@@ -3,32 +3,76 @@ package com.twitter.finagle.smtp
 import javax.mail.internet.InternetAddress
 import javax.mail.{Session, Multipart, Message}
 import scala.collection.JavaConversions._
-import java.util.Properties
+import java.util.{Calendar, Date, Properties}
 
-//case class Email(from: String, to: String, body: String)
+class MailingAddress(val local: String, val domain: String) {
+  override def toString = local + "@" + domain
+}
+
+object MailingAddress {
+  def apply(address: String) = {
+    val parts = address split "@"
+    new MailingAddress(parts(0), parts(1))
+  }
+}
 
 trait EmailMessage {
-  def from: String
-  def to: Seq[String]
-  def cc: Seq[String]
-  def bcc: Seq[String]
-  def body: Seq[String]
+  def getFrom: Seq[MailingAddress]
+  def getSender: MailingAddress
+  def getTo: Seq[MailingAddress]
+  def getCc: Seq[MailingAddress]
+  def getBcc: Seq[MailingAddress]
+  def getDate: Date
+  def getSubject: String
+  def getBody: Seq[String]
 }
 
 object EmailMessage {
-  def apply(_from: String, _to: Seq[String], _cc: Seq[String], _bcc: Seq[String],_body: Seq[String]) = new EmailMessage{
-    def from = _from
-    def to = _to
-    def cc = _cc
-    def bcc = _bcc
-    def body = _body
+  def apply(from: Seq[MailingAddress],
+            sender: MailingAddress,
+            to: Seq[MailingAddress],
+            cc: Seq[MailingAddress],
+            bcc: Seq[MailingAddress],
+            date: Date,
+            subject: String,
+            body: Seq[String])
+  = new EmailMessage{
+    def getFrom = from
+    def getSender = sender
+    def getTo = to
+    def getCc = cc
+    def getBcc = bcc
+    def getDate = date
+    def getSubject = subject
+    def getBody = body
   }
 
-  def apply(javamail: javax.mail.internet.MimeMessage) = new JavaMailMessage(javamail)
+  def apply(from: Seq[MailingAddress],
+            to: Seq[MailingAddress],
+            cc: Seq[MailingAddress],
+            bcc: Seq[MailingAddress],
+            date: Date,
+            subject: String,
+            body: Seq[String]): EmailMessage
+  = apply(from, from(0), to, cc, bcc, date, subject, body)
 
-  def apply(commonsmail: org.apache.commons.mail.Email) = new CommonsMailMessage(commonsmail)
+  def apply(from: Seq[MailingAddress],
+            to: Seq[MailingAddress],
+            subject: String,
+            body: Seq[String]): EmailMessage
+  = apply(from, from(0), to, Seq(), Seq(), Calendar.getInstance().getTime, subject, body)
+
+  def apply(from: String,
+            to: Seq[String],
+            subject: String,
+            body: Seq[String]): EmailMessage
+  = apply(Seq(MailingAddress(from)), to map (MailingAddress(_)), subject, body)
+
+  //def apply(javamail: javax.mail.internet.MimeMessage) = new JavaMailMessage(javamail)
+
+  //def apply(commonsmail: org.apache.commons.mail.Email) = new CommonsMailMessage(commonsmail)
 }
-
+/*
 class JavaMailMessage(val javamail: javax.mail.internet.MimeMessage) extends EmailMessage {
   def from = InternetAddress.toString(javamail.getFrom)
   def to = javamail.getRecipients(Message.RecipientType.TO).map(_.toString)
@@ -65,3 +109,4 @@ class CommonsMailMessage(val commonsmail: org.apache.commons.mail.Email) extends
     }
   }
 }
+*/

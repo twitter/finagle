@@ -14,22 +14,22 @@ object Request {
   val BeginData = new SingleRequest("DATA") //Indicate that data is sent
 }
 
-case class AddFrom(addr: String) extends SingleRequest("MAIL FROM: <" + addr + ">")
-case class AddRecipients(rcpt: Seq[String]) extends SingleRequest("RCPT TO: <" + rcpt.mkString(",") + ">")
+case class AddFrom(addr: Seq[MailingAddress]) extends SingleRequest("MAIL FROM: <" + addr.mkString(",") + ">")
+case class AddRecipients(rcpt: Seq[MailingAddress]) extends SingleRequest("RCPT TO: <" + rcpt.mkString(",") + ">")
 
 case class Data(data: Seq[String]) extends SingleRequest(data.mkString("\r\n"))
 
-case class VerifyAddress(address: String) extends SingleRequest("VRFY " + address)
-case class ExpandMailingList(list: String) extends SingleRequest("EXPN " + list)
+case class VerifyAddress(address: MailingAddress) extends SingleRequest("VRFY " + address.toString)
+case class ExpandMailingList(list: MailingAddress) extends SingleRequest("EXPN " + list.toString)
 
 private[smtp] case class ComposedRequest(requests: Seq[SingleRequest]) extends Request
 
 private[smtp] object ComposedRequest {
   def SendEmail(msg: EmailMessage) = ComposedRequest(Seq(
-    AddFrom(msg.from),
-    AddRecipients(msg.to),
+    AddFrom(msg.getFrom),
+    AddRecipients(msg.getTo),
     Request.BeginData,
-    Data(msg.body)
+    Data(msg.getBody)
   ))
 }
 

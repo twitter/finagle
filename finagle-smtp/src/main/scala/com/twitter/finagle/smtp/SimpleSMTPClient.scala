@@ -3,7 +3,7 @@ package com.twitter.finagle.smtp
 import javax.mail.internet.{InternetAddress, MimeMessage}
 import javax.mail.Session
 import javax.mail.Message
-import java.util.Properties
+import java.util.{Calendar, Properties}
 import org.apache.commons.mail.SimpleEmail
 import com.twitter.util.{Await, Future}
 
@@ -16,15 +16,14 @@ object SimpleSMTPClient {
  def main(args: Array[String]) = {
    //raw text email
    val email1 = EmailMessage(
-   "ex@ex.com",
-   Seq("to@ro.com"),
-   Seq(),
-   Seq(),
-   Seq("test")
+   from = "ex@ex.com",
+   to = Seq("to@ro.com"),
+   subject = "test",
+   body = Seq("test")
    )
 
    //email from javamail
-   val javamail = new MimeMessage(Session.getDefaultInstance(new Properties()))
+   /*val javamail = new MimeMessage(Session.getDefaultInstance(new Properties()))
    javamail.setFrom(new InternetAddress("ex@ex.com"))
    javamail.addRecipient(Message.RecipientType.TO, new InternetAddress("to@ro.com"))
    javamail.setSubject("test")
@@ -39,7 +38,7 @@ object SimpleSMTPClient {
    commons.setMsg("test")
 
    val email3 = EmailMessage(commons)
-
+*/
    val send = SmtpSimple.newService("localhost:25")
    val res: Future[Result] = send(email1)
 
