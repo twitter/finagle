@@ -8,9 +8,30 @@ import java.util.HashMap
  * the first `fastSize` tags in an array for efficient access.
  */
 private trait TagMap[T] extends Iterable[(Int, T)] {
+  /**
+   * If a tag is available, an unused tag is returned and `el` is
+   * associated with it. Otherwise, None is returned.
+   */
   def map(el: T): Option[Int]
+
+  /**
+   * If `tag` is currently associated with another element, that
+   * element is returned and `tag` is reassociated with
+   * `newEl`. Otherwise, None is returned.
+   */
   def maybeRemap(tag: Int, newEl: T): Option[T]
+
+  /**
+   * If `tag` is currently associated with an element, that element is
+   * returned and `tag` the tag is freed. Otherwise, None is returned.
+   */
   def unmap(tag: Int): Option[T]
+
+  /**
+   * If `tag` is currently associated with an element, that element is
+   * returned. Otherwise, None is returned.
+   */
+  def get(tag: Int): Option[T]
 }
 
 private object TagMap {
@@ -62,6 +83,13 @@ private object TagMap {
 
       set.release(tag)
       res
+    }
+
+    def get(tag: Int): Option[T] = synchronized {
+      if (inFast(tag))
+        Option(getFast(tag))
+      else
+        Option(fallback.get(tag))
     }
 
     private[this] def contains(tag: Int) =

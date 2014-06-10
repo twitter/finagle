@@ -49,10 +49,18 @@ class NoBrokersAvailableException(
   override def getMessage = "No hosts are available for client " + name
 }
 
-class RetryFailureException(cause: Throwable)        extends RequestException(cause)
-class CancelledRequestException extends RequestException {
-  override def getMessage = "request cancelled"
+class RetryFailureException(cause: Throwable) extends RequestException(cause)
+
+class CancelledRequestException(cause: Throwable) extends RequestException(cause) {
+  def this() = this(null)
+  override def getMessage = {
+    if (cause == null)
+      "request cancelled"
+    else
+      "request cancelled due to " + cause
+  }
 }
+
 class TooManyWaitersException                        extends RequestException
 class CancelledConnectionException(cause: Throwable) extends RequestException(cause) {
   def this() = this(null)

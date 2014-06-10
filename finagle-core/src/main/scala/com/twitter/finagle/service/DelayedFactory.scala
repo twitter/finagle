@@ -71,7 +71,7 @@ class DelayedFactory[Req, Rep](
     case AwaitingRelease(_, cause) => Future.exception(cause)
     case Failed(exc) => Future.exception(exc)
     case Succeeded(factory) => factory(conn)
-    case state => applySlow(conn)
+    case _ => applySlow(conn)
   }
 
   private[this] def applySlow(conn: ClientConnection): Future[Service[Req, Rep]] = synchronized {
@@ -81,11 +81,13 @@ class DelayedFactory[Req, Rep](
         val waiter = (conn, p)
         q.addLast(waiter)
         p.setInterruptHandler { case cause: Throwable =>
-          state match {
-            case AwaitingFactory(q) =>
-              if (synchronized(q.remove(waiter)))
-                p.setException(new CancelledConnectionException(cause))
-            case Succeeded(_) | Failed(_) | AwaitingRelease(_, _) =>
+          synchronized {
+            state match {
+              case AwaitingFactory(q) =>
+                if (q.remove(waiter))
+                  p.setException(new CancelledConnectionException(cause))
+              case Succeeded(_) | Failed(_) | AwaitingRelease(_, _) =>
+            }
           }
         }
         p

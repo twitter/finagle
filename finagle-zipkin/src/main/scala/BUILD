@@ -11,5 +11,8 @@ scala_library(name='scala',
   sources=rglobs('*.scala'),
   resources=[
     pants('finagle/finagle-zipkin/src/main/resources')
-  ]
+  ],
+  provides=artifact(org='com.twitter',
+                    name='finagle-zipkin',
+                    repo='pants-support/ivy:internal',),
 )

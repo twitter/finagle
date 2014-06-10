@@ -2,8 +2,11 @@ package com.twitter.finagle.thriftmux
 
 import com.twitter.finagle.{mux, Dtab, ThriftMuxUtil}
 import com.twitter.finagle.mux.{BadMessageException, Message}
+import com.twitter.finagle.netty3.Conversions._
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift._
-import com.twitter.finagle.thrift.thrift.{ResponseHeader, RequestHeader, UpgradeReply}
+import com.twitter.finagle.thrift.thrift.{
+  ResponseHeader, RequestContext, RequestHeader, UpgradeReply}
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceContext, TraceId}
 import com.twitter.io.Buf
 import com.twitter.util.{Try, Return, Throw, NonFatal}
@@ -12,8 +15,16 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.apache.thrift.protocol.{TProtocolFactory, TMessage, TMessageType}
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.jboss.netty.channel._
+import scala.collection.mutable.ArrayBuffer
 
-private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
+/**
+ * A [[org.jboss.netty.channel.ChannelPipelineFactory]] that records the number
+ * of open ThriftMux and non-Mux downgraded connections in a pair of
+ * [[java.util.concurrent.atomic.AtomicInteger AtomicIntegers]].
+ */
+private[finagle] class PipelineFactory(
+    statsReceiver: StatsReceiver = NullStatsReceiver,
+    protocolFactory: TProtocolFactory = Protocols.binaryFactory())
   extends ChannelPipelineFactory
 {
   case class UnexpectedRequestException(err: String) extends Exception(err)
@@ -26,9 +37,16 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
   private class TTwitterToMux extends SimpleChannelHandler {
     import TTwitterToMux._
 
+    private[this] def contextStructToKVTuple(c: RequestContext): (ChannelBuffer, ChannelBuffer) =
+      (ChannelBuffers.wrappedBuffer(c.getKey), ChannelBuffers.wrappedBuffer(c.getValue))
+
     private[this] def thriftToMux(req: ChannelBuffer): Message.Tdispatch = {
       val header = new RequestHeader
-      val request_ = InputBuffer.peelMessage(ThriftMuxUtil.bufferToArray(req), header, protocolFactory)
+      val request_ = InputBuffer.peelMessage(
+        ThriftMuxUtil.bufferToArray(req),
+        header,
+        protocolFactory
+      )
       val sampled = if (header.isSetSampled) Some(header.isSampled) else None
       val traceId = TraceId(
         if (header.isSetTrace_id) Some(SpanId(header.getTrace_id)) else None,
@@ -39,10 +57,18 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
       )
 
       val clientIdOpt = Option(header.client_id) map { _.name }
-      val contexts = Seq(TraceContext.newKVTuple(traceId), ClientIdContext.newKVTuple(clientIdOpt))
+      val contextBuf = ArrayBuffer.empty[(ChannelBuffer, ChannelBuffer)]
+      contextBuf += TraceContext.newKVTuple(traceId)
+      contextBuf += ClientIdContext.newKVTuple(clientIdOpt)
+      if (header.contexts != null) {
+        val iter = header.contexts.iterator()
+        while (iter.hasNext) {
+          contextBuf += contextStructToKVTuple(iter.next())
+        }
+      }
 
       Message.Tdispatch(
-        Message.MinTag, contexts, "", Dtab.empty, ChannelBuffers.wrappedBuffer(request_))
+        Message.MinTag, contextBuf.toSeq, "", Dtab.empty, ChannelBuffers.wrappedBuffer(request_))
     }
 
     override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent)  {
@@ -57,6 +83,34 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
           super.writeRequested(ctx,
             new DownstreamMessageEvent(e.getChannel, e.getFuture,
               ChannelBuffers.wrappedBuffer(responseHeader, rep), e.getRemoteAddress))
+
+        case Message.RdispatchNack(_, _) =>
+          // The only mechanism for negative acknowledgement afforded by non-Mux
+          // clients is to tear down the connection.
+          Channels.close(e.getChannel)
+
+        case Message.Tdrain(_) =>
+          // Ignore Tdrains because they are advisory and non-Mux clients
+          // cannot handle them.
+          e.getFuture.setSuccess()
+
+        case Message.Tping(tag) =>
+          e.getFuture.setSuccess()
+          super.messageReceived(ctx,
+            new UpstreamMessageEvent(
+              e.getChannel,
+              Message.encode(Message.Rping(tag)),
+              e.getRemoteAddress))
+
+        case Message.ControlMessage(tag) =>
+          e.getFuture.setSuccess()
+          super.messageReceived(ctx,
+            new UpstreamMessageEvent(
+              e.getChannel,
+              Message.encode(
+                Message.Rerr(tag, "Unable to send Mux control message to non-Mux client")
+              ),
+              e.getRemoteAddress))
 
         case Message.RdispatchError(_, _, error) =>
           // OK to throw an exception here as ServerBridge take cares it
@@ -85,6 +139,36 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
         case Message.RdispatchOk(_, _, rep) =>
           super.writeRequested(ctx,
             new DownstreamMessageEvent(e.getChannel, e.getFuture, rep, e.getRemoteAddress))
+
+        case Message.RdispatchNack(_, _) =>
+          // The only mechanism for negative acknowledgement afforded by non-Mux
+          // clients is to tear down the connection.
+          Channels.close(e.getChannel)
+
+        case Message.Tdrain(_) =>
+          // Ignore Tdrains because they are advisory and non-Mux clients
+          // cannot handle them.
+          e.getFuture.setSuccess()
+
+        // Non-mux clients can't handle T-type control messages, so we
+        // simulate responses.
+        case Message.Tping(tag) =>
+          e.getFuture.setSuccess()
+          super.messageReceived(ctx,
+            new UpstreamMessageEvent(
+              e.getChannel,
+              Message.encode(Message.Rping(tag)),
+              e.getRemoteAddress))
+
+        case Message.ControlMessage(tag) =>
+          e.getFuture.setSuccess()
+          super.messageReceived(ctx,
+            new UpstreamMessageEvent(
+              e.getChannel,
+              Message.encode(
+                Message.Rerr(tag, "Unable to send Mux control message to non-Mux client")
+              ),
+              e.getRemoteAddress))
 
         case Message.RdispatchError(_, _, error) =>
           // OK to throw an exception here as ServerBridge take cares it
@@ -176,6 +260,14 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
         //
         // The hazards of protocol multiplexing.
         case Throw(_: BadMessageException) | Return(Message.Rerr(65537, _)) | Return(Message.Rerr(65540, _))=>
+          // Increment ThriftMux connection count stats and wire up a callback to
+          // decrement on channel closure.
+          downgradedConnects.incr()
+          downgradedConnectionCount.incrementAndGet()
+          ctx.getChannel.getCloseFuture() onSuccessOrFailure {
+            downgradedConnectionCount.decrementAndGet()
+          }
+
           // Add a ChannelHandler to serialize the requests since we may
           // deal with a client that pipelines requests
           ctx.getPipeline.addBefore(ctx.getName, "request_serializer", new RequestSerializer(1))
@@ -192,6 +284,14 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
           }
 
         case Return(_) =>
+          // Increment ThriftMux connection count stats and wire up a callback to
+          // decrement on channel closure.
+          thriftmuxConnects.incr()
+          thriftMuxConnectionCount.incrementAndGet()
+          ctx.getChannel.getCloseFuture() onSuccessOrFailure {
+            thriftMuxConnectionCount.decrementAndGet()
+          }
+
           ctx.getPipeline.remove(this)
           super.messageReceived(ctx, e)
 
@@ -200,11 +300,19 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
     }
   }
 
+  private[this] val downgradedConnectionCount = new AtomicInteger
+  private[this] val thriftMuxConnectionCount = new AtomicInteger
+
+  private[this] val thriftmuxConnects = statsReceiver.counter("connects")
+  private[this] val downgradedConnects = statsReceiver.counter("downgraded_connects")
+  private[this] val downgradedConnectionGauge =
+    statsReceiver.addGauge("downgraded_connections") { downgradedConnectionCount.get() }
+  private[this] val thriftmuxConnectionGauge =
+    statsReceiver.addGauge("connections") { thriftMuxConnectionCount.get() }
+
   def getPipeline() = {
     val pipeline = mux.PipelineFactory.getPipeline()
     pipeline.addLast("upgrader", new Upgrader)
     pipeline
   }
 }
-
-private[finagle] object PipelineFactory extends PipelineFactory(Protocols.binaryFactory())

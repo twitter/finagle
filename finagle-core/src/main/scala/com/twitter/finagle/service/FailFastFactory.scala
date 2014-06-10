@@ -42,14 +42,17 @@ private[finagle] object FailFastFactory {
 }
 
 /**
- * An experimental fail-fast factory that attempts to reduce
- * the amount of requests dispatched to endpoints that will
- * anyway fail. It works by marking a host dead on failure,
- * launching a background process that attempts to reestablish
- * the connection with the given backoff schedule. At this time,
- * the factory is marked unavailable (and thus the load balancer
- * above it will avoid its use). The factory becomes available
- * again on success or when the backoff schedule runs out.
+ * A fail-fast factory that attempts to reduce the amount of requests dispatched
+ * to endpoints that will anyway fail. It works by marking a host dead on
+ * failure, launching a background process that attempts to reestablish the
+ * connection with the given backoff schedule. At this time, the factory is
+ * marked unavailable (and thus the load balancer above it will avoid its
+ * use). The factory becomes available again on success or when the backoff
+ * schedule runs out.
+ *
+ * Inflight attempts to connect will continue uninterrupted. However, trying to
+ * connect *after* being marked dead will fail fast until the background process
+ * is able to establish a connection.
  */
 private[finagle] class FailFastFactory[Req, Rep](
   self: ServiceFactory[Req, Rep],
@@ -77,6 +80,7 @@ private[finagle] class FailFastFactory[Req, Rep](
       val wait #:: rest = getBackoffs()
       val now = Time.now
       val task = timer.schedule(now + wait) { proc ! Observation.Timeout }
+      markedDeadCounter.incr()
       state = Retrying(now, task, 0, rest)
 
     case Observation.TimeoutFail if state != Ok =>
@@ -126,6 +130,8 @@ private[finagle] class FailFastFactory[Req, Rep](
         case _ => 0
       }
     }
+
+  private[this] val markedDeadCounter = statsReceiver.counter("marked_dead")
 
   override def apply(conn: ClientConnection) =
     if (state != Ok) failedFastExc else {

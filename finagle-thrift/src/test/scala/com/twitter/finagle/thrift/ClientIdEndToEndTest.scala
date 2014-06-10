@@ -23,6 +23,7 @@ class ClientIdEndToEndTest extends FunSuite with ThriftTest {
     }
     def someway() = Future.Void
     def show_me_your_dtab() = Future.value("")
+    def show_me_your_dtab_size() = Future.value(0)
   }
 
   val ifaceToService = new B.Service(_, _)

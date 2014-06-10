@@ -10,5 +10,8 @@ junit_tests(name='scala',
     pants('finagle/finagle-thriftmux/src/test/thrift:thrift-scala'),
     pants('util/util-core'),
   ],
-  sources=rglobs('*.scala')
+  sources=rglobs('*.scala'),
+  resources=[
+    pants('finagle/finagle-thriftmux/src/test/resources')
+  ]
 )

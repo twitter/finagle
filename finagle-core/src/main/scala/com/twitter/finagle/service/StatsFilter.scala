@@ -70,6 +70,13 @@ class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
               sourcedFailuresReceiver
                 .counter(sourced.serviceName +: Throwables.mkString(sourced): _*)
                 .incr()
+            case sourced: Failure =>
+              val maybe = sourced.getSource(Failure.Sources.ServiceName)
+              maybe foreach { name =>
+                sourcedFailuresReceiver
+                  .counter(name.toString +: Throwables.mkString(sourced): _*)
+                  .incr()
+              }
             case _ =>
           }
         case Return(_) =>

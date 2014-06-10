@@ -153,6 +153,14 @@ private[thrift] class RawZipkinTracer(
         annotate(record, thrift.Constants.SERVER_SEND)
       case tracing.Annotation.ServerRecv()   =>
         annotate(record, thrift.Constants.SERVER_RECV)
+      case tracing.Annotation.ClientSendFragment()   =>
+        annotate(record, thrift.Constants.CLIENT_SEND_FRAGMENT)
+      case tracing.Annotation.ClientRecvFragment()   =>
+        annotate(record, thrift.Constants.CLIENT_RECV_FRAGMENT)
+      case tracing.Annotation.ServerSendFragment()   =>
+        annotate(record, thrift.Constants.SERVER_SEND_FRAGMENT)
+      case tracing.Annotation.ServerRecvFragment()   =>
+        annotate(record, thrift.Constants.SERVER_RECV_FRAGMENT)
       case tracing.Annotation.Message(value) =>
         annotate(record, value)
       case tracing.Annotation.Rpc(name: String) =>

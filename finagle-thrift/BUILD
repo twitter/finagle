@@ -2,7 +2,6 @@ maven_layout()
 
 jar_library(name='finagle-thrift',
   dependencies=[
-    pants('finagle/finagle-thrift/src/main/java'),
     pants('finagle/finagle-thrift/src/main/scala')
   ]
 )

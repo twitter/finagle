@@ -11,7 +11,7 @@ abstract class RequestProxy extends Request {
   override def httpRequest = request
   override def httpMessage = request
 
-  override lazy val params = request.params
+  override def params = request.params
   def remoteSocketAddress = request.remoteSocketAddress
 
   override lazy val response = request.response

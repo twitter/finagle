@@ -1,7 +1,7 @@
 package com.twitter.finagle.filter
 
 import com.twitter.finagle.{param, SimpleFilter, Service,
-  ServiceFactory, SourcedException, Stack, Stackable}
+  ServiceFactory, SourcedException, Stack, Stackable, Failure}
 import com.twitter.util.Future
 
 private[finagle] object ExceptionSourceFilter {
@@ -28,8 +28,13 @@ private[finagle] object ExceptionSourceFilter {
  */
 class ExceptionSourceFilter[Req, Rep](serviceName: String) extends SimpleFilter[Req, Rep] {
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] =
-    service(req) onFailure {
-      case e: SourcedException => e.serviceName = serviceName
-      case _ => ()
+    service(req) rescue { case t: Throwable =>
+      Future.exception(t match {
+        case f: Failure => f.withSource(Failure.Sources.ServiceName, serviceName)
+        case e: SourcedException =>
+          e.serviceName = serviceName
+          e
+        case t: Throwable => t
+      })
     }
 }

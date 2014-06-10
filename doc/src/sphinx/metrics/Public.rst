@@ -23,19 +23,23 @@ StatsFilter
   a counter of the number of times any exception has been thrown
 
 **sourcedfailures/<source_service_name>{/<exception_name>}+**
-  a counter of the number of times a specific SourcedException has been thrown
+  a counter of the number of times a specific SourcedException or sourced
+  Failure has been thrown
 
 **sourcedfailures/<source_service_name>**
-  a counter of the number of times any SourcedException has been thrown from this service
+  a counter of the number of times any SourcedException or sourced Failure has
+  been thrown from this service
 
 **sourcedfailures**
-  a counter of the number of times any SourcedException has been thrown
+  a counter of the number of times any SourcedException or sourced Failure has
+  been thrown
 
 StatsFactoryWrapper
 <<<<<<<<<<<<<<<<<<<
 
 **failures/<exception_class_name>**
-  a counter of the number of times a service factory has failed with this specific exception
+  a counter of the number of times a service factory has failed with this
+  specific exception
 
 **failures**
   a counter of the number of times a service factory has failed

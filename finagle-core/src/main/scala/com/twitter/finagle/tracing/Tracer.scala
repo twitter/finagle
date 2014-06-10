@@ -38,6 +38,10 @@ object Annotation {
   case class ClientRecv()                          extends Annotation
   case class ServerSend()                          extends Annotation
   case class ServerRecv()                          extends Annotation
+  case class ClientSendFragment()                  extends Annotation
+  case class ClientRecvFragment()                  extends Annotation
+  case class ServerSendFragment()                  extends Annotation
+  case class ServerRecvFragment()                  extends Annotation
   case class Message(content: String)              extends Annotation
   case class ServiceName(service: String)          extends Annotation
   case class Rpc(name: String)                     extends Annotation

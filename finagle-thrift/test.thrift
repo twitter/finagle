@@ -36,4 +36,5 @@ service B extends A {
   oneway void someway();
   
   string show_me_your_dtab();
+  i32 show_me_your_dtab_size();
 }

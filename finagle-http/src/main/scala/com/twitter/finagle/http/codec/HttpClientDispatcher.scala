@@ -77,7 +77,7 @@ class HttpClientDispatcher[Req <: HttpRequest](
     // It's kind of nasty to modify the request inline like this, but it's
     // in-line with what we already do in finagle-http. For example:
     // the body buf gets read without slicing.
-    HttpDtab.write(Dtab.baseDiff(), req)
+    HttpDtab.write(Dtab.local, req)
     trans.write(req) rescue(wrapWriteException) before
       trans.read() flatMap {
         case res: HttpResponse if !res.isChunked =>
