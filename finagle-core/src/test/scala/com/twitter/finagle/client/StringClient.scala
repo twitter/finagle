@@ -17,7 +17,7 @@ private[client] object StringClientPipeline extends ChannelPipelineFactory {
   }
 }
 
-private[client] trait StringClient {
+private[finagle] trait StringClient {
   val stringClient = new StackClient[String, String, String, String] {
     val newTransporter: Stack.Params => Transporter[String, String] =
       Netty3Transporter(StringClientPipeline, _)

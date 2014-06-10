@@ -10,6 +10,11 @@ import java.net.{SocketAddress, InetSocketAddress}
 import java.util.logging.{Level, Logger}
 
 object defaultBalancer extends GlobalFlag("heap", "Default load balancer")
+object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n" + 
+  "\tWhen enabled,the configured stats receiver will be used,\n" + 
+  "\tor the loaded stats receiver if none given.\n" +
+  "\tWhen disabled, the configured stats receiver will be used,\n" + 
+  "\tor the NullStatsReceiver if none given.")
 
 private[finagle] object LoadBalancerFactory {
   import client.StackClient.Role.LoadBalancer
@@ -57,7 +62,15 @@ private[finagle] object LoadBalancerFactory {
       def make(params: Params, next: Stack[ServiceFactory[Req, Rep]]) = {
         val Dest(dest) = params[Dest]
         val Param(loadBalancerFactory) = params[Param]
-        val HostStats(hostStatsReceiver) = params[HostStats]
+      
+        // Determine which stats receiver to use based on the flag 
+        // 'com.twitter.finagle.loadbalancer.perHostStats'
+        // and the configured per-host stats receiver
+        // If the per-host stats receiver is set, ignore the flag
+        val hostStatsReceiver = 
+          if (!params.contains[HostStats]) {
+            if (perHostStats()) LoadedStatsReceiver else NullStatsReceiver
+          } else params[HostStats].hostStatsReceiver
         val param.Stats(statsReceiver) = params[param.Stats]
         val param.Logger(log) = params[param.Logger]
         val param.Label(label) = params[param.Label]
