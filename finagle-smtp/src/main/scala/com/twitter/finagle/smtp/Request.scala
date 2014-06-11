@@ -22,5 +22,3 @@ case class Data(data: Seq[String]) extends SingleRequest(data.mkString("\r\n"))
 case class VerifyAddress(address: MailingAddress) extends SingleRequest("VRFY " + address.toString)
 case class ExpandMailingList(list: MailingAddress) extends SingleRequest("EXPN " + list.toString)
 
-private[smtp] case class ComposedRequest(requests: Seq[SingleRequest]) extends Request
-

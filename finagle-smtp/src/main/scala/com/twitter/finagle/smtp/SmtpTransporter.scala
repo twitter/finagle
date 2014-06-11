@@ -10,10 +10,11 @@ import org.jboss.netty.handler.logging.LoggingHandler
 import org.jboss.netty.logging.InternalLogLevel
 
 class SmtpDecoder extends SimpleChannelUpstreamHandler{
+  import codecUtil._
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = {
     val pipeline = ctx.getPipeline
-    if (pipeline.get("aggregateExtensions") != null)
-      pipeline.remove("aggregateExtensions")
+    if (pipeline.get(aggregation) != null)
+      pipeline.remove(aggregation)
     e.getMessage match {
       case rep: UnspecifiedReply => Channels.fireMessageReceived(ctx, rep)
       case other => Channels.fireMessageReceived(ctx, InvalidReply(other.toString))
@@ -21,12 +22,14 @@ class SmtpDecoder extends SimpleChannelUpstreamHandler{
   }
 }
 
-object ReplyDecoder {
-  private def getInfo(rep: String) = rep drop 4
+private[smtp] object codecUtil {
+  def getInfo(rep: String): String = rep drop 4
+  def getCode(rep: String): Int = rep.take(3).toInt
+  val aggregation = "aggregateMultiline"
 }
 
 class ReplyDecoder extends LineBasedFrameDecoder(100) {
-import ReplyDecoder._
+import codecUtil._
   override def decode(ctx: ChannelHandlerContext, channel: Channel, msg: ChannelBuffer): UnspecifiedReply = {
     super.decode(ctx, channel, msg) match {
       case cb: ChannelBuffer => {
@@ -35,28 +38,26 @@ import ReplyDecoder._
         val second = rep(1)
         val third = rep(2)
 
-        //EHLO reply: list of extensions
-        if (rep.startsWith("250-")) {
-          val pipeline = ctx.getPipeline
-          val info = getInfo(rep)
-          if (pipeline.get("aggregateExtensions") == null) {
-            //wait for all list to be receive and wrap it into a reply
-            pipeline.addBefore("smtpDecode","aggregateExtensions", AggregateExtensions(info, Seq[Extension]()))
-            EmptyReply
-          }
-          else {
-            Channels.fireMessageReceived(ctx, Extension(info))
-            EmptyReply
-          }
-        }
-        //specifying at this stage to be able to detect the last node in extension list
-        else if (rep.startsWith("250 ")) OKReply(getInfo(rep))
         //Standart reply: three-digit-code SP info
-        else if (first.isDigit && second.isDigit && third.isDigit && rep(3).isSpaceChar)
-          new UnspecifiedReply {
-            val code = rep.take(3).toInt
-            val info = getInfo(rep)
+        if (first.isDigit && second.isDigit && third.isDigit)
+          rep(3) match {
+            case ' ' => 
+              new UnspecifiedReply {
+              val code = getCode(rep)
+              val info = getInfo(rep)
+              }
+
+            case '-' =>
+              val pipeline = ctx.getPipeline
+              val code = getCode(rep)
+              if (pipeline.get(aggregation) == null)
+                pipeline.addBefore("smtpDecode", aggregation, AggregateMultiline(code, Seq[String]()))
+              MultilinePart(code, getInfo(rep))
+
+
+            case _ => InvalidReply(rep)
           }
+
         else
           InvalidReply(rep)
       }
@@ -65,17 +66,25 @@ import ReplyDecoder._
 }
 
 /*Aggregates Extension replies in one AvailableExtensions reply*/
-case class AggregateExtensions(info: String, ext: Seq[Extension]) extends SimpleChannelUpstreamHandler {
+case class AggregateMultiline(multiline_code: Int, lns: Seq[String]) extends SimpleChannelUpstreamHandler {
+  import codecUtil._
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = {
     e.getMessage match {
-      case EmptyReply => {}
-      case extension: Extension => {
+      case MultilinePart(code, next) => 
+        if (code == multiline_code){
         val pipeline = ctx.getPipeline
-        pipeline.replace("aggregateExtensions", "aggregateExtensions", copy(ext = ext :+ extension))
+        pipeline.replace(aggregation, aggregation, copy(lns = lns :+ next))
       }
+        else Channels.fireMessageReceived(ctx, InvalidReply(code.toString + "-" + next))
       //last element in the list
-      case last: OKReply => {
-        Channels.fireMessageReceived(ctx, AvailableExtensions(info, ext,  last))
+      case last: UnspecifiedReply => {
+        val multiline = new UnspecifiedReply {
+          val info: String = lns.head
+          val code: Int = multiline_code
+          override val lines = lns :+ last.info
+          override val isMultiline = true
+        }
+        Channels.fireMessageReceived(ctx, multiline)
       }
       case _ => ctx.sendUpstream(e)
     }

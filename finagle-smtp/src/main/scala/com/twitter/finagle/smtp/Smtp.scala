@@ -37,7 +37,7 @@ object HeadersFilter extends SimpleFilter[EmailMessage, Unit] {
 /*Filter for parsing email and sending corresponding commands, then aggregating results*/
 object MailFilter extends Filter[EmailMessage, Unit, Request, Reply]{
   override def apply(msg: EmailMessage, send: Service[Request, Reply]): Future[Unit] = {
-    val SendEmailRequest: Seq[Request] = 
+    val SendEmailRequest: Seq[Request] =
       Seq(AddFrom(msg.getSender)) ++
       msg.getTo.map(AddRecipient(_)) ++
       Seq(Request.BeginData,

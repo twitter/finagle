@@ -3,8 +3,12 @@ package com.twitter.finagle.smtp
 trait UnspecifiedReply {
   val code: Int
   val info: String
+
+  val isMultiline: Boolean = false
+  val lines: Seq[String] = Seq(info)
 }
 
+case class MultilinePart(code: Int, info: String) extends UnspecifiedReply
 
 object ReplyCode {
 
@@ -42,12 +46,6 @@ private[smtp] trait Reply extends UnspecifiedReply
 
 trait Error extends Exception with Reply
 
-//used in cases when you need just to return something
-case object EmptyReply extends Reply {
-  override val code = INVALID_REPLY_CODE
-  val info = ""
-}
-
 case class InvalidReply(content: String) extends Error {
   val code = INVALID_REPLY_CODE
   val info = content
@@ -81,6 +79,7 @@ trait ActionErrorReply extends TransientNegativeCompletionReply with MailSystemR
 case class SyntaxError(info: String) extends SyntaxErrorReply {
   val code = SYNTAX_ERROR
 }
+
 case class ArgumentSyntaxError(info: String) extends SyntaxErrorReply {
   val code = ARGUMENT_SYNTAX_ERROR
 }
@@ -115,15 +114,6 @@ case class ServiceNotAvailable(info: String) extends NotAvailableReply {
 
 /*Mail system successes*/
 case class OKReply(info: String) extends MailOkReply {
-  val code = OK
-}
-
-//for greeting with extensions
-case class Extension(info: String) extends MailOkReply {
-  val code = OK
-}
-
-case class AvailableExtensions(info: String, ext: Seq[Extension], last: OKReply) extends MailOkReply {
   val code = OK
 }
 
