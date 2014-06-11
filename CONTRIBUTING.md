@@ -53,5 +53,73 @@ messages along these guidelines:
 
     After your change, what will change?
 
+## Code Review
+
+The Finagle repository on GitHub is kept in sync with an internal repository at
+Twitter. For the most part this process should be transparent to Finagle users,
+but it does have some implications for how pull requests are merged into the
+codebase.
+
+When you submit a pull request on GitHub, it will be reviewed by the
+Finagle community (both inside and outside of Twitter), and once the changes are
+approved, your commits will be brought into the internal system for additional
+testing. Once the changes are merged internally, they will be pushed back to
+GitHub with the next release.
+
+This process means that the pull request will not be merged in the usual way.
+Instead you'll get a message from a member of the Finagle team indicating that
+your changes have made their way back to GitHub, and the pull request will be
+closed (see [this pull request][2] for an example). The changes in the pull
+request will be collapsed into a single commit, but the authorship metadata will
+be preserved.
+
+Please let us know if you have any questions about this process!
+
+## Getting Started
+
+Migrating a few Specs tests to ScalaTest is a great way to get started
+contributing to Finagle. We also have [a `Starter` label][3] for issues that we
+think are likely to be reasonably limited in scope and ready to be tackled by
+new contributors.
+
+Please feel free to ask questions in the issue thread or [on the mailing list][4]
+if you run into problems trying to implement a new feature or fix a bug
+described in one of the starter issues.
+
+## Documentation
+
+We also welcome improvements to the Finagle documentation, which is maintained
+in this repository and hosted on [the corresponding GitHub Pages site][5].
+
+Finagle uses [Sphinx][6] to generate its user guide via the built-in Sphinx
+support in the [sbt-site plugin][7]. You'll need to [install Sphinx][8] on your
+system before you can build the site locally.
+
+Once you've got Sphinx installed, you can make changes to the [RST][9] files in
+the `doc/src/sphinx` directory and then build the site with the following
+command:
+
+``` bash
+./sbt 'project finagle-doc' make-site
+```
+
+You can then view the site locally at `doc/target/site/index.html`.
+
+Please note that sbt-site currently will not work with the Python 3 version of
+Sphinx. It's also hard-coded to call an executable named `sphinx-build`, which
+on some systems may be the name of the Python 3 version, with the Python 2
+version named `sphinx-build2`. If the site build process crashes with a "Failed
+to build Sphinx html documentation", this is likely to be the problem. The
+simplest solution is to create a symbolic link to `sphinx-build2` named
+`sphinx-build` somewhere on your path.
+
 [0]: http://twitter.github.io/effectivescala/
 [1]: http://docs.scala-lang.org/style/scaladoc.html
+[2]: https://github.com/twitter/finagle/pull/267
+[3]: https://github.com/twitter/finagle/issues?direction=desc&labels=Starter&sort=created&state=open
+[4]: https://groups.google.com/d/forum/finaglers
+[5]: http://twitter.github.io/finagle/
+[6]: http://sphinx-doc.org/
+[7]: https://github.com/sbt/sbt-site
+[8]: http://sphinx-doc.org/install.html
+[9]: http://docutils.sourceforge.net/rst.html
