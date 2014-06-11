@@ -16,6 +16,7 @@ class SmtpClientDispatcher(trans: Transport[Request, UnspecifiedReply])
 extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](trans){
   import GenSerialClientDispatcher.wrapWriteException
   import SmtpClientDispatcher._
+  import ReplyCode._
 
   /*Connection phase: should receive greeting from the server*/
   private val connPhase: Future[Unit] = {
@@ -61,33 +62,30 @@ extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](tra
     case specified: Reply => specified
     case _: UnspecifiedReply => {
       resp.code match {
-        case 211 => SystemStatus(resp.info)
-        case 214 => Help(resp.info)
-        case 220 => ServiceReady(resp.info)
-        case 221 => ClosingTransmission(resp.info)
-        case 250 => OK(resp.info)
-        case 251 => TempUserNotLocal(resp.info)
-        case 252 => TempUserNotVerified(resp.info)
-
-        case 354 => StartInput(resp.info)
-
-        case 421 => ServiceNotAvailable(resp.info)
-        case 450 => TempMailboxUnavailable(resp.info)
-        case 451 => ProcessingError(resp.info)
-        case 452 => TempInsufficientStorage(resp.info)
-        case 455 => ParamsAccommodationError(resp.info)
-
-        case 500 => SyntaxError(resp.info)
-        case 501 => ArgumentSyntaxError(resp.info)
-        case 502 => CommandNotImplemented(resp.info)
-        case 503 => BadCommandSequence(resp.info)
-        case 504 => ParameterNotImplemented(resp.info)
-        case 550 => MailboxUnavailableError(resp.info)
-        case 551 => UserNotLocalError(resp.info)
-        case 552 => InsufficientStorageError(resp.info)
-        case 553 => InvalidMailboxName(resp.info)
-        case 554 => TransactionFailed(resp.info)
-        case 555 => AddressNotRecognized(resp.info)
+        case SYSTEM_STATUS => SystemStatus(resp.info)
+        case HELP => Help(resp.info)
+        case SERVICE_READY => ServiceReady(resp.info)
+        case CLOSING_TRANSMISSION => ClosingTransmission(resp.info)
+        case OK => OKReply(resp.info)
+        case TEMP_USER_NOT_LOCAL => TempUserNotLocal(resp.info)
+        case TEMP_USER_NOT_VERIFIED => TempUserNotVerified(resp.info)
+        case START_INPUT => StartInput(resp.info)
+        case SERVICE_NOT_AVAILABLE => ServiceNotAvailable(resp.info)
+        case TEMP_MAILBOX_UNAVAILABLE => TempMailboxUnavailable(resp.info)
+        case PROCESSING_ERROR => ProcessingError(resp.info)
+        case TEMP_INSUFFICIENT_STORAGE => TempInsufficientStorage(resp.info)
+        case PARAMS_ACCOMODATION_ERROR => ParamsAccommodationError(resp.info)
+        case SYNTAX_ERROR => SyntaxError(resp.info)
+        case ARGUMENT_SYNTAX_ERROR => ArgumentSyntaxError(resp.info)
+        case COMMAND_NOT_IMPLEMENTED => CommandNotImplemented(resp.info)
+        case BAD_COMMAND_SEQUENCE => BadCommandSequence(resp.info)
+        case PARAMETER_NOT_IMPLEMENTED => ParameterNotImplemented(resp.info)
+        case MAILBOX_UNAVAILABLE_ERROR => MailboxUnavailableError(resp.info)
+        case USER_NOT_LOCAL_ERROR => UserNotLocalError(resp.info)
+        case INSUFFICIENT_STORAGE_ERROR => InsufficientStorageError(resp.info)
+        case INVALID_MAILBOX_NAME => InvalidMailboxName(resp.info)
+        case TRANSACTION_FAILED => TransactionFailed(resp.info)
+        case ADDRESS_NOT_RECOGNIZED => AddressNotRecognized(resp.info)
 
         case _ => UnknownReplyCodeError(resp.code, resp.info)
       }
@@ -95,7 +93,6 @@ extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](tra
   }
 
   private def decodeReply(rep: UnspecifiedReply, p: Promise[Reply]): Future[Unit] = rep match {
-    case Greeting(greet, rp) => makeUnit(p, Greeting(greet, getSpecifiedReply(rp)))
     case specified: Reply => makeUnit(p, specified) //covers Extension, OK and InvalidReply
     case unspecified: UnspecifiedReply =>  makeUnit(p, getSpecifiedReply(unspecified))
   }

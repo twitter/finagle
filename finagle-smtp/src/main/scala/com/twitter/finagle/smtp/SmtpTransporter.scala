@@ -50,7 +50,7 @@ import ReplyDecoder._
           }
         }
         //specifying at this stage to be able to detect the last node in extension list
-        else if (rep.startsWith("250 ")) OK(getInfo(rep))
+        else if (rep.startsWith("250 ")) OKReply(getInfo(rep))
         //Standart reply: three-digit-code SP info
         else if (first.isDigit && second.isDigit && third.isDigit && rep(3).isSpaceChar)
           new UnspecifiedReply {
@@ -74,7 +74,7 @@ case class AggregateExtensions(info: String, ext: Seq[Extension]) extends Simple
         pipeline.replace("aggregateExtensions", "aggregateExtensions", copy(ext = ext :+ extension))
       }
       //last element in the list
-      case last: OK => {
+      case last: OKReply => {
         Channels.fireMessageReceived(ctx, AvailableExtensions(info, ext,  last))
       }
       case _ => ctx.sendUpstream(e)
