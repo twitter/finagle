@@ -12,8 +12,6 @@ import org.jboss.netty.logging.InternalLogLevel
 class SmtpDecoder extends SimpleChannelUpstreamHandler{
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = {
     val pipeline = ctx.getPipeline
-    if (pipeline.get("makeGreeting") != null)
-      pipeline.remove("makeGreeting")
     if (pipeline.get("aggregateExtensions") != null)
       pipeline.remove("aggregateExtensions")
     e.getMessage match {
@@ -37,23 +35,13 @@ import ReplyDecoder._
         val second = rep(1)
         val third = rep(2)
 
-        //connected, server greets the client
-        if (rep.startsWith("220 ")) {
-          val greet = getInfo(rep)
-          //wait for another reply to pair with the greeting
-          ctx.getPipeline.addBefore("smtpDecode", "makeGreeting", makeGreeting(greet))
-          EmptyReply
-        }
         //EHLO reply: list of extensions
-        else if (rep.startsWith("250-")) {
+        if (rep.startsWith("250-")) {
           val pipeline = ctx.getPipeline
           val info = getInfo(rep)
           if (pipeline.get("aggregateExtensions") == null) {
             //wait for all list to be receive and wrap it into a reply
-            if (pipeline.get("makeGreeting") != null) //possibly to pair with the greeting
-              pipeline.addBefore("makeGreeting", "aggregateExtensions", AggregateExtensions(info, Seq[Extension]()))
-            else
-              pipeline.addBefore("smtpDecode","aggregateExtensions", AggregateExtensions(info, Seq[Extension]()))
+            pipeline.addBefore("smtpDecode","aggregateExtensions", AggregateExtensions(info, Seq[Extension]()))
             EmptyReply
           }
           else {
@@ -72,19 +60,6 @@ import ReplyDecoder._
         else
           InvalidReply(rep)
       }
-    }
-  }
-}
-
-/*Waits for the next reply to pair it with greeting*/
-case class makeGreeting(greet: String) extends SimpleChannelUpstreamHandler {
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = {
-    e.getMessage match {
-      case EmptyReply => {}
-      case rep: Reply => {
-        Channels.fireMessageReceived(ctx, Greeting(greet, rep))
-      }
-      case _ => ctx.sendUpstream(e)
     }
   }
 }

@@ -76,9 +76,6 @@ case class Extension(info: String) extends MailOkReply
 
 case class AvailableExtensions(info: String, ext: Seq[Extension], last: OK) extends MailOkReply
 
-//Greeting contains ServiceReady message and whatever is received next
-case class Greeting(info: String, ext: Reply) extends ServiceInfoReply
-
 case class TempUserNotLocal(info: String) extends MailOkReply
 case class TempUserNotVerified(info: String) extends MailOkReply
 case class StartInput(info: String) extends MailIntermediateReply

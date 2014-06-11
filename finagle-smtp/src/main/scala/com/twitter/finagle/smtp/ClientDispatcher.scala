@@ -17,6 +17,31 @@ extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](tra
   import GenSerialClientDispatcher.wrapWriteException
   import SmtpClientDispatcher._
 
+  /*Connection phase: should receive greeting from the server*/
+  private val connPhase: Future[Unit] = {
+    trans.read flatMap { greet =>
+      val p = new Promise[Reply]
+      decodeReply(greet, p) flatMap { unit =>
+        p flatMap {
+          case ServiceReady(info) => Future.Done
+          case other => Future.exception(InvalidReply(other.toString))
+        }
+      }
+    } onFailure {
+      case _ =>  close()
+    }
+  }
+
+  override def apply(req: Request): Future[Reply]  = {
+    connPhase flatMap { _ =>
+      val p = new Promise[Reply]
+      dispatch(req, p)
+      p
+    } onFailure {
+      case _ => close()
+    }
+  }
+
   /**
    * Dispatch a request, satisfying Promise `p` with the response;
    * the returned Future is satisfied when the dispatch is complete:
