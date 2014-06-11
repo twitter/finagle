@@ -7,7 +7,6 @@ import java.util.{Calendar, Properties}
 import org.apache.commons.mail.SimpleEmail
 import com.twitter.util.{Await, Future}
 
-import resp._
 
 /**
  * Simple SMTP client without error handling
@@ -40,11 +39,7 @@ object SimpleSMTPClient {
    val email3 = EmailMessage(commons)
 */
    val send = SmtpSimple.newService("localhost:25")
-   val res: Future[Result] = send(email1)
-
-   .onSuccess {
-     case resps => for ((req, resp) <- resps) println(req + "\n" + resp)
-   }
+   val res: Future[Unit] = send(email1)
    .onFailure {
      case ex => ex.printStackTrace()
    }

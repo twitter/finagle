@@ -6,28 +6,6 @@ import com.twitter.finagle.client.{DefaultClient, Bridge}
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-//initial response types
-object resp {
-  type Result = Seq[(Request, Reply)]
-}
-
-import resp._
-
-/*Filter for potentially sending sequences of requests*/
-object CommandFilter extends  Filter[Request, Result, Request, Reply] {
-  override def apply(req: Request, send: Service[Request, Reply]): Future[Result] = req match {
-    case single: SingleRequest => {
-      send(single) map {resp => Seq((single, resp))}
-    }
-
-    case ComposedRequest(reqs) => {
-      val freqs = for (req <- reqs) yield send(req)
-      val fresps = Future.collect(freqs)
-      fresps map {resps => reqs zip resps}
-    }
-  }
-}
-
 object DataFilter extends SimpleFilter[Request, Reply] {
   override def apply(req: Request, send: Service[Request, Reply]): Future[Reply] = req match {
     case Data(lines: Seq[String]) => {
@@ -42,9 +20,8 @@ object DataFilter extends SimpleFilter[Request, Reply] {
   }
 }
 
-
-object HeadersFilter extends SimpleFilter[EmailMessage, Result] {
-  def apply(msg: EmailMessage, send: Service[EmailMessage, Result]): Future[Result] = {
+object HeadersFilter extends SimpleFilter[EmailMessage, Unit] {
+  def apply(msg: EmailMessage, send: Service[EmailMessage, Unit]): Future[Unit] = {
     val date = "Date: " + new SimpleDateFormat("EE, dd MMM yyyy HH:mm:ss ZZ", Locale.forLanguageTag("eng")).format(msg.getDate)
     val from = "From: " + msg.getFrom.mkString(",")
     val sender = if (msg.getFrom.length > 1)"Sender: " + msg.getSender.toString else null
@@ -58,31 +35,29 @@ object HeadersFilter extends SimpleFilter[EmailMessage, Result] {
 }
 
 /*Filter for parsing email and sending corresponding commands, then aggregating results*/
-object MailFilter extends Filter[EmailMessage, Result, Request, Result]{
+object MailFilter extends Filter[EmailMessage, Unit, Request, Reply]{
+  override def apply(msg: EmailMessage, send: Service[Request, Reply]): Future[Unit] = {
+    val SendEmailRequest: Seq[Request] = 
+      Seq(AddFrom(msg.getSender)) ++
+      msg.getTo.map(AddRecipient(_)) ++
+      Seq(Request.BeginData,
+          Data(msg.getBody))
 
-  override def apply(msg: EmailMessage, send: Service[Request, Result]): Future[Result] = {
+    val reqs: Seq[Request] =
+      Seq(Request.Hello) ++
+      SendEmailRequest ++
+      Seq(Request.Quit)
 
-    val SendEmailRequest = ComposedRequest(Seq(
-      AddFrom(msg.getSender)) ++
-      msg.getTo.map(AddRecipient(_)) ++ Seq(
-      Request.BeginData,
-      Data(msg.getBody)
-    ))
-
-    val reqs = Seq[Request](
-      Request.Hello,
-      SendEmailRequest,
-      Request.Quit
-    )
     val freqs = for (req <- reqs) yield send(req)
 
-    val fresps = Future.collect(freqs)
+    Future.collect(freqs) flatMap { _ =>
+      Future.Done
+    }
 
-    fresps.map(_.flatten) //compose result from several ones
   }
 }
 
-object Smtp extends Client[Request, Result]{
+object Smtp extends Client[Request, Reply]{
 
   val defaultClient = DefaultClient[Request, Reply] (
     name = "smtp",
@@ -94,11 +69,11 @@ object Smtp extends Client[Request, Result]{
     })
 
   override def newClient(dest: Name, label: String) = {
-    CommandFilter andThen DataFilter andThen defaultClient.newClient(dest, label)
+    DataFilter andThen defaultClient.newClient(dest, label)
   }
 }
 
-object SmtpSimple extends Client[EmailMessage, Result] {
+object SmtpSimple extends Client[EmailMessage, Unit] {
   override def newClient(dest: Name, label: String) = {
     HeadersFilter andThen MailFilter andThen Smtp.newClient(dest, label)
   }
