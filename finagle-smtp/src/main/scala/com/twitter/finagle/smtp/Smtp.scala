@@ -33,7 +33,7 @@ object DataFilter extends SimpleFilter[Request, Reply] {
     case Data(lines: Seq[String]) => {
       //duplicate leading dot
       val firstLine = if (lines(0) == ".") ".." else lines(0)
-      //add dot an the end
+      //add dot at the end
       val lastLine = "\r\n."
       val body = Seq(firstLine) ++ (lines drop 1) ++ Seq(lastLine)
       send(Data(body))
@@ -59,10 +59,19 @@ object HeadersFilter extends SimpleFilter[EmailMessage, Result] {
 
 /*Filter for parsing email and sending corresponding commands, then aggregating results*/
 object MailFilter extends Filter[EmailMessage, Result, Request, Result]{
+
   override def apply(msg: EmailMessage, send: Service[Request, Result]): Future[Result] = {
+
+    val SendEmailRequest = ComposedRequest(Seq(
+      AddFrom(msg.getSender)) ++
+      msg.getTo.map(AddRecipient(_)) ++ Seq(
+      Request.BeginData,
+      Data(msg.getBody)
+    ))
+
     val reqs = Seq[Request](
       Request.Hello,
-      ComposedRequest.SendEmail(msg),
+      SendEmailRequest,
       Request.Quit
     )
     val freqs = for (req <- reqs) yield send(req)

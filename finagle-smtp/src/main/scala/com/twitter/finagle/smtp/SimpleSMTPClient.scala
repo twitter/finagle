@@ -17,7 +17,7 @@ object SimpleSMTPClient {
    //raw text email
    val email1 = EmailMessage(
    from = "ex@ex.com",
-   to = Seq("to@ro.com"),
+   to = Seq("to@ro.com", "second@sd.com"),
    subject = "test",
    body = Seq("test")
    )

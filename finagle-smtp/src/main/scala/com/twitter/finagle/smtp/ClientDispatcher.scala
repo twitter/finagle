@@ -33,29 +33,23 @@ extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](tra
     }
   }
 
-  override def apply(req: Request): Future[Reply]  = {
-    connPhase flatMap { _ =>
-      val p = new Promise[Reply]
-      dispatch(req, p)
-      p
-    } onFailure {
-      case _ => close()
-    }
-  }
-
   /**
    * Dispatch a request, satisfying Promise `p` with the response;
    * the returned Future is satisfied when the dispatch is complete:
    * only one request is admitted at any given time.
    */
   protected def dispatch(req: Request, p: Promise[Reply]): Future[Unit] = {
-    trans.write(req) rescue {
-      wrapWriteException
-    } flatMap { unit =>
-      trans.read()
-    } flatMap { rp =>
-      decodeReply(rp, p)
+    connPhase flatMap { _ =>
+      trans.write(req) rescue {
+        wrapWriteException
+      } flatMap { unit =>
+        trans.read()
+      } flatMap { rp =>
+        decodeReply(rp, p)
       }
+    } onFailure {
+      _ => close()
+    }
   }
 
   private def getSpecifiedReply(resp: UnspecifiedReply): Reply = resp match {
