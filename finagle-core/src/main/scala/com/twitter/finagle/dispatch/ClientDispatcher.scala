@@ -91,7 +91,6 @@ class SerialClientDispatcher[Req, Rep](trans: Transport[Req, Rep])
     }
   }.unit
 
-
   protected def write(req: Req) = trans.write(req)
   protected def read(permit: Permit) = trans.read() ensure { permit.release() }
 }

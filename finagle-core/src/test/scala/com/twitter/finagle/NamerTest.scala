@@ -57,10 +57,10 @@ class NamerTest extends FunSuite {
     namer("/test/0").notify(Return(NameTree.read("/test/2")))
     assert(res.run.sample() === Activity.Pending)
 
-    namer("/test/1").notify(Return(NameTree.read("/$/inet//1")))
+    namer("/test/1").notify(Return(NameTree.read("/$/inet/0/1")))
     assert(res.run.sample() === Activity.Pending)
 
-    namer("/test/2").notify(Return(NameTree.read("/$/inet//2")))
+    namer("/test/2").notify(Return(NameTree.read("/$/inet/0/2")))
 
     assertEval(res, ia(1), ia(2))
 
@@ -88,16 +88,16 @@ class NamerTest extends FunSuite {
 
     assert(res.sample().eval === Some(Set.empty))
     
-    namer("/test/0").notify(Return(NameTree.read("/$/inet//1")))
+    namer("/test/0").notify(Return(NameTree.read("/$/inet/0/1")))
     assertEval(res, ia(1))
 
     namer("/test/0").notify(Return(NameTree.Neg))
     assert(res.sample().eval === None)
 
-    namer("/test/2").notify(Return(NameTree.read("/$/inet//2")))
+    namer("/test/2").notify(Return(NameTree.read("/$/inet/0/2")))
     assertEval(res, ia(2))
 
-    namer("/test/0").notify(Return(NameTree.read("/$/inet//3")))
+    namer("/test/0").notify(Return(NameTree.read("/$/inet/0/3")))
     assertEval(res, ia(3)) 
   })
 

@@ -35,13 +35,13 @@ class DtabTest extends FunSuite {
 
   test("d1 ++ d2") {
     val d1 = Dtab.read("/foo => /bar")
-    val d2 = Dtab.read("/foo=>/biz;/biz=>/$/inet//8080;/bar=>/$/inet//9090")
+    val d2 = Dtab.read("/foo=>/biz;/biz=>/$/inet/0/8080;/bar=>/$/inet/0/9090")
     
     assert(d1++d2 === Dtab.read("""
       /foo=>/bar;
       /foo=>/biz;
-      /biz=>/$/inet//8080;
-      /bar=>/$/inet//9090
+      /biz=>/$/inet/0/8080;
+      /bar=>/$/inet/0/9090
     """))
     
     def assertEval(dtab: Dtab, path: Path, expect: Name*) {

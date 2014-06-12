@@ -323,15 +323,15 @@ private trait NameTreePathParsers extends NameTreeParsers {
 
   val byte: Parser[Byte] = escapedByte | showableChar ^^ (_.toByte)
 
-  val label: Parser[Buf] = (
+  val label: Parser[Buf] =
       rep1(byte)  ^^ {
         case bytes => Buf.ByteArray(bytes:_*)
       }
-    | "" ^^^ Buf.Empty
-  )
 
-  val path: Parser[Path] = 
-    rep1("/" ~> label) ^^ { labels => Path(labels:_*) }
+  val path: Parser[Path] = (
+      rep1("/" ~> label) ^^ { labels => Path(labels:_*) }
+    | "/" ^^^ Path.empty
+  )
 
   val leaf = path
 }

@@ -17,7 +17,7 @@ class NameTreeTest extends FunSuite {
     "aute", "irure", "dolor", "in", "reprehenderit", "in", "voluptate", "velit", "esse", "cillum", 
     "dolore", "eu", "fugiat", "nulla", "pariatur", "Excepteur", "sint", "occaecat", "cupidatat", 
     "non", "proident", "sunt", "in", "culpa", "qui", "officia", "deserunt", "mollit", "anim", 
-    "id", "est", "laborum", "")
+    "id", "est", "laborum")
     
   def pick[T](xs: Seq[T]): T = xs(rng.nextInt(xs.length))
 
@@ -48,8 +48,6 @@ class NameTreeTest extends FunSuite {
     }
     
     val leaves = Seq[() => NameTree[Path]](
-      // Note: atoms don't have a syntactic component yet.
-      //      () => NameTree.Atom(new SocketAddress{}),
       () => NameTree.Empty,
       () => NameTree.Neg,
       () => newPath())
@@ -72,13 +70,7 @@ class NameTreeTest extends FunSuite {
       
     val trees = Seq.fill(100) { newTree(2) }
     for (tree <- trees)
-      try { 
-        assert(splice(NameTree.read(tree.show)) == splice(tree))
-      } catch {
-        case NonFatal(exc) =>
-          fail("Exception %s while parsing %s: %s; spliced: %s".format(
-            exc, tree.show, tree, splice(tree)))
-      }
+      assert(splice(NameTree.read(tree.show)) === splice(tree))
   }
 
   test("NameTree.bind: infinite loop") {
