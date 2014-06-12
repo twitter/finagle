@@ -6,8 +6,11 @@ import com.twitter.finagle.{Addr, Group, Name, ServiceFactory}
 import com.twitter.finagle.builder._
 import com.twitter.finagle.kestrel.protocol.{Response, Command, Kestrel}
 import com.twitter.finagle.thrift.{ThriftClientFramedCodec, ClientId, ThriftClientRequest}
+import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util.{Closable, Duration, Future, Return, Throw, Try, Timer, Var, Witness}
 import _root_.java.{util => ju}
+import _root_.java.lang.UnsupportedOperationException
+import _root_.java.util.logging.Level
 import _root_.java.net.SocketAddress
 import scala.collection.mutable
 import scala.collection.JavaConversions._
@@ -116,6 +119,15 @@ private[finagle] object MultiReaderHelper {
  * }}}
  */
 object MultiReaderMemcache {
+  def apply(dest: Name, queueName: String): MultiReaderBuilderMemcache = {
+    dest match {
+      case Name.Bound(va) => apply(va, queueName)
+      case Name.Path(_) => throw new UnsupportedOperationException(
+        "Failed to bind Name.Path in `MultiReaderMemcache.apply`"
+      )
+    }
+  }
+
   def apply(va: Var[Addr], queueName: String): MultiReaderBuilderMemcache = {
     val config = MultiReaderConfig[Command, Response](va, queueName)
     new MultiReaderBuilderMemcache(config)
@@ -168,15 +180,37 @@ object MultiReaderThrift {
    * used then it is more reasonable to use the version of apply that does
    * not take a ClientId or else the client id will need to be passed to
    * both apply and the codec in clientBuilder.
+   * @param dest a [[com.twitter.finagle.Name]] representing the Kestrel
+   * endpoints to connect to
+   * @param queueName the name of the queue to read from
+   * @param clientId the clientid to be used
+   * @return A MultiReaderBuilderThrift
+   */
+  def apply(dest: Name, queueName: String, clientId: Option[ClientId]): MultiReaderBuilderThrift = {
+    dest match {
+      case Name.Bound(va) => apply(va, queueName, clientId)
+      case Name.Path(_) => throw new UnsupportedOperationException(
+        "Failed to bind Name.Path in `MultiReaderThrift.apply`"
+      )
+    }
+  }
+
+  /**
+   * Used to create a thrift based MultiReader with a ClientId when a custom
+   * client builder will not be used.  If a custom client builder will be
+   * used then it is more reasonable to use the version of apply that does
+   * not take a ClientId or else the client id will need to be passed to
+   * both apply and the codec in clientBuilder.
    * @param va endpoints for Kestrel
    * @param queueName the name of the queue to read from
    * @param clientId the clientid to be used
    * @return A MultiReaderBuilderThrift
    */
   def apply(
-      va: Var[Addr],
-      queueName: String,
-      clientId: Option[ClientId]): MultiReaderBuilderThrift = {
+    va: Var[Addr],
+    queueName: String,
+    clientId: Option[ClientId]
+  ): MultiReaderBuilderThrift = {
     val config = MultiReaderConfig[ThriftClientRequest, Array[Byte]](va, queueName, clientId)
     new MultiReaderBuilderThrift(config)
   }
