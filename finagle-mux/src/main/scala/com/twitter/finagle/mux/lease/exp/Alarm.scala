@@ -2,6 +2,7 @@ package com.twitter.finagle.mux.lease.exp
 
 import com.twitter.util.{Duration, Stopwatch, StorageUnit, Time}
 import com.twitter.conversions.time.longToTimeableNumber
+import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
 import java.lang.management.GarbageCollectorMXBean
 
 /**
@@ -64,11 +65,12 @@ private[lease] class DurationAlarm(dur: Duration) extends Alarm {
   def finished: Boolean = elapsed() >= dur
 }
 
-private[lease] class GenerationAlarm(info: JvmInfo) extends Alarm {
-  private[this] val generation = info.generation()
+private[lease] class GenerationAlarm(
+  ctr: ByteCounter
+) extends BytesAlarm(ctr, () => 0.bytes) {
+  private[this] val generation = ctr.info.generation()
 
-  def sleeptime: Duration = Duration.Top
-  def finished: Boolean = generation != info.generation()
+  override def finished: Boolean = generation != ctr.info.generation()
 }
 
 private[lease] class IntervalAlarm(val sleeptime: Duration) extends Alarm {
@@ -102,7 +104,3 @@ private[lease] class BytesAlarm(counter: ByteCounter, bytes: () => StorageUnit) 
 
   def finished: Boolean = target() <= StorageUnit.zero
 }
-
-private[lease] class PercentAlarm(
-  counter: ByteCounter, pct: Int
-) extends BytesAlarm(counter, () => counter.info.committed() * pct / 100)
