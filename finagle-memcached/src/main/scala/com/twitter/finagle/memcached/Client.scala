@@ -926,7 +926,7 @@ case class KetamaClientBuilder private[memcached] (
   def ejectFailedHost(eject: Boolean): KetamaClientBuilder =
     copy(_ejectFailedHost = eject)
 
-  def build(): Client = {
+  def build(): KetamaClient = {
     val builder =
       (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1).daemon(true))
         .codec(Memcached())
