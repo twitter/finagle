@@ -9,29 +9,35 @@ you're using Finagle. Or even better, add the links yourself and
 * [Box](https://www.box.com/)
 * [Foursquare](https://foursquare.com/)
 * [Gigya](http://www.gigya.com/)
+* [Green Man Gaming](http://www.greenmangaming.com/)
 * [Gutefrage.net](http://www.gutefrage.net/)
   * ["Introducing Gutefrage.net's Service-Oriented Architecture"][2]
 * [Magine TV](https://magine.com/)
 * [Nest](https://nest.com/)
+* The [New York Times](http://www.nytimes.com/)
 * [OpenAura](http://openaura.com/)
 * [PagerDuty](https://www.pagerduty.com/)
 * [Pellucid Analytics](http://www.pellucid.com/)
 * [Pinterest](https://www.pinterest.com/)
   * ["How we make pins more useful"][3]
+* [Qubit](http://www.qubitproducts.com/)
 * [Rdio](http://www.rdio.com/)
   * [Thor, a Finagle-based image processor][4]
 * [Sharethrough](http://www.sharethrough.com/)
   * ["Finagle @ Sharethrough: Twitter #Conf Presentation"][5]
 * [SoundCloud](https://soundcloud.com/)
+  * ["Building Products at SoundCloud—Part III: Microservices in Scala and
+    Finagle"][6]
 * [Strava](http://www.strava.com/)
-  * ["Introducing Routemaster"][6]
+  * ["Introducing Routemaster"][7]
 * [StumbleUpon](https://www.stumbleupon.com/)
 * [Tapad](http://www.tapad.com/)
-  * [Case study][7] by [Typesafe][8]
+  * [Case study][8] by [Typesafe][9]
 * [Teads.tv](http://teads.tv/)
 * [Tumblr](https://www.tumblr.com/)
 * [Twitter](https://twitter.com/)
-  * ["Finagle: A Protocol-Agnostic RPC System"][9]
+  * ["Finagle: A Protocol-Agnostic RPC System"][10]
+* [wasted.io](http://wasted.io/)
 
 [0]: https://twitter.com/finagle
 [1]: https://github.com/twitter/finagle/blob/master/CONTRIBUTING.md
@@ -39,7 +45,8 @@ you're using Finagle. Or even better, add the links yourself and
 [3]: http://engineering.pinterest.com/post/59132790640/how-we-make-pins-more-useful
 [4]: https://github.com/rdio/thor
 [5]: http://engineering.sharethrough.com/blog/2014/04/17/finagle-at-sharethrough-twitter-conf-talk/
-[6]: http://engineering.strava.com/routemaster/
-[7]: http://typesafe.com/blog/tapad_turns_to_typesafe_platform
-[8]: http://typesafe.com/
-[9]: https://blog.twitter.com/2011/finagle-a-protocol-agnostic-rpc-system
+[6]: http://developers.soundcloud.com/blog/building-products-at-soundcloud-part-3-microservices-in-scala-and-finagle
+[7]: http://engineering.strava.com/routemaster/
+[8]: http://typesafe.com/blog/tapad_turns_to_typesafe_platform
+[9]: http://typesafe.com/
+[10]: https://blog.twitter.com/2011/finagle-a-protocol-agnostic-rpc-system
