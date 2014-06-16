@@ -156,6 +156,7 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
    * when applied.
    */
   private[this] val endpointer = new Stack.Simple[ServiceFactory[Req, Rep]](Endpoint) {
+    val description = "Send requests over the wire"
     def make(prms: Stack.Params, next: ServiceFactory[Req, Rep]) = {
       val Transporter.EndpointAddr(addr) = prms[Transporter.EndpointAddr]
       val transporter = newTransporter(prms)

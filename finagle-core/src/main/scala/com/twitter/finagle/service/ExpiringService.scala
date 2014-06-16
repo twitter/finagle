@@ -26,6 +26,7 @@ private[finagle] object ExpiringService {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]](Expiration) {
+      val description = "Expire a service after a certain amount of idle time"
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
         val param.Timer(timer) = params[param.Timer]
         val ExpiringService.Param(idleTime, lifeTime) = params[ExpiringService.Param]

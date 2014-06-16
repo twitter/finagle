@@ -13,6 +13,8 @@ private[finagle] object StatsFactoryWrapper {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]](ServiceCreationStats) {
+      val description = "Track statistics on service creation failures " +
+        "and service acquisition latency"
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
         val param.Stats(statsReceiver) = params[param.Stats]
         new StatsFactoryWrapper(
@@ -25,7 +27,7 @@ private[finagle] object StatsFactoryWrapper {
 
 /**
  * A [[com.twitter.finagle.ServiceFactoryProxy]] that tracks statistics on
- * [[com.twitter.finagle.Service]] creation failures.
+ * [[com.twitter.finagle.Service]] creation failures and service acquisition latency.
  */
 class StatsFactoryWrapper[Req, Rep](
     self: ServiceFactory[Req, Rep],

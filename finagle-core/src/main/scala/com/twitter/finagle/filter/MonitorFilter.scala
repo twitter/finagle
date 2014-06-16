@@ -12,6 +12,7 @@ private[finagle] object MonitorFilter {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]](Monitoring) {
+      val description = "Act as last-resort exception handler"
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
         val param.Monitor(monitor) = params[param.Monitor]
         new MonitorFilter(monitor) andThen next

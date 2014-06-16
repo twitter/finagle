@@ -33,6 +33,7 @@ private[finagle] object FailFastFactory {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]](FailFast) {
+      val description = "Backoff exponentially from hosts to which we cannot establish a connection"
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
           val param.Stats(statsReceiver) = params[param.Stats]
           val param.Timer(timer) = params[param.Timer]

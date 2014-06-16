@@ -23,6 +23,7 @@ object TimeoutFilter {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]](RequestTimeout) {
+      val description = "Apply a timeout to requests"
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
         val TimeoutFilter.Param(timeout) = params[TimeoutFilter.Param]
         val param.Timer(timer) = params[param.Timer]

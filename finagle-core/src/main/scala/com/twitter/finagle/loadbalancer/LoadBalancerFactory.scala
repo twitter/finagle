@@ -59,6 +59,7 @@ private[finagle] object LoadBalancerFactory {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module[ServiceFactory[Req, Rep]](LoadBalancer) {
+      val description = "Balance requests across multiple endpoints"
       def make(params: Params, next: Stack[ServiceFactory[Req, Rep]]) = {
         val Dest(dest) = params[Dest]
         val Param(loadBalancerFactory) = params[Param]

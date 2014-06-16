@@ -12,6 +12,7 @@ private[finagle] object HandletimeFilter {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]](HandleTime) {
+      val description = "Record elapsed execution time of underlying service"
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
         val param.Stats(statsReceiver) = params[param.Stats]
         new HandletimeFilter(statsReceiver) andThen next

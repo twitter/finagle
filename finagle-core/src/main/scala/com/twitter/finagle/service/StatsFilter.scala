@@ -14,6 +14,7 @@ private[finagle] object StatsFilter {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]](RequestStats) {
+      val description = "Report request statistics"
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
         val param.Stats(statsReceiver) = params[param.Stats]
         if (statsReceiver.isNull) next
@@ -96,6 +97,7 @@ private[finagle] object StatsServiceFactory {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]](FactoryStats) {
+      val description = "Report connection statistics"
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
         val param.Stats(statsReceiver) = params[param.Stats]
         if (statsReceiver.isNull) next

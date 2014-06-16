@@ -21,6 +21,7 @@ private object ThriftMuxUtil {
 
   object ProtocolRecorder extends Stack.Role
   val protocolRecorder = new Stack.Simple[ServiceFactory[CB, CB]](ProtocolRecorder) {
+    val description = "Record ThriftMux protocol usage"
     def make(params: Stack.Params, next: ServiceFactory[CB, CB]) = {
       val param.Stats(stats) = params[param.Stats]
       stats.scope("protocol").counter("thriftmux").incr()
