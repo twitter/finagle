@@ -3,7 +3,7 @@ package com.twitter.finagle.smtp
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.util.{Future, Promise, Try}
-import scala.annotation.tailrec
+import com.twitter.finagle.smtp.reply._
 
 object SmtpClientDispatcher {
   private def makeUnit[T](p: Promise[T], value: => T): Future[Unit] = {

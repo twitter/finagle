@@ -1,8 +1,8 @@
 package com.twitter.finagle.smtp
 
-import javax.mail.internet.InternetAddress
-import javax.mail.{Session, Multipart, Message}
-import scala.collection.JavaConversions._
+//import javax.mail.internet.InternetAddress
+//import javax.mail.{Session, Multipart, Message}
+//import scala.collection.JavaConversions._
 import java.util.{Calendar, Date, Properties}
 
 class MailingAddress(val local: String, val domain: String) {
@@ -68,6 +68,11 @@ object EmailMessage {
             body: Seq[String]): EmailMessage
   = apply(Seq(MailingAddress(from)), to map (MailingAddress(_)), subject, body)
 
+  def apply(from: String,
+            to: String,
+            subject: String,
+            body: Seq[String]): EmailMessage
+  = apply(from, Seq(to), subject, body)
   //def apply(javamail: javax.mail.internet.MimeMessage) = new JavaMailMessage(javamail)
 
   //def apply(commonsmail: org.apache.commons.mail.Email) = new CommonsMailMessage(commonsmail)

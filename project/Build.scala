@@ -330,16 +330,16 @@ object Finagle extends Build {
     name := "finagle-kestrel"
   ).dependsOn(finagleCore, finagleMemcached)
 
-  lazy val finagleSmtp = Project(
+  /*lazy val finagleSmtp = Project(
     id = "finagle-smtp",
     base = file("finagle-smtp"),
     settings = Project.defaultSettings ++
       sharedSettings
   ).settings(
       name := "finagle-smtp",
-      libraryDependencies ++= Seq(util("core"),util("codec"),
-        "org.apache.commons" % "commons-email" % "1.3.2")
-    ).dependsOn(finagleCore)
+      libraryDependencies ++= Seq(util("core"),util("codec")/*,
+        "org.apache.commons" % "commons-email" % "1.3.2"*/)
+    ).dependsOn(finagleCore)*/
 
 /*  notyet
   lazy val finagleProtobuf = Project(
