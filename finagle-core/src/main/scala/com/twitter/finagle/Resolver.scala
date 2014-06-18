@@ -1,11 +1,12 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.util.{InetSocketAddressUtil, LoadService}
-import com.twitter.util.{Closable, Return, Throw, Time, Try, Var}
-import java.net.SocketAddress
+import com.twitter.finagle.util.{DefaultTimer, InetSocketAddressUtil, LoadService}
+import com.twitter.util.{Return, Throw, Time, Try, Var, FuturePool}
+import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.util.WeakHashMap
 import java.util.logging.Logger
-import scala.collection.mutable
+import java.security.Security
+import com.twitter.conversions.time._
 
 /**
  * A resolver binds a name, represented by a string, to a
@@ -41,11 +42,42 @@ abstract class AbstractResolver extends Resolver
 
 object InetResolver extends Resolver {
   val scheme = "inet"
+  val ttl = {
+    val minTtl     = 5.seconds
+    val defaultTtl = 10.seconds
+    val maxTtl     = 1.hour
 
-  def bind(arg: String) = {
-    val sockaddrs = InetSocketAddressUtil.parseHosts(arg)
-    val addr = Addr.Bound(sockaddrs:_*)
-    Var.value(addr)
+    val property = Option(Security.getProperty("networkaddress.cache.ttl"))
+    property map (_.toInt.seconds max minTtl min maxTtl) getOrElse defaultTtl
+  }
+  val timer = DefaultTimer.twitter
+  val futurePool = FuturePool.unboundedPool
+  val log = Logger.getLogger(getClass.getName)
+
+  def bind(hosts: String): Var[Addr] = {
+    if (hosts == ":*") return Var.value(Addr.Bound(new InetSocketAddress(0)))
+
+    val hostPorts = hosts split Array(' ', ',') filter (!_.isEmpty) map (_.split(":"))
+    def parseHosts: Set[SocketAddress] = {
+      (hostPorts flatMap { hp =>
+        require(hp.size == 2)
+        val host = hp(0)
+        val port = hp(1).toInt
+        InetAddress.getAllByName(host) map { addr =>
+          new InetSocketAddress(addr, port)
+        }
+      }).toSet
+    }
+
+    val varAddr = Var[Addr](Addr.Bound(parseHosts))
+    timer.schedule(Time.now, ttl) {
+      futurePool(parseHosts) onSuccess { addrs =>
+        varAddr.update(Addr.Bound(addrs))
+      } onFailure { ex =>
+        log.warning("failed to resolve hosts " + ex)
+      }
+    }
+    varAddr
   }
 }
 
