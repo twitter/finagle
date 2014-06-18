@@ -25,7 +25,18 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
   private[this] val state = new AtomicReference[Future[_]](Idle)
   private[this] val cancelled = new CancelledRequestException
 
-  protected def dispatch(req: Out): Future[Rep]
+  /**
+   * Dispatches a request. The first argument is the request. The second
+   * argument `eos` (end-of-stream promise) must be fulfilled when the request
+   * is complete.
+   *
+   * For non-streaming requests, `eos.setDone()` should be called immediately,
+   * since the entire request is present. For streaming requests,
+   * `eos.setDone()` must be called at the end of stream (in HTTP, this is on
+   * receipt of last chunk). Refer to the implementation in
+   * [[com.twitter.finagle.http.codec.HttpServerDispatcher]].
+   */
+  protected def dispatch(req: Out, eos: Promise[Unit]): Future[Rep]
   protected def handle(rep: Rep): Future[Unit]
 
   private[this] def loop(): Future[Unit] = {
@@ -33,13 +44,14 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
     trans.read() flatMap { req =>
       val p = new Promise[Rep]
       if (state.compareAndSet(Idle, p)) {
+        val eos = new Promise[Unit]
         val save = Local.save()
-        try p.become(dispatch(req))
+        try p.become(dispatch(req, eos))
         finally Local.restore(save)
-        p
+        p map { res => (res, eos) }
       } else Eof
-    } flatMap { rep =>
-      handle(rep)
+    } flatMap { case (rep, eos) =>
+      Future.join(handle(rep), eos).unit
     } respond {
       case Return(()) if state.get ne Closed =>
         loop()
@@ -83,6 +95,8 @@ class SerialServerDispatcher[Req, Rep](
     service.close()
   }
 
-  protected def dispatch(req: Req) = service(req)
+  protected def dispatch(req: Req, eos: Promise[Unit]) =
+    service(req) ensure eos.setDone()
+
   protected def handle(rep: Rep) = trans.write(rep)
 }

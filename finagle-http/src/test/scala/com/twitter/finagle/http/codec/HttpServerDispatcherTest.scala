@@ -4,24 +4,41 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.{ChannelClosedException, Service}
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.netty3.ChannelBufferBuf
-import com.twitter.finagle.transport.QueueTransport
-import com.twitter.io.Reader
+import com.twitter.finagle.transport.{QueueTransport, Transport}
+import com.twitter.io.{Reader, Buf}
 import com.twitter.util.{Await, Future, Promise}
 import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.handler.codec.http.{HttpChunk, DefaultHttpChunk}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class HttpServerDispatcherTest extends FunSuite {
-  def mkPair[A,B] = {
-    val inQ = new AsyncQueue[A]
-    val outQ = new AsyncQueue[B]
-    (new QueueTransport[A,B](inQ, outQ), new QueueTransport[B,A](outQ, inQ))
+  import HttpServerDispatcherTest._
+
+  def testChunk(trans: Transport[Any, Any], chunk: HttpChunk) = {
+    val f = trans.read()
+    assert(!f.isDefined)
+    Await.ready(trans.write(chunk))
+    val c = Await.result(f).asInstanceOf[HttpChunk]
+    assert(c.getContent === chunk.getContent)
   }
 
-  def buf(msg: String) =
-    ChannelBufferBuf(ChannelBuffers.wrappedBuffer(msg.getBytes("UTF-8")))
+  test("streaming request body") {
+    val service = Service.mk { req: Request => ok(req.reader) }
+    val (in, out) = mkPair[Any, Any]
+    val disp = new HttpServerDispatcher[Request](out, service)
+
+    val req = Request()
+    req.setChunked(true)
+    in.write(req)
+    val res = Await.result(in.read).asInstanceOf[Response]
+
+    testChunk(in, chunk("a"))
+    testChunk(in, chunk("foo"))
+    testChunk(in, HttpChunk.LAST_CHUNK)
+  }
 
   test("client abort before dispatch") {
     val promise = new Promise[Response]
@@ -53,5 +70,26 @@ class HttpServerDispatcherTest extends FunSuite {
     // Simulate channel closure
     out.close()
     intercept[Reader.ReaderDiscarded] { Await.result(res.writer.write(buf("."))) }
+  }
+}
+
+object HttpServerDispatcherTest {
+  def mkPair[A,B] = {
+    val inQ = new AsyncQueue[A]
+    val outQ = new AsyncQueue[B]
+    (new QueueTransport[A,B](inQ, outQ), new QueueTransport[B,A](outQ, inQ))
+  }
+
+  def wrap(msg: String) = ChannelBuffers.wrappedBuffer(msg.getBytes("UTF-8"))
+  def buf(msg: String) = ChannelBufferBuf(wrap(msg))
+  def chunk(msg: String) = new DefaultHttpChunk(wrap(msg))
+
+  def ok(readerIn: Reader): Future[Response] = {
+    val res = new Response {
+      final val httpResponse = Response()
+      override val reader = readerIn
+    }
+    res.setChunked(true)
+    Future.value(res)
   }
 }

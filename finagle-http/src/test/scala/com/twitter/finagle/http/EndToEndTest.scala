@@ -1,7 +1,10 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.{CancelledRequestException, Dtab, Service, ServiceProxy}
+import com.twitter.finagle.{
+  ChannelClosedException, CancelledRequestException, Dtab, Service,
+  ServiceProxy
+}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.tracing.Trace
 import com.twitter.io.{Buf, Reader, Writer}
@@ -29,6 +32,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
   type HttpService = Service[HttpRequest, HttpResponse]
   type RichHttpService = Service[Request, Response]
 
+  def drip(w: Writer): Future[Unit] = w.write(buf("*")) before drip(w)
   def buf(msg: String): ChannelBufferBuf =
     ChannelBufferBuf(
       ChannelBuffers.wrappedBuffer(msg.getBytes("UTF-8")))
@@ -171,6 +175,67 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       assert(Await.result(readNBytes(5, reader)) === Buf.Utf8("world"))
       client.close()
     }
+
+    test(name + ": transport closure propagates to request stream reader") {
+      val p = new Promise[Buf]
+      val s = Service.mk[Request, Response] { req =>
+        p.become(Reader.readAll(req.reader))
+        Future.value(Response())
+      }
+      val client = connect(s)
+      val req = Request()
+      req.setChunked(true)
+      Await.result(client(req))
+      client.close()
+      intercept[ChannelClosedException] { Await.result(p) }
+    }
+
+    test(name + ": transport closure propagates to request stream producer") {
+      val s = Service.mk[Request, Response] { _ => Future.value(Response()) }
+      val client = connect(s)
+      val req = Request()
+      req.setChunked(true)
+      client(req)
+      client.close()
+      intercept[Reader.ReaderDiscarded] { Await.result(drip(req.writer)) }
+    }
+
+    test(name + ": request discard terminates remote stream producer") {
+      val s = Service.mk[Request, Response] { req =>
+        val res = Response()
+        res.setChunked(true)
+        def go = for {
+          c <- req.reader.read(Int.MaxValue)
+          _  <- res.writer.write(c)
+          _  <- res.close()
+        } yield ()
+        // discard the reader, which should terminate the drip.
+        go ensure req.reader.discard()
+
+        Future.value(res)
+      }
+
+      val client = connect(s)
+      val req = Request()
+      req.setChunked(true)
+      val resf = client(req)
+
+      Await.result(req.writer.write(buf("hello")))
+
+      val contentf = resf flatMap { res => Reader.readAll(res.reader) }
+      assert(Await.result(contentf) === Buf.Utf8("hello"))
+
+      // drip should terminate because the request is discarded.
+      intercept[Reader.ReaderDiscarded] { Await.result(drip(req.writer)) }
+    }
+
+    test(name + ": two fixed-length requests") {
+      val svc = Service.mk[Request, Response] { _ => Future.value(Response()) }
+      val client = connect(svc)
+      Await.result(client(Request()))
+      Await.result(client(Request()))
+      client.close()
+    }
   }
 
   def trace(name: String)(connect: HttpService => HttpService) {
@@ -284,7 +349,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     rich("ClientBuilder (RichHttp)") {
       service =>
         val server = ServerBuilder()
-          .codec(RichHttp[Request](Http()))
+          .codec(RichHttp[Request](Http(), aggregateChunks = false))
           .bindTo(new InetSocketAddress(0))
           .name("server")
           .build(service)
