@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.util.{Return, Throw, Var}
-import java.net.SocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -79,4 +79,13 @@ class ResolverTest extends FunSuite {
     assert(Resolver.eval("test!xyz") === Resolver.eval("test!xyz"))
     assert(Resolver.eval("test!xyz") != Resolver.eval("test!xxx"))
   }
+
+  test("InetResolver should resolve localhost correctly") {
+    val changes = InetResolver.bind(":*").changes
+    changes.respond {
+      case Addr.Bound(addrs) => assert(addrs === Set(new InetSocketAddress(0)))
+      case _ => fail()
+    }
+  }
+
 }

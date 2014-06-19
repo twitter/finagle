@@ -1,10 +1,10 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.util.{DefaultTimer, InetSocketAddressUtil, LoadService}
-import com.twitter.util.{Return, Throw, Time, Try, Var, FuturePool}
+import com.twitter.util.{Return, Throw, Try, Var, FuturePool, Closable}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.util.WeakHashMap
-import java.util.logging.Logger
+import java.util.logging.{Level, Logger}
 import java.security.Security
 import com.twitter.conversions.time._
 
@@ -40,44 +40,63 @@ trait Resolver {
  */
 abstract class AbstractResolver extends Resolver
 
+/**
+ * Resolver for inet scheme. This Resolver resolves DNS after each ttl timeouts.
+ * ttl is got from "networkaddress.cache.ttl",
+ * and if "networkaddress.cache.ttl" is not set a default ttl is used.
+ */
 object InetResolver extends Resolver {
   val scheme = "inet"
-  val ttl = {
-    val minTtl     = 5.seconds
+  private val log = Logger.getLogger(getClass.getName)
+  private val ttl = {
     val defaultTtl = 10.seconds
-    val maxTtl     = 1.hour
-
-    val property = Option(Security.getProperty("networkaddress.cache.ttl"))
-    property map (_.toInt.seconds max minTtl min maxTtl) getOrElse defaultTtl
+    Try(Option(Security.getProperty("networkaddress.cache.ttl")).map(_.toInt.seconds)) match {
+      case Throw(exc: SecurityException) =>
+        log.log(Level.WARNING, "security permissions block us from checking ttl, setting dns caching ttl to default", exc)
+        defaultTtl
+      case Throw(exc: NumberFormatException) =>
+        log.log(Level.WARNING, "networkaddress.cache.ttl is set as non-number", exc)
+        defaultTtl
+      case Return(None) => defaultTtl
+      case Return(Some(value)) => value
+    }
   }
-  val timer = DefaultTimer.twitter
-  val futurePool = FuturePool.unboundedPool
-  val log = Logger.getLogger(getClass.getName)
+  private val timer = DefaultTimer.twitter
+  private val futurePool = FuturePool.unboundedPool
 
+  /**
+   * Check the format of host:port string first.
+   * Then create an async Var and schedule a timer task to resolve DNS hosts.
+   * When observation is closed, the timer task will be closed.
+   */
   def bind(hosts: String): Var[Addr] = {
     if (hosts == ":*") return Var.value(Addr.Bound(new InetSocketAddress(0)))
 
-    val hostPorts = hosts split Array(' ', ',') filter (!_.isEmpty) map (_.split(":"))
+    val hostPorts = hosts split Array(' ', ',') filter (!_.isEmpty) map (_.split(":")) map { hp =>
+      require(hp.size == 2)
+      (hp(0), hp(1).toInt)
+    }
+
     def parseHosts: Set[SocketAddress] = {
       (hostPorts flatMap { hp =>
-        require(hp.size == 2)
-        val host = hp(0)
-        val port = hp(1).toInt
-        InetAddress.getAllByName(host) map { addr =>
-          new InetSocketAddress(addr, port)
+        InetAddress.getAllByName(hp._1) map { addr =>
+          new InetSocketAddress(addr, hp._2)
         }
       }).toSet
     }
 
-    val varAddr = Var[Addr](Addr.Bound(parseHosts))
-    timer.schedule(Time.now, ttl) {
-      futurePool(parseHosts) onSuccess { addrs =>
-        varAddr.update(Addr.Bound(addrs))
-      } onFailure { ex =>
-        log.warning("failed to resolve hosts " + ex)
+    Var.async(Addr.Bound(parseHosts)) { u =>
+      val timerTask = timer.schedule(ttl.fromNow, ttl) {
+        futurePool { parseHosts } onSuccess { addrs =>
+          u() = Addr.Bound(addrs)
+        } onFailure { ex =>
+          log.log(Level.WARNING, "failed to resolve hosts ", ex)
+        }
+      }
+      Closable.make { deadline =>
+        timerTask.close(deadline)
       }
     }
-    varAddr
   }
 }
 
