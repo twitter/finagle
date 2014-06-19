@@ -67,7 +67,7 @@ class ReusingPoolTest extends FunSuite with MockitoSugar {
   test("first attempt establishes a connection, subsequent attempts don't") {
     val ctx = new Ctx
     import ctx._
-     
+
     verify(underlying, never).apply(any[ClientConnection])
     val f = pool()
     assert(f.poll === None)
@@ -97,7 +97,7 @@ class ReusingPoolTest extends FunSuite with MockitoSugar {
     verify(underlying, times(2)).apply(any[ClientConnection])
     verify(service2, never).close(any[Time])
   }
-  
+
   test("return on failure") {
     val ctx = new Ctx
     import ctx._

@@ -1,7 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Var, Updatable}
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -9,12 +8,12 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class DtabTest extends FunSuite {
 
-  def pathTree(t: String) = 
+  def pathTree(t: String) =
     NameTree.read(t).map(Name(_))
 
   def assertEquiv[T: Equiv](left: T, right: T) = assert(
     if (Equiv[T].equiv(left, right)) None
-    else Some(left+"!="+right)
+    else Some(left + "!=" + right)
   )
 
   test("Lookup all prefixes in reverse order") {
@@ -43,13 +42,13 @@ class DtabTest extends FunSuite {
       /biz=>/$/inet/0/8080;
       /bar=>/$/inet/0/9090
     """))
-    
+
     def assertEval(dtab: Dtab, path: Path, expect: Name*) {
       assert((dtab orElse Namer.global).bind(NameTree.Leaf(path)).sample().eval === Some(expect.toSet))
     }
 
-    assertEval(d1++d2, Path.read("/foo"), Name.bound(new InetSocketAddress(8080)))
-    assertEval(d2++d1, Path.read("/foo"), Name.bound(new InetSocketAddress(9090)))
+    assertEval(d1 ++ d2, Path.read("/foo"), Name.bound(new InetSocketAddress(8080)))
+    assertEval(d2 ++ d1, Path.read("/foo"), Name.bound(new InetSocketAddress(9090)))
   }
   
   test("d1 ++ Dtab.empty") {
@@ -68,7 +67,7 @@ class DtabTest extends FunSuite {
       (d1 + Dentry.read("/foo => /123")).stripPrefix(d1),
       Dtab.read("/foo=>/123"))
 
-    assertEquiv(d1.stripPrefix(d1+ Dentry.read("/s => /b")), d1)
+    assertEquiv(d1.stripPrefix(d1 + Dentry.read("/s => /b")), d1)
     assert(Dtab.empty.stripPrefix(d1).isEmpty)
   }
 
@@ -78,8 +77,8 @@ class DtabTest extends FunSuite {
     b += Dentry.read("/a => /b")
     b += Dentry.read("/c => /d")
     val dtab = b.result
-    
-    val dtab1: Dtab = dtab map { case Dentry(a, b) => 
+
+    val dtab1: Dtab = dtab map { case Dentry(a, b) =>
       Dentry.read("%s=>%s".format(a.show.toUpperCase, b.show.toUpperCase))
     }
 

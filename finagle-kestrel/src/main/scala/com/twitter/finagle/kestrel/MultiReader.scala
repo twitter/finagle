@@ -6,7 +6,6 @@ import com.twitter.finagle.{Addr, Group, Name, ServiceFactory}
 import com.twitter.finagle.builder._
 import com.twitter.finagle.kestrel.protocol.{Response, Command, Kestrel}
 import com.twitter.finagle.thrift.{ThriftClientFramedCodec, ClientId, ThriftClientRequest}
-import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util.{Closable, Duration, Future, Return, Throw, Try, Timer, Var, Witness}
 import _root_.java.{util => ju}
 import _root_.java.lang.UnsupportedOperationException

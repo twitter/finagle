@@ -7,7 +7,7 @@ import com.twitter.io.Buf
 
 class MyContext extends ContextHandler {
   @volatile var allBuf = Buf.Empty
-  
+
   val key = Buf.Utf8("com.twitter.finagle.MyContext")
 
   def handle(buf: Buf) {
@@ -36,7 +36,7 @@ class ContextTest extends FunSuite {
         buf.write(out, 0)
         assert(out.toSeq === Seq(1,2,3,4))
       case None =>
-        fail("Map doesn't contain key "+key)
+        fail("Map doesn't contain key " + key)
     }
 
     Context.handle(key8, Buf.ByteArray(5,6,7,8))
@@ -59,7 +59,7 @@ class ContextTest extends FunSuite {
         buf.write(out, 0)
         assert(out.toSeq === Seq(1,2,3,4))
       case None =>
-        fail("Map doesn't contain K "+K)
+        fail("Map doesn't contain K " + K)
     }
 
     Context.handle(K8, Buf.ByteArray(5,6,7,8))

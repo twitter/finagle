@@ -3,18 +3,18 @@ package com.twitter.finagle
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import java.net.{SocketAddress, InetSocketAddress}
-import com.twitter.util.{Return, Throw, Var, Activity, Witness, Try}
+import java.net.InetSocketAddress
+import com.twitter.util.{Return, Throw, Activity, Witness, Try}
 
 @RunWith(classOf[JUnitRunner])
 class NamerTest extends FunSuite {
   trait Ctx {
     def ia(i: Int) = new InetSocketAddress(i)
 
-    val exc = new Exception{}
+    val exc = new Exception {}
 
     val namer = new Namer {
-      var acts: Map[Path, (Activity[NameTree[Path]], Witness[Try[NameTree[Path]]])] = 
+      var acts: Map[Path, (Activity[NameTree[Path]], Witness[Try[NameTree[Path]]])] =
         Map.empty
 
       def contains(path: String) = acts contains Path.read(path)
@@ -29,7 +29,7 @@ class NamerTest extends FunSuite {
           // Don't capture system paths.
           case Path.Utf8("$", _*) => Activity.value(NameTree.Neg)
           case Path.Utf8(elems@_*) =>
-            val p = Path.Utf8(elems:_*)
+            val p = Path.Utf8(elems: _*)
             acts.get(p) match {
               case Some((a, _)) => a map { tree => tree.map(Name(_)) }
               case None =>
@@ -37,7 +37,7 @@ class NamerTest extends FunSuite {
                 acts += p -> tup
                 act map { tree => tree.map(Name(_)) }
             }
-          case _ =>  Activity.value(NameTree.Neg)
+          case _ => Activity.value(NameTree.Neg)
         }
       }
 
@@ -45,12 +45,12 @@ class NamerTest extends FunSuite {
       def lookup(path: Path) = namer.lookup(path)
     }
   }
-  
+
   def assertEval(res: Activity[NameTree[Name.Bound]], ias: InetSocketAddress*) {
     assert(res.sample().eval === Some((ias map { ia => Name.bound(ia) }).toSet))
   }
 
-  test("NameTree.bind: union") (new Ctx {
+  test("NameTree.bind: union")(new Ctx {
     val res = namer.bind(NameTree.read("/test/0 & /test/1"))
     assert(res.run.sample() === Activity.Pending)
 
@@ -71,14 +71,14 @@ class NamerTest extends FunSuite {
     assert(res.sample().eval === None)
 
     namer("/test/1").notify(Return(NameTree.Empty))
-    
+
     assert(res.sample().eval === Some(Set.empty))
 
     namer("/test/2").notify(Throw(exc))
     assert(res.run.sample() === Activity.Failed(exc))
   })
 
-  test("NameTree.bind: failover") (new Ctx {
+  test("NameTree.bind: failover")(new Ctx {
     val res = namer.bind(NameTree.read("/test/0 | /test/1 & /test/2"))
     assert(res.run.sample() === Activity.Pending)
 
@@ -103,7 +103,7 @@ class NamerTest extends FunSuite {
 
   test("Namer.global: /$/nil") {
     assert(Namer.global.lookup(Path.read("/$/nil")).sample() === NameTree.Empty)
-    assert(Namer.global.lookup(Path.read("/$/nil/foo/bar")).sample() 
+    assert(Namer.global.lookup(Path.read("/$/nil/foo/bar")).sample()
       === NameTree.Empty)
   }
 }

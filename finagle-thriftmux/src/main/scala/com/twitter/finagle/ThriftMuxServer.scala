@@ -5,9 +5,8 @@ import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.server._
 import com.twitter.finagle.thrift.{Protocols, HandleUncaughtApplicationExceptions}
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Closable, Future}
+import com.twitter.util.Future
 import java.net.SocketAddress
-import java.util.concurrent.atomic.AtomicInteger
 import org.apache.thrift.protocol.TProtocolFactory
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 

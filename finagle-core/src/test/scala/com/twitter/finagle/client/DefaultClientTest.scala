@@ -7,7 +7,7 @@ import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.util.{Await, Future, MockTimer, Time, Var, Closable, Return}
 import com.twitter.util.TimeConversions.intToTimeableNumber
 import com.twitter.finagle.stats.{StatsReceiver, InMemoryStatsReceiver}
-import java.net.{SocketAddress, InetAddress, InetSocketAddress}
+import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.Eventually
@@ -23,8 +23,9 @@ class DefaultClientTest extends FunSuite with Eventually {
     val qIn = new AsyncQueue[Int]()
     val qOut = new AsyncQueue[Int]()
 
-    val transporter: (SocketAddress, StatsReceiver) => Future[Transport[Int, Int]] = { case (_, _) =>
-      Future.value(new QueueTransport(qIn, qOut))
+    val transporter: (SocketAddress, StatsReceiver) => Future[Transport[Int, Int]] = {
+      case (_, _) =>
+        Future.value(new QueueTransport(qIn, qOut))
     }
   }
 
@@ -35,7 +36,7 @@ class DefaultClientTest extends FunSuite with Eventually {
   trait SourcedExceptionDispatcherHelper extends DispatcherHelper {
     val dispatcher: Transport[Int, Int] => Service[Int, Int] = { _ =>
       Service.mk { _ =>
-        throw new SourcedException{}
+        throw new SourcedException {}
       }
     }
   }
@@ -43,7 +44,7 @@ class DefaultClientTest extends FunSuite with Eventually {
   trait ServiceHelper { self: QueueTransportHelper with DispatcherHelper =>
     val endPointer = Bridge[Int, Int, Int, Int](transporter, dispatcher)
     val name = "name"
-    val socket = new SocketAddress(){}
+    val socket = new SocketAddress() {}
     val client: Client[Int, Int]
     lazy val service: Service[Int, Int] = client.newService(Name.bound(socket), name)
   }
@@ -100,7 +101,7 @@ class DefaultClientTest extends FunSuite with Eventually {
       )
 
       Time.withCurrentTimeFrozen { control =>
-        val f1 = service(3)  // has a connection
+        val f1 = service(3) // has a connection
         val f2 = service(4)  // is queued
 
         assert(!f1.isDefined)
@@ -108,7 +109,7 @@ class DefaultClientTest extends FunSuite with Eventually {
 
         control.advance(rTimeout)
         timer.tick()
-        assert(f1.isDefined)  // times out
+        assert(f1.isDefined) // times out
         intercept[IndividualRequestTimeoutException] {
           Await.result(f1)
         }

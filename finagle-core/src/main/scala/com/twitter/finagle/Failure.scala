@@ -60,6 +60,15 @@ final class Failure private[finagle](
       p.println("\tat %s".format(te))
   }
 
+  override def equals(a: Any) = {
+    a match {
+      case Failure(cause, flags) => this.cause == cause && this.flags == flags
+      case _ => false
+    }
+  }
+
+  override def hashCode = cause.hashCode ^ flags.hashCode
+
   def copy(
     why: String = why,
     cause: Throwable = cause,
