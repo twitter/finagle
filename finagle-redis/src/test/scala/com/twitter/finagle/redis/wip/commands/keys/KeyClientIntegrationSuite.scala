@@ -5,25 +5,7 @@ import com.twitter.finagle.redis.tags.{RedisTest, SlowTest}
 import com.twitter.util.Await
 import com.twitter.finagle.redis.util.{CBToString, StringToChannelBuffer}
 
-final class SimpleClientSuite extends FinagleRedisClientSuite {
-
-  test("Correctly perform the APPEND command", RedisTest, SlowTest) {
-    withRedisClient { client =>
-      Await.result(client.set(foo, bar))
-      val actualResult = Await.result(client.append(foo, baz))
-      val expectedResult = 6
-      assert(actualResult === expectedResult)
-    }
-  }
-
-  test("Correctly perform the DECRBY command", RedisTest, SlowTest) {
-    withRedisClient { client =>
-      Await.result(client.set(foo, StringToChannelBuffer("21")))
-      val actualResult = Await.result(client.decrBy(foo, 2))
-      val expectedResult = 19
-      assert(actualResult === expectedResult)
-    }
-  }
+final class KeyClientIntegrationSuite extends FinagleRedisClientSuite {
 
   test("Correctly perform the DEL command", RedisTest, SlowTest) {
     withRedisClient { client =>
@@ -40,74 +22,6 @@ final class SimpleClientSuite extends FinagleRedisClientSuite {
       Await.result(client.set(foo, bar))
       val actualResult = Await.result(client.exists(foo))
       val expectedResult = true
-      assert(actualResult === expectedResult)
-    }
-  }
-
-  test("Correctly perform the GETRANGE command", RedisTest, SlowTest) {
-    withRedisClient { client =>
-      Await.result(client.set(foo, StringToChannelBuffer("boing")))
-      val actualResult = CBToString(Await.result(client.getRange(foo, 0, 2)).get)
-      val expectedResult = "boi"
-      assert(actualResult === expectedResult)
-    }
-  }
-
-  test("Correctly perform the GET & SET commands", RedisTest, SlowTest) {
-    withRedisClient { client =>
-      val actualEmptyGetResult = Await.result(client.get(foo))
-      val expectedEmptyGetResult = None
-      assert(actualEmptyGetResult === expectedEmptyGetResult)
-
-      Await.result(client.set(foo, bar))
-      val actualGetResult = CBToString(Await.result(client.get(foo)).get)
-      val expectedGetResult = "bar"
-      assert(actualGetResult === expectedGetResult)
-    }
-  }
-
-  test("Correctly perform the FLUSH command", RedisTest, SlowTest) {
-    withRedisClient { client =>
-      Await.result(client.set(foo, bar))
-      Await.result(client.flushDB())
-      val actualResult = Await.result(client.get(foo))
-      val expectedResult = None
-      assert(actualResult === expectedResult)
-    }
-  }
-
-  test("Correctly perform the SELECT command", RedisTest, SlowTest) {
-    withRedisClient { client =>
-      val actualResult =Await.result(client.select(1))
-      val expectedResult = ()
-      assert(actualResult === expectedResult)
-    }
-  }
-
-  test("Correctly perform the INFO command", RedisTest, SlowTest) {
-    withRedisClient { client =>
-      val info = new String(Await.result(client.info()).get.array, "UTF8")
-      val hasServer = info.contains("# Server")
-      assert(hasServer === true)
-      val hasRedisVersion = info.contains("redis_version:")
-      assert(hasRedisVersion === true)
-      val hasClients = info.contains("# Clients")
-      assert(hasClients === true)
-
-      val cpu = new String(Await.result(client.info(StringToChannelBuffer("cpu"))).get.array, "UTF8")
-      val hasCpu = cpu.contains("# CPU")
-      assert(hasCpu === true)
-      val hasUsedCpuSys = cpu.contains("used_cpu_sys:")
-      assert(hasUsedCpuSys === true)
-      val cpuHasRedisVersion = cpu.contains("redis_version:")
-      assert(cpuHasRedisVersion === false)
-    }
-  }
-
-  test("Correctly perform the QUIT command", RedisTest, SlowTest) {
-    withRedisClient { client =>
-      val actualResult = Await.result(client.quit())
-      val expectedResult = ()
       assert(actualResult === expectedResult)
     }
   }
@@ -167,6 +81,43 @@ final class SimpleClientSuite extends FinagleRedisClientSuite {
       assert(actualResult === expectedResult)
 
       Await.result(client.del(Seq(foo))) // clean up
+    }
+  }
+
+  test("Correctly perform the PEXPIRE & PTL commands", RedisTest, SlowTest) {
+    withRedisClient { client =>
+      val ttl = 100000L
+      Await.result(client.set(foo, bar))
+      val didSetPEXPIRE = Await.result(client.pExpire(foo, ttl))
+      val expectedPEXPIREResult = true
+      assert(didSetPEXPIRE === expectedPEXPIREResult)
+
+      val result = Await.result(client.pTtl(foo)) match {
+        case Some(num) => num
+        case None      => fail("Could not retrieve pTtl for key")
+      }
+      val actualResult = if(result <= ttl) true else false
+      val expectedResult = true
+      assert(actualResult === expectedResult)
+    }
+  }
+
+  test("Correctly perform the PEXPIREAT & PTL commands", RedisTest, SlowTest) {
+    withRedisClient { client =>
+      val horizon = 20000L
+      val ttl = System.currentTimeMillis() + horizon
+      Await.result(client.set(foo, bar))
+      val didSetPEXPIREAT = Await.result(client.pExpireAt(foo, ttl))
+      val expectedPEXPIREATResult = true
+      assert(didSetPEXPIREAT === expectedPEXPIREATResult)
+
+      val result = Await.result(client.pTtl(foo)) match {
+        case Some(num) => num
+        case None      => fail("Could not retrieve pTtl for key")
+      }
+      val actualResult = if(result <= horizon) true else false
+      val expectedResult = true
+      assert(actualResult === expectedResult)
     }
   }
 }
