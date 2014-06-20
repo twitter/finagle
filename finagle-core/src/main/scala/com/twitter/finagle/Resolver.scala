@@ -1,11 +1,11 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.util.{DefaultTimer, InetSocketAddressUtil, LoadService}
-import com.twitter.util.{Return, Throw, Try, Var, FuturePool, Closable}
+import com.twitter.util.{Return, Throw, Try, Var, FuturePool, Closable, Duration}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.util.WeakHashMap
 import java.util.logging.{Level, Logger}
-import java.security.Security
+import java.security.{PrivilegedAction, Security}
 import com.twitter.conversions.time._
 
 /**
@@ -49,16 +49,20 @@ object InetResolver extends Resolver {
   val scheme = "inet"
   private val log = Logger.getLogger(getClass.getName)
   private val ttl = {
-    val defaultTtl = 10.seconds
-    Try(Option(Security.getProperty("networkaddress.cache.ttl")).map(_.toInt.seconds)) match {
-      case Throw(exc: SecurityException) =>
-        log.log(Level.WARNING, "security permissions block us from checking ttl, setting dns caching ttl to default", exc)
-        defaultTtl
+    val t = Try(Option(java.security.AccessController.doPrivileged(
+      new PrivilegedAction[String] {
+        override def run(): String = Security.getProperty("networkaddress.cache.ttl")
+      }
+    )) map { s => s.toInt })
+
+    t match {
       case Throw(exc: NumberFormatException) =>
-        log.log(Level.WARNING, "networkaddress.cache.ttl is set as non-number", exc)
-        defaultTtl
-      case Return(None) => defaultTtl
-      case Return(Some(value)) => value
+        log.log(Level.WARNING, "networkaddress.cache.ttl is set as non-number, DNS cache refresh turned off", exc)
+        Duration.Top
+      case Return(None) =>
+        log.log(Level.INFO, "networkaddress.cache.ttl is not set, DNS cache refresh turned off")
+        Duration.Top
+      case Return(Some(value)) => value.seconds
     }
   }
   private val timer = DefaultTimer.twitter
@@ -72,22 +76,19 @@ object InetResolver extends Resolver {
   def bind(hosts: String): Var[Addr] = {
     if (hosts == ":*") return Var.value(Addr.Bound(new InetSocketAddress(0)))
 
-    val hostPorts = hosts split Array(' ', ',') filter (!_.isEmpty) map (_.split(":")) map { hp =>
-      require(hp.size == 2)
-      (hp(0), hp(1).toInt)
-    }
+    val hostPorts = InetSocketAddressUtil.parseHostPorts(hosts)
 
-    def parseHosts: Set[SocketAddress] = {
-      (hostPorts flatMap { hp =>
-        InetAddress.getAllByName(hp._1) map { addr =>
-          new InetSocketAddress(addr, hp._2)
+    def parseHosts(): Set[SocketAddress] = {
+      (hostPorts flatMap { case (host, port) =>
+        InetAddress.getAllByName(host) map { addr =>
+          new InetSocketAddress(addr, port)
         }
       }).toSet
     }
 
-    Var.async(Addr.Bound(parseHosts)) { u =>
+    Var.async(Addr.Bound(parseHosts())) { u =>
       val timerTask = timer.schedule(ttl.fromNow, ttl) {
-        futurePool { parseHosts } onSuccess { addrs =>
+        futurePool { parseHosts() } onSuccess { addrs =>
           u() = Addr.Bound(addrs)
         } onFailure { ex =>
           log.log(Level.WARNING, "failed to resolve hosts ", ex)
