@@ -31,6 +31,8 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
   def anonNamer() = new Namer {
     def lookup(path: Path): Activity[NameTree[Name]] =
       Activity.value(NameTree.Neg)
+    def enum(prefix: Path): Activity[Dtab] =
+      Activity.exception(new UnsupportedOperationException)
   }
 
   trait Ctx {

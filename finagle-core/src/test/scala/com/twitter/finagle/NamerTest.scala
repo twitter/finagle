@@ -39,10 +39,13 @@ class NamerTest extends FunSuite {
             }
           case _ => Activity.value(NameTree.Neg)
         }
+        
+        def enum(prefix: Path): Activity[Dtab] = Activity.exception(new UnsupportedOperationException)
       }
 
       val namer = pathNamer orElse Namer.global
       def lookup(path: Path) = namer.lookup(path)
+      def enum(prefix: Path): Activity[Dtab] = namer.enum(prefix)
     }
   }
 
@@ -106,6 +109,39 @@ class NamerTest extends FunSuite {
     assert(Namer.global.lookup(Path.read("/$/nil/foo/bar")).sample()
       === NameTree.Empty)
   }
+
+  test("Namer.expand") {
+    def assertExpand(dtab: String, path: String, expected: String) {
+      val expanded = Dtab.read(dtab).expand(Path.read(path)).sample
+      assert(Equiv[Dtab].equiv(expanded, Dtab.read(expected)), 
+        "Expanded dtab \"%s\" does not match expected dtab \"%s\"".format(
+          expanded.show, Dtab.read(expected).show))
+    }
+
+    assertExpand("""
+      /x => /foo;
+      /x/1 => /xx/1;
+      /x/2 => /xx/2;
+      /foo => /y;
+      /y/1 => /yy/1;
+      /y/3 => /yy/3
+    """, "/x", """
+      /1=>/yy/1;
+      /3=>/yy/3;
+      /1=>/xx/1;
+      /2=>/xx/2
+    """)
+
+    assertExpand("""
+      /x => /foo & /bar;
+      /foo/1 => /foo1;
+      /foo/2 => /foo2;
+      /bar/1 => /bar1;
+      /bar/3 => /bar3
+    """, "/x", """
+      /1=>/foo1&/bar1;
+      /2=>/foo2;
+      /3=>/bar3
+      """)
+  }
 }
-
-
