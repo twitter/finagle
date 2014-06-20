@@ -6,7 +6,7 @@ import com.twitter.finagle.redis.naggati.FinagleRedisRequestTest
 import com.twitter.finagle.redis.tags.CodecTest
 import com.twitter.util.Time
 
-final class KeyCommandSuite extends FinagleRedisRequestTest {
+final class KeyCodecSuite extends FinagleRedisRequestTest {
 
   test("Correctly encode DELETE for one key", CodecTest) {
     val actualEncoding = codec(wrap("DEL foo\r\n"))
