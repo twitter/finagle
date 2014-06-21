@@ -29,7 +29,7 @@ case class Help(info: String) extends SystemInfoReply {
 }
 
 /*Service information*/
-case class ServiceReady(info: String) extends ServiceInfoReply {
+case class ServiceReady(domain: String, info: String) extends ServiceInfoReply {
   val code = SERVICE_READY
 }
 case class ClosingTransmission(info: String) extends ServiceInfoReply {
@@ -40,8 +40,8 @@ case class ServiceNotAvailable(info: String) extends NotAvailableReply {
 }
 
 /*Mail system successes*/
-case class OKReply(info: String) extends MailOkReply {
-  val code = OK
+case class OK(info: String) extends MailOkReply {
+  val code = OKReply
 }
 
 case class TempUserNotLocal(info: String) extends MailOkReply {

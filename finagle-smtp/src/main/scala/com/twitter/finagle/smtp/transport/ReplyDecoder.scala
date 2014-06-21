@@ -6,10 +6,12 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.util.CharsetUtil
 import com.twitter.finagle.smtp.reply._
 
-class ReplyDecoder extends LineBasedFrameDecoder(100) {
+class ReplyDecoder extends LineBasedFrameDecoder(500) {
   import CodecUtil._
   override def decode(ctx: ChannelHandlerContext, channel: Channel, msg: ChannelBuffer): UnspecifiedReply = {
-    super.decode(ctx, channel, msg) match {
+    val buf = super.decode(ctx, channel, msg)
+    if (buf == null) null
+    else buf match {
       case cb: ChannelBuffer => {
         val rep = cb.toString(CharsetUtil.UTF_8)
         val first = rep(0)

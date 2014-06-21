@@ -31,21 +31,21 @@ class DataFilterTest extends FunSuite {
 
   test("makes data end with <CRLF>.<CRLF>") {
     val data = Seq("line1", "line2.")
-    val request = Data(data)
+    val request = Request.Data(data)
     val response = Await.result(dataFilterService(request)).asInstanceOf[TestReply]
     assert(response.req.cmd === "line1\r\nline2.\r\n.") //last /r/n will be added by encoder, as after any other command
   }
 
   test("duplicates leading dot") {
     val data = Seq(".", ".line1", "line2.")
-    val request = Data(data)
+    val request = Request.Data(data)
     val response = Await.result(dataFilterService(request)).asInstanceOf[TestReply]
     assert(response.req.cmd === "..\r\n..line1\r\nline2.\r\n.") //last /r/n will be added by encoder, as after any other command
   }
 
   test("ignores non-Data commands") {
     val req1 = Request.Hello
-    val req2 = AddFrom(MailingAddress("test@test.test"))
+    val req2 = Request.AddFrom(MailingAddress("test@test.test"))
     val rep1 = Await.result(dataFilterService(req1)).asInstanceOf[TestReply]
     assert(rep1.req === req1)
     val rep2 = Await.result(dataFilterService(req2)).asInstanceOf[TestReply]
@@ -60,10 +60,10 @@ class MailFilterTest extends FunSuite {
   def MailTestService(msg: EmailMessage) = new Service[Request, Reply] {
     var cmdSeq = Seq(
       Request.Hello,
-      AddFrom(msg.getSender)) ++
-      msg.getTo.map(AddRecipient(_)) ++ Seq(
+      Request.AddFrom(msg.getSender)) ++
+      msg.getTo.map(Request.AddRecipient(_)) ++ Seq(
       Request.BeginData,
-      Data(msg.getBody),
+      Request.Data(msg.getBody),
       Request.Quit
     )
 

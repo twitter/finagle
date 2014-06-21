@@ -24,7 +24,7 @@ extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](tra
       val p = new Promise[Reply]
       decodeReply(greet, p) flatMap { unit =>
         p flatMap {
-          case ServiceReady(info) => Future.Done
+          case ServiceReady(_,_) => Future.Done
           case other => Future.exception(InvalidReply(other.toString))
         }
       }
@@ -45,7 +45,12 @@ extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](tra
       } flatMap { unit =>
         trans.read()
       } flatMap { rp =>
-        decodeReply(rp, p)
+        val signal = decodeReply(rp, p)
+        p onFailure {
+          case UnknownReplyCodeError(_,_) => close()
+          case _ =>
+        }
+        signal
       }
     } onFailure {
       _ => close()
@@ -64,7 +69,8 @@ extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](tra
                                                 override val isMultiline = resp.isMultiline
                                                 override val lines = resp.lines
                                             }
-        case SERVICE_READY              => new ServiceReady(resp.info)  {
+        case SERVICE_READY              => val (domain, info) = resp.info span {_ != ' '}
+                                           new ServiceReady(domain, info)  {
                                                  override val isMultiline = resp.isMultiline
                                                  override val lines = resp.lines
                                                }
@@ -72,7 +78,7 @@ extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](tra
                                                  override val isMultiline = resp.isMultiline
                                                  override val lines = resp.lines
                                                }
-        case OK                         => new OKReply(resp.info)  {
+        case OKReply                         => new OK(resp.info)  {
                                                  override val isMultiline = resp.isMultiline
                                                  override val lines = resp.lines
                                                }
