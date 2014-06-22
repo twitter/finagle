@@ -42,13 +42,13 @@ abstract class AbstractResolver extends Resolver
 
 /**
  * Resolver for inet scheme. This Resolver resolves DNS after each ttl timeouts.
- * ttl is got from "networkaddress.cache.ttl",
- * and if "networkaddress.cache.ttl" is not set a default ttl is used.
+ * Ttl is got from "networkaddress.cache.ttl" which is a Java Security Property.
+ * If "networkaddress.cache.ttl" is not set or set to non-positive value, DNS cache refresh will be turned off.
  */
 object InetResolver extends Resolver {
   val scheme = "inet"
   private val log = Logger.getLogger(getClass.getName)
-  private val ttl = {
+  private val ttlOption = {
     val t = Try(Option(java.security.AccessController.doPrivileged(
       new PrivilegedAction[String] {
         override def run(): String = Security.getProperty("networkaddress.cache.ttl")
@@ -58,45 +58,43 @@ object InetResolver extends Resolver {
     t match {
       case Throw(exc: NumberFormatException) =>
         log.log(Level.WARNING, "networkaddress.cache.ttl is set as non-number, DNS cache refresh turned off", exc)
-        Duration.Top
+        None
       case Return(None) =>
         log.log(Level.INFO, "networkaddress.cache.ttl is not set, DNS cache refresh turned off")
-        Duration.Top
-      case Return(Some(value)) => value.seconds
+        None
+      case Return(Some(value)) =>
+        if (value <= 0) {
+          log.log(Level.INFO, "networkaddress.cache.ttl is set as non-positive value, DNS cache refresh turned off")
+          None
+        } else Some(value.seconds)
     }
   }
   private val timer = DefaultTimer.twitter
   private val futurePool = FuturePool.unboundedPool
 
   /**
-   * Check the format of host:port string first.
-   * Then create an async Var and schedule a timer task to resolve DNS hosts.
-   * When observation is closed, the timer task will be closed.
+   * Binds to the specified hostnames, and refreshes the DNS information periodically.
    */
   def bind(hosts: String): Var[Addr] = {
+    import InetSocketAddressUtil._
+
     if (hosts == ":*") return Var.value(Addr.Bound(new InetSocketAddress(0)))
 
-    val hostPorts = InetSocketAddressUtil.parseHostPorts(hosts)
-
-    def parseHosts(): Set[SocketAddress] = {
-      (hostPorts flatMap { case (host, port) =>
-        InetAddress.getAllByName(host) map { addr =>
-          new InetSocketAddress(addr, port)
+    val hostPorts = parseHostPorts(hosts)
+    val init = Addr.Bound(resolveHostPorts(hostPorts))
+    ttlOption match {
+      case Some(ttl) =>
+        Var.async(init) { u =>
+          timer.schedule(ttl.fromNow, ttl) {
+            futurePool { resolveHostPorts(hostPorts) } onSuccess { addrs =>
+              u() = Addr.Bound(addrs)
+            } onFailure { ex =>
+              log.log(Level.WARNING, "failed to resolve hosts ", ex)
+            }
+          }
         }
-      }).toSet
-    }
-
-    Var.async(Addr.Bound(parseHosts())) { u =>
-      val timerTask = timer.schedule(ttl.fromNow, ttl) {
-        futurePool { parseHosts() } onSuccess { addrs =>
-          u() = Addr.Bound(addrs)
-        } onFailure { ex =>
-          log.log(Level.WARNING, "failed to resolve hosts ", ex)
-        }
-      }
-      Closable.make { deadline =>
-        timerTask.close(deadline)
-      }
+      case None =>
+        Var.value(init)
     }
   }
 }
