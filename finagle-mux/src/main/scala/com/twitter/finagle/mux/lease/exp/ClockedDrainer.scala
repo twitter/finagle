@@ -30,7 +30,7 @@ import java.util.logging.Logger
 // Drain
 // GC
 // Undrain
-private[lease] class ClockedDrainer(
+private[finagle] class ClockedDrainer(
   coord: Coordinator,
   forceGc: () => Unit,
   space: MemorySpace,
@@ -99,7 +99,7 @@ private[lease] class ClockedDrainer(
   }
 
   private[this] def upkeep(state: String, init: () => Duration) {
-    lr.record("%_ms".format(state), init().inMilliseconds.toString)
+    lr.record("%s_ms".format(state), init().inMilliseconds.toString)
     lr.record("count_%s".format(state), requestCount.get().toString)
     lr.record("pending_%s".format(state), npending().toString)
     lr.record("arrival_%s".format(state), narrival.get().toString)
@@ -144,7 +144,10 @@ private[lease] class ClockedDrainer(
     coord.sleepUntilDiscountRemaining(space, { () =>
       if (verbose) {
         log.info("AWAIT-DISCOUNT: discount="+space.discount()+
-          "; clock="+coord)
+          "; clock="+coord.counter +
+          "; space="+space
+
+        )
       }
     })
   }
@@ -173,7 +176,8 @@ private[lease] class ClockedDrainer(
 
     if (verbose) {
       log.info("AWAIT-DRAIN: n="+npending()+
-        "; clock="+coord+
+        "; clock="+coord.counter+
+        "; space="+space+
         "; maxWaitMs="+maxWait.inMilliseconds+
         "; minDiscount="+space.minDiscount)
     }
@@ -191,7 +195,7 @@ private[lease] class ClockedDrainer(
     forcedGc = 0
     if (coord.counter.info.generation() == generation) {
       val n = npending()
-      if (verbose) log.info("FORCE-GC: n="+n+"; clock="+coord)
+      if (verbose) log.info("FORCE-GC: n="+n+"; clock="+coord.counter+"; space="+space)
 
       lr.record("byteLeft", coord.counter.info.remaining().inBytes.toString)
 
@@ -274,7 +278,7 @@ object drainerPercentile extends GlobalFlag(95, "GC drainer cutoff percentile")
 object drainerDebug extends GlobalFlag(false, "GC drainer debug log (verbose)")
 object drainerEnabled extends GlobalFlag(false, "GC drainer enabled")
 
-object ClockedDrainer {
+private[finagle] object ClockedDrainer {
   private[this] val log = Logger.getLogger("ClockedDrainer")
   private[this] val lr = if (drainerDebug()) new DedupingLogsReceiver(log) else NullLogsReceiver
 
@@ -287,7 +291,7 @@ object ClockedDrainer {
       case Some(coord) =>
         val rSnooper = new RequestSnooper(
           coord.counter,
-          drainerPercentile(),
+          drainerPercentile().toDouble / 100.0,
           lr
         )
 

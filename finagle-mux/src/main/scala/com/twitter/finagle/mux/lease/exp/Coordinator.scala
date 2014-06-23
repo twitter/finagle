@@ -71,7 +71,7 @@ private[lease] class Coordinator(
       if (verbose) {
         log.info("DRAIN-LOOP: target="+
           ((counter.info.remaining-space.minDiscount) / 100).inBytes+"; n="+npending()+
-          "; coord="+this+"; maxMs="+
+          "; counter="+counter+"; maxMs="+
           ((maxWait-elapsed()) / 2).inMilliseconds.toInt)
       }
     })

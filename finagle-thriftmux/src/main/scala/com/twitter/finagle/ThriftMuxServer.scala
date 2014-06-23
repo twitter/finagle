@@ -121,7 +121,7 @@ private[finagle] object ThriftServerMuxer
   }
 
   protected val newDispatcher: Stack.Params => Dispatcher =
-    Function.const(new mux.ServerDispatcher(_, _, true))
+    Function.const(new mux.ServerDispatcher(_, _, true, mux.lease.exp.ClockedDrainer.flagged))
 }
 
 /**

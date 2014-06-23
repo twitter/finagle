@@ -15,7 +15,7 @@ import com.twitter.util.Duration
  * The lessee provides an interface that lets the lessor notify the lessee about
  * lease information, and lets the lessor query the lessee for draining info.
  */
-private[exp] trait Lessee {
+private[mux] trait Lessee {
   /**
    * The Lessee is given the lease for d, starting now.
    */
@@ -30,7 +30,7 @@ private[exp] trait Lessee {
 /**
  * The Lessor is the entity that gives leases.
  */
-private[exp] trait Lessor {
+private[mux] trait Lessor {
 
   /**
    * The lessor will notify all lessees that have been registered and have not
@@ -55,7 +55,7 @@ private[exp] trait Lessor {
   def observeArrival()
 }
 
-private[exp] object Lessor {
+private[mux] object Lessor {
   val nil: Lessor = new Lessor {
     def register(lessee: Lessee) = ()
     def unregister(lessee: Lessee) = ()

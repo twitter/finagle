@@ -13,7 +13,7 @@ private[lease] object GarbageCollector {
     log.log(Level.INFO, "Found System.minorGc")
     () => meth.invoke(null)
   } catch {
-    case NonFatal(exc) =>
+    case exc: NoSuchMethodException =>
       log.log(
         Level.INFO,
         "Failed to resolve System.minorGc; falling "+

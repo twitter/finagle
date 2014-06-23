@@ -76,7 +76,7 @@ private[lease] class WindowedByteCounter private[lease](
 
   /** @return allocation rate in bytes per second. */
   def rate(): Long = sum().inBytes / W.inSeconds
-  private[this] def lastRate() = allocs(idx).inBytes * 100 / P.inMilliseconds
+  private[this] def lastRate() = allocs(idx).inBytes * 1000 / P.inMilliseconds
 
   override def toString =
     "WindowedByteCounter(windowed="+
