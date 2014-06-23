@@ -67,12 +67,12 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging</artifactId>
-      <version>6.17.1-SNAPSHOT</version>
+      <version>6.18.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-app</artifactId>
-      <version>6.17.1-SNAPSHOT</version>
+      <version>6.18.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
