@@ -259,6 +259,6 @@ trait PreparedStatement {
   }
 
   def selectFirst[T](params: Any*)(f: Row => T): Future[Option[T]] =
-    select[T](params:_*)(f) map { rows => rows.headOption }
+    select[T](params:_*)(f) flatMap { rows => Future.value(rows.headOption) }
 
 }
