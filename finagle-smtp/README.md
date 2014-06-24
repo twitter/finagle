@@ -34,12 +34,14 @@ The object for instantiating a client capable of sending a simple email is `Smtp
 
 EmailMessage trait for composing emails is described in `Email.scala`. You can create an email by calling the factory method:
 
-         val email = EmailMessage(
-            from = "from@from.com",
-            to = Seq("first@to.com", "second@to.com"),
-            subject = "test",
-            body = Seq("test") //body is a sequence of lines
-            )
+```scala
+val email = EmailMessage(
+  from = "from@from.com",
+  to = Seq("first@to.com", "second@to.com"),
+  subject = "test",
+  body = Seq("test") //body is a sequence of lines
+)
+```
 
 Applying the service on the email returns `Future.Done` in case of a successful operation or the first encountered error.
 
