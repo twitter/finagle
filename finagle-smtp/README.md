@@ -4,7 +4,7 @@ A minimum implementation of SMTP client for finagle. Supports sending plain text
 
 ## Usage
 
-### Sending independent SMTP commands**
+### Sending independent SMTP commands
 
 The object for instantiating an SMTP client capable of sending any command defined in *RFC5321* is `Smtp`. For services created with it the request type is `Request`.
 Command classes are described in `Request.scala`. Replies are differentiated by groups, which are described in `reply/ReplyGroups.scala`.
@@ -52,4 +52,4 @@ For now in case of success the connection is closed, and in case of error sessio
 
 ### Example
 
-The example of sending email to a local SMTP server with SmtpSimple and handling errors can be seen in `Example.scala`.
+The example of sending email to a local SMTP server with SmtpSimple and handling errors can be seen in (`Example.scala`)[https://github.com/suncelesta/finagle/blob/master/finagle-smtp/src/main/scala/com/twitter/finagle/Example.scala].
