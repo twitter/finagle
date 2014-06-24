@@ -22,7 +22,7 @@ Streaming requires the ``RichHttp`` codec with ``aggregateChunks=false``.
 (Currently, codec specification is only available through ``ServerBuilder`` and
 ``ClientBuilder``.)
 
-::
+.. code-block:: scala
 
   val server = ServerBuilder()
     .codec(RichHttp[Request](Http(), aggregateChunks = false))
@@ -53,7 +53,7 @@ the sequence to get a collection of bytes (specified by the type ``Buf``).
 Alternatively, we can think of byte streams as a server of bytes, responding to
 requests of ``Int`` with a ``Buf``.
 
-::
+.. code-block:: scala
 
   trait Reader {
     def read(n: Int): Future[Buf]
@@ -71,7 +71,7 @@ Consuming a byte stream from ``Reader`` is as simple as calling ``read``. To
 produce a byte stream, we can use ``Reader.writable()``, such as in the
 following example.
 
-::
+.. code-block:: scala
 
   val reader: Reader = {
     val writer = Reader.writable()
@@ -94,7 +94,7 @@ Implementing a Reader
 
 ``Request`` and ``Response`` have a convenience method for writing streams.
 
-::
+.. code-block:: scala
 
   def apply(req: Request): Future[Response] = {
     val response = Response()
@@ -136,7 +136,7 @@ More advanced producers will need to implement the ``Reader`` interface. This
 next example echoes the incoming byte stream in the byte stream of the
 response.
 
-::
+.. code-block:: scala
 
   def apply(req: Request): Future[Response] = {
     val response = new Response {
@@ -155,7 +155,7 @@ To make things simpler we define an interface for file operations ``Handle``.
 The implementation can specify how to handle read operations with the return
 type ``Future[ByteBuffer]``. Reading 0 bytes signifies end-of-file.
 
-::
+.. code-block:: scala
 
   trait Handle {
     def read(n: Int): Future[ByteBuffer]
@@ -167,7 +167,7 @@ Given a ``Handle h`` we can make a new ``Reader``. This implementation of
 ``Reader`` is simplified for clarity in this example. The essential control
 flow is dictated by ``finished`` and ``state``.
 
-::
+.. code-block:: scala
 
   def readerFromHandle(h: Handle) = new Reader {
     val finished = new Promise[Buf]
@@ -198,7 +198,7 @@ handler. This turns out to be okay since resolving ``finished`` guarantees
 ``Handle`` closure, and when resolved, it becomes impossible to access
 ``state``.
 
-::
+.. code-block:: scala
 
     def read(n: Int) =
       if (finished.isDefined) finished
@@ -221,7 +221,7 @@ handler. This turns out to be okay since resolving ``finished`` guarantees
 Anyone with a reference to the ``Reader`` may interrupt whatever computation is
 in progress by invoking ``discard()``.
 
-::
+.. code-block:: scala
 
     def discard() {
       finished.updateIfEmpty(Throw(new Reader.ReaderDiscarded))
@@ -233,7 +233,7 @@ part is straight forward. A new ``Request`` is created, the important part here
 is that we override the default ``reader``, installing our own
 ``readerFromHandle``.
 
-::
+.. code-block:: scala
 
   val fileToRead: Handle = // ...
   val reqIn = new DefaultHttpRequest(HTTP_1_1, OK)
@@ -260,7 +260,7 @@ The result of the ``read`` falls into two cases:
 1. End-of-file: The ``reader`` is empty, the recursion terminates with ``Future.Done``
 2. A ``Buf``: A successful read, the ``Buf`` is then written to the file.
 
-::
+.. code-block:: scala
 
   val fileToWrite: Handle = // ...
 
