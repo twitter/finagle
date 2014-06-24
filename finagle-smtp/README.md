@@ -52,4 +52,4 @@ For now in case of success the connection is closed, and in case of error sessio
 
 ### Example
 
-The example of sending email to a local SMTP server with SmtpSimple and handling errors can be seen in (`Example.scala`)[https://github.com/suncelesta/finagle/blob/master/finagle-smtp/src/main/scala/com/twitter/finagle/Example.scala].
+The example of sending email to a local SMTP server with SmtpSimple and handling errors can be seen in [`Example.scala`](https://github.com/suncelesta/finagle/blob/master/finagle-smtp/src/main/scala/com/twitter/finagle/Example.scala).
