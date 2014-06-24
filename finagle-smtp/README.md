@@ -14,11 +14,15 @@ This allows flexible error handling:
 
 ```scala
 val res: Future[Unit] = send(command) onFailure {
-  //catching by reply group
+  // An error group
   case ex: SyntaxErrorReply => println("Syntax error: ", ex.info)
 
-  //catching a concrete reply
+  // A concrete reply
   case ProcessingError(info) => println("Error processing request: ", info)
+}
+
+res handle {
+  ...
 }
 ```
 
