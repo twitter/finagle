@@ -8,7 +8,7 @@ trait UnspecifiedReply {
   val lines: Seq[String] = Seq(info)
 }
 
-case class MultilinePart(code: Int, info: String) extends UnspecifiedReply
+case class NonTerminalLine(code: Int, info: String) extends UnspecifiedReply
 
 object ReplyCode {
 
@@ -41,3 +41,4 @@ object ReplyCode {
 }
 
 trait Reply extends UnspecifiedReply
+

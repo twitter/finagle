@@ -6,6 +6,7 @@ import com.twitter.finagle.smtp._
 import com.twitter.finagle.smtp.reply._
 import com.twitter.finagle.smtp.filter.{MailFilter, HeadersFilter, DataFilter}
 import com.twitter.finagle.smtp.transport.SmtpTransporter
+import com.twitter.finagle.service.RetryingFilter
 
 
 object Smtp extends Client[Request, Reply]{

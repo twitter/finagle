@@ -32,7 +32,7 @@ class ReplyDecoder extends LineBasedFrameDecoder(500) {
               val code = getCode(rep)
               if (pipeline.get(aggregation) == null)
                 pipeline.addBefore("smtpDecode", aggregation, AggregateMultiline(code, Seq[String]()))
-              MultilinePart(code, getInfo(rep))
+              NonTerminalLine(code, getInfo(rep))
 
 
             case _ => InvalidReply(rep)
