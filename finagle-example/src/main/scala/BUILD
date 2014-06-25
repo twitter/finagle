@@ -1,7 +1,6 @@
 scala_library(name='scala',
   dependencies=[
-    jar(org='com.twitter.common', name='flags', rev='1.0.0')
-      .exclude(org='com.twitter'),
+    pants('3rdparty/jvm/com/twitter/common:flags'),
     pants('finagle/finagle-core'),
     pants('finagle/finagle-example/src/main/thrift:thrift-scala'),
     pants('finagle/finagle-http'),

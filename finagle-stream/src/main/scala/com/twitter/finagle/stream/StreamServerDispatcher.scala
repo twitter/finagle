@@ -4,7 +4,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.transport.Transport
 import org.jboss.netty.handler.codec.http._
 import com.twitter.finagle.dispatch.GenSerialServerDispatcher
-import com.twitter.util.Future
+import com.twitter.util.{Future, Promise}
 
 /**
  * Stream StreamResponse messages into HTTP chunks.
@@ -30,10 +30,11 @@ private class StreamServerDispatcher(
     }
   }
   
-  protected def dispatch(req: Any) = req match {
+  protected def dispatch(req: Any, eos: Promise[Unit]) = req match {
     case req: HttpRequest =>
-      service(req)
+      service(req) ensure eos.setDone()
     case invalid =>
+      eos.setDone()
       Future.exception(new IllegalArgumentException("Invalid message "+invalid))
   }
   

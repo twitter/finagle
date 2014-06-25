@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.SerialServerDispatcher
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
@@ -10,7 +11,7 @@ import com.twitter.finagle.netty3._
 import com.twitter.finagle.server._
 import com.twitter.finagle.ssl.Ssl
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.Future
+import com.twitter.util.{Future, StorageUnit}
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.handler.codec.http._
 
@@ -73,6 +74,26 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
 }
 
 package exp {
+
+  private[exp] object Http {
+    object StackParams {
+      case class MaxRequestSize(size: StorageUnit)
+      implicit object MaxRequestSize extends Stack.Param[MaxRequestSize] {
+        val default = MaxRequestSize(5.megabytes)
+      }
+
+      case class MaxResponseSize(size: StorageUnit)
+      implicit object MaxResponseSize extends Stack.Param[MaxResponseSize] {
+        val default = MaxResponseSize(5.megabytes)
+      }
+
+      def applyToCodec(params: Stack.Params, codec: http.Http): http.Http =
+        codec
+          .maxRequestSize(params[MaxRequestSize].size)
+          .maxResponseSize(params[MaxResponseSize].size)
+    }
+  }
+
   private[finagle]
   class HttpClient(client: StackClient[HttpRequest, HttpResponse, Any, Any])
     extends StackClientLike[HttpRequest, HttpResponse, Any, Any, HttpClient](client) {
@@ -90,12 +111,21 @@ package exp {
 
     def withTlsWithoutValidation(): HttpClient =
       configured(Transport.TLSEngine(Some({ () => Ssl.clientWithoutCertificateValidation() })))
+
+    def withMaxRequestSize(size: StorageUnit): HttpClient =
+      configured(Http.StackParams.MaxRequestSize(size))
+
+    def withMaxResponseSize(size: StorageUnit): HttpClient =
+      configured(Http.StackParams.MaxResponseSize(size))
   }
 
   object HttpClient extends HttpClient(new StackClient[HttpRequest, HttpResponse, Any, Any] {
     protected val newTransporter: Stack.Params => Transporter[Any, Any] = { prms =>
       val param.Label(label) = prms[param.Label]
-      val httpPipeline = http.Http().client(ClientCodecConfig(label)).pipelineFactory
+      val httpPipeline =
+        Http.StackParams.applyToCodec(prms, http.Http())
+          .client(ClientCodecConfig(label))
+          .pipelineFactory
       Netty3Transporter(httpPipeline, prms)
     }
 
@@ -112,14 +142,21 @@ package exp {
 
     def withTls(cfg: Netty3ListenerTLSConfig): HttpServer =
       configured(Transport.TLSEngine(Some(cfg.newEngine)))
-  }
 
+    def withMaxRequestSize(size: StorageUnit): HttpServer =
+      configured(Http.StackParams.MaxRequestSize(size))
+
+    def withMaxResponseSize(size: StorageUnit): HttpServer =
+      configured(Http.StackParams.MaxResponseSize(size))
+  }
 
   object HttpServer extends HttpServer(new StackServer[HttpRequest, HttpResponse, Any, Any] {
     protected val newListener: Stack.Params => Listener[Any, Any] = { prms =>
       val param.Label(label) = prms[param.Label]
-      val httpPipeline = http.Http().server(ServerCodecConfig(label,
-        new SocketAddress{})).pipelineFactory
+      val httpPipeline =
+        Http.StackParams.applyToCodec(prms, http.Http())
+          .server(ServerCodecConfig(label, new SocketAddress{}))
+          .pipelineFactory
       Netty3Listener(httpPipeline, prms)
     }
 

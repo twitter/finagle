@@ -3,7 +3,7 @@ package com.twitter
 import com.twitter.app.GlobalFlag
 import com.twitter.finagle.serverset2.Zk2Resolver
 import com.twitter.finagle.zookeeper.ZkResolver
-import com.twitter.finagle.{Addr, NameTree, Namer, Resolver, Path, WeightedInetSocketAddress, Name}
+import com.twitter.finagle.{Addr, Dtab, NameTree, Namer, Resolver, Path, WeightedInetSocketAddress, Name}
 import com.twitter.util.Activity
 import java.net.InetSocketAddress
 
@@ -58,8 +58,13 @@ class serverset extends Namer {
         case Addr.Pending => Activity.Pending
         case Addr.Failed(exc) => Activity.Failed(exc)
       })
+      
 
     case _ =>
       Activity.exception(new Exception("Invalid com.twitter.namer path "+path.show))
   }
+
+  def enum(prefix: Path): Activity[Dtab] = Activity.value(Dtab.empty)
+
 }
+

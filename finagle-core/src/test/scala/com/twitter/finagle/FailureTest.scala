@@ -39,6 +39,22 @@ class FailureTest extends FunSuite {
     }
   }
 
+  test("equality") {
+    val ex_a = new Exception("fonzbonz")
+    val ex_b = new Exception("otherone")
+    val fa1: Failure = Failure.Retryable(ex_a)
+    val fa2: Failure = Failure.Retryable(ex_a)
+    val fb: Failure = Failure.Retryable(ex_b)
+    val faa: Failure = Failure.InterruptedBy(ex_a)
+
+    assert(fa1 === fa2)
+    assert(fa1.hashCode === fa2.hashCode)
+    assert(fa1 != fb)
+    assert(fa2 != faa)
+    assert(fa2.hashCode != fb.hashCode)
+    assert(fa1.hashCode != faa.hashCode)
+  }
+
   test("interrupted failures") {
     val exc = new Exception
     val f = Failure.InterruptedBy(exc)

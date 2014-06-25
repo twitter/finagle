@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-core</artifactId>
   <packaging>jar</packaging>
-  <version>6.17.1-SNAPSHOT</version>
+  <version>6.18.1-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -34,12 +34,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.scala-tools.testing</groupId>
-      <artifactId>specs_2.9.2</artifactId>
-      <version>1.6.9</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_2.9.2</artifactId>
       <version>1.9.1</version>
@@ -50,37 +44,37 @@
       <groupId>com.twitter</groupId>
       <artifactId>finagle-test</artifactId>
       <scope>test</scope>
-      <version>6.17.1-SNAPSHOT</version>
+      <version>6.18.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-app</artifactId>
-      <version>6.17.1-SNAPSHOT</version>
+      <version>6.18.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-collection</artifactId>
-      <version>6.17.1-SNAPSHOT</version>
+      <version>6.18.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-core</artifactId>
-      <version>6.17.1-SNAPSHOT</version>
+      <version>6.18.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-hashing</artifactId>
-      <version>6.17.1-SNAPSHOT</version>
+      <version>6.18.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-jvm</artifactId>
-      <version>6.17.1-SNAPSHOT</version>
+      <version>6.18.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging</artifactId>
-      <version>6.17.1-SNAPSHOT</version>
+      <version>6.18.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

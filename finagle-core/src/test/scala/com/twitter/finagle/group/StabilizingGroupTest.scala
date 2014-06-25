@@ -4,13 +4,10 @@ import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Group, MockTimer}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Duration, Time, Timer, TimerTask}
+import com.twitter.util.Time
 import org.junit.runner.RunWith
-import org.scalatest.concurrent.Eventually._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.time._
 import StabilizingGroup.State._
 
 class MockHealth {

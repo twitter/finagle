@@ -6,7 +6,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-import scala.annotation.tailrec
 import scala.util.Random
 import scala.collection.mutable
 

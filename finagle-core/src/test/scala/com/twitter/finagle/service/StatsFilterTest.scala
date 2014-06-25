@@ -32,10 +32,10 @@ class StatsFilterTest extends FunSuite {
     assert(res.isDefined)
     assert(Await.ready(res).poll.get.isThrow)
     val sourced = receiver.counters.keys.filter { _.exists(_ == "sourcedfailures") }
-    assert(sourced.size == 1)
-    assert(sourced.toSeq(0).exists(_.indexOf("bogus") >=0))
+    assert(sourced.size === 1)
+    assert(sourced.toSeq(0).exists(_.indexOf("bogus") >= 0))
     val unsourced = receiver.counters.keys.filter { _.exists(_ == "failures") }
-    assert(unsourced.size == 1)
+    assert(unsourced.size === 1)
     assert(unsourced.toSeq(0).exists { s => s.indexOf("RequestException") >= 0 })
     assert(unsourced.toSeq(0).exists { s => s.indexOf("WriteException") >= 0 })
   }
@@ -69,28 +69,28 @@ class StatsFilterTest extends FunSuite {
       assert(receiver.gauges(Seq("pending"))() === 1.0)
       promise.setException(BackupRequestLost)
       assert(!receiver.counters.keys.exists(_ contains "failure"))
-      assert(!(receiver.counters.contains(Seq("requests"))))
-      assert(!(receiver.counters.contains(Seq("success"))))
+      assert(!receiver.counters.contains(Seq("requests")))
+      assert(!receiver.counters.contains(Seq("success")))
       assert(receiver.gauges(Seq("pending"))() === 0.0)
     }
   }
 
   test("report pending requests on success") {
     val (promise, receiver, statsService) = getService
-    assert(receiver.gauges(Seq("pending"))() == 0.0)
+    assert(receiver.gauges(Seq("pending"))() === 0.0)
     statsService("foo")
-    assert(receiver.gauges(Seq("pending"))() == 1.0)
+    assert(receiver.gauges(Seq("pending"))() === 1.0)
     promise.setValue("")
-    assert(receiver.gauges(Seq("pending"))() == 0.0)
+    assert(receiver.gauges(Seq("pending"))() === 0.0)
   }
 
   test("report pending requests on failure") {
     val (promise, receiver, statsService) = getService
-    assert(receiver.gauges(Seq("pending"))() == 0.0)
+    assert(receiver.gauges(Seq("pending"))() === 0.0)
     statsService("foo")
-    assert(receiver.gauges(Seq("pending"))() == 1.0)
+    assert(receiver.gauges(Seq("pending"))() === 1.0)
     promise.setException(new Exception)
-    assert(receiver.gauges(Seq("pending"))() == 0.0)
+    assert(receiver.gauges(Seq("pending"))() === 0.0)
   }
 
   trait StatsFilterHelper {

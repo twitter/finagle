@@ -7,12 +7,16 @@ import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.{ChannelTransport, Transport}
 import java.net.SocketAddress
 import org.jboss.netty.channel.{Channel, ChannelFactory, ChannelPipeline,
-  ChannelPipelineFactory, Channels, DefaultChannelConfig}
-import org.mockito.Matchers
-import org.specs.SpecificationWithJUnit
-import org.specs.mock.Mockito
+ChannelPipelineFactory, Channels, DefaultChannelConfig}
+import org.mockito.Matchers._
+import org.mockito.Mockito.when
+import org.scalatest.FunSuite
+import org.mockito.stubbing.Answer
+import org.scalatest.mock.MockitoSugar
+import org.mockito.Mockito
+import org.mockito.invocation.InvocationOnMock
 
-trait IntegrationBase extends SpecificationWithJUnit with Mockito {
+trait IntegrationBase extends FunSuite with MockitoSugar {
   /*
    * Bootstrap enough to get a basic client connection up & running.
    */
@@ -21,41 +25,63 @@ trait IntegrationBase extends SpecificationWithJUnit with Mockito {
     val statsReceiver = new InMemoryStatsReceiver
 
     val codec = mock[Codec[String, String]]
-    (codec.prepareConnFactory(any)
-     answers { s => s.asInstanceOf[ServiceFactory[String, String]] })
-    (codec.prepareServiceFactory(Matchers.any[ServiceFactory[String, String]])
-     answers { f => f.asInstanceOf[ServiceFactory[String, String]] })
-    (codec.newClientTransport(Matchers.any[Channel], Matchers.any[StatsReceiver])
-     answers { case args: Array[Any] =>
-      new ChannelTransport[Any, Any](args(0).asInstanceOf[Channel])
-     })
-    (codec.newClientDispatcher(Matchers.any[Transport[Any, Any]])
-     answers { t => new SerialClientDispatcher[String, String](t.asInstanceOf[Transport[String, String]]) })
+    when(codec.prepareConnFactory(any[ServiceFactory[String, String]])) thenAnswer {
+      new Answer[ServiceFactory[String, String]] {
+        def answer(invocation: InvocationOnMock): ServiceFactory[String, String] = {
+          val arg = invocation.getArguments.head
+          arg.asInstanceOf[ServiceFactory[String, String]]
+        }
+      }
+    }
+    when(codec.prepareServiceFactory(any[ServiceFactory[String, String]])) thenAnswer {
+      new Answer[ServiceFactory[String, String]] {
+        def answer(invocation: InvocationOnMock): ServiceFactory[String, String] = {
+          val arg = invocation.getArguments.head
+          arg.asInstanceOf[ServiceFactory[String, String]]
+        }
+      }
+    }
+    when(codec.newClientTransport(any[Channel], any[StatsReceiver])) thenAnswer {
+      new Answer[ChannelTransport[Any, Any]] {
+        def answer(invocation: InvocationOnMock): ChannelTransport[Any, Any] = invocation.getArguments match {
+          case args: Array[Object] =>
+            new ChannelTransport[Any, Any](args.head.asInstanceOf[Channel])
+        }
+      }
+    }
+    when(codec.newClientDispatcher(any[Transport[Any, Any]])) thenAnswer {
+      new Answer[SerialClientDispatcher[String, String]] {
+        def answer(invocation: InvocationOnMock): SerialClientDispatcher[String, String] = {
+          val arg = invocation.getArguments.head
+          new SerialClientDispatcher[String, String](arg.asInstanceOf[Transport[String, String]])
+        }
+      }
+    }
 
-    val clientAddress = new SocketAddress{}
+    val clientAddress = new SocketAddress {}
 
     // Pipeline
     val clientPipelineFactory = mock[ChannelPipelineFactory]
     val channelPipeline = mock[ChannelPipeline]
-    clientPipelineFactory.getPipeline returns channelPipeline
-    codec.pipelineFactory returns clientPipelineFactory
+    when(clientPipelineFactory.getPipeline) thenReturn channelPipeline
+    when(codec.pipelineFactory) thenReturn clientPipelineFactory
 
-/*
-    val codec = new Codec[String, String] {
-      def pipelineFactory = clientPipelineFactory
-    }
-*/
+    /*
+        val codec = new Codec[String, String] {
+          def pipelineFactory = clientPipelineFactory
+        }
+    */
     // Channel
     val channelFactory = mock[ChannelFactory]
     val channel = mock[Channel]
-    val connectFuture = spy(Channels.future(channel, true))
-    val closeFuture = spy(Channels.future(channel))
-    channel.getCloseFuture returns closeFuture
+    val connectFuture = Mockito.spy(Channels.future(channel, true))
+    val closeFuture = Mockito.spy(Channels.future(channel))
+    when(channel.getCloseFuture) thenReturn closeFuture
     val channelConfig = new DefaultChannelConfig
-    channel.getConfig() returns channelConfig
-    channel.connect(clientAddress) returns connectFuture
-    channel.getPipeline returns channelPipeline
-    channelFactory.newChannel(channelPipeline) returns channel
+    when(channel.getConfig()) thenReturn channelConfig
+    when(channel.connect(clientAddress)) thenReturn connectFuture
+    when(channel.getPipeline) thenReturn channelPipeline
+    when(channelFactory.newChannel(channelPipeline)) thenReturn channel
 
     val codecFactory = Function.const(codec) _
 

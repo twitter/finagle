@@ -9,7 +9,7 @@ import com.twitter.finagle.dispatch._
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.util._
 import com.twitter.finagle.stats.StatsReceiver
-import java.net.{SocketAddress, InetAddress, InetSocketAddress}
+import java.net.{SocketAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{verify, when}
@@ -44,7 +44,7 @@ class DefaultServerTest extends FunSpec with MockitoSugar {
       val port = RandomSocket.nextPort()
       val socket = new InetSocketAddress(InetAddressUtil.Loopback, port).asInstanceOf[SocketAddress]
       val factory = ServiceFactory.const(Service.mk[Try[Int], Try[Int]] { num =>
-        Future.exception(new SourcedException{})
+        Future.exception(new SourcedException {})
       })
 
       val listeningServer: ListeningServer = server.serve(socket, factory)
@@ -63,7 +63,7 @@ class DefaultServerTest extends FunSpec with MockitoSugar {
       val clientTransport = new QueueTransport(qOut, qIn)
 
       val mockConnHandle = mock[Closable]
-      when(mockConnHandle.close(any[Time])) thenReturn(Future.Done)
+      when(mockConnHandle.close(any[Time])) thenReturn Future.Done
 
       val serviceTransport: (Transport[Try[Int], Try[Int]], Service[Try[Int], Try[Int]]) => Closable =
         (_, _) => mockConnHandle
@@ -73,8 +73,8 @@ class DefaultServerTest extends FunSpec with MockitoSugar {
       val socket = new InetSocketAddress(InetAddressUtil.Loopback, port).asInstanceOf[SocketAddress]
       val factory = mock[ServiceFactory[Try[Int], Try[Int]]]
       val service = Service.mk[Try[Int], Try[Int]] { Future.value }
-      when(factory(any[ClientConnection])) thenReturn(Future.value(service))
-      when(factory.close(any[Time])) thenReturn(Future.Done)
+      when(factory(any[ClientConnection])) thenReturn Future.value(service)
+      when(factory.close(any[Time])) thenReturn Future.Done
       val listeningServer: ListeningServer = server.serve(socket, factory)
 
       assert(clientTransport.write(Return(3)).isDefined === true)
@@ -92,7 +92,7 @@ class DefaultServerTest extends FunSpec with MockitoSugar {
       val clientTransport = new QueueTransport(qOut, qIn)
 
       val mockConnHandle = mock[Closable]
-      when(mockConnHandle.close(any[Time])) thenReturn(Future.Done)
+      when(mockConnHandle.close(any[Time])) thenReturn Future.Done
 
       val serviceTransport: (Transport[Try[Int], Try[Int]], Service[Try[Int], Try[Int]]) => Closable =
         new SerialServerDispatcher(_, _)

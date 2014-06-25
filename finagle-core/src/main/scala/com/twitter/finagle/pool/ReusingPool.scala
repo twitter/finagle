@@ -14,6 +14,7 @@ private[finagle] object ReusingPool {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]](ReusingPool) {
+      val description = "Maintain at most one connection"
       def make(params: Stack.Params, next: ServiceFactory[Req, Rep]) = {
         val param.Stats(sr) = params[param.Stats]
         new ReusingPool(next, sr.scope("reusingpool"))

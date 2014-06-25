@@ -43,6 +43,7 @@ class StackTest extends FunSuite {
 
   test("Stack.replace") {
     val stack = newStack().replace(TestRole2, new Stack.Simple[List[Int]](TestRole2) {
+      val description = TestRole2.toString
       def make(params: Stack.Params, next: List[Int]): List[Int] = 100 :: next
     })
 

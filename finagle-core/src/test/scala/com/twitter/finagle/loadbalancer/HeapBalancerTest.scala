@@ -2,7 +2,7 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{
-  ClientConnection, Group, NoBrokersAvailableException, Service, ServiceFactory}
+ClientConnection, Group, NoBrokersAvailableException, Service, ServiceFactory}
 import com.twitter.util.{Await, Future, Time, Var}
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
@@ -31,7 +31,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
 
     override def isAvailable = _isAvailable
     def isClosed = _closed
-    def close(deadline: Time) =  {
+    def close(deadline: Time) = {
       _closed = true
       Future.Done
     }
@@ -178,7 +178,6 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
 
   test("return NoBrokersAvailableException when empty") {
     val ctx = new Ctx
-    import ctx._
 
     val b = new HeapBalancer[Unit, LoadedFactory](Var.value(Set.empty))
     intercept[NoBrokersAvailableException] { Await.result(b()) }

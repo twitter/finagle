@@ -16,31 +16,14 @@ class HttpServerDispatcher[REQUEST <: Request](
     service: Service[REQUEST, HttpResponse])
   extends GenSerialServerDispatcher[REQUEST, HttpResponse, Any, Any](trans) {
 
+  import ReaderUtils.{readerFromTransport, streamChunks}
+
   trans.onClose ensure {
     service.close()
   }
 
-  private[this] def chunkOfBuf(buf: Buf): HttpChunk = buf match {
-    case Buf.Eof =>
-      HttpChunk.LAST_CHUNK
-    case cb: ChannelBufferBuf => 
-      new DefaultHttpChunk(cb.buf)
-    case buf =>
-      val bytes = new Array[Byte](buf.length)
-      buf.write(bytes, 0)
-      new DefaultHttpChunk(ChannelBuffers.wrappedBuffer(bytes))
-  }
-
-  private[this] def streamChunks(r: Reader): Future[Unit] = {
-    r.read(Int.MaxValue) flatMap { buf =>
-      val chunk = chunkOfBuf(buf)
-      if (chunk.isLast) trans.write(chunk)
-      else trans.write(chunk) before streamChunks(r)
-    }
-  }
-
-  protected def dispatch(req: Any) = req match {
-    case reqIn: HttpRequest if !reqIn.isChunked =>
+  protected def dispatch(m: Any, eos: Promise[Unit]) = m match {
+    case reqIn: HttpRequest =>
       val req = new Request {
         val httpRequest = reqIn
         override val httpMessage = reqIn
@@ -48,11 +31,21 @@ class HttpServerDispatcher[REQUEST <: Request](
           case ia: InetSocketAddress => ia
           case _ => new InetSocketAddress(0)
         }
+
+        override val reader =
+          if (reqIn.isChunked) {
+            readerFromTransport(trans, eos)
+          } else {
+            eos.setDone()
+            NullReader
+          }
+
       }.asInstanceOf[REQUEST]
       
       service(req)
 
     case invalid =>
+      eos.setDone()
       Future.exception(new IllegalArgumentException("Invalid message "+invalid))
   }
 
@@ -60,7 +53,7 @@ class HttpServerDispatcher[REQUEST <: Request](
     case rep: Response =>
       if (rep.isChunked) {
         val p = new Promise[Unit]
-        val f = trans.write(rep) before streamChunks(rep.reader)
+        val f = trans.write(rep) before streamChunks(trans, rep.reader)
         // This awkwardness is unfortunate but necessary for now as you may be
         // interrupted in the middle of a write, or when there otherwise isn’t
         // an outstanding read (e.g. read-write race).

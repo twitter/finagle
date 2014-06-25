@@ -20,6 +20,7 @@ private[finagle] object RequestSemaphoreFilter {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]](RequestConcurrencyLimit) {
+      val description = "Restrict number of concurrent requests"
       def make(params: Params, next: ServiceFactory[Req, Rep]) =
         params[RequestSemaphoreFilter.Param] match {
           case RequestSemaphoreFilter.Param(Int.MaxValue) => next

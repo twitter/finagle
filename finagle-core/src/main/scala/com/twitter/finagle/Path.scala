@@ -10,6 +10,8 @@ import java.util.BitSet
  * hierarchically-addressed object.
  */
 case class Path(elems: Buf*) {
+  require(elems.forall(Path.nonemptyBuf))
+
   def startsWith(other: Path) = elems startsWith other.elems
 
   def take(n: Int) = Path((elems take n):_*)
@@ -48,16 +50,19 @@ case class Path(elems: Buf*) {
     }
   }
 
-  lazy val show = showElems map ("/"+_) mkString ""
+  lazy val show = "/"+(showElems mkString "/")
 
   override def toString = "Path("+(showElems mkString ",")+")"
 }
 
 object Path {
+  private val nonemptyBuf: Buf => Boolean = !_.isEmpty
 
   implicit val showable: Showable[Path] = new Showable[Path] {
     def show(path: Path) = path.show
   }
+  
+  val empty = Path()
 
   private val Utf8Charset = Charset.forName("UTF-8")
   
@@ -107,12 +112,14 @@ object Path {
    *
    * {{{
    * /foo/bar/baz
+   * /
    * }}}
    *
    * parses into the path 
    *
    * {{{
    * Path(foo,bar,baz)
+   * Path()
    * }}}
    *
    * @throws IllegalArgumentException when `s` is not a syntactically valid path.

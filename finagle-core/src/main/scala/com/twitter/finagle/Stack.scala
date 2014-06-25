@@ -268,6 +268,7 @@ object Stack {
  */
 trait Stackable[T] {
   val headRole: Stack.Role
+  val description: String
   def toStack(next: Stack[T]): Stack[T]
 }
 
@@ -286,6 +287,7 @@ object CanStackFrom {
     new CanStackFrom[T=>T, T] {
       def toStackable(headRole: Stack.Role, fn: T => T): Stackable[T] =
         new Stack.Simple[T](headRole) {
+          val description = headRole.toString
           def make(params: Stack.Params, next: T) = fn(next)
         }
     }

@@ -144,7 +144,10 @@ object NameTree {
         case (a, e) => a :+ e
       }
 
-      Alt(trees1:_*)
+      if (trees1.size == 1) trees1.head
+      else Alt(trees1:_*)
+
+    case Union(tree) => simplify(tree)
 
     case Union(trees@_*) =>
       val trees1 = (trees map simplify) filter {
@@ -154,6 +157,7 @@ object NameTree {
       }
 
       if (trees1.isEmpty) Neg
+      else if (trees1.size == 1) trees1.head
       else Union(trees1:_*)
 
     case other => other
@@ -323,15 +327,15 @@ private trait NameTreePathParsers extends NameTreeParsers {
 
   val byte: Parser[Byte] = escapedByte | showableChar ^^ (_.toByte)
 
-  val label: Parser[Buf] = (
+  val label: Parser[Buf] =
       rep1(byte)  ^^ {
         case bytes => Buf.ByteArray(bytes:_*)
       }
-    | "" ^^^ Buf.Empty
-  )
 
-  val path: Parser[Path] = 
-    rep1("/" ~> label) ^^ { labels => Path(labels:_*) }
+  val path: Parser[Path] = (
+      rep1("/" ~> label) ^^ { labels => Path(labels:_*) }
+    | "/" ^^^ Path.empty
+  )
 
   val leaf = path
 }

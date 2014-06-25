@@ -65,4 +65,6 @@ private[lease] class JvmInfo(val pool: MemoryPool, val collector: GarbageCollect
     lr.record("byte_%s".format(state), (snap.committed() - snap.used()).toString)
     lr.record("gen_%s".format(state), generation().toString)
   }
+
+  override def toString(): String = "JvmInfo(committed" + committed() + ", generation=" + generation() + ", used=" + used() + ", remaining=" + remaining() + ")"
 }

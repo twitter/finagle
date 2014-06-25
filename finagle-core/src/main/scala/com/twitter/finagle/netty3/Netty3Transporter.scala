@@ -274,7 +274,7 @@ case class Netty3Transporter[In, Out](
     }
 
     (socksProxy, addr) match {
-      case (Some(proxyAddr), (inetAddr : InetSocketAddress)) =>
+      case (Some(proxyAddr), (inetAddr : InetSocketAddress)) if !inetAddr.getAddress.isLoopbackAddress =>
         val authentication = socksUsernameAndPassword match {
           case (Some((username, password))) =>
             UsernamePassAuthenticationSetting(username, password)

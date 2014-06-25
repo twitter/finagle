@@ -68,7 +68,7 @@ class BroadcastStatsReceiverTest extends FunSuite
     assert(None === recv1.gauges.get(Seq("hi")))
     assert(None === recv1.gauges.get(Seq("scopeA", "hi")))
 
-    val gaugeA = broadcastA.addGauge("hi"){ 5f }
+    val gaugeA = broadcastA.addGauge("hi") { 5f }
     assert(5f === recv1.gauges(Seq("hi"))())
     assert(5f === recv1.gauges(Seq("scopeA", "hi"))())
 
@@ -109,16 +109,16 @@ class BroadcastStatsReceiverTest extends FunSuite
     val recv = BroadcastStatsReceiver(Seq(recv1, recv2))
 
     val statName = Seq("meh")
-    recv1.stats.get(statName).isEmpty should be (true)
-    recv2.stats.get(statName).isEmpty should be (true)
+    recv1.stats.get(statName).isEmpty should be(true)
+    recv2.stats.get(statName).isEmpty should be(true)
 
     recv.time("meh")()
-    recv1.stats(statName).size should be (1)
-    recv2.stats(statName).size should be (1)
+    recv1.stats(statName).size should be(1)
+    recv2.stats(statName).size should be(1)
 
     recv.time("meh")()
-    recv1.stats(statName).size should be (2)
-    recv2.stats(statName).size should be (2)
+    recv1.stats(statName).size should be(2)
+    recv2.stats(statName).size should be(2)
   }
 
   test("timeFuture") {
@@ -127,16 +127,16 @@ class BroadcastStatsReceiverTest extends FunSuite
     val recv = BroadcastStatsReceiver(Seq(recv1, recv2))
 
     val statName = Seq("meh")
-    recv1.stats.get(statName).isEmpty should be (true)
-    recv2.stats.get(statName).isEmpty should be (true)
+    recv1.stats.get(statName).isEmpty should be(true)
+    recv2.stats.get(statName).isEmpty should be(true)
 
     Await.result(recv.timeFuture("meh")(Future.Unit))
-    recv1.stats(statName).size should be (1)
-    recv2.stats(statName).size should be (1)
+    recv1.stats(statName).size should be(1)
+    recv2.stats(statName).size should be(1)
 
     Await.result(recv.timeFuture("meh")(Future.Unit))
-    recv1.stats(statName).size should be (2)
-    recv2.stats(statName).size should be (2)
+    recv1.stats(statName).size should be(2)
+    recv2.stats(statName).size should be(2)
   }
 
 }

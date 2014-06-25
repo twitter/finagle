@@ -140,6 +140,19 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.del(Seq(foo)))
       }
 
+      "dump" in {
+        val kv = (StringToChannelBuffer("mykey"), StringToChannelBuffer("10"))
+        Await.result(client.set(kv._1, kv._2))
+        val expectedBytes: Array[Byte] = Array(0, -64, 10, 6, 0, -8, 114, 63, -59, -5, -5, 95, 40)
+        Await.result(client.dump(kv._1)) match {
+          case Some(bytes) => bytes.array must haveTheSameElementsAs(expectedBytes)
+          case None        => fail("Some bytes expected")
+        }
+
+        Await.result(client.del(List(foo)))
+        Await.result(client.dump(foo)) must beNone
+      }
+
       // Once the scan/hscan pull request gets merged into Redis master,
       // the tests can be uncommented.
       // "scan" in {

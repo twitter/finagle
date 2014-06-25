@@ -44,11 +44,15 @@ StatsFactoryWrapper
 **failures**
   a counter of the number of times a service factory has failed
 
+**service_acquisition_latency_ms**
+  a stat of the latency to acquire a service in milliseconds
+  this entails establishing a connection or waiting for a connection from a pool
+
 HandletimeFilter
 <<<<<<<<<<<<<<<<
 
 **handletime_us**
-  a histogram of the time it takes to handle the request in microseconds.
+  a histogram of the time it takes to handle the request in microseconds
   NB: does not include the time to respond
 
 DefaultServer

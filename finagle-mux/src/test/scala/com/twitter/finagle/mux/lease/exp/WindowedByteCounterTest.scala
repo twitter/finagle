@@ -30,7 +30,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually {
       }
 
       @volatile var closed = false
-      @volatile var prev = -1
+      @volatile var prev = 0
       val nextPeriod = { () =>
         eventually {
           assert(counter.getState === Thread.State.TIMED_WAITING)
@@ -80,7 +80,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually {
     }
   }
 
-  if (!sys.props.contains("SKIP_FLAKY")) test("ByteCounter should accurately measure rate") {
+  test("ByteCounter should accurately measure rate") {
     val h = new ByteCounterHelper{}
     import h._
 
@@ -95,7 +95,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually {
     }
   }
 
-  if (!sys.props.contains("SKIP_FLAKY")) test("ByteCounter should support a windowed rate") {
+  test("ByteCounter should support a windowed rate") {
     val h = new ByteCounterHelper{}
     import h._
 
@@ -136,7 +136,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually {
     }
   }
 
-  if (!sys.props.contains("SKIP_FLAKY")) test("Doing a gc should make us roll over, and should not count the gc") {
+  test("Doing a gc should make us roll over, and should not count the gc") {
     val h = new ByteCounterHelper{}
     import h._
 
@@ -166,7 +166,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually {
     }
   }
 
-  if (!sys.props.contains("SKIP_FLAKY")) test("Keep track of last gc time") {
+  test("Keep track of last gc time") {
     val h = new ByteCounterHelper{}
     import h._
 

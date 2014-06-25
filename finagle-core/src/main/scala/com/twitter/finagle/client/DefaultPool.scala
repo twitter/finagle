@@ -53,6 +53,7 @@ object DefaultPool {
     new Stack.Module[ServiceFactory[Req, Rep]](StackClient.Role.Pool) {
       import com.twitter.finagle.pool.{CachingPool, WatermarkPool, BufferingPool}
 
+      val description = "Control client connection pool"
       def make(params: Params, next: Stack[ServiceFactory[Req, Rep]]) = {
         val DefaultPool.Param(low, high, bufferSize, idleTime, maxWaiters) = params[DefaultPool.Param]
         val param.Stats(statsReceiver) = params[param.Stats]

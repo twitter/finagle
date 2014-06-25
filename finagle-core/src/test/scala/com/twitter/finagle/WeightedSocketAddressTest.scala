@@ -8,12 +8,12 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class WeightedSocketAddressTest extends FunSuite {
   test("WeightedSocketAddress.Impl") {
-    val sa = new SocketAddress{}
+    val sa = new SocketAddress {}
     val wsa = WeightedSocketAddress(sa, 1.2)
     val WeightedSocketAddress(`sa`, 1.2) = wsa
     val WeightedSocketAddress(`sa`, 1.0) = sa
   }
-  
+
   test("WeightedInetSocketAddress") {
     val ia = new InetSocketAddress(8080)
     val wsa = WeightedSocketAddress(ia, 8.9)

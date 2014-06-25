@@ -15,6 +15,17 @@ object Del {
   def apply(args: => Seq[Array[Byte]]) = new Del(args.map(ChannelBuffers.wrappedBuffer(_)))
 }
 
+case class Dump(key: ChannelBuffer) extends StrictKeyCommand {
+  def command = Commands.DUMP
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.DUMP, key))
+}
+object Dump {
+  def apply(args: Seq[Array[Byte]]) = {
+    val list = trimList(args, 1, "DUMP")
+    new Dump(ChannelBuffers.wrappedBuffer(list(0)))
+  }
+}
+
 case class Exists(key: ChannelBuffer) extends StrictKeyCommand {
   def command = Commands.EXISTS
   def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.EXISTS, key))

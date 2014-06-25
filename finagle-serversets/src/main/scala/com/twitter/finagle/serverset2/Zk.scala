@@ -3,7 +3,7 @@ package com.twitter.finagle.serverset2
 import com.twitter.conversions.time._
 import com.twitter.finagle.serverset2.client._
 import com.twitter.finagle.service.Backoff
-import com.twitter.finagle.util.DefaultTimer
+import com.twitter.finagle.util.{DefaultTimer, Rng}
 import com.twitter.io.Buf
 import com.twitter.util._
 
@@ -14,6 +14,8 @@ import com.twitter.util._
  * are represented with a [[com.twitter.util.Var Var]].
  */
 private class Zk(watchedZk: Watched[ZooKeeperReader], timerIn: Timer) {
+  import Zk.randomizedDelay
+
   val state: Var[WatchState] = watchedZk.state
   protected[serverset2] implicit val timer: Timer = timerIn
   private val zkr: ZooKeeperReader = watchedZk.value
@@ -27,7 +29,7 @@ private class Zk(watchedZk: Watched[ZooKeeperReader], timerIn: Timer) {
       case exc: KeeperException.ConnectionLoss =>
         backoff match {
           case wait #:: rest =>
-            Future.sleep(wait) before safeRetry(go, rest)
+            Future.sleep(randomizedDelay(wait)) before safeRetry(go, rest)
           case _ =>
             Future.exception(exc)
         }
@@ -220,6 +222,9 @@ private[serverset2] object Zk extends FnZkFactory(
   val authInfo: String = "%s:%s".format(user, user)
   val nil: Zk = new Zk(Watched(new NullZooKeeperReader, Var(WatchState.Pending)), Timer.Nil)
 
+  private def randomizedDelay(minDelay: Duration): Duration =
+    minDelay + Duration.fromMilliseconds(Rng.threadLocal.nextInt(minDelay.inMilliseconds.toInt))
+
   def retrying(
       backoff: Duration,
       newZk: () => Zk,
@@ -238,7 +243,7 @@ private[serverset2] object Zk extends FnZkFactory(
       }
       val expired = zk.state.changes.filter(_ == WatchState.SessionState(SessionState.Expired))
       expired.toFuture().onSuccess { _ =>
-        timer.doLater(backoff) {
+        timer.doLater(randomizedDelay(backoff)) {
           reconnect()
         }
       }

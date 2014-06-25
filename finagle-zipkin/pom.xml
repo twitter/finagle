@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-zipkin</artifactId>
   <packaging>jar</packaging>
-  <version>6.17.1-SNAPSHOT</version>
+  <version>6.18.1-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -40,12 +40,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.scala-tools.testing</groupId>
-      <artifactId>specs_2.9.2</artifactId>
-      <version>1.6.9</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_2.9.2</artifactId>
       <version>1.9.1</version>
@@ -61,28 +55,28 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.17.1-SNAPSHOT</version>
+      <version>6.18.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-test</artifactId>
       <scope>test</scope>
-      <version>6.17.1-SNAPSHOT</version>
+      <version>6.18.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift</artifactId>
-      <version>6.17.1-SNAPSHOT</version>
+      <version>6.18.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-codec</artifactId>
-      <version>6.17.1-SNAPSHOT</version>
+      <version>6.18.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>scrooge-core</artifactId>
-      <version>3.16.1-SNAPSHOT</version>
+      <version>3.16.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>

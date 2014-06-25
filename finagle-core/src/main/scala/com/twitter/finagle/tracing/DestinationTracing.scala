@@ -45,6 +45,7 @@ private[finagle] object ClientDestTracingFilter {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]](EndpointTracing) {
+      val description = "Record remote address of server"
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
         val Transporter.EndpointAddr(addr) = params[Transporter.EndpointAddr]
         new ClientDestTracingFilter(addr) andThen next
