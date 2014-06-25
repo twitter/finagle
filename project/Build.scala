@@ -146,7 +146,7 @@ object Finagle extends Build {
     // Protocols
     finagleHttp, finagleStream, finagleNative, finagleThrift,
     finagleMemcached, finagleKestrel, finagleRedis,
-    finagleMux, finagleThriftMux, finagleMySQL, finagleSpdy, finagleSmtp,
+    finagleMux, finagleThriftMux, finagleMySQL, finagleSpdy,
 
     // Use and integration
     // removing benchmark because swift can't build outside of twitter for now
