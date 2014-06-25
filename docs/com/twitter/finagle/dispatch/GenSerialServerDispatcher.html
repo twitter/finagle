@@ -83,17 +83,24 @@ allowing the implementor to furnish custom dispatchers &amp; handlers.
         <div class="values members" id="values">
               <h3>Abstract Value Members</h3>
               <ol><li visbl="prt" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher#dispatch" data-isabs="true">
-      <a id="dispatch(Out):Future[Rep]"></a>
+      <a id="dispatch(Out,Promise[Unit]):Future[Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">dispatch</span><span class="params">(<span name="req">req: Out</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Rep]</span>
+        <span class="name">dispatch</span><span class="params">(<span name="req">req: Out</span>, <span name="eos">eos: <span name="com.twitter.util.Promise" class="extype">Promise</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Rep]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+      <p class="shortcomment cmt">Dispatches a request.</p><div class="fullcomment"><div class="comment cmt"><p>Dispatches a request. The first argument is the request. The second
+argument <code>eos</code> (end-of-stream promise) must be fulfilled when the request
+is complete.</p><p>For non-streaming requests, <code>eos.setDone()</code> should be called immediately,
+since the entire request is present. For streaming requests,
+<code>eos.setDone()</code> must be called at the end of stream (in HTTP, this is on
+receipt of last chunk). Refer to the implementation in
+<a name="com.twitter.finagle.http.codec.HttpServerDispatcher" class="extype" href="../http/codec/HttpServerDispatcher.html">HttpServerDispatcher</a>.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li visbl="prt" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher#handle" data-isabs="true">
       <a id="handle(Rep):Future[Unit]"></a>
       <h4 class="signature">

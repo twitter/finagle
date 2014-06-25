@@ -32,7 +32,8 @@
       <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Http codec for rich Request/Response objects. Note the
 CheckHttpRequestFilter isn't baked in, as in the Http Codec.</p><p>Ed. note: I'm not sure how parameterizing on REQUEST &lt;: Request
 works safely, ever. This is a big typesafety bug: the codec is
-blindly casting Requests to REQUEST.
+blindly casting Requests to REQUEST.</p><p>Setting aggregateChunks to false disables the aggregator, and consequently
+lifts the restriction on request size.
 </p></div><dl class="paramcmts block"><dt class="param">httpFactory</dt><dd class="cmt"><p>the underlying HTTP CodecFactory</p></dd><dt class="param">aggregateChunks</dt><dd class="cmt"><p>if true, the client pipeline collects HttpChunks into the body of each HttpResponse
 </p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>

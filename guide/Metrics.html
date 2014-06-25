@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.17.0 documentation</title>
+    <title>Metrics &mdash; Finagle 6.18.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.17.0',
+        VERSION:     '6.18.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,12 +23,22 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.17.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.18.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-39101739-4', 'twitter.github.io');
+    ga('send', 'pageview');
+
+  </script>
 
   </head>
   <body>
@@ -107,13 +117,16 @@ been thrown</dd>
 specific exception</dd>
 <dt><strong>failures</strong></dt>
 <dd>a counter of the number of times a service factory has failed</dd>
+<dt><strong>service_acquisition_latency_ms</strong></dt>
+<dd>a stat of the latency to acquire a service in milliseconds
+this entails establishing a connection or waiting for a connection from a pool</dd>
 </dl>
 </div>
 <div class="section" id="handletimefilter">
 <h3>HandletimeFilter<a class="headerlink" href="#handletimefilter" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>handletime_us</strong></dt>
-<dd>a histogram of the time it takes to handle the request in microseconds.
+<dd>a histogram of the time it takes to handle the request in microseconds
 NB: does not include the time to respond</dd>
 </dl>
 </div>

@@ -2,21 +2,21 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.Path</title>
+          <title>com.twitter.finagle.redis.protocol.Dump</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../lib/template.css" />
-      <script type="text/javascript" src="../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
     
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
-        <a title="Go to companion" href="Path$.html"><img src="../../../lib/class_to_object_big.png" /></a>
-        <p id="owner"><a name="com" class="extype" href="../../package.html">com</a>.<a name="com.twitter" class="extype" href="../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="package.html">finagle</a></p>
-        <h1><a title="Go to companion" href="Path$.html">Path</a></h1>
+        <a title="Go to companion" href="Dump$.html"><img src="../../../../../lib/class_to_object_big.png" /></a>
+        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.redis" class="extype" href="../package.html">redis</a>.<a name="com.twitter.finagle.redis.protocol" class="extype" href="package.html">protocol</a></p>
+        <h1><a title="Go to companion" href="Dump$.html">Dump</a></h1>
       </div>
 
       <h4 class="signature" id="signature">
@@ -25,15 +25,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Path</span><span class="params">(<span name="elems">elems: <span name="com.twitter.io.Buf" class="extype">Buf</span>*</span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">Dump</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result"> extends <a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="Command.html">Command</a> with <a name="com.twitter.finagle.redis.protocol.StrictKeyCommand" class="extype" href="StrictKeyCommand.html">StrictKeyCommand</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A Path comprises a sequence of byte buffers naming a
-hierarchically-addressed object.
-</p></div><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <a name="com.twitter.finagle.redis.protocol.StrictKeyCommand" class="extype" href="StrictKeyCommand.html">StrictKeyCommand</a>, <a name="com.twitter.finagle.redis.protocol.KeyCommand" class="extype" href="KeyCommand.html">KeyCommand</a>, <a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="Command.html">Command</a>, <a name="com.twitter.finagle.redis.protocol.RedisMessage" class="extype" href="RedisMessage.html">RedisMessage</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -47,7 +45,7 @@ hierarchically-addressed object.
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.Path" class="in"><span>Path</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.redis.protocol.Dump" class="in"><span>Dump</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="com.twitter.finagle.redis.protocol.StrictKeyCommand" class="in"><span>StrictKeyCommand</span></li><li name="com.twitter.finagle.redis.protocol.KeyCommand" class="in"><span>KeyCommand</span></li><li name="com.twitter.finagle.redis.protocol.Command" class="in"><span>Command</span></li><li name="com.twitter.finagle.redis.protocol.RedisMessage" class="in"><span>RedisMessage</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -59,15 +57,15 @@ hierarchically-addressed object.
         <div id="allMembers">
         <div class="members" id="constructors">
               <h3>Instance Constructors</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.Path#this" data-isabs="false">
-      <a id="this:Path"></a>
+              <ol><li visbl="pub" name="com.twitter.finagle.redis.protocol.Dump#this" data-isabs="false">
+      <a id="this:Dump"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Path</span><span class="params">(<span name="elems">elems: <span name="com.twitter.io.Buf" class="extype">Buf</span>*</span>)</span>
+        <span class="name">Dump</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span>
       </span>
       </h4>
       
@@ -116,18 +114,6 @@ hierarchically-addressed object.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Path#++" data-isabs="false">
-      <a id="++(Path):Path"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name" title="gt4s: $plus$plus">++</span><span class="params">(<span name="that">that: <a name="com.twitter.finagle.Path" class="extype" href="">Path</a></span>)</span><span class="result">: <a name="com.twitter.finagle.Path" class="extype" href="">Path</a></span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
       <a id="==(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -164,7 +150,7 @@ hierarchically-addressed object.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Path#canEqual" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.Dump#canEqual" data-isabs="false">
       <a id="canEqual(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -175,7 +161,7 @@ hierarchically-addressed object.
         <span class="name">canEqual</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Path" class="extype" href="">Path</a> → Equals</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.protocol.Dump" class="extype" href="">Dump</a> → Equals</dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
@@ -187,34 +173,22 @@ hierarchically-addressed object.
         <span class="name">clone</span><span class="params">()</span><span class="result">: AnyRef</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Path#drop" data-isabs="false">
-      <a id="drop(Int):Path"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.Dump#command" data-isabs="false">
+      <a id="command:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">drop</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <a name="com.twitter.finagle.Path" class="extype" href="">Path</a></span>
+        <span class="name">command</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.Path#elems" data-isabs="false">
-      <a id="elems:Buf*"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">elems</span><span class="result">: <span name="com.twitter.io.Buf" class="extype">Buf</span>*</span>
-      </span>
-      </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.protocol.Dump" class="extype" href="">Dump</a> → <a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="Command.html">Command</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -227,7 +201,7 @@ hierarchically-addressed object.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Path#equals" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.Dump#equals" data-isabs="false">
       <a id="equals(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -238,7 +212,7 @@ hierarchically-addressed object.
         <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Path" class="extype" href="">Path</a> → Equals → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.protocol.Dump" class="extype" href="">Dump</a> → Equals → AnyRef → Any</dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
       <h4 class="signature">
@@ -250,7 +224,7 @@ hierarchically-addressed object.
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
@@ -266,7 +240,7 @@ hierarchically-addressed object.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Path#hashCode" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.Dump#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -277,19 +251,7 @@ hierarchically-addressed object.
         <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Path" class="extype" href="">Path</a> → AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Path#isEmpty" data-isabs="false">
-      <a id="isEmpty:Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">isEmpty</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
-      </span>
-      </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.protocol.Dump" class="extype" href="">Dump</a> → AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -302,6 +264,18 @@ hierarchically-addressed object.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.Dump#key" data-isabs="false">
+      <a id="key:ChannelBuffer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">key</span><span class="result">: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.protocol.Dump" class="extype" href="">Dump</a> → <a name="com.twitter.finagle.redis.protocol.KeyCommand" class="extype" href="KeyCommand.html">KeyCommand</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -338,7 +312,7 @@ hierarchically-addressed object.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Path#productArity" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.Dump#productArity" data-isabs="false">
       <a id="productArity:Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -349,8 +323,8 @@ hierarchically-addressed object.
         <span class="name">productArity</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Path" class="extype" href="">Path</a> → Product</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Path#productElement" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.protocol.Dump" class="extype" href="">Dump</a> → Product</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.Dump#productElement" data-isabs="false">
       <a id="productElement(Int):Any"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -361,7 +335,7 @@ hierarchically-addressed object.
         <span class="name">productElement</span><span class="params">(<span name="arg0">arg0: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Any" class="extype">Any</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Path" class="extype" href="">Path</a> → Product</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.protocol.Dump" class="extype" href="">Dump</a> → Product</dd></dl></div>
     </li><li visbl="pub" name="scala.Product#productIterator" data-isabs="false">
       <a id="productIterator:Iterator[Any]"></a>
       <h4 class="signature">
@@ -374,7 +348,7 @@ hierarchically-addressed object.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Product</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Path#productPrefix" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.Dump#productPrefix" data-isabs="false">
       <a id="productPrefix:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -385,55 +359,7 @@ hierarchically-addressed object.
         <span class="name">productPrefix</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Path" class="extype" href="">Path</a> → Product</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Path#show" data-isabs="false">
-      <a id="show:String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">lazy val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">show</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.Path#showElems" data-isabs="false">
-      <a id="showElems:Seq[String]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">lazy val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">showElems</span><span class="result">: <span name="scala.collection.Seq" class="extype">Seq</span>[<span name="java.lang.String" class="extype">String</span>]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.Path#size" data-isabs="false">
-      <a id="size:Int"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">size</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.Path#startsWith" data-isabs="false">
-      <a id="startsWith(Path):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">startsWith</span><span class="params">(<span name="other">other: <a name="com.twitter.finagle.Path" class="extype" href="">Path</a></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
-      </span>
-      </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.protocol.Dump" class="extype" href="">Dump</a> → Product</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -446,19 +372,31 @@ hierarchically-addressed object.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Path#take" data-isabs="false">
-      <a id="take(Int):Path"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.RedisMessage#toByteArray" data-isabs="false">
+      <a id="toByteArray:Array[Byte]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">take</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <a name="com.twitter.finagle.Path" class="extype" href="">Path</a></span>
+        <span class="name">toByteArray</span><span class="result">: <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]</span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.Path#toString" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.protocol.RedisMessage" class="extype" href="RedisMessage.html">RedisMessage</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.Dump#toChannelBuffer" data-isabs="false">
+      <a id="toChannelBuffer:ChannelBuffer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toChannelBuffer</span><span class="result">: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.protocol.Dump" class="extype" href="">Dump</a> → <a name="com.twitter.finagle.redis.protocol.RedisMessage" class="extype" href="RedisMessage.html">RedisMessage</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.Dump#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -466,10 +404,22 @@ hierarchically-addressed object.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+        <span class="name">toString</span><span class="params">()</span><span class="result">: String</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Path" class="extype" href="">Path</a> → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.protocol.Dump" class="extype" href="">Dump</a> → AnyRef → Any</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.redis.protocol.KeyCommand#validate" data-isabs="false">
+      <a id="validate():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">validate</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.protocol.KeyCommand" class="extype" href="KeyCommand.html">KeyCommand</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -548,6 +498,14 @@ hierarchically-addressed object.
               <h3>Inherited from <span name="scala.Product" class="extype">Product</span></h3>
             </div><div name="scala.Equals" class="parent">
               <h3>Inherited from <span name="scala.Equals" class="extype">Equals</span></h3>
+            </div><div name="com.twitter.finagle.redis.protocol.StrictKeyCommand" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.redis.protocol.StrictKeyCommand" class="extype" href="StrictKeyCommand.html">StrictKeyCommand</a></h3>
+            </div><div name="com.twitter.finagle.redis.protocol.KeyCommand" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.redis.protocol.KeyCommand" class="extype" href="KeyCommand.html">KeyCommand</a></h3>
+            </div><div name="com.twitter.finagle.redis.protocol.Command" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="Command.html">Command</a></h3>
+            </div><div name="com.twitter.finagle.redis.protocol.RedisMessage" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.redis.protocol.RedisMessage" class="extype" href="RedisMessage.html">RedisMessage</a></h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

@@ -325,6 +325,23 @@ entry appended.</p>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce → GenTraversableOnce</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Dtab#alt" data-isabs="false">
+      <a id="alt(Dtab):Dtab"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">alt</span><span class="params">(<span name="other">other: <a name="com.twitter.finagle.Dtab" class="extype" href="">Dtab</a></span>)</span><span class="result">: <a name="com.twitter.finagle.Dtab" class="extype" href="">Dtab</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Construct a Dtab representing the alternative composition of
+<code><code>this</code></code> with its argument, under evaluation; that is</p><div class="fullcomment"><div class="comment cmt"><p>Construct a Dtab representing the alternative composition of
+<code><code>this</code></code> with its argument, under evaluation; that is</p><pre>
+<span class="kw">val</span> a, b: Dtab = ..
+a.alt(b).lookup(path).eval == NameTree.Alt(a.lookup(path), b.lookup(path)).eval
+</pre></div></div>
     </li><li visbl="pub" name="scala.PartialFunction#andThen" data-isabs="false">
       <a id="andThen[C]((Dentry) ⇒ C):PartialFunction[Int, C]"></a>
       <h4 class="signature">
@@ -683,6 +700,19 @@ is translated into a Var[Addr].
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SeqLike → GenSeqLike</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Dtab#enum" data-isabs="false">
+      <a id="enum(Path):Activity[Dtab]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">enum</span><span class="params">(<span name="prefix">prefix: <a name="com.twitter.finagle.Path" class="extype" href="Path.html">Path</a></span>)</span><span class="result">: <span name="com.twitter.util.Activity" class="extype">Activity</span>[<a name="com.twitter.finagle.Dtab" class="extype" href="">Dtab</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Enumerate entries in this namer by prefix.</p><div class="fullcomment"><div class="comment cmt"><p>Enumerate entries in this namer by prefix.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Dtab" class="extype" href="">Dtab</a> → <a name="com.twitter.finagle.Namer" class="extype" href="Namer.html">Namer</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -719,6 +749,23 @@ is translated into a Var[Addr].
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → TraversableOnce → GenTraversableOnce</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Namer#expand" data-isabs="false">
+      <a id="expand(Path):Activity[Dtab]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">expand</span><span class="params">(<span name="prefix">prefix: <a name="com.twitter.finagle.Path" class="extype" href="Path.html">Path</a></span>)</span><span class="result">: <span name="com.twitter.util.Activity" class="extype">Activity</span>[<a name="com.twitter.finagle.Dtab" class="extype" href="">Dtab</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Expand a prefix of this Namer, producing a Dtab reflecting the
+this prefixed namespace.</p><div class="fullcomment"><div class="comment cmt"><p>Expand a prefix of this Namer, producing a Dtab reflecting the
+this prefixed namespace. The returned Dtab does not contain any
+root entries (/=&gt;...), and thus represents valid suffixes of the
+given prefix.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Namer" class="extype" href="Namer.html">Namer</a></dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#filter" data-isabs="false">
       <a id="filter((Dentry) ⇒ Boolean):IndexedSeq[Dentry]"></a>
       <h4 class="signature">
@@ -1825,6 +1872,22 @@ with this namer's result first.
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.Dtab#simplified" data-isabs="false">
+      <a id="simplified:Dtab"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">simplified</span><span class="result">: <a name="com.twitter.finagle.Dtab" class="extype" href="">Dtab</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Simplify the Dtab.</p><div class="fullcomment"><div class="comment cmt"><p>Simplify the Dtab. This returns a functionally equivalent Dtab
+whose destination name trees have been simplified. The returned
+Dtab is equivalent with respect to evaluation.
+</p></div><dl class="attributes block"> <dt>To do</dt><dd><span class="cmt"><p>collapse entries with common prefixes
+</p></span>, <span class="cmt"><p>dedup equivalent entries so that the only the last entry is retained</p></span></dd></dl></div>
     </li><li visbl="pub" name="scala.collection.SeqLike#size" data-isabs="false">
       <a id="size:Int"></a>
       <h4 class="signature">
@@ -2248,6 +2311,23 @@ with this namer's result first.
                 <span class="name">@migration</span>
               
         </dd><dt>Migration</dt><dd class="cmt"><p><i>(Changed in version 2.9.0)</i> <code>transpose</code> throws an <code>IllegalArgumentException</code> if collections are not uniformly sized.</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Dtab#union" data-isabs="false">
+      <a id="union(Dtab):Dtab"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">union</span><span class="params">(<span name="other">other: <a name="com.twitter.finagle.Dtab" class="extype" href="">Dtab</a></span>)</span><span class="result">: <a name="com.twitter.finagle.Dtab" class="extype" href="">Dtab</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Construct a Dtab representing the union composition of <code><code>this</code></code>
+with its argument, under evaluation; that is</p><div class="fullcomment"><div class="comment cmt"><p>Construct a Dtab representing the union composition of <code><code>this</code></code>
+with its argument, under evaluation; that is</p><pre>
+<span class="kw">val</span> a, b: Dtab = ..
+a.union(b).lookup(path).eval == NameTree.Union(a.lookup(path), b.lookup(path)).eval
+</pre></div></div>
     </li><li visbl="pub" name="scala.collection.SeqLike#union" data-isabs="false">
       <a id="union[B&gt;:Dentry, That](GenSeq[B])(CanBuildFrom[IndexedSeq[Dentry], B, That]):That"></a>
       <h4 class="signature">

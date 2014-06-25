@@ -205,17 +205,24 @@ released after any error.
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
     </li><li visbl="prt" name="com.twitter.finagle.dispatch.SerialServerDispatcher#dispatch" data-isabs="false">
-      <a id="dispatch(Req):Future[Rep]"></a>
+      <a id="dispatch(Req,Promise[Unit]):Future[Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">dispatch</span><span class="params">(<span name="req">req: Req</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Rep]</span>
+        <span class="name">dispatch</span><span class="params">(<span name="req">req: Req</span>, <span name="eos">eos: <span name="com.twitter.util.Promise" class="extype">Promise</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Rep]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.dispatch.SerialServerDispatcher" class="extype" href="">SerialServerDispatcher</a> → <a name="com.twitter.finagle.dispatch.GenSerialServerDispatcher" class="extype" href="GenSerialServerDispatcher.html">GenSerialServerDispatcher</a></dd></dl></div>
+      <p class="shortcomment cmt">Dispatches a request.</p><div class="fullcomment"><div class="comment cmt"><p>Dispatches a request. The first argument is the request. The second
+argument <code>eos</code> (end-of-stream promise) must be fulfilled when the request
+is complete.</p><p>For non-streaming requests, <code>eos.setDone()</code> should be called immediately,
+since the entire request is present. For streaming requests,
+<code>eos.setDone()</code> must be called at the end of stream (in HTTP, this is on
+receipt of last chunk). Refer to the implementation in
+<a name="com.twitter.finagle.http.codec.HttpServerDispatcher" class="extype" href="../http/codec/HttpServerDispatcher.html">HttpServerDispatcher</a>.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.dispatch.SerialServerDispatcher" class="extype" href="">SerialServerDispatcher</a> → <a name="com.twitter.finagle.dispatch.GenSerialServerDispatcher" class="extype" href="GenSerialServerDispatcher.html">GenSerialServerDispatcher</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">

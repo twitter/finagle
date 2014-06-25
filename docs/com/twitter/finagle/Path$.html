@@ -163,6 +163,18 @@ Utf8-typed paths.</p>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Path#empty" data-isabs="false">
+      <a id="empty:Path"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">empty</span><span class="result">: <a name="com.twitter.finagle.Path" class="extype" href="Path.html">Path</a></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -316,8 +328,10 @@ label      ::= (\\x[a-f0-<span class="num">9</span>][a-f0-<span class="num">9</s
 
 </pre><p>for example</p><pre>
 /foo/bar/baz
+/
 </pre><p>parses into the path</p><pre>
 Path(foo,bar,baz)
+Path()
 </pre></div><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt">IllegalArgumentException<p>when <code>s</code> is not a syntactically valid path.
 </p></span></dd></dl></div>
     </li><li visbl="prt" name="com.twitter.finagle.Path#readResolve" data-isabs="false">

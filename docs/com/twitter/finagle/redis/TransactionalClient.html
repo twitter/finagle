@@ -335,6 +335,21 @@ of the wrong type
       </h4>
       <p class="shortcomment cmt">Removes keys</p><div class="fullcomment"><div class="comment cmt"><p>Removes keys</p></div><dl class="paramcmts block"><dt class="param">keys</dt><dd class="cmt"><p>list of keys to remove</p></dd><dt>returns</dt><dd class="cmt"><p>Number of keys removed
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Keys" class="extype" href="Keys.html">Keys</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#dump" data-isabs="false">
+      <a id="dump(ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dump</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Serialize the value stored at key in a Redis-specific format and
+returns it to the user</p><div class="fullcomment"><div class="comment cmt"><p>Serialize the value stored at key in a Redis-specific format and
+returns it to the user</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>bytes, or none if the key did not exist
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Keys" class="extype" href="Keys.html">Keys</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">

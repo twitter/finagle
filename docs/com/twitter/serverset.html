@@ -200,6 +200,19 @@ is translated into a Var[Addr].
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.serverset#enum" data-isabs="false">
+      <a id="enum(Path):Activity[Dtab]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">enum</span><span class="params">(<span name="prefix">prefix: <a name="com.twitter.finagle.Path" class="extype" href="finagle/Path.html">Path</a></span>)</span><span class="result">: <span name="com.twitter.util.Activity" class="extype">Activity</span>[<a name="com.twitter.finagle.Dtab" class="extype" href="finagle/Dtab.html">Dtab</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Enumerate entries in this namer by prefix.</p><div class="fullcomment"><div class="comment cmt"><p>Enumerate entries in this namer by prefix.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.serverset" class="extype" href="">serverset</a> → <a name="com.twitter.finagle.Namer" class="extype" href="finagle/Namer.html">Namer</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -224,6 +237,23 @@ is translated into a Var[Addr].
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Namer#expand" data-isabs="false">
+      <a id="expand(Path):Activity[Dtab]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">expand</span><span class="params">(<span name="prefix">prefix: <a name="com.twitter.finagle.Path" class="extype" href="finagle/Path.html">Path</a></span>)</span><span class="result">: <span name="com.twitter.util.Activity" class="extype">Activity</span>[<a name="com.twitter.finagle.Dtab" class="extype" href="finagle/Dtab.html">Dtab</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Expand a prefix of this Namer, producing a Dtab reflecting the
+this prefixed namespace.</p><div class="fullcomment"><div class="comment cmt"><p>Expand a prefix of this Namer, producing a Dtab reflecting the
+this prefixed namespace. The returned Dtab does not contain any
+root entries (/=&gt;...), and thus represents valid suffixes of the
+given prefix.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Namer" class="extype" href="finagle/Namer.html">Namer</a></dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
       <h4 class="signature">

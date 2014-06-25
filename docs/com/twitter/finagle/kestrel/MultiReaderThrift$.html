@@ -183,6 +183,25 @@ used then it is more reasonable to use the version of apply that does
 not take a ClientId or else the client id will need to be passed to
 both apply and the codec in clientBuilder.</p></div><dl class="paramcmts block"><dt class="param">va</dt><dd class="cmt"><p>endpoints for Kestrel</p></dd><dt class="param">queueName</dt><dd class="cmt"><p>the name of the queue to read from</p></dd><dt class="param">clientId</dt><dd class="cmt"><p>the clientid to be used</p></dd><dt>returns</dt><dd class="cmt"><p>A MultiReaderBuilderThrift
 </p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReaderThrift#apply" data-isabs="false">
+      <a id="apply(Name,String,Option[ClientId]):MultiReaderBuilderThrift"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Name" class="extype" href="../Name.html">Name</a></span>, <span name="queueName">queueName: String</span>, <span name="clientId">clientId: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.thrift.ClientId" class="extype" href="../thrift/ClientId.html">ClientId</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.MultiReaderBuilderThrift" class="extype" href="MultiReaderBuilderThrift.html">MultiReaderBuilderThrift</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Used to create a thrift based MultiReader with a ClientId when a custom
+client builder will not be used.</p><div class="fullcomment"><div class="comment cmt"><p>Used to create a thrift based MultiReader with a ClientId when a custom
+client builder will not be used.  If a custom client builder will be
+used then it is more reasonable to use the version of apply that does
+not take a ClientId or else the client id will need to be passed to
+both apply and the codec in clientBuilder.</p></div><dl class="paramcmts block"><dt class="param">dest</dt><dd class="cmt"><p>a <a name="com.twitter.finagle.Name" class="extype" href="../Name.html">Name</a> representing the Kestrel
+endpoints to connect to</p></dd><dt class="param">queueName</dt><dd class="cmt"><p>the name of the queue to read from</p></dd><dt class="param">clientId</dt><dd class="cmt"><p>the clientid to be used</p></dd><dt>returns</dt><dd class="cmt"><p>A MultiReaderBuilderThrift
+</p></dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">

@@ -25,12 +25,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">Failure</span><span class="result"> extends <span name="java.lang.RuntimeException" class="extype">RuntimeException</span> with <a name="com.twitter.finagle.NoStacktrace" class="extype" href="NoStacktrace.html">NoStacktrace</a></span>
+        <span class="name">Failure</span><span class="result"> extends <span name="java.lang.Exception" class="extype">Exception</span> with <a name="com.twitter.finagle.NoStacktrace" class="extype" href="NoStacktrace.html">NoStacktrace</a></span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Base exception for all Finagle originated failures. These are
-RuntimeExceptions, but with additional <code>sources</code> and <code>flags</code>.
+Exceptions, but with additional <code>sources</code> and <code>flags</code>.
 Sources describe the origins of the failure to aid in debugging
 and flags mark attributes of the Failure (e.g. Retryable).
 Failures are constructed and extracted using the Failure
@@ -42,7 +42,7 @@ companion object.</p><pre>
 }
 </pre></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.NoStacktrace" class="extype" href="NoStacktrace.html">NoStacktrace</a>, <span name="java.lang.RuntimeException" class="extype">RuntimeException</span>, <span name="java.lang.Exception" class="extype">Exception</span>, <span name="java.lang.Throwable" class="extype">Throwable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.NoStacktrace" class="extype" href="NoStacktrace.html">NoStacktrace</a>, <span name="java.lang.Exception" class="extype">Exception</span>, <span name="java.lang.Throwable" class="extype">Throwable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -56,7 +56,7 @@ companion object.</p><pre>
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.Failure" class="in"><span>Failure</span></li><li name="com.twitter.finagle.NoStacktrace" class="in"><span>NoStacktrace</span></li><li name="java.lang.RuntimeException" class="in"><span>RuntimeException</span></li><li name="java.lang.Exception" class="in"><span>Exception</span></li><li name="java.lang.Throwable" class="in"><span>Throwable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.Failure" class="in"><span>Failure</span></li><li name="com.twitter.finagle.NoStacktrace" class="in"><span>NoStacktrace</span></li><li name="java.lang.Exception" class="in"><span>Exception</span></li><li name="java.lang.Throwable" class="in"><span>Throwable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -209,7 +209,7 @@ companion object.</p><pre>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#equals" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.Failure#equals" data-isabs="false">
       <a id="equals(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -217,10 +217,10 @@ companion object.</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">equals</span><span class="params">(<span name="a">a: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Failure" class="extype" href="">Failure</a> → AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.NoStacktrace#fillInStackTrace" data-isabs="false">
       <a id="fillInStackTrace():NoStacktrace"></a>
       <h4 class="signature">
@@ -344,7 +344,7 @@ companion object.</p><pre>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.Failure#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -355,7 +355,7 @@ companion object.</p><pre>
         <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Failure" class="extype" href="">Failure</a> → AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="java.lang.Throwable#initCause" data-isabs="false">
       <a id="initCause(Throwable):Throwable"></a>
       <h4 class="signature">
@@ -590,8 +590,6 @@ companion object.</p><pre>
         <div id="inheritedMembers">
         <div name="com.twitter.finagle.NoStacktrace" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.NoStacktrace" class="extype" href="NoStacktrace.html">NoStacktrace</a></h3>
-            </div><div name="java.lang.RuntimeException" class="parent">
-              <h3>Inherited from <span name="java.lang.RuntimeException" class="extype">RuntimeException</span></h3>
             </div><div name="java.lang.Exception" class="parent">
               <h3>Inherited from <span name="java.lang.Exception" class="extype">Exception</span></h3>
             </div><div name="java.lang.Throwable" class="parent">
