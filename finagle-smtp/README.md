@@ -26,10 +26,11 @@ res handle {
 }
 ```
 
-### Greeting and session
+#### Greeting and session
 
 Default SMTP client only connects to the server and receives its greeting, but does not send greeting to it,
 as some commands may be executed without that. If the greeting is incorrect, the service is closed.
+Upon closing the service a quit command is sent automatically, if not sent earlier.
 
 ### Sending an email
 
@@ -48,10 +49,9 @@ val email = EmailMessage(
 
 Applying the service on the email returns `Future.Done` in case of a successful operation or the first encountered error.
 
-### Greeting and session
+#### Greeting and session
 
-Upon the connection the client receives server greeting, as in `Smtp`.
-For now in case of success the connection is closed, and in case of error session state is reset before every next try.
+Upon the connection the client receives server greeting, as in `Smtp`. In case of error session state is reset before every next try.
 
 ### Example
 

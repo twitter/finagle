@@ -9,7 +9,7 @@ import com.twitter.util.{Await, Future}
 object Example {
   def main(args: Array[String]) = {
     //raw text email
-    val email1 = EmailMessage(
+    val email = EmailMessage(
       from = "from@from.com",
       to = Seq("first@to.com", "second@to.com"),
       subject = "test",
@@ -18,12 +18,11 @@ object Example {
     //connect to a local SMTP server
     val send = SmtpSimple.newService("localhost:25")
     //send email
-    val res: Future[Unit] = send(email1)
-    //do some error handling
+    val res: Future[Unit] = send(email)
       .onFailure {
-      //catching by reply group
+      //An error group
       case ex: smtp.reply.SyntaxErrorReply => println("Syntax error: ", ex.info)
-      //catching by concrete reply
+      //A concrete reply
       case smtp.reply.ProcessingError(info) => println("Error processing request: ", info)
     }
 

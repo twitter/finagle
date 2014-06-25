@@ -1,12 +1,11 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Await, Future}
+import com.twitter.util.{Time, Future}
 import com.twitter.finagle.client.{DefaultClient, Bridge}
 import com.twitter.finagle.smtp._
 import com.twitter.finagle.smtp.reply._
 import com.twitter.finagle.smtp.filter.{MailFilter, HeadersFilter, DataFilter}
 import com.twitter.finagle.smtp.transport.SmtpTransporter
-import com.twitter.finagle.service.RetryingFilter
 
 
 object Smtp extends Client[Request, Reply]{
@@ -21,7 +20,24 @@ object Smtp extends Client[Request, Reply]{
     })
 
   override def newClient(dest: Name, label: String) = {
-    DataFilter andThen defaultClient.newClient(dest, label)
+
+    val quitOnCloseClient = new ServiceFactoryProxy[Request, Reply](defaultClient.newClient(dest, label)){
+
+      override def apply(conn: ClientConnection) = {
+        self.apply(conn) flatMap { service =>
+          val quitOnClose = new ServiceProxy[Request, Reply](service) {
+            override def close(deadline: Time) = {
+              if (service.isAvailable)
+                  service(Request.Quit)
+              service.close(deadline)
+            }
+          }
+          Future.value(quitOnClose)
+        }
+      }
+    }
+
+    DataFilter andThen quitOnCloseClient
   }
 }
 
