@@ -355,6 +355,17 @@ object Finagle extends Build {
     libraryDependencies ++= scroogeLibs
   ).dependsOn(finagleCore, finagleMemcached, finagleThrift)
 
+  /*lazy val finagleSmtp = Project(
+    id = "finagle-smtp",
+    base = file("finagle-smtp"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+  ).settings(
+      name := "finagle-smtp",
+      libraryDependencies ++= Seq(util("core"),util("codec")/*,
+        "org.apache.commons" % "commons-email" % "1.3.2"*/)
+    ).dependsOn(finagleCore)*/
+
 /*  notyet
   lazy val finagleProtobuf = Project(
     id = "finagle-protobuf",
