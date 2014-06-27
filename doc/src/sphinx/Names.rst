@@ -1,7 +1,7 @@
 Names and Naming in Finagle
 ===========================
 
-Finagle uses *names*[*] to identify network locations. Names must be
+Finagle uses *names* [#names]_ to identify network locations. Names must be
 supplied when constructing a Finagle client through
 :api:`ClientBuilder.dest <com.twitter.finagle.builder.ClientBuilder>`
 or through implementations of :api:`Client
@@ -308,6 +308,7 @@ for example a dynamic serverset_.
 
 .. _serverset: http://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html
 
-.. [*] A `name` identities *what* you want; an
+.. rubric:: Footnotes
+.. [#names] A `name` identities *what* you want; an
   `address` is a `location`, identifying `where` an object resides.
   `Binding` is the process that turns names into addresses.
