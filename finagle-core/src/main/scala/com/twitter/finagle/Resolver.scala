@@ -1,12 +1,14 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.util.{DefaultTimer, InetSocketAddressUtil, LoadService}
-import com.twitter.util.{Return, Throw, Try, Var, FuturePool, Closable, Duration}
-import java.net.{InetAddress, InetSocketAddress, SocketAddress}
+import com.twitter.finagle.util._
+import com.twitter.util.{Return, Throw, Try, Var, FuturePool}
+import java.net.SocketAddress
 import java.util.WeakHashMap
 import java.util.logging.{Level, Logger}
 import java.security.{PrivilegedAction, Security}
 import com.twitter.conversions.time._
+import scala.Some
+
 
 /**
  * A resolver binds a name, represented by a string, to a
@@ -78,19 +80,21 @@ object InetResolver extends Resolver {
   def bind(hosts: String): Var[Addr] = {
     import InetSocketAddressUtil._
 
-    if (hosts == ":*") return Var.value(Addr.Bound(new InetSocketAddress(0)))
-
     val hostPorts = parseHostPorts(hosts)
     val init = Addr.Bound(resolveHostPorts(hostPorts))
     ttlOption match {
       case Some(ttl) =>
         Var.async(init) { u =>
-          timer.schedule(ttl.fromNow, ttl) {
+          implicit val intPri = new Prioritized[Int] { def apply(i: Int) = i }
+          val updater = Updater { _: Int =>
             futurePool { resolveHostPorts(hostPorts) } onSuccess { addrs =>
               u() = Addr.Bound(addrs)
             } onFailure { ex =>
               log.log(Level.WARNING, "failed to resolve hosts ", ex)
             }
+          }
+          timer.schedule(ttl.fromNow, ttl) {
+            updater(0)
           }
         }
       case None =>

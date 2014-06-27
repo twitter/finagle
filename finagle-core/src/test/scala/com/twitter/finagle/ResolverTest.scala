@@ -80,12 +80,4 @@ class ResolverTest extends FunSuite {
     assert(Resolver.eval("test!xyz") != Resolver.eval("test!xxx"))
   }
 
-  test("InetResolver should resolve localhost correctly") {
-    val sampled = InetResolver.bind(":*").sample()
-    sampled match {
-      case Addr.Bound(addrs) => assert(addrs === Set(new InetSocketAddress(0)))
-      case _ => fail()
-    }
-  }
-
 }
