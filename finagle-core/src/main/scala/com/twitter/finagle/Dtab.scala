@@ -323,7 +323,7 @@ final class DtabBuilder extends Builder[Dentry, Dtab] {
 }
 
 private trait DtabParsers extends NameTreePathParsers {
-  lazy val dtab: Parser[Dtab] = repsep(dentry, ";") ^^ { dentries => 
+  lazy val dtab: Parser[Dtab] = repsep(dentry, ";") <~ opt(";") ^^ { dentries =>
     Dtab(dentries.toIndexedSeq)
   }
 

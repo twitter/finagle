@@ -3,10 +3,10 @@ package com.twitter.finagle
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 
 @RunWith(classOf[JUnitRunner])
-class DtabTest extends FunSuite {
+class DtabTest extends FunSuite with AssertionsForJUnit {
 
   def pathTree(t: String) =
     NameTree.read(t).map(Name(_))
@@ -88,5 +88,15 @@ class DtabTest extends FunSuite {
         assert(a === Path.Utf8("A"))
         assert(b === NameTree.Leaf(Path.Utf8("B")))
     }
+  }
+
+  test("Allows trailing semicolon") {
+    val dtab = try {
+        Dtab.read("""
+          /b => /c;
+          /a => /b;
+          """)
+      } catch { case _: IllegalArgumentException => Dtab.empty }
+    assert(dtab.length === 2)
   }
 }
