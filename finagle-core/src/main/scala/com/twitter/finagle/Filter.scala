@@ -49,11 +49,14 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
   def andThen[Req2, Rep2](next: Filter[ReqOut, RepIn, Req2, Rep2]) =
     new Filter[ReqIn, RepOut, Req2, Rep2] {
       def apply(request: ReqIn, service: Service[Req2, Rep2]) = {
-        Filter.this.apply(request, new Service[ReqOut, RepIn] {
-          def apply(request: ReqOut): Future[RepIn] = next(request, service)
-          override def close(deadline: Time) = service.close(deadline)
-          override def isAvailable = service.isAvailable
-        })
+        Filter.this.apply(
+          request,
+          Service.rescue(new Service[ReqOut, RepIn] {
+            def apply(request: ReqOut): Future[RepIn] = next(request, service)
+            override def close(deadline: Time) = service.close(deadline)
+            override def isAvailable = service.isAvailable
+          })
+        )
       }
     }
 
