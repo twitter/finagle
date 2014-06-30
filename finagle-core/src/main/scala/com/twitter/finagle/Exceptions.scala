@@ -51,6 +51,12 @@ class NoBrokersAvailableException(
 
 class RetryFailureException(cause: Throwable) extends RequestException(cause)
 
+/**
+ * Cancellation is propagated between a Finagle server and client intra-process
+ * when the server is interrupted by an upstream service. In cases like these, the pending Future
+ * is interrupted with this exception. The client will cancel its pending request which
+ * will propagate an interrupt to its downstream, and so on. This is done to conserve resources.
+ */
 class CancelledRequestException(cause: Throwable) extends RequestException(cause) {
   def this() = this(null)
   override def getMessage = {
@@ -62,6 +68,17 @@ class CancelledRequestException(cause: Throwable) extends RequestException(cause
 }
 
 class TooManyWaitersException                        extends RequestException
+
+/**
+ * A Future is satisfied with this exception when the process of establishing
+ * a session is interrupted. Sessions are not preemptively established in Finagle,
+ * rather requests are taxed with session establishment when necessary.
+ * For example, this exception can occur if a request is interrupted while waiting for
+ * an available session or if an interrupt is propagated from a Finagle server
+ * during session establishment.
+ *
+ * @see com.twitter.finagle.CancelledRequestException
+ */
 class CancelledConnectionException(cause: Throwable) extends RequestException(cause) {
   def this() = this(null)
 }
