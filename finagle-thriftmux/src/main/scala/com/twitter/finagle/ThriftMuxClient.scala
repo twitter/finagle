@@ -14,7 +14,9 @@ import org.jboss.netty.buffer.{ChannelBuffer => CB, ChannelBuffers}
  */
 class ThriftMuxClientLike private[finagle](
   muxer: StackClient[CB, CB, CB, CB],
-  clientId: Option[ClientId]
+  // TODO: consider stuffing these into Stack.Params
+  clientId: Option[ClientId],
+  protected val protocolFactory: TProtocolFactory
 ) extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
   with (Stack.Params => Client[ThriftClientRequest, Array[Byte]]) {
 
@@ -40,9 +42,6 @@ class ThriftMuxClientLike private[finagle](
     sr
   }
 
-  // TODO: this should probably be threaded through via Stack.Params
-  protected val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
-
   /**
    * Create a new ThriftMuxClientLike with `params` used to configure the
    * muxer. This makes `ThriftMuxClientLike` compatible with the legacy
@@ -51,21 +50,28 @@ class ThriftMuxClientLike private[finagle](
    * muxer.
    */
   def apply(params: Stack.Params): Client[ThriftClientRequest, Array[Byte]] =
-    new ThriftMuxClientLike(muxer.copy(params = params), clientId)
+    new ThriftMuxClientLike(muxer.copy(params = params), clientId, protocolFactory)
 
   /**
    * Create a new ThriftMuxClientLike with `p` added to the
    * parameters used to configure the `muxer`.
    */
   def configured[P: Stack.Param](p: P): ThriftMuxClientLike =
-    new ThriftMuxClientLike(muxer.configured(p), clientId)
+    new ThriftMuxClientLike(muxer.configured(p), clientId, protocolFactory)
 
   /**
    * Produce a [[com.twitter.finagle.ThriftMuxClientLike]] using the provided
    * client ID.
    */
-  def withClientId(clientId: ClientId) = new ThriftMuxClientLike(
-    muxer, clientId = Some(clientId))
+  def withClientId(clientId: ClientId): ThriftMuxClientLike =
+    new ThriftMuxClientLike(muxer, Some(clientId), protocolFactory)
+
+  /**
+   * Produce a [[com.twitter.finagle.ThriftMuxClientLike]] using the provided
+   * protocolFactory.
+   */
+  def withProtocolFactory(pf: TProtocolFactory): ThriftMuxClientLike =
+    new ThriftMuxClientLike(muxer, clientId, pf)
 
   def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
     muxer.newClient(dest, label) map { service =>
@@ -108,5 +114,5 @@ private[finagle] object ThriftMuxClientStack {
  */
 object ThriftMuxClient extends ThriftMuxClientLike(
   exp.MuxClient.copy(ThriftMuxClientStack(), Stack.Params.empty),
-  None
+  None, Protocols.binaryFactory()
 )

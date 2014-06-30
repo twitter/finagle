@@ -30,7 +30,9 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
  * see [[com.twitter.finagle.ThriftMuxServer]]
  */
 class ThriftMuxServerLike private[finagle](
-  muxer: StackServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer]
+  muxer: StackServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer],
+  // TODO: consider stuffing this into Stack.Params
+  protected val protocolFactory: TProtocolFactory
 ) extends Server[Array[Byte], Array[Byte]] with ThriftRichServer
   with (Stack.Params => Server[Array[Byte], Array[Byte]]) {
 
@@ -45,9 +47,6 @@ class ThriftMuxServerLike private[finagle](
    * the stack.
    */
   val params = muxer.params
-
-  // TODO: thread this in via Stack.Params
-  protected val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
 
   private[this] val bufToArrayFilter =
     new Filter[ChannelBuffer, ChannelBuffer, Array[Byte], Array[Byte]] {
@@ -65,14 +64,21 @@ class ThriftMuxServerLike private[finagle](
    * [[com.twitter.finagle.builder.ServerBuilder]].
    */
   def apply(params: Stack.Params): Server[Array[Byte], Array[Byte]] =
-    new ThriftMuxServerLike(muxer.copy(params = params))
+    new ThriftMuxServerLike(muxer.copy(params = params), protocolFactory)
 
   /**
    * Create a new ThriftMuxServerLike with `p` added to the
    * parameters used to configure the `muxer`.
    */
   def configured[P: Stack.Param](p: P): ThriftMuxServerLike =
-    new ThriftMuxServerLike(muxer.configured(p))
+    new ThriftMuxServerLike(muxer.configured(p), protocolFactory)
+
+  /**
+   * Produce a [[com.twitter.finagle.ThriftMuxServerLike]] using the provided
+   * protocolFactory.
+   */
+  def withProtocolFactory(pf: TProtocolFactory): ThriftMuxServerLike =
+    new ThriftMuxServerLike(muxer, pf)
 
   def serve(addr: SocketAddress, factory: ServiceFactory[Array[Byte], Array[Byte]]) = {
     muxer.serve(addr, factory map { service =>
@@ -131,4 +137,5 @@ private[finagle] object ThriftServerMuxer
  *
  * @define serverExampleObject ThriftMuxServer
  */
-object ThriftMuxServer extends ThriftMuxServerLike(ThriftServerMuxer)
+object ThriftMuxServer extends ThriftMuxServerLike(
+  ThriftServerMuxer, Protocols.binaryFactory())

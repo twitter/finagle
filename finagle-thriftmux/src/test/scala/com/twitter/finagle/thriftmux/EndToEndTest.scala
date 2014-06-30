@@ -3,9 +3,9 @@ package com.twitter.finagle.thriftmux
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.client.{DefaultClient, Bridge}
-import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.dispatch.{PipeliningDispatcher, SerialClientDispatcher}
 import com.twitter.finagle.netty3.Netty3Listener
+import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.server.StackServer
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftFramedTransporter, ThriftClientRequest}
@@ -14,6 +14,7 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.tracing.Annotation.{ServerRecv, ClientSend}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Promise, RandomSocket}
+import org.apache.thrift.protocol.TCompactProtocol
 import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -162,7 +163,7 @@ class EndToEndTest extends FunSuite {
       })_
     }
 
-    object TestThriftMuxServer extends ThriftMuxServerLike(TestThriftMuxer)
+    object TestThriftMuxServer extends ThriftMuxServerLike(TestThriftMuxer, Protocols.binaryFactory())
 
     val testService = new TestService.FutureIface {
       def query(x: String) = Future.value(x + x)
@@ -394,6 +395,24 @@ class EndToEndTest extends FunSuite {
       // labeled via configured
       assertStats("client1", base.configured(Label("client1"))
         .newIface[TestService.FutureIface](server))
+    }
+  }
+
+  test("ThriftMux with TCompactProtocol") {
+    val pf = new TCompactProtocol.Factory
+
+    val server = ThriftMux.withProtocolFactory(pf)
+      .serveIface(":*", new TestService.FutureIface {
+        def query(x: String) = Future.value(x+x)
+      })
+
+    val tcompactClient = ThriftMux.withProtocolFactory(pf)
+      .newIface[TestService.FutureIface](server)
+    assert(Await.result(tcompactClient.query("ok")) === "okok")
+
+    val tbinaryClient = ThriftMux.newIface[TestService.FutureIface](server)
+    intercept[com.twitter.finagle.mux.ServerApplicationError] {
+      Await.result(tbinaryClient.query("ok"))
     }
   }
 }
