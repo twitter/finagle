@@ -7,7 +7,6 @@ import java.util.WeakHashMap
 import java.util.logging.{Level, Logger}
 import java.security.{PrivilegedAction, Security}
 import com.twitter.conversions.time._
-import scala.Some
 
 
 /**
@@ -58,17 +57,21 @@ object InetResolver extends Resolver {
     )) map { s => s.toInt })
 
     t match {
-      case Throw(exc: NumberFormatException) =>
-        log.log(Level.WARNING, "networkaddress.cache.ttl is set as non-number, DNS cache refresh turned off", exc)
-        None
-      case Return(None) =>
-        log.log(Level.INFO, "networkaddress.cache.ttl is not set, DNS cache refresh turned off")
-        None
       case Return(Some(value)) =>
         if (value <= 0) {
           log.log(Level.INFO, "networkaddress.cache.ttl is set as non-positive value, DNS cache refresh turned off")
           None
         } else Some(value.seconds)
+      case Return(None) =>
+        log.log(Level.INFO, "networkaddress.cache.ttl is not set, DNS cache refresh turned off")
+        None
+      case Throw(exc: NumberFormatException) =>
+        log.log(Level.WARNING, "networkaddress.cache.ttl is set as non-number, DNS cache refresh turned off", exc)
+        None
+      case Throw(exc) =>
+        log.log(Level.WARNING,
+          "Unexpected Exception is thrown when get networkaddress.cache.ttl, DNS cache refresh turned off", exc)
+        None
     }
   }
   private val timer = DefaultTimer.twitter
