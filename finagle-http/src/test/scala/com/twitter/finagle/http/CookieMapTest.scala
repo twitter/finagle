@@ -15,16 +15,16 @@ class CookieMapTest extends FunSuite {
   test("request cookie basics") {
     val request = Request()
     request.headers.set("Cookie", "name=value; name2=value2")
-    assert(request.cookies("name").value == "value")
-    assert(request.cookies("name2").value == "value2")
-    assert(request.cookies.isValid == true)
+    assert(request.cookies("name").value === "value")
+    assert(request.cookies("name2").value === "value2")
+    assert(request.cookies.isValid === true)
   }
 
   test("response cookie basics") {
     val response = Response()
     response.headers.set("Set-Cookie", "name=value; name2=value2")
-    assert(response.cookies("name").value == "value")
-    assert(response.cookies("name2").value == "value2")
+    assert(response.cookies("name").value === "value")
+    assert(response.cookies("name2").value === "value2")
   }
 
   test("cookie with attributes") {
@@ -32,18 +32,18 @@ class CookieMapTest extends FunSuite {
     request.headers.set("Cookie", "name=value; Max-Age=23; Domain=.example.com; Path=/")
     val cookie = request.cookies("name")
 
-    assert(cookie.value == "value")
-    assert(cookie.maxAge == 23.seconds)
-    assert(cookie.domain == ".example.com")
-    assert(cookie.path == "/")
+    assert(cookie.value === "value")
+    assert(cookie.maxAge === 23.seconds)
+    assert(cookie.domain === ".example.com")
+    assert(cookie.path === "/")
   }
 
   test("add cookie") {
     val request = Request()
     val cookie = new Cookie("name", "value")
     request.cookies += cookie
-    assert(request.cookies("name").value == "value")
-    assert(request.headers.get("Cookie") == "name=value")
+    assert(request.cookies("name").value === "value")
+    assert(request.headers.get("Cookie") === "name=value")
   }
 
   test("add same cookie only once") {
@@ -52,9 +52,9 @@ class CookieMapTest extends FunSuite {
     request.cookies += cookie
     request.cookies += cookie
 
-    assert(request.cookies("name").value == "value")
-    assert(request.headers.get("Cookie") == "name=value")
-    assert(request.cookies.size == 1)
+    assert(request.cookies("name").value === "value")
+    assert(request.headers.get("Cookie") === "name=value")
+    assert(request.cookies.size === 1)
   }
 
   test("add same cookie more than once") {
@@ -65,10 +65,10 @@ class CookieMapTest extends FunSuite {
     request.cookies.add(cookie2)
 
     assert(request.cookies.size === 2)
-    assert(request.cookies("name").value == "value")
+    assert(request.cookies("name").value === "value")
 
     val cookieHeaders = request.headerMap.getAll("Cookie")
-    assert(cookieHeaders.size == 2)
+    assert(cookieHeaders.size === 2)
     assert(cookieHeaders.toSeq.contains("name=value"))
     assert(cookieHeaders.toSeq.contains("name=value2"))
   }
@@ -86,7 +86,7 @@ class CookieMapTest extends FunSuite {
     val request = Request()
     request.headers.add("Cookie", "namé=value")
 
-    assert(request.cookies.size == 0)
-    assert(request.cookies.isValid == false)
+    assert(request.cookies.size === 0)
+    assert(request.cookies.isValid === false)
   }
 }
