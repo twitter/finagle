@@ -4,47 +4,46 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Method, Request, Response, Version}
 import com.twitter.logging.{BareFormatter, Logger, StringHandler}
 import com.twitter.util.{Await, Future, Time}
-import org.specs.SpecificationWithJUnit
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
+class LoggingFilterTest extends FunSuite {
 
-class LoggingFilterSpec extends SpecificationWithJUnit {
+  test("log") {
+    val logger = Logger.get("access")
+    logger.setLevel(Logger.INFO)
+    val stringHandler = new StringHandler(BareFormatter, Some(Logger.INFO))
+    logger.addHandler(stringHandler)
+    logger.setUseParentHandlers(false)
 
-  "LoggingFilter" should {
-    "log" in {
-      val logger = Logger.get("access")
-      logger.setLevel(Logger.INFO)
-      val stringHandler = new StringHandler(BareFormatter, Some(Logger.INFO))
-      logger.addHandler(stringHandler)
-      logger.setUseParentHandlers(false)
+    val request = Request("/search.json")
+    request.method = Method.Get
+    request.xForwardedFor = "10.0.0.1"
+    request.referer       = "http://www.example.com/"
+    request.userAgent     = "User Agent"
+    request.version = Version.Http11
 
-      val request = Request("/search.json")
-      request.method = Method.Get
-      request.xForwardedFor = "10.0.0.1"
-      request.referer       = "http://www.example.com/"
-      request.userAgent     = "User Agent"
-      request.version = Version.Http11
-
-      val formatter = new CommonLogFormatter
-      val service = new Service[Request, Response] {
-        def apply(request: Request): Future[Response] = {
-          val response = request.response
-          response.statusCode = 123
-          response.write("hello")
-          Future.value(response)
-        }
+    val formatter = new CommonLogFormatter
+    val service = new Service[Request, Response] {
+      def apply(request: Request): Future[Response] = {
+        val response = request.response
+        response.statusCode = 123
+        response.write("hello")
+        Future.value(response)
       }
-      val filter = (new LoggingFilter(logger, formatter)) andThen service
-
-      Time.withTimeAt(Time.fromSeconds(1302121932)) { _ =>
-        Await.result(filter(request))
-      }
-
-      stringHandler.get mustMatch ("""127\.0\.0\.1 - - \[06/Apr/2011:20:32:12 \+0000\] "GET /search\.json HTTP/1\.1" 123 5 [0-9]+ "User Agent"""" + "\n")
     }
+    val filter = (new LoggingFilter(logger, formatter)) andThen service
+
+    Time.withTimeAt(Time.fromSeconds(1302121932)) { _ =>
+      Await.result(filter(request))
+    }
+
+    stringHandler.get === ("""127\.0\.0\.1 - - \[06/Apr/2011:20:32:12 \+0000\] "GET /search\.json HTTP/1\.1" 123 5 [0-9]+ "User Agent"""" + "\n")
   }
 
-  "LogFormatter" should {
-    val UnescapedEscaped =
+  val UnescapedEscaped =
     Seq(
       // boundaries
       ("",        ""),
@@ -184,10 +183,9 @@ class LoggingFilterSpec extends SpecificationWithJUnit {
       ("\u2603", "\\xe2\\x98\\x83") // snowman
     )
 
-    "escape() escapes non-printable, non-ASCII" in {
-      UnescapedEscaped.foreach { case (input, escaped) =>
-        LogFormatter.escape(input) must_== escaped
-      }
+  test("escape() escapes non-printable, non-ASCII") {
+    UnescapedEscaped.foreach { case (input, escaped) =>
+      assert(LogFormatter.escape(input) === escaped)
     }
   }
 }

@@ -3,14 +3,18 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Method, Request, Response, Status}
 import com.twitter.util.{Await, Future}
-import org.specs.SpecificationWithJUnit
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
-class HeadFilterSpec extends SpecificationWithJUnit {
+@RunWith(classOf[JUnitRunner])
+class HeadFilterSpec extends FunSuite {
   val Body = "hello world"
 
   val dummyService = new Service[Request, Response] {
    def apply(request: Request) = {
-     request.method must be_==(Method.Get)
+     assert(request.method === Method.Get)
+
      val response = request.response
      response.status = Status.Ok
      response.write(Body)
@@ -18,24 +22,22 @@ class HeadFilterSpec extends SpecificationWithJUnit {
    }
   }
 
-  "HeadFilter" should {
-    "convert GET to HEAD" in {
-      val request = Request("/test.json")
-      request.method = Method.Head
+  test("convert GET to HEAD") {
+    val request = Request("/test.json")
+    request.method = Method.Head
 
-      val response = Await.result(HeadFilter(request, dummyService))
-      request.method must be_==(Method.Head) // unchanged
-      response.contentLength must be_==(Some(Body.length))
-      response.contentString must be_==("")
-    }
+    val response = Await.result(HeadFilter(request, dummyService))
+    assert(request.method === Method.Head) // unchanged
+    assert(response.contentLength === Some(Body.length))
+    assert(response.contentString === "")
+  }
 
-    "GET is normal" in {
-      val request = Request("/test.json")
+  test("GET is normal") {
+    val request = Request("/test.json")
 
-      val response = Await.result(HeadFilter(request, dummyService))
-      request.method must be_==(Method.Get) // unchanged
-      response.contentLength must be_==(None)
-      response.contentString must be_==(Body)
-    }
+    val response = Await.result(HeadFilter(request, dummyService))
+    request.method === Method.Get // unchanged
+    assert(response.contentLength === None)
+    assert(response.contentString === Body)
   }
 }
