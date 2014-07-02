@@ -1,88 +1,92 @@
 package com.twitter.finagle.http
-
+import org.scalatest.FunSuite
 import com.twitter.conversions.time._
-import org.specs.SpecificationWithJUnit
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
-class CookieMapSpec extends SpecificationWithJUnit {
-  "CookieMap" should {
-    "no cookies" in {
-      val request = Request()
-      request.cookies must beEmpty
-    }
+@RunWith(classOf[JUnitRunner])
+class CookieMapSpec extends FunSuite {
 
-    "request cookie basics" in {
-      val request = Request()
-      request.headers.set("Cookie", "name=value; name2=value2")
-      request.cookies("name").value must_== "value"
-      request.cookies("name2").value must_== "value2"
-      request.cookies.isValid must beTrue
-    }
+  test("no cookies") {
+    val request = Request()
+    request.cookies.isEmpty === true
+  }
 
-    "response cookie basics" in {
-      val response = Response()
-      response.headers.set("Set-Cookie", "name=value; name2=value2")
-      response.cookies("name").value must_== "value"
-      response.cookies("name2").value must_== "value2"
-    }
+  test("request cookie basics") {
+    val request = Request()
+    request.headers.set("Cookie", "name=value; name2=value2")
+    assert(request.cookies("name").value == "value")
+    assert(request.cookies("name2").value == "value2")
+    assert(request.cookies.isValid == true)
+  }
 
-    "cookie with attributes" in {
-      val request = Request()
-      request.headers.set("Cookie", "name=value; Max-Age=23; Domain=.example.com; Path=/")
-      val cookie = request.cookies("name")
-      cookie.value  must_== "value"
-      cookie.maxAge must_== 23.seconds
-      cookie.domain must_== ".example.com"
-      cookie.path   must_== "/"
-    }
+  test("response cookie basics") {
+    val response = Response()
+    response.headers.set("Set-Cookie", "name=value; name2=value2")
+    assert(response.cookies("name").value == "value")
+    assert(response.cookies("name2").value == "value2")
+  }
 
-    "add cookie" in {
-      val request = Request()
-      val cookie = new Cookie("name", "value")
-      request.cookies += cookie
-      request.cookies("name").value must_== "value"
-      request.headers.get("Cookie") must_== "name=value"
-    }
+  test("cookie with attributes") {
+    val request = Request()
+    request.headers.set("Cookie", "name=value; Max-Age=23; Domain=.example.com; Path=/")
+    val cookie = request.cookies("name")
 
-    "add same cookie only once" in {
-      val request = Request()
-      val cookie = new Cookie("name", "value")
-      request.cookies += cookie
-      request.cookies += cookie
-      request.cookies("name").value must_== "value"
-      request.headers.get("Cookie") must_== "name=value"
-      request.cookies must haveSize(1)
-    }
+    assert(cookie.value == "value")
+    assert(cookie.maxAge == 23.seconds)
+    assert(cookie.domain == ".example.com")
+    assert(cookie.path == "/")
+  }
 
-    "add same cookie more than once" in {
-      val request = Request()
-      val cookie = new Cookie("name", "value")
-      val cookie2 = new Cookie("name", "value2")
-      request.cookies.add(cookie)
-      request.cookies.add(cookie2)
+  test("add cookie") {
+    val request = Request()
+    val cookie = new Cookie("name", "value")
+    request.cookies += cookie
+    assert(request.cookies("name").value == "value")
+    assert(request.headers.get("Cookie") == "name=value")
+  }
 
-      request.cookies must haveSize(2)
-      request.cookies("name").value must_== "value"
+  test("add same cookie only once") {
+    val request = Request()
+    val cookie = new Cookie("name", "value")
+    request.cookies += cookie
+    request.cookies += cookie
 
-      val cookieHeaders = request.headerMap.getAll("Cookie")
-      cookieHeaders must haveSize(2)
-      cookieHeaders must contain ("name=value")
-      cookieHeaders must contain ("name=value2")
-    }
+    assert(request.cookies("name").value == "value")
+    assert(request.headers.get("Cookie") == "name=value")
+    assert(request.cookies.size == 1)
+  }
 
-    "remove cookie" in {
-      val request = Request()
-      request.headers.add("Cookie", "name=value")
-      request.headers.add("Cookie", "name=value2") // same name - gets removed too
+  test("add same cookie more than once") {
+    val request = Request()
+    val cookie = new Cookie("name", "value")
+    val cookie2 = new Cookie("name", "value2")
+    request.cookies.add(cookie)
+    request.cookies.add(cookie2)
 
-      request.cookies -= "name"
-      request.cookies must haveSize(0)
-    }
+    assert(request.cookies.size === 2)
+    assert(request.cookies("name").value == "value")
 
-    "invalid cookies are ignored" in {
-      val request = Request()
-      request.headers.add("Cookie", "namé=value")
-      request.cookies must haveSize(0)
-      request.cookies.isValid must beFalse
-    }
+    val cookieHeaders = request.headerMap.getAll("Cookie")
+    assert(cookieHeaders.size == 2)
+    assert(cookieHeaders.toSeq.contains("name=value"))
+    assert(cookieHeaders.toSeq.contains("name=value2"))
+  }
+
+  test("remove cookie") {
+    val request = Request()
+    request.headers.add("Cookie", "name=value")
+    request.headers.add("Cookie", "name=value2") // same name - gets removed too
+    request.cookies -= "name"
+
+    assert(request.cookies.size === 0)
+  }
+
+  test("invalid cookies are ignored") {
+    val request = Request()
+    request.headers.add("Cookie", "namé=value")
+
+    assert(request.cookies.size == 0)
+    assert(request.cookies.isValid == false)
   }
 }

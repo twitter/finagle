@@ -49,7 +49,7 @@ object Finagle extends Build {
     crossScalaVersions := Seq("2.9.2", "2.10.4"),
     scalaVersion := "2.9.2",
     libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" %"1.9.1" % "test",
+      "org.scalatest" %% "scalatest" % "1.9.1" % "test",
       "org.scala-tools.testing" %% "specs" % "1.6.9" % "test" cross CrossVersion.binaryMapped {
         case "2.9.2" => "2.9.1"
         case "2.10.4" => "2.10"
@@ -81,7 +81,7 @@ object Finagle extends Build {
 
     scalacOptions ++= Seq("-encoding", "utf8"),
     scalacOptions += "-deprecation",
-    scalacOptions <++= scalaVersion.map { 
+    scalacOptions <++= scalaVersion.map {
       case "2.10" | "2.10.4" => Seq("-language:_")
       case _ => Seq.empty[String]
     },
