@@ -22,6 +22,9 @@ junit_tests(name='core',
     pants('finagle/finagle-test'),
     pants('finagle/finagle-serversets'),
     pants('util/util-core')
+  ],
+  resources=[
+    pants('finagle/finagle-serversets/src/test/resources')
   ]
 )
 

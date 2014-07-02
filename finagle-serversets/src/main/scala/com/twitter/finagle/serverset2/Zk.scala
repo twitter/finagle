@@ -218,8 +218,8 @@ private[serverset2] object Zk extends FnZkFactory(
         .reader(),
       DefaultTimer.twitter)) {
 
-  val user: String = System.getProperty("user.name", "unknown")
-  val authInfo: String = "%s:%s".format(user, user)
+  private val authUser = Identities.get().headOption getOrElse(("/null"))
+  private val authInfo: String = "%s:%s".format(authUser, authUser)
   val nil: Zk = new Zk(Watched(new NullZooKeeperReader, Var(WatchState.Pending)), Timer.Nil)
 
   private def randomizedDelay(minDelay: Duration): Duration =
