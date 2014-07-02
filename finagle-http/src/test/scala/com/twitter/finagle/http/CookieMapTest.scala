@@ -5,7 +5,7 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class CookieMapSpec extends FunSuite {
+class CookieMapTest extends FunSuite {
 
   test("no cookies") {
     val request = Request()
