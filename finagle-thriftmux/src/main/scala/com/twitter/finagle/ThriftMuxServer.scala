@@ -30,7 +30,7 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
  * see [[com.twitter.finagle.ThriftMuxServer]]
  */
 class ThriftMuxServerLike private[finagle](
-  muxer: StackServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer],
+  muxer: StackServer[ChannelBuffer, ChannelBuffer],
   // TODO: consider stuffing this into Stack.Params
   protected val protocolFactory: TProtocolFactory
 ) extends Server[Array[Byte], Array[Byte]] with ThriftRichServer
@@ -102,11 +102,14 @@ private[finagle] object ThriftMuxServerStack {
  * custom pipeline that supports downgrading to vanilla thrift.
  */
 private[finagle] object ThriftServerMuxer
-  extends StackServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer](
+  extends StackServer[ChannelBuffer, ChannelBuffer](
     ThriftMuxServerStack(),
     Stack.Params.empty
   )
 {
+  protected type In = ChannelBuffer
+  protected type Out = ChannelBuffer
+
   protected val newListener: Stack.Params => Listener[ChannelBuffer, ChannelBuffer] = { params =>
     val Label(label) = params[Label]
     val Stats(sr) = params[Stats]

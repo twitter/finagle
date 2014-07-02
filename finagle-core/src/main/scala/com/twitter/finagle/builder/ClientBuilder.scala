@@ -368,7 +368,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         else newStack
       }
 
-      new StackClient[Req1, Rep1, Any, Any](clientStack, prms) {
+      new StackClient[Req1, Rep1](clientStack, prms) {
+        protected type In = Any
+        protected type Out = Any
+
         protected val newTransporter: Stack.Params => Transporter[Any, Any] = { ps =>
           val Stats(stats) = ps[Stats]
           val newTransport = (ch: Channel) => codec.newClientTransport(ch, stats)

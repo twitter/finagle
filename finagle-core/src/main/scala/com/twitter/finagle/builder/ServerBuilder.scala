@@ -191,7 +191,10 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         StackServer.Role.Preparer, (next: ServiceFactory[Req1, Rep1]) =>
           codec.prepareConnFactory(next)
       )
-      new StackServer[Req1, Rep1, Any, Any](newStack, ps) {
+      new StackServer[Req1, Rep1](newStack, ps) {
+        protected type In = Any
+        protected type Out = Any
+
         protected val newListener: Stack.Params => Listener[Any, Any] =
           Netty3Listener(codec.pipelineFactory, _)
 

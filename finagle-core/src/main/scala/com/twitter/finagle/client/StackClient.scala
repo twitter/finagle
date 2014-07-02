@@ -91,14 +91,17 @@ private[finagle] object StackClient {
 /**
  * A [[com.twitter.finagle.Stack]]-based client.
  */
-private[finagle] abstract class StackClient[Req, Rep, In, Out](
+private[finagle] abstract class StackClient[Req, Rep](
   val stack: Stack[ServiceFactory[Req, Rep]],
   val params: Stack.Params
 ) extends Client[Req, Rep] { self =>
+  protected type In
+  protected type Out
+
    /**
     * A convenient type alias for a client dispatcher.
     */
-  type Dispatcher = Transport[In, Out] => Service[Req, Rep]
+  protected type Dispatcher = Transport[In, Out] => Service[Req, Rep]
 
   /**
    * Creates a new StackClient with the default stack (StackClient#newStack)
@@ -135,7 +138,7 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
    * Creates a new StackClient with `p` added to the `params`
    * used to configure this StackClient's `stack`.
    */
-  def configured[P: Stack.Param](p: P): StackClient[Req, Rep, In, Out] =
+  def configured[P: Stack.Param](p: P): StackClient[Req, Rep] =
     copy(params = params+p)
 
   /**
@@ -145,8 +148,10 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
   def copy(
     stack: Stack[ServiceFactory[Req, Rep]] = self.stack,
     params: Stack.Params = self.params
-  ): StackClient[Req, Rep, In, Out] =
-    new StackClient[Req, Rep, In, Out](stack, params) {
+  ): StackClient[Req, Rep] =
+    new StackClient[Req, Rep](stack, params) {
+      protected type In = self.In
+      protected type Out = self.Out
       protected val newTransporter = self.newTransporter
       protected val newDispatcher = self.newDispatcher
     }
@@ -198,15 +203,15 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
  * A [[com.twitter.finagle.Stack Stack]]-based client which preserves
  * `Like` client semantics. This makes it appropriate for implementing rich
  * clients, since the rich type can be preserved without having to drop down
- * to StackClient[Req, Rep, In, Out] when making changes.
+ * to StackClient[Req, Rep] when making changes.
  */
 private[finagle]
-abstract class StackClientLike[Req, Rep, In, Out, Repr <: StackClientLike[Req, Rep, In, Out, Repr]](
-  client: StackClient[Req, Rep, In, Out]
+abstract class StackClientLike[Req, Rep, Repr <: StackClientLike[Req, Rep, Repr]](
+  client: StackClient[Req, Rep]
 ) extends Client[Req, Rep] {
   val stack = client.stack
 
-  protected def newInstance(client: StackClient[Req, Rep, In, Out]): Repr
+  protected def newInstance(client: StackClient[Req, Rep]): Repr
 
   /**
    * Creates a new `Repr` with an underlying StackClient where `p` has been

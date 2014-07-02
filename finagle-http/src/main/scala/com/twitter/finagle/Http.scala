@@ -95,10 +95,10 @@ package exp {
   }
 
   private[finagle]
-  class HttpClient(client: StackClient[HttpRequest, HttpResponse, Any, Any])
-    extends StackClientLike[HttpRequest, HttpResponse, Any, Any, HttpClient](client) {
+  class HttpClient(client: StackClient[HttpRequest, HttpResponse])
+    extends StackClientLike[HttpRequest, HttpResponse, HttpClient](client) {
 
-    protected def newInstance(client: StackClient[HttpRequest, HttpResponse, Any, Any]) =
+    protected def newInstance(client: StackClient[HttpRequest, HttpResponse]) =
       new HttpClient(client)
 
     def withTls(cfg: Netty3TransporterTLSConfig): HttpClient =
@@ -119,7 +119,10 @@ package exp {
       configured(Http.StackParams.MaxResponseSize(size))
   }
 
-  object HttpClient extends HttpClient(new StackClient[HttpRequest, HttpResponse, Any, Any] {
+  object HttpClient extends HttpClient(new StackClient[HttpRequest, HttpResponse] {
+    protected type In = Any
+    protected type Out = Any
+
     protected val newTransporter: Stack.Params => Transporter[Any, Any] = { prms =>
       val param.Label(label) = prms[param.Label]
       val httpPipeline =
@@ -135,9 +138,9 @@ package exp {
 
   private[finagle]
   class HttpServer(
-    server: StackServer[HttpRequest, HttpResponse, Any, Any]
-  ) extends StackServerLike[HttpRequest, HttpResponse, Any, Any, HttpServer](server) {
-    protected def newInstance(server: StackServer[HttpRequest, HttpResponse, Any, Any]) =
+    server: StackServer[HttpRequest, HttpResponse]
+  ) extends StackServerLike[HttpRequest, HttpResponse, HttpServer](server) {
+    protected def newInstance(server: StackServer[HttpRequest, HttpResponse]) =
       new HttpServer(server)
 
     def withTls(cfg: Netty3ListenerTLSConfig): HttpServer =
@@ -150,7 +153,10 @@ package exp {
       configured(Http.StackParams.MaxResponseSize(size))
   }
 
-  object HttpServer extends HttpServer(new StackServer[HttpRequest, HttpResponse, Any, Any] {
+  object HttpServer extends HttpServer(new StackServer[HttpRequest, HttpResponse] {
+    protected type In = Any
+    protected type Out = Any
+
     protected val newListener: Stack.Params => Listener[Any, Any] = { prms =>
       val param.Label(label) = prms[param.Label]
       val httpPipeline =

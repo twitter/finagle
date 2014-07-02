@@ -56,10 +56,15 @@ case class DefaultServer[Req, Rep, In, Out](
 
   val stack = StackServer.newStack[Req, Rep]
     .replace(StackServer.Role.Preparer, prepare)
+    
+  private type _In = In
+  private type _Out = Out
 
-  val underlying = new StackServer[Req, Rep, In, Out](stack, Stack.Params.empty) {
-    val newListener = Function.const(listener) _
-    val newDispatcher = Function.const(serviceTransport) _
+  val underlying = new StackServer[Req, Rep](stack, Stack.Params.empty) {
+    protected type In = _In
+    protected type Out = _Out
+    protected val newListener = Function.const(listener) _
+    protected val newDispatcher = Function.const(serviceTransport) _
   }
 
   val configured = underlying

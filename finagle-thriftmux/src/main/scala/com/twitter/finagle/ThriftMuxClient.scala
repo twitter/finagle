@@ -13,7 +13,7 @@ import org.jboss.netty.buffer.{ChannelBuffer => CB, ChannelBuffers}
  * instance of ThriftMuxClientLike, see [[com.twitter.finagle.ThriftMuxClient]].
  */
 class ThriftMuxClientLike private[finagle](
-  muxer: StackClient[CB, CB, CB, CB],
+  muxer: StackClient[CB, CB],
   // TODO: consider stuffing these into Stack.Params
   clientId: Option[ClientId],
   protected val protocolFactory: TProtocolFactory

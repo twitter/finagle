@@ -154,9 +154,12 @@ class EndToEndTest extends FunSuite {
       "thrift", new thriftmux.PipelineFactory)
 
     // TODO: temporary workaround to capture the ServerRecv record.
-    object TestThriftMuxer extends StackServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer] {
-      val newListener = Function.const(ThriftMuxListener)_
-      val newDispatcher: Stack.Params => Dispatcher =
+    object TestThriftMuxer extends StackServer[ChannelBuffer, ChannelBuffer] {
+      protected type In = ChannelBuffer
+      protected type Out = ChannelBuffer
+
+      protected val newListener = Function.const(ThriftMuxListener)_
+      protected val newDispatcher: Stack.Params => Dispatcher =
       Function.const((trans, service) => Trace.unwind {
         Trace.pushTracer(tracer)
         new mux.ServerDispatcher(trans, service, true)

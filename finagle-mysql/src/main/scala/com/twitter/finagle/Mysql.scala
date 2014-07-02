@@ -60,12 +60,14 @@ private object MysqlTracing extends SimpleFilter[Request, Result] { self =>
  * The client inherits a wealth of features from finagle including connection
  * pooling and load balancing.
  */
-object MysqlStackClient extends StackClient[Request, Result, Packet, Packet](
+object MysqlStackClient extends StackClient[Request, Result](
   MysqlTracing.module +: StackClient.newStack,
   Stack.Params.empty
 ) {
-  val newTransporter = MysqlTransporter(_)
-  val newDispatcher: Stack.Params => Dispatcher = { prms =>
+  protected type In = Packet
+  protected type Out = Packet
+  protected val newTransporter = MysqlTransporter(_)
+  protected val newDispatcher: Stack.Params => Dispatcher = { prms =>
     trans => mysql.ClientDispatcher(trans, Handshake(prms))
   }
 }
@@ -74,10 +76,10 @@ object MysqlStackClient extends StackClient[Request, Result, Packet, Packet](
  * Wraps a mysql client with builder semantics. Additionally, this class provides
  * methods for constructing a rich client which exposes a rich mysql api.
  */
-class MysqlClient(client: StackClient[Request, Result, Packet, Packet])
-  extends StackClientLike[Request, Result, Packet, Packet, MysqlClient](client)
+class MysqlClient(client: StackClient[Request, Result])
+  extends StackClientLike[Request, Result, MysqlClient](client)
   with MysqlRichClient {
-  protected def newInstance(client: StackClient[Request, Result, Packet, Packet]) =
+  protected def newInstance(client: StackClient[Request, Result]) =
     new MysqlClient(client)
 
   /**
