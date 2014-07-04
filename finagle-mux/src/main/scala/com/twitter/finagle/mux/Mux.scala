@@ -55,7 +55,7 @@ package exp {
   private[finagle] object MuxServer extends StackServer[CB, CB, CB, CB] {
     protected val newListener = MuxListener(_)
     protected val newDispatcher: Stack.Params => Dispatcher =
-      Function.const(new mux.ServerDispatcher(_, _, true))
+      Function.const(new mux.ServerDispatcher(_, _, true, mux.lease.exp.ClockedDrainer.flagged))
   }
 }
 

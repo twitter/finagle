@@ -62,5 +62,7 @@ private[lease] class MemorySpace(
    * discount.
    */
   def left: StorageUnit = info.remaining() - minDiscount
-}
 
+  override def toString(): String =
+    "MemorySpace(left=" + left + ", discount=" + discount() + ", info=" + info + ")"
+}

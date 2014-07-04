@@ -20,6 +20,11 @@ trait Namer { self =>
    * [[com.twitter.finagle.NameTree NameTree]].
    */
   def lookup(path: Path): Activity[NameTree[Name]]
+  
+  /**
+   * Enumerate entries in this namer by prefix.
+   */
+  def enum(prefix: Path): Activity[Dtab]
 
   /**
    * Compose this [[com.twitter.finagle.Namer Namer]] with `next`;
@@ -48,10 +53,21 @@ trait Namer { self =>
       case Activity.Pending => Var.value(Addr.Pending)
       case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
     }
+
+  /**
+   * Expand a prefix of this Namer, producing a Dtab reflecting the
+   * this prefixed namespace. The returned Dtab does not contain any
+   * root entries (/=>...), and thus represents valid suffixes of the
+   * given prefix.
+   */
+  final def expand(prefix: Path): Activity[Dtab] = Namer.expand(this, prefix)
 }
 
 private case class FailingNamer(exc: Throwable) extends Namer {
   def lookup(path: Path): Activity[NameTree[Name]] =
+    Activity.exception(exc)
+
+  def enum(prefix: Path): Activity[Dtab] =
     Activity.exception(exc)
 }
 
@@ -96,7 +112,17 @@ object Namer  {
       case Path.Utf8("$", kind, rest@_*) => namerOfKind(kind).lookup(Path.Utf8(rest:_*))
       case _ => Activity.value(Neg)
     }
-    
+
+    def enum(prefix: Path) = prefix match {
+      case Path.Utf8("$", kind, rest@_*) =>
+        namerOfKind(kind).enum(Path.Utf8(rest:_*))
+      case Path.Utf8("$", "nil", _*) => Activity.value(Dtab.empty)
+      case _ => 
+        // We can't efficiently enumerate the 'kind' namespace
+        // without some sort of service loading.
+        Activity.exception(new UnsupportedOperationException)
+    }
+
     override def toString = "Namer.global"
   }
 
@@ -133,11 +159,54 @@ object Namer  {
         Activity.collect(trees map bind(namer, depth+1)) map Alt.fromSeq
     }
 
+  private def expandTree(namer: Namer, depth: Int)(tree: NameTree[Path]): Activity[Dtab] = {
+    if (depth > MaxDepth) 
+      return Activity.exception(new IllegalArgumentException("Max recursion level reached."))
+
+    tree match {
+      case NameTree.Union(trees@_*) =>
+        if (trees.isEmpty) Activity.value(Dtab.empty) else {
+          val expanded = Activity.collect(trees map expandTree(namer, depth+1)) 
+          expanded map { dtabs => dtabs.reduceLeft(_.union(_)) }
+        }
+      case NameTree.Alt(trees@_*) =>
+        if (trees.isEmpty) Activity.value(Dtab.empty) else {
+          val expanded = Activity.collect(trees map expandTree(namer, depth+1)) 
+          expanded map { dtabs => dtabs.reduceLeft(_.alt(_)) }
+        }
+
+      case NameTree.Leaf(path) => expandPath(namer, depth+1)(path)
+      case NameTree.Neg => Activity.value(Dtab(Vector(Dentry(Path(), NameTree.Neg))))
+      case NameTree.Empty => Activity.value(Dtab.empty)
+    }
+  }
+
+  private def expandPath(namer: Namer, depth: Int)(prefix: Path): Activity[Dtab] = {
+    if (depth > MaxDepth) 
+      return Activity.exception(new IllegalArgumentException("Max recursion level reached."))
+
+    namer.enum(prefix) flatMap { dtab =>
+      val dtabs = Activity.collect(dtab map {
+        case Dentry(Path(), tree) => expandTree(namer, depth+1)(tree)
+        case dentry => Activity.value(Vector(dentry))
+      })
+
+      dtabs map { dtabs => Dtab(dtabs.flatten) }
+    }
+  }
+
+  private def expand(namer: Namer, prefix: Path): Activity[Dtab] =
+    expandPath(namer, 0)(prefix).map(_.simplified)
+
   private case class OrElse(fst: Namer, snd: Namer) extends Namer {
     def lookup(path: Path): Activity[NameTree[Name]] =
       (fst.lookup(path) join snd.lookup(path)) map {
         case (left, right) => NameTree.Alt(left, right)
       }
+
+    def enum(prefix: Path): Activity[Dtab] = 
+      (fst.enum(prefix) join snd.enum(prefix)) map {
+        case (left, right) => left.alt(right)
+      }
   }
 }
-

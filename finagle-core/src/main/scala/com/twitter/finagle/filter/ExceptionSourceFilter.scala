@@ -13,6 +13,7 @@ private[finagle] object ExceptionSourceFilter {
    */
    def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
      new Stack.Simple[ServiceFactory[Req, Rep]](ExceptionSource) {
+      val description = "Source exceptions to the service name"
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
         val param.Label(label) = params[param.Label]
         new ExceptionSourceFilter(label) andThen next

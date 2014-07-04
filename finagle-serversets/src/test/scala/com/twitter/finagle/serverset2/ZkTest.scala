@@ -112,7 +112,7 @@ class ZkTest extends FunSuite {
     assert(timer.tasks.isEmpty)
     watchedZk.value.opq(0).res() = Throw(new KeeperException.ConnectionLoss(None))
     assert(timer.tasks.size === 1)
-    tc.advance(10.milliseconds)
+    tc.advance(20.milliseconds)
     timer.tick()
     assert(watchedZk.value.opq === Seq(ExistsWatch("/foo/bar"), ExistsWatch("/foo/bar")))
     assert(ref.get === Activity.Pending)
@@ -173,7 +173,7 @@ class ZkTest extends FunSuite {
     }
 
     zkState() = WatchState.SessionState(SessionState.Expired)
-    tc.advance(5.seconds)
+    tc.advance(10.seconds)
     timer.tick()
     eventually {
       assert(watchedZk.value.opq === Seq(

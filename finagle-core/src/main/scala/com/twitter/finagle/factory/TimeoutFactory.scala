@@ -20,6 +20,7 @@ private[finagle] object TimeoutFactory {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]](ServiceTimeout) {
+      val description = "Time out service acquisition after a given period"
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
         val TimeoutFactory.Param(timeout) = params[TimeoutFactory.Param]
         val param.Label(label) = params[param.Label]

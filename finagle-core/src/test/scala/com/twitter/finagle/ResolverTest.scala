@@ -57,7 +57,7 @@ class ResolverTest extends FunSuite {
       case _ => fail()
     }
 
-    val sockaddr = new SocketAddress{}
+    val sockaddr = new SocketAddress {}
     ConstResolver(Addr.Bound(sockaddr)).resolve("blah") match {
       case Return(g) => assert(g() === Set(sockaddr))
       case _ => fail()

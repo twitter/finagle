@@ -348,6 +348,9 @@ class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String)
  * works safely, ever. This is a big typesafety bug: the codec is
  * blindly casting Requests to REQUEST.
  *
+ * Setting aggregateChunks to false disables the aggregator, and consequently
+ * lifts the restriction on request size.
+ *
  * @param httpFactory the underlying HTTP CodecFactory
  * @param aggregateChunks if true, the client pipeline collects HttpChunks into the body of each HttpResponse
  */
@@ -360,7 +363,7 @@ case class RichHttp[REQUEST <: Request](
     new Codec[REQUEST, Response] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
-          val pipeline = httpFactory.client(null).pipelineFactory.getPipeline
+          val pipeline = httpFactory.client(config).pipelineFactory.getPipeline
           if (!aggregateChunks) pipeline.remove("httpDechunker")
           pipeline
         }
@@ -394,7 +397,13 @@ case class RichHttp[REQUEST <: Request](
 
   def server = { config =>
     new Codec[REQUEST, Response] {
-      def pipelineFactory = httpFactory.server(config).pipelineFactory
+      def pipelineFactory = new ChannelPipelineFactory {
+        def getPipeline() = {
+          val pipeline = httpFactory.server(config).pipelineFactory.getPipeline
+          if (!aggregateChunks) pipeline.remove("httpDechunker")
+          pipeline
+        }
+      }
 
       override def newServerDispatcher(
           transport: Transport[Any, Any], 

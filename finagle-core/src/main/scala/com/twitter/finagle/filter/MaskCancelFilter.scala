@@ -17,6 +17,7 @@ object MaskCancelFilter {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]](MaskCancel) {
+      val description = "Prevent cancellations from propagating to other services"
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
         params[Param] match {
           case Param(true) => new MaskCancelFilter[Req, Rep] andThen next

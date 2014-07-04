@@ -8,6 +8,7 @@ private[finagle] object TracingFilter {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]](param.Tracer) {
+      val description = "Handle span lifecycle events to report tracing from protocols"
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
         val param.Tracer(tracer) = params[param.Tracer]
         val param.Label(label) = params[param.Label]

@@ -33,6 +33,8 @@ private[finagle] object IdleConnectionFilter {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]](IdleConnectionAssasin) {
+      val description = "Refuse requests and try to close idle connections " + 
+        "based on the number of active connections"
       def make(params: Stack.Params, next: ServiceFactory[Req, Rep]) = {
         params[IdleConnectionFilter.Param] match {
           case IdleConnectionFilter.Param(Some(thres)) =>

@@ -1,10 +1,10 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.io.Buf
-import com.twitter.util.Await
+import com.twitter.io.{Buf, Reader}
+import com.twitter.util.{Await, Future, Promise, Return}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.HttpResponseStatus.OK
 import org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1
@@ -25,6 +25,41 @@ class HttpClientDispatcherTest extends FunSuite {
   def chunk(content: String) =
     new DefaultHttpChunk(
       ChannelBuffers.wrappedBuffer(content.getBytes("UTF-8")))
+
+  test("streaming request body") {
+    val (in, out) = mkPair[Any,Any]
+    val disp = new HttpClientDispatcher[Request](in)
+    val req = Request()
+    req.setChunked(true)
+    val f = disp(req)
+    assert(!f.isDefined)
+
+    // discard the request immediately
+    out.read()
+
+    val r = Response()
+    r.setChunked(true)
+    out.write(r)
+    val res = Await.result(f)
+
+    val c = res.reader.read(Int.MaxValue)
+    assert(!c.isDefined)
+    req.writer.write(Buf.Utf8("a"))
+    out.read() flatMap { c => out.write(c) }
+    assert(Await.result(c) === Buf.Utf8("a"))
+
+    val cc = res.reader.read(Int.MaxValue)
+    assert(!cc.isDefined)
+    req.writer.write(Buf.Utf8("some other thing"))
+    out.read() flatMap { c => out.write(c) }
+    assert(Await.result(cc) === Buf.Utf8("some other thing"))
+
+    val last = res.reader.read(Int.MaxValue)
+    assert(!last.isDefined)
+    req.close()
+    out.read() flatMap { c => out.write(c) }
+    assert(Await.result(last) === Buf.Eof)
+  }
 
   test("invalid message") {
     val (in, out) = mkPair[Any,Any]
@@ -86,5 +121,30 @@ class HttpClientDispatcherTest extends FunSuite {
     out.write("something else")
     intercept[IllegalArgumentException] { Await.result(cc) }
     verify(inSpy, times(1)).close()
+  }
+
+  test("upstream interrupt on request triggers discard") {
+    val (in, out) = mkPair[Any,Any]
+    val inSpy = spy(in)
+    val disp = new HttpClientDispatcher[Request](inSpy)
+
+    val discardp = new Promise[Unit]
+    val reqIn = Request()
+    val req = new Request {
+      val httpRequest = reqIn
+      override val httpMessage = reqIn
+      lazy val remoteSocketAddress = reqIn.remoteSocketAddress
+      override val reader = new Reader {
+        def read(n: Int) = Future.value(Buf.Eof)
+        def discard() {
+          discardp.setDone()
+        }
+      }
+    }
+    req.setChunked(true)
+
+    val f = disp(req)
+    f.raise(new Exception)
+    assert(discardp.poll === Some(Return.Unit))
   }
 }

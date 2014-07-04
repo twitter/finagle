@@ -329,6 +329,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       val codec = codecFactory(ClientCodecConfig(name))
 
       val prepConn = new Stack.Simple[ServiceFactory[Req1, Rep1]](StackClient.Role.PrepConn) {
+        val description = "Connection preparation phase as defined by a Codec"
         def make(params: Params, next: ServiceFactory[Req1, Rep1]) = {
           val Stats(stats) = params[Stats]
           val underlying = codec.prepareConnFactory(next)

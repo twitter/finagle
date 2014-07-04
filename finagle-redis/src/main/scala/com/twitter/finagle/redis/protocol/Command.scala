@@ -16,6 +16,7 @@ abstract class Command extends RedisMessage {
 object Commands {
   // Key Commands
   val DEL       = "DEL"
+  val DUMP      = "DUMP"
   val EXISTS    = "EXISTS"
   val EXPIRE    = "EXPIRE"
   val EXPIREAT  = "EXPIREAT"
@@ -137,6 +138,7 @@ object Commands {
   val commandMap: Map[String, Function1[List[Array[Byte]],Command]] = Map(
     // key commands
     DEL               -> {Del(_)},
+    DUMP              -> {Dump(_)},
     EXISTS            -> {Exists(_)},
     EXPIRE            -> {Expire(_)},
     EXPIREAT          -> {ExpireAt(_)},
@@ -273,6 +275,7 @@ object Commands {
 object CommandBytes {
   // Key Commands
   val DEL               = StringToChannelBuffer("DEL")
+  val DUMP              = StringToChannelBuffer("DUMP")
   val EXISTS            = StringToChannelBuffer("EXISTS")
   val EXPIRE            = StringToChannelBuffer("EXPIRE")
   val EXPIREAT          = StringToChannelBuffer("EXPIREAT")

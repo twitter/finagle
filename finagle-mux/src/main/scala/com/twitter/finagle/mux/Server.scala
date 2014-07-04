@@ -1,11 +1,12 @@
 package com.twitter.finagle.mux
 
 import com.twitter.finagle.{CancelledRequestException, Context, Dtab, Service, WriteException}
+import com.twitter.finagle.mux.lease.exp.{Lessor, Lessee}
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
-import com.twitter.util.{Closable, Future, Local, Promise, Return, Throw, Time}
+import com.twitter.util.{Closable, Future, Local, Promise, Return, Throw, Time, Stopwatch, Duration}
 import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
@@ -24,12 +25,21 @@ object ServerDispatcher {
 /**
  * A ServerDispatcher for the mux protocol.
  */
-private[finagle] class ServerDispatcher(
+private[finagle] class ServerDispatcher private[finagle](
   trans: Transport[ChannelBuffer, ChannelBuffer],
   service: Service[ChannelBuffer, ChannelBuffer],
-  canDispatch: Boolean
-) extends Closable {
+  canDispatch: Boolean, // XXX: a hack to indicate whether a server understand {T,R}Dispatch
+  lessor: Lessor // the lessor that the dispatcher should register with in order to get leases
+) extends Closable with Lessee {
+  def this(
+    trans: Transport[ChannelBuffer, ChannelBuffer],
+    service: Service[ChannelBuffer, ChannelBuffer],
+    canDispatch: Boolean
+  ) = this(trans, service, canDispatch, Lessor.nil)
+
   import Message._
+
+  lessor.register(this)
 
   // Used to buffer requests with in-progress local service invocation.
   private[this] val pending = new ConcurrentHashMap[Int, Future[_]]
@@ -47,6 +57,7 @@ private[finagle] class ServerDispatcher(
 
   @volatile private[this] var receive: Message => Unit = {
     case Tdispatch(tag, contexts, /*ignore*/_dst, dtab, req) =>
+      lessor.observeArrival()
       if (!canDispatch) {
         // There seems to be a bug in the Scala pattern matcher:
         // 	case Tdispatch(..) if canDispatch => ..
@@ -61,10 +72,12 @@ private[finagle] class ServerDispatcher(
         Trace.record(Annotation.ServerRecv())
         if (dtab.length > 0)
           Dtab.local ++= dtab
+        val elapsed = Stopwatch.start()
         val f = service(req)
         pending.put(tag, f)
         f respond {
           case Return(rep) =>
+            lessor.observe(elapsed())
             pending.remove(tag)
 
               // Record tracing info to track Mux adoption across clusters.
@@ -77,6 +90,7 @@ private[finagle] class ServerDispatcher(
       }
 
     case Treq(tag, traceId, req) =>
+      lessor.observeArrival()
       val saved = Trace.state
       try {
         for (traceId <- traceId)
@@ -86,10 +100,12 @@ private[finagle] class ServerDispatcher(
         // Record tracing info to track Mux adoption across clusters.
         Trace.record(ServerDispatcher.ServerEnabledTraceMessage)
 
+        val elapsed = Stopwatch.start()
         val f = service(req)
         pending.put(tag, f)
         f respond {
           case Return(rep) =>
+            lessor.observe(elapsed())
             pending.remove(tag)
             Trace.record(Annotation.ServerSend())
             trans.write(encode(RreqOk(tag, rep)))
@@ -139,6 +155,7 @@ private[finagle] class ServerDispatcher(
       f.raise(exc)
     pending.clear()
 
+    lessor.unregister(this)
     trans.close()
   }
 
@@ -182,9 +199,20 @@ private[finagle] class ServerDispatcher(
       // need to allocate a distinct tag to differentiate messages.
       trans.write(encode(Tdrain(1))) before {
         closep.within(DefaultTimer.twitter, deadline - Time.now) transform { _ =>
+          lessor.unregister(this)
           trans.close()
         }
       }
     }
   }
+
+  /**
+   * Emit a lease to the clients of this server.
+   */
+  def issue(howlong: Duration) {
+    require(howlong >= Tlease.MinLease)
+    trans.write(encode(Tlease(howlong min Tlease.MaxLease)))
+  }
+
+  def npending(): Int = pending.size
 }

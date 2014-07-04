@@ -31,6 +31,7 @@ private[finagle] object FailureAccrualFactory {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]](FailureAccrual) {
+      val description = "Backoff from hosts that we cannot successfully make requests to"
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
         val FailureAccrualFactory.Param(n, d) = params[FailureAccrualFactory.Param]
         val param.Timer(timer) = params[param.Timer]

@@ -39,11 +39,13 @@ object Status {
   val UnsupportedMediaType         = HttpResponseStatus.UNSUPPORTED_MEDIA_TYPE
   val RequestedRangeNotSatisfiable = HttpResponseStatus.REQUESTED_RANGE_NOT_SATISFIABLE
   val ExpectationFailed            = HttpResponseStatus.EXPECTATION_FAILED
+  val EnhanceYourCalm              = HttpResponseStatus.valueOf(420)
   val UnprocessableEntity          = HttpResponseStatus.UNPROCESSABLE_ENTITY
   val Locked                       = HttpResponseStatus.LOCKED
   val FailedDependency             = HttpResponseStatus.FAILED_DEPENDENCY
   val UnorderedCollection          = HttpResponseStatus.UNORDERED_COLLECTION
   val UpgradeRequired              = HttpResponseStatus.UPGRADE_REQUIRED
+  val TooManyRequests              = HttpResponseStatus.valueOf(429)
   val InternalServerError          = HttpResponseStatus.INTERNAL_SERVER_ERROR
   val NotImplemented               = HttpResponseStatus.NOT_IMPLEMENTED
   val BadGateway                   = HttpResponseStatus.BAD_GATEWAY

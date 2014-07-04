@@ -2,7 +2,7 @@ package com.twitter.finagle
 
 /**
  * Base exception for all Finagle originated failures. These are
- * RuntimeExceptions, but with additional `sources` and `flags`.
+ * Exceptions, but with additional `sources` and `flags`.
  * Sources describe the origins of the failure to aid in debugging
  * and flags mark attributes of the Failure (e.g. Retryable).
  * Failures are constructed and extracted using the Failure
@@ -22,7 +22,7 @@ final class Failure private[finagle](
   val flags: Long = Failure.Flag.None,
   sources: Map[String, Object] = Map(),
   val stacktrace: Array[StackTraceElement] = Failure.NoStacktrace
-) extends RuntimeException(why, cause) with NoStacktrace {
+) extends Exception(why, cause) with NoStacktrace {
   import Failure._
 
   /**
@@ -59,6 +59,15 @@ final class Failure private[finagle](
     for (te <- stacktrace)
       p.println("\tat %s".format(te))
   }
+
+  override def equals(a: Any) = {
+    a match {
+      case Failure(cause, flags) => this.cause == cause && this.flags == flags
+      case _ => false
+    }
+  }
+
+  override def hashCode = cause.hashCode ^ flags.hashCode
 
   def copy(
     why: String = why,

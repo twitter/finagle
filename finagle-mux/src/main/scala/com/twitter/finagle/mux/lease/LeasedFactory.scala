@@ -8,6 +8,7 @@ object LeasedFactory {
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]](Leased) {
+      val description = "Bridge gap between ServiceFactory.isAvailable and Acting.isActive"
       def make(params: Params, next: ServiceFactory[Req, Rep]) = {
         val mk: () => Future[Service[Req, Rep] with Acting] = { () =>
           next() map {

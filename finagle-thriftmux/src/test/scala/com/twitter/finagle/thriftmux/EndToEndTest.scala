@@ -372,6 +372,8 @@ class EndToEndTest extends FunSuite {
     assert(mem.counters(Seq("foobar", "protocol", "thriftmux")) === 2)
   }
 
+  // Flaky tests. See https://jira.twitter.biz/browse/CSL-974 for details.
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("ThriftMuxClients are properly labeled and scoped") {
     new ThriftMuxTestServer {
       val mem = new InMemoryStatsReceiver
