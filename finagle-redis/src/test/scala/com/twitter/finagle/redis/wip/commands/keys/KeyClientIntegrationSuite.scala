@@ -1,13 +1,13 @@
 package com.twitter.finagle.redis.integration
 
 import com.twitter.finagle.redis.naggati.FinagleRedisClientSuite
-import com.twitter.finagle.redis.tags.{RedisTest, SlowTest}
+import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
 import com.twitter.util.Await
 import com.twitter.finagle.redis.util.{CBToString, StringToChannelBuffer}
 
 final class KeyClientIntegrationSuite extends FinagleRedisClientSuite {
 
-  test("Correctly perform the DEL command", RedisTest, SlowTest) {
+  test("Correctly perform the DEL command", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.set(foo, bar))
       Await.result(client.del(Seq(foo)))
@@ -17,7 +17,7 @@ final class KeyClientIntegrationSuite extends FinagleRedisClientSuite {
     }
   }
 
-  test("Correctly perform the EXISTS command", RedisTest, SlowTest) {
+  test("Correctly perform the EXISTS command", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.set(foo, bar))
       val actualResult = Await.result(client.exists(foo))
@@ -26,7 +26,7 @@ final class KeyClientIntegrationSuite extends FinagleRedisClientSuite {
     }
   }
 
-  test("Correctly perform the TTL command", RedisTest, SlowTest) {
+  test("Correctly perform the TTL command", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.set(foo, bar))
       val time = 20L
@@ -45,7 +45,7 @@ final class KeyClientIntegrationSuite extends FinagleRedisClientSuite {
     }
   }
 
-  test("Correctly perform the EXPIREAT command", RedisTest, SlowTest) {
+  test("Correctly perform the EXPIREAT command", RedisTest, ClientTest) {
     withRedisClient { client =>
       val ttl = System.currentTimeMillis() + 20000L
       Await.result(client.set(foo, bar))
@@ -63,7 +63,7 @@ final class KeyClientIntegrationSuite extends FinagleRedisClientSuite {
     }
   }
 
-  test("Correctly perform the MOVE command", RedisTest, SlowTest) {
+  test("Correctly perform the MOVE command", RedisTest, ClientTest) {
     withRedisClient { client =>
       val fromDb = 14
       val toDb   = 15
@@ -84,7 +84,7 @@ final class KeyClientIntegrationSuite extends FinagleRedisClientSuite {
     }
   }
 
-  test("Correctly perform the PEXPIRE & PTL commands", RedisTest, SlowTest) {
+  test("Correctly perform the PEXPIRE & PTL commands", RedisTest, ClientTest) {
     withRedisClient { client =>
       val ttl = 100000L
       Await.result(client.set(foo, bar))
@@ -102,7 +102,7 @@ final class KeyClientIntegrationSuite extends FinagleRedisClientSuite {
     }
   }
 
-  test("Correctly perform the PEXPIREAT & PTL commands", RedisTest, SlowTest) {
+  test("Correctly perform the PEXPIREAT & PTL commands", RedisTest, ClientTest) {
     withRedisClient { client =>
       val horizon = 20000L
       val ttl = System.currentTimeMillis() + horizon
