@@ -59,7 +59,7 @@ trait FinagleRedisClientSuite extends FinagleRedisTest with BeforeAndAfterAll {
         .hosts(RedisCluster.hostAddresses())
         .hostConnectionLimit(1)
         .buildFactory())
-    Await.result(client.flushDB())
+    Await.result(client.flushAll)
     try {
       testCode(client)
     }
@@ -104,11 +104,11 @@ trait FinagleRedisClientServerIntegrationTest extends FinagleRedisTest with Befo
           .hostConnectionLimit(1)
           .retries(2)
           .build()
+    Await.result(client(FlushAll))
     try {
       testCode(client)
     }
     finally {
-      Await.result(client(FlushDB))
       client.close()
     }
   }

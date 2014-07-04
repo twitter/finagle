@@ -82,6 +82,7 @@ object Commands {
   val BRANGE            = "BRANGE"
 
   // Miscellaneous
+  val FLUSHALL          = "FLUSHALL"
   val FLUSHDB           = "FLUSHDB"
   val SELECT            = "SELECT"
   val AUTH              = "AUTH"
@@ -203,6 +204,7 @@ object Commands {
     BGET              -> {BGet(_)},
 
     // miscellaneous
+    FLUSHALL          -> {_ => FlushAll},
     FLUSHDB           -> {_ => FlushDB},
     SELECT            -> {Select(_)},
     AUTH              -> {Auth(_)},
@@ -341,6 +343,7 @@ object CommandBytes {
   val BRANGE            = StringToChannelBuffer("BRANGE")
 
   // Miscellaneous
+  val FLUSHALL          = StringToChannelBuffer("FLUSHALL")
   val FLUSHDB           = StringToChannelBuffer("FLUSHDB")
   val SELECT            = StringToChannelBuffer("SELECT")
   val AUTH              = StringToChannelBuffer("AUTH")

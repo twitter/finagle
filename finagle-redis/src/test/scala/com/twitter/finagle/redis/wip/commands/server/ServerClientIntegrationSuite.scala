@@ -7,6 +7,20 @@ import com.twitter.finagle.redis.util.{CBToString, StringToChannelBuffer}
 
 final class ServerClientIntegrationSuite extends FinagleRedisClientSuite {
 
+  test("Correctly perform the FLUSHALL command", RedisTest, ClientTest) {
+    withRedisClient { client =>
+      Await.result(client.select(15))
+      Await.result(client.set(foo, bar))
+      Await.result(client.select(1))
+      Await.result(client.flushAll())
+      Await.result(client.select(15))
+
+      val actualResult = Await.result(client.get(foo))
+      val expectedResult = None
+      assert(actualResult === expectedResult)
+    }
+  }
+
   test("Correctly perform the FLUSHDB command", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.set(foo, bar))
