@@ -1,13 +1,13 @@
 package com.twitter.finagle.redis.integration
 
 import com.twitter.finagle.redis.naggati.FinagleRedisClientSuite
-import com.twitter.finagle.redis.tags.{RedisTest, SlowTest}
+import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
 import com.twitter.util.Await
 import com.twitter.finagle.redis.util.{CBToString, StringToChannelBuffer}
 
 final class ServerClientIntegrationSuite extends FinagleRedisClientSuite {
 
-  test("Correctly perform the FLUSHDB command", RedisTest, SlowTest) {
+  test("Correctly perform the FLUSHDB command", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.set(foo, bar))
       Await.result(client.flushDB())
@@ -17,7 +17,7 @@ final class ServerClientIntegrationSuite extends FinagleRedisClientSuite {
     }
   }
 
-  test("Correctly perform the INFO command", RedisTest, SlowTest) {
+  test("Correctly perform the INFO command", RedisTest, ClientTest) {
     withRedisClient { client =>
       val info = new String(Await.result(client.info()).get.array, "UTF8")
       val hasServer = info.contains("# Server")
