@@ -12,7 +12,7 @@ import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffers
 import org.specs.SpecificationWithJUnit
 
-class ProxySpec extends SpecificationWithJUnit {
+class ProxyTest extends SpecificationWithJUnit {
 
   type MemcacheService = Service[Command, Response]
 

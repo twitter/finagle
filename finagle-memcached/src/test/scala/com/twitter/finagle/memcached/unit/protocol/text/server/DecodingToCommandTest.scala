@@ -11,7 +11,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.specs.SpecificationWithJUnit
 import org.specs.util.DataTables
 
-class DecodingToCommandSpec extends SpecificationWithJUnit with DataTables {
+class DecodingToCommandTest extends SpecificationWithJUnit with DataTables {
   "DecodingToCommand" should {
     val decodingToCommand = new DecodingToCommand
 

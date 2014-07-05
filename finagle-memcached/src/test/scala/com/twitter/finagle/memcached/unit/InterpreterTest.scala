@@ -10,7 +10,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.specs.SpecificationWithJUnit
 import scala.collection.mutable
 
-class InterpreterSpec extends SpecificationWithJUnit {
+class InterpreterTest extends SpecificationWithJUnit {
   "Interpreter" should {
     val map = mutable.Map[ChannelBuffer, Entry]()
     val atomicMap = new AtomicMap(Seq(map))

@@ -9,7 +9,7 @@ import org.jboss.netty.channel.{ChannelHandlerContext, Channel}
 import org.specs.mock.Mockito
 import org.specs.SpecificationWithJUnit
 
-class EncoderSpec extends SpecificationWithJUnit with Mockito {
+class EncoderTest extends SpecificationWithJUnit with Mockito {
   "Encoder" should {
     val channel = smartMock[Channel]
     val context = smartMock[ChannelHandlerContext]

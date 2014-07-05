@@ -25,7 +25,7 @@ import com.twitter.util.{Await, Duration, Future, Return, Throw}
 import org.specs.SpecificationWithJUnit
 import scala.collection.mutable
 
-class ClientSpec extends SpecificationWithJUnit {
+class ClientTest extends SpecificationWithJUnit {
   "ConnectedClient" should {
     /**
      * Note: This integration test requires a real Memcached server to run.

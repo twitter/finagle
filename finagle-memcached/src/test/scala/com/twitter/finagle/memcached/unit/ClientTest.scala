@@ -12,7 +12,7 @@ import org.specs.SpecificationWithJUnit
 import scala.collection.{immutable, mutable}
 import _root_.java.io.{BufferedReader, InputStreamReader}
 
-class ClientSpec extends SpecificationWithJUnit with Mockito {
+class ClientTest extends SpecificationWithJUnit with Mockito {
   "KetamaClient" should {
     // Test from Smile's KetamaNodeLocatorSpec.scala
 

@@ -5,7 +5,7 @@ import com.twitter.util.Await
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
-class PoolingReadRepairClientSpec extends SpecificationWithJUnit with Mockito {
+class PoolingReadRepairClientTest extends SpecificationWithJUnit with Mockito {
   var full: MockClient = null
   var partial: MockClient = null
   var pooled: Client = null

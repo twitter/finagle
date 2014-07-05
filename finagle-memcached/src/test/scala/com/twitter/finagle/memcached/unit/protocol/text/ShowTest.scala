@@ -9,7 +9,7 @@ import com.twitter.finagle.memcached.protocol.{
 import com.twitter.io.Charsets
 import org.specs.SpecificationWithJUnit
 
-class ShowSpec extends SpecificationWithJUnit {
+class ShowTest extends SpecificationWithJUnit {
   "ResponseToEncoding" should {
     val responseToEncoding = new ResponseToEncoding
 

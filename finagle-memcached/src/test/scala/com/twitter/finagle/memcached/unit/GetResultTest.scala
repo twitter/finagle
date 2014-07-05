@@ -6,7 +6,7 @@ import org.specs.mock.Mockito
 import org.specs.SpecificationWithJUnit
 import scala.collection.immutable
 
-class GetResultSpec extends SpecificationWithJUnit with Mockito {
+class GetResultTest extends SpecificationWithJUnit with Mockito {
 
   "GetResult" should {
     "add together hits/misses/failures with ++" in {

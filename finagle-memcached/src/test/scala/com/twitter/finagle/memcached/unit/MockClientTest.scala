@@ -5,7 +5,7 @@ import com.twitter.finagle.memcached.protocol.ClientError
 import com.twitter.util.Await
 import org.specs.SpecificationWithJUnit
 
-class MockClientSpec extends SpecificationWithJUnit {
+class MockClientTest extends SpecificationWithJUnit {
   "MockClient" should {
     "get" in {
       val memcache = new MockClient(Map("key" -> "value")).withStrings

@@ -6,7 +6,7 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import org.specs.mock.Mockito
 import org.specs.SpecificationWithJUnit
 
-class DecoderSpec extends SpecificationWithJUnit with Mockito {
+class DecoderTest extends SpecificationWithJUnit with Mockito {
   "Decoder" should {
     val decoder = new Decoder
     decoder.start()

@@ -9,7 +9,7 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import org.jboss.netty.buffer.ChannelBuffer
 import org.specs.SpecificationWithJUnit
 
-class DecodingToResponseSpec extends SpecificationWithJUnit {
+class DecodingToResponseTest extends SpecificationWithJUnit {
   "DecodingToResponse" should {
     val decodingToResponse = new DecodingToResponse
 

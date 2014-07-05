@@ -1,16 +1,16 @@
-package com.twitter.finagle.memcached.integration
+package com.twitter.finagle.memcached.stress
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.memcached.integration.InProcessMemcached
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.util.TimeConversions._
 import com.twitter.util.{Await, Time}
 import java.net.InetSocketAddress
 import org.specs.SpecificationWithJUnit
 
-class InterpreterServiceSpec extends SpecificationWithJUnit {
+class InterpreterServiceTest extends SpecificationWithJUnit {
   "InterpreterService" should {
     var server: InProcessMemcached = null
     var client: Service[Command, Response] = null
@@ -30,21 +30,18 @@ class InterpreterServiceSpec extends SpecificationWithJUnit {
     }
 
     "set & get" in {
-      val key   = "key"
+      val _key   = "key"
       val value = "value"
       val zero = "0"
-      val result = for {
-        _ <- client(Delete(key))
-        _ <- client(Set(key, 0, Time.epoch, value))
-        r <- client(Get(Seq(key)))
-      } yield r
-      Await.result(result, 1.second) mustEqual Values(Seq(Value(key, value, None, Some(zero))))
-      client.isAvailable must beTrue
-    }
-
-    "quit" in {
-      val result = client(Quit())
-      Await.result(result) mustEqual NoOp()
+      val start = System.currentTimeMillis
+      (0 until 100) map { i =>
+        val key = _key + i
+        Await.result(client(Delete(key)))
+        Await.result(client(Set(key, 0, Time.epoch, value)))
+        Await.result(client(Get(Seq(key)))) mustEqual Values(Seq(Value(key, value, None, Some(zero))))
+      }
+      val end = System.currentTimeMillis
+      // println("%d ms".format(end - start))
     }
   }
 }
