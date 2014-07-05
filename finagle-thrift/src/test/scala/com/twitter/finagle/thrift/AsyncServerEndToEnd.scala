@@ -80,7 +80,7 @@ class AsyncServerEndToEnd extends FunSuite {
     val result = Try(Await.result(callResults, 1.second))
     assert(result.isReturn === true)
 
-    assert(result().response.success  ==="yehyeh")
+    assert(result().response.success  === "yehyeh")
 
     serverChannel.close().awaitUninterruptibly()
     serverBootstrap.getFactory.releaseExternalResources()

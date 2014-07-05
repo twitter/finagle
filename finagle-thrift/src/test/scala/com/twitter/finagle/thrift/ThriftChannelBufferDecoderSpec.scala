@@ -17,7 +17,7 @@ class ThriftChannelBufferDecoderSpec extends FunSuite with MockitoSugar with One
       val arr = "hello, world!".getBytes
       val buf = ChannelBuffers.wrappedBuffer(arr)
       decoder.decode(ctx, ch, buf) match {
-        case a: Array[Byte] => assert(arr === a)
+        case a: Array[Byte] => assert(a === arr)
         case _ => fail()
       }
     }
@@ -27,7 +27,7 @@ class ThriftChannelBufferDecoderSpec extends FunSuite with MockitoSugar with One
       val buf = ChannelBuffers.wrappedBuffer(arr)
       buf.readByte()
       decoder.decode(ctx, ch, buf) match {
-        case a: Array[Byte] => assert((arr drop 1).toSeq === a.toSeq)
+        case a: Array[Byte] => assert(a.toSeq === (arr drop 1).toSeq)
         case _ => fail()
       }
     }
@@ -36,7 +36,7 @@ class ThriftChannelBufferDecoderSpec extends FunSuite with MockitoSugar with One
       val arr = "hello, world!".getBytes
       val buf = ChannelBuffers.wrappedBuffer(arr take 2, arr drop 2)
       decoder.decode(ctx, ch, buf) match {
-        case a: Array[Byte] => assert(arr.toSeq === a.toSeq)
+        case a: Array[Byte] => assert(a.toSeq === arr.toSeq)
       }
     }
 

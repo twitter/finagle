@@ -13,7 +13,7 @@ class ChannelBufferTransportTest extends FunSuite with MockitoSugar {
   val t = new ChannelBufferToTransport(buf)
   val bb = "hello".getBytes
 
-  test("ChannelBufferToTransport write bytes to the underlying ChannelBuffer"){
+  test("ChannelBufferToTransport writes bytes to the underlying ChannelBuffer"){
     t.write(bb, 0, 1)
     verify(buf).writeBytes(bb, 0, 1)
 

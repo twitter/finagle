@@ -38,7 +38,7 @@ class SeqIdFilterSpec extends FunSuite with MockitoSugar with OneInstancePerTest
     val filter = new SeqIdFilter
     val filtered = filter andThen service
 
-    test("SeqIdFilter(%s)".format(how) + "maintain seqids passed in by the client") {
+    test("SeqIdFilter(%s) maintain seqids passed in by the client".format(how)) {
       val f = filtered(new ThriftClientRequest(mkmsg(new TMessage("proc", TMessageType.CALL, seqId)), false))
       assert(f.poll === None)
 
@@ -46,13 +46,13 @@ class SeqIdFilterSpec extends FunSuite with MockitoSugar with OneInstancePerTest
       verify(service).apply(req.capture)
       p.setValue(mkmsg(new TMessage("proc", TMessageType.REPLY, getmsg(req.getValue.message).seqid)))
 
-      assert(f.poll match {
-        case Some(Return(buf)) => getmsg(buf).seqid == seqId
-        case _ => false
-      })
+      f.poll match {
+        case Some(Return(buf)) => assert(getmsg(buf).seqid === seqId)
+        case _ => fail()
+      }
     }
 
-    test("SeqIdFilter(%s)".format(how) + "use its own seqids to the server")  {Time.withCurrentTimeFrozen { _ =>
+    test("SeqIdFilter(%s) use its own seqids to the server".format(how))  {Time.withCurrentTimeFrozen { _ =>
       val filtered = new SeqIdFilter andThen service
       val expected = (new scala.util.Random(Time.now.inMilliseconds)).nextInt()
       val f = filtered(new ThriftClientRequest(mkmsg(new TMessage("proc", TMessageType.CALL, seqId)), false))
@@ -61,7 +61,7 @@ class SeqIdFilterSpec extends FunSuite with MockitoSugar with OneInstancePerTest
       assert(getmsg(req.getValue.message).seqid === expected)
     }}
 
-    test("SeqIdFilter(%s)".format(how) + "fail when sequence ids are out of order") { Time.withCurrentTimeFrozen { _ =>
+    test("SeqIdFilter(%s) fail when sequence ids are out of order".format(how)) { Time.withCurrentTimeFrozen { _ =>
       val filtered = new SeqIdFilter andThen service
       val expected = (new scala.util.Random(Time.now.inMilliseconds)).nextInt()
       val f = filtered(new ThriftClientRequest(mkmsg(new TMessage("proc", TMessageType.CALL, seqId)), false))
@@ -73,29 +73,30 @@ class SeqIdFilterSpec extends FunSuite with MockitoSugar with OneInstancePerTest
     }}
 
     def mustExcept(bytes: Array[Byte], exceptionMsg: String) {
-      assert(filtered(new ThriftClientRequest(bytes, false)).poll match {
-        case Some(Throw(exc: IllegalArgumentException)) => exc.getMessage == exceptionMsg
-        case _ => false
-      })
+      filtered(new ThriftClientRequest(bytes, false)).poll match {
+        case Some(Throw(exc: IllegalArgumentException)) => assert(exc.getMessage === exceptionMsg)
+        case _ => fail()
+      }
     }
 
-    test("SeqIdFilter(%s)".format(how) + "must not modify the underlying request buffer") {
+    test("SeqIdFilter(%s) must not modify the underlying request buffer".format(how)) {
       val reqBuf = mkmsg(new TMessage("proc", TMessageType.CALL, 0))
       val origBuf = reqBuf.clone()
       filtered(new ThriftClientRequest(reqBuf, false))
+
       verify(service).apply(Matchers.any[ThriftClientRequest])
       assert(reqBuf.toSeq === origBuf.toSeq)
     }
 
-    test("SeqIdFilter(%s)".format(how) + "handle empty TMessage") {
+    test("SeqIdFilter(%s) handle empty TMessage".format(how)) {
       mustExcept(Array(), "short header")
     }
 
-    test("SeqIdFilter(%s)".format(how) + "handle short name size") {
+    test("SeqIdFilter(%s) handle short name size".format(how)) {
       mustExcept(Array(-128, 1, 0, 0, 0, 0, 0), "short name size")
     }
 
-    test("SeqIdFilter(%s)".format(how) + "handle old short buffer") {
+    test("SeqIdFilter(%s) handle old short buffer".format(how)) {
       mustExcept(Array(0, 0, 0, 1, 0, 0, 0, 0, 1), "short buffer")
     }
   }

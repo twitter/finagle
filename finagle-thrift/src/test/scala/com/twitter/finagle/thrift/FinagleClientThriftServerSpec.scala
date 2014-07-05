@@ -27,7 +27,7 @@ class FinagleClientThriftServerSpec extends FunSuite with OneInstancePerTest {
 
   if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
       var somewayPromise = new Promise[Unit]
-      def makeServer(transportFactory: TTransportFactory)(f: (Int, Int) => Int): TestServer = {
+      def makeServer(transportFactory: TTransportFactory)(f: (Int, Int) => Int) = {
         val processor = new B.Iface {
           def multiply(a: Int, b: Int): Int = f(a, b)
           def add(a: Int, b: Int): Int = { throw new AnException }
@@ -63,14 +63,11 @@ class FinagleClientThriftServerSpec extends FunSuite with OneInstancePerTest {
         thriftServerThread.start()
 
         new TestServer {
-          def shutdown: Unit = {
-            thriftServer.stop()
-            //thriftServerThread.join()
-          }
+          def shutdown: Unit = thriftServer.stop()
+
           def server: InetSocketAddress = thriftServerAddr
         }
       }
-
 
       def doit(
         transportFactory: TTransportFactory,
@@ -92,9 +89,8 @@ class FinagleClientThriftServerSpec extends FunSuite with OneInstancePerTest {
           val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
           val future = client.multiply(1, 2)
-          assert(Await.result(future) ===3)
+          assert(Await.result(future) === 3)
           testServer.shutdown
-
         }
 
         test("%s:finagle client vs. synchronous thrift server should handle exceptions".format(named)) {
@@ -113,7 +109,6 @@ class FinagleClientThriftServerSpec extends FunSuite with OneInstancePerTest {
             Await.result(client.add(1, 2))
           }
           testServer.shutdown
-
         }
 
         test("%s:finagle client vs. synchronous thrift server should handle void returns".format(named)) {
@@ -129,9 +124,8 @@ class FinagleClientThriftServerSpec extends FunSuite with OneInstancePerTest {
           val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
           Await.result(client.add_one(1, 2))
-          assert(true ===  true)
+          assert(true === true)
           testServer.shutdown
-
         }
 
         // race condition..
@@ -149,7 +143,7 @@ class FinagleClientThriftServerSpec extends FunSuite with OneInstancePerTest {
 
           assert(somewayPromise.isDefined === false)
           assert(Await.result(client.someway()) === null)  // returns
-          assert(Await.result(somewayPromise) ===(()))
+          assert(Await.result(somewayPromise) === (()))
 
           testServer.shutdown
         }
@@ -174,7 +168,7 @@ class FinagleClientThriftServerSpec extends FunSuite with OneInstancePerTest {
           {
             val futures = 0 until NumParties map { _ => client.multiply(1, 2) }
             val resolved = futures map(Await.result(_))
-            resolved foreach { r => assert(r ===(3)) }
+            resolved foreach { r => assert(r === (3)) }
           }
 
           addrs.foreach(_.shutdown)
@@ -182,7 +176,7 @@ class FinagleClientThriftServerSpec extends FunSuite with OneInstancePerTest {
       }
 
       // Flaky test
-      doit(new TFramedTransport.Factory(), ThriftClientFramedCodec(),"framed transport")
+      doit(new TFramedTransport.Factory(), ThriftClientFramedCodec(), "framed transport")
 
       // Flaky test
       doit(new TTransportFactory, ThriftClientBufferedCodec(), "buffered transport")
