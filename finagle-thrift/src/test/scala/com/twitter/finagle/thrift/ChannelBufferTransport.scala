@@ -1,61 +1,61 @@
 package com.twitter.finagle.thrift
 
-import org.specs.SpecificationWithJUnit
-import org.specs.mock.Mockito
-
 import org.jboss.netty.buffer.ChannelBuffer
+import org.junit.runner.RunWith
+import org.mockito.Mockito.{verify, when}
+import org.scalatest.FunSuite
+import org.scalatest.mock.MockitoSugar
+import org.scalatest.junit.JUnitRunner
 
-class ChannelBufferTransportSpec extends SpecificationWithJUnit with Mockito {
-  "ChannelBufferToTransport" should {
-    val buf = mock[ChannelBuffer]
-    val t = new ChannelBufferToTransport(buf)
-    val bb = "hello".getBytes
+@RunWith(classOf[JUnitRunner])
+class ChannelBufferTransportTest extends FunSuite with MockitoSugar {
+  val buf = mock[ChannelBuffer]
+  val t = new ChannelBufferToTransport(buf)
+  val bb = "hello".getBytes
 
-    "writing bytes to the underlying ChannelBuffer" in {
-      t.write(bb, 0, 1)
-      there was one(buf).writeBytes(bb, 0, 1)
+  test("ChannelBufferToTransport write bytes to the underlying ChannelBuffer"){
+    t.write(bb, 0, 1)
+    verify(buf).writeBytes(bb, 0, 1)
 
-      t.write(bb, 1, 2)
-      there was one(buf).writeBytes(bb, 1, 2)
+    t.write(bb, 1, 2)
+    verify(buf).writeBytes(bb, 1, 2)
 
-      t.write(bb, 0, 5)
-      there was one(buf).writeBytes(bb, 1, 2)
-    }
+    t.write(bb, 0, 5)
+    verify(buf).writeBytes(bb, 1, 2)
+  }
 
-    "reading bytes from the underlying ChannelBuffer" in {
-      val nReadable = 5
-      buf.readableBytes returns nReadable
-      val b = new Array[Byte](nReadable)
-      t.read(b, 0, 10) mustEqual nReadable
-      t.read(b, 0, 3) mustEqual 3
-    }
+  test("ChannelBufferToTransport reads bytes from the underlying ChannelBuffer") {
+    val nReadable = 5
+    when(buf.readableBytes).thenReturn(nReadable)
+    val b = new Array[Byte](nReadable)
+    assert(t.read(b, 0, 10) === nReadable)
+    assert(t.read(b, 0, 3) === 3)
   }
 }
 
-class DuplexChannelBufferTransportSpec extends SpecificationWithJUnit with Mockito {
-  "DuplexChannelBufferTransport" should {
-    val in = mock[ChannelBuffer]
-    val out = mock[ChannelBuffer]
-    val t = new DuplexChannelBufferTransport(in, out)
-    val bb = "hello".getBytes
+@RunWith(classOf[JUnitRunner])
+class DuplexChannelBufferTransportTest extends FunSuite with MockitoSugar {
+  val in = mock[ChannelBuffer]
+  val out = mock[ChannelBuffer]
+  val t = new DuplexChannelBufferTransport(in, out)
+  val bb = "hello".getBytes
 
-    "writes to the output ChannelBuffer" in {
-      t.write(bb, 0, 1)
-      there was one(out).writeBytes(bb, 0, 1)
+  test("DuplexChannelBufferTransport writes to the output ChannelBuffer"){
+    t.write(bb, 0, 1)
+    verify(out).writeBytes(bb, 0, 1)
 
-      t.write(bb, 1, 2)
-      there was one(out).writeBytes(bb, 1, 2)
+    t.write(bb, 1, 2)
+    verify(out).writeBytes(bb, 1, 2)
 
-      t.write(bb, 0, 5)
-      there was one(out).writeBytes(bb, 1, 2)
-    }
-
-    "reading from the input ChannelBuffer" in {
-      val nReadable = 5
-      in.readableBytes returns nReadable
-      val b = new Array[Byte](nReadable)
-      t.read(b, 0, 10) mustEqual nReadable
-      t.read(b, 0, 3) mustEqual 3
-    }
+    t.write(bb, 0, 5)
+    verify(out).writeBytes(bb, 1, 2)
   }
+
+  test("DuplexChannelBufferTransport reads from the input ChannelBuffer"){
+    val nReadable = 5
+    when(in.readableBytes).thenReturn(nReadable)
+    val b = new Array[Byte](nReadable)
+    assert(t.read(b, 0, 10) === nReadable)
+    assert(t.read(b, 0, 3) === 3)
+}
 }
