@@ -2,16 +2,18 @@ package com.twitter.finagle.smtp
 
 import java.util.Date
 
-class MailingAddress(val local: String, val domain: String) {
+private[smtp] class MailingAddress(val local: String, val domain: String) {
   def mailbox: String = if (isEmpty) ""
                         else local + "@" + domain
-  def isEmpty = local.isEmpty || domain.isEmpty
+  def isEmpty = local.isEmpty && domain.isEmpty
 }
 
 object MailingAddress {
   def apply(address: String) = {
     val parts = address split "@"
     require(parts.length == 2, "incorrect mailbox syntax")
+    require(!parts(0).isEmpty, "incorrect mailbox syntax: local part should not be empty")
+    require(!parts(1).isEmpty, "incorrect mailbox syntax: domain should not be empty")
     new MailingAddress(parts(0), parts(1))
   }
   val empty = new MailingAddress("","")
