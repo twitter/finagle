@@ -29,6 +29,7 @@ class JsonpFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response] {
       if (response.mediaType == Some(MediaType.Json)) {
         response.content =
           ChannelBuffers.wrappedBuffer(
+            ChannelBuffers.wrappedBuffer(JsonpFilter.Comment),
             ChannelBuffers.wrappedBuffer(callback.getBytes("UTF-8")),
             ChannelBuffers.wrappedBuffer(JsonpFilter.LeftParen),
             response.getContent,
@@ -63,4 +64,6 @@ object JsonpFilter extends JsonpFilter[Request] {
   // some APIs include it.
   private val LeftParen  = Array('('.toByte)
   private val RightParenSemicolon = ");".getBytes
+  // Prepended to address CVE-2014-4671
+  private val Comment = "/**/".getBytes
 }

@@ -26,7 +26,7 @@ class JsonpFilterSpec extends SpecificationWithJUnit {
 
       val response = Await.result(JsonpFilter(request, dummyService))
       response.contentType   must_== Some("application/javascript")
-      response.contentString must_== "mycallback({});"
+      response.contentString must_== "/**/mycallback({});"
     }
 
     "ignore non-json" in {
