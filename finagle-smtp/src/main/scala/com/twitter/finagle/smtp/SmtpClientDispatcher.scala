@@ -4,6 +4,7 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.util.{Future, Promise, Try}
 import com.twitter.finagle.smtp.reply._
+import com.twitter.logging.Logger
 
 object SmtpClientDispatcher {
   private def makeUnit[T](p: Promise[T], value: => T): Future[Unit] = {
@@ -17,6 +18,8 @@ extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](tra
   import GenSerialClientDispatcher.wrapWriteException
   import SmtpClientDispatcher._
   import ReplyCode._
+
+  val log = Logger(getClass)
 
   /*Connection phase: should receive greeting from the server*/
   private val connPhase: Future[Unit] = {
@@ -40,6 +43,7 @@ extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](tra
    */
   protected def dispatch(req: Request, p: Promise[Reply]): Future[Unit] = {
     connPhase flatMap { _ =>
+      log.info("client: %s", req.cmd)
       trans.write(req) rescue {
         wrapWriteException
       } flatMap { unit =>
@@ -167,6 +171,16 @@ extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](tra
     }
   }
 
-  private def decodeReply(rep: UnspecifiedReply, p: Promise[Reply]): Future[Unit] = makeUnit(p, getSpecifiedReply(rep))
+  private def decodeReply(rep: UnspecifiedReply, p: Promise[Reply]): Future[Unit] = {
+    if (rep.isMultiline) {
+      val start = "server:\r\n" + rep.code + "-"
+      val middle = rep.lines.dropRight(1).mkString("\r\n" + rep.code + "-")
+      val end = "\r\n" + rep.code + " " + rep.lines.last
+
+      log.info("%s%s%s", start, middle, end)
+    }
+    else log.info("server: %d %s", rep.code, rep.info)
+    makeUnit(p, getSpecifiedReply(rep))
+  }
 
 }
