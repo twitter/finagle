@@ -14,11 +14,11 @@ object Request {
   val BeginData = new Request("DATA") //Indicate that data is sent
 
 
-case class AddFrom(addr: MailingAddress) extends Request("MAIL FROM: <" + addr.toString + ">")
-case class AddRecipient(rcpt: MailingAddress) extends Request("RCPT TO: <" + rcpt.toString + ">")
+case class AddSender(addr: MailingAddress) extends Request("MAIL FROM: <" + addr.mailbox + ">")
+case class AddRecipient(rcpt: MailingAddress) extends Request("RCPT TO: <" + rcpt.mailbox + ">")
 
 case class Data(data: Seq[String]) extends Request(data.mkString("\r\n"))
 
-case class VerifyAddress(address: MailingAddress) extends Request("VRFY " + address.toString)
-case class ExpandMailingList(list: MailingAddress) extends Request("EXPN " + list.toString)
+case class VerifyAddress(address: MailingAddress) extends Request("VRFY " + address.mailbox)
+case class ExpandMailingList(list: MailingAddress) extends Request("EXPN " + list.mailbox)
 }

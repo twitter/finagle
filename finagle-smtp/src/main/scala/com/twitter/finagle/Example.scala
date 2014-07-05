@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.smtp.EmailMessage
+import com.twitter.finagle.smtp.{EmailBuilder, EmailMessage}
 import com.twitter.util.{Await, Future}
 
 /**
@@ -9,12 +9,12 @@ import com.twitter.util.{Await, Future}
 object Example {
   def main(args: Array[String]) = {
     //raw text email
-    val email = EmailMessage(
-      from = "from@from.com",
-      to = Seq("first@to.com", "second@to.com"),
-      subject = "test",
-      body = Seq("test") //body is a sequence of lines
-    )
+    val email = EmailBuilder()
+                .sender("from@from.com")
+                .to("first@to.com", "second@to.com")
+                .subject("test")
+                .bodyLines("first line", "second line") //body is a sequence of lines
+                .build
     //connect to a local SMTP server
     val send = SmtpSimple.newService("localhost:25")
     //send email

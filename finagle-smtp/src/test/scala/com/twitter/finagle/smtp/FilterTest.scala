@@ -25,7 +25,7 @@ class TestError extends Error {
 class DataFilterTest extends FunSuite {
 
   val TestService = new Service[Request, Reply] {
-    def apply(req: Request): Future[Reply] = Future { new TestReply(req)}
+    def apply(req: Request): Future[Reply] = Future { TestReply(req)}
   }
   val dataFilterService = DataFilter andThen TestService
 
@@ -45,7 +45,7 @@ class DataFilterTest extends FunSuite {
 
   test("ignores non-Data commands") {
     val req1 = Request.Hello
-    val req2 = Request.AddFrom(MailingAddress("test@test.test"))
+    val req2 = Request.AddSender(MailingAddress("test@test.test"))
     val rep1 = Await.result(dataFilterService(req1)).asInstanceOf[TestReply]
     assert(rep1.req === req1)
     val rep2 = Await.result(dataFilterService(req2)).asInstanceOf[TestReply]
@@ -60,7 +60,7 @@ class MailFilterTest extends FunSuite {
   def MailTestService(msg: EmailMessage) = new Service[Request, Reply] {
     var cmdSeq = Seq(
       Request.Hello,
-      Request.AddFrom(msg.getSender)) ++
+      Request.AddSender(msg.getSender)) ++
       msg.getTo.map(Request.AddRecipient(_)) ++ Seq(
       Request.BeginData,
       Request.Data(msg.getBody),
@@ -77,7 +77,12 @@ class MailFilterTest extends FunSuite {
     }
   }
 
-    val msg = EmailMessage("from@test.com", "to@test.com", "test", Seq("body"))
+    val msg = EmailBuilder()
+              .from("from@test.com")
+              .to("to@test.com")
+              .subject("test")
+              .bodyLines("body")
+              .build
     val mailFilterService = MailFilter andThen MailTestService(msg)
     val test = mailFilterService(msg)
   }
@@ -97,10 +102,18 @@ class HeaderFilterTest extends FunSuite {
     }
   }
 
-  val simpleMsg = EmailMessage("from@test.com", "to@test.com", "test", Seq("body"))
-  val multipleAddressMsg = EmailMessage(Seq(MailingAddress("from1@test.com"),MailingAddress("from2@test.com")),
-    Seq(MailingAddress("to1@test.com"), MailingAddress("to2@test.com")),
-    "test", Seq("body"))
+  val simpleMsg = EmailBuilder()
+    .from("from@test.com")
+    .to("to@test.com")
+    .subject("test")
+    .bodyLines("body")
+    .build
+  val multipleAddressMsg = EmailBuilder()
+    .from("from1@test.com", "from2@test.com")
+    .to("to1@test.com", "to2@test.com")
+    .subject("test")
+    .bodyLines("body")
+    .build
 
   test("result message has all necessary headers") {
     val headerTestService = new Service[EmailMessage, Unit] {

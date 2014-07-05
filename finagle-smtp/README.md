@@ -34,17 +34,18 @@ Upon closing the service a quit command is sent automatically, if not sent earli
 
 ### Sending an email
 
-The object for instantiating a client capable of sending a simple email is `SmtpSimple`. For services created with it the request type is `EmailMessage`.
+The object for instantiating a client capable of sending a simple email is `SmtpSimple`.
+For services created with it the request type is `EmailMessage`, described in `EmailMessage.scala`.
 
-EmailMessage trait for composing emails is described in `Email.scala`. You can create an email by calling the factory method:
+You can create an email using `EmailBuilder` class described in `EmailBuilder.scala`:
 
 ```scala
-val email = EmailMessage(
-  from = "from@from.com",
-  to = Seq("first@to.com", "second@to.com"),
-  subject = "test",
-  body = Seq("test") //body is a sequence of lines
-)
+    val email = EmailBuilder()
+                .sender("from@from.com")
+                .to("first@to.com", "second@to.com")
+                .subject("test")
+                .bodyLines("first line", "second line") //body is a sequence of lines
+                .build
 ```
 
 Applying the service on the email returns `Future.Done` in case of a successful operation or the first encountered error.
