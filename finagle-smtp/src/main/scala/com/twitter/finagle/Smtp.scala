@@ -7,7 +7,6 @@ import com.twitter.finagle.smtp.reply._
 import com.twitter.finagle.smtp.filter.{MailFilter, HeadersFilter, DataFilter}
 import com.twitter.finagle.smtp.transport.SmtpTransporter
 
-
 object Smtp extends Client[Request, Reply]{
 
   val defaultClient = DefaultClient[Request, Reply] (
@@ -41,9 +40,19 @@ object Smtp extends Client[Request, Reply]{
   }
 }
 
+
 object SmtpSimple extends Client[EmailMessage, Unit] {
   override def newClient(dest: Name, label: String) = {
-    HeadersFilter andThen MailFilter andThen Smtp.newClient(dest, label)
+    //send EHLO in the beginning of the session
+    val startHelloClient = new ServiceFactoryProxy[Request, Reply](Smtp.newClient(dest, label)) {
+      override def apply(conn: ClientConnection) = {
+        self.apply(conn) flatMap { service =>
+          service(Request.Hello) //TODO: parse and make use of extensions
+          Future.value(service)
+        }
+      }
+    }
+    HeadersFilter andThen MailFilter andThen startHelloClient
   }
 }
 
