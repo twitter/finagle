@@ -3,108 +3,113 @@ package com.twitter.finagle.memcached.unit
 import com.twitter.finagle.memcached.MockClient
 import com.twitter.finagle.memcached.protocol.ClientError
 import com.twitter.util.Await
-import org.specs.SpecificationWithJUnit
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
-class MockClientTest extends SpecificationWithJUnit {
-  "MockClient" should {
-    "get" in {
-      val memcache = new MockClient(Map("key" -> "value")).withStrings
-      Await.result(memcache.get("key"))                  must beSome("value")
-      Await.result(memcache.get("unknown"))              must be_==(None)
-    }
+@RunWith(classOf[JUnitRunner])
+class MockClientTest extends FunSuite {
 
-    "set" in {
-      val memcache = new MockClient(Map("key" -> "value")).withStrings
+  test("correctly perform the GET command") {
+    val memcache = new MockClient(Map("key" -> "value")).withStrings
 
-      Await.result(memcache.set("key", "new value"))     must be_==(())
-      Await.result(memcache.get("key"))                  must beSome("new value")
+    assert(Await.result(memcache.get("key")) === Some("value"))
+    assert(Await.result(memcache.get("unknown")) === None)
+  }
 
-      Await.result(memcache.set("key2", "value2"))       must be_==(())
-      Await.result(memcache.get("key2"))                 must beSome("value2")
-      Await.result(memcache.set("key2", "value3"))       must be_==(())
-      Await.result(memcache.get("key2"))                 must beSome("value3")
-    }
+  test("correctly perform the SET command") {
+    val memcache = new MockClient(Map("key" -> "value")).withStrings
 
-    "add" in {
-      val memcache = new MockClient(Map("key" -> "value")).withStrings
+    assert(Await.result(memcache.set("key", "new value")) === (()))
+    assert(Await.result(memcache.get("key")) === Some("new value"))
 
-      Await.result(memcache.add("key", "new value"))     must beFalse
-      Await.result(memcache.get("key"))                  must beSome("value")
+    assert(Await.result(memcache.set("key2", "value2")) === (()))
+    assert(Await.result(memcache.get("key2")) === Some("value2"))
 
-      Await.result(memcache.add("key2", "value2"))       must beTrue
-      Await.result(memcache.get("key2"))                 must beSome("value2")
-      Await.result(memcache.add("key2", "value3"))       must beFalse
-      Await.result(memcache.get("key2"))                 must beSome("value2")
-    }
+    assert(Await.result(memcache.set("key2", "value3")) === (()))
+    assert(Await.result(memcache.get("key2")) === Some("value3"))
+  }
 
-    "append" in {
-      val memcache = new MockClient(Map("key" -> "value")).withStrings
+  test("correctly perform the ADD command") {
+    val memcache = new MockClient(Map("key" -> "value")).withStrings
 
-      Await.result(memcache.append("key", "More"))       must beTrue
-      Await.result(memcache.get("key"))                  must beSome("valueMore")
+    assert(!Await.result(memcache.add("key", "new value")))
+    assert(Await.result(memcache.get("key")) === Some("value"))
 
-      Await.result(memcache.append("unknown", "value"))  must beFalse
-      Await.result(memcache.get("unknown"))              must beNone
-    }
+    assert(Await.result(memcache.add("key2", "value2")))
+    assert(Await.result(memcache.get("key2")) === Some("value2"))
 
-    "prepend" in {
-      val memcache = new MockClient(Map("key" -> "value")).withStrings
+    assert(!Await.result(memcache.add("key2", "value3")))
+    assert(Await.result(memcache.get("key2")) === Some("value2"))
+  }
 
-      Await.result(memcache.prepend("key", "More"))      must beTrue
-      Await.result(memcache.get("key"))                  must beSome("Morevalue")
+  test("correctly perform the APPEND command") {
+    val memcache = new MockClient(Map("key" -> "value")).withStrings
 
-      Await.result(memcache.prepend("unknown", "value")) must beFalse
-      Await.result(memcache.get("unknown"))              must beNone
-    }
+    assert(Await.result(memcache.append("key", "More")))
+    assert(Await.result(memcache.get("key")) === Some("valueMore"))
 
-    "replace" in {
-      val memcache = new MockClient(Map("key" -> "value")).withStrings
+    assert(!Await.result(memcache.append("unknown", "value")))
+    assert(Await.result(memcache.get("unknown")) === None)
+  }
 
-      Await.result(memcache.replace("key", "new value")) must beTrue
-      Await.result(memcache.get("key"))                  must beSome("new value")
+  test("correctly perform the PREPEND command") {
+    val memcache = new MockClient(Map("key" -> "value")).withStrings
 
-      Await.result(memcache.replace("unknown", "value")) must beFalse
-      Await.result(memcache.get("unknown"))              must beNone
-    }
+    assert(Await.result(memcache.prepend("key", "More")))
+    assert(Await.result(memcache.get("key")) === Some("Morevalue"))
 
-    "delete" in {
-      val memcache = new MockClient(Map("key" -> "value")).withStrings
+    assert(!Await.result(memcache.prepend("unknown", "value")))
+    assert(Await.result(memcache.get("unknown")) === None)
+  }
 
-      Await.result(memcache.delete("key"))               must beTrue
-      Await.result(memcache.get("key"))                  must beNone
+  test("correctly perform the REPLACE command") {
+    val memcache = new MockClient(Map("key" -> "value")).withStrings
 
-      Await.result(memcache.delete("unknown"))           must beFalse
-      Await.result(memcache.get("unknown"))              must beNone
-    }
+    assert(Await.result(memcache.replace("key", "new value")))
+    assert(Await.result(memcache.get("key")) === Some("new value"))
 
-    "incr" in {
-      val memcache = new MockClient(Map("key" -> "value", "count" -> "1")).withStrings
+    assert(!Await.result(memcache.replace("unknown", "value")))
+    assert(Await.result(memcache.get("unknown")) === None)
+  }
 
-      Await.result(memcache.incr("key"))                 must throwA[ClientError]
-      Await.result(memcache.get("key"))                  must beSome("value")
+  test("correctly perform the DELETE command") {
+    val memcache = new MockClient(Map("key" -> "value")).withStrings
 
-      Await.result(memcache.incr("count"))               must beSome(2)
-      Await.result(memcache.get("count"))                must beSome("2")
+    assert(Await.result(memcache.delete("key")))
+    assert(Await.result(memcache.get("key")) === None)
 
-      Await.result(memcache.incr("unknown"))             must beNone
-      Await.result(memcache.get("unknown"))              must beNone
-    }
+    assert(!Await.result(memcache.delete("unknown")))
+    assert(Await.result(memcache.get("unknown")) === None)
+  }
 
-    "decr" in {
-      val memcache = new MockClient(Map("key" -> "value", "count" -> "1")).withStrings
+  test("correctly perform the INCR command") {
+    val memcache = new MockClient(Map("key" -> "value", "count" -> "1")).withStrings
 
-      Await.result(memcache.decr("key"))                 must throwA[ClientError]
-      Await.result(memcache.get("key"))                  must beSome("value")
+    intercept[ClientError] { Await.result(memcache.incr("key")) }
 
-      Await.result(memcache.decr("count"))               must beSome(0)
-      Await.result(memcache.get("count"))                must beSome("0")
-      Await.result(memcache.decr("count"))               must beSome(0)
-      Await.result(memcache.get("count"))                must beSome("0")
+    assert(Await.result(memcache.get("key")) === Some("value"))
 
-      Await.result(memcache.decr("unknown"))             must beNone
-      Await.result(memcache.get("unknown"))              must beNone
-    }
+    assert(Await.result(memcache.incr("count")) === Some(2))
+    assert(Await.result(memcache.get("count")) === Some("2"))
+
+    assert(Await.result(memcache.incr("unknown")) === None)
+    assert(Await.result(memcache.get("unknown")) === None)
+  }
+
+  test("correctly perform the DECR command") {
+    val memcache = new MockClient(Map("key" -> "value", "count" -> "1")).withStrings
+
+    intercept[ClientError] { Await.result(memcache.decr("key")) }
+
+    assert(Await.result(memcache.get("key")) === Some("value"))
+
+    assert(Await.result(memcache.decr("count")) === Some(0))
+    assert(Await.result(memcache.get("count")) === Some("0"))
+    assert(Await.result(memcache.decr("count")) === Some(0))
+    assert(Await.result(memcache.get("count")) === Some("0"))
+
+    assert(Await.result(memcache.decr("unknown")) === None)
+    assert(Await.result(memcache.get("unknown")) === None)
   }
 }
-
-

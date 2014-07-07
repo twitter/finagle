@@ -6,16 +6,21 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils.{
 }
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{ChannelHandlerContext, Channel}
-import org.specs.mock.Mockito
-import org.specs.SpecificationWithJUnit
+import org.junit.runner.RunWith
+import org.mockito.Mockito.{verify, when}
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 
-class EncoderTest extends SpecificationWithJUnit with Mockito {
-  "Encoder" should {
-    val channel = smartMock[Channel]
-    val context = smartMock[ChannelHandlerContext]
-    val addr = smartMock[java.net.SocketAddress]
-    context.getChannel returns channel
-    channel.getLocalAddress returns addr
+@RunWith(classOf[JUnitRunner])
+class EncoderTest extends FunSuite with MockitoSugar {
+
+  test("not alter the tokens it is serializing") {
+    val channel = mock[Channel]
+    val context = mock[ChannelHandlerContext]
+    val addr = mock[java.net.SocketAddress]
+    when(context.getChannel) thenReturn channel
+    when(channel.getLocalAddress) thenReturn addr
     val encoder = new Encoder
 
     def encode(x: AnyRef) = {
@@ -26,25 +31,32 @@ class EncoderTest extends SpecificationWithJUnit with Mockito {
     def encodeIsPure(x: AnyRef) = {
       val buf1 = encode(x)
       val buf2 = encode(x)
-
-      buf1 mustEqual buf2
+      assert(buf1 === buf2)
     }
 
-    "not alter the tokens it is serializing" in {
-      "tokens" in encodeIsPure(Tokens(Seq("tok")))
-      "tokens with data" in encodeIsPure(TokensWithData(Seq("foo"), "bar", None))
-      "tokens with data and cas" in encodeIsPure(TokensWithData(Seq("foo"), "baz", Some("quux")))
-      "stat lines" in encodeIsPure(
-        StatLines(
-          Seq(
-            Tokens(Seq("tok1")),
-            Tokens(Seq("tok2"))
-          )
+    info("tokens")
+    encodeIsPure(Tokens(Seq("tok")))
+
+    info("tokens with data")
+    encodeIsPure(TokensWithData(Seq("foo"), "bar", None))
+
+    info("tokens with data and cas")
+    encodeIsPure(TokensWithData(Seq("foo"), "baz", Some("quux")))
+
+    info("stat lines")
+    encodeIsPure(
+      StatLines(
+        Seq(
+          Tokens(Seq("tok1")),
+          Tokens(Seq("tok2"))
         )
       )
-      "value lines" in encodeIsPure(
-        ValueLines(Seq(TokensWithData(Seq("foo"), "bar", Some("quux"))))
-      )
-    }
+    )
+
+    info("value lines")
+    encodeIsPure(
+      ValueLines(Seq(TokensWithData(Seq("foo"), "bar", Some("quux"))))
+    )
   }
 }
+

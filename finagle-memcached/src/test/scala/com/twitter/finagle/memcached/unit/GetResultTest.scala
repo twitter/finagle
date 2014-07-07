@@ -2,69 +2,65 @@ package com.twitter.finagle.memcached.unit
 
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol.Value
-import org.specs.mock.Mockito
-import org.specs.SpecificationWithJUnit
 import scala.collection.immutable
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 
-class GetResultTest extends SpecificationWithJUnit with Mockito {
+@RunWith(classOf[JUnitRunner])
+class GetResultTest extends FunSuite with MockitoSugar {
 
-  "GetResult" should {
-    "add together hits/misses/failures with ++" in {
-      val value1 = mock[Value]
-      val value2 = mock[Value]
-      val ex1 = mock[Exception]
-      val ex2 = mock[Exception]
-      val left = GetResult(
-        hits = Map("h1" -> value1),
-        misses = immutable.Set("m1"),
-        failures = Map("f1" -> ex1))
-      val right = GetResult(
-        hits = Map("h2" -> value2),
-        misses = immutable.Set("m2"),
-        failures = Map("f2" -> ex2))
-      val empty = GetResult()
+  val value1 = mock[Value]
+  val value2 = mock[Value]
+  val ex1 = mock[Exception]
+  val ex2 = mock[Exception]
+  val empty = GetResult()
+  val left = GetResult(
+    hits = Map("h1" -> value1),
+    misses = immutable.Set("m1"),
+    failures = Map("f1" -> ex1))
+  val right = GetResult(
+    hits = Map("h2" -> value2),
+    misses = immutable.Set("m2"),
+    failures = Map("f2" -> ex2))
 
-      "both empty" in {
-        empty ++ empty mustEqual empty
-      }
+  test("add together hits/misses/failures with ++") {
+    info("both empty")
+    assert(empty ++ empty === empty)
 
-      "non-empty left, empty right" in {
-        left ++ empty mustEqual left
-      }
+    info("non-empty left, empty right")
+    assert(left ++ empty === left)
 
-      "empty left, non-empty right" in {
-        empty ++ right mustEqual right
-      }
+    info("Empty left, non-empty right")
+    assert(empty ++ right === right)
 
-      "non-empty left, non-empty right" in {
-        left ++ right mustEqual GetResult(
-          hits = Map("h1" -> value1, "h2" -> value2),
-          misses = immutable.Set("m1", "m2"),
-          failures = Map("f1" -> ex1, "f2" -> ex2)
-        )
-      }
-    }
+    info("non-empty left, non-empty right")
+    assert(left ++ right === GetResult(
+      hits = Map("h1" -> value1, "h2" -> value2),
+      misses = immutable.Set("m1", "m2"),
+      failures = Map("f1" -> ex1, "f2" -> ex2)
+    ))
   }
 
-  "object GetResult" should {
-    "merged of empty seq produces empty GetResult" in {
-      GetResult.merged(Seq[GetResult]()) mustEqual GetResult()
-    }
-
-    "merged of single item produces that item" in {
-      val getResult = GetResult()
-      GetResult.merged(Seq(getResult)) mustBe getResult
-    }
-
-    "merge is the same as ++" in {
-      val subResults = (1 to 10) map { i =>
-        GetResult(
-          hits = Map("h" + i -> mock[Value]),
-          misses = immutable.Set("m" + i),
-          failures = Map("f" + i -> mock[Exception]))
-      }
-
-      GetResult.merged(subResults) mustEqual (subResults.reduceLeft { _ ++ _ })
-    }
+  test("merged of empty seq produces empty GetResult") {
+    assert(GetResult.merged(Seq[GetResult]()) === GetResult())
   }
+
+  test("merged of single item produces that item") {
+    val getResult = GetResult()
+    assert(GetResult.merged(Seq(getResult)) === getResult)
+  }
+
+  test("merge is the same as ++") {
+    val subResults = (1 to 10) map { i =>
+      GetResult(
+        hits = Map("h" + i -> mock[Value]),
+        misses = immutable.Set("m" + i),
+        failures = Map("f" + i -> mock[Exception]))
+    }
+    
+    assert(GetResult.merged(subResults) === (subResults.reduceLeft { _ ++ _ }))
+  }
+
 }

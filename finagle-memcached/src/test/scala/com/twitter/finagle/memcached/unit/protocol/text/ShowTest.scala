@@ -7,37 +7,38 @@ import com.twitter.finagle.memcached.protocol.{
   ServerError
 }
 import com.twitter.io.Charsets
-import org.specs.SpecificationWithJUnit
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
-class ShowTest extends SpecificationWithJUnit {
-  "ResponseToEncoding" should {
-    val responseToEncoding = new ResponseToEncoding
+@RunWith(classOf[JUnitRunner])
+class ShowTest extends FunSuite {
+  val responseToEncoding = new ResponseToEncoding
 
-    "encode errors" >> {
-      "ERROR" >> {
-        val error = MemcacheError(new NonexistentCommand("No such command"))
-        val res = responseToEncoding.encode(null, null, error)
-        res must haveClass[Tokens]
-        val tokens = res.asInstanceOf[Tokens]
-        tokens.tokens must haveSize(1)
-        tokens.tokens.head.toString(Charsets.Utf8) mustEqual "ERROR"
-      }
-      "CLIENT_ERROR" >> {
-        val error = MemcacheError(new ClientError("Invalid Input"))
-        val res = responseToEncoding.encode(null, null, error)
-        res must haveClass[Tokens]
-        val tokens = res.asInstanceOf[Tokens]
-        tokens.tokens must haveSize(2)
-        tokens.tokens.head.toString(Charsets.Utf8) mustEqual "CLIENT_ERROR"
-      }
-      "SERVER_ERROR" >> {
-        val error = MemcacheError(new ServerError("Out of Memory"))
-        val res = responseToEncoding.encode(null, null, error)
-        res must haveClass[Tokens]
-        val tokens = res.asInstanceOf[Tokens]
-        tokens.tokens must haveSize(2)
-        tokens.tokens.head.toString(Charsets.Utf8) mustEqual "SERVER_ERROR"
-      }
-    }
+  test("encode errors - ERROR") {
+    val error = MemcacheError(new NonexistentCommand("No such command"))
+    val res = responseToEncoding.encode(null, null, error)
+    assert(res.getClass === classOf[Tokens])
+    val tokens = res.asInstanceOf[Tokens]
+    assert(tokens.tokens.size === 1)
+    assert(tokens.tokens.head.toString(Charsets.Utf8) === "ERROR")
+  }
+
+  test("encode errors - CLIENT_ERROR") {
+    val error = MemcacheError(new ClientError("Invalid Input"))
+    val res = responseToEncoding.encode(null, null, error)
+    assert(res.getClass === classOf[Tokens])
+    val tokens = res.asInstanceOf[Tokens]
+    assert(tokens.tokens.size === 2)
+    assert(tokens.tokens.head.toString(Charsets.Utf8) === "CLIENT_ERROR")
+  }
+
+  test("encode errors - SERVER_ERROR") {
+    val error = MemcacheError(new ServerError("Out of Memory"))
+    val res = responseToEncoding.encode(null, null, error)
+    assert(res.getClass === classOf[Tokens])
+    val tokens = res.asInstanceOf[Tokens]
+    assert(tokens.tokens.size === 2)
+    assert(tokens.tokens.head.toString(Charsets.Utf8) === "SERVER_ERROR")
   }
 }
