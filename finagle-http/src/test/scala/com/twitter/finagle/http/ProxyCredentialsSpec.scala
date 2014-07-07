@@ -1,12 +1,13 @@
 package com.twitter.finagle.http
 
-import org.specs.SpecificationWithJUnit
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
-class ProxyCredentialsSpec extends SpecificationWithJUnit {
-  "BasicProxyCredentials" should {
-    "add Proxy-Authorization header" in {
-      val creds = ProxyCredentials("foo", "bar")
-      creds.basicAuthorization must_== "Basic Zm9vOmJhcg=="
-    }
+@RunWith(classOf[JUnitRunner])
+class ProxyCredentialsSpec extends FunSuite {
+  test("add Proxy-Authorization header") {
+    val creds = ProxyCredentials("foo", "bar")
+    assert(creds.basicAuthorization === "Basic Zm9vOmJhcg==")
   }
 }
