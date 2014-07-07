@@ -12,6 +12,8 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class MysqlBuilderTest extends FunSuite {
+  // Flaky test, see FLAKEY-530
+  if (!sys.props.contains("SKIP_FLAKY")) {
   test("clients have granular tracing") {
     var annotations: List[Annotation] = Nil
     val mockTracer = new Tracer {
@@ -36,5 +38,6 @@ class MysqlBuilderTest extends FunSuite {
     }
 
     assert(mysqlTraces.size === 3, "missing traces")
+  }
   }
 }
