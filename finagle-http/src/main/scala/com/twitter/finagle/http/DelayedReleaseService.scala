@@ -27,7 +27,7 @@ private[finagle] class DelayedReleaseService[-Req <: Request](
       val httpResponse = in
       override lazy val reader = new Reader {
         def read(n: Int) = in.reader.read(n) respond {
-          case Return(Buf.Eof) => done()
+          case Return(None) => done()
           case Throw(_) => done()
           case _ =>
         }

@@ -9,13 +9,11 @@ import org.jboss.netty.handler.codec.http.{HttpChunk, DefaultHttpChunk}
 import org.jboss.netty.buffer.ChannelBuffers
 
 private[http] object NullReader extends Reader {
-  def read(n: Int) = ReaderUtils.eof
+  def read(n: Int) = Future.None
   def discard() { }
 }
 
 private[http] object ReaderUtils {
-  val eof = Future.value(Buf.Eof)
-
   /**
    * Implement a Reader given a Transport. The Reader represents a byte
    * stream, so it is useful to know when the stream has finished. This end of
@@ -25,58 +23,61 @@ private[http] object ReaderUtils {
   def readerFromTransport(trans: Transport[Any, Any], done: Promise[Unit]): Reader =
     new Reader {
       private[this] val mu = new AsyncMutex
-      @volatile private[this] var buf = Buf.Empty
+      @volatile private[this] var buf: Option[Buf] = Some(Buf.Empty)  // None = EOF
 
-      // We don't want to rely on scheduler semantics for ordering.
-      def read(n: Int): Future[Buf] = mu.acquire() flatMap { permit =>
-        val readOp = if (buf eq Buf.Eof) {
-          eof
-        } else if (buf.length > 0) {
-          val f = Future.value(buf.slice(0, n))
-          buf = buf.slice(n, Int.MaxValue)
-          f
-        } else trans.read() flatMap {
+      private[this] def fill(): Future[Unit] = {
+        trans.read() flatMap {
           // Buf is empty so set it to the result of trans.read()
           case chunk: HttpChunk if chunk.isLast =>
-            done.setDone()
-            buf = Buf.Eof
-            eof
+            buf = None
+            Future.Done
 
           case chunk: HttpChunk =>
             // Read data -- return up to n bytes and save the rest
-            val cbb = ChannelBufferBuf(chunk.getContent)
-            val f = Future.value(cbb.slice(0, n))
-            buf = cbb.slice(n, Int.MaxValue)
-            f
+            buf = Some(ChannelBufferBuf(chunk.getContent))
+            Future.Done
 
           case invalid =>
             val exc = new IllegalArgumentException(
               "invalid message \"%s\"".format(invalid))
+            buf = None
             Future.exception(exc)
         }
-
-        readOp onFailure { exc =>
-          trans.close()
-          done.updateIfEmpty(Throw(exc))
-        } ensure { permit.release() }
       }
+
+      def read(n: Int): Future[Option[Buf]] = 
+        mu.acquire() flatMap { permit =>
+          def go(): Future[Option[Buf]] = buf match {
+            case None =>
+              done.setDone()
+              Future.None
+            case Some(buf) if buf.isEmpty => 
+              fill() before go()
+            case Some(nonempty) =>
+              val f = Future.value(Some(nonempty.slice(0, n)))
+              buf = Some(nonempty.slice(n, Int.MaxValue))
+              f
+          }
+
+          go() onFailure { exc =>
+            trans.close()
+            done.updateIfEmpty(Throw(exc))
+          } ensure { permit.release() }
+        }
 
       def discard() {
         // Any interrupt to `read` will result in transport closure, but we also
-        // call `trans.close` here to handle the case where a discard is called
+        // call `trans.close()` here to handle the case where a discard is called
         // without interrupting the `read` operation.
         trans.close()
       }
     }
 
   /**
-   * Translates a Buf into HttpChunk. Beware: Buf.Empty will have the same
-   * effect as Buf.Eof, which if used incorrectly can prematurely signal the end
+   * Translates a Buf into HttpChunk. Beware: an empty buffer indicates end
    * of stream.
    */
   def chunkOfBuf(buf: Buf): HttpChunk = buf match {
-    case Buf.Eof =>
-      HttpChunk.LAST_CHUNK
     case cb: ChannelBufferBuf =>
       new DefaultHttpChunk(cb.buf)
     case buf =>
@@ -93,11 +94,9 @@ private[http] object ReaderUtils {
     bufSize: Int = Int.MaxValue
   ): Future[Unit] =
     r.read(bufSize) flatMap {
-      // Ignore Buf.Empty as they can prematurely end the stream.
-      case buf if buf eq Buf.Empty => streamChunks(trans, r)
-      case buf =>
-        val chunk = chunkOfBuf(buf)
-        if (chunk.isLast) trans.write(chunk)
-        else trans.write(chunk) before streamChunks(trans, r)
+      case None =>
+        trans.write(HttpChunk.LAST_CHUNK)
+      case Some(buf) =>
+        trans.write(chunkOfBuf(buf)) before streamChunks(trans, r)
     }
 }

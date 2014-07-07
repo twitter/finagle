@@ -46,19 +46,19 @@ class HttpClientDispatcherTest extends FunSuite {
     assert(!c.isDefined)
     req.writer.write(Buf.Utf8("a"))
     out.read() flatMap { c => out.write(c) }
-    assert(Await.result(c) === Buf.Utf8("a"))
+    assert(Await.result(c) === Some(Buf.Utf8("a")))
 
     val cc = res.reader.read(Int.MaxValue)
     assert(!cc.isDefined)
     req.writer.write(Buf.Utf8("some other thing"))
     out.read() flatMap { c => out.write(c) }
-    assert(Await.result(cc) === Buf.Utf8("some other thing"))
+    assert(Await.result(cc) === Some(Buf.Utf8("some other thing")))
 
     val last = res.reader.read(Int.MaxValue)
     assert(!last.isDefined)
     req.close()
     out.read() flatMap { c => out.write(c) }
-    assert(Await.result(last) === Buf.Eof)
+    assert(Await.result(last).isEmpty)
   }
 
   test("invalid message") {
@@ -92,14 +92,14 @@ class HttpClientDispatcherTest extends FunSuite {
 
     val c = reader.read(Int.MaxValue)
     out.write(chunk("hello"))
-    assert(Await.result(c) === Buf.Utf8("hello"))
+    assert(Await.result(c) === Some(Buf.Utf8("hello")))
 
     val cc = reader.read(Int.MaxValue)
     out.write(chunk("world"))
-    assert(Await.result(cc) === Buf.Utf8("world"))
+    assert(Await.result(cc) === Some(Buf.Utf8("world")))
 
     out.write(HttpChunk.LAST_CHUNK)
-    assert(Await.result(reader.read(Int.MaxValue)) === Buf.Eof)
+    assert(Await.result(reader.read(Int.MaxValue)).isEmpty)
   }
 
   test("error mid-chunk") {
@@ -115,7 +115,7 @@ class HttpClientDispatcherTest extends FunSuite {
 
     val c = reader.read(Int.MaxValue)
     out.write(chunk("hello"))
-    assert(Await.result(c) === Buf.Utf8("hello"))
+    assert(Await.result(c) === Some(Buf.Utf8("hello")))
 
     val cc = reader.read(Int.MaxValue)
     out.write("something else")
@@ -135,7 +135,7 @@ class HttpClientDispatcherTest extends FunSuite {
       override val httpMessage = reqIn
       lazy val remoteSocketAddress = reqIn.remoteSocketAddress
       override val reader = new Reader {
-        def read(n: Int) = Future.value(Buf.Eof)
+        def read(n: Int) = Future.value(None)
         def discard() {
           discardp.setDone()
         }

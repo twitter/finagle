@@ -41,13 +41,13 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
    * Read `n` number of bytes from the bytestream represented by `r`.
    */
   def readNBytes(n: Int, r: Reader): Future[Buf] = {
-    def loop(buf: Buf): Future[Buf] = (n - buf.length) match {
+    def loop(left: Buf): Future[Buf] = (n - left.length) match {
       case x if x > 0 =>
         r.read(x) flatMap {
-          case Buf.Eof => Future.value(buf)
-          case next => loop(buf concat next)
+          case Some(right) => loop(left concat right)
+          case None => Future.value(left)
         }
-      case _ => Future.value(buf)
+      case _ => Future.value(left)
     }
 
     loop(Buf.Empty)
@@ -205,7 +205,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
         val res = Response()
         res.setChunked(true)
         def go = for {
-          c <- req.reader.read(Int.MaxValue)
+          Some(c) <- req.reader.read(Int.MaxValue)
           _  <- res.writer.write(c)
           _  <- res.close()
         } yield ()
