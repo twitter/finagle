@@ -1,50 +1,5 @@
 package com.twitter.finagle.builder
 
-/**
- * Provides a class for building clients.  The main class to use is
- * [[com.twitter.finagle.builder.ClientBuilder]], as so
- *
- * {{{
- * val client = ClientBuilder()
- *   .codec(Http)
- *   .hosts("localhost:10000,localhost:10001,localhost:10003")
- *   .hostConnectionLimit(1)
- *   .tcpConnectTimeout(1.second)        // max time to spend establishing a TCP connection.
- *   .retries(2)                         // (1) per-request retries
- *   .reportTo(new OstrichStatsReceiver) // export host-level load data to ostrich
- *   .logger(Logger.getLogger("http"))
- *   .build()
- * }}}
- *
- * The `ClientBuilder` requires the definition of `cluster`, `codec`,
- * and `hostConnectionLimit`. In Scala, these are statically type
- * checked, and in Java the lack of any of the above causes a runtime
- * error.
- *
- * The `build` method uses an implicit argument to statically
- * typecheck the builder (to ensure completeness, see above). The Java
- * compiler cannot provide such implicit, so we provide a separate
- * function in Java to accomplish this. Thus, the Java code for the
- * above is
- *
- * {{{
- * Service<HttpRequest, HttpResponse> service =
- *  ClientBuilder.safeBuild(
- *    ClientBuilder.get()
- *      .codec(new Http())
- *      .hosts("localhost:10000,localhost:10001,localhost:10003")
- *      .hostConnectionLimit(1)
- *      .tcpConnectTimeout(1.second)
- *      .retries(2)
- *      .reportTo(new OstrichStatsReceiver())
- *      .logger(Logger.getLogger("http")))
- * }}}
- *
- * Alternatively, using the `unsafeBuild` method on `ClientBuilder`
- * verifies the builder dynamically, resulting in a runtime error
- * instead of a compiler error.
- */
-
 import com.twitter.finagle._
 import com.twitter.finagle.client.{DefaultPool, StackClient, Transporter}
 import com.twitter.finagle.factory.TimeoutFactory
@@ -177,6 +132,95 @@ private[builder] object ClientConfigEvidence {
  */
 private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit]
 
+/**
+ * Provides a class for building clients.  The main class to use is
+ * [[com.twitter.finagle.builder.ClientBuilder]], as so
+ *
+
+ */
+
+
+/**
+ * A builder of Finagle [[com.twitter.finagle.Client Clients]].
+ *
+ * {{{
+ * val client = ClientBuilder()
+ *   .codec(Http)
+ *   .hosts("localhost:10000,localhost:10001,localhost:10003")
+ *   .hostConnectionLimit(1)
+ *   .tcpConnectTimeout(1.second)        // max time to spend establishing a TCP connection.
+ *   .retries(2)                         // (1) per-request retries
+ *   .reportTo(new OstrichStatsReceiver) // export host-level load data to ostrich
+ *   .logger(Logger.getLogger("http"))
+ *   .build()
+ * }}}
+ *
+ * The `ClientBuilder` requires the definition of `cluster`, `codec`,
+ * and `hostConnectionLimit`. In Scala, these are statically type
+ * checked, and in Java the lack of any of the above causes a runtime
+ * error.
+ *
+ * The `build` method uses an implicit argument to statically
+ * typecheck the builder (to ensure completeness, see above). The Java
+ * compiler cannot provide such implicit, so we provide a separate
+ * function in Java to accomplish this. Thus, the Java code for the
+ * above is
+ *
+ * {{{
+ * Service<HttpRequest, HttpResponse> service =
+ *  ClientBuilder.safeBuild(
+ *    ClientBuilder.get()
+ *      .codec(new Http())
+ *      .hosts("localhost:10000,localhost:10001,localhost:10003")
+ *      .hostConnectionLimit(1)
+ *      .tcpConnectTimeout(1.second)
+ *      .retries(2)
+ *      .reportTo(new OstrichStatsReceiver())
+ *      .logger(Logger.getLogger("http")))
+ * }}}
+ *
+ * Alternatively, using the `unsafeBuild` method on `ClientBuilder`
+ * verifies the builder dynamically, resulting in a runtime error
+ * instead of a compiler error.
+ *
+ * =Defaults=
+ *
+ * The following defaults are applied to clients constructed via ClientBuilder,
+ * unless overridden with the corresponding method. These defaults were chosen
+ * carefully so as to work well for most use cases.
+ *
+ * Commonly-configured options:
+ *
+ * - `connectTimeout`: [[com.twitter.util.Duration]].Top
+ * - `tcpConnectTimeout`: 1 second
+ * - `requestTimeout`: [[com.twitter.util.Duration]].Top
+ * - `timeout`: [[com.twitter.util.Duration]].Top
+ * - `hostConnectionLimit`: Int.MaxValue
+ * - `hostConnectionCoresize`: 0
+ * - `hostConnectionIdleTime`: [[com.twitter.util.Duration]].Top
+ * - `hostConnectionMaxWaiters`: Int.MaxValue
+ * - `failFast`: true
+ * - `failureAccrualParams`, `failureAccrual`, `failureAccrualFactory`:
+ *   `numFailures` = 5, `markDeadFor` = 5 seconds
+ *
+ * Advanced options:
+ *
+ * *Before changing any of these, make sure that you know exactly how they will
+ * affect your application -- these options are typically only changed by expert
+ * users.*
+ *
+ * - `keepAlive`: Unspecified, in which case the Java default of `false` is used
+ *   (http://docs.oracle.com/javase/7/docs/api/java/net/StandardSocketOptions.html?is-external=true#SO_KEEPALIVE)
+ * - `readerIdleTimeout`: [[com.twitter.util.Duration]].Top
+ * - `writerIdleTimeout`: [[com.twitter.util.Duration]].Top
+ * - `hostConnectionMaxIdleTime`: [[com.twitter.util.Duration]].Top
+ * - `hostConnectionMaxLifeTime`: [[com.twitter.util.Duration]].Top
+ * - `sendBufferSize`, `recvBufferSize`: OS-defined default value
+ *
+ * Please see the Finagle user guide for information on a newer set of
+ * client-construction APIs introduced in Finagle v6:
+ * http://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6
+ */
 class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle](
   params: Stack.Params,
   mk: Stack.Params => Client[Req, Rep]

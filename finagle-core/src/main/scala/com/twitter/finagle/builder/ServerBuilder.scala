@@ -142,6 +142,18 @@ private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName
  * Alternatively, using the `unsafeBuild` method on `ServerBuilder`
  * verifies the builder dynamically, resulting in a runtime error
  * instead of a compiler error.
+ *
+ * =Defaults=
+ *
+ * The following defaults are applied to servers constructed via ServerBuilder,
+ * unless overridden with the corresponding method. These defaults were chosen
+ * carefully so as to work well for most use cases. Before changing any of them,
+ * make sure that you know exactly how they will affect your application --
+ * these options are typically only changed by expert users.
+ *
+ * - `openConnectionsThresholds`: None
+ * - `maxConcurrentRequests`: Int.MaxValue
+ * - `backlog`: OS-defined default value
  */
 class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   params: Stack.Params,
