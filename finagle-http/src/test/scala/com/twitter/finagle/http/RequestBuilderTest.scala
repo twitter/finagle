@@ -1,6 +1,5 @@
 package com.twitter.finagle.http
 
-import org.specs.SpecificationWithJUnit
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import java.net.URL
