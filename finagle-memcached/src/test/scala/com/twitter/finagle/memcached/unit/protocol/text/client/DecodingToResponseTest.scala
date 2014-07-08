@@ -7,64 +7,67 @@ import com.twitter.finagle.memcached.protocol.text.{Tokens, StatLines}
 import com.twitter.finagle.memcached.protocol.{ClientError, Info => MCInfo, InfoLines, Stored, NonexistentCommand, NotFound, Exists}
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import org.jboss.netty.buffer.ChannelBuffer
-import org.specs.SpecificationWithJUnit
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
-class DecodingToResponseTest extends SpecificationWithJUnit {
-  "DecodingToResponse" should {
-    val decodingToResponse = new DecodingToResponse
+@RunWith(classOf[JUnitRunner])
+class DecodingToResponseTest extends FunSuite {
 
-    "parseResponse" in {
-      "NOT_FOUND" in {
-        val buffer = Tokens(Seq[ChannelBuffer]("NOT_FOUND"))
-        decodingToResponse.decode(null, null, buffer) mustEqual NotFound()
-      }
+  val decodingToResponse = new DecodingToResponse
 
-      "STORED" in {
-        val buffer = Tokens(Seq[ChannelBuffer]("STORED"))
-        decodingToResponse.decode(null, null, buffer) mustEqual Stored()
-      }
+  test("parseResponse NOT_FOUND") {
+    val buffer = Tokens(Seq[ChannelBuffer]("NOT_FOUND"))
+    assert(decodingToResponse.decode(null, null, buffer) === NotFound())
+  }
 
-      "EXISTS" in {
-        val buffer = Tokens(Seq[ChannelBuffer]("EXISTS"))
-        decodingToResponse.decode(null, null, buffer) mustEqual Exists()
-      }
+  test("parseResponse STORED") {
+    val buffer = Tokens(Seq[ChannelBuffer]("STORED"))
+    assert(decodingToResponse.decode(null, null, buffer) === Stored())
+  }
 
-      "ERROR" in {
-        val buffer = Tokens(Seq[ChannelBuffer]("ERROR"))
-        decodingToResponse.decode(null, null, buffer).asInstanceOf[protocol.Error].cause must
-          haveClass[NonexistentCommand]
-      }
+  test("parseResponse EXISTS") {
+    val buffer = Tokens(Seq[ChannelBuffer]("EXISTS"))
+    assert(decodingToResponse.decode(null, null, buffer) === Exists())
+  }
 
-      "STATS" in {
-        val lines = Seq(
-          Seq("STAT", "items:1:number", "1"),
-          Seq("STAT", "items:1:age", "1468"),
-          Seq("ITEM", "foo", "[5 b;", "1322514067", "s]"))
-        val plines = lines.map { line =>
-          Tokens(line)
-        }
-        val info = decodingToResponse.decode(null, null, StatLines(plines))
-        info must haveClass[InfoLines]
-        val ilines = info.asInstanceOf[InfoLines].lines
-        ilines must haveSize(lines.size)
-        ilines.zipWithIndex.foreach { case(line, idx) =>
-          val key = lines(idx)(0)
-          val values = lines(idx).drop(1)
-          line.key.toString(Utf8) mustEqual key
-          line.values.size mustEqual values.size
-          line.values.zipWithIndex.foreach { case(token, tokIdx) =>
-            token.toString(Utf8) mustEqual values(tokIdx)
-          }
-        }
-      }
+  test("parseResponse ERROR") {
+    val buffer = Tokens(Seq[ChannelBuffer]("ERROR"))
+    assert(decodingToResponse
+      .decode(null, null, buffer).asInstanceOf[protocol.Error]
+      .cause
+      .getClass === classOf[NonexistentCommand])
+  }
 
-      "CLIENT_ERROR" in {
-        val errorMessage = "sad panda error"
-        val buffer = Tokens(Seq[ChannelBuffer]("CLIENT_ERROR", errorMessage))
-        val error = decodingToResponse.decode(null, null, buffer).asInstanceOf[protocol.Error]
-        error.cause must haveClass[ClientError]
-        error.cause.getMessage() mustEqual errorMessage
+  test("parseResponse STATS") {
+    val lines = Seq(
+      Seq("STAT", "items:1:number", "1"),
+      Seq("STAT", "items:1:age", "1468"),
+      Seq("ITEM", "foo", "[5 b;", "1322514067", "s]"))
+    val plines = lines.map { line =>
+      Tokens(line)
+    }
+    val info = decodingToResponse.decode(null, null, StatLines(plines))
+    assert(info.getClass === classOf[InfoLines])
+    val ilines = info.asInstanceOf[InfoLines].lines
+    assert(ilines.size === lines.size)
+    ilines.zipWithIndex.foreach { case(line, idx) =>
+      val key = lines(idx)(0)
+      val values = lines(idx).drop(1)
+      assert(line.key.toString(Utf8) === key)
+      assert(line.values.size === values.size)
+      line.values.zipWithIndex.foreach { case(token, tokIdx) =>
+        assert(token.toString(Utf8) === values(tokIdx))
       }
     }
   }
+
+  test("parseResponse CLIENT_ERROR") {
+    val errorMessage = "sad panda error"
+    val buffer = Tokens(Seq[ChannelBuffer]("CLIENT_ERROR", errorMessage))
+    val error = decodingToResponse.decode(null, null, buffer).asInstanceOf[protocol.Error]
+    assert(error.cause.getClass === classOf[ClientError])
+    assert(error.cause.getMessage() === errorMessage)
+  }
+
 }
