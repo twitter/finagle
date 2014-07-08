@@ -39,6 +39,15 @@ class InetSocketAddressUtilTest extends FunSuite {
     }
   }
 
+  test("resolveHostPorts") {
+    assert(InetSocketAddressUtil.resolveHostPorts(Seq()).isEmpty)
+    intercept[UnknownHostException] { InetSocketAddressUtil.resolveHostPorts(Seq(("gobble-d-gook", port1))) }
+
+    assert(InetSocketAddressUtil.resolveHostPorts(Seq(("127.0.0.1", port1))) === Set(new InetSocketAddress("127.0.0.1", port1)))
+    assert(InetSocketAddressUtil.resolveHostPorts(Seq(("127.0.0.1", port1), ("127.0.0.1", port2))) ===
+      Set(new InetSocketAddress("127.0.0.1", port1), new InetSocketAddress("127.0.0.1", port2)))
+  }
+
   test("parseHosts") {
     assert(InetSocketAddressUtil.parseHosts("").isEmpty)
     assert(InetSocketAddressUtil.parseHosts(",").isEmpty)
