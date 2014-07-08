@@ -1,9 +1,28 @@
 .. Author notes: this file is formatted with restructured text
-(http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
-as it is included in Finagle's user's guide.
+  (http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
+  as it is included in Finagle's user's guide.
 
 6.x
 -----
+
+6.19.0
+~~~~~~~
+
+- `finagle-core`: Allow trailing semicolons in dtabs
+- `finagle-core`: Rescue exceptions thrown by filter in `Filter.andthen(Filter)`
+- `finagle-core`: StackClient, StackClientLike don't leak underlying In, Out types
+- `finagle-doc`: Clarify cancellation
+- `finagle-doc`: Fix broken link in document
+- `finagle-doc`: Fix name footnote in finagle Names docs
+- `finagle-http`: Buf, Reader remove Buf.Eof; end-of-stream is None
+- `finagle-http`: Prepend comment to JSONP callbacks
+- `finagle-http`: Removing specs from the CookieMapSpec test.
+- `finagle-kestrel`: Make failFast configurable in Kestrel codec
+- `finagle-mysql`: Ensure mysql specific tracing is composed.
+- `finagle-mysql`: Finagle MySQL PreparedStatement accepts Value types as params.
+- `finagle-serversets`: Identity Providers for Serverset2
+- `finagle-thriftmux`: Add withProtocolFactory API endpoint
+- `finagle-thriftmux`: Don't reuse InMemoryStatsReceiver in the same test
 
 6.18.0
 ~~~~~~~
