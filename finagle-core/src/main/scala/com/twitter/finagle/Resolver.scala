@@ -90,14 +90,15 @@ object InetResolver extends Resolver {
         Var.async(init) { u =>
           implicit val intPri = new Prioritized[Int] { def apply(i: Int) = i }
           val updater = Updater { _: Int =>
-            futurePool { resolveHostPorts(hostPorts) } onSuccess { addrs =>
-              u() = Addr.Bound(addrs)
+            val addr = resolveHostPorts(hostPorts)
+            u() = Addr.Bound(addr)
+          }
+          timer.schedule(ttl.fromNow, ttl) {
+            futurePool {
+              updater(0)
             } onFailure { ex =>
               log.log(Level.WARNING, "failed to resolve hosts ", ex)
             }
-          }
-          timer.schedule(ttl.fromNow, ttl) {
-            updater(0)
           }
         }
       case None =>
