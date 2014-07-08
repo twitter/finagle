@@ -5,7 +5,7 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ProxyCredentialsSpec extends FunSuite {
+class ProxyCredentialsTest extends FunSuite {
   test("add Proxy-Authorization header") {
     val creds = ProxyCredentials("foo", "bar")
     assert(creds.basicAuthorization === "Basic Zm9vOmJhcg==")

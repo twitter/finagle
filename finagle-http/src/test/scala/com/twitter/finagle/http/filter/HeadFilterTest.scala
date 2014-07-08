@@ -8,7 +8,7 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class HeadFilterSpec extends FunSuite {
+class HeadFilterTest extends FunSuite {
   val Body = "hello world"
 
   val dummyService = new Service[Request, Response] {
