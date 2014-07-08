@@ -6,7 +6,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-import org.specs.mock.Mockito
 
 @RunWith(classOf[JUnitRunner])
 class PacketFrameDecoderTest extends FunSuite with MockitoSugar {
