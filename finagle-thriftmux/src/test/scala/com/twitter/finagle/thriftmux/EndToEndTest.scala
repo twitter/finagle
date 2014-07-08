@@ -376,28 +376,25 @@ class EndToEndTest extends FunSuite {
     assert(mem.counters(Seq("foobar", "protocol", "thriftmux")) === 2)
   }
 
-  // Flaky tests. See https://jira.twitter.biz/browse/CSL-974 for details.
-  if (!sys.props.contains("SKIP_FLAKY"))
   test("ThriftMuxClients are properly labeled and scoped") {
     new ThriftMuxTestServer {
-      val mem = new InMemoryStatsReceiver
-      val label = Label("foobar")
-      val sr = Stats(mem)
-      val base = ThriftMuxClient.configured(sr)
+      def base(sr: InMemoryStatsReceiver) = ThriftMuxClient.configured(Stats(sr))
 
-      def assertStats(prefix: String, iface: TestService.FutureIface) {
+      def assertStats(prefix: String, sr: InMemoryStatsReceiver, iface: TestService.FutureIface) {
         assert(Await.result(iface.query("ok")) === "okok")
         // These stats are exported by scrooge generated code.
-        assert(mem.counters(Seq(prefix, "query", "requests")) === 1)
-        assert(mem.counters(Seq(prefix, "query", "success")) === 1)
+        assert(sr.counters(Seq(prefix, "query", "requests")) === 1)
       }
 
       // non-labeled client inherits destination as label
-      assertStats(server.toString, base.newIface[TestService.FutureIface](server))
+      val sr1 = new InMemoryStatsReceiver
+      assertStats(server.toString, sr1,
+        base(sr1).newIface[TestService.FutureIface](server))
 
       // labeled via configured
-      assertStats("client1", base.configured(Label("client1"))
-        .newIface[TestService.FutureIface](server))
+      val sr2 = new InMemoryStatsReceiver
+      assertStats("client1", sr2,
+        base(sr2).configured(Label("client1")).newIface[TestService.FutureIface](server))
     }
   }
 
