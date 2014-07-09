@@ -1,7 +1,8 @@
-package com.twitter.finagle
+package com.twitter.finagle.example.smtp
 
-import com.twitter.finagle.smtp.{EmailBuilder, EmailMessage}
 import com.twitter.util.{Await, Future}
+import com.twitter.finagle.smtp._
+import com.twitter.finagle.SmtpSimple
 
 /**
  * Simple SMTP client with an example of error handling
@@ -21,9 +22,9 @@ object Example {
     val res: Future[Unit] = send(email)
       .onFailure {
       //An error group
-      case ex: smtp.reply.SyntaxErrorReply => println("Syntax error: ", ex.info)
+      case ex: reply.SyntaxErrorReply => println("Syntax error: ", ex.info)
       //A concrete reply
-      case smtp.reply.ProcessingError(info) => println("Error processing request: ", info)
+      case reply.ProcessingError(info) => println("Error processing request: ", info)
     }
 
     println("Sending email...") //this will be printed before the future returns
