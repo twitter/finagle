@@ -1,7 +1,7 @@
 package com.twitter.finagle.serverset2
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.Addr
+import com.twitter.finagle.{Addr, WeightedSocketAddress}
 import com.twitter.util.{Event, Witness, Var, Timer, Duration}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicInteger
@@ -57,11 +57,11 @@ private[serverset2] object Stabilizer {
       // Addr update
       case (st@State(limbo, active, last), Left(addr)) =>
         addr match {
-          case Addr.Failed(_) => 
+          case Addr.Failed(_) =>
             State(Set.empty, active++limbo, addr)
 
           case Addr.Bound(bound) =>
-            State(limbo, active++bound, addr)
+            State(limbo, merge(active, bound), addr)
 
           case addr => 
             // Any other address simply propagates the address while
@@ -90,7 +90,7 @@ private[serverset2] object Stabilizer {
     }
 
     val addrs = states map { case State(limbo, active, last) =>
-      val all = limbo++active
+      val all = merge(limbo, active)
       if (all.nonEmpty) Addr.Bound(all)
       else last
     } sliding(2) collect {
@@ -100,5 +100,21 @@ private[serverset2] object Stabilizer {
     }
 
     addrs.register(Witness(u))
+  }
+
+  /**
+   * Merge WeightedSocketAddresses with same underlying SocketAddress
+   * preferring weights from `next` over `prev`.
+   */
+  private def merge(prev: Set[SocketAddress], next: Set[SocketAddress]): Set[SocketAddress] = {
+    val nextStripped = next map {
+      case WeightedSocketAddress(sa, w) => sa
+    }
+
+    val legacy = prev filter {
+      case WeightedSocketAddress(sa, w) => !nextStripped.contains(sa)
+    }
+
+    legacy ++ next
   }
 }

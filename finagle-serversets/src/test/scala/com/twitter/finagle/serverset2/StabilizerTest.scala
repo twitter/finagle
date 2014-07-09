@@ -1,6 +1,6 @@
 package com.twitter.finagle.serverset2
 
-import com.twitter.finagle.Addr
+import com.twitter.finagle.{Addr, WeightedSocketAddress}
 import com.twitter.util.{Var, Event, Witness}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicReference
@@ -11,7 +11,13 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class StabilizerTest extends FunSuite {
   class Ctx {
-    val sa1, sa2, sa3 = new SocketAddress{}
+    val sa1 = new SocketAddress{ override def toString() = "sa1" }
+    val sa2 = new SocketAddress{ override def toString() = "sa2" }
+    val sa3 = new SocketAddress{ override def toString() = "sa3" }
+    val wsa1 = WeightedSocketAddress(sa1, 1D)
+    val wsa2 = WeightedSocketAddress(sa1, 2D)
+    val wsa3 = WeightedSocketAddress(sa2, 2D)
+
     val va = Var[Addr](Addr.Pending)
     val epoch = Event[Unit]()
 
@@ -113,5 +119,27 @@ class StabilizerTest extends FunSuite {
     assertStabilized(Addr.Bound(sa1, sa2, sa3))
     va() = Addr.Failed(new Exception)
     pulse()
+  })
+
+  test("Merge WeightedSocketAddresses") (new Ctx {
+    va() = Addr.Bound(wsa1, sa2, sa3)
+    assertStabilized(Addr.Bound(wsa1, sa2, sa3))
+
+    pulse()
+    va() = Addr.Bound(wsa2, sa2)
+    assertStabilized(Addr.Bound(wsa2, sa2, sa3))
+
+    pulse()
+    assertStabilized(Addr.Bound(wsa2, sa2, sa3))
+
+    pulse()
+    assertStabilized(Addr.Bound(wsa2, sa2))
+
+    pulse()
+    va() = Addr.Bound(wsa2, wsa3)
+    assertStabilized(Addr.Bound(wsa2, wsa3))
+
+    pulse()
+    assertStabilized(Addr.Bound(wsa2, wsa3))
   })
 }
