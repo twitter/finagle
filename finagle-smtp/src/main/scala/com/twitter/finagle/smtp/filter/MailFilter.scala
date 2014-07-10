@@ -17,8 +17,7 @@ object MailFilter extends Filter[EmailMessage, Unit, Request, Reply]{
            Request.Data(msg.getBody))
 
      val reqs: Seq[Request] =
-       Seq(Request.Reset,
-          Request.Hello) ++
+       Seq(Request.Reset) ++
        SendEmailRequest
 
      val freqs = for (req <- reqs) yield send(req)

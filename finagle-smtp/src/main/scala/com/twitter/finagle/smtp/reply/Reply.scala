@@ -16,7 +16,7 @@ object ReplyCode {
   val HELP                        = 214
   val SERVICE_READY               = 220
   val CLOSING_TRANSMISSION        = 221
-  val OKReply                     = 250
+  val OK_REPLY                    = 250
   val TEMP_USER_NOT_LOCAL         = 251
   val TEMP_USER_NOT_VERIFIED      = 252
   val START_INPUT                 = 354

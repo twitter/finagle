@@ -19,10 +19,10 @@ object HeadersFilter extends SimpleFilter[EmailMessage, Unit] {
          "Subject: " + msg.getSubject
        ).filter(_.split(": ").length > 1)
 
-       val richmsg = EmailBuilder(msg)
-                     .setBodyLines(fields ++ msg.getBody)
-                     .build
+     val richmsg = EmailBuilder(msg)
+                   .setBodyLines(fields ++ msg.getBody)
+                   .build
 
-       send(richmsg)
+     send(richmsg)
    }
  }

@@ -82,7 +82,7 @@ extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](tra
                                                  override val isMultiline = resp.isMultiline
                                                  override val lines = resp.lines
                                                }
-        case OKReply                         => new OK(resp.info)  {
+        case OK_REPLY                         => new OK(resp.info)  {
                                                  override val isMultiline = resp.isMultiline
                                                  override val lines = resp.lines
                                                }

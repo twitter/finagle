@@ -41,7 +41,7 @@ case class ServiceNotAvailable(info: String) extends NotAvailableReply {
 
 /*Mail system successes*/
 case class OK(info: String) extends MailOkReply {
-  val code = OKReply
+  val code = OK_REPLY
 }
 
 case class TempUserNotLocal(info: String) extends MailOkReply {
