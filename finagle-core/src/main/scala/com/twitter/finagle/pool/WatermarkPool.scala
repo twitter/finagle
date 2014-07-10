@@ -7,6 +7,10 @@ import java.util.ArrayDeque
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
+object WatermarkPool {
+  private val TooManyWaiters = Future.exception(new TooManyWaitersException)
+}
+
 /**
  * The watermark pool is an object pool with low & high
  * watermarks. It keeps the number of services from a given service
@@ -32,6 +36,7 @@ class WatermarkPool[Req, Rep](
   @volatile private[this] var isOpen      = true
 
   private[this] val numWaiters = statsReceiver.counter("pool_num_waited")
+  private[this] val tooManyWaiters = statsReceiver.counter("pool_num_too_many_waiters")
   private[this] val waitersStat = statsReceiver.addGauge("pool_waiters") { synchronized { waiters.size } }
   private[this] val sizeStat = statsReceiver.addGauge("pool_size") { synchronized { numServices } }
 
@@ -108,15 +113,15 @@ class WatermarkPool[Req, Rep](
         case None if numServices < highWatermark =>
           numServices += 1
         case None if waiters.size >= maxWaiters =>
-          return Future.exception(new TooManyWaitersException)
+          tooManyWaiters.incr()
+          return WatermarkPool.TooManyWaiters
         case None =>
           val p = new Promise[Service[Req, Rep]]
           numWaiters.incr()
           waiters.addLast(p)
           p.setInterruptHandler { case _cause =>
-            // TODO: use cause
             if (WatermarkPool.this.synchronized(waiters.remove(p)))
-              p.setException(new CancelledConnectionException)
+              p.setException(new CancelledConnectionException(_cause))
           }
           return p
       }
