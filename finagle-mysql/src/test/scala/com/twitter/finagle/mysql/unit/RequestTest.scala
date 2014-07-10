@@ -28,7 +28,7 @@ class HandshakeResponseTest extends FunSuite {
   val username = Some("username")
   val password = Some("password")
   val salt = Array[Byte](70,38,43,66,74,48,79,126,76,66,
-    70,118,67,40,63,68,120,80,103,54)
+                          70,118,67,40,63,68,120,80,103,54)
   val req = HandshakeResponse(
     username,
     password,
@@ -230,4 +230,3 @@ class ExecuteRequestTest extends FunSuite {
     }
   }
 }
-
