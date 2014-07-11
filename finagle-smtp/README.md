@@ -13,13 +13,18 @@ The concrete reply types are case classes described in `reply/SmtpReplies.scala`
 This allows flexible error handling:
 
 ```scala
-val res: Future[Unit] = send(command) onFailure {
+val res = service(command) onFailure {
   // An error group
   case ex: SyntaxErrorReply => println("Syntax error: ", ex.info)
 
   // A concrete reply
   case ProcessingError(info) => println("Error processing request: ", info)
+
+  // Default
+  case _ => println("Error!")
 }
+
+// Or, another way:
 
 res handle {
   ...
