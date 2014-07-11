@@ -23,7 +23,7 @@ class SslTest extends FunSuite {
     "openssl-root.conf"
   )
 
-  def init() {
+  class Context {
     // before we run any tests, construct the chain
     try {
       // would prefer to have an abstraction for what's below, but
@@ -63,7 +63,8 @@ class SslTest extends FunSuite {
 
   // now let's run some tests
   test("be able to send and receive various sized content") {
-    init()
+    val ctx = new Context{}
+    import ctx._
     def makeContent(length: Int) = {
       val buf = ChannelBuffers.directBuffer(length)
       while (buf.writableBytes() > 0)
@@ -148,7 +149,8 @@ class SslTest extends FunSuite {
   }
 
   test("be able to validate a properly constructed authentication chain") {
-    init()
+    val ctx = new Context{}
+    import ctx._
     // ... spin up an SSL server ...
     val service = new Service[HttpRequest, HttpResponse] {
       def apply(request: HttpRequest) = Future {
