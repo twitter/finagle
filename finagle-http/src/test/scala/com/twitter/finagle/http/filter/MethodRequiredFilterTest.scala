@@ -3,9 +3,12 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Method, Request, Response, Status}
 import com.twitter.util.{Await, Future}
-import org.specs.SpecificationWithJUnit
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
-class MethodRequiredFilterSpec extends SpecificationWithJUnit {
+@RunWith(classOf[JUnitRunner])
+class MethodRequiredFilterTest extends FunSuite {
 
   val dummyService = new Service[Request, Response] {
     def apply(request: Request): Future[Response] = {
@@ -24,20 +27,18 @@ class MethodRequiredFilterSpec extends SpecificationWithJUnit {
 
   val filter = new MethodRequiredFilter[Request](Set(Method.Post))
 
-  "disable filter" should {
-    "return 407 when disallowed method is used" in {
-      val request = Request()
-      request.method = Method.Get
-      val response = Await.result(filter(request, dummyService))
-      response.status must_== Status.MethodNotAllowed
-      response.headers.get("Allow") must be_==("POST")
-    }
+  test("return 407 when disallowed method is used") {
+    val request = Request()
+    request.method = Method.Get
+    val response = Await.result(filter(request, dummyService))
+    assert(response.status === Status.MethodNotAllowed)
+    assert(response.headers.get("Allow") === "POST")
+  }
 
-    "return 200 when allowed method is used" in {
-      val request = Request()
-      request.method = Method.Post
-      val response = Await.result(filter(request, dummyService))
-      response.status must_== Status.Ok
-    }
+  test("return 200 when allowed method is used") {
+    val request = Request()
+    request.method = Method.Post
+    val response = Await.result(filter(request, dummyService))
+    assert(response.status === Status.Ok)
   }
 }
