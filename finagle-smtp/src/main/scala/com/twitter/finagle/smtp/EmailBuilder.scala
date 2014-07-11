@@ -63,7 +63,7 @@ case class EmailBuilder(payload: Payload) {
     def getCc = payload.cc
     def getTo = payload.to
     def getSubject = payload.subject
-    def getSender = if (payload.from.length > 1) payload.sender else MailingAddress.empty
+    def getSender = payload.sender
     def getBody = payload.body
     def getFrom = payload.from
     def getReplyTo = payload.reply_to
