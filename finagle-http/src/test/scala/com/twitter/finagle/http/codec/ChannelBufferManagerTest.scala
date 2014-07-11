@@ -6,17 +6,18 @@ import org.jboss.netty.channel._
 import org.jboss.netty.buffer.ChannelBuffers
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
+import org.scalatest.mock.MockitoSugar
 import org.mockito.Matchers._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ChannelBufferManagerTest extends FunSuite {
-  val me = mock(classOf[MessageEvent])
-  val c = mock(classOf[Channel])
-  val ctx = mock(classOf[ChannelHandlerContext])
-  val e = mock(classOf[ChannelStateEvent])
-  val wce = mock(classOf[WriteCompletionEvent])
+class ChannelBufferManagerTest extends FunSuite with MockitoSugar {
+  val me = mock[MessageEvent]
+  val c = mock[Channel]
+  val ctx = mock[ChannelHandlerContext]
+  val e = mock[ChannelStateEvent]
+  val wce = mock[WriteCompletionEvent]
   when(me.getChannel).thenReturn(c)
 
   def makeGetMessage(channelCapacity: Int): Unit = {

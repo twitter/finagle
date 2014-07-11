@@ -9,19 +9,20 @@ import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
+import org.scalatest.mock.MockitoSugar
 import org.mockito.Matchers._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ConnectionManagerTest extends FunSuite {
+class ConnectionManagerTest extends FunSuite with MockitoSugar {
   // > further tests
   //   - malformed requests/responses
   //   - methods other than GET
   //   - 100/continue
 
-  val me = mock(classOf[MessageEvent])
-  val c = mock(classOf[Channel])
+  val me = mock[MessageEvent]
+  val c = mock[Channel]
   val cFuture = new DefaultChannelFuture(c, false)
   when(me.getChannel).thenReturn(c)
 
@@ -44,7 +45,7 @@ class ConnectionManagerTest extends FunSuite {
   }
 
   def perform(request: HttpRequest, response: HttpResponse, shouldMarkDead: Boolean) {
-    val trans = mock(classOf[Transport[Any, Any]])
+    val trans = mock[Transport[Any, Any]]
     when(trans.close(any[Time])).thenReturn(Future.Done)
     when(trans.close).thenReturn(Future.Done)
 
