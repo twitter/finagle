@@ -8,7 +8,6 @@ import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.util.{Await, Time}
 import java.net.InetSocketAddress
-import org.specs.SpecificationWithJUnit
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner

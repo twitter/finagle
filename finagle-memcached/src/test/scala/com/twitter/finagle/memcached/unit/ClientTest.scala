@@ -7,16 +7,26 @@ import com.twitter.finagle.memcached.protocol._
 import com.twitter.hashing.KeyHasher
 import com.twitter.util.{Await, Duration, Future}
 import org.jboss.netty.buffer.ChannelBuffers
-import org.specs.mock.Mockito
-import org.specs.SpecificationWithJUnit
 import scala.collection.{immutable, mutable}
 import _root_.java.io.{BufferedReader, InputStreamReader}
+import org.junit.runner.RunWith
+import org.mockito.Matchers._
+import org.mockito.Mockito.{verify, when, times, RETURNS_SMART_NULLS}
+import org.scalatest.{BeforeAndAfter, FunSuite, Suites}
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 
-class ClientTest extends SpecificationWithJUnit with Mockito {
-  "KetamaClient" should {
-    // Test from Smile's KetamaNodeLocatorSpec.scala
+@RunWith(classOf[JUnitRunner])
+class ClientTest extends Suites (
+  new KetamaClientTest,
+  new RubyMemCacheClientTest,
+  new PHPMemCacheClientTest
+)
 
-    // Load known good results (key, hash(?), continuum ceiling(?), IP)
+// Test from Smile's KetamaNodeLocatorSpec.scala
+class KetamaClientTest extends FunSuite with MockitoSugar {
+
+  test("load known good results (key, hash(?), continuum ceiling(?), IP)") {
     val stream = getClass.getClassLoader.getResourceAsStream("ketama_results")
     val reader = new BufferedReader(new InputStreamReader(stream))
     val expected = new mutable.ListBuffer[Array[String]]
@@ -25,16 +35,16 @@ class ClientTest extends SpecificationWithJUnit with Mockito {
       line = reader.readLine
       if (line != null) {
         val segments = line.split(" ")
-        segments.length mustEqual 4
+        assert(segments.length === 4)
         expected += segments
       }
     } while (line != null)
-    expected.size mustEqual 99
+      assert(expected.size === 99)
 
     // Build Ketama client
     def newMock() = {
       val s = mock[Service[Command, Response]]
-      s.close(any) returns Future.Done
+      when(s.close(any())) thenReturn Future.Done
       s
     }
     val clients = Map(
@@ -51,30 +61,30 @@ class ClientTest extends SpecificationWithJUnit with Mockito {
       (node: CacheNode, k: KetamaClientKey, _: Broker[NodeHealth], _: (Int, Duration)) => clients.get(node).get
     val ketamaClient = new KetamaClient(Group(clients.keys.toSeq:_*), KeyHasher.KETAMA, 160, (Int.MaxValue, Duration.Zero), Some(mockBuilder))
 
-    "pick the correct node" in {
-      val ipToService = clients map { case (key, service) => key.host -> service } toMap
-      val rng = new scala.util.Random
-      for (testcase <- expected) {
-        val mockClient = ketamaClient.clientOf(testcase(0))
-        val expectedService = ipToService(testcase(3))
-        val randomResponse = Number(rng.nextLong)
+    info("pick the correct node")
+    val ipToService = clients map { case (key, service) => key.host -> service } toMap
+    val rng = new scala.util.Random
+    for (testcase <- expected) {
+      val mockClient = ketamaClient.clientOf(testcase(0))
+      val expectedService = ipToService(testcase(3))
+      val randomResponse = Number(rng.nextLong)
 
-        expectedService.apply(any[Incr]) returns Future.value(randomResponse)
+      when(expectedService.apply(any[Incr])) thenReturn Future.value(randomResponse)
 
-        Await.result(mockClient.incr("foo")).get mustEqual randomResponse.value
-      }
+      assert(Await.result(mockClient.incr("foo")).get === randomResponse.value)
     }
 
-    "release" in {
-      ketamaClient.release()
-      clients.values foreach { client =>
-        there was one(client).close(any)
-      }
+    info("release")
+    ketamaClient.release()
+    clients.values foreach { client =>
+      verify(client, times(1)).close(any())
     }
+  }
 
-    "ejects dead clients" in {
-      val serviceA = smartMock[Service[Command,Response]]
-      val serviceB = smartMock[Service[Command,Response]]
+  test("ejects dead clients") {
+    trait KetamaClientBuilder {
+      val serviceA = mock[Service[Command,Response]](RETURNS_SMART_NULLS)
+      val serviceB = mock[Service[Command,Response]](RETURNS_SMART_NULLS)
       val nodeA = CacheNode("10.0.1.1", 11211, 100)
       val nodeB = CacheNode("10.0.1.2", 11211, 100)
       val nodeKeyA = KetamaClientKey(nodeA.host, nodeA.port, nodeA.weight)
@@ -86,9 +96,9 @@ class ClientTest extends SpecificationWithJUnit with Mockito {
       val mutableGroup = Group.mutable(services.keys.toSeq:_*)
 
       val key = ChannelBuffers.wrappedBuffer("foo".getBytes)
-      val value = smartMock[Value]
-      value.key returns key
-      serviceA(any) returns Future.value(Values(Seq(value)))
+      val value = mock[Value](RETURNS_SMART_NULLS)
+      when(value.key) thenReturn key
+      when(serviceA(any())) thenReturn Future.value(Values(Seq(value)))
 
       var broker = new Broker[NodeHealth]
       val mockBuilder = (node: CacheNode, k: KetamaClientKey, internalBroker: Broker[NodeHealth], _: (Int, Duration)) => {
@@ -98,82 +108,90 @@ class ClientTest extends SpecificationWithJUnit with Mockito {
       val ketamaClient = new KetamaClient(mutableGroup, KeyHasher.KETAMA, 160, (Int.MaxValue, Duration.Zero), Some(mockBuilder))
 
       Await.result(ketamaClient.get("foo"))
-      there was one(serviceA).apply(any)
+      verify(serviceA, times(1)).apply(any())
 
       broker !! NodeMarkedDead(nodeKeyA)
+    }
 
-      "goes to secondary if primary is down" in {
-        serviceB(Get(Seq(key))) returns Future.value(Values(Seq(value)))
+    info("goes to secondary if primary is down")
+    new KetamaClientBuilder {
+      when(serviceB(Get(Seq(key)))) thenReturn Future.value(Values(Seq(value)))
+      Await.result(ketamaClient.get("foo"))
+      verify(serviceB, times(1)).apply(any())
+    }
+
+    info("throws ShardNotAvailableException when no nodes available")
+    new KetamaClientBuilder {
+      broker !! NodeMarkedDead(nodeKeyB)
+      intercept[ShardNotAvailableException] {
         Await.result(ketamaClient.get("foo"))
-        there was one(serviceB).apply(any)
       }
+    }
 
-      "throws ShardNotAvailableException when no nodes available" in {
-        broker !! NodeMarkedDead(nodeKeyB)
-        Await.result(ketamaClient.get("foo")) must throwA[ShardNotAvailableException]
-      }
+    info("brings back the dead node")
+    new KetamaClientBuilder {
+      when(serviceA(any())) thenReturn Future.value(Values(Seq(value)))
+      broker !! NodeRevived(nodeKeyA)
+      Await.result(ketamaClient.get("foo"))
+      verify(serviceA, times(2)).apply(any())
+      broker !! NodeRevived(nodeKeyB)
+    }
+    
+    info("primary leaves and rejoins")
+    new KetamaClientBuilder {
+      mutableGroup.update(immutable.Set(nodeB)) // nodeA leaves
+      when(serviceB(Get(Seq(key)))) thenReturn Future.value(Values(Seq(value)))
+      Await.result(ketamaClient.get("foo"))
+      verify(serviceB, times(1)).apply(any())
 
-      "brings back the dead node" in {
-        serviceA(any) returns Future.value(Values(Seq(value)))
-        broker !! NodeRevived(nodeKeyA)
-        Await.result(ketamaClient.get("foo"))
-        there was two(serviceA).apply(any)
-      }
-
-      "primary leaves and rejoins" in {
-        mutableGroup.update(immutable.Set(nodeB)) // nodeA leaves
-        serviceB(Get(Seq(key))) returns Future.value(Values(Seq(value)))
-        Await.result(ketamaClient.get("foo"))
-        there was one(serviceB).apply(any)
-
-        mutableGroup.update(immutable.Set(nodeA, nodeB)) // nodeA joins
-        serviceA(Get(Seq(key))) returns Future.value(Values(Seq(value)))
-        Await.result(ketamaClient.get("foo"))
-        there was two(serviceA).apply(any)
-      }
+      mutableGroup.update(immutable.Set(nodeA, nodeB)) // nodeA joins
+      when(serviceA(Get(Seq(key)))) thenReturn Future.value(Values(Seq(value)))
+      Await.result(ketamaClient.get("foo"))
+      verify(serviceA, times(2)).apply(any())
     }
   }
+}
 
-  "RubyMemCacheClient" should {
-    val client1 = mock[Client]
-    val client2 = mock[Client]
-    val client3 = mock[Client]
-    val rubyMemCacheClient = new RubyMemCacheClient(Seq(client1, client2, client3))
+class RubyMemCacheClientTest extends FunSuite with MockitoSugar {
+  val client1 = mock[Client]
+  val client2 = mock[Client]
+  val client3 = mock[Client]
+  val rubyMemCacheClient = new RubyMemCacheClient(Seq(client1, client2, client3))
 
-    "pick the correct node" in {
-      rubyMemCacheClient.clientOf("apple")    must be_==(client1)
-      rubyMemCacheClient.clientOf("banana")   must be_==(client2)
-      rubyMemCacheClient.clientOf("cow")      must be_==(client1)
-      rubyMemCacheClient.clientOf("dog")      must be_==(client1)
-      rubyMemCacheClient.clientOf("elephant") must be_==(client3)
-    }
-    "release" in {
-      rubyMemCacheClient.release()
-      there was one(client1).release()
-      there was one(client2).release()
-      there was one(client3).release()
-    }
+  test("pick the correct node") {
+    assert(rubyMemCacheClient.clientOf("apple")    === (client1))
+    assert(rubyMemCacheClient.clientOf("banana")   === (client2))
+    assert(rubyMemCacheClient.clientOf("cow")      === (client1))
+    assert(rubyMemCacheClient.clientOf("dog")      === (client1))
+    assert(rubyMemCacheClient.clientOf("elephant") === (client3))
   }
 
-  "PHPMemCacheClient" should {
-    val client1 = mock[Client]
-    val client2 = mock[Client]
-    val client3 = mock[Client]
-    val phpMemCacheClient = new PHPMemCacheClient(Array(client1, client2, client3), KeyHasher.FNV1_32)
+  test("release") {
+    rubyMemCacheClient.release()
+    verify(client1, times(1)).release()
+    verify(client2, times(1)).release()
+    verify(client3, times(1)).release()
+  }
+}
 
-    "pick the correct node" in {
-      phpMemCacheClient.clientOf("apple")    must be_==(client3)
-      phpMemCacheClient.clientOf("banana")   must be_==(client1)
-      phpMemCacheClient.clientOf("cow")      must be_==(client3)
-      phpMemCacheClient.clientOf("dog")      must be_==(client2)
-      phpMemCacheClient.clientOf("elephant") must be_==(client2)
-    }
-    "release" in {
-      phpMemCacheClient.release()
-      there was one(client1).release()
-      there was one(client2).release()
-      there was one(client3).release()
-    }
+class PHPMemCacheClientTest extends FunSuite with MockitoSugar {
+  val client1 = mock[Client]
+  val client2 = mock[Client]
+  val client3 = mock[Client]
+  val phpMemCacheClient = new PHPMemCacheClient(Array(client1, client2, client3), KeyHasher.FNV1_32)
+
+  test("pick the correct node") {
+    assert(phpMemCacheClient.clientOf("apple")    === (client3))
+    assert(phpMemCacheClient.clientOf("banana")   === (client1))
+    assert(phpMemCacheClient.clientOf("cow")      === (client3))
+    assert(phpMemCacheClient.clientOf("dog")      === (client2))
+    assert(phpMemCacheClient.clientOf("elephant") === (client2))
   }
 
+  test("release") {
+    phpMemCacheClient.release()
+    verify(client1).release()
+    verify(client2).release()
+    verify(client3).release()
+  }
 }
