@@ -10,7 +10,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class ClientIdRequiredFilterSpec extends FunSuite with MockitoSugar {
+class ClientIdRequiredFilterTest extends FunSuite with MockitoSugar {
 
   val request = "request"
   val response = Future.value("response")

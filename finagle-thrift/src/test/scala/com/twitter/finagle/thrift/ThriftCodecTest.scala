@@ -11,7 +11,7 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ThriftCodecSpec extends FunSuite {
+class ThriftCodecTest extends FunSuite {
   val protocolFactory = new TBinaryProtocol.Factory()
 
   def thriftToBuffer(method: String, `type`: Byte, seqid: Int,

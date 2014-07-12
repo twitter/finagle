@@ -12,7 +12,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class ValidateThriftServiceSpec extends FunSuite with MockitoSugar with OneInstancePerTest{
+class ValidateThriftServiceTest extends FunSuite with MockitoSugar with OneInstancePerTest {
   val protocolFactory = new TBinaryProtocol.Factory()
 
   val p = new Promise[Array[Byte]]

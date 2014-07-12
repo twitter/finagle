@@ -14,7 +14,7 @@ import org.scalatest.{OneInstancePerTest, FunSuite}
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class FinagleClientThriftServerSpec extends FunSuite with OneInstancePerTest {
+class FinagleClientThriftServerTest extends FunSuite with OneInstancePerTest {
   /* The entire block is marked as flaky because both tests are flaky.
    * If only one test is fixed, and is longer flaky, then this guard
    * can be moved back down to the individual test.

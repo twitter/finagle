@@ -14,7 +14,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class ThriftServerFramedCodecSpec extends FunSuite with MockitoSugar {
+class ThriftServerFramedCodecTest extends FunSuite with MockitoSugar {
   val protocolFactory = new TBinaryProtocol.Factory()
 
   test("ThriftServerTracingFilter read header correctly") {

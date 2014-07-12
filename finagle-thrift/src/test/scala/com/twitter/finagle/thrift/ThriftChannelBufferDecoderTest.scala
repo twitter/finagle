@@ -8,7 +8,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class ThriftChannelBufferDecoderSpec extends FunSuite with MockitoSugar with OneInstancePerTest{
+class ThriftChannelBufferDecoderTest extends FunSuite with MockitoSugar with OneInstancePerTest {
     val decoder = new ThriftChannelBufferDecoder
     val ctx = mock[ChannelHandlerContext]
     val ch = mock[Channel]

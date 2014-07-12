@@ -13,7 +13,7 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class AsyncServerEndToEnd extends FunSuite {
+class AsyncServerEndToEndTest extends FunSuite {
   val protocolFactory = new TBinaryProtocol.Factory()
 
   test("async Thrift server should work"){
