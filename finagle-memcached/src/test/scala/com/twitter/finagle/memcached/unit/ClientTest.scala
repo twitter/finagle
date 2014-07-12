@@ -12,9 +12,9 @@ import _root_.java.io.{BufferedReader, InputStreamReader}
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito.{verify, when, times, RETURNS_SMART_NULLS}
-import org.scalatest.{BeforeAndAfter, FunSuite, Suites}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
+import org.scalatest.{BeforeAndAfter, FunSuite, Suites}
 
 @RunWith(classOf[JUnitRunner])
 class ClientTest extends Suites (

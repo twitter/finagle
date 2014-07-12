@@ -24,8 +24,8 @@ import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.util.{Await, Duration, Future, Return, Throw}
 import scala.collection.mutable
 import org.junit.runner.RunWith
-import org.scalatest.{BeforeAndAfter, FunSuite, Suites}
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.{BeforeAndAfter, FunSuite, Suites}
 
 @RunWith(classOf[JUnitRunner])
 class ClientTest extends Suites(

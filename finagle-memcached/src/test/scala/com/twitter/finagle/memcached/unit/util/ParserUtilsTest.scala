@@ -1,11 +1,11 @@
 package com.twitter.finagle.memcached.unit.util
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.FunSuite
+import com.google.common.base.Charsets
 import com.twitter.finagle.memcached.util.ParserUtils
 import org.jboss.netty.buffer.ChannelBuffers
-import com.google.common.base.Charsets
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class ParserUtilsTest extends FunSuite {

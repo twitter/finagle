@@ -11,8 +11,8 @@ import com.twitter.util.{Await, RandomSocket}
 import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffers
 import org.junit.runner.RunWith
-import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class ProxyTest extends FunSuite with BeforeAndAfter {

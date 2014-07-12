@@ -3,8 +3,8 @@ package com.twitter.finagle.memcached.unit
 import com.twitter.finagle.memcached._
 import com.twitter.util.Await
 import org.junit.runner.RunWith
-import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class PoolingReadRepairClientTest extends FunSuite with BeforeAndAfter {
