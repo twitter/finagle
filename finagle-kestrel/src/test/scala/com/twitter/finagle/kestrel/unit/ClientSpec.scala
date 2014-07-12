@@ -1,8 +1,12 @@
 package com.twitter.finagle.kestrel
 package unit
 
-import org.specs.SpecificationWithJUnit
-import org.specs.mock.Mockito
+import org.junit.runner.RunWith
+import org.scalatest.{FunSuite, Suites}
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
+
+import org.mockito.Mockito.{verify, times, when}
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import com.twitter.util.{Await, Future, Duration, Time, MockTimer, Promise}
@@ -16,6 +20,12 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.thrift.ThriftClientRequest
 import com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Item
 
+class ClientTest extends Suites(
+  new ClientReadReliablyTest, 
+  new ConnectedClientReadTest, 
+  new ThriftConnectedClientReadTest
+)
+
 // all this so we can spy() on a client.
 class MockClient extends Client {
   def set(queueName: String, value: ChannelBuffer, expiry: Time = Time.epoch) = null
@@ -27,149 +37,149 @@ class MockClient extends Client {
   def close() {}
 }
 
-class ClientSpec extends SpecificationWithJUnit with Mockito {
+class ClientReadReliablyTest extends FunSuite with MockitoSugar {
   def buf(i: Int) = ChannelBuffers.wrappedBuffer("%d".format(i).getBytes)
   def msg(i: Int) = {
     val m = mock[ReadMessage]
-    m.bytes returns buf(i)
+    when(m.bytes).thenReturn(buf(i))
     m
   }
 
-  "Client.readReliably" should {
-    val messages = new Broker[ReadMessage]
-    val error = new Broker[Throwable]
-    val client = spy(new MockClient)
-    val rh = mock[ReadHandle]
-    rh.messages returns messages.recv
-    rh.error returns error.recv
-    client.read("foo") returns rh
+  val messages = new Broker[ReadMessage]
+  val error = new Broker[Throwable]
+  val client = mock[Client]
+  val rh = mock[ReadHandle]
+  when(rh.messages).thenReturn(messages.recv)
+  when(rh.error).thenReturn(error.recv)
+  when(client.read("foo")).thenReturn(rh)
 
-    "proxy messages" in {
-      val h = client.readReliably("foo")
-      there was one(client).read("foo")
+  test("proxy messages") {
+    val h = client.readReliably("foo")
+    verify(client).read("foo")
 
-      val f = (h.messages?)
-      f.isDefined must beFalse
+    val f = (h.messages?)
+    assert(f.isDefined === false)
 
-      val m = msg(0)
+    val m = msg(0)
 
-      messages ! m
-      f.isDefined must beTrue
-      Await.result(f) must be(m)
+    messages ! m
+    assert(f.isDefined === true)
+    assert(Await.result(f) === m)
 
-      (h.messages?).isDefined must beFalse
-    }
-
-    "reconnect on failure" in {
-      val h = client.readReliably("foo")
-      there was one(client).read("foo")
-      val m = msg(0)
-      messages ! m
-      (h.messages??) must be(m)
-
-      val messages2 = new Broker[ReadMessage]
-      val error2 = new Broker[Throwable]
-      val rh2 = mock[ReadHandle]
-      rh2.messages returns messages2.recv
-      rh2.error returns error2.recv
-      client.read("foo") returns rh2
-
-      error ! new Exception("wtf")
-      there were two(client).read("foo")
-
-      messages ! m  // an errant message on broken channel
-
-      // new messages must make it
-      val f = (h.messages?)
-      f.isDefined must beFalse
-
-      val m2 = msg(2)
-      messages2 ! m2
-      f.isDefined must beTrue
-      Await.result(f) must be(m2)
-    }
-
-    "reconnect on failure (with delay)" in Time.withCurrentTimeFrozen { tc =>
-      val timer = new MockTimer
-      val delays = Stream(1.seconds, 2.seconds, 3.second)
-      val h = client.readReliably("foo", timer, delays)
-      there was one(client).read("foo")
-
-      val errf = (h.error?)
-
-      delays.zipWithIndex foreach { case (delay, i) =>
-        there were (i + 1).times(client).read("foo")
-        error ! new Exception("sad panda")
-        tc.advance(delay)
-        timer.tick()
-        there were (i + 2).times(client).read("foo")
-        errf.isDefined must beFalse
-      }
-
-      error ! new Exception("final sad panda")
-
-      errf.isDefined must beTrue
-      Await.result(errf) must be_==(OutOfRetriesException)
-    }
-
-    "close on close requested" in {
-      val h = client.readReliably("foo")
-      there was no(rh).close()
-      h.close()
-      there was one(rh).close()
-    }
+    assert((h.messages?).isDefined === false)
   }
 
-  "ConnectedClient.read" should {
-    val queueName = "foo"
-    val factory = mock[ServiceFactory[Command, Response]]
-    val service = mock[Service[Command, Response]]
-    val client = new ConnectedClient(factory)
-    val open = Open(queueName, Some(Duration.Top))
-    val closeAndOpen = CloseAndOpen(queueName, Some(Duration.Top))
-    val abort = Abort(queueName)
+  test("reconnect on failure") {
+    val h = client.readReliably("foo")
+    verify(client).read("foo")
+    val m = msg(0)
+    messages ! m
+    assert((h.messages??) === m)
 
-    "interrupt current request on close" in {
-      factory.apply() returns Future(service)
-      val promise = new Promise[Response]()
-      @volatile var wasInterrupted = false
-      promise.setInterruptHandler { case _cause =>
-        wasInterrupted = true
-      }
-      service(open) returns promise
-      service(closeAndOpen) returns promise
-      service(abort) returns Future(Values(Seq()))
+    val messages2 = new Broker[ReadMessage]
+    val error2 = new Broker[Throwable]
+    val rh2 = mock[ReadHandle]
+    when(rh2.messages).thenReturn(messages2.recv)
+    when(rh2.error).thenReturn(error2.recv)
+    when(client.read("foo")).thenReturn(rh2)
 
-      val rh = client.read(queueName)
+    error ! new Exception("wtf")
+    verify(client, times(2)).read("foo")
 
-      wasInterrupted must beFalse
-      rh.close()
-      wasInterrupted must beTrue
-    }
+    messages ! m  // an errant message on broken channel
+
+    // new messages must make it
+    val f = (h.messages?)
+    assert(f.isDefined === false)
+
+    val m2 = msg(2)
+    messages2 ! m2
+    assert(f.isDefined === true)
+    assert(Await.result(f) === m2)
   }
 
-  "ThriftConnectedClient.read" should {
-    val queueName = "foo"
-    val clientFactory = mock[FinagledClientFactory]
-    val finagledClient = mock[FinagledClosableClient]
-    val client = new ThriftConnectedClient(clientFactory)
+  // test("reconnect on failure (with delay)") in Time.withCurrentTimeFrozen { tc =>
+  //   val timer = new MockTimer
+  //   val delays = Stream(1.seconds, 2.seconds, 3.second)
+  //   val h = client.readReliably("foo", timer, delays)
+  //   verify(client).read("foo")
 
-    "interrupt current thrift request on close" in {
-      clientFactory.apply() returns Future(finagledClient)
-      val promise = new Promise[Seq[Item]]()
+  //   val errf = (h.error?)
 
-      @volatile var wasInterrupted = false
-      promise.setInterruptHandler { case _cause =>
-        wasInterrupted = true
-      }
+  //   delays.zipWithIndex foreach { case (delay, i) =>
+  //     verify(client, times(i + 1)).read("foo")
+  //     error ! new Exception("sad panda")
+  //     tc.advance(delay)
+  //     timer.tick()
+  //     verify(client, times(i + 2)).read("foo")
+  //     assert(errf.isDefined === false)
+  //   }
 
-      finagledClient.get(queueName, 1, Int.MaxValue, Int.MaxValue) returns promise
+  //   error ! new Exception("final sad panda")
 
-      val rh = client.read(queueName)
+  //   assert(errf.isDefined === true)
+  //   intercept[OutOfRetriesException] {
+  //     Await.result(errf)
+  //   }
+  // }
 
-      wasInterrupted must beFalse
-      rh.close()
-      wasInterrupted must beTrue
+  test("close on close requested") {
+    val h = client.readReliably("foo")
+    verify(rh, times(0)).close()
+    h.close()
+    verify(rh).close()
+  }
+}
+
+class ConnectedClientReadTest extends FunSuite with MockitoSugar {
+  val queueName = "foo"
+  val factory = mock[ServiceFactory[Command, Response]]
+  val service = mock[Service[Command, Response]]
+  val client = new ConnectedClient(factory)
+  val open = Open(queueName, Some(Duration.Top))
+  val closeAndOpen = CloseAndOpen(queueName, Some(Duration.Top))
+  val abort = Abort(queueName)
+
+  test("interrupt current request on close") {
+    when(factory.apply()).thenReturn(Future(service))
+    val promise = new Promise[Response]()
+    @volatile var wasInterrupted = false
+    promise.setInterruptHandler { case _cause =>
+      wasInterrupted = true
     }
+    when(service(open)).thenReturn(promise)
+    when(service(closeAndOpen)).thenReturn(promise)
+    when(service(abort)).thenReturn(Future(Values(Seq())))
+
+    val rh = client.read(queueName)
+
+    assert(wasInterrupted === false)
+    rh.close()
+    assert(wasInterrupted === true)
+  }
+}
+
+class ThriftConnectedClientReadTest extends FunSuite with MockitoSugar {
+  val queueName = "foo"
+  val clientFactory = mock[FinagledClientFactory]
+  val finagledClient = mock[FinagledClosableClient]
+  val client = new ThriftConnectedClient(clientFactory)
+
+  test("interrupt current thrift request on close") {
+    when(clientFactory.apply()).thenReturn(Future(finagledClient))
+    val promise = new Promise[Seq[Item]]()
+
+    @volatile var wasInterrupted = false
+    promise.setInterruptHandler { case _cause =>
+      wasInterrupted = true
+    }
+
+    when(finagledClient.get(queueName, 1, Int.MaxValue, Int.MaxValue)).thenReturn(promise)
+
+    val rh = client.read(queueName)
+
+    assert(wasInterrupted === false)
+    rh.close()
+    assert(wasInterrupted === true)
   }
 }
