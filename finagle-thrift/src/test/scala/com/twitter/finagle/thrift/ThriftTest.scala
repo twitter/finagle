@@ -42,6 +42,13 @@ trait ThriftTest { self: FunSuite =>
     thriftTests += ThriftTestDefinition(label, clientIdOpt, theTest)
   }
 
+  def skipTestThrift(
+    label: String,
+    clientIdOpt: Option[ClientId] = None
+  )(theTest: (Iface, BufferingTracer) => Unit) {
+    Unit
+  }
+
   private val newBuilderServer = (protocolFactory: TProtocolFactory) => new {
     val server = ServerBuilder()
       .codec(ThriftServerFramedCodec(protocolFactory))
@@ -107,8 +114,8 @@ trait ThriftTest { self: FunSuite =>
 
   private val protocols = Map(
     // Commenting out due to flakiness - see DPT-175 and DPT-181
-    // "binary" -> new TBinaryProtocol.Factory()
-    //"compact" -> new TCompactProtocol.Factory()
+     "binary" -> new TBinaryProtocol.Factory(),
+    "compact" -> new TCompactProtocol.Factory()
 // Unsupported. Add back when we upgrade Thrift.
 // (There's a test that will fail when we do.)
 //    "json" -> new TJSONProtocol.Factory()
@@ -136,22 +143,28 @@ trait ThriftTest { self: FunSuite =>
   )
 
   /** Invoke this in your test to run all defined thrift tests */
-  def runThriftTests() = for {
-    (protoName, proto) <- protocols
-    (clientName, newClient) <- clients
-    (serverName, newServer) <- servers
-    testDef <- thriftTests
-  } test("server:%s client:%s proto:%s %s".format(
-    clientName, serverName, protoName, testDef.label)) {
-    val tracer = new BufferingTracer
-    val previous = DefaultTracer.self
-    DefaultTracer.self = tracer
-    val server = newServer(proto)
-    val client = newClient(proto, server.boundAddr, testDef.clientIdOpt)
-    try testDef.testFunction(client.client, tracer) finally {
-      DefaultTracer.self = previous
-      server.close()
-      client.close()
+  def runThriftTests() = {
+    val notSkipFlaky = !Option(System.getProperty("SKIP_FLAKY")).isDefined
+
+    if(notSkipFlaky){
+      for {
+        (protoName, proto) <- protocols
+        (clientName, newClient) <- clients
+        (serverName, newServer) <- servers
+        testDef <- thriftTests
+      } test("ThriftTest: server:%s client:%s proto:%s %s".format(
+        clientName, serverName, protoName, testDef.label)) {
+        val tracer = new BufferingTracer
+        val previous = DefaultTracer.self
+        DefaultTracer.self = tracer
+        val server = newServer(proto)
+        val client = newClient(proto, server.boundAddr, testDef.clientIdOpt)
+        try testDef.testFunction(client.client, tracer) finally {
+          DefaultTracer.self = previous
+          server.close()
+          client.close()
+        }
+      }
     }
   }
 }
