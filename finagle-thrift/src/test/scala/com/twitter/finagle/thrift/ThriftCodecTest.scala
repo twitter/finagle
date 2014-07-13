@@ -58,7 +58,7 @@ class ThriftCodecTest extends FunSuite {
     val result = new Silly.bleep_result()
     result.read(protocol)
     assert(result.isSetSuccess)
-    assert(result.success ==="result")
+    assert(result.success === "result")
   }
 
   test("thrift server decoder should decode calls") {
