@@ -141,6 +141,10 @@ object Commands {
   val PFCOUNT           = "PFCOUNT"
   val PFMERGE           = "PFMERGE"
 
+  // Scripts
+  val EVAL              = "EVAL"
+  val EVALSHA           = "EVALSHA"
+
   val commandMap: Map[String, Function1[List[Array[Byte]],Command]] = Map(
     // key commands
     DEL               -> {Del(_)},
@@ -265,7 +269,11 @@ object Commands {
     // HyperLogLogs
     PFADD             -> {PFAdd(_)},
     PFCOUNT           -> {PFCount(_)},
-    PFMERGE           -> {PFMerge(_)}
+    PFMERGE           -> {PFMerge(_)},
+
+    // Scripts
+    EVAL              -> {Eval(_)},
+    EVALSHA           -> {EvalSha(_)}
 
   )
 
@@ -410,6 +418,10 @@ object CommandBytes {
   val PFADD             = StringToChannelBuffer("PFADD")
   val PFCOUNT           = StringToChannelBuffer("PFCOUNT")
   val PFMERGE           = StringToChannelBuffer("PFMERGE")
+
+  // Script
+  val EVAL              = StringToChannelBuffer("EVAL")
+  val EVALSHA           = StringToChannelBuffer("EVALSHA")
 }
 
 
