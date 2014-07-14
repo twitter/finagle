@@ -14,16 +14,9 @@ import org.mockito.Matchers._
 import org.mockito.Mockito.{verify, when, times, RETURNS_SMART_NULLS}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.{BeforeAndAfter, FunSuite, Suites}
+import org.scalatest.FunSuite
 
 @RunWith(classOf[JUnitRunner])
-class ClientTest extends Suites (
-  new KetamaClientTest,
-  new RubyMemCacheClientTest,
-  new PHPMemCacheClientTest
-)
-
-// Test from Smile's KetamaNodeLocatorSpec.scala
 class KetamaClientTest extends FunSuite with MockitoSugar {
 
   test("load known good results (key, hash(?), continuum ceiling(?), IP)") {
@@ -149,49 +142,5 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
       Await.result(ketamaClient.get("foo"))
       verify(serviceA, times(2)).apply(any())
     }
-  }
-}
-
-class RubyMemCacheClientTest extends FunSuite with MockitoSugar {
-  val client1 = mock[Client]
-  val client2 = mock[Client]
-  val client3 = mock[Client]
-  val rubyMemCacheClient = new RubyMemCacheClient(Seq(client1, client2, client3))
-
-  test("pick the correct node") {
-    assert(rubyMemCacheClient.clientOf("apple")    === (client1))
-    assert(rubyMemCacheClient.clientOf("banana")   === (client2))
-    assert(rubyMemCacheClient.clientOf("cow")      === (client1))
-    assert(rubyMemCacheClient.clientOf("dog")      === (client1))
-    assert(rubyMemCacheClient.clientOf("elephant") === (client3))
-  }
-
-  test("release") {
-    rubyMemCacheClient.release()
-    verify(client1, times(1)).release()
-    verify(client2, times(1)).release()
-    verify(client3, times(1)).release()
-  }
-}
-
-class PHPMemCacheClientTest extends FunSuite with MockitoSugar {
-  val client1 = mock[Client]
-  val client2 = mock[Client]
-  val client3 = mock[Client]
-  val phpMemCacheClient = new PHPMemCacheClient(Array(client1, client2, client3), KeyHasher.FNV1_32)
-
-  test("pick the correct node") {
-    assert(phpMemCacheClient.clientOf("apple")    === (client3))
-    assert(phpMemCacheClient.clientOf("banana")   === (client1))
-    assert(phpMemCacheClient.clientOf("cow")      === (client3))
-    assert(phpMemCacheClient.clientOf("dog")      === (client2))
-    assert(phpMemCacheClient.clientOf("elephant") === (client2))
-  }
-
-  test("release") {
-    phpMemCacheClient.release()
-    verify(client1).release()
-    verify(client2).release()
-    verify(client3).release()
   }
 }

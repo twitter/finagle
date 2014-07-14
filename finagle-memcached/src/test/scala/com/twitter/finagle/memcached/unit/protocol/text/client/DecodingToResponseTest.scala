@@ -14,24 +14,38 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class DecodingToResponseTest extends FunSuite {
 
-  val decodingToResponse = new DecodingToResponse
+  class Context {
+    val decodingToResponse = new DecodingToResponse
+  }
 
   test("parseResponse NOT_FOUND") {
+    val context = new Context
+    import context._
+
     val buffer = Tokens(Seq[ChannelBuffer]("NOT_FOUND"))
     assert(decodingToResponse.decode(null, null, buffer) === NotFound())
   }
 
   test("parseResponse STORED") {
+    val context = new Context
+    import context._
+
     val buffer = Tokens(Seq[ChannelBuffer]("STORED"))
     assert(decodingToResponse.decode(null, null, buffer) === Stored())
   }
 
   test("parseResponse EXISTS") {
+    val context = new Context
+    import context._
+
     val buffer = Tokens(Seq[ChannelBuffer]("EXISTS"))
     assert(decodingToResponse.decode(null, null, buffer) === Exists())
   }
 
   test("parseResponse ERROR") {
+    val context = new Context
+    import context._
+
     val buffer = Tokens(Seq[ChannelBuffer]("ERROR"))
     assert(decodingToResponse
       .decode(null, null, buffer).asInstanceOf[protocol.Error]
@@ -40,6 +54,9 @@ class DecodingToResponseTest extends FunSuite {
   }
 
   test("parseResponse STATS") {
+    val context = new Context
+    import context._
+
     val lines = Seq(
       Seq("STAT", "items:1:number", "1"),
       Seq("STAT", "items:1:age", "1468"),
@@ -63,6 +80,9 @@ class DecodingToResponseTest extends FunSuite {
   }
 
   test("parseResponse CLIENT_ERROR") {
+    val context = new Context
+    import context._
+
     val errorMessage = "sad panda error"
     val buffer = Tokens(Seq[ChannelBuffer]("CLIENT_ERROR", errorMessage))
     val error = decodingToResponse.decode(null, null, buffer).asInstanceOf[protocol.Error]

@@ -4,26 +4,28 @@ import com.twitter.finagle.memcached._
 import com.twitter.util.Await
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.FunSuite
 
 @RunWith(classOf[JUnitRunner])
-class PoolingReadRepairClientTest extends FunSuite with BeforeAndAfter {
-  var full: MockClient = null
-  var partial: MockClient = null
-  var pooled: Client = null
-  var pooledNoRepair: Client = null
+class PoolingReadRepairClientTest extends FunSuite {
 
-  before {
-    full = new MockClient(Map("key" -> "value", "foo" -> "bar"))
-    partial = new MockClient(Map("key" -> "value"))
-    pooled = new PoolingReadRepairClient(Seq(full, partial), 1, 1)
+  class Context {
+    val full: MockClient = new MockClient(Map("key" -> "value", "foo" -> "bar"))
+    val partial: MockClient = new MockClient(Map("key" -> "value"))
+    val pooled: Client = new PoolingReadRepairClient(Seq(full, partial), 1, 1)
   }
 
   test("return the correct value") {
+    val context = new Context
+    import context._
+
     assert(Await.result(pooled.withStrings.get("key")) === Some("value"))
   }
 
   test("return the correct value and read-repair") {
+    val context = new Context
+    import context._
+
     assert(partial.map.size                            === 1)
     assert(Await.result(pooled.withStrings.get("foo")) === Some("bar"))
     assert(partial.map.size                            === 2)

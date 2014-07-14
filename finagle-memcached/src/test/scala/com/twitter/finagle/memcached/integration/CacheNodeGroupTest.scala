@@ -69,8 +69,7 @@ class CacheNodeGroupTest extends FunSuite with BeforeAndAfterEach {
     assert(myPool.members forall(_.key.isDefined))
   }
 
-  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined)
-    test("add and remove") {
+  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) test("add and remove") {
       // the cluster initially must have 5 members
       val myPool = new ZookeeperCacheNodeGroup(zkPath, zookeeperClient)
       assert(waitForMemberSize(myPool, 0, 5))
@@ -119,8 +118,7 @@ class CacheNodeGroupTest extends FunSuite with BeforeAndAfterEach {
       currentMembers = myPool.members
     }
 
-  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined)
-    test("node key remap") {
+  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) test("node key remap") {
       // turn on detecting key remapping
       val output: ByteArrayOutputStream = new ByteArrayOutputStream
       CachePoolConfig.jsonCodec.serialize(CachePoolConfig(5, detectKeyRemapping = true), output)
@@ -160,8 +158,7 @@ class CacheNodeGroupTest extends FunSuite with BeforeAndAfterEach {
       assert(myPool.members == currentMembers, myPool.members + " should equal to " + currentMembers)
     }
 
-  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined)
-    test("zk failures test") {
+  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) test("zk failures test") {
       // the cluster initially must have 5 members
       val myPool = new ZookeeperCacheNodeGroup(zkPath, zookeeperClient)
       assert(waitForMemberSize(myPool, 0, 5))

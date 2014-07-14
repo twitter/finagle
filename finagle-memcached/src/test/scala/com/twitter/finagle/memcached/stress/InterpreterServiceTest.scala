@@ -41,7 +41,7 @@ class InterpreterServiceTest extends FunSuite with BeforeAndAfter {
       val key = _key + i
       Await.result(client(Delete(key)))
       Await.result(client(Set(key, 0, Time.epoch, value)))
-      Await.result(client(Get(Seq(key)))) === Values(Seq(Value(key, value, None, Some(zero))))
+      assert(Await.result(client(Get(Seq(key)))) === Values(Seq(Value(key, value, None, Some(zero)))))
     }
     val end = System.currentTimeMillis
     // println("%d ms".format(end - start))

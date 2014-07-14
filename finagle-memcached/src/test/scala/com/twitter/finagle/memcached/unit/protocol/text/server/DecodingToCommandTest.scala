@@ -11,35 +11,48 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.prop.TableDrivenPropertyChecks._
 
 @RunWith(classOf[JUnitRunner])
 class DecodingToCommandTest extends FunSuite {
 
-  val decodingToCommand = new DecodingToCommand
+  class Context {
+    val decodingToCommand = new DecodingToCommand
+    case class ExpectedTimeTable(expireTime: Int, expirationTime: Time)
+  }
 
   test("parseCommand SET with expire times") {
+    val context = new Context
+    import context._
+
     val key = "testKey"
     val flags = "0"
     val data = "Hello World"
     val dataSize = data.size.toString
 
-    Map(
-      //(expire time                 -> expected value)      -> allowed delta)
-      (0                             -> Time.epoch)          -> 0.seconds,
-      (200.seconds.fromNow.inSeconds -> 200.seconds.fromNow) -> 1.seconds,
-      (200                           -> 200.seconds.fromNow) -> 1.seconds
-    ) foreach { case ((exptime: Int, expectedExpiration: Time), delta: Duration) =>
-      val buffer = TokensWithData(Seq[ChannelBuffer]("set", key, flags, exptime.toString, dataSize), data, None)
+    val expireTimeTableData =
+      Table(
+        "expectedTime"                                                        -> "allowedDelta",
+        ExpectedTimeTable(0, Time.epoch)                                      -> 0.seconds,
+        ExpectedTimeTable(200.seconds.fromNow.inSeconds, 200.seconds.fromNow) -> 1.seconds,
+        ExpectedTimeTable(200, 200.seconds.fromNow)                           -> 1.seconds
+      )
+
+    forAll (expireTimeTableData) { (expectedTime: ExpectedTimeTable, allowedDelta: Duration) =>
+      val buffer = TokensWithData(Seq[ChannelBuffer]("set", key, flags, expectedTime.expireTime.toString, dataSize), data, None)
       val command = decodingToCommand.decode(null, null, buffer)
       assert(command.getClass === classOf[Set])
       val set = command.asInstanceOf[Set]
       assert(set.key.toString(Charsets.Utf8) === key)
       assert(set.value.toString(Charsets.Utf8) === data)
-      assert(set.expiry.moreOrLessEquals(expectedExpiration, delta))
+      assert(set.expiry.moreOrLessEquals(expectedTime.expirationTime, allowedDelta))
     }
   }
 
   test("parseCommand STAT") {
+    val context = new Context
+    import context._
+
     Seq(None, Some("slabs"), Some("items")).foreach { arg =>
       val cmd: Seq[ChannelBuffer] = arg match {
         case None => Seq("stats")
