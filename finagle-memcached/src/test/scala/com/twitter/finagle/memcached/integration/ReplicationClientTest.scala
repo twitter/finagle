@@ -15,8 +15,8 @@ import com.twitter.finagle.memcached.{CachePoolCluster, CachePoolConfig, KetamaC
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.util.{Await, Return, Throw}
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
