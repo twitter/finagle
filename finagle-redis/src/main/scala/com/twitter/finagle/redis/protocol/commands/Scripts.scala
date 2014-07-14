@@ -5,20 +5,37 @@ import com.twitter.finagle.redis.protocol.Commands.trimList
 import com.twitter.finagle.redis.util._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
-case class Eval(script: ChannelBuffer) extends Command {
+case class Eval(
+    script: ChannelBuffer,
+    numkeys: Int,
+    keys: Seq[ChannelBuffer],
+    args: Seq[ChannelBuffer])
+  extends KeysCommand
+{
   def command = Commands.EVAL
-  def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(Seq(CommandBytes.EVAL, script))
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(
+      CommandBytes.EVAL,
+      script,
+      numkeys,
+      keys,
+      args))
 }
 
 object Eval {
   def apply(args: Seq[Array[Byte]]): Eval = {
-    val list = trimList(args, 1, Commands.EVAL)
-    Eval(ChannelBuffers.wrappedBuffer(list(0)))
+    val list = trimList(args, 3, Commands.EVAL)
+    val script = ChannelBuffers.wrappedBuffer(args(0))
+    val numkeys = RequireClientProtocol.safe {
+      NumberFormat.toInt(BytesToString(list(1)))
+    }
+    Eval(ChannelBuffers.wrappedBuffer(args(0)),
+      numkeys,
+      ChannelBuffers.wrappedBuffer(list(2)),
+      ChannelBuffers.wrappedBuffer(list(3)))
   }
 }
 
-case class EvalSha(script: ChannelBuffer) extends Command {
+case class EvalSha(script: ChannelBuffer) extends KeysCommand {
   def command = Commands.EVALSHA
   def toChannelBuffer =
     RedisCodec.toUnifiedFormat(Seq(CommandBytes.EVALSHA, script))
