@@ -11,7 +11,7 @@ import com.twitter.finagle.{Server, Service, ServiceFactory, ListeningServer}
 import com.twitter.util.{Closable, Duration, Future, Monitor, Timer}
 import java.net.SocketAddress
 
-/*
+/**
  * The default Server implementation. It is given a Listener (eg.
  * [[com.twitter.finagle.netty3.Netty3Listener]]) and a function,
  * serveTransport, that binds a transport and a service. It will then

@@ -19,7 +19,7 @@ private[finagle] object ReusingPool {
         val param.Stats(sr) = params[param.Stats]
         new ReusingPool(next, sr.scope("reusingpool"))
       }
-  }
+    }
 }
 
 /**
