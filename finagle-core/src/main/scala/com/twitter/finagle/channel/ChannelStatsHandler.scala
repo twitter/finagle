@@ -5,9 +5,9 @@ package com.twitter.finagle.channel
  * shared as to keep statistics across a number of channels.
  */
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.util.{Duration, Future, Stopwatch, Time}
+import com.twitter.util.{Duration, Future, Monitor, Stopwatch, Time}
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
-import java.util.logging.Logger
+import java.util.logging.{Level, Logger}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{ChannelHandlerContext, ChannelStateEvent,
   ExceptionEvent, MessageEvent, SimpleChannelHandler}
@@ -98,6 +98,9 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
     val m = if (e.getCause != null) e.getCause.getClass.getName else "unknown"
     exceptions.counter(m).incr()
+    // If no Monitor is active, then log the exception so we don't fail silently.
+    if (!Monitor.isActive)
+      log.log(Level.WARNING, "ChannelStatsHandler caught an exception", e.getCause)
     super.exceptionCaught(ctx, e)
   }
 
