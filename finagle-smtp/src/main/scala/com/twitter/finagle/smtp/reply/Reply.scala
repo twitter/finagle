@@ -1,17 +1,31 @@
 package com.twitter.finagle.smtp.reply
 
+/**
+ * Basic trait for all SMTP replies. Describes a reply
+ * whose type is not yet specified by decoding.
+ */
 trait UnspecifiedReply {
   val code: Int
   val info: String
 
-  val isMultiline: Boolean = false
-  val lines: Seq[String] = Seq(info)
+  def isMultiline: Boolean = false
+
+  /**
+   * @return Sequence containing reply lines
+   *         (or just the informational line
+   *         in case of a single-line reply)*/
+  def lines: Seq[String] = Seq(info)
 }
 
+/**
+ * A non-terminal part of a multiline reply.
+ */
 case class NonTerminalLine(code: Int, info: String) extends UnspecifiedReply
 
+/**
+ * Contains all known SMTP reply codes.
+ */
 object ReplyCode {
-
   val SYSTEM_STATUS               = 211
   val HELP                        = 214
   val SERVICE_READY               = 220
@@ -40,5 +54,9 @@ object ReplyCode {
   val INVALID_REPLY_CODE          = -1
 }
 
+/**
+ * Basic trait for all SMTP replies whose type
+ * is already specified by decoding.
+ */
 trait Reply extends UnspecifiedReply
 

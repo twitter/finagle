@@ -3,7 +3,9 @@ package com.twitter.finagle.smtp.transport
 import org.jboss.netty.channel.{Channels, MessageEvent, ChannelHandlerContext, SimpleChannelUpstreamHandler}
 import com.twitter.finagle.smtp.reply._
 
-/*Aggregates replies in one multiline reply*/
+/**
+ *  Aggregates multiline reply lines into one multiline reply.
+ */
 case class AggregateMultiline(multiline_code: Int, lns: Seq[String]) extends SimpleChannelUpstreamHandler {
   import CodecUtil._
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = {
@@ -30,7 +32,8 @@ case class AggregateMultiline(multiline_code: Int, lns: Seq[String]) extends Sim
         }
         Channels.fireMessageReceived(ctx, invalid)
       }
-      //last element in the list
+
+      // last element in the list
       case last: UnspecifiedReply => {
         val multiline = new UnspecifiedReply {
           val info: String = lns.head

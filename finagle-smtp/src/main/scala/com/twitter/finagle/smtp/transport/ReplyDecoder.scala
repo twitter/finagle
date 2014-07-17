@@ -6,7 +6,16 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.util.CharsetUtil
 import com.twitter.finagle.smtp.reply._
 
-class ReplyDecoder extends LineBasedFrameDecoder(500) {
+/**
+ * Decodes SMTP replies from lines ending with <CRLF>.
+ * An SMTP reply is a three-digit code followed by
+ * space and an optional informational string.
+ *
+ * If the three-digit code is followed by a hyphen,
+ * treats the line as a part of a multiline reply
+ * and passes it to [[com.twitter.finagle.smtp.transport.AggregateMultiline]].
+ */
+class ReplyDecoder extends LineBasedFrameDecoder(1000) {
   import CodecUtil._
   override def decode(ctx: ChannelHandlerContext, channel: Channel, msg: ChannelBuffer): UnspecifiedReply = {
     val buf = super.decode(ctx, channel, msg)

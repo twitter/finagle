@@ -7,21 +7,37 @@ import com.twitter.finagle.smtp.reply._
 import com.twitter.logging.Logger
 
 object SmtpClientDispatcher {
+  /**
+   * Satisfy the promise and return a Future[Unit] immediately.
+   *
+   * @param p     The promise to satisfy
+   * @param value The value to satisfy the promise with
+   * @return      [[Future.Done]]*/
   private def makeUnit[T](p: Promise[T], value: => T): Future[Unit] = {
    p.updateIfEmpty(Try(value))
    Future.Done
   }
 }
 
+
+/**
+ * A ClientDispatcher that implements SMTP client/server protocol.
+ */
 class SmtpClientDispatcher(trans: Transport[Request, UnspecifiedReply])
 extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](trans){
   import GenSerialClientDispatcher.wrapWriteException
   import SmtpClientDispatcher._
   import ReplyCode._
 
+  /** Logs client requests and server replies. */
   val log = Logger(getClass)
 
-  /*Connection phase: should receive greeting from the server*/
+  /**
+   * Performs the connection phase. This is done once
+   * before any client-server exchange. Upon the connection
+   * the server should send greeting. If the greeting is
+   * not correct, the service is closed.
+   */
   private val connPhase: Future[Unit] = {
     trans.read flatMap { greet =>
       val p = new Promise[Reply]
@@ -37,7 +53,7 @@ extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](tra
   }
 
   /**
-   * Dispatch a request, satisfying Promise `p` with the response;
+   * Dispatch and log a request, satisfying Promise `p` with the response;
    * the returned Future is satisfied when the dispatch is complete:
    * only one request is admitted at any given time.
    */
@@ -61,6 +77,12 @@ extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](tra
     }
   }
 
+  /**
+   * Constructs a specified [[Reply]] judging by the code
+   * of a given [[UnspecifiedReply]].
+   *
+   * @param resp The reply to specify
+   */
   private def getSpecifiedReply(resp: UnspecifiedReply): Reply = resp match {
     case specified: Reply => specified
     case _: UnspecifiedReply => {
@@ -171,6 +193,13 @@ extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](tra
     }
   }
 
+  /**
+   * Satisfies given promise with the specified version of a given reply
+   * and logs it.
+   *
+   * @param rep The reply to specify
+   * @param p   The satisfied promise
+   */
   private def decodeReply(rep: UnspecifiedReply, p: Promise[Reply]): Future[Unit] = {
     if (rep.isMultiline) {
       val start = "server:\r\n" + rep.code + "-"

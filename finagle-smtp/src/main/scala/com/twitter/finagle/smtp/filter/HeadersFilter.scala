@@ -6,6 +6,9 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import com.twitter.finagle.smtp.{MailingAddress, EmailBuilder, EmailMessage}
 
+/**
+ * Adds email headers to message body.
+ */
 object HeadersFilter extends SimpleFilter[EmailMessage, Unit] {
    def apply(msg: EmailMessage, send: Service[EmailMessage, Unit]): Future[Unit] = {
      val fields = Seq(

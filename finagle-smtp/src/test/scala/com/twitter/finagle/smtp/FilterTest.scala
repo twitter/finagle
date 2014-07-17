@@ -81,7 +81,7 @@ class MailFilterTest extends FunSuite {
               .from("from@test.com")
               .to("to@test.com")
               .subject("test")
-              .bodyLines("body")
+              .addBodyLines("body")
               .build
     val mailFilterService = MailFilter andThen MailTestService(msg)
     val test = mailFilterService(msg)
@@ -106,13 +106,13 @@ class HeaderFilterTest extends FunSuite {
     .from("from@test.com")
     .to("to@test.com")
     .subject("test")
-    .bodyLines("body")
+    .addBodyLines("body")
     .build
   val multipleAddressMsg = EmailBuilder()
     .from("from1@test.com", "from2@test.com")
     .to("to1@test.com", "to2@test.com")
     .subject("test")
-    .bodyLines("body")
+    .addBodyLines("body")
     .build
 
   test("result message has all necessary headers") {

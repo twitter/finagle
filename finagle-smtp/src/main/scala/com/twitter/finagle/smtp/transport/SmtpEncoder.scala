@@ -6,7 +6,9 @@ import org.jboss.netty.util.CharsetUtil
 import com.twitter.util.NonFatal
 import com.twitter.finagle.smtp.Request
 
-
+/**
+ * Encodes a Request into a ChannelBuffer.
+ */
 class SmtpEncoder extends SimpleChannelDownstreamHandler {
   override def writeRequested(ctx: ChannelHandlerContext, evt: MessageEvent) =
     evt.getMessage match {

@@ -5,6 +5,11 @@ import com.twitter.finagle.smtp._
 import com.twitter.util.Future
 import com.twitter.finagle.smtp.reply.Reply
 
+/**
+ * Duplicates dots in the beginning of each line of email body for transparency
+ * (see [[http://tools.ietf.org/search/rfc5321#section-4.5.2]]) and adds a terminating
+ * <CRLF>.<CRLF>
+ */
 object DataFilter extends SimpleFilter[Request, Reply] {
    override def apply(req: Request, send: Service[Request, Reply]): Future[Reply] = req match {
      case Request.Data(lines: Seq[String]) => {

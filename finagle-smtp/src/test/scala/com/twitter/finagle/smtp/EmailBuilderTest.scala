@@ -80,7 +80,7 @@ class EmailBuilderTest extends FunSuite {
   }
 
   test("body") {
-    val addlines = defaultBuilder.bodyLines("line1").bodyLines("line2")
+    val addlines = defaultBuilder.addBodyLines("line1").addBodyLines("line2")
     assert(addlines.payload.body === Seq("line1", "line2"), "add lines to body")
     val setlines = addlines.setBodyLines(Seq("line3"))
     assert(setlines.payload.body === Seq("line3"), "set lines of body")

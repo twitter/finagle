@@ -5,8 +5,14 @@ import com.twitter.finagle.smtp._
 import com.twitter.util.Future
 import com.twitter.finagle.smtp.reply.Reply
 
-/*Filter for parsing email and sending corresponding commands, then aggregating results*/
+/**
+ * Sends [[com.twitter.finagle.smtp.EmailMessage]], transforming it to a sequence of SMTP commands.
+ */
 object MailFilter extends Filter[EmailMessage, Unit, Request, Reply]{
+  /**
+   * @return [[Future.Done]] if the message was sent successfully,
+   *        or the first encountered error.
+   */
    override def apply(msg: EmailMessage, send: Service[Request, Reply]): Future[Unit] = {
      val SendEmailRequest: Seq[Request] =
        Seq(Request.AddSender(msg.getSender))   ++

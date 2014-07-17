@@ -2,7 +2,8 @@ package com.twitter.finagle.smtp.reply
 
 import ReplyCode._
 
-/*Syntax errors*/
+/* Syntax errors */
+
 case class SyntaxError(info: String) extends SyntaxErrorReply {
   val code = SYNTAX_ERROR
 }
@@ -20,7 +21,8 @@ case class ParameterNotImplemented(info: String) extends SyntaxErrorReply {
   val code = PARAMETER_NOT_IMPLEMENTED
 }
 
-/*System information*/
+/* System information */
+
 case class SystemStatus(info: String) extends SystemInfoReply {
   val code = SYSTEM_STATUS
 }
@@ -28,7 +30,8 @@ case class Help(info: String) extends SystemInfoReply {
   val code = HELP
 }
 
-/*Service information*/
+/* Service information */
+
 case class ServiceReady(domain: String, info: String) extends ServiceInfoReply {
   val code = SERVICE_READY
 }
@@ -39,7 +42,8 @@ case class ServiceNotAvailable(info: String) extends NotAvailableReply {
   val code = SERVICE_NOT_AVAILABLE
 }
 
-/*Mail system successes*/
+/* Mail system successes */
+
 case class OK(info: String) extends MailOkReply {
   val code = OK_REPLY
 }
@@ -54,7 +58,8 @@ case class StartInput(info: String) extends MailIntermediateReply {
   val code = START_INPUT
 }
 
-/*Mail system errors*/
+/* Mail system errors */
+
 case class MailboxUnavailableError(info: String) extends MailErrorReply {
   val code = MAILBOX_UNAVAILABLE_ERROR
 }
@@ -74,7 +79,8 @@ case class AddressNotRecognized(info: String) extends MailErrorReply {
   val code = ADDRESS_NOT_RECOGNIZED
 }
 
-/*Errors in performing requested action*/
+/* Errors in performing requested action */
+
 case class TempMailboxUnavailable(info: String) extends ActionErrorReply {
   val code = TEMP_MAILBOX_UNAVAILABLE
 }
