@@ -15,7 +15,7 @@ class RequestSnooperTest extends FunSuite with MockitoSugar {
     val ctr = mock[ByteCounter]
     val quantile = 0.50
 
-    when(ctr.rate()).thenReturn(100)
+    when(ctr.rate()).thenReturn(1)
 
     Time.withCurrentTimeFrozen { ctl =>
       when(ctr.lastGc).thenReturn(Time.now - 5.seconds)
@@ -30,7 +30,7 @@ class RequestSnooperTest extends FunSuite with MockitoSugar {
         snooper.observe(3.seconds)
       ctl.advance(12.seconds)
       tmr.tick()
-      assert(snooper.handleBytes() === 200.bytes)
+      assert(snooper.handleBytes() === 2000.bytes)
     }
   }
 
@@ -38,7 +38,7 @@ class RequestSnooperTest extends FunSuite with MockitoSugar {
     val ctr = mock[ByteCounter]
     val quantile = 0.50
 
-    when(ctr.rate()).thenReturn(100)
+    when(ctr.rate()).thenReturn(1)
 
     Time.withCurrentTimeFrozen { ctl =>
       when(ctr.lastGc).thenReturn(Time.now - 5.seconds)
@@ -55,7 +55,7 @@ class RequestSnooperTest extends FunSuite with MockitoSugar {
         snooper.observe(8.seconds)
       ctl.advance(12.seconds)
       tmr.tick()
-      assert(snooper.handleBytes() === 200.bytes)
+      assert(snooper.handleBytes() === 2000.bytes)
     }
   }
 }

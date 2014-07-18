@@ -57,7 +57,7 @@ private[finagle] class ClockedDrainer(
     val r = space.left
     if (r <= StorageUnit.zero) Duration.Zero
     else if (rate <= 0) 10.milliseconds
-    else (r.inBytes / rate).seconds
+    else (r.inBytes / rate).toLong.milliseconds
   }
 
   private object stats {

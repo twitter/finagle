@@ -57,7 +57,7 @@ private[lease] class RequestSnooper(
     lr.record("discountHistoMs", histo.getQuantile(quantile).toString)
     lr.record("discountRate", counter.rate().toString)
 
-    (histo.getQuantile(quantile).milliseconds.inSeconds * counter.rate()).bytes
+    (histo.getQuantile(quantile) * counter.rate()).toLong.bytes
   }
 }
 

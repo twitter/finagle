@@ -17,7 +17,7 @@ class CoordinatorTest extends ExecElsewhere with MockitoSugar {
     val coord = new Coordinator(ctr)
     val nfo = mock[JvmInfo]
     when(ctr.info).thenReturn(nfo)
-    when(ctr.rate()).thenReturn(1000)
+    when(ctr.rate()).thenReturn(1)
   }
 
   test("Coordinator gateCycles properly") {
