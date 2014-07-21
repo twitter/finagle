@@ -26,22 +26,37 @@ object Eval {
     val numkeys = RequireClientProtocol.safe {
       NumberFormat.toInt(BytesToString(list(1)))
     }
-    Eval(ChannelBuffers.wrappedBuffer(args(0)),
+    Eval(script,
       numkeys,
       Seq(ChannelBuffers.wrappedBuffer(list(2))),
       Seq(ChannelBuffers.wrappedBuffer(list(3))))
   }
 }
 
-case class EvalSha(script: ChannelBuffer) extends KeysCommand {
+case class EvalSha(
+    sha1: ChannelBuffer,
+    numkeys: Int,
+    keys: Seq[ChannelBuffer],
+    args: Seq[ChannelBuffer])
+  extends KeysCommand
+{
   def command = Commands.EVALSHA
-  def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(Seq(CommandBytes.EVALSHA, script))
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(
+    CommandBytes.EVALSHA,
+    sha1,
+    StringToChannelBuffer(numkeys.toString)) ++ keys ++ args)
 }
 
 object EvalSha {
   def apply(args: Seq[Array[Byte]]): EvalSha = {
-    val list = trimList(args, 1, Commands.EVALSHA)
-    EvalSha(ChannelBuffers.wrappedBuffer(list(0)))
+    val list = trimList(args, 3, Commands.EVALSHA)
+    val sha1 = ChannelBuffers.wrappedBuffer(args(0))
+    val numkeys = RequireClientProtocol.safe {
+      NumberFormat.toInt(BytesToString(list(1)))
+    }
+    EvalSha(sha1,
+      numkeys,
+      Seq(ChannelBuffers.wrappedBuffer(list(2))),
+      Seq(ChannelBuffers.wrappedBuffer(list(3))))
   }
 }

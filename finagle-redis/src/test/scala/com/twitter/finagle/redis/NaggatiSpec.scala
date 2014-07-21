@@ -645,9 +645,9 @@ class NaggatiSpec extends SpecificationWithJUnit {
         "script commands" >> {
           "EVAL" >> {
             unwrap(codec(wrap("EVAL 'return {KEYS[1],KEYS[2],ARGV[1],ARGV[2]}' 2 foo bar baz boo\r\n"))) {
-              case Eval(script, numkeys, keys, args) => {
-                BytesToString(value.array) mustEqual "foo bar baz boo"
-              }
+              case Eval(script, numkeys, keys, args) =>
+                keys mustEqual "foo bar"
+                args mustEqual "baz boo"
             }
           }
         } // script commands
