@@ -16,9 +16,7 @@ case class Eval(
   def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(
       CommandBytes.EVAL,
       script,
-      numkeys,
-      keys,
-      args))
+      StringToChannelBuffer(numkeys.toString)) ++ keys ++ args)
 }
 
 object Eval {
@@ -30,8 +28,8 @@ object Eval {
     }
     Eval(ChannelBuffers.wrappedBuffer(args(0)),
       numkeys,
-      ChannelBuffers.wrappedBuffer(list(2)),
-      ChannelBuffers.wrappedBuffer(list(3)))
+      Seq(ChannelBuffers.wrappedBuffer(list(2))),
+      Seq(ChannelBuffers.wrappedBuffer(list(3))))
   }
 }
 
