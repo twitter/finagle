@@ -154,13 +154,14 @@ private[finagle] abstract class StackClient[Req, Rep](
       protected type Out = self.Out
       protected val newTransporter = self.newTransporter
       protected val newDispatcher = self.newDispatcher
+      override protected val endpointer = self.endpointer
     }
 
   /**
    * A stackable module that creates new `Transports` (via transporter)
    * when applied.
    */
-  private[this] val endpointer = new Stack.Simple[ServiceFactory[Req, Rep]](Endpoint) {
+  protected val endpointer = new Stack.Simple[ServiceFactory[Req, Rep]](Endpoint) {
     val description = "Send requests over the wire"
     def make(prms: Stack.Params, next: ServiceFactory[Req, Rep]) = {
       val Transporter.EndpointAddr(addr) = prms[Transporter.EndpointAddr]

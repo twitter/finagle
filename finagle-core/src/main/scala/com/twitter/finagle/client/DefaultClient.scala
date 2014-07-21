@@ -2,20 +2,15 @@ package com.twitter.finagle.client
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.factory._
+import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.filter.{ExceptionSourceFilter, MonitorFilter}
-import com.twitter.finagle.loadbalancer.{
-  HeapBalancer, DefaultBalancerFactory, WeightedLoadBalancerFactory}
-import com.twitter.finagle.service._
-import com.twitter.finagle.stats.{
-  BroadcastStatsReceiver, ClientStatsReceiver, NullStatsReceiver, RollupStatsReceiver,
-  StatsReceiver}
+import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, DefaultBalancerFactory, WeightedLoadBalancerFactory}
+import com.twitter.finagle.service.{ExpiringService, FailureAccrualFactory, FailFastFactory, TimeoutFilter}
+import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.util.{
-  DefaultMonitor, DefaultTimer, LoadedReporterFactory, ReporterFactory}
-import com.twitter.util.{Duration, Time, Future, Monitor, Return, Timer, Throw, Var}
+import com.twitter.finagle.util.{DefaultMonitor, DefaultTimer, LoadedReporterFactory, ReporterFactory}
+import com.twitter.util.{Duration, Monitor, Timer, Var}
 import java.net.{SocketAddress, InetSocketAddress}
-import java.util.logging.{Level, Logger}
 
 object DefaultClient {
   private val defaultFailureAccrual: ServiceFactoryWrapper =
@@ -72,157 +67,63 @@ case class DefaultClient[Req, Rep](
   monitor: Monitor = DefaultMonitor,
   reporter: ReporterFactory = LoadedReporterFactory,
   loadBalancer: WeightedLoadBalancerFactory = DefaultBalancerFactory
-) extends Client[Req, Rep] {
-  com.twitter.finagle.Init()
-  private[this] val log = Logger.getLogger(getClass.getName)
+) extends Client[Req, Rep] { outer =>
 
-  /** Bind a socket address to a well-formed stack */
+  private[this] def transform(stack: Stack[ServiceFactory[Req, Rep]]) = {
+    val stk = stack
+      .replace(FailureAccrualFactory.FailureAccrual, failureAccrual)
+      .replace(StackClient.Role.Pool, pool(statsReceiver))
+
+    if (!failFast) stk.remove(FailFastFactory.FailFast) else stk
+  }
+
+  private[this] val clientStack = transform(StackClient.newStack[Req, Rep])
+  private[this] val endpointStack = transform(StackClient.endpointStack[Req, Rep])
+
+  private[this] val params = Stack.Params.empty +
+    param.Label(name) +
+    param.Timer(timer) +
+    param.Monitor(monitor) +
+    param.Stats(statsReceiver) +
+    param.Tracer(tracer) +
+    param.Reporter(reporter) +
+    LoadBalancerFactory.HostStats(hostStatsReceiver) +
+    LoadBalancerFactory.Param(loadBalancer) +
+    TimeoutFactory.Param(serviceTimeout) +
+    TimeoutFilter.Param(requestTimeout) +
+    ExpiringService.Param(maxIdletime, maxLifetime)
+
+  private[this] val underlying = new StackClient[Req, Rep](clientStack, params) {
+    protected type In = Req
+    protected type Out = Rep
+    // The default client forces users to compose these two as part of
+    // the `endpointer`. We ignore them and instead override the
+    // endpointer directly.
+    lazy val unimplemented = throw new Exception("unimplemented")
+    val newTransporter = Function.const(unimplemented) _
+    val newDispatcher = Function.const(unimplemented) _
+
+    override protected val endpointer = new Stack.Simple[ServiceFactory[Req, Rep]](
+      com.twitter.finagle.stack.Endpoint) {
+      val description = "Send requests over the wire"
+      def make(params: Stack.Params, next: ServiceFactory[Req, Rep]) = {
+        val param.Stats(sr) = params[param.Stats]
+        val Transporter.EndpointAddr(addr) = params[Transporter.EndpointAddr]
+        outer.endpointer(addr, sr)
+      }
+    }
+  }
+
+  def newClient(dest: Name, label: String) =
+    underlying.newClient(dest, label)
+
+  // These are kept around to not break the API. They probably should
+  // have been private[finagle] to begin with.
+  val newStack: Name => ServiceFactory[Req, Rep] = newClient(_, name)
+  val newStack0: Var[Addr] => ServiceFactory[Req, Rep] = va => {
+    clientStack.make(params + LoadBalancerFactory.Dest(va))
+  }
   val bindStack: SocketAddress => ServiceFactory[Req, Rep] = sa => {
-    val hostStats = if (hostStatsReceiver.isNull) statsReceiver else {
-      val host = new RollupStatsReceiver(hostStatsReceiver.scope(
-        sa match {
-         case ia: InetSocketAddress => "%s:%d".format(ia.getHostName, ia.getPort)
-         case other => other.toString
-        }))
-      BroadcastStatsReceiver(Seq(host, statsReceiver))
-    }
-
-    val lifetimeLimited: Transformer[Req, Rep] = {
-      val idle = if (maxIdletime < Duration.Top) Some(maxIdletime) else None
-      val life = if (maxLifetime < Duration.Top) Some(maxLifetime) else None
-
-      if (!idle.isDefined && !life.isDefined) identity else {
-        factory => factory map { service =>
-          val closeOnRelease = new CloseOnReleaseService(service)
-          new ExpiringService(closeOnRelease, idle, life, timer, hostStats) {
-            def onExpire() { closeOnRelease.close() }
-          }
-        }
-      }
-    }
-
-    val exceptionSourceFilter: Transformer[Req, Rep] = { factory =>
-      new ExceptionSourceFilter[Req, Rep](name) andThen factory
-    }
-
-    val timeBounded: Transformer[Req, Rep] = {
-      if (requestTimeout == Duration.Top) identity else {
-        val exception = new IndividualRequestTimeoutException(requestTimeout)
-        factory => new TimeoutFilter(requestTimeout, exception, timer) andThen factory
-      }
-    }
-
-    val fastFailed: Transformer[Req, Rep] =
-      if (!failFast) identity else
-        factory => new FailFastFactory(factory, hostStats.scope("failfast"), timer)
-
-    val observed: Transformer[Req, Rep] = {
-      val filter = new StatsFilter[Req, Rep](hostStats)
-      factory => filter andThen new StatsServiceFactory[Req, Rep](factory, hostStats)
-    }
-
-    val monitored: Transformer[Req, Rep] = {
-      val filter = new MonitorFilter[Req, Rep](reporter(name, Some(sa)) andThen monitor)
-      factory => filter andThen factory
-    }
-
-    val traceDest: Transformer[Req, Rep] = {
-      val filter = new ClientDestTracingFilter[Req,Rep](sa)
-      factory => filter andThen factory
-    }
-
-    val newStack: SocketAddress => ServiceFactory[Req, Rep] = exceptionSourceFilter compose
-      monitored compose
-      traceDest compose
-      observed compose
-      failureAccrual compose
-      timeBounded compose
-      pool(hostStats) compose
-      fastFailed compose
-      lifetimeLimited compose
-      (endpointer(_, hostStats))
-
-    newStack(sa)
+    endpointStack.make(params + Transporter.EndpointAddr(sa))
   }
-
-
-  val newStack0: Var[Addr] => ServiceFactory[Req, Rep] = {
-    val refcounted: Transformer[Req, Rep] = new RefcountedFactory(_)
-
-    val timeLimited: Transformer[Req, Rep] = factory =>
-      if (serviceTimeout == Duration.Top) factory else {
-        val exception = new ServiceTimeoutException(serviceTimeout)
-        exception.serviceName = name
-        new TimeoutFactory(factory, serviceTimeout, exception, timer)
-      }
-
-    val traced: Transformer[Req, Rep] = new TracingFilter[Req, Rep](tracer, name) andThen _
-
-    val observed: Transformer[Req, Rep] =
-      new StatsFactoryWrapper(_, statsReceiver.scope("service_creation"))
-
-    val noBrokersException = new NoBrokersAvailableException(name)
-
-    // Name is bound(!)
-    val balanced: Var[Addr] => ServiceFactory[Req, Rep] = va => {
-      // TODO: load balancer consumes Var[Addr] directly., 
-      // or at least Var[SocketAddress]
-      val g = Group.mutable[SocketAddress]()
-
-      val observation = va.observe {
-        case Addr.Bound(sockaddrs) =>
-          g() = sockaddrs
-        case Addr.Failed(e) =>
-          g() = Set()
-          log.log(Level.WARNING, "Name binding failure", e)
-        case Addr.Pending =>
-          log.log(Level.WARNING, "Name resolution is pending")
-          g() = Set()
-        case Addr.Neg =>
-          log.log(Level.WARNING, "Name resolution for " + name + "  failed")
-          g() = Set()
-      }
-
-      // TODO: use com.twitter.util.Event here
-      val endpoints = g map {
-        case WeightedSocketAddress(sa, w) => (bindStack(sa), w)
-        case sa => (bindStack(sa), 1D)
-      }
-
-      val balanced = loadBalancer.newLoadBalancer(
-        endpoints.set, statsReceiver.scope("loadbalancer"),
-        noBrokersException)
-
-      // observeUntil fails the future on interrupts, but ready
-      // should not be interruptible DelayedFactory implicitly masks
-      // this future--interrupts will not be propagated to it
-      val ready = va.observeUntil(_ != Addr.Pending)
-      val f = ready map (_ => balanced)
-
-      // TODO: should we retain a count for the number of clients here?
-
-      new DelayedFactory(f) {
-        override def close(deadline: Time) =
-          Future.join(observation.close(deadline), super.close(deadline)).unit
-      }
-    }
-
-    traced compose
-      observed compose
-      timeLimited compose
-      refcounted compose
-      balanced
-  }
-
-  val newStack: Name => ServiceFactory[Req, Rep] = {
-    case Name.Path(path) =>
-      new BindingFactory(path, newStack0, statsReceiver.scope("interpreter"))
-    case Name.Bound(addr) =>
-      newStack0(addr)
-  }
-
-  def newClient(dest: Name, label: String) = copy(
-    statsReceiver = statsReceiver.scope(label),
-    hostStatsReceiver = hostStatsReceiver.scope(label)
-  ).newStack(dest)
 }
