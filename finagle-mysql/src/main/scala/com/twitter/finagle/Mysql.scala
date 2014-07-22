@@ -105,7 +105,7 @@ class MysqlClient(client: StackClient[Request, Result])
 /**
  * @example {{{
  * val client = Mysql
- *   .withCredentials("<username>", "<password>")
+ *   .withCredentials("username", "password")
  *   .withDatabase("db")
  *   .newRichClient("inet!localhost:3306")
  * }}}
