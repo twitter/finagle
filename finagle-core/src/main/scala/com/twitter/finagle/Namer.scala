@@ -95,31 +95,48 @@ object Namer  {
    */
   val global: Namer = new Namer {
     val namerOfKind: (String => Namer) = Memoize {
-      kind => 
+      kind =>
         try Class.forName(kind).newInstance().asInstanceOf[Namer] catch {
           case NonFatal(exc) => FailingNamer(exc)
         }
     }
 
+    private[this] object InetPath {
+      def unapply(path: Path): Option[InetSocketAddress] = path match {
+        case Path.Utf8("$", "inet", IntegerString(port)) =>
+          Some(new InetSocketAddress(port))
+        case Path.Utf8("$", "inet", host, IntegerString(port)) =>
+          Some(new InetSocketAddress(host, port))
+        case _ => None
+      }
+    }
+
+    private[this] object NilPath {
+      val prefix = Path.Utf8("$", "nil")
+
+      def unapply(path: Path): Boolean =
+        path startsWith prefix
+    }
+
+    private[this] object NamerPath {
+      def unapply(path: Path): Option[(Namer, Path)] = path match {
+        case Path.Utf8("$", kind, rest@_*) => Some((namerOfKind(kind), Path.Utf8(rest: _*)))
+        case _ => None
+      }
+    }
+
     def lookup(path: Path): Activity[NameTree[Name]] = path match {
-      case Path.Utf8("$", "inet", "", IntegerString(port)) =>
-        Activity.value(Leaf(Name.bound(new InetSocketAddress(port))))
-
-      case Path.Utf8("$", "inet", host, IntegerString(port)) =>
-        Activity.value(Leaf(Name.bound(new InetSocketAddress(host, port))))
-
-      case Path.Utf8("$", "nil", _*) => Activity.value(Empty)
-      case Path.Utf8("$", kind, rest@_*) => namerOfKind(kind).lookup(Path.Utf8(rest:_*))
+      case InetPath(addr) => Activity.value(Leaf(Name.bound(addr)))
+      case NilPath() => Activity.value(Empty)
+      case NamerPath(namer, rest) => namer.lookup(rest)
       case _ => Activity.value(Neg)
     }
 
     def enum(prefix: Path) = prefix match {
-      case Path.Utf8("$", kind, rest@_*) =>
-        namerOfKind(kind).enum(Path.Utf8(rest:_*))
-      case Path.Utf8("$", "nil", _*) => Activity.value(Dtab.empty)
-      case _ => 
-        // We can't efficiently enumerate the 'kind' namespace
-        // without some sort of service loading.
+      case NilPath() => Activity.value(Dtab.empty)
+      case NamerPath(namer, rest) => namer.enum(rest)
+      case _ =>
+        // Can't enumerate the 'inet' namespace
         Activity.exception(new UnsupportedOperationException)
     }
 

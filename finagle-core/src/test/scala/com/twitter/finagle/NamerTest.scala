@@ -1,13 +1,13 @@
 package com.twitter.finagle
 
+import com.twitter.util.{Return, Throw, Activity, Witness, Try}
+import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import java.net.InetSocketAddress
-import com.twitter.util.{Return, Throw, Activity, Witness, Try}
+import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 
 @RunWith(classOf[JUnitRunner])
-class NamerTest extends FunSuite {
+class NamerTest extends FunSuite with AssertionsForJUnit {
   trait Ctx {
     def ia(i: Int) = new InetSocketAddress(i)
 
@@ -104,10 +104,33 @@ class NamerTest extends FunSuite {
     assertEval(res, ia(3)) 
   })
 
+  test("Namer.global: /$/inet") {
+    assert(Namer.global.lookup(Path.read("/$/inet/1234")).sample()
+        === NameTree.Leaf(Name.bound(new InetSocketAddress(1234))))
+    assert(Namer.global.lookup(Path.read("/$/inet/127.0.0.1/1234")).sample()
+        === NameTree.Leaf(Name.bound(new InetSocketAddress("127.0.0.1", 1234))))
+
+    intercept[ClassNotFoundException] {
+      Namer.global.lookup(Path.read("/$/inet")).sample()
+    }
+
+    intercept[ClassNotFoundException] {
+      Namer.global.lookup(Path.read("/$/inet/1234/foobar")).sample()
+    }
+  }
+
   test("Namer.global: /$/nil") {
-    assert(Namer.global.lookup(Path.read("/$/nil")).sample() === NameTree.Empty)
+    assert(Namer.global.lookup(Path.read("/$/nil")).sample()
+        === NameTree.Empty)
     assert(Namer.global.lookup(Path.read("/$/nil/foo/bar")).sample()
-      === NameTree.Empty)
+        === NameTree.Empty)
+  }
+
+  test("Namer.global: negative resolution") {
+    assert(Namer.global.lookup(Path.read("/foo/bar/bah/blah")).sample()
+        === NameTree.Neg)
+    assert(Namer.global.lookup(Path.read("/foo/bar")).sample()
+        === NameTree.Neg)
   }
 
   test("Namer.expand") {
