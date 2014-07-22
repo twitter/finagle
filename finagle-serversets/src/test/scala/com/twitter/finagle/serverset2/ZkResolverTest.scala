@@ -76,8 +76,8 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
     )
 
     eventually {
-      assert(Var.sample(va1) === Addr.Bound(serviceAddr))
-      assert(Var.sample(va2) === Addr.Bound(epepAddr))
+      assert(Var.sample(va1) === Addr.Bound(WeightedSocketAddress(serviceAddr, 1.0)))
+      assert(Var.sample(va2) === Addr.Bound(WeightedSocketAddress(epepAddr, 1.0)))
     }
     
     status.leave()
