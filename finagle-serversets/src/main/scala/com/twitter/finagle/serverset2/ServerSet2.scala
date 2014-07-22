@@ -244,14 +244,14 @@ private[serverset2] object ZkServerSet2 {
 private[serverset2] case class ZkServerSet2(zk: Zk) extends ServerSet2 {
   import ZkServerSet2._
 
-  private[this] def dataOf(pat: String): Activity[Seq[(String, Buf)]] =
+  private[this] def dataOf(pat: String): Activity[Seq[(String, Option[Buf])]] =
     zk.globOf(pat) flatMap zk.collectImmutableDataOf
 
   def entriesOf(path: String, cache: PathCache): Activity[Set[Entry]] = {
     dataOf(path+EndpointGlob) map { pathmap =>
       val endpoints = pathmap flatMap {
         case (_, null) => None // no data
-        case (path, Buf.Utf8(data)) =>
+        case (path, Some(Buf.Utf8(data))) =>
           cache.entries.getIfPresent(path) match {
             case null =>
               val ents = Entry.parseJson(path, data)
@@ -270,7 +270,12 @@ private[serverset2] case class ZkServerSet2(zk: Zk) extends ServerSet2 {
   def vectorsOf(path: String, cache: PathCache): Activity[Set[Vector]] =
     dataOf(path+VectorGlob) map { pathmap =>
       val vectors = pathmap flatMap {
-        case (path, Buf.Utf8(data)) => 
+        case (path, None) =>
+          cache.vectors.getIfPresent(path) match {
+            case null => None
+            case vec => vec
+          }
+        case (path, Some(Buf.Utf8(data))) =>
           cache.vectors.getIfPresent(path) match {
             case null =>
               val vec = Vector.parseJson(data)

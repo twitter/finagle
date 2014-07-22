@@ -131,11 +131,11 @@ private class Zk(watchedZk: Watched[ZooKeeperReader], timerIn: Timer) {
   }
 
   private val immutableDataOf_ = Memoize { path: String =>
-    Activity(Var.async[Activity.State[Buf]](Activity.Pending) { v =>
+    Activity(Var.async[Activity.State[Option[Buf]]](Activity.Pending) { v =>
       safeRetry(zkr.getData(path), retryBackoffs) respond {
-        case Throw(exc) => v() = Activity.Failed(exc)
-        case Return(Node.Data(Some(data), _)) => v() = Activity.Ok(data)
-        case Return(_) => v() = Activity.Ok(Buf.Empty)
+        case Return(Node.Data(Some(data), _)) => v() = Activity.Ok(Some(data))
+        case Return(_) => v() = Activity.Ok(None)
+        case Throw(exc) => v() = Activity.Ok(None)
       }
 
       Closable.nop
@@ -148,14 +148,14 @@ private class Zk(watchedZk: Watched[ZooKeeperReader], timerIn: Timer) {
    * path. Note: this only works on immutable nodes. I.e. it does not
    * leave a watch on the node to look for changes.
    */
-  def immutableDataOf(path: String): Activity[Buf] =
+  def immutableDataOf(path: String): Activity[Option[Buf]] =
     immutableDataOf_(path)
 
   /**
    * Collect immutable data from a number of paths together.
    */
-  def collectImmutableDataOf(paths: Seq[String]): Activity[Seq[(String, Buf)]] = {
-    def pathDataOf(path: String): Activity[(String, Buf)] =
+  def collectImmutableDataOf(paths: Seq[String]): Activity[Seq[(String, Option[Buf])]] = {
+    def pathDataOf(path: String): Activity[(String, Option[Buf])] =
       immutableDataOf(path).map(path -> _)
 
     Activity.collect(paths map pathDataOf)
