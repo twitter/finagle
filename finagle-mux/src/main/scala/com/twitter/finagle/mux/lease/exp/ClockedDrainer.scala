@@ -156,7 +156,8 @@ private[finagle] class ClockedDrainer(
   private[lease] def drain() { // private[lease] for testing
     val sinceClosed = Stopwatch.start()
     startDraining()
-    finishDraining(sinceClosed)
+    finishDraining()
+    stats.drainTime.add(sinceClosed().inMilliseconds)
   }
 
   private[this] def startDraining() {
@@ -171,7 +172,7 @@ private[finagle] class ClockedDrainer(
       iter.next().issue(Duration.Zero)
   }
 
-  private[this] def finishDraining(sinceClosed: () => Duration) {
+  private[this] def finishDraining() {
     val maxWait = calculateMaxWait
 
     if (verbose) {
@@ -182,9 +183,7 @@ private[finagle] class ClockedDrainer(
         "; minDiscount="+space.minDiscount)
     }
 
-    coord.sleepUntilFinishedDraining(space, maxWait, sinceClosed, npending, log)
-
-    stats.drainTime.add(sinceClosed().inMilliseconds)
+    coord.sleepUntilFinishedDraining(space, maxWait, npending, log)
   }
 
   // GC

@@ -1,8 +1,9 @@
 package com.twitter.finagle.mux.lease.exp
 
-import com.twitter.util.Time
+import com.twitter.util.{Time, Duration}
 import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
-import com.twitter.conversions.time.intToTimeableNumber
+import com.twitter.conversions.time._
+import java.util.logging.Logger
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.Eventually
 import org.scalatest.FunSuite
@@ -86,6 +87,67 @@ class CoordinatorTest extends ExecElsewhere with MockitoSugar {
         { () =>
           x = 1
           ctl.advance(20.millisecond)
+        }
+      )
+    }
+  }
+
+  test("Coordinator sleeps until discount remaining") {
+    val ctx = new Ctx{}
+    import ctx._
+
+    val space = mock[MemorySpace]
+    when(space.discount()).thenReturn(5.megabytes)
+    when(nfo.remaining())
+      .thenReturn(10.megabytes)
+
+    @volatile var incr = 0
+
+    Time.withCurrentTimeFrozen { ctl =>
+      exec(
+        { () =>
+          coord.sleepUntilDiscountRemaining(space, () => incr += 1)
+        },
+        { () =>
+          when(nfo.remaining())
+            .thenReturn(5.megabytes)
+          ctl.advance(100.milliseconds)
+        }
+      )
+    }
+
+    assert(incr === 2)
+  }
+
+  test("Coordinator sleeps until finished draining") {
+    val ctx = new Ctx{}
+    import ctx._
+
+    val space = mock[MemorySpace]
+    when(space.left).thenReturn(5.megabytes)
+
+    when(nfo.committed()).thenReturn(5.megabytes)
+    when(nfo.remaining())
+      .thenReturn(10.megabytes)
+    when(nfo.generation()).thenReturn(0)
+
+    val maxWait = Duration.Top
+    @volatile var npending = 1
+    val log = Logger.getAnonymousLogger()
+
+    Time.withCurrentTimeFrozen { ctl =>
+      exec(
+        { () =>
+          coord.sleepUntilFinishedDraining(
+            space,
+            maxWait,
+            () => npending,
+            log
+          )
+        },
+        { () =>
+          npending = 0
+          ctl.advance(100.milliseconds)
         }
       )
     }
