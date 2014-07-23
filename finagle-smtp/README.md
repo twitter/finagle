@@ -1,6 +1,7 @@
 # finagle-smtp
 
-A minimum implementation of SMTP client for finagle. Supports sending plain text emails to one or more mailing addresses.
+A minimum implementation of SMTP client for finagle according to [`RFC5321`](http://tools.ietf.org/search/rfc5321). 
+Supports sending plain text emails to one or more mailing addresses.
 
 ## Usage
 
