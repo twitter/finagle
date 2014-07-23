@@ -6,6 +6,8 @@ package com.twitter.finagle.channel
  */
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.{Duration, Future, Monitor, Stopwatch, Time}
+import java.net.{PortUnreachableException, ConnectException}
+import java.nio.channels.ClosedChannelException
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 import java.util.logging.{Level, Logger}
 import org.jboss.netty.buffer.ChannelBuffer
@@ -99,8 +101,15 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
     val m = if (e.getCause != null) e.getCause.getClass.getName else "unknown"
     exceptions.counter(m).incr()
     // If no Monitor is active, then log the exception so we don't fail silently.
-    if (!Monitor.isActive)
-      log.log(Level.WARNING, "ChannelStatsHandler caught an exception", e.getCause)
+    if (!Monitor.isActive) {
+      val level = e match {
+        case e: ClosedChannelException => Level.FINE
+        case e: ConnectException => Level.FINE
+        case e: PortUnreachableException => Level.FINE
+        case _ => Level.WARNING
+      }
+      log.log(level, "ChannelStatsHandler caught an exception", e.getCause)
+    }
     super.exceptionCaught(ctx, e)
   }
 
