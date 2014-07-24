@@ -1,17 +1,18 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.Service
-import com.twitter.util.Future
-import org.jboss.netty.handler.codec.http.{HttpResponse, HttpRequest}
-import java.net.InetSocketAddress
-import HttpTracing._
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceId, Trace}
+import com.twitter.util.Future
+import java.net.InetSocketAddress
+import org.jboss.netty.handler.codec.http.{HttpResponse, HttpRequest}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class TracingTest extends FunSuite {
+  import HttpTracing.{Header, stripParameters}
+
   lazy val flags = Flags().setDebug
   lazy val traceId = TraceId(Some(SpanId(1)), None, SpanId(2), Some(true), flags)
 
