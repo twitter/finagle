@@ -3,10 +3,10 @@ scala_library(name='scala',
     pants('3rdparty:netty'),
     pants('3rdparty:thrift-0.5.0'),
     pants('finagle/finagle-core'),
+    pants('finagle/finagle-thrift/src/main/java'),
     pants('util/util-core')
   ],
   sources=rglobs('*.scala'),
-  java_sources=[pants('finagle/finagle-thrift/src/main/java')],
   resources=[
     pants('finagle/finagle-thrift/src/main/resources')
   ],
