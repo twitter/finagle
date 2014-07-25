@@ -164,11 +164,16 @@ object Client {
   /**
    * Create a client that uses Kestrel's thrift protocol.
    * @param raw the underlying thrift service factory for the client to use
+   * @param txnAbortTimeout The duration after which an open transaction will be auto-aborted if not confirmed
    * @return A thrift kestrel client
    */
   // Due to type erasure this cannot be apply(raw: ServiceFactory[ThriftClientRequest, Array[Byte]])
+  def makeThrift(raw: ServiceFactory[ThriftClientRequest, Array[Byte]], txnAbortTimeout: Duration): Client = {
+    new ThriftConnectedClient(new FinagledClientFactory(raw), txnAbortTimeout)
+  }
+
   def makeThrift(raw: ServiceFactory[ThriftClientRequest, Array[Byte]]): Client = {
-    new ThriftConnectedClient(new FinagledClientFactory(raw))
+    makeThrift(raw, Duration.Top)
   }
 
   private val nullTimer = new NullTimer
@@ -510,7 +515,7 @@ protected[kestrel] class FinagledClientFactory(
  * @param underlying  a FinagledClientFactory that wraps a
  *   ServiceFactory[ThriftClientRequest, Array[Byte] ].
  */
-protected[kestrel] class ThriftConnectedClient(underlying: FinagledClientFactory)
+protected[kestrel] class ThriftConnectedClient(underlying: FinagledClientFactory, txnAbortTimeout: Duration)
   extends ClientBase[FinagledClosableClient, Seq[Item], Long](underlying)
 {
   private def safeLongToInt(l: Long): Int = {
@@ -558,7 +563,7 @@ protected[kestrel] class ThriftConnectedClient(underlying: FinagledClientFactory
   }
 
   private def openRead(queueName: String)(client: FinagledClosableClient): Future[Seq[Item]] =
-    client.get(queueName, 1, Int.MaxValue, Int.MaxValue)
+    client.get(queueName, 1, Int.MaxValue, safeLongToInt(txnAbortTimeout.inMilliseconds.toLong))
 
   private def confirmAndOpenRead(queueName: String)
                                 (id: Long)

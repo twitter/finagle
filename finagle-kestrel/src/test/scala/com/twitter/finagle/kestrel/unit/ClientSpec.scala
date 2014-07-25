@@ -152,7 +152,7 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
     val queueName = "foo"
     val clientFactory = mock[FinagledClientFactory]
     val finagledClient = mock[FinagledClosableClient]
-    val client = new ThriftConnectedClient(clientFactory)
+    val client = new ThriftConnectedClient(clientFactory, Duration.Top)
 
     "interrupt current thrift request on close" in {
       clientFactory.apply() returns Future(finagledClient)

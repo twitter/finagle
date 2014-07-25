@@ -308,6 +308,7 @@ final case class MultiReaderConfig[Req, Rep] private[kestrel](
   private val _va: Var[Addr],
   private val _queueName: String,
   private val _clientId: Option[ClientId] = None,
+  private val _txnAbortTimeout: Duration = Duration.Top,
   private val _clientBuilder:
     Option[ClientBuilder[Req, Rep, Nothing, ClientConfig.Yes, ClientConfig.Yes]] = None,
   private val _timer: Option[Timer] = None,
@@ -320,6 +321,7 @@ final case class MultiReaderConfig[Req, Rep] private[kestrel](
   val timer = _timer
   val retryBackoffs = _retryBackoffs
   val clientId = _clientId
+  val txnAbortTimeout = _txnAbortTimeout
 }
 
 @deprecated("Use MultiReaderConfig[Req, Rep] instead", "6.15.1")
@@ -346,6 +348,7 @@ final case class ClusterMultiReaderConfig private[kestrel](
       this.va,
       this.queueName,
       None,
+      Duration.Top,
       this.clientBuilder,
       this.timer,
       this.retryBackoffs)
@@ -519,6 +522,13 @@ class MultiReaderBuilderThrift private[kestrel](
 
   protected[kestrel] def createClient(
       factory: ServiceFactory[ThriftClientRequest, Array[Byte]]): Client =
-    Client.makeThrift(factory)
+    Client.makeThrift(factory, config.txnAbortTimeout)
+
+  /**
+   * While reading items, an open transaction will be auto aborted if not confirmed by the client within the specified
+   * timeout.
+   */
+  def txnAbortTimeout(txnAbortTimeout: Duration) =
+    withConfig(_.copy(_txnAbortTimeout = txnAbortTimeout))
 }
 
