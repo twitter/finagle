@@ -23,33 +23,31 @@ class SslTest extends FunSuite {
     "openssl-root.conf"
   )
 
-  class Context {
-    // before we run any tests, construct the chain
-    try {
-      // would prefer to have an abstraction for what's below, but
-      // Shell.run doesn't give you back the process
-      certChainInput.setupCAFile.setExecutable(true)
-      certChainInput.makeCertFile.setExecutable(true)
-      // this process requires an openssl executable
-      val process = Runtime.getRuntime.exec(
-        Array[String](
-          certChainInput.setupCAPath,
-          certChainInput.makeCertPath,
-          certChainInput.openSSLIntConfPath,
-          certChainInput.openSSLRootConfPath
-        ), // command
-        null, // null == inherit the environment of the current process
-        certChainInput.setupCADir // working dir
-      )
-      process.waitFor()
-      assert(process.exitValue === 0)
-    } catch {
-      case e: java.io.IOException =>
-        println("IOException: I/O error in running setupCA script: " +
-          e.getMessage())
-      case e => println("Unknown exception in running setupCA script: " +
-          e.getMessage())
-    }
+  // before we run any tests, construct the chain
+  try {
+    // would prefer to have an abstraction for what's below, but
+    // Shell.run doesn't give you back the process
+    certChainInput.setupCAFile.setExecutable(true)
+    certChainInput.makeCertFile.setExecutable(true)
+    // this process requires an openssl executable
+    val process = Runtime.getRuntime.exec(
+      Array[String](
+        certChainInput.setupCAPath,
+        certChainInput.makeCertPath,
+        certChainInput.openSSLIntConfPath,
+        certChainInput.openSSLRootConfPath
+      ), // command
+      null, // null == inherit the environment of the current process
+      certChainInput.setupCADir // working dir
+    )
+    process.waitFor()
+    assert(process.exitValue === 0)
+  } catch {
+    case e: java.io.IOException =>
+      println("IOException: I/O error in running setupCA script: " +
+        e.getMessage())
+    case e => println("Unknown exception in running setupCA script: " +
+        e.getMessage())
   }
 
   // the chain should have generated the files below
@@ -63,8 +61,6 @@ class SslTest extends FunSuite {
 
   // now let's run some tests
   test("be able to send and receive various sized content") {
-    val ctx = new Context{}
-    import ctx._
     def makeContent(length: Int) = {
       val buf = ChannelBuffers.directBuffer(length)
       while (buf.writableBytes() > 0)
@@ -111,7 +107,7 @@ class SslTest extends FunSuite {
         .tlsWithoutValidation()
         .build()
 
-    def testCase(requestSize: Int, responseSize: Int) {
+    def check(requestSize: Int, responseSize: Int) {
       val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1,
         HttpMethod.GET, "/")
 
@@ -126,10 +122,8 @@ class SslTest extends FunSuite {
         request.setHeader("Requested-Bytes", 0)
 
       val response = Await.result(client(request))
-
       assert(response.getStatus === HttpResponseStatus.OK)
       assert(HttpHeaders.getContentLength(response) === responseSize)
-
       val content = response.getContent()
 
       assert(content.readableBytes() === responseSize)
@@ -142,15 +136,13 @@ class SslTest extends FunSuite {
       assert(cipher != "null")
     }
 
-    testCase(   0 * 1024, 16   * 1024)
-    testCase(  16 * 1024, 0    * 1024)
-    testCase(1000 * 1024, 16   * 1024)
-    testCase( 256 * 1024, 256  * 1024)
+    check(   0 * 1024, 16   * 1024)
+    check(  16 * 1024, 0    * 1024)
+    check(1000 * 1024, 16   * 1024)
+    check( 256 * 1024, 256  * 1024)
   }
 
   test("be able to validate a properly constructed authentication chain") {
-    val ctx = new Context{}
-    import ctx._
     // ... spin up an SSL server ...
     val service = new Service[HttpRequest, HttpResponse] {
       def apply(request: HttpRequest) = Future {
@@ -210,14 +202,14 @@ class SslTest extends FunSuite {
       process.getOutputStream.close()
 
       process.waitFor()
-      assert(process.exitValue ===  0)
+      assert(process.exitValue === 0)
 
       // look for text "Verify return code: 0 (ok)" on stdout
       val out = process.getInputStream
       val outBuf = new Array[Byte](out.available)
       out.read(outBuf)
       val outBufStr = new String(outBuf)
-      assert("Verify return code: 0 \\(ok\\)".r.findFirstIn(outBufStr) === Some("Verify return code: 0 (ok)"))
+      assert("Verify return code: 0 \\(ok\\)".r.findFirstIn(outBufStr) === Some("""Verify return code: 0 (ok)"""))
     } catch {
       case ex: java.io.IOException =>
         println("Test skipped: running openssl failed" +
