@@ -1,4 +1,4 @@
-junit_tests(name='scala',
+dependencies(name='scala',
   dependencies=[
     pants(':client'),
     pants(':defaultloader'),
@@ -6,7 +6,7 @@ junit_tests(name='scala',
   ]
 )
 
-junit_tests(name='core',
+dependencies(name='core',
   dependencies=[
     pants('3rdparty:junit'),
     pants('3rdparty:mockito-all'),
@@ -23,9 +23,6 @@ junit_tests(name='core',
     pants('finagle/finagle-serversets'),
     pants('util/util-core')
   ],
-  resources=[
-    pants('finagle/finagle-serversets/src/test/resources')
-  ]
 )
 
 junit_tests(name='defaultloader',
