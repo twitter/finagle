@@ -1,11 +1,7 @@
 package com.twitter.finagle.memcached.protocol.text
 
 import com.twitter.finagle.memcached.protocol.{
-  ClientError,
-  Error => MemcacheError,
-  NonexistentCommand,
-  ServerError
-}
+  Error => MemcacheError, ClientError, NonexistentCommand, ServerError}
 import com.twitter.io.Charsets
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
