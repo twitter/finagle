@@ -6,12 +6,9 @@ import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.MustMatchers
 
 @RunWith(classOf[JUnitRunner])
-class KeyValidationTest extends FunSuite
-  with MustMatchers
-{
+class KeyValidationTest extends FunSuite {
 
   private class BasicKeyValidation(
     override val keys: Seq[ChannelBuffer]
@@ -25,8 +22,8 @@ class KeyValidationTest extends FunSuite
     val x = intercept[IllegalArgumentException] {
       new BasicKeyValidation(Seq(cb))
     }
-    x.getMessage must include("key cannot be longer than")
-    x.getMessage must include("(" + length + ")")
+    assert(x.getMessage.contains("key cannot be longer than"))
+    assert(x.getMessage.contains("(" + length + ")"))
   }
 
   test("reject invalid key with whitespace or control chars") {
@@ -41,7 +38,7 @@ class KeyValidationTest extends FunSuite
       val x = intercept[IllegalArgumentException] {
         new BasicKeyValidation(Seq(bad))
       }
-      x.getMessage must include("key cannot have whitespace or control characters")
+      assert(x.getMessage.contains("key cannot have whitespace or control characters"))
     }
   }
 
