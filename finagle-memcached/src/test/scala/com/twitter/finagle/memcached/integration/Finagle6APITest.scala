@@ -17,7 +17,6 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class Finagle6APITest extends FunSuite with BeforeAndAfter {
-
   /**
     * Note: This integration test requires a real Memcached server to run.
     */

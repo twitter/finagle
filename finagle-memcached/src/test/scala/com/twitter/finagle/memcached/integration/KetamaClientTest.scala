@@ -13,7 +13,6 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class KetamaClientTest extends FunSuite with BeforeAndAfter {
-
   /**
     * We already proved above that we can hit a real memcache server,
     * so we can use our own for the partitioned client test.

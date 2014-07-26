@@ -18,7 +18,6 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 class ProxyTest extends FunSuite with BeforeAndAfter {
 
   type MemcacheService = Service[Command, Response]
-
   /**
     * Note: This integration test requires a real Memcached server to run.
     */
