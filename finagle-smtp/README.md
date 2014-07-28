@@ -64,4 +64,4 @@ In case of error session state is reset before every next try.
 
 ### Example
 
-The example of sending email to a local SMTP server with SmtpSimple and handling errors can be seen in [`Example.scala`](https://github.com/suncelesta/finagle/blob/master/finagle-smtp/src/main/scala/com/twitter/finagle/Example.scala).
+The example of sending email to a local SMTP server with SmtpSimple and handling errors can be seen in [`Example.scala`](https://github.com/suncelesta/finagle/blob/finagle-smtp/finagle-example/src/main/scala/com/twitter/finagle/example/smtp/Example.scala).
