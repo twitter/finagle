@@ -37,8 +37,8 @@ package exp {
   private[finagle] object MuxClient extends StackClient[CB, CB](
     // LeasedFactory.module needs to be directly before the stack endpoint.
     StackClient.newStack
-      .replace(StackClient.Role.Pool, ReusingPool.module[CB, CB])
-      .replace(StackClient.Role.PrepConn, mux.lease.LeasedFactory.module[CB, CB]),
+      .replace(StackClient.Role.pool, ReusingPool.module[CB, CB])
+      .replace(StackClient.Role.prepConn, mux.lease.LeasedFactory.module[CB, CB]),
     Stack.Params.empty) {
     protected type In = CB
     protected type Out = CB

@@ -55,7 +55,7 @@ case class DefaultServer[Req, Rep, In, Out](
 ) extends Server[Req, Rep] {
 
   val stack = StackServer.newStack[Req, Rep]
-    .replace(StackServer.Role.Preparer, prepare)
+    .replace(StackServer.Role.preparer, prepare)
     
   private type _In = In
   private type _Out = Out

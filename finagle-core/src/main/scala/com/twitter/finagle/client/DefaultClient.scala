@@ -71,10 +71,10 @@ case class DefaultClient[Req, Rep](
 
   private[this] def transform(stack: Stack[ServiceFactory[Req, Rep]]) = {
     val stk = stack
-      .replace(FailureAccrualFactory.FailureAccrual, failureAccrual)
-      .replace(StackClient.Role.Pool, pool(statsReceiver))
+      .replace(FailureAccrualFactory.role, failureAccrual)
+      .replace(StackClient.Role.pool, pool(statsReceiver))
 
-    if (!failFast) stk.remove(FailFastFactory.FailFast) else stk
+    if (!failFast) stk.remove(FailFastFactory.role) else stk
   }
 
   private[this] val clientStack = transform(StackClient.newStack[Req, Rep])
@@ -103,12 +103,12 @@ case class DefaultClient[Req, Rep](
     val newTransporter = Function.const(unimplemented) _
     val newDispatcher = Function.const(unimplemented) _
 
-    override protected val endpointer = new Stack.Simple[ServiceFactory[Req, Rep]](
-      com.twitter.finagle.stack.Endpoint) {
+    override protected val endpointer = new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = com.twitter.finagle.stack.Endpoint
       val description = "Send requests over the wire"
-      def make(params: Stack.Params, next: ServiceFactory[Req, Rep]) = {
-        val param.Stats(sr) = params[param.Stats]
-        val Transporter.EndpointAddr(addr) = params[Transporter.EndpointAddr]
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Stack.Params) = {
+        val param.Stats(sr) = get[param.Stats]
+        val Transporter.EndpointAddr(addr) = get[Transporter.EndpointAddr]
         outer.endpointer(addr, sr)
       }
     }

@@ -7,7 +7,7 @@ import com.twitter.util.{Duration, Promise, Future, NullTimerTask, Timer, Time}
 import java.util.concurrent.atomic.AtomicBoolean
 
 private[finagle] object ExpiringService {
-  object Expiration extends Stack.Role
+  val role = Stack.Role("Expiration")
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
@@ -17,7 +17,7 @@ private[finagle] object ExpiringService {
    * @param lifeTIme max lifetime of a connection.
    */
   case class Param(idleTime: Duration, lifeTime: Duration)
-  implicit object Param extends Stack.Param[Param] with Stack.Role {
+  implicit object Param extends Stack.Param[Param] {
     val default = Param(Duration.Top, Duration.Top)
   }
 
@@ -25,12 +25,13 @@ private[finagle] object ExpiringService {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.ExpiringService]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]](Expiration) {
+    new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = ExpiringService.role
       val description = "Expire a service after a certain amount of idle time"
-      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
-        val param.Timer(timer) = params[param.Timer]
-        val ExpiringService.Param(idleTime, lifeTime) = params[ExpiringService.Param]
-        val param.Stats(statsReceiver) = params[param.Stats]
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+        val param.Timer(timer) = get[param.Timer]
+        val ExpiringService.Param(idleTime, lifeTime) = get[ExpiringService.Param]
+        val param.Stats(statsReceiver) = get[param.Stats]
 
         val idle = if (idleTime.isFinite) Some(idleTime) else None
         val life = if (lifeTime.isFinite) Some(lifeTime) else None

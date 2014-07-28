@@ -47,10 +47,11 @@ private object MysqlTracing extends SimpleFilter[Request, Result] { self =>
   // TODO: We should consider adding toStackable(elem) to CanStackFrom so this sort of
   // boiler-plate isn't necessary. For example, we should be able to do MysqlTracing +: stack
   // and the role should be inferred (maybe as the class name).
-  object mysqlTracing extends Stack.Role
-  val module = new Stack.Simple[ServiceFactory[Request, Result]](mysqlTracing) {
-    val description = "trace mysql specific calls to the loaded tracer"
-    def make(params: Stack.Params, next: ServiceFactory[Request, Result]) =
+  val role = Stack.Role("MysqlTracing")
+  val module = new Stack.Simple[ServiceFactory[Request, Result]] {
+    val role = MysqlTracing.role
+    val description = "Trace mysql specific calls to the loaded tracer"
+    def make(next: ServiceFactory[Request, Result])(implicit params: Stack.Params) =
       self andThen next
   }
 }

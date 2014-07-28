@@ -7,16 +7,17 @@ import java.util.concurrent.atomic.AtomicReference
 import scala.annotation.tailrec
 
 private[finagle] object ReusingPool {
-  object ReusingPool extends Stack.Role
+  val role = Stack.Role("ReusingPool")
 
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.pool.ReusingPool]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]](ReusingPool) {
+    new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = ReusingPool.role
       val description = "Maintain at most one connection"
-      def make(params: Stack.Params, next: ServiceFactory[Req, Rep]) = {
-        val param.Stats(sr) = params[param.Stats]
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Stack.Params) = {
+        val param.Stats(sr) = get[param.Stats]
         new ReusingPool(next, sr.scope("reusingpool"))
       }
     }

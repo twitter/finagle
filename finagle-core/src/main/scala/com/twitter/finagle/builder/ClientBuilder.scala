@@ -300,7 +300,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
           if (label.isEmpty || l != addr)
             this.name(l)
           else
-            this
+            this 
 
         cb.dest(n)
     }
@@ -372,9 +372,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       val Timer(timer) = params[Timer]
       val codec = codecFactory(ClientCodecConfig(name))
 
-      val prepConn = new Stack.Simple[ServiceFactory[Req1, Rep1]](StackClient.Role.PrepConn) {
+      val prepConn = new Stack.Simple[ServiceFactory[Req1, Rep1]] {
+        val role = StackClient.Role.prepConn
         val description = "Connection preparation phase as defined by a Codec"
-        def make(params: Params, next: ServiceFactory[Req1, Rep1]) = {
+        def make(next: ServiceFactory[Req1, Rep1])(implicit params: Params) = {
           val Stats(stats) = params[Stats]
           val underlying = codec.prepareConnFactory(next)
           new ServiceFactoryProxy(underlying) {
@@ -391,15 +392,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
       val clientStack = {
         val stack = StackClient.newStack[Req1, Rep1]
-          .replace(StackClient.Role.PrepConn, prepConn)
-          .replace(StackClient.Role.PrepFactory, (next: ServiceFactory[Req1, Rep1]) =>
+          .replace(StackClient.Role.prepConn, prepConn)
+          .replace(StackClient.Role.prepFactory, (next: ServiceFactory[Req1, Rep1]) =>
             codec.prepareServiceFactory(next))
 
         // transform stack wrt. failure accrual
         val newStack =
           if (prms.contains[FailureAccrualFac]) {
             val FailureAccrualFac(fac) = prms[FailureAccrualFac]
-            stack.replace(FailureAccrualFactory.FailureAccrual, (next: ServiceFactory[Req1, Rep1]) =>
+            stack.replace(FailureAccrualFactory.role, (next: ServiceFactory[Req1, Rep1]) =>
               fac(timer) andThen next)
           } else {
             stack
@@ -408,7 +409,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         // disable failFast if the codec requests it or it is
         // disabled via the ClientBuilder paramater.
         val FailFast(failFast) = prms[FailFast]
-        if (!codec.failFastOk || !failFast) newStack.remove(FailFastFactory.FailFast)
+        if (!codec.failFastOk || !failFast) newStack.remove(FailFastFactory.role)
         else newStack
       }
 

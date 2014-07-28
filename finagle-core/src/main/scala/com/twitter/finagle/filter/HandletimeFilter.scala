@@ -5,16 +5,17 @@ import com.twitter.finagle.{param, Service, ServiceFactory, SimpleFilter, Stack,
 import com.twitter.util.{Stopwatch, Future}
 
 private[finagle] object HandletimeFilter {
-  object HandleTime extends Stack.Role
+  val role = Stack.Role("HandleTime")
 
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.filter.HandletimeFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]](HandleTime) {
+    new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = HandletimeFilter.role
       val description = "Record elapsed execution time of underlying service"
-      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
-        val param.Stats(statsReceiver) = params[param.Stats]
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+        val param.Stats(statsReceiver) = get[param.Stats]
         new HandletimeFilter(statsReceiver) andThen next
       }
     }

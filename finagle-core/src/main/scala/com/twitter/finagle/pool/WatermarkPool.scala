@@ -105,7 +105,6 @@ class WatermarkPool[Req, Rep](
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
     if (!isOpen)
       return Future.exception(new ServiceClosedException)
-
     synchronized {
       dequeue() match {
         case Some(service) =>

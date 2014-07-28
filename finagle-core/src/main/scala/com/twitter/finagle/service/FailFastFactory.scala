@@ -26,17 +26,19 @@ private[finagle] object FailFastFactory {
   // reconsider having this logic in the load balancer instead.
   private val failedFastExc = Future.exception(new FailedFastException)
 
-  object FailFast extends Stack.Role
+  val role = Stack.Role("FailFast")
 
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.FailFastFactory]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]](FailFast) {
-      val description = "Backoff exponentially from hosts to which we cannot establish a connection"
-      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
-        val param.Stats(statsReceiver) = params[param.Stats]
-        val param.Timer(timer) = params[param.Timer]
+    new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = FailFastFactory.role
+      val description =
+        "Backoff exponentially from hosts to which we cannot establish a connection"
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+        val param.Stats(statsReceiver) = get[param.Stats]
+        val param.Timer(timer) = get[param.Timer]
         new FailFastFactory(next, statsReceiver.scope("failfast"), timer)
       }
     }

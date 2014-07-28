@@ -101,6 +101,7 @@ class DefaultClientTest extends FunSuite with Eventually {
       )
 
       Time.withCurrentTimeFrozen { control =>
+        println("HELLO WOR")
         val f1 = service(3) // has a connection
         val f2 = service(4)  // is queued
 
@@ -109,10 +110,12 @@ class DefaultClientTest extends FunSuite with Eventually {
 
         control.advance(rTimeout)
         timer.tick()
+        println("F1 is defined as-------------------:" + f1)
         assert(f1.isDefined) // times out
         intercept[IndividualRequestTimeoutException] {
           Await.result(f1)
         }
+        println("F2 is defined as-------------------:" + f2)
         assert(!f2.isDefined)
         // f2 is now moved from the queue to dispatched
 

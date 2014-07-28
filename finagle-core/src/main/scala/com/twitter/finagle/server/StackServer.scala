@@ -21,11 +21,11 @@ private[finagle] object StackServer {
   /**
    * Canonical Roles for each Server-related Stack modules.
    */
-  object Role {
-    object ServerDestTracing extends Stack.Role
-    object JvmTracing extends Stack.Role
-    object Preparer extends Stack.Role
-  }
+  object Role extends Stack.Role("StackServer") {
+    val serverDestTracing = Stack.Role("ServerDestTracing")
+    val jvmTracing = Stack.Role("JvmTracing")
+    val preparer = Stack.Role("preparer")
+   }
 
   /**
    * Creates a default finagle server [[com.twitter.finagle.Stack]].
@@ -47,14 +47,14 @@ private[finagle] object StackServer {
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](
       stack.nilStack[Req, Rep])
 
-    stk.push(Role.ServerDestTracing, ((next: ServiceFactory[Req, Rep]) => new ServerDestTracingProxy[Req, Rep](next)))
+    stk.push(Role.serverDestTracing, ((next: ServiceFactory[Req, Rep]) => new ServerDestTracingProxy[Req, Rep](next)))
     stk.push(TimeoutFilter.module)
     stk.push(StatsFilter.module)
     stk.push(RequestSemaphoreFilter.module)
     stk.push(MaskCancelFilter.module)
     stk.push(ExceptionSourceFilter.module)
-    stk.push(Role.Preparer, identity[ServiceFactory[Req, Rep]](_))
-    stk.push(Role.JvmTracing, ((next: ServiceFactory[Req, Rep]) =>
+    stk.push(Role.preparer, identity[ServiceFactory[Req, Rep]](_))
+    stk.push(Role.jvmTracing, ((next: ServiceFactory[Req, Rep]) =>
       newJvmFilter[Req, Rep]() andThen next))
     stk.push(TracingFilter.module)
     stk.push(MonitorFilter.module)

@@ -109,20 +109,22 @@ object Filter {
   implicit def canStackFromSvc[Req, Rep]
     : CanStackFrom[Filter[Req, Rep, Req, Rep], Service[Req, Rep]] =
     new CanStackFrom[Filter[Req, Rep, Req, Rep], Service[Req, Rep]] {
-      def toStackable(headRole: Stack.Role, filter: Filter[Req, Rep, Req, Rep]) =
-        new Stack.Simple[Service[Req, Rep]](headRole) {
-          val description = headRole.toString
-          def make(params: Params, next: Service[Req, Rep]) = filter andThen next
+      def toStackable(_role: Stack.Role, filter: Filter[Req, Rep, Req, Rep]) =
+        new Stack.Simple[Service[Req, Rep]] {
+          val role = _role
+          val description = role.name
+          def make(next: Service[Req, Rep])(implicit params: Params) = filter andThen next
         }
     }
 
   implicit def canStackFromFac[Req, Rep]
     : CanStackFrom[Filter[Req, Rep, Req, Rep], ServiceFactory[Req, Rep]] =
     new CanStackFrom[Filter[Req, Rep, Req, Rep], ServiceFactory[Req, Rep]] {
-      def toStackable(headRole: Stack.Role, filter: Filter[Req, Rep, Req, Rep]) =
-        new Stack.Simple[ServiceFactory[Req, Rep]](headRole) {
-          val description = headRole.toString
-          def make(params: Params, next: ServiceFactory[Req, Rep]) = filter andThen next
+      def toStackable(_role: Stack.Role, filter: Filter[Req, Rep, Req, Rep]) =
+        new Stack.Simple[ServiceFactory[Req, Rep]] {
+          val role = _role
+          val description = role.name
+          def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = filter andThen next
         }
     }
 

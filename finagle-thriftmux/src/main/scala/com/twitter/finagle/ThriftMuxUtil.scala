@@ -3,6 +3,7 @@ package com.twitter.finagle
 import org.jboss.netty.buffer.{ChannelBuffer => CB}
 
 private object ThriftMuxUtil {
+  val role = Stack.Role("ProtocolRecorder")
   def bufferToArray(buf: CB): Array[Byte] =
     if (buf.hasArray && buf.arrayOffset == 0
         && buf.readableBytes == buf.array().length) {
@@ -19,10 +20,10 @@ private object ThriftMuxUtil {
         throw new IllegalArgumentException("Iface is not a valid thrift iface", cause)
     }
 
-  object ProtocolRecorder extends Stack.Role
-  val protocolRecorder = new Stack.Simple[ServiceFactory[CB, CB]](ProtocolRecorder) {
+  val protocolRecorder = new Stack.Simple[ServiceFactory[CB, CB]] {
+    val role = ThriftMuxUtil.role
     val description = "Record ThriftMux protocol usage"
-    def make(params: Stack.Params, next: ServiceFactory[CB, CB]) = {
+    def make(next: ServiceFactory[CB, CB])(implicit params: Stack.Params) = {
       val param.Stats(stats) = params[param.Stats]
       stats.scope("protocol").counter("thriftmux").incr()
       next

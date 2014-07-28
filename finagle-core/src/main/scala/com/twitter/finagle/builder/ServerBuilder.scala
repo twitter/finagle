@@ -200,7 +200,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       val BindTo(addr) = ps[BindTo]
       val codec = codecFactory(ServerCodecConfig(label, addr))
       val newStack = StackServer.newStack[Req1, Rep1].replace(
-        StackServer.Role.Preparer, (next: ServiceFactory[Req1, Rep1]) =>
+        StackServer.Role.preparer, (next: ServiceFactory[Req1, Rep1]) =>
           codec.prepareConnFactory(next)
       )
       new StackServer[Req1, Rep1](newStack, ps) {

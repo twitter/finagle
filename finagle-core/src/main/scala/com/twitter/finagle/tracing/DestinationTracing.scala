@@ -38,16 +38,17 @@ class ServerDestTracingProxy[Req, Rep](self: ServiceFactory[Req, Rep])
 }
 
 private[finagle] object ClientDestTracingFilter {
-  object EndpointTracing extends Stack.Role
+  val role = Stack.Role("EndpointTracing")
 
   /**
    * $module [[com.twitter.finagle.tracing.ClientDestTracingFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]](EndpointTracing) {
+    new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = ClientDestTracingFilter.role
       val description = "Record remote address of server"
-      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
-        val Transporter.EndpointAddr(addr) = params[Transporter.EndpointAddr]
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+        val Transporter.EndpointAddr(addr) = get[Transporter.EndpointAddr]
         new ClientDestTracingFilter(addr) andThen next
       }
     }

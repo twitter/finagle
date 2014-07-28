@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
 import scala.collection.mutable
+import scala.collection.immutable
 
 /**
  * Stacks represent stackable elements of type T. It is assumed that
@@ -21,10 +22,13 @@ sealed trait Stack[T] {
   import Stack._
 
   /**
-   * The [[com.twitter.finagle.Stack.Role Role]] that the head element of
-   * this Stack can serve.
+   * The head field of the Stack composes all associated metadata
+   * of the topmost element of the stack.
+   * @note `head` does not give access to the value `T`, use `make` instead
+   * @see [[com.twitter.finagle.Stack.Head]]
    */
-  val headRole: Role
+
+  val head: Stack.Head
 
   /**
    * Materialize the current stack with the given parameters,
@@ -40,7 +44,7 @@ sealed trait Stack[T] {
    */
   def transform(fn: Stack[T] => Stack[T]): Stack[T] =
     fn(this) match {
-      case Node(headRole, mk, next) => Node(headRole, mk, next.transform(fn))
+      case Node(head, mk, next) => Node(head, mk, next.transform(fn))
       case leaf@Leaf(_, _) => leaf
     }
 
@@ -50,8 +54,9 @@ sealed trait Stack[T] {
    */
   def remove(target: Role): Stack[T] =
     this match {
-      case Node(`target`, _, next) => next.remove(target)
-      case Node(role, mk, next) => Node(role, mk, next.remove(target))
+      case Node(head, mk, next) => 
+        if (head.role == target) next.remove(target)
+        else Node(head, mk, next.remove(target))
       case leaf@Leaf(_, _) => leaf
     }
 
@@ -60,11 +65,14 @@ sealed trait Stack[T] {
    * [[com.twitter.finagle.Stackable Stackable]]. If no elements match the
    * role, then an unmodified stack is returned.
    */
-  def replace(target: Role, replacement: Stackable[T]): Stack[T] = transform {
-    case n@Node(`target`, _, next) => replacement +: next
-    case stk => stk
+  def replace(target: Role, replacement: Stackable[T]): Stack[T] = {
+    transform {
+      case n@Node(head, _, next) if head.role == target => 
+        replacement +: next
+      case stk => stk
+    }
   }
-
+  
   /**
    * Replace any stack elements matching the argument role with a given
    * [[com.twitter.finagle.Stackable]]. If no elements match the
@@ -100,7 +108,7 @@ sealed trait Stack[T] {
    * `this`.
    */
   def ++(right: Stack[T]): Stack[T] = this match {
-    case Node(headRole, mk, left) => Node(headRole, mk, left++right)
+    case Node(head, mk, left) => Node(head, mk, left++right)
     case Leaf(_, _) => right
   }
 
@@ -112,14 +120,14 @@ sealed trait Stack[T] {
 
   override def toString = {
     val elems = tails map {
-      case Node(headRole, mk, _) => "Node(headRole = %s, mk = %s)".format(headRole, mk)
-      case Leaf(headRole, t) => "Leaf(headRole = %s, t = %s)".format(headRole, t)
+      case Node(head, mk, _) => "Node(role = %s, description = %s)".format(head.role, head.description)
+      case Leaf(head, t) => "Leaf(role = %s, description = %s)".format(head.role, head.description)
     }
     elems mkString "\n"
   }
 }
 
-object Stack {
+private[finagle] object Stack {
   /**
    * Base trait for Stack roles. A stack's role is indicative of its
    * functionality. Roles provide a way to group similarly-purposed stacks and
@@ -127,18 +135,39 @@ object Stack {
    *
    * TODO: CSL-869
    */
-  trait Role {
+  case class Role(val name: String) {
     // Override `toString` to return the flat, lowercase object name for use in stats.
-    private[this] lazy val _toString = getClass.getName.split('$').last.toLowerCase
+    private[this] lazy val _toString = name.toLowerCase
     override def toString = _toString
+  }
+
+  /**
+   * Trait encompassing all associated metadata of a stack element. 
+   * [[com.twitter.finagle.Stackable Stackables]] extend this trait.
+   */
+  trait Head {
+    /** 
+     * The [[com.twitter.finagle.Stack.Role Role]] that the element can serve
+     */
+    val role: Stack.Role
+
+    /** 
+     * The description of the functionality of the element
+     */
+    val description: String
+
+    /**
+     * The [[com.twitter.finagle.Stack.Param Params]] used to configure the element
+     */
+    def params: Map[String, String]
   }
 
   /**
    * Nodes materialize by transforming the underlying stack in
    * some way.
    */
-  case class Node[T](headRole: Role, mk: (Params, Stack[T]) => Stack[T], next: Stack[T])
-    extends Stack[T]
+  case class Node[T](head: Stack.Head, mk: (Params, Stack[T]) => Stack[T], next: Stack[T])
+    extends Stack[T] 
   {
     def make(params: Params) = mk(params, next).make(params)
   }
@@ -147,15 +176,30 @@ object Stack {
     /**
      * A constructor for a 'simple' Node.
      */
-    def apply[T](headRole: Role, mk: T => T, next: Stack[T]): Node[T] =
-      Node(headRole, (p, stk) => Leaf(headRole, mk(stk.make(p))), next)
+    def apply[T](head: Stack.Head, mk: T => T, next: Stack[T]): Node[T] =
+      Node(head, (p, stk) => Leaf(head, mk(stk.make(p))), next)
   }
 
   /**
    * A static stack element; necessarily the last.
    */
-  case class Leaf[T](headRole: Role, t: T) extends Stack[T] {
+  case class Leaf[T](head: Stack.Head, t: T) extends Stack[T] {
     def make(params: Params) = t
+  }
+
+  object Leaf {
+    /**
+     * If only a role is given when constructing a leaf, then the head
+     * is created automatically
+     */
+    def apply[T](_role: Stack.Role, t: T): Leaf[T] = {
+      val head = new Stack.Head {
+        val role = _role
+        val description = _role.toString
+        val params = Map.empty[String, String]
+      }
+      Leaf(head, t)
+    }
   }
 
   /**
@@ -231,12 +275,12 @@ object Stack {
    * }
    * }}}
    */
-  abstract class Simple[T](val headRole: Role) extends Stackable[T] {
+  abstract class Simple[T] extends Stackable[T] {
     type Params = Stack.Params
-    def make(params: Params, next: T): T
+    def make(next: T)(implicit params: Params): T
 
     def toStack(next: Stack[T]) = {
-      Node(headRole, (params, next) => Leaf(headRole, make(params, next.make(params))), next)
+      Node(this, (params, next) => Leaf(this, make(next.make(params))(params)), next)
     }
   }
 
@@ -254,22 +298,57 @@ object Stack {
    * }
    * }}}
    */
-  abstract class Module[T](val headRole: Role) extends Stackable[T] {
+  abstract class Module[T] extends Stackable[T] {
     type Params = Stack.Params
-    def make(params: Params, next: Stack[T]): Stack[T]
+    def make(next: Stack[T])(implicit params: Params): Stack[T]
 
-    def toStack(next: Stack[T]) =
-      Node(headRole, (params, next) => make(params, next), next)
+    def toStack(next: Stack[T]) = {
+      Node(this, (params, next) => make(next)(params), next)
+    }
   }
+     
 }
 
 /**
  * Produce a stack from a `T`-typed element.
  */
-trait Stackable[T] {
-  val headRole: Stack.Role
-  val description: String
+trait Stackable[T] extends Stack.Head {
+  private val _params = mutable.Map.empty[String, String]
+
+  def params: immutable.Map[String, String] = _params.toMap
+
   def toStack(next: Stack[T]): Stack[T]
+
+
+  // Record the parameter names and values
+  private def register(paramVal: Product): Unit = {
+    // zip two lists, and pair any unmatched values with `padding`
+    def zipWithPadding[T](l1: List[T], l2: List[T], padding: T): List[(T, T)] =
+      (l1.length - l2.length) match {
+        case 0 => l1 zip l2
+        case x if x > 0 => l1 zip (l2 ++ List.fill(x)(padding))
+        case x if x < 0 => (l1 ++ List.fill(-x)(padding)) zip l2
+      }
+
+    val paramValues = paramVal.productIterator.toList.map(_.toString)
+    val paramNames = paramVal.getClass.getDeclaredFields().map(_.getName()).toList
+    zipWithPadding(paramNames, paramValues, "<unknown>").map { case (k, v) => _params.put(k, v) }
+  }
+
+  // Using get[<param name>] when accessing parameters in Stackables causes
+  // the parameter name and value to be recorded in the params map of the
+  // Stackable.head. Per-module recorded parameters are shown by 
+  // [[com.twitter.server.TwitterServer TwitterServer]] at the admin endpoint 
+  // "/admin/clients/<client name>")
+  // TODO: Replace signature with equivalent: 
+  //   def get[P <: Product : Stack.Param](implicit params: Stack.Params): P
+  // Once upgraded to Scala 2.10 (2.9 does not support having both implicit 
+  // parameters and context bounds)
+  protected def get[P <: Product](implicit param: Stack.Param[P], params: Stack.Params): P = {
+    val paramVal = params[P]
+    register(paramVal)
+    paramVal
+  }
 }
 
 /**
@@ -279,17 +358,20 @@ trait Stackable[T] {
  */
 @scala.annotation.implicitNotFound("${From} is not Stackable to ${To}")
 trait CanStackFrom[-From, To] {
-  def toStackable(headRole: Stack.Role, el: From): Stackable[To]
+  def toStackable(role: Stack.Role, el: From): Stackable[To]
 }
 
 object CanStackFrom {
   implicit def fromFun[T]: CanStackFrom[T=>T, T] =
     new CanStackFrom[T=>T, T] {
-      def toStackable(headRole: Stack.Role, fn: T => T): Stackable[T] =
-        new Stack.Simple[T](headRole) {
-          val description = headRole.toString
-          def make(params: Stack.Params, next: T) = fn(next)
+      def toStackable(role: Stack.Role, fn: T => T): Stackable[T] = {
+        val test = role
+        new Stack.Simple[T] {
+          val role = test
+          val description = role.name
+          def make(next: T)(implicit params: Stack.Params) = fn(next)
         }
+      }
     }
 }
 
@@ -299,7 +381,7 @@ object CanStackFrom {
  * a new stack).
  */
 class StackBuilder[T](init: Stack[T]) {
-  def this(headRole: Stack.Role, end: T) = this(Stack.Leaf(headRole, end))
+  def this(role: Stack.Role, end: T) = this(Stack.Leaf(role, end))
 
   private[this] var stack = init
 
@@ -307,8 +389,8 @@ class StackBuilder[T](init: Stack[T]) {
    * Push the stack element `el` onto the stack; el must conform to
    * typeclass [[com.twitter.finagle.CanStackFrom CanStackFrom]].
    */
-  def push[U](headRole: Stack.Role, el: U)(implicit csf: CanStackFrom[U, T]): this.type = {
-    stack = csf.toStackable(headRole, el) +: stack
+  def push[U](role: Stack.Role, el: U)(implicit csf: CanStackFrom[U, T]): this.type = {
+    stack = csf.toStackable(role, el) +: stack
     this
   }
 
