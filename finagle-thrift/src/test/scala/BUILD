@@ -18,7 +18,7 @@ junit_tests(name='scala',
 )
 
 jar_library(name='silly-thrift-dep',
-  dependencies=[
+  jars=[
     jar(org='silly', name='silly-thrift', rev='0.5.0'),
   ],
 )

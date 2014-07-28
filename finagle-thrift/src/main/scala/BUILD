@@ -4,7 +4,7 @@ scala_library(name='scala',
     pants('3rdparty:thrift-0.5.0'),
     pants('finagle/finagle-core'),
     pants('finagle/finagle-thrift/src/main/java'),
-    pants('util/util-core')
+    pants('util/util-core'),
   ],
   sources=rglobs('*.scala'),
   resources=[
