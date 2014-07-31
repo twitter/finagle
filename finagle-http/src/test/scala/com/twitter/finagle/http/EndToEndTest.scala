@@ -165,6 +165,26 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       }
     }
 
+    test(name + ": symmetric reader and getContent") {
+      val s = Service.mk[Request, Response] { req =>
+        val buf = Await.result(Reader.readAll(req.reader))
+        assert(buf === Buf.Utf8("hello"))
+        assert(req.contentString === "hello")
+
+        req.response.setContent(req.getContent)
+        Future.value(req.response)
+      }
+      val req = Request()
+      req.contentString = "hello"
+      req.headers.set("Content-Length", 5)
+      val client = connect(s)
+      val res = Await.result(client(req))
+
+      val buf = Await.result(Reader.readAll(res.reader))
+      assert(buf === Buf.Utf8("hello"))
+      assert(res.contentString === "hello")
+    }
+
     test(name + ": stream") {
       val writer = Reader.writable()
       val client = connect(service(writer))

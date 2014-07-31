@@ -8,11 +8,6 @@ import com.twitter.util.{Future, Promise, Throw}
 import org.jboss.netty.handler.codec.http.{HttpChunk, DefaultHttpChunk}
 import org.jboss.netty.buffer.ChannelBuffers
 
-private[http] object NullReader extends Reader {
-  def read(n: Int) = Future.None
-  def discard() { }
-}
-
 private[http] object ReaderUtils {
   /**
    * Implement a Reader given a Transport. The Reader represents a byte

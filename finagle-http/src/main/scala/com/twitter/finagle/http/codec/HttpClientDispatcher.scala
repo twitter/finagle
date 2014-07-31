@@ -6,7 +6,7 @@ import com.twitter.finagle.http.{Response, Request, ReaderUtils}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.Dtab
-import com.twitter.io.{Buf, Reader}
+import com.twitter.io.{Buf, Reader, BufReader}
 import com.twitter.util.{Future, Promise, Return, Throw}
 import org.jboss.netty.handler.codec.http.{
   HttpChunk, HttpRequest, HttpResponse, HttpHeaders
@@ -51,7 +51,12 @@ class HttpClientDispatcher[Req <: HttpRequest](
         // 2. Drain the Transport into Response body.
         trans.read() flatMap {
           case res: HttpResponse if !res.isChunked =>
-            p.updateIfEmpty(Return(Response(res)))
+            val response = new Response {
+              final val httpResponse = res
+              override val reader = BufReader(ChannelBufferBuf(res.getContent))
+            }
+
+            p.updateIfEmpty(Return(response))
             Future.Done
 
           case res: HttpResponse =>
