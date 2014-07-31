@@ -7,6 +7,7 @@ package com.twitter.finagle.channel
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.{Duration, Future, Monitor, Stopwatch, Time}
 import java.net.{PortUnreachableException, ConnectException}
+import java.io.IOException
 import java.nio.channels.ClosedChannelException
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 import java.util.logging.{Level, Logger}
@@ -97,20 +98,18 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
     super.channelClosed(ctx, e)
   }
 
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    val m = if (e.getCause != null) e.getCause.getClass.getName else "unknown"
+  override def exceptionCaught(ctx: ChannelHandlerContext, evt: ExceptionEvent) {
+    val m = if (evt.getCause != null) evt.getCause.getClass.getName else "unknown"
     exceptions.counter(m).incr()
     // If no Monitor is active, then log the exception so we don't fail silently.
     if (!Monitor.isActive) {
-      val level = e match {
-        case e: ClosedChannelException => Level.FINE
-        case e: ConnectException => Level.FINE
-        case e: PortUnreachableException => Level.FINE
+      val level = evt.getCause match {
+        case t: IOException => Level.FINE
         case _ => Level.WARNING
       }
-      log.log(level, "ChannelStatsHandler caught an exception", e.getCause)
+      log.log(level, "ChannelStatsHandler caught an exception", evt.getCause)
     }
-    super.exceptionCaught(ctx, e)
+    super.exceptionCaught(ctx, evt)
   }
 
   private[this] var hasBeenWritable = true //netty channels start in writable state
