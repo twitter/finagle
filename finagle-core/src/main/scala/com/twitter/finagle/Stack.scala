@@ -65,12 +65,10 @@ sealed trait Stack[T] {
    * [[com.twitter.finagle.Stackable Stackable]]. If no elements match the
    * role, then an unmodified stack is returned.
    */
-  def replace(target: Role, replacement: Stackable[T]): Stack[T] = {
-    transform {
-      case n@Node(head, _, next) if head.role == target => 
-        replacement +: next
-      case stk => stk
-    }
+  def replace(target: Role, replacement: Stackable[T]): Stack[T] = transform {
+    case n@Node(head, _, next) if head.role == target => 
+      replacement +: next
+    case stk => stk
   }
   
   /**
