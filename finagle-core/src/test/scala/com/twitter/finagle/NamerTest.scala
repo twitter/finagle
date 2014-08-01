@@ -39,7 +39,7 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
             }
           case _ => Activity.value(NameTree.Neg)
         }
-        
+
         def enum(prefix: Path): Activity[Dtab] = Activity.exception(new UnsupportedOperationException)
       }
 
@@ -90,7 +90,7 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
     namer("/test/2").notify(Return(NameTree.Neg))
 
     assert(res.sample().eval === Some(Set.empty))
-    
+
     namer("/test/0").notify(Return(NameTree.read("/$/inet/0/1")))
     assertEval(res, ia(1))
 
@@ -101,7 +101,7 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
     assertEval(res, ia(2))
 
     namer("/test/0").notify(Return(NameTree.read("/$/inet/0/3")))
-    assertEval(res, ia(3)) 
+    assertEval(res, ia(3))
   })
 
   test("Namer.global: /$/inet") {
@@ -117,6 +117,13 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
     intercept[ClassNotFoundException] {
       Namer.global.lookup(Path.read("/$/inet/1234/foobar")).sample()
     }
+  }
+
+  test("Namer.global: /$/fail") {
+    assert(Namer.global.lookup(Path.read("/$/fail")).sample()
+      === NameTree.Fail)
+    assert(Namer.global.lookup(Path.read("/$/fail/foo/bar")).sample()
+      === NameTree.Fail)
   }
 
   test("Namer.global: /$/nil") {
@@ -136,7 +143,7 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
   test("Namer.expand") {
     def assertExpand(dtab: String, path: String, expected: String) {
       val expanded = Dtab.read(dtab).expand(Path.read(path)).sample
-      assert(Equiv[Dtab].equiv(expanded, Dtab.read(expected)), 
+      assert(Equiv[Dtab].equiv(expanded, Dtab.read(expected)),
         "Expanded dtab \"%s\" does not match expected dtab \"%s\"".format(
           expanded.show, Dtab.read(expected).show))
     }

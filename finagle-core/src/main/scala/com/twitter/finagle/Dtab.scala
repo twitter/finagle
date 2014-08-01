@@ -15,7 +15,7 @@ import scala.collection.mutable
  * of delegation rules. Together, these describe how to bind a
  * path to an Addr.
  */
-case class Dtab(dentries0: IndexedSeq[Dentry]) 
+case class Dtab(dentries0: IndexedSeq[Dentry])
     extends IndexedSeq[Dentry] with Namer {
   private lazy val dentries = dentries0.reverse
 
@@ -85,7 +85,7 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
     //
     //    /a/b => /two;
     //    /a => /one
-    // 
+    //
     // and
     //
     //    /a/b => /three;
@@ -182,9 +182,9 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
    */
   def simplified: Dtab = Dtab({
     val simple = this map {
-      case Dentry(prefix, dst) => Dentry(prefix, dst.simplified) 
+      case Dentry(prefix, dst) => Dentry(prefix, dst.simplified)
     }
-    
+
     // Negative destinations are no-ops
     simple.filter(_.dst != NameTree.Neg)
   })
@@ -222,7 +222,7 @@ object Dentry {
 
   implicit val equiv: Equiv[Dentry] = new Equiv[Dentry] {
     def equiv(d1: Dentry, d2: Dentry): Boolean = (
-      d1.prefix == d2.prefix && 
+      d1.prefix == d2.prefix &&
       d1.dst.simplified == d2.dst.simplified
     )
   }
@@ -234,10 +234,15 @@ object Dentry {
 object Dtab {
   implicit val equiv: Equiv[Dtab] = new Equiv[Dtab] {
     def equiv(d1: Dtab, d2: Dtab): Boolean = (
-      d1.size == d2.size && 
+      d1.size == d2.size &&
       d1.zip(d2).forall { case (de1, de2) => Equiv[Dentry].equiv(de1, de2) }
     )
   }
+
+  /**
+    * A failing delegation table.
+    */
+  val fail: Dtab = Dtab.read("/=>!")
 
   /**
    * An empty delegation table.
@@ -250,7 +255,7 @@ object Dtab {
    * startup, and not changed thereafter.
    */
   @volatile var base: Dtab = empty
-  
+
   /**
    * Java API for ``base_=``
    */
@@ -288,11 +293,11 @@ object Dtab {
 
   /**
    * Parse a Dtab from string `s` with concrete syntax
-   * 
+   *
    * {{{
    * dtab       ::= dentry ';' dtab | dentry
    * }}}
-   * 
+   *
    * where the production ``dentry`` is from the grammar documented in
    * [[com.twitter.finagle.Dentry$ Dentry.read]]
    *
@@ -337,7 +342,7 @@ private object DtabParser extends DtabParsers {
   def apply(str: String): Dtab = synchronized {
     parseAll(dtab, str) match {
       case Success(dtab, _) => dtab
-      case err: NoSuccess => 
+      case err: NoSuccess =>
         throw new IllegalArgumentException(err.msg+" at "+err.next.first)
     }
   }
@@ -347,7 +352,7 @@ private object DentryParser extends DtabParsers {
   def apply(str: String): Dentry = synchronized {
     parseAll(dentry, str) match {
       case Success(dentry, _) => dentry
-      case err: NoSuccess => 
+      case err: NoSuccess =>
         throw new IllegalArgumentException(err.msg+" at "+err.next.first)
     }
   }

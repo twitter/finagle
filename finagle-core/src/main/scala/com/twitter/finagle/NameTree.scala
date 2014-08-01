@@ -3,6 +3,7 @@ package com.twitter.finagle
 import com.twitter.util.{Activity, Var}
 import com.twitter.io.Buf
 import com.twitter.finagle.util.Showable
+import scala.annotation.tailrec
 import scala.util.parsing.combinator.{RegexParsers, JavaTokenParsers}
 import java.net.{InetSocketAddress, SocketAddress}
 import scala.collection.breakOut
@@ -12,19 +13,19 @@ import scala.collection.breakOut
  * is subject to evaluation rules. Typically, a [[com.twitter.finagle.Namer Namer]]
  * is used to provide evaluation context for these trees.
  *
- *  - [[com.twitter.finagle.NameTree.Union]] nodes represent the union of several 
+ *  - [[com.twitter.finagle.NameTree.Union]] nodes represent the union of several
  *  trees; a destination is reached by load-balancing over the sub-trees.
  *
- *  - [[com.twitter.finagle.NameTree.Alt Alt]] nodes represent a fail-over relationship 
+ *  - [[com.twitter.finagle.NameTree.Alt Alt]] nodes represent a fail-over relationship
  *  between several trees; the first successful tree is picked as the destination. When
  *  the tree-list is empty, Alt-nodes evaluate to Empty.
  *
  *  - A [[com.twitter.finagle.NameTree.Leaf Leaf]] represents a T-typed leaf node;
  *
- *  - A [[com.twitter.finagle.NameTree.Neg Neg]] represents a negative location; no 
+ *  - A [[com.twitter.finagle.NameTree.Neg Neg]] represents a negative location; no
  *  destination exists here.
  *
- *  - Finally, [[com.twitter.finagle.NameTree.Empty Empty]] trees represent an empty 
+ *  - Finally, [[com.twitter.finagle.NameTree.Empty Empty]] trees represent an empty
  *  location: it exists but is uninhabited at this time.
  */
 sealed trait NameTree[+T] {
@@ -35,9 +36,9 @@ sealed trait NameTree[+T] {
     NameTree.map(f)(this)
 
    /**
-    * A parsable representation of the name tree; a 
+    * A parsable representation of the name tree; a
     * [[com.twitter.finagle.NameTree NameTree]] is recovered
-    * from this string by 
+    * from this string by
     * [[com.twitter.finagle.NameTree.read NameTree.read]].
     */
   def show(implicit showable: Showable[T]): String = NameTree.show(this)
@@ -58,16 +59,21 @@ sealed trait NameTree[+T] {
    * tree is evaluated recursively, Alt nodes are evaluated by
    * selecting its first nonnegative child.
    */
-  def eval[U>:T]: Option[Set[U]] = NameTree.eval(this)
+  def eval[U>:T]: Option[Set[U]] = NameTree.eval[U](this) match {
+    case NameTree.Fail => None
+    case NameTree.Neg => None
+    case NameTree.Leaf(value) => Some(value)
+    case _ => scala.sys.error("bug")
+  }
 }
 
 /**
- * The NameTree object comprises 
+ * The NameTree object comprises
  * [[com.twitter.finagle.NameTree NameTree]] types as well
  * as binding and evaluation routines.
  */
 object NameTree {
-  /** 
+  /**
    * A [[com.twitter.finagle.NameTree NameTree]] representing
    * fallback; it is evaluated by picking the first nonnegative
    * (evaluated) subtree.
@@ -91,8 +97,15 @@ object NameTree {
   object Union {
     private[finagle] def fromSeq[T](trees: Seq[NameTree[T]]): Union[T] = Union(trees:_*)
   }
-  
+
   case class Leaf[+T](value: T) extends NameTree[T]
+
+  /**
+    * A failing [[com.twitter.finagle.NameTree NameTree]].
+    */
+  object Fail extends NameTree[Nothing] {
+    override def toString = "Fail"
+  }
 
   /**
    * A negative [[com.twitter.finagle.NameTree NameTree]].
@@ -100,7 +113,7 @@ object NameTree {
   object Neg extends NameTree[Nothing] {
     override def toString = "Neg"
   }
-  
+
   /**
    * An empty [[com.twitter.finagle.NameTree NameTree]].
    */
@@ -109,7 +122,7 @@ object NameTree {
   }
 
   /**
-   * Rewrite the paths in a tree for values defined by the given 
+   * Rewrite the paths in a tree for values defined by the given
    * partial function.
    */
   def map[T, U](f: T => U)(tree: NameTree[T]): NameTree[U] =
@@ -118,12 +131,13 @@ object NameTree {
         val trees1 = trees map map(f)
         Union(trees1:_*)
 
-      case Alt(trees@_*) => 
+      case Alt(trees@_*) =>
         val trees1 = trees map map(f)
         Alt(trees1:_*)
 
       case Leaf(t) => Leaf(f(t))
-      
+
+      case Fail => Fail
       case Neg => Neg
       case Empty => Empty
     }
@@ -139,30 +153,45 @@ object NameTree {
     case Alt(tree) => simplify(tree)
 
     case Alt(trees@_*) =>
-      val trees1 = (trees map simplify).foldLeft(Seq.empty: Seq[NameTree[T]]) {
-        case (a, Neg) => a
-        case (a, e) => a :+ e
+      @tailrec def loop(trees: List[NameTree[T]], accum: List[NameTree[T]]): List[NameTree[T]] =
+        trees match {
+          case Nil => accum
+          case head :: tail =>
+            simplify(head) match {
+              case Fail => accum :+ Fail
+              case Neg => loop(tail, accum)
+              case head => loop(tail, accum :+ head)
+            }
+        }
+      loop(trees.toList, Nil) match {
+        case Nil => Neg
+        case List(head) => head
+        case trees => Alt(trees:_*)
       }
-
-      if (trees1.size == 1) trees1.head
-      else Alt(trees1:_*)
 
     case Union(tree) => simplify(tree)
 
     case Union(trees@_*) =>
-      val trees1 = (trees map simplify) filter {
-        case Neg => false
-        case Empty => false
-        case _ => true
+      @tailrec def loop(trees: List[NameTree[T]], accum: List[NameTree[T]]): List[NameTree[T]] =
+        trees match {
+          case Nil => accum
+          case head :: tail =>
+            simplify(head) match {
+              case Fail => List(Fail)
+              case Neg => loop(tail, accum)
+              case Empty => loop(tail, accum)
+              case head => loop(tail, accum :+ head)
+            }
+        }
+      loop(trees.toList, Nil) match {
+        case Nil => Neg
+        case List(head) => head
+        case trees => Union(trees:_*)
       }
-
-      if (trees1.isEmpty) Neg
-      else if (trees1.size == 1) trees1.head
-      else Union(trees1:_*)
 
     case other => other
   }
-  
+
   /**
    * A string parseable by [[com.twitter.finagle.NameTree.read NameTree.read]].
    */
@@ -173,10 +202,10 @@ object NameTree {
     case Union(tree) =>
       show1(level)(tree)
 
-    case Alt(tree) => 
+    case Alt(tree) =>
       show1(level)(tree)
 
-    case Union(trees@_*) => 
+    case Union(trees@_*) =>
       val trees1 = trees map show1(level+1)
       trees1 mkString " & "
 
@@ -190,29 +219,56 @@ object NameTree {
 
     case Leaf(l) => Showable.show(l)
 
-    case Neg => "~" 
+    case Fail => "!"
+    case Neg => "~"
     case Empty => "$"
   }
-  
-  private def eval[T](tree: NameTree[T]): Option[Set[T]] = tree match {
-    case Union() | Alt() => None
+
+  // return value is restricted to Fail | Neg | Leaf
+  private def eval[T](tree: NameTree[T]): NameTree[Set[T]] = tree match {
+    case Union() | Alt() => Neg
     case Alt(tree) => eval(tree)
     case Union(tree) => eval(tree)
-    case Neg => None
-    case Empty => Some(Set.empty)
-    case Leaf(t) => Some(Set(t))
+    case Fail => Fail
+    case Neg => Neg
+    case Empty => Leaf(Set.empty)
+    case Leaf(t) => Leaf(Set(t))
 
     case Union(trees@_*) =>
-      val trees1 = trees flatMap { x => eval (x) }
-      if (trees1.isEmpty) None
-      else Some(trees1.flatten.toSet)
+      @tailrec def loop(trees: List[NameTree[T]], accum: List[Set[T]]): NameTree[Set[T]] =
+        trees match {
+          case Nil =>
+            accum match {
+              case Nil => Neg
+              case _ => Leaf(accum.flatten.toSet)
+            }
+          case head :: tail =>
+            eval(head) match {
+              case Fail => Fail
+              case Neg => loop(tail, accum)
+              case Leaf(value) => loop(tail, accum :+ value)
+              case _ => scala.sys.error("bug")
+            }
+        }
+      loop(trees.toList, Nil)
 
     case Alt(trees@_*) =>
-      (trees flatMap { x => eval(x) }).headOption
+      @tailrec def loop(trees: List[NameTree[T]]): NameTree[Set[T]] =
+        trees match {
+          case Nil => Neg
+          case head :: tail =>
+            eval(head) match {
+              case Fail => Fail
+              case Neg => loop(tail)
+              case head@Leaf(_) => head
+              case _ => scala.sys.error("bug")
+            }
+        }
+      loop(trees.toList)
   }
 
   implicit def equiv[T]: Equiv[NameTree[T]] = new Equiv[NameTree[T]] {
-    def equiv(t1: NameTree[T], t2: NameTree[T]): Boolean = 
+    def equiv(t1: NameTree[T], t2: NameTree[T]): Boolean =
       simplify(t1) == simplify(t2)
   }
 
@@ -226,9 +282,9 @@ object NameTree {
    *                tree '&' tree
    *                tree '|' tree
    *                '(' tree ')'
-   * 
-   * name       ::= path | '~' | '$'
-   * 
+   *
+   * name       ::= path | '!' | '~' | '$'
+   *
    * weight     ::= -?([0-9]++(\.[0-9]+*)?|[0-9]+*\.[0-9]++)([eE][+-]?[0-9]++)?[fFdD]?
    * }}}
    *
@@ -262,20 +318,20 @@ private  trait NameTreeParsers extends RegexParsers with JavaTokenParsers {
   // refactor the grammar so that it does not contain any left
   // recursion; this accounts for the ugliness here.
 
-  lazy val tree: Parser[NameTree[T]] = 
-    rep1sep(tree1, "|") ^^ { 
+  lazy val tree: Parser[NameTree[T]] =
+    rep1sep(tree1, "|") ^^ {
       case tree :: Nil => tree
       case trees => Alt(trees:_*)
     }
 
-  lazy val tree1: Parser[NameTree[T]] = 
+  lazy val tree1: Parser[NameTree[T]] =
     rep1sep(node, "&") ^^ {
       case tree :: Nil => tree
       case trees => Union(trees:_*)
     }
 
   lazy val node: Parser[NameTree[T]] = (
-      "(" ~> tree <~ ")" 
+      "(" ~> tree <~ ")"
     | simple
   )
 
@@ -285,13 +341,14 @@ private  trait NameTreeParsers extends RegexParsers with JavaTokenParsers {
   )
 
   lazy val address: Parser[NameTree[T]] = (
-      "~" ^^^ Neg
+      "!" ^^^ Fail
+    | "~" ^^^ Neg
     | "$" ^^^ Empty
   )
 
   def leaf: Parser[T]
 
-  lazy val weight: Parser[Double] = 
+  lazy val weight: Parser[Double] =
     floatingPointNumber ^^ (_.toDouble)
 }
 
@@ -318,9 +375,9 @@ private trait NameTreePathParsers extends NameTreeParsers {
   }
 
   val hexChar: Parser[Char] = """[0-9a-fA-F]""".r ^^ { s => s.head }
-  
-  val escapedByte: Parser[Byte] =  
-    "\\x" ~> hexChar ~ hexChar ^^ { 
+
+  val escapedByte: Parser[Byte] =
+    "\\x" ~> hexChar ~ hexChar ^^ {
       case fst ~ snd =>
         ((Character.digit(fst, 16) << 4) | Character.digit(snd, 16)).toByte
     }
@@ -350,4 +407,3 @@ private object NameTreeParser extends NameTreePathParsers {
     }
   }
 }
-
