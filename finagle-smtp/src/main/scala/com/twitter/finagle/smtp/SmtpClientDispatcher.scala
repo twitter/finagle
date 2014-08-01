@@ -5,28 +5,12 @@ import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.util.{Future, Promise, Try}
 import com.twitter.finagle.smtp.reply._
 import com.twitter.logging.Logger
-
-object SmtpClientDispatcher {
-  /**
-   * Satisfy the promise and return a Future[Unit] immediately.
-   *
-   * @param p     The promise to satisfy
-   * @param value The value to satisfy the promise with
-   * @return      [[Future.Done]]*/
-  private def makeUnit[T](p: Promise[T], value: => T): Future[Unit] = {
-   p.updateIfEmpty(Try(value))
-   Future.Done
-  }
-}
-
-
 /**
  * A ClientDispatcher that implements SMTP client/server protocol.
  */
 class SmtpClientDispatcher(trans: Transport[Request, UnspecifiedReply])
 extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](trans){
   import GenSerialClientDispatcher.wrapWriteException
-  import SmtpClientDispatcher._
   import ReplyCode._
 
   /** Logs client requests and server replies. */
@@ -104,7 +88,7 @@ extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](tra
                                                  override val isMultiline = resp.isMultiline
                                                  override val lines = resp.lines
                                                }
-        case OK_REPLY                         => new OK(resp.info)  {
+        case OK_REPLY                   => new OK(resp.info)  {
                                                  override val isMultiline = resp.isMultiline
                                                  override val lines = resp.lines
                                                }
@@ -209,7 +193,12 @@ extends GenSerialClientDispatcher[Request, Reply, Request, UnspecifiedReply](tra
       log.info("%s%s%s", start, middle, end)
     }
     else log.info("server: %d %s", rep.code, rep.info)
-    makeUnit(p, getSpecifiedReply(rep))
+
+    getSpecifiedReply(rep) match {
+      case err: Error => p.setException(err)
+      case r@_ => p.setValue(r)
+    }
+    Future.Done
   }
 
 }

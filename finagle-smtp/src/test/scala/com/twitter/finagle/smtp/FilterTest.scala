@@ -4,7 +4,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 import com.twitter.finagle.Service
-import com.twitter.util.{Await, Future}
+import com.twitter.util.{Try, Await, Future}
 import java.text.SimpleDateFormat
 import java.util.Locale
 import com.twitter.finagle.smtp.filter.{HeadersFilter, MailFilter, DataFilter}
@@ -60,10 +60,10 @@ class MailFilterTest extends FunSuite {
   def MailTestService(msg: EmailMessage) = new Service[Request, Reply] {
     var cmdSeq = Seq(
       Request.Hello,
-      Request.AddSender(msg.getSender)) ++
-      msg.getTo.map(Request.AddRecipient(_)) ++ Seq(
+      Request.AddSender(msg.sender)) ++
+      msg.to.map(Request.AddRecipient(_)) ++ Seq(
       Request.BeginData,
-      Request.Data(msg.getBody),
+      Request.Data(msg.body),
       Request.Quit
     )
 
@@ -96,7 +96,7 @@ class HeaderFilterTest extends FunSuite {
     line match {
       case Some(hdr) => {
         val value = hdr drop header.length
-        assert(value === expected, header)
+        assert(value === expected, "%s is incorrect" format header)
       }
       case None => throw new TestError
     }
@@ -118,7 +118,7 @@ class HeaderFilterTest extends FunSuite {
   test("result message has all necessary headers") {
     val headerTestService = new Service[EmailMessage, Unit] {
       def apply(msg: EmailMessage): Future[Unit] = Future {
-        val body = msg.getBody
+        val body = msg.body
         val headers = Seq("From: ", "To: ", "Subject: ", "Date: ")
         val hasHeaders = headers.map(hasOneHeader(body, _)).reduce(_ && _)
         assert(hasHeaders)
@@ -132,27 +132,27 @@ class HeaderFilterTest extends FunSuite {
   test("message has Sender header in case of multiple From") {
     val headerTestService = new Service[EmailMessage, Unit] {
       def apply(msg: EmailMessage): Future[Unit] = {
-        val body = msg.getBody
-        if (msg.getFrom.length > 1) Future {
+        val body = msg.body
+        if (msg.from.length > 1) Future  {
           assert(hasOneHeader(body, "Sender: "))
-          checkHeader(body, "Sender: ", msg.getSender.toString)
+          checkHeader(body, "Sender: ", msg.sender.mailbox)
         }
         else Future.Done
       }
     }
 
     val headerFilterService = HeadersFilter andThen headerTestService
-    val test = headerFilterService(multipleAddressMsg)
+    val test = Await result headerFilterService(multipleAddressMsg)
   }
 
   test("necessary headers correspond to the right values") {
     val headerTestService = new Service[EmailMessage, Unit] {
       def apply(msg: EmailMessage): Future[Unit] = Future {
-        val body = msg.getBody
-        checkHeader(body, "From: ", msg.getFrom.mkString(","))
-        checkHeader(body, "To: ", msg.getTo.mkString(","))
-        checkHeader(body, "Subject: ", msg.getSubject)
-        checkHeader(body, "Date: ", new SimpleDateFormat("EE, dd MMM yyyy HH:mm:ss ZZ", Locale.forLanguageTag("eng")).format(msg.getDate))
+        val body = msg.body
+        checkHeader(body, "From: ", msg.from.map(_.mailbox).mkString(","))
+        checkHeader(body, "To: ", msg.to.map(_.mailbox).mkString(","))
+        checkHeader(body, "Subject: ", msg.subject)
+        checkHeader(body, "Date: ", EmailMessage.DateFormat.format(msg.date))
       }
     }
 

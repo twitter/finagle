@@ -15,12 +15,12 @@ object MailFilter extends Filter[EmailMessage, Unit, Request, Reply]{
    */
    override def apply(msg: EmailMessage, send: Service[Request, Reply]): Future[Unit] = {
      val SendEmailRequest: Seq[Request] =
-       Seq(Request.AddSender(msg.getSender))   ++
-       msg.getTo.map(Request.AddRecipient(_))  ++
-       msg.getCc.map(Request.AddRecipient(_))  ++
-       msg.getBcc.map(Request.AddRecipient(_)) ++
+       Seq(Request.AddSender(msg.sender))   ++
+       msg.to.map(Request.AddRecipient(_))  ++
+       msg.cc.map(Request.AddRecipient(_))  ++
+       msg.bcc.map(Request.AddRecipient(_)) ++
        Seq(Request.BeginData,
-           Request.Data(msg.getBody))
+           Request.Data(msg.body))
 
      val reqs: Seq[Request] =
        Seq(Request.Reset) ++
