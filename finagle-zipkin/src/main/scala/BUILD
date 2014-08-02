@@ -1,16 +1,16 @@
 scala_library(name='scala',
   dependencies=[
-    pants('3rdparty:thrift-0.5.0'),
-    pants('finagle/finagle-core'),
-    pants('finagle/finagle-thrift'),
-    pants('finagle/finagle-zipkin/src/main/thrift:thrift-scala'),
-    pants('util/util-app'),
-    pants('util/util-codec'),
-    pants('util/util-core'),
+    '3rdparty:thrift-0.5.0',
+    'finagle/finagle-core',
+    'finagle/finagle-thrift',
+    'finagle/finagle-zipkin/src/main/thrift:thrift-scala',
+    'util/util-app',
+    'util/util-codec',
+    'util/util-core',
   ],
   sources=rglobs('*.scala'),
   resources=[
-    pants('finagle/finagle-zipkin/src/main/resources')
+    'finagle/finagle-zipkin/src/main/resources'
   ],
   provides=artifact(org='com.twitter',
                     name='finagle-zipkin',

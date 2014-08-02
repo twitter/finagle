@@ -1,11 +1,11 @@
 java_library(name='java',
   dependencies=[
-    pants('3rdparty:netty'),
-    pants('3rdparty:scala-library'),
-    pants('finagle/finagle-core'),
-    pants('finagle/finagle-memcached'),
-    pants('finagle/finagle-kestrel/src/main/scala'),
-    pants('util/util-core'),
+    '3rdparty:netty',
+    '3rdparty:scala-library',
+    'finagle/finagle-core',
+    'finagle/finagle-memcached',
+    'finagle/finagle-kestrel/src/main/scala',
+    'util/util-core',
   ],
   sources=rglobs('*.java')
 )

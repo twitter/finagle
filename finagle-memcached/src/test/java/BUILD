@@ -1,12 +1,12 @@
 junit_tests(name='java',
   dependencies=[
-    pants('3rdparty:junit'),
-    pants('3rdparty:netty'),
-    pants('3rdparty:scala-library'),
-    pants('finagle/finagle-core'),
-    pants('finagle/finagle-memcached'),
-    pants('finagle/finagle-memcached/src/test/scala:external'),
-    pants('util/util-core'),
+    '3rdparty:junit',
+    '3rdparty:netty',
+    '3rdparty:scala-library',
+    'finagle/finagle-core',
+    'finagle/finagle-memcached',
+    'finagle/finagle-memcached/src/test/scala:external',
+    'util/util-core',
   ],
   sources=rglobs('*.java')
 )

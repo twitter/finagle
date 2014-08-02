@@ -1,18 +1,18 @@
 scala_library(name='scala',
   dependencies=[
-    pants('3rdparty/jvm/com/twitter/common:flags'),
-    pants('finagle/finagle-core'),
-    pants('finagle/finagle-example/src/main/thrift:thrift-scala'),
-    pants('finagle/finagle-http'),
-    pants('finagle/finagle-kestrel'),
-    pants('finagle/finagle-memcached'),
-    pants('finagle/finagle-mysql'),
-    pants('finagle/finagle-ostrich4'),
-    pants('finagle/finagle-redis'),
-    pants('finagle/finagle-stats'),
-    pants('finagle/finagle-stream'),
-    pants('finagle/finagle-thrift'),
-    pants('util/util-codec'),
+    '3rdparty/jvm/com/twitter/common:flags',
+    'finagle/finagle-core',
+    'finagle/finagle-example/src/main/thrift:thrift-scala',
+    'finagle/finagle-http',
+    'finagle/finagle-kestrel',
+    'finagle/finagle-memcached',
+    'finagle/finagle-mysql',
+    'finagle/finagle-ostrich4',
+    'finagle/finagle-redis',
+    'finagle/finagle-stats',
+    'finagle/finagle-stream',
+    'finagle/finagle-thrift',
+    'util/util-codec',
   ],
   sources=rglobs('*.scala'),
   provides=artifact(org='com.twitter',
@@ -24,7 +24,7 @@ def binary(name, main=None):
   return jvm_binary(name=name,
     main=main,
     dependencies=[
-      pants(':scala')
+      ':scala'
     ]
   )
 

@@ -1,9 +1,9 @@
 scala_library(name='scala',
   dependencies=[
-    pants('3rdparty:jsr166e'),
-    pants('finagle/finagle-core'),
-    pants('finagle/finagle-thrift'),
-    pants('util/util-core'),
+    '3rdparty:jsr166e',
+    'finagle/finagle-core',
+    'finagle/finagle-thrift',
+    'util/util-core',
   ],
   sources=rglobs('com/twitter/finagle/exp/*.scala'),
   provides=artifact(org='com.twitter',
@@ -13,9 +13,9 @@ scala_library(name='scala',
 
 benchmark(name='benchmark',
   dependencies=[
-    pants(':scala'),
-    pants('3rdparty:caliper'),
-    pants('util/util-core'),
+    ':scala',
+    '3rdparty:caliper',
+    'util/util-core',
   ],
   sources=rglobs('com/twitter/finagle/benchmark/*.scala')
 )

@@ -1,17 +1,17 @@
 scala_library(name='scala',
   dependencies=[
-    pants('3rdparty:caliper'),
-    pants('3rdparty:netty'),
-    pants('3rdparty:scala-library'),
-    pants('finagle/finagle-core'),
-    pants('finagle/finagle-http'),
-    pants('finagle/finagle-ostrich4'),
-    pants('finagle/finagle-stress/src/main/thrift:thrift-scala'),
-    pants('finagle/finagle-thrift'),
-    pants('finagle/finagle-thriftmux'),
-    pants('ostrich'),
-    pants('util/util-app'),
-    pants('util/util-logging'),
+    '3rdparty:caliper',
+    '3rdparty:netty',
+    '3rdparty:scala-library',
+    'finagle/finagle-core',
+    'finagle/finagle-http',
+    'finagle/finagle-ostrich4',
+    'finagle/finagle-stress/src/main/thrift:thrift-scala',
+    'finagle/finagle-thrift',
+    'finagle/finagle-thriftmux',
+    'ostrich',
+    'util/util-app',
+    'util/util-logging',
   ],
   sources=rglobs('*.scala'),
   provides=artifact(org='com.twitter',
@@ -21,14 +21,14 @@ scala_library(name='scala',
 
 benchmark(name='bench',
   dependencies=[
-    pants(":scala")
+    ":scala"
   ]
 )
 
 jvm_binary(name='stress',
   main='com.twitter.finagle.stress.LoadBalancerTest',
   dependencies=[
-    pants(':scala')
+    ':scala'
   ]
 )
 

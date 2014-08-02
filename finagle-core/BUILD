@@ -2,13 +2,13 @@ maven_layout()
 
 jar_library(name='finagle-core',
   dependencies=[
-    pants('finagle/finagle-core/src/main/scala')
+    'finagle/finagle-core/src/main/scala'
   ]
 )
 
 jar_library(name='tests',
   dependencies=[
-    pants('finagle/finagle-core/src/test/java'),
-    pants('finagle/finagle-core/src/test/scala')
+    'finagle/finagle-core/src/test/java',
+    'finagle/finagle-core/src/test/scala'
   ]
 )
