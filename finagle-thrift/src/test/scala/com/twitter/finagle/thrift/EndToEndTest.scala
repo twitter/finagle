@@ -165,7 +165,6 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually with BeforeA
     }
   }
 
-
   runThriftTests()
 }
 

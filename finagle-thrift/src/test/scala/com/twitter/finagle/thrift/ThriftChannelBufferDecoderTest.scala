@@ -9,40 +9,40 @@ import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class ThriftChannelBufferDecoderTest extends FunSuite with MockitoSugar with OneInstancePerTest {
-    val decoder = new ThriftChannelBufferDecoder
-    val ctx = mock[ChannelHandlerContext]
-    val ch = mock[Channel]
+  val decoder = new ThriftChannelBufferDecoder
+  val ctx = mock[ChannelHandlerContext]
+  val ch = mock[Channel]
 
-    test("ThriftChannelBufferDecoder convert channel buffers to arrays directly") {
-      val arr = "hello, world!".getBytes
-      val buf = ChannelBuffers.wrappedBuffer(arr)
-      decoder.decode(ctx, ch, buf) match {
-        case a: Array[Byte] => assert(a === arr)
-        case _ => fail()
-      }
+  test("ThriftChannelBufferDecoder convert channel buffers to arrays directly") {
+    val arr = "hello, world!".getBytes
+    val buf = ChannelBuffers.wrappedBuffer(arr)
+    decoder.decode(ctx, ch, buf) match {
+      case a: Array[Byte] => assert(a === arr)
+      case _ => fail()
     }
+  }
 
-    test("ThriftChannelBufferDecoder convert channel buffers to arrays with offset") {
-      val arr = "hello, world!".getBytes
-      val buf = ChannelBuffers.wrappedBuffer(arr)
-      buf.readByte()
-      decoder.decode(ctx, ch, buf) match {
-        case a: Array[Byte] => assert(a.toSeq === (arr drop 1).toSeq)
-        case _ => fail()
-      }
+  test("ThriftChannelBufferDecoder convert channel buffers to arrays with offset") {
+    val arr = "hello, world!".getBytes
+    val buf = ChannelBuffers.wrappedBuffer(arr)
+    buf.readByte()
+    decoder.decode(ctx, ch, buf) match {
+      case a: Array[Byte] => assert(a.toSeq === (arr drop 1).toSeq)
+      case _ => fail()
     }
+  }
 
-    test("ThriftChannelBufferDecoder convert composite buffers to arrays"){
-      val arr = "hello, world!".getBytes
-      val buf = ChannelBuffers.wrappedBuffer(arr take 2, arr drop 2)
-      decoder.decode(ctx, ch, buf) match {
-        case a: Array[Byte] => assert(a.toSeq === arr.toSeq)
-      }
+  test("ThriftChannelBufferDecoder convert composite buffers to arrays"){
+    val arr = "hello, world!".getBytes
+    val buf = ChannelBuffers.wrappedBuffer(arr take 2, arr drop 2)
+    decoder.decode(ctx, ch, buf) match {
+      case a: Array[Byte] => assert(a.toSeq === arr.toSeq)
     }
+  }
 
-    test("ThriftChannelBufferDecoder fail to convert non buffers") {
-      intercept[IllegalArgumentException]{
-        decoder.decode(ctx, ch, new {})
-      }
+  test("ThriftChannelBufferDecoder fail to convert non buffers") {
+    intercept[IllegalArgumentException]{
+      decoder.decode(ctx, ch, new {})
     }
+  }
 }

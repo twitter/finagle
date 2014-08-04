@@ -17,7 +17,7 @@ class AsyncServerEndToEndTest extends FunSuite {
   val protocolFactory = new TBinaryProtocol.Factory()
 
   test("async Thrift server should work"){
-    // ** Set up the server.
+    // Set up the server.
 
     ThriftTypes.add(new ThriftCallFactory[Silly.bleep_args, Silly.bleep_result](
       "bleep", classOf[Silly.bleep_args], classOf[Silly.bleep_result]))
@@ -48,7 +48,7 @@ class AsyncServerEndToEndTest extends FunSuite {
 
     val callResults = new Promise[ThriftReply[Silly.bleep_result]]
 
-    // ** Set up the client.
+    // Set up the client.
     val clientBootstrap = new ClientBootstrap(new DefaultLocalClientChannelFactory)
     clientBootstrap.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline() = {

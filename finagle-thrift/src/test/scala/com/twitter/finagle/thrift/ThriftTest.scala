@@ -146,7 +146,7 @@ trait ThriftTest { self: FunSuite =>
   def runThriftTests() = {
     val notSkipFlaky = !Option(System.getProperty("SKIP_FLAKY")).isDefined
 
-    if(notSkipFlaky){
+    if (notSkipFlaky){
       for {
         (protoName, proto) <- protocols
         (clientName, newClient) <- clients

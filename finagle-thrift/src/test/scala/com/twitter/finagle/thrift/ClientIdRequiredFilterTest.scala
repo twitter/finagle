@@ -15,6 +15,7 @@ class ClientIdRequiredFilterTest extends FunSuite with MockitoSugar {
   val request = "request"
   val response = Future.value("response")
   val clientId = ClientId("test")
+  
   test("ClientIdRequiredFilter passes through when ClientId exists") {
     val underlying = mock[Service[String, String]]
     val service = new ClientIdRequiredFilter andThen underlying
