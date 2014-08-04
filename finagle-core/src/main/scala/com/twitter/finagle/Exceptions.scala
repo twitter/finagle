@@ -44,9 +44,9 @@ class GlobalRequestTimeoutException(timeout: Duration)
     "waiting for a response for the request, including retries (if applicable)")
 
 class NoBrokersAvailableException(
-  name: String = "unknown"
+  val name: String = "unknown"
 ) extends RequestException {
-  override def getMessage = "No hosts are available for client " + name
+  override def getMessage = "No hosts are available for " + name
 }
 
 class RetryFailureException(cause: Throwable) extends RequestException(cause)

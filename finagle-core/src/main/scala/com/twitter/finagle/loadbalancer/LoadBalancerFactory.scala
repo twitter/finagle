@@ -10,10 +10,10 @@ import java.net.{SocketAddress, InetSocketAddress}
 import java.util.logging.{Level, Logger}
 
 object defaultBalancer extends GlobalFlag("heap", "Default load balancer")
-object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n" + 
-  "\tWhen enabled,the configured stats receiver will be used,\n" + 
+object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n" +
+  "\tWhen enabled,the configured stats receiver will be used,\n" +
   "\tor the loaded stats receiver if none given.\n" +
-  "\tWhen disabled, the configured stats receiver will be used,\n" + 
+  "\tWhen disabled, the configured stats receiver will be used,\n" +
   "\tor the NullStatsReceiver if none given.")
 
 private[finagle] object LoadBalancerFactory {
@@ -43,6 +43,16 @@ private[finagle] object LoadBalancerFactory {
   }
 
   /**
+    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+    * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] with a label
+    * for use in error messages.
+    */
+  case class ErrorLabel(label: String)
+  implicit object ErrorLabel extends Stack.Param[ErrorLabel] {
+    val default = ErrorLabel("unknown")
+  }
+
+  /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]].
    */
@@ -62,14 +72,15 @@ private[finagle] object LoadBalancerFactory {
       val role = LoadBalancerFactory.role
       val description = "Balance requests across multiple endpoints"
       def make(next: Stack[ServiceFactory[Req, Rep]])(implicit params: Params) = {
+        val ErrorLabel(errorLabel) = get[ErrorLabel]
         val Dest(dest) = get[Dest]
         val Param(loadBalancerFactory) = get[Param]
-      
-        // Determine which stats receiver to use based on the flag 
+
+        // Determine which stats receiver to use based on the flag
         // 'com.twitter.finagle.loadbalancer.perHostStats'
         // and the configured per-host stats receiver
         // If the per-host stats receiver is set, ignore the flag
-        val hostStatsReceiver = 
+        val hostStatsReceiver =
           if (!params.contains[HostStats]) {
             if (perHostStats()) LoadedStatsReceiver else NullStatsReceiver
           } else get[HostStats].hostStatsReceiver
@@ -77,7 +88,7 @@ private[finagle] object LoadBalancerFactory {
         val param.Logger(log) = get[param.Logger]
         val param.Label(label) = get[param.Label]
 
-        val noBrokersException = new NoBrokersAvailableException(label)
+        val noBrokersException = new NoBrokersAvailableException(errorLabel)
 
         // TODO: load balancer consumes Var[Addr] directly,
         // or at least Var[SocketAddress]
@@ -116,7 +127,7 @@ private[finagle] object LoadBalancerFactory {
               Transporter.EndpointAddr(sa) +
               param.Stats(stats) +
               param.Monitor(composite))
-          
+
           sockaddr match {
             case WeightedSocketAddress(sa, w) => (endpointStack(sa), w)
             case sa => (endpointStack(sa), 1D)
