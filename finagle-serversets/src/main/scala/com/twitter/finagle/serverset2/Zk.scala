@@ -202,7 +202,7 @@ private[serverset2] trait ZkFactory {
 
 private[serverset2] class FnZkFactory(
     newZk: (String, Duration) => Zk,
-    timeout: Duration = 3.seconds) extends ZkFactory {
+    timeout: Duration = 10.seconds) extends ZkFactory {
 
   def apply(hosts: String): Zk = newZk(hosts, timeout)
   def withTimeout(d: Duration) = new FnZkFactory(newZk, d)

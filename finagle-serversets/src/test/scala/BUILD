@@ -37,6 +37,9 @@ junit_tests(name='client',
 
 junit_tests(name='serversets',
   dependencies=[':core'],
+  resources=[
+    'finagle/finagle-serversets/src/test/resources'
+  ],
   sources=globs(
     'com/twitter/finagle/serverset2/*.scala',
     'com/twitter/finagle/zookeeper/*.scala',
