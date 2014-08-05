@@ -9,7 +9,7 @@ import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.service._
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stack.nilStack
-import com.twitter.finagle.stats.{ClientStatsReceiver, RollupStatsReceiver}
+import com.twitter.finagle.stats.ClientStatsReceiver
 import com.twitter.finagle.tracing.{ClientDestTracingFilter, TracingFilter}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.Showable
@@ -70,10 +70,10 @@ private[finagle] object StackClient {
    *
    * @see [[com.twitter.finagle.client.StackClient#endpointStack]]
    * @see [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]]
-   * @see [[com.twitter.finagle.factory.RefCountedFactory]]
+   * @see [[com.twitter.finagle.factory.RefcountedFactory]]
    * @see [[com.twitter.finagle.factory.TimeoutFactory]]
    * @see [[com.twitter.finagle.factory.StatsFactoryWrapper]]
-   * @see [[com.twitter.finagle.filter.TracingFilter]]
+   * @see [[com.twitter.finagle.tracing.TracingFilter]]
    */
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
     val stk = new StackBuilder(endpointStack[Req, Rep])
@@ -113,7 +113,7 @@ private[finagle] abstract class StackClient[Req, Rep](
   )
 
   /**
-   * Defines a typed [[com.twitter.finagle.Transporter]] for this client.
+   * Defines a typed [[com.twitter.finagle.client.Transporter]] for this client.
    * Concrete StackClient implementations are expected to specify this.
    */
   protected val newTransporter: Stack.Params => Transporter[In, Out]

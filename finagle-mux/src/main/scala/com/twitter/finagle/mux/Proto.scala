@@ -2,7 +2,7 @@ package com.twitter.finagle.mux
 
 import com.twitter.finagle.tracing.{SpanId, TraceId, Flags}
 import com.twitter.finagle.{Dtab, Dentry, NameTree, Path}
-import com.twitter.io.{Charsets, Buf}
+import com.twitter.io.Charsets
 import com.twitter.util.{Duration, Time}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
@@ -106,10 +106,10 @@ private[finagle] object Message {
   case class RreqOk(tag: Int, reply: ChannelBuffer) extends Rreq(0, reply)
   case class RreqError(tag: Int, error: String) extends Rreq(1, encodeString(error))
   case class RreqNack(tag: Int) extends Rreq(2, ChannelBuffers.EMPTY_BUFFER)
-  
+
   case class Tdispatch(
-      tag: Int, 
-      contexts: Seq[(ChannelBuffer, ChannelBuffer)], 
+      tag: Int,
+      contexts: Seq[(ChannelBuffer, ChannelBuffer)],
       dst: String,
       dtab: Dtab,
       req: ChannelBuffer
@@ -135,7 +135,7 @@ private[finagle] object Message {
       hd.writeShort(contexts.length)
       seq = contexts
       while (seq.nonEmpty) {
-        // TODO: it may or may not make sense 
+        // TODO: it may or may not make sense
         // to do zero-copy here.
         val (k, v) = seq.head
         hd.writeShort(k.readableBytes)
@@ -166,8 +166,8 @@ private[finagle] object Message {
   }
 
   abstract class Rdispatch(
-      status: Byte, 
-      contexts: Seq[(ChannelBuffer, ChannelBuffer)], 
+      status: Byte,
+      contexts: Seq[(ChannelBuffer, ChannelBuffer)],
       body: ChannelBuffer
   ) extends Message {
     val typ = Types.Rdispatch
@@ -192,25 +192,25 @@ private[finagle] object Message {
         hd.writeBytes(v.slice())
         seq = seq.tail
       }
-      
+
       ChannelBuffers.wrappedBuffer(hd, body)
     }
   }
-  
+
   case class RdispatchOk(
-      tag: Int, 
-      contexts: Seq[(ChannelBuffer, ChannelBuffer)], 
+      tag: Int,
+      contexts: Seq[(ChannelBuffer, ChannelBuffer)],
       reply: ChannelBuffer
   ) extends Rdispatch(0, contexts, reply)
 
   case class RdispatchError(
-      tag: Int, 
-      contexts: Seq[(ChannelBuffer, ChannelBuffer)], 
+      tag: Int,
+      contexts: Seq[(ChannelBuffer, ChannelBuffer)],
       error: String
   ) extends Rdispatch(1, contexts, encodeString(error))
 
   case class RdispatchNack(
-      tag: Int, 
+      tag: Int,
       contexts: Seq[(ChannelBuffer, ChannelBuffer)]
   ) extends Rdispatch(2, contexts, ChannelBuffers.EMPTY_BUFFER)
 
@@ -252,8 +252,6 @@ private[finagle] object Message {
   }
 
   case class Tlease(unit: Byte, howLong: Long) extends MarkerMessage(Types.Tlease) {
-    import Tlease._
-
     lazy val buf = {
       val b = ChannelBuffers.buffer(9)
       b.writeByte(unit)
@@ -283,7 +281,7 @@ private[finagle] object Message {
       else None
   }
 
-  def decodeUtf8(buf: ChannelBuffer): String = 
+  def decodeUtf8(buf: ChannelBuffer): String =
     decodeUtf8(buf, buf.readableBytes)
 
   def decodeUtf8(buf: ChannelBuffer, n: Int): String = {
@@ -353,7 +351,7 @@ private[finagle] object Message {
 
     Treq(tag, id, buf.slice())
   }
-  
+
   private def decodeContexts(buf: ChannelBuffer): Seq[(ChannelBuffer, ChannelBuffer)] = {
     val n = buf.readUnsignedShort()
     if (n == 0)
@@ -381,7 +379,7 @@ private[finagle] object Message {
     val nd = buf.readUnsignedShort()
     val dtab = if (nd == 0) Dtab.empty else {
       var i = 0
-      var delegations = new Array[Dentry](nd)
+      val delegations = new Array[Dentry](nd)
       while (i < nd) {
         val src = decodeUtf8(buf, buf.readUnsignedShort())
         val dst = decodeUtf8(buf, buf.readUnsignedShort())

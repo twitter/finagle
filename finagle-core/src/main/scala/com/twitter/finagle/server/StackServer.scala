@@ -3,13 +3,13 @@ package com.twitter.finagle.server
 import com.twitter.finagle._
 import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
-import com.twitter.finagle.service.{StatsFilter, TimeoutFilter, FailingFactory}
+import com.twitter.finagle.service.{StatsFilter, TimeoutFilter}
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.ServerStatsReceiver
 import com.twitter.finagle.tracing.{TracingFilter, ServerDestTracingProxy}
 import com.twitter.finagle.transport.Transport
 import com.twitter.jvm.Jvm
-import com.twitter.util.{Closable, CloseAwaitably, Future, Return, Throw, Time}
+import com.twitter.util.{Closable, CloseAwaitably, Return, Throw, Time}
 import java.net.SocketAddress
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
@@ -34,8 +34,8 @@ private[finagle] object StackServer {
    * params defined in the companion objects of the respective modules.
    *
    * @see [[com.twitter.finagle.tracing.ServerDestTracingProxy]]
-   * @see [[com.twitter.finagle.filter.TimeoutFilter]]
-   * @see [[com.twitter.finagle.filter.StatsFilter]]
+   * @see [[com.twitter.finagle.service.TimeoutFilter]]
+   * @see [[com.twitter.finagle.service.StatsFilter]]
    * @see [[com.twitter.finagle.filter.RequestSemaphoreFilter]]
    * @see [[com.twitter.finagle.filter.ExceptionSourceFilter]]
    * @see [[com.twitter.finagle.filter.MkJvmFilter]]
@@ -72,7 +72,7 @@ private[finagle] object StackServer {
  * by the ServiceFactory).
  *
  * If no `stack` is provided, the default in
- * [[com.twitter.finagle.StackServer#newStack]] is used.
+ * [[com.twitter.finagle.server.StackServer#newStack]] is used.
  */
 private[finagle] abstract class StackServer[Req, Rep](
   val stack: Stack[ServiceFactory[Req, Rep]],
@@ -97,7 +97,7 @@ private[finagle] abstract class StackServer[Req, Rep](
   )
 
   /**
-   * Defines a typed [[com.twitter.finagle.Listener]] for this server.
+   * Defines a typed [[com.twitter.finagle.server.Listener]] for this server.
    * Concrete StackServer implementations are expected to specify this.
    */
   protected val newListener: Stack.Params => Listener[In, Out]

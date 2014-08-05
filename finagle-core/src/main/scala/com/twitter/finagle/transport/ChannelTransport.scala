@@ -12,7 +12,7 @@ class ChannelTransport[In, Out](ch: Channel)
   extends Transport[In, Out] with ChannelUpstreamHandler
 {
   private[this] var nneed = 0
-  private[this] def need(n: Int) = synchronized {
+  private[this] def need(n: Int): Unit = synchronized {
     nneed += n
     // Note: we buffer 1 message here so that we receive socket
     // closes proactively.
@@ -57,14 +57,14 @@ class ChannelTransport[In, Out](ch: Channel)
         // of interest ops.
         //
         // This can't deadlock, because:
-        //    #1 Updates from other threads are enqueued onto a pending 
+        //    #1 Updates from other threads are enqueued onto a pending
         //    operations queue for the owner thread, and they never wait
         //    for completion.
         //    #2 Within the context of this thread, Channel.isReadable cannot
         //    change while we're invoking setReadable(): subsequent channel
         //    state events will be terminated early by need()'s check.
         need(0)
-        
+
       case e: ChannelStateEvent
       if e.getState == ChannelState.CONNECTED
           && e.getValue == java.lang.Boolean.TRUE =>
@@ -109,12 +109,12 @@ class ChannelTransport[In, Out](ch: Channel)
     p
   }
 
-  def isOpen = !failed.get && ch.isOpen
+  def isOpen: Boolean = !failed.get && ch.isOpen
 
-  def close(deadline: Time) = {
+  def close(deadline: Time): Future[Unit] = {
     if (ch.isOpen)
       Channels.close(ch)
-    closep map { _ => () }
+    closep.unit
   }
 
   def localAddress: SocketAddress = ch.getLocalAddress()

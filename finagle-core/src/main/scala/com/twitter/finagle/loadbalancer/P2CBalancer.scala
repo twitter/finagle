@@ -7,9 +7,7 @@ import com.twitter.finagle.util.{Drv, Rng, Updater, Prioritized}
 import com.twitter.util.{Future, Var, Time, Return, Throw, Closable}
 import java.util.concurrent.atomic.AtomicInteger
 import scala.annotation.tailrec
-import scala.annotation.tailrec
 import scala.collection.immutable
-import scala.collection.mutable
 
 object P2CBalancerFactory extends WeightedLoadBalancerFactory {
   def newLoadBalancer[Req, Rep](
