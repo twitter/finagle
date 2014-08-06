@@ -355,7 +355,6 @@ object Finagle extends Build {
     libraryDependencies ++= scroogeLibs
   ).dependsOn(finagleCore, finagleMemcached, finagleThrift)
 
-/*  notyet
   lazy val finagleProtobuf = Project(
     id = "finagle-protobuf",
     base = file("finagle-protobuf"),
@@ -369,7 +368,6 @@ object Finagle extends Build {
       "org.slf4j" % "slf4j-nop" % "1.5.8" % "provided"
     )
   ).dependsOn(finagleCore)
-*/
 
   lazy val finagleRedis = Project(
     id = "finagle-redis",

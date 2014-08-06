@@ -1,6 +1,10 @@
 package com.twitter.finagle.protobuf.rpc.channel
 
 import com.twitter.finagle.protobuf.rpc.Util
+import com.google.protobuf.Service
+import scala.collection.JavaConversions._
+import scala.collection.mutable._
+import com.google.common.base.Joiner
 
 /**
  * Maps method names to short codes. This particular implementation uses the trivial String.hashCode.
@@ -8,20 +12,29 @@ import com.twitter.finagle.protobuf.rpc.Util
 class SimpleMethodLookup(val methods: java.util.List[String]) extends MethodLookup {
 
   val codeToNameMulti = new HashMap[Int, Set[String]] with MultiMap[Int, String]
-  methods.toList foreach { it => codeToNameMulti.getOrElseUpdate(createEncoding(it), Set.empty[String]) += it }
+  methods.toList foreach {
+    it => codeToNameMulti.getOrElseUpdate(createEncoding(it), Set.empty[String]) += it
+  }
 
   // do we have collisions?
-  codeToNameMulti foreach { it =>
-    if (it._2.size > 1) {
-      val sb = new StringBuilder("Collision on ")
-      it._2 foreach { it => sb.append(it).append(", ") }
-      throw new IllegalArgumentException(sb.toString())
-    }
+  codeToNameMulti foreach {
+    it =>
+      if (it._2.size > 1) {
+        val sb = new StringBuilder("Collision on ")
+        it._2 foreach {
+          it => sb.append(it).append(", ")
+        }
+        throw new IllegalArgumentException(sb.toString())
+      }
   }
 
   val codeToName = new HashMap[Int, String]
-  codeToNameMulti foreach { it => codeToName(it._1) = it._2.iterator.next() }
-  val nameToCode = codeToName map { _.swap }
+  codeToNameMulti foreach {
+    it => codeToName(it._1) = it._2.iterator.next()
+  }
+  val nameToCode = codeToName map {
+    _.swap
+  }
 
   def encode(methodName: String): Int = nameToCode.getOrElse(methodName, throw new NoSuchMethodException("Method: " + methodName))
 
@@ -34,6 +47,8 @@ class SimpleMethodLookup(val methods: java.util.List[String]) extends MethodLook
 }
 
 object SimpleMethodLookup {
-  def apply(s: Service): SimpleMethodLookup = { new SimpleMethodLookup(Util.extractMethodNames(s)) }
+  def apply(s: Service): SimpleMethodLookup = {
+    new SimpleMethodLookup(Util.extractMethodNames(s))
+  }
 }
 
