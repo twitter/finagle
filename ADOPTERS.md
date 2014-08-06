@@ -23,6 +23,7 @@ you're using Finagle. Or even better, add the links yourself and
 * [Qubit](http://www.qubitproducts.com/)
 * [Rdio](http://www.rdio.com/)
   * [Thor, a Finagle-based image processor][4]
+* [Reputation.com](https://www.reputation.com/)
 * [Sharethrough](http://www.sharethrough.com/)
   * ["Finagle @ Sharethrough: Twitter #Conf Presentation"][5]
 * [SoundCloud](https://soundcloud.com/)
