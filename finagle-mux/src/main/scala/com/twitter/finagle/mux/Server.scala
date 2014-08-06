@@ -6,7 +6,7 @@ import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
-import com.twitter.util.{Closable, Future, Local, Promise, Return, Throw, Time, Stopwatch, Duration}
+import com.twitter.util._
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import org.jboss.netty.buffer.ChannelBuffer
@@ -67,17 +67,18 @@ private[finagle] class ServerDispatcher private[finagle](
         val elapsed = Stopwatch.start()
         val f = service(req)
         pending.put(tag, f)
-        f respond {
-          case Return(rep) =>
-            lessor.observe(elapsed())
-            pending.remove(tag)
-
+        f respond { tr =>
+          pending.remove(tag)
+          tr match {
+            case Return(rep) =>
+              lessor.observe(elapsed())
               // Record tracing info to track Mux adoption across clusters.
               Trace.record(ServerDispatcher.ServerEnabledTraceMessage)
-            Trace.record(Annotation.ServerSend())
-            trans.write(encode(RdispatchOk(tag, Seq.empty, rep)))
-          case Throw(exc) =>
-            trans.write(encode(RdispatchError(tag, Seq.empty, exc.toString)))
+              Trace.record(Annotation.ServerSend())
+              trans.write(encode(RdispatchOk(tag, Seq.empty, rep)))
+            case Throw(exc) =>
+              trans.write(encode(RdispatchError(tag, Seq.empty, exc.toString)))
+          }
         }
       }
 
@@ -95,14 +96,16 @@ private[finagle] class ServerDispatcher private[finagle](
         val elapsed = Stopwatch.start()
         val f = service(req)
         pending.put(tag, f)
-        f respond {
-          case Return(rep) =>
-            lessor.observe(elapsed())
-            pending.remove(tag)
-            Trace.record(Annotation.ServerSend())
-            trans.write(encode(RreqOk(tag, rep)))
-          case Throw(exc) =>
-            trans.write(encode(RreqError(tag, exc.toString)))
+        f respond { tr =>
+          pending.remove(tag)
+          tr match {
+            case Return(rep) =>
+              lessor.observe(elapsed())
+              Trace.record(Annotation.ServerSend())
+              trans.write(encode(RreqOk(tag, rep)))
+            case Throw(exc) =>
+              trans.write(encode(RreqError(tag, exc.toString)))
+          }
         }
       } finally {
         Trace.state = saved
@@ -143,9 +146,10 @@ private[finagle] class ServerDispatcher private[finagle](
     // We know that if we have a failure, we cannot from this point forward
     // insert new entries in the pending map.
     val exc = new CancelledRequestException(cause)
-    for ((_, f) <- pending.asScala)
+    pending.asScala.foreach { case (tag, f) =>
+      pending.remove(tag)
       f.raise(exc)
-    pending.clear()
+    }
 
     lessor.unregister(this)
     trans.close()

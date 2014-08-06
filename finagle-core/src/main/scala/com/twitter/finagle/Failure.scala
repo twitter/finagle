@@ -1,5 +1,7 @@
 package com.twitter.finagle
 
+import com.twitter.logging.Level
+
 /**
  * Base exception for all Finagle originated failures. These are
  * Exceptions, but with additional `sources` and `flags`.
@@ -21,7 +23,8 @@ final class Failure private[finagle](
   val cause: Throwable = null,
   val flags: Long = Failure.Flag.None,
   sources: Map[String, Object] = Map(),
-  val stacktrace: Array[StackTraceElement] = Failure.NoStacktrace
+  val stacktrace: Array[StackTraceElement] = Failure.NoStacktrace,
+  val logLevel: Level = Level.WARNING
 ) extends Exception(why, cause) with NoStacktrace {
   import Failure._
 
@@ -50,6 +53,15 @@ final class Failure private[finagle](
       copy(flags = toggle(on, flags, Flag.Retryable))
     }
 
+  /**
+   * Creates a new Failure with the given logging Level.
+   *
+   * Note: it is not guaranteed that all `Failure`s are logged
+   * within finagle and this only applies to ones that are.
+   */
+  def withLogLevel(level: Level): Failure =
+    copy(logLevel = level)
+
   override def toString: String =
     "Failure(%s, flags=0x%02x)\n\twith %s".format(why, flags,
       if (sources.isEmpty) "NoSources" else sources.mkString("\n\twith "))
@@ -70,13 +82,14 @@ final class Failure private[finagle](
 
   override def hashCode = cause.hashCode ^ flags.hashCode
 
-  def copy(
+  private[this] def copy(
     why: String = why,
     cause: Throwable = cause,
     flags: Long = flags,
     sources: Map[String, Object] = sources,
-    stacktrace: Array[StackTraceElement] = stacktrace
-  ): Failure = new Failure(why, cause, flags, sources, stacktrace)
+    stacktrace: Array[StackTraceElement] = stacktrace,
+    logLevel: Level = logLevel
+  ): Failure = new Failure(why, cause, flags, sources, stacktrace, logLevel)
 }
 
 /**

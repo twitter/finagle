@@ -1,8 +1,10 @@
 package com.twitter.finagle.builder
 
 import com.twitter.finagle.{Failure, RequestException}
+import java.io.IOException
 import java.util.logging.{Level, Logger}
 import org.junit.runner.RunWith
+import org.mockito.Matchers.{any, eq => mockitoEq}
 import org.mockito.Mockito.verify
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -26,5 +28,13 @@ class SourceTrackingMonitorTest extends FunSuite with MockitoSugar {
         " threw an exception",
       exc
     )
+  }
+
+  test("logs IOExceptions at Level.FINE") {
+    val logger = mock[Logger]
+    val ioEx = new IOException("hi")
+    val monitor = new SourceTrackingMonitor(logger, "umm")
+    monitor.handle(ioEx)
+    verify(logger).log(mockitoEq(Level.FINE), any(), mockitoEq(ioEx))
   }
 }
