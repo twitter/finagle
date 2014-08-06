@@ -29,7 +29,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Resolver for inet scheme. This Resolver resolves DNS after each TTL timeout.
+The TTL is gotten from &quot;networkaddress.cache.ttl&quot;, a Java Security Property.
+If &quot;networkaddress.cache.ttl&quot; is not set or set to a non-positive value, DNS
+cache refresh will be turned off.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a name="com.twitter.finagle.Resolver" class="extype" href="Resolver.html">Resolver</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
@@ -143,10 +147,11 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">bind</span><span class="params">(<span name="arg">arg: String</span>)</span><span class="result">: <span name="com.twitter.util.Var" class="extype">Var</span>[<a name="com.twitter.finagle.Addr" class="extype" href="Addr.html">Addr</a>]</span>
+        <span class="name">bind</span><span class="params">(<span name="hosts">hosts: String</span>)</span><span class="result">: <span name="com.twitter.util.Var" class="extype">Var</span>[<a name="com.twitter.finagle.Addr" class="extype" href="Addr.html">Addr</a>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.InetResolver" class="extype" href="">InetResolver</a> → <a name="com.twitter.finagle.Resolver" class="extype" href="Resolver.html">Resolver</a></dd></dl></div>
+      <p class="shortcomment cmt">Binds to the specified hostnames, and refreshes the DNS information periodically.</p><div class="fullcomment"><div class="comment cmt"><p>Binds to the specified hostnames, and refreshes the DNS information periodically.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.InetResolver" class="extype" href="">InetResolver</a> → <a name="com.twitter.finagle.Resolver" class="extype" href="Resolver.html">Resolver</a></dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.18.0 documentation</title>
+    <title>Metrics &mdash; Finagle 6.20.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.18.0',
+        VERSION:     '6.20.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.18.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.20.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -264,6 +264,10 @@ in between requests</dd>
 <dd>a gauge of the number of clients waiting on connections</dd>
 <dt><strong>pool_size</strong></dt>
 <dd>a gauge of the number of connections that are currently alive, either in use or not</dd>
+<dt><strong>pool_num_waited</strong></dt>
+<dd>a counter of the number of times there were no connections immediately available and the client waited for a connection</dd>
+<dt><strong>pool_num_too_many_waiters</strong></dt>
+<dd>a counter of the number of times there were no connections immediately available and there were already too many waiters</dd>
 </dl>
 </div>
 <div class="section" id="reusingpool">

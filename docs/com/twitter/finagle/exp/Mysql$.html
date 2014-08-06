@@ -32,13 +32,13 @@
       <div class="fullcommenttop" id="comment"><div class="comment cmt"></div><dl class="attributes block"> <div class="block">Example:
                 <ol><li class="cmt"><p></p><pre>
 <span class="kw">val</span> client = Mysql
-  .withCredentials(<span class="lit">"<username>"</span>, <span class="lit">"<password>"</span>)
+  .withCredentials(<span class="lit">"username"</span>, <span class="lit">"password"</span>)
   .withDatabase(<span class="lit">"db"</span>)
   .newRichClient(<span class="lit">"inet!localhost:3306"</span>)
 </pre></li></ol>
               </div></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.exp.MysqlClient" class="extype" href="MysqlClient.html">MysqlClient</a>, <a name="com.twitter.finagle.exp.MysqlRichClient" class="extype" href="MysqlRichClient.html">MysqlRichClient</a>, <span name="com.twitter.finagle.client.StackClientLike" class="extype">StackClientLike</span>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>, <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="mysql/transport/Packet.html">Packet</a>, <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="mysql/transport/Packet.html">Packet</a>, <a name="com.twitter.finagle.exp.MysqlClient" class="extype" href="MysqlClient.html">MysqlClient</a>], <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.exp.MysqlClient" class="extype" href="MysqlClient.html">MysqlClient</a>, <a name="com.twitter.finagle.exp.MysqlRichClient" class="extype" href="MysqlRichClient.html">MysqlRichClient</a>, <span name="com.twitter.finagle.client.StackClientLike" class="extype">StackClientLike</span>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>, <a name="com.twitter.finagle.exp.MysqlClient" class="extype" href="MysqlClient.html">MysqlClient</a>], <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -165,7 +165,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="p">p: P</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a name="com.twitter.finagle.Stack.Param" class="extype" href="../Stack$$Param.html">Param</a>[P]</span>)</span><span class="result">: <a name="com.twitter.finagle.exp.MysqlClient" class="extype" href="MysqlClient.html">MysqlClient</a></span>
+        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="p">p: P</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span name="com.twitter.finagle.Stack.Param" class="extype">Param</span>[P]</span>)</span><span class="result">: <a name="com.twitter.finagle.exp.MysqlClient" class="extype" href="MysqlClient.html">MysqlClient</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Creates a new <code>Repr</code> with an underlying StackClient where <code>p</code> has been
@@ -298,14 +298,14 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a></dd></dl></div>
     </li><li visbl="prt" name="com.twitter.finagle.exp.MysqlClient#newInstance" data-isabs="false">
-      <a id="newInstance(StackClient[Request, Result, Packet, Packet]):MysqlClient"></a>
+      <a id="newInstance(StackClient[Request, Result]):MysqlClient"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newInstance</span><span class="params">(<span name="client">client: <span name="com.twitter.finagle.client.StackClient" class="extype">StackClient</span>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>, <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="mysql/transport/Packet.html">Packet</a>, <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="mysql/transport/Packet.html">Packet</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.exp.MysqlClient" class="extype" href="MysqlClient.html">MysqlClient</a></span>
+        <span class="name">newInstance</span><span class="params">(<span name="client">client: <span name="com.twitter.finagle.client.StackClient" class="extype">StackClient</span>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.exp.MysqlClient" class="extype" href="MysqlClient.html">MysqlClient</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.MysqlClient" class="extype" href="MysqlClient.html">MysqlClient</a> → StackClientLike</dd></dl></div>
@@ -573,7 +573,7 @@ a new session.
             </div><div name="com.twitter.finagle.exp.MysqlRichClient" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.exp.MysqlRichClient" class="extype" href="MysqlRichClient.html">MysqlRichClient</a></h3>
             </div><div name="com.twitter.finagle.client.StackClientLike" class="parent">
-              <h3>Inherited from <span name="com.twitter.finagle.client.StackClientLike" class="extype">StackClientLike</span>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>, <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="mysql/transport/Packet.html">Packet</a>, <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="mysql/transport/Packet.html">Packet</a>, <a name="com.twitter.finagle.exp.MysqlClient" class="extype" href="MysqlClient.html">MysqlClient</a>]</h3>
+              <h3>Inherited from <span name="com.twitter.finagle.client.StackClientLike" class="extype">StackClientLike</span>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>, <a name="com.twitter.finagle.exp.MysqlClient" class="extype" href="MysqlClient.html">MysqlClient</a>]</h3>
             </div><div name="com.twitter.finagle.Client" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="mysql/Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="mysql/Result.html">Result</a>]</h3>
             </div><div name="scala.AnyRef" class="parent">

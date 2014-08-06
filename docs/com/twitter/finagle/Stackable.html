@@ -25,17 +25,14 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">Stackable</span><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends AnyRef</span>
+        <span class="name">Stackable</span><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span name="com.twitter.finagle.Stack.Head" class="extype">Head</span></span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Produce a stack from a <code>T</code>-typed element.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
-        </div><div class="toggleContainer block">
-          <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.Stack.Module" class="extype" href="Stack$$Module.html">Module</a>, <a name="com.twitter.finagle.Stack.Simple" class="extype" href="Stack$$Simple.html">Simple</a></div>
+          <div class="superTypes hiddenContent"><span name="com.twitter.finagle.Stack.Head" class="extype">Head</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -49,7 +46,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.Stackable" class="in"><span>Stackable</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.Stackable" class="in"><span>Stackable</span></li><li name="com.twitter.finagle.Stack.Head" class="in"><span>Head</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -65,7 +62,7 @@
 
         <div class="values members" id="values">
               <h3>Abstract Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.Stackable#description" data-isabs="true">
+              <ol><li visbl="pub" name="com.twitter.finagle.Stack.Head#description" data-isabs="true">
       <a id="description:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -76,19 +73,23 @@
         <span class="name">description</span><span class="result">: String</span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.Stackable#headRole" data-isabs="true">
-      <a id="headRole:Role"></a>
+      <p class="shortcomment cmt">The description of the functionality of the element
+</p><div class="fullcomment"><div class="comment cmt"><p>The description of the functionality of the element
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>Head</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Stack.Head#role" data-isabs="true">
+      <a id="role:Role"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">headRole</span><span class="result">: <a name="com.twitter.finagle.Stack.Role" class="extype" href="Stack$$Role.html">Role</a></span>
+        <span class="name">role</span><span class="result">: <span name="com.twitter.finagle.Stack.Role" class="extype">Role</span></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">The com.twitter.finagle.Stack.Role that the element can serve
+</p><div class="fullcomment"><div class="comment cmt"><p>The com.twitter.finagle.Stack.Role that the element can serve
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>Head</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Stackable#toStack" data-isabs="true">
       <a id="toStack(Stack[T]):Stack[T]"></a>
       <h4 class="signature">
@@ -232,6 +233,18 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.Stackable#get" data-isabs="false">
+      <a id="get[P&lt;:Product](Param[P],Params):P"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get</span><span class="tparams">[<span name="P">P &lt;: <span name="scala.Product" class="extype">Product</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="param">param: <span name="com.twitter.finagle.Stack.Param" class="extype">Param</span>[P]</span>, <span name="params">params: <span name="com.twitter.finagle.Stack.Params" class="extype">Params</span></span>)</span><span class="result">: P</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
       <a id="getClass():java.lang.Class[_]"></a>
       <h4 class="signature">
@@ -304,6 +317,20 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Stackable#params" data-isabs="false">
+      <a id="params:Map[String, String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">params</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[String, String]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The com.twitter.finagle.Stack.Param used to configure the element
+</p><div class="fullcomment"><div class="comment cmt"><p>The com.twitter.finagle.Stack.Param used to configure the element
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Stackable" class="extype" href="">Stackable</a> → Head</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -380,7 +407,9 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.AnyRef" class="parent">
+        <div name="com.twitter.finagle.Stack.Head" class="parent">
+              <h3>Inherited from <span name="com.twitter.finagle.Stack.Head" class="extype">Head</span></h3>
+            </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">
               <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>

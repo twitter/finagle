@@ -57,7 +57,22 @@
         <div id="allMembers">
         
 
-        
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.util.InetSocketAddressUtil#HostPort" data-isabs="false">
+      <a id="HostPort:(String, Int)"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">HostPort</span><span class="result"> = (String, <span name="scala.Int" class="extype">Int</span>)</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
 
         
 
@@ -261,6 +276,19 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.util.InetSocketAddressUtil#parseHostPorts" data-isabs="false">
+      <a id="parseHostPorts(String):Seq[(String, Int)]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">parseHostPorts</span><span class="params">(<span name="hosts">hosts: String</span>)</span><span class="result">: Seq[(String, <span name="scala.Int" class="extype">Int</span>)]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Parses a comma or space-delimited string of hostname and port pairs into scala pair.</p><div class="fullcomment"><div class="comment cmt"><p>Parses a comma or space-delimited string of hostname and port pairs into scala pair. For example,</p><p>    InetSocketAddressUtil.parseHostPorts(&quot;127.0.0.1:11211&quot;) =&gt; Seq((&quot;127.0.0.1&quot;, 11211))
+</p></div><dl class="paramcmts block"><dt class="param">hosts</dt><dd class="cmt"><p>a comma or space-delimited string of hostname and port pairs.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt">IllegalArgumentException<p>if host and port are not both present</p></span></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.util.InetSocketAddressUtil#parseHosts" data-isabs="false">
       <a id="parseHosts(String):Seq[InetSocketAddress]"></a>
       <h4 class="signature">
@@ -274,6 +302,20 @@
       </h4>
       <p class="shortcomment cmt">Parses a comma or space-delimited string of hostname and port pairs.</p><div class="fullcomment"><div class="comment cmt"><p>Parses a comma or space-delimited string of hostname and port pairs. For example,</p><p>    InetSocketAddressUtil.parseHosts(&quot;127.0.0.1:11211&quot;) =&gt; Seq(new InetSocketAddress(&quot;127.0.0.1&quot;, 11211))
 </p></div><dl class="paramcmts block"><dt class="param">hosts</dt><dd class="cmt"><p>a comma or space-delimited string of hostname and port pairs.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt">IllegalArgumentException<p>if host and port are not both present</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.util.InetSocketAddressUtil#resolveHostPorts" data-isabs="false">
+      <a id="resolveHostPorts(Seq[(String, Int)]):Set[SocketAddress]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">resolveHostPorts</span><span class="params">(<span name="hostPorts">hostPorts: Seq[(String, <span name="scala.Int" class="extype">Int</span>)]</span>)</span><span class="result">: Set[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Resolves a sequence of host port pairs into a set of socket addresses.</p><div class="fullcomment"><div class="comment cmt"><p>Resolves a sequence of host port pairs into a set of socket addresses. For example,</p><p>    InetSocketAddressUtil.resolveHostPorts(Seq((&quot;127.0.0.1&quot;, 11211))) = Set(new InetSocketAddress(&quot;127.0.0.1&quot;, 11211))
+</p></div><dl class="paramcmts block"><dt class="param">hostPorts</dt><dd class="cmt"><p>a sequence of host port pairs</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt">java.net.UnknownHostException<p>if some host cannot be resolved
+</p></span></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">

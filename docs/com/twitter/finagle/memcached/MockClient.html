@@ -29,8 +29,7 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Map-based mock client for testing
-Note: The cas method checks if value is same as previous value, if not, do a swap and return true
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Map-based mock client for testing</p><p>Note: expiry and flags are ignored on update operations.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a name="com.twitter.finagle.memcached.Client" class="extype" href="Client.html">Client</a>, <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
@@ -211,8 +210,7 @@ Note: The cas method checks if value is same as previous value, if not, do a swa
         <span class="name">add</span><span class="params">(<span name="key">key: String</span>, <span name="flags">flags: <span name="scala.Int" class="extype">Int</span></span>, <span name="expiry">expiry: <span name="com.twitter.util.Time" class="extype">Time</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Store a key but only if it doesn't already exist on the server.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key but only if it doesn't already exist on the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
-</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.MockClient" class="extype" href="">MockClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Note: expiry and flags are ignored.</p><div class="fullcomment"><div class="comment cmt"><p>Note: expiry and flags are ignored.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.MockClient" class="extype" href="">MockClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#add" data-isabs="false">
       <a id="add(String,ChannelBuffer):Future[Boolean]"></a>
       <h4 class="signature">
@@ -237,9 +235,7 @@ Note: The cas method checks if value is same as previous value, if not, do a swa
         <span class="name">append</span><span class="params">(<span name="key">key: String</span>, <span name="flags">flags: <span name="scala.Int" class="extype">Int</span></span>, <span name="expiry">expiry: <span name="com.twitter.util.Time" class="extype">Time</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Append bytes to the end of an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Append bytes to the end of an existing key. If the key doesn't exist, the
-operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
-</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.MockClient" class="extype" href="">MockClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Note: expiry and flags are ignored.</p><div class="fullcomment"><div class="comment cmt"><p>Note: expiry and flags are ignored.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.MockClient" class="extype" href="">MockClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#append" data-isabs="false">
       <a id="append(String,ChannelBuffer):Future[Boolean]"></a>
       <h4 class="signature">
@@ -277,14 +273,7 @@ exist, the operation has no effect.</p></div><dl class="paramcmts block"><dt>ret
         <span class="name">cas</span><span class="params">(<span name="key">key: String</span>, <span name="flags">flags: <span name="scala.Int" class="extype">Int</span></span>, <span name="expiry">expiry: <span name="com.twitter.util.Time" class="extype">Time</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="casUnique">casUnique: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Perform a CAS operation on the key, only if the value has not
-changed since the value was last retrieved, and <code>casUnique</code>
-extracted from a <code>gets</code> command.</p><div class="fullcomment"><div class="comment cmt"><p>Perform a CAS operation on the key, only if the value has not
-changed since the value was last retrieved, and <code>casUnique</code>
-extracted from a <code>gets</code> command.  We treat the &quot;cas unique&quot; token
-opaquely, but in reality it is a string-encoded u64.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if replaced, false if not
-</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.MockClient" class="extype" href="">MockClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Checks if value is same as previous value, if not, do a swap and return true.</p><div class="fullcomment"><div class="comment cmt"><p>Checks if value is same as previous value, if not, do a swap and return true.</p><p>Note: expiry and flags are ignored.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if replaced, false if not</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.MockClient" class="extype" href="">MockClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#cas" data-isabs="false">
       <a id="cas(String,ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
       <h4 class="signature">
@@ -618,9 +607,7 @@ This operation has no effect if there is no value there already.
         <span class="name">prepend</span><span class="params">(<span name="key">key: String</span>, <span name="flags">flags: <span name="scala.Int" class="extype">Int</span></span>, <span name="expiry">expiry: <span name="com.twitter.util.Time" class="extype">Time</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Prepend bytes to the beginning of an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Prepend bytes to the beginning of an existing key. If the key doesn't
-exist, the operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
-</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.MockClient" class="extype" href="">MockClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Note: expiry and flags are ignored.</p><div class="fullcomment"><div class="comment cmt"><p>Note: expiry and flags are ignored.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.MockClient" class="extype" href="">MockClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#prepend" data-isabs="false">
       <a id="prepend(String,ChannelBuffer):Future[Boolean]"></a>
       <h4 class="signature">
@@ -674,9 +661,7 @@ protocol compatability.</p></div><dl class="paramcmts block"><dt>returns</dt><dd
         <span class="name">replace</span><span class="params">(<span name="key">key: String</span>, <span name="flags">flags: <span name="scala.Int" class="extype">Int</span></span>, <span name="expiry">expiry: <span name="com.twitter.util.Time" class="extype">Time</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Replace bytes on an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Replace bytes on an existing key. If the key doesn't exist, the
-operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
-</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.MockClient" class="extype" href="">MockClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Note: expiry and flags are ignored.</p><div class="fullcomment"><div class="comment cmt"><p>Note: expiry and flags are ignored.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.MockClient" class="extype" href="">MockClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#replace" data-isabs="false">
       <a id="replace(String,ChannelBuffer):Future[Boolean]"></a>
       <h4 class="signature">
@@ -702,8 +687,7 @@ effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>
         <span class="name">set</span><span class="params">(<span name="key">key: String</span>, <span name="flags">flags: <span name="scala.Int" class="extype">Int</span></span>, <span name="expiry">expiry: <span name="com.twitter.util.Time" class="extype">Time</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Store a key.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key. Override an existing value.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true
-</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.MockClient" class="extype" href="">MockClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Note: expiry and flags are ignored.</p><div class="fullcomment"><div class="comment cmt"><p>Note: expiry and flags are ignored.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.MockClient" class="extype" href="">MockClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#set" data-isabs="false">
       <a id="set(String,ChannelBuffer):Future[Unit]"></a>
       <h4 class="signature">

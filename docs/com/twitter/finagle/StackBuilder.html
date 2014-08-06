@@ -68,7 +68,7 @@ a new stack).
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">StackBuilder</span><span class="params">(<span name="headRole">headRole: <a name="com.twitter.finagle.Stack.Role" class="extype" href="Stack$$Role.html">Role</a></span>, <span name="end">end: T</span>)</span>
+        <span class="name">StackBuilder</span><span class="params">(<span name="role">role: <span name="com.twitter.finagle.Stack.Role" class="extype">Role</span></span>, <span name="end">end: T</span>)</span>
       </span>
       </h4>
       
@@ -263,7 +263,7 @@ a new stack).
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">make</span><span class="params">(<span name="params">params: <a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a></span>)</span><span class="result">: T</span>
+        <span class="name">make</span><span class="params">(<span name="params">params: <span name="com.twitter.finagle.Stack.Params" class="extype">Params</span></span>)</span><span class="result">: T</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Materialize the current stack: equivalent to
@@ -325,7 +325,7 @@ the stack.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">push</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="headRole">headRole: <a name="com.twitter.finagle.Stack.Role" class="extype" href="Stack$$Role.html">Role</a></span>, <span name="el">el: U</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="csf">csf: <a name="com.twitter.finagle.CanStackFrom" class="extype" href="CanStackFrom.html">CanStackFrom</a>[U, T]</span>)</span><span class="result">: StackBuilder.this.type</span>
+        <span class="name">push</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="role">role: <span name="com.twitter.finagle.Stack.Role" class="extype">Role</span></span>, <span name="el">el: U</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="csf">csf: <a name="com.twitter.finagle.CanStackFrom" class="extype" href="CanStackFrom.html">CanStackFrom</a>[U, T]</span>)</span><span class="result">: StackBuilder.this.type</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Push the stack element <code>el</code> onto the stack; el must conform to

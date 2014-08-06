@@ -124,14 +124,29 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Kestrel#apply" data-isabs="false">
-      <a id="apply():Kestrel"></a>
+      <a id="apply(Boolean):CodecFactory[Command, Response]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">()</span><span class="result">: <a name="com.twitter.finagle.kestrel.protocol.Kestrel" class="extype" href="Kestrel.html">Kestrel</a></span>
+        <span class="name">apply</span><span class="params">(<span name="failFast">failFast: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <a name="com.twitter.finagle.CodecFactory" class="extype" href="../../CodecFactory.html">CodecFactory</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="Response.html">Response</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">NOTE: If you're using the codec to build a client connected to a single host, don't set this
+to true.</p><div class="fullcomment"><div class="comment cmt"><p>NOTE: If you're using the codec to build a client connected to a single host, don't set this
+to true. See CSL-288
+</p></div></div>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Kestrel#apply" data-isabs="false">
+      <a id="apply():CodecFactory[Command, Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">()</span><span class="result">: <a name="com.twitter.finagle.CodecFactory" class="extype" href="../../CodecFactory.html">CodecFactory</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="Response.html">Response</a>]</span>
       </span>
       </h4>
       
@@ -202,14 +217,14 @@
               
         </dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Kestrel#get" data-isabs="false">
-      <a id="get():Kestrel"></a>
+      <a id="get():CodecFactory[Command, Response]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="params">()</span><span class="result">: <a name="com.twitter.finagle.kestrel.protocol.Kestrel" class="extype" href="Kestrel.html">Kestrel</a></span>
+        <span class="name">get</span><span class="params">()</span><span class="result">: <a name="com.twitter.finagle.CodecFactory" class="extype" href="../../CodecFactory.html">CodecFactory</a>[<a name="com.twitter.finagle.kestrel.protocol.Command" class="extype" href="Command.html">Command</a>, <a name="com.twitter.finagle.kestrel.protocol.Response" class="extype" href="Response.html">Response</a>]</span>
       </span>
       </h4>
       

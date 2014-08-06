@@ -31,7 +31,7 @@
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="com.twitter.finagle.exp.HttpServer" class="extype">HttpServer</span>, <span name="com.twitter.finagle.server.StackServerLike" class="extype">StackServerLike</span>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>, <span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>, <span name="com.twitter.finagle.exp.HttpServer" class="extype">HttpServer</span>], <a name="com.twitter.finagle.Server" class="extype" href="../Server.html">Server</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="com.twitter.finagle.exp.HttpServer" class="extype">HttpServer</span>, <span name="com.twitter.finagle.server.StackServerLike" class="extype">StackServerLike</span>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>, <span name="com.twitter.finagle.exp.HttpServer" class="extype">HttpServer</span>], <a name="com.twitter.finagle.Server" class="extype" href="../Server.html">Server</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -158,7 +158,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="p">p: P</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a name="com.twitter.finagle.Stack.Param" class="extype" href="../Stack$$Param.html">Param</a>[P]</span>)</span><span class="result">: <span name="com.twitter.finagle.exp.HttpServer" class="extype">HttpServer</span></span>
+        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="p">p: P</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span name="com.twitter.finagle.Stack.Param" class="extype">Param</span>[P]</span>)</span><span class="result">: <span name="com.twitter.finagle.exp.HttpServer" class="extype">HttpServer</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StackServerLike</dd></dl></div>
@@ -250,14 +250,14 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li visbl="prt" name="com.twitter.finagle.exp.HttpServer#newInstance" data-isabs="false">
-      <a id="newInstance(StackServer[HttpRequest, HttpResponse, Any, Any]):HttpServer"></a>
+      <a id="newInstance(StackServer[HttpRequest, HttpResponse]):HttpServer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newInstance</span><span class="params">(<span name="server">server: <span name="com.twitter.finagle.server.StackServer" class="extype">StackServer</span>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>, <span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>]</span>)</span><span class="result">: <span name="com.twitter.finagle.exp.HttpServer" class="extype">HttpServer</span></span>
+        <span class="name">newInstance</span><span class="params">(<span name="server">server: <span name="com.twitter.finagle.server.StackServer" class="extype">StackServer</span>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>)</span><span class="result">: <span name="com.twitter.finagle.exp.HttpServer" class="extype">HttpServer</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>HttpServer → StackServerLike</dd></dl></div>
@@ -520,7 +520,7 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
         <div name="com.twitter.finagle.exp.HttpServer" class="parent">
               <h3>Inherited from <span name="com.twitter.finagle.exp.HttpServer" class="extype">HttpServer</span></h3>
             </div><div name="com.twitter.finagle.server.StackServerLike" class="parent">
-              <h3>Inherited from <span name="com.twitter.finagle.server.StackServerLike" class="extype">StackServerLike</span>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>, <span name="scala.Any" class="extype">Any</span>, <span name="scala.Any" class="extype">Any</span>, <span name="com.twitter.finagle.exp.HttpServer" class="extype">HttpServer</span>]</h3>
+              <h3>Inherited from <span name="com.twitter.finagle.server.StackServerLike" class="extype">StackServerLike</span>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>, <span name="com.twitter.finagle.exp.HttpServer" class="extype">HttpServer</span>]</h3>
             </div><div name="com.twitter.finagle.Server" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.Server" class="extype" href="../Server.html">Server</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</h3>
             </div><div name="scala.AnyRef" class="parent">

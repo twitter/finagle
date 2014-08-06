@@ -57,7 +57,13 @@ ServerBuilder.safeBuild(
   .bindTo(<span class="kw">new</span> InetSocketAddress(serverPort)));
 </pre><p>Alternatively, using the <code>unsafeBuild</code> method on <code>ServerBuilder</code>
 verifies the builder dynamically, resulting in a runtime error
-instead of a compiler error.
+instead of a compiler error.</p><h3>Defaults</h3><p>The following defaults are applied to servers constructed via ServerBuilder,
+unless overridden with the corresponding method. These defaults were chosen
+carefully so as to work well for most use cases. Before changing any of them,
+make sure that you know exactly how they will affect your application --
+these options are typically only changed by expert users.</p><p>- <code>openConnectionsThresholds</code>: None
+- <code>maxConcurrentRequests</code>: Int.MaxValue
+- <code>backlog</code>: OS-defined default value
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
@@ -339,7 +345,7 @@ This defaults to true.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasBindTo1">HasBindTo1</span>, <span name="HasName1">HasName1</span>]</span><span class="params">(<span name="param">param: P</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a name="com.twitter.finagle.Stack.Param" class="extype" href="../Stack$$Param.html">Param</a>[P]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req, Rep, HasCodec1, HasBindTo1, HasName1]</span>
+        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasBindTo1">HasBindTo1</span>, <span name="HasName1">HasName1</span>]</span><span class="params">(<span name="param">param: P</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span name="com.twitter.finagle.Stack.Param" class="extype">Param</span>[P]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req, Rep, HasCodec1, HasBindTo1, HasName1]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
@@ -351,7 +357,7 @@ This defaults to true.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">copy</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasBindTo1">HasBindTo1</span>, <span name="HasName1">HasName1</span>]</span><span class="params">(<span name="ps">ps: <a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a></span>, <span name="newServer">newServer: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a>) ⇒ <a name="com.twitter.finagle.Server" class="extype" href="../Server.html">Server</a>[Req1, Rep1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]</span>
+        <span class="name">copy</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasBindTo1">HasBindTo1</span>, <span name="HasName1">HasName1</span>]</span><span class="params">(<span name="ps">ps: <span name="com.twitter.finagle.Stack.Params" class="extype">Params</span></span>, <span name="newServer">newServer: (<span name="com.twitter.finagle.Stack.Params" class="extype">Params</span>) ⇒ <a name="com.twitter.finagle.Server" class="extype" href="../Server.html">Server</a>[Req1, Rep1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
@@ -681,7 +687,7 @@ False by default.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">stack</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="mk">mk: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a>) ⇒ <a name="com.twitter.finagle.Server" class="extype" href="../Server.html">Server</a>[Req1, Rep1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req1, Rep1, <a name="com.twitter.finagle.builder.ServerConfig.Yes" class="extype" href="ServerConfig$$Yes.html">Yes</a>, HasBindTo, HasName]</span>
+        <span class="name">stack</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="mk">mk: (<span name="com.twitter.finagle.Stack.Params" class="extype">Params</span>) ⇒ <a name="com.twitter.finagle.Server" class="extype" href="../Server.html">Server</a>[Req1, Rep1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req1, Rep1, <a name="com.twitter.finagle.builder.ServerConfig.Yes" class="extype" href="ServerConfig$$Yes.html">Yes</a>, HasBindTo, HasName]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Overrides the stack and <a name="com.twitter.finagle.Server" class="extype" href="../Server.html">Server</a> that will be used

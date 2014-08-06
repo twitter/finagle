@@ -202,7 +202,7 @@ Kestrel's thrift protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="MultiReaderConfig.html"><span class="name">MultiReaderConfig</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="_va">_va: Var[Addr]</span>, <span name="_queueName">_queueName: String</span>, <span name="_clientId">_clientId: Option[ClientId]</span>, <span name="_clientBuilder">_clientBuilder: Option[ClientBuilder[Req, Rep, Nothing, Yes, Yes]]</span>, <span name="_timer">_timer: Option[Timer]</span>, <span name="_retryBackoffs">_retryBackoffs: Option[() ⇒ Stream[Duration]]</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="MultiReaderConfig.html"><span class="name">MultiReaderConfig</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="_va">_va: Var[Addr]</span>, <span name="_queueName">_queueName: String</span>, <span name="_clientId">_clientId: Option[ClientId]</span>, <span name="_txnAbortTimeout">_txnAbortTimeout: Duration</span>, <span name="_clientBuilder">_clientBuilder: Option[ClientBuilder[Req, Rep, Nothing, Yes, Yes]]</span>, <span name="_timer">_timer: Option[Timer]</span>, <span name="_retryBackoffs">_retryBackoffs: Option[() ⇒ Stream[Duration]]</span>)</span><span class="result"> extends Product with Serializable</span>
       </span>
       </h4>
       <p class="comment cmt">Multi reader configuration settings

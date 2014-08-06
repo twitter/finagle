@@ -233,7 +233,8 @@ name.</p>
         <a href="CancelledConnectionException.html"><span class="name">CancelledConnectionException</span></a><span class="result"> extends RequestException</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A Future is satisfied with this exception when the process of establishing
+a session is interrupted.</p>
     </li><li visbl="pub" name="com.twitter.finagle.CancelledReadException" data-isabs="false">
       <a id="CancelledReadException:CancelledReadException"></a>
       <h4 class="signature">
@@ -257,7 +258,8 @@ name.</p>
         <a href="CancelledRequestException.html"><span class="name">CancelledRequestException</span></a><span class="result"> extends RequestException</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">Cancellation is propagated between a Finagle server and client intra-process
+when the server is interrupted by an upstream service.</p>
     </li><li visbl="pub" name="com.twitter.finagle.CancelledWriteException" data-isabs="false">
       <a id="CancelledWriteException:CancelledWriteException"></a>
       <h4 class="signature">
@@ -1142,7 +1144,7 @@ ServiceFactory.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Stackable.html"><span class="name">Stackable</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends AnyRef</span>
+        <a href="Stackable.html"><span class="name">Stackable</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends Head</span>
       </span>
       </h4>
       <p class="comment cmt">Produce a stack from a <code>T</code>-typed element.</p>
@@ -1613,7 +1615,7 @@ registered handler.</p>
         <a href="InetResolver$.html"><span class="name">InetResolver</span></a><span class="result"> extends Resolver</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">Resolver for inet scheme.</p>
     </li><li visbl="pub" name="com.twitter.finagle.Memcached" data-isabs="false">
       <a id="Memcached:Memcached"></a>
       <h4 class="signature">
@@ -1916,18 +1918,6 @@ as binding and evaluation routines.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.Stack" data-isabs="false">
-      <a id="Stack:Stack"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Stack$.html"><span class="name">Stack</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.SunkChannel" data-isabs="false">
       <a id="SunkChannel:SunkChannel"></a>
       <h4 class="signature">
@@ -1963,8 +1953,8 @@ as binding and evaluation routines.</p>
         <a href="ThriftMux$.html"><span class="name">ThriftMux</span></a><span class="result"> extends ThriftMuxLike</span>
       </span>
       </h4>
-      <p class="comment cmt">The <code>ThriftMux</code> object is both a com.twitter.finagle.client.Client and a
-com.twitter.finagle.server.Server for the Thrift protocol served over
+      <p class="comment cmt">The <code>ThriftMux</code> object is both a <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a> and a
+<a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a> for the Thrift protocol served over
 <a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxClient" data-isabs="false">
       <a id="ThriftMuxClient:ThriftMuxClient"></a>
@@ -2314,7 +2304,7 @@ com.twitter.finagle.server.Server for the Thrift protocol served over
         <a href="package$$param$.html"><span class="name">param</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
-      <p class="comment cmt">Defines common <a name="com.twitter.finagle.Stack.Param" class="extype" href="Stack$$Param.html">Param</a>'s shared between
+      <p class="comment cmt">Defines common com.twitter.finagle.Stack.Param's shared between
 finagle clients and servers.</p>
     </li><li visbl="pub" name="com.twitter.finagle.pool" data-isabs="false">
       <a id="pool:pool"></a>

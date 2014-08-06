@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.Stack.Params</title>
+          <title>com.twitter.finagle.NameTree.Fail</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link type="text/css" media="screen" rel="stylesheet" href="../../../lib/template.css" />
@@ -14,9 +14,9 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
       <div id="definition">
-        <a title="Go to companion" href="Stack$$Params.html"><img src="../../../lib/object_to_trait_big.png" /></a>
-        <p id="owner"><a name="com" class="extype" href="../../package.html">com</a>.<a name="com.twitter" class="extype" href="../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="package.html">finagle</a>.<a name="com.twitter.finagle.Stack" class="extype" href="Stack$.html">Stack</a></p>
-        <h1><a title="Go to companion" href="Stack$$Params.html">Params</a></h1>
+        <img src="../../../lib/object_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../package.html">com</a>.<a name="com.twitter" class="extype" href="../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="package.html">finagle</a>.<a name="com.twitter.finagle.NameTree" class="extype" href="NameTree$.html">NameTree</a></p>
+        <h1>Fail</h1>
       </div>
 
       <h4 class="signature" id="signature">
@@ -25,13 +25,14 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Params</span><span class="result"> extends AnyRef</span>
+        <span class="name">Fail</span><span class="result"> extends <a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a>[<span name="scala.Nothing" class="extype">Nothing</span>]</span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A failing <a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a>.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a>[<span name="scala.Nothing" class="extype">Nothing</span>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +46,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.Stack.Params" class="in"><span>Params</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.NameTree.Fail" class="in"><span>Fail</span></li><li name="com.twitter.finagle.NameTree" class="in"><span>NameTree</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -150,18 +151,6 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Stack.Params#empty" data-isabs="false">
-      <a id="empty:Params"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">empty</span><span class="result">: <a name="com.twitter.finagle.Stack.Params" class="extype" href="Stack$$Params.html">Params</a></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">The empty parameter map.</p>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -186,6 +175,21 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.NameTree#eval" data-isabs="false">
+      <a id="eval[U&gt;:Nothing]:Option[Set[U]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eval</span><span class="tparams">[<span name="U">U &gt;: <span name="scala.Nothing" class="extype">Nothing</span></span>]</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[Set[U]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Evaluate this NameTree with the default evaluation strategy.</p><div class="fullcomment"><div class="comment cmt"><p>Evaluate this NameTree with the default evaluation strategy. A
+tree is evaluated recursively, Alt nodes are evaluated by
+selecting its first nonnegative child.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a></dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
       <h4 class="signature">
@@ -237,6 +241,19 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.NameTree#map" data-isabs="false">
+      <a id="map[U]((Nothing) ⇒ U):NameTree[U]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">map</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="f">f: (<span name="scala.Nothing" class="extype">Nothing</span>) ⇒ U</span>)</span><span class="result">: <a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a>[U]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Use <code>f</code> to map a T-typed NameTree to a U-typed one.</p><div class="fullcomment"><div class="comment cmt"><p>Use <code>f</code> to map a T-typed NameTree to a U-typed one.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -273,6 +290,42 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.NameTree#show" data-isabs="false">
+      <a id="show(Showable[Nothing]):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">show</span><span class="params">(<span class="implicit">implicit </span><span name="showable">showable: <a name="com.twitter.finagle.util.Showable" class="extype" href="util/Showable.html">Showable</a>[<span name="scala.Nothing" class="extype">Nothing</span>]</span>)</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">A parsable representation of the name tree; a
+<a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a> is recovered
+from this string by
+com.twitter.finagle.NameTree.read.</p><div class="fullcomment"><div class="comment cmt"><p>A parsable representation of the name tree; a
+<a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a> is recovered
+from this string by
+com.twitter.finagle.NameTree.read.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.NameTree#simplified" data-isabs="false">
+      <a id="simplified:NameTree[Nothing]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">simplified</span><span class="result">: <a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a>[<span name="scala.Nothing" class="extype">Nothing</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">A simplified version of this NameTree -- the returned
+name tree is equivalent vis-à-vis evaluation.</p><div class="fullcomment"><div class="comment cmt"><p>A simplified version of this NameTree -- the returned
+name tree is equivalent vis-à-vis evaluation. The returned
+name also represents a fixpoint; in other words:</p><pre>
+  tree.simplified == tree.simplified.simplified
+</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -285,7 +338,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.NameTree.Fail#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -296,7 +349,7 @@
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.NameTree.Fail" class="extype" href="">Fail</a> → AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -349,7 +402,9 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.AnyRef" class="parent">
+        <div name="com.twitter.finagle.NameTree" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a>[<span name="scala.Nothing" class="extype">Nothing</span>]</h3>
+            </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">
               <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>

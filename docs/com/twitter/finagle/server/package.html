@@ -59,7 +59,7 @@
         <a href="DefaultServer.html"><span class="name">DefaultServer</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="In">In</span>, <span name="Out">Out</span>]</span><span class="params">(<span name="name">name: String</span>, <span name="listener">listener: Listener[In, Out]</span>, <span name="serviceTransport">serviceTransport: (Transport[In, Out], Service[Req, Rep]) ⇒ Closable</span>, <span name="requestTimeout">requestTimeout: Duration</span>, <span name="maxConcurrentRequests">maxConcurrentRequests: Int</span>, <span name="cancelOnHangup">cancelOnHangup: Boolean</span>, <span name="prepare">prepare: (ServiceFactory[Req, Rep]) ⇒ ServiceFactory[Req, Rep]</span>, <span name="timer">timer: Timer</span>, <span name="monitor">monitor: Monitor</span>, <span name="logger">logger: Logger</span>, <span name="statsReceiver">statsReceiver: StatsReceiver</span>, <span name="tracer">tracer: Tracer</span>, <span name="reporter">reporter: ReporterFactory</span>)</span><span class="result"> extends Server[Req, Rep] with Product with Serializable</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">The default Server implementation.</p>
     </li><li visbl="pub" name="com.twitter.finagle.server.Listener" data-isabs="true">
       <a id="Listener:Listener[In, Out]"></a>
       <h4 class="signature">

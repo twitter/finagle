@@ -192,6 +192,18 @@ of trees.</p>
       </span>
       </h4>
       <p class="comment cmt">An empty <a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a>.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.NameTree.Fail" data-isabs="false">
+      <a id="Fail:Fail"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="NameTree$$Fail$.html"><span class="name">Fail</span></a><span class="result"> extends NameTree[Nothing]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A failing <a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.NameTree.Neg" data-isabs="false">
       <a id="Neg:Neg"></a>
       <h4 class="signature">
@@ -399,7 +411,7 @@ tree       ::= name
                tree <span class="lit">'|'</span> tree
                <span class="lit">'('</span> tree <span class="lit">')'</span>
 
-name       ::= path | <span class="lit">'~'</span> | <span class="lit">'$'</span>
+name       ::= path | <span class="lit">'!'</span> | <span class="lit">'~'</span> | <span class="lit">'$'</span>
 
 weight     ::= -?([<span class="num">0</span>-<span class="num">9</span>]++(\.[<span class="num">0</span>-<span class="num">9</span>]+*)?|[<span class="num">0</span>-<span class="num">9</span>]+*\.[<span class="num">0</span>-<span class="num">9</span>]++)([eE][+-]?[<span class="num">0</span>-<span class="num">9</span>]++)?[fFdD]?
 </pre><p>For example:</p><pre>

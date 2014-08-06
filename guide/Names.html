@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Names and Naming in Finagle &mdash; Finagle 6.18.0 documentation</title>
+    <title>Names and Naming in Finagle &mdash; Finagle 6.20.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.18.0',
+        VERSION:     '6.20.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.18.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.20.0 documentation" href="index.html" />
     <link rel="next" title="Protocols" href="Protocols.html" />
     <link rel="prev" title="Clients" href="Clients.html" />
    
@@ -68,7 +68,7 @@
             
   <div class="section" id="names-and-naming-in-finagle">
 <h1>Names and Naming in Finagle<a class="headerlink" href="#names-and-naming-in-finagle" title="Permalink to this headline">¶</a></h1>
-<p>Finagle uses <em>names*[</em>] to identify network locations. Names must be
+<p>Finagle uses <em>names</em> <a class="footnote-reference" href="#names" id="id1">[1]</a> to identify network locations. Names must be
 supplied when constructing a Finagle client through
 <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ClientBuilder">ClientBuilder.dest</a>
 or through implementations of <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Client">Client</a>.</p>
@@ -279,7 +279,7 @@ the <a class="reference external" href="http://twitter.github.io/finagle/docs/#c
 <p>(This is a powerful facility that should be used with care.)</p>
 </div>
 <div class="section" id="addr">
-<span id="id1"></span><h2>Addr<a class="headerlink" href="#addr" title="Permalink to this headline">¶</a></h2>
+<span id="id2"></span><h2>Addr<a class="headerlink" href="#addr" title="Permalink to this headline">¶</a></h2>
 <p><cite>Name.Bound</cite> comprises a <tt class="docutils literal"><span class="pre">Var[Addr]</span></tt>, representing a dynamically
 changing <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Addr">Addr</a>. (<a class="reference external" href="http://twitter.github.io/util/docs/#com.twitter.util.Var">Var</a> implements a form of self-adjusting
 computation); <tt class="docutils literal"><span class="pre">Addrs</span></tt> are in one of 3 states:</p>
@@ -297,10 +297,11 @@ concrete endpoints.</dd>
 </dl>
 <p>We now see that a <tt class="docutils literal"><span class="pre">Var[Addr]</span></tt> is capable of representing a moving target,
 for example a dynamic <a class="reference external" href="http://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a>.</p>
-<table class="docutils footnote" frame="void" id="id2" rules="none">
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="names" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[*]</td><td>A <cite>name</cite> identities <em>what</em> you want; an
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>A <cite>name</cite> identities <em>what</em> you want; an
 <cite>address</cite> is a <cite>location</cite>, identifying <cite>where</cite> an object resides.
 <cite>Binding</cite> is the process that turns names into addresses.</td></tr>
 </tbody>

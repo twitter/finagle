@@ -29,7 +29,14 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A Future is satisfied with this exception when the process of establishing
+a session is interrupted. Sessions are not preemptively established in Finagle,
+rather requests are taxed with session establishment when necessary.
+For example, this exception can occur if a request is interrupted while waiting for
+an available session or if an interrupt is propagated from a Finagle server
+during session establishment.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>com.twitter.finagle.CancelledRequestException
+</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a name="com.twitter.finagle.RequestException" class="extype" href="RequestException.html">RequestException</a>, <a name="com.twitter.finagle.SourcedException" class="extype" href="SourcedException.html">SourcedException</a>, <a name="com.twitter.finagle.NoStacktrace" class="extype" href="NoStacktrace.html">NoStacktrace</a>, <span name="java.lang.Exception" class="extype">Exception</span>, <span name="java.lang.Throwable" class="extype">Throwable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>

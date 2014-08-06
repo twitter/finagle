@@ -25,7 +25,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">MultiReaderConfig</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="_va">_va: <span name="com.twitter.util.Var" class="extype">Var</span>[<a name="com.twitter.finagle.Addr" class="extype" href="../Addr.html">Addr</a>]</span>, <span name="_queueName">_queueName: String</span>, <span name="_clientId">_clientId: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.thrift.ClientId" class="extype" href="../thrift/ClientId.html">ClientId</a>]</span>, <span name="_clientBuilder">_clientBuilder: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="../builder/ClientBuilder.html">ClientBuilder</a>[Req, Rep, <span name="scala.Nothing" class="extype">Nothing</span>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>]]</span>, <span name="_timer">_timer: <span name="scala.Option" class="extype">Option</span>[<span name="com.twitter.util.Timer" class="extype">Timer</span>]</span>, <span name="_retryBackoffs">_retryBackoffs: <span name="scala.Option" class="extype">Option</span>[() ⇒ Stream[<span name="com.twitter.util.Duration" class="extype">Duration</span>]]</span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">MultiReaderConfig</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="_va">_va: <span name="com.twitter.util.Var" class="extype">Var</span>[<a name="com.twitter.finagle.Addr" class="extype" href="../Addr.html">Addr</a>]</span>, <span name="_queueName">_queueName: String</span>, <span name="_clientId">_clientId: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.thrift.ClientId" class="extype" href="../thrift/ClientId.html">ClientId</a>]</span>, <span name="_txnAbortTimeout">_txnAbortTimeout: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>, <span name="_clientBuilder">_clientBuilder: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="../builder/ClientBuilder.html">ClientBuilder</a>[Req, Rep, <span name="scala.Nothing" class="extype">Nothing</span>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="../builder/ClientConfig$$Yes.html">Yes</a>]]</span>, <span name="_timer">_timer: <span name="scala.Option" class="extype">Option</span>[<span name="com.twitter.util.Timer" class="extype">Timer</span>]</span>, <span name="_retryBackoffs">_retryBackoffs: <span name="scala.Option" class="extype">Option</span>[() ⇒ Stream[<span name="com.twitter.util.Duration" class="extype">Duration</span>]]</span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
@@ -406,6 +406,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.kestrel.MultiReaderConfig" class="extype" href="">MultiReaderConfig</a> → AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReaderConfig#txnAbortTimeout" data-isabs="false">
+      <a id="txnAbortTimeout:Duration"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">txnAbortTimeout</span><span class="result">: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.kestrel.MultiReaderConfig#va" data-isabs="false">
       <a id="va:Var[Addr]"></a>
       <h4 class="signature">

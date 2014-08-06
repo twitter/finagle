@@ -29,7 +29,60 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A builder of Finagle <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a>.</p><pre>
+<span class="kw">val</span> client = ClientBuilder()
+  .codec(Http)
+  .hosts(<span class="lit">"localhost:10000,localhost:10001,localhost:10003"</span>)
+  .hostConnectionLimit(<span class="num">1</span>)
+  .tcpConnectTimeout(<span class="num">1.</span>second)        <span class="cmt">// max time to spend establishing a TCP connection.</span>
+  .retries(<span class="num">2</span>)                         <span class="cmt">// (1) per-request retries</span>
+  .reportTo(<span class="kw">new</span> OstrichStatsReceiver) <span class="cmt">// export host-level load data to ostrich</span>
+  .logger(Logger.getLogger(<span class="lit">"http"</span>))
+  .build()
+</pre><p>The <code>ClientBuilder</code> requires the definition of <code>cluster</code>, <code>codec</code>,
+and <code>hostConnectionLimit</code>. In Scala, these are statically type
+checked, and in Java the lack of any of the above causes a runtime
+error.</p><p>The <code>build</code> method uses an implicit argument to statically
+typecheck the builder (to ensure completeness, see above). The Java
+compiler cannot provide such implicit, so we provide a separate
+function in Java to accomplish this. Thus, the Java code for the
+above is</p><pre>
+Service&lt;HttpRequest, HttpResponse&gt; service =
+ ClientBuilder.safeBuild(
+   ClientBuilder.get()
+     .codec(<span class="kw">new</span> Http())
+     .hosts(<span class="lit">"localhost:10000,localhost:10001,localhost:10003"</span>)
+     .hostConnectionLimit(<span class="num">1</span>)
+     .tcpConnectTimeout(<span class="num">1.</span>second)
+     .retries(<span class="num">2</span>)
+     .reportTo(<span class="kw">new</span> OstrichStatsReceiver())
+     .logger(Logger.getLogger(<span class="lit">"http"</span>)))
+</pre><p>Alternatively, using the <code>unsafeBuild</code> method on <code>ClientBuilder</code>
+verifies the builder dynamically, resulting in a runtime error
+instead of a compiler error.</p><h3>Defaults</h3><p>The following defaults are applied to clients constructed via ClientBuilder,
+unless overridden with the corresponding method. These defaults were chosen
+carefully so as to work well for most use cases.</p><p>Commonly-configured options:</p><p>- <code>connectTimeout</code>: com.twitter.util.Duration.Top
+- <code>tcpConnectTimeout</code>: 1 second
+- <code>requestTimeout</code>: com.twitter.util.Duration.Top
+- <code>timeout</code>: com.twitter.util.Duration.Top
+- <code>hostConnectionLimit</code>: Int.MaxValue
+- <code>hostConnectionCoresize</code>: 0
+- <code>hostConnectionIdleTime</code>: com.twitter.util.Duration.Top
+- <code>hostConnectionMaxWaiters</code>: Int.MaxValue
+- <code>failFast</code>: true
+- <code>failureAccrualParams</code>, <code>failureAccrual</code>, <code>failureAccrualFactory</code>:
+  <code>numFailures</code> = 5, <code>markDeadFor</code> = 5 seconds</p><p>Advanced options:</p><p>*Before changing any of these, make sure that you know exactly how they will
+affect your application -- these options are typically only changed by expert
+users.*</p><p>- <code>keepAlive</code>: Unspecified, in which case the Java default of <code>false</code> is used
+  (http://docs.oracle.com/javase/7/docs/api/java/net/StandardSocketOptions.html?is-external=true#SO_KEEPALIVE)
+- <code>readerIdleTimeout</code>: com.twitter.util.Duration.Top
+- <code>writerIdleTimeout</code>: com.twitter.util.Duration.Top
+- <code>hostConnectionMaxIdleTime</code>: com.twitter.util.Duration.Top
+- <code>hostConnectionMaxLifeTime</code>: com.twitter.util.Duration.Top
+- <code>sendBufferSize</code>, <code>recvBufferSize</code>: OS-defined default value</p><p>Please see the Finagle user guide for information on a newer set of
+client-construction APIs introduced in Finagle v6:
+http://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
@@ -297,7 +350,7 @@ type variables. One of the codec variations is required.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>, <span name="HasCluster1">HasCluster1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasHostConnectionLimit1">HasHostConnectionLimit1</span>]</span><span class="params">(<span name="param">param: P</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a name="com.twitter.finagle.Stack.Param" class="extype" href="../Stack$$Param.html">Param</a>[P]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req, Rep, HasCluster1, HasCodec1, HasHostConnectionLimit1]</span>
+        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>, <span name="HasCluster1">HasCluster1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasHostConnectionLimit1">HasHostConnectionLimit1</span>]</span><span class="params">(<span name="param">param: P</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span name="com.twitter.finagle.Stack.Param" class="extype">Param</span>[P]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req, Rep, HasCluster1, HasCodec1, HasHostConnectionLimit1]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
@@ -328,7 +381,7 @@ as well as physical connection time.  Futures returned from
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">copy</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>, <span name="HasCluster1">HasCluster1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasHostConnectionLimit1">HasHostConnectionLimit1</span>]</span><span class="params">(<span name="ps">ps: <a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a></span>, <span name="newClient">newClient: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a>) ⇒ <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a>[Req1, Rep1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]</span>
+        <span class="name">copy</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>, <span name="HasCluster1">HasCluster1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasHostConnectionLimit1">HasHostConnectionLimit1</span>]</span><span class="params">(<span name="ps">ps: <span name="com.twitter.finagle.Stack.Params" class="extype">Params</span></span>, <span name="newClient">newClient: (<span name="com.twitter.finagle.Stack.Params" class="extype">Params</span>) ⇒ <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a>[Req1, Rep1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
@@ -928,7 +981,7 @@ socksPassword and socksProxy must be set as well
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">stack</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="mk">mk: (<a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a>) ⇒ <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a>[Req1, Rep1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req1, Rep1, HasCluster, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="ClientConfig$$Yes.html">Yes</a>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="ClientConfig$$Yes.html">Yes</a>]</span>
+        <span class="name">stack</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="mk">mk: (<span name="com.twitter.finagle.Stack.Params" class="extype">Params</span>) ⇒ <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a>[Req1, Rep1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req1, Rep1, HasCluster, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="ClientConfig$$Yes.html">Yes</a>, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="ClientConfig$$Yes.html">Yes</a>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Overrides the stack and <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a> that will be used

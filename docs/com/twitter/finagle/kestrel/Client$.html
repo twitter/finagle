@@ -260,7 +260,19 @@
         <span class="name">makeThrift</span><span class="params">(<span name="raw">raw: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="../thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.Client" class="extype" href="Client.html">Client</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a client that uses Kestrel's thrift protocol.</p><div class="fullcomment"><div class="comment cmt"><p>Create a client that uses Kestrel's thrift protocol.</p></div><dl class="paramcmts block"><dt class="param">raw</dt><dd class="cmt"><p>the underlying thrift service factory for the client to use</p></dd><dt>returns</dt><dd class="cmt"><p>A thrift kestrel client
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.Client#makeThrift" data-isabs="false">
+      <a id="makeThrift(ServiceFactory[ThriftClientRequest, Array[Byte]],Duration):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">makeThrift</span><span class="params">(<span name="raw">raw: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="../thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>, <span name="txnAbortTimeout">txnAbortTimeout: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="result">: <a name="com.twitter.finagle.kestrel.Client" class="extype" href="Client.html">Client</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Create a client that uses Kestrel's thrift protocol.</p><div class="fullcomment"><div class="comment cmt"><p>Create a client that uses Kestrel's thrift protocol.</p></div><dl class="paramcmts block"><dt class="param">raw</dt><dd class="cmt"><p>the underlying thrift service factory for the client to use</p></dd><dt class="param">txnAbortTimeout</dt><dd class="cmt"><p>The duration after which an open transaction will be auto-aborted if not confirmed</p></dd><dt>returns</dt><dd class="cmt"><p>A thrift kestrel client
 </p></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>

@@ -70,7 +70,7 @@
         <a href="Netty3Transporter$$ChannelFactory.html"><span class="name">ChannelFactory</span></a><span class="params">(<span name="cf">cf: ChannelFactory</span>)</span><span class="result"> extends Product with Serializable</span>
       </span>
       </h4>
-      <p class="comment cmt">A <a name="com.twitter.finagle.Stack.Param" class="extype" href="../Stack$$Param.html">Param</a> used to configure a netty3
+      <p class="comment cmt">A com.twitter.finagle.Stack.Param used to configure a netty3
 ChannelFactory.</p>
     </li><li visbl="pub" name="com.twitter.finagle.netty3.Netty3Transporter.TransportFactory" data-isabs="false">
       <a id="TransportFactory:TransportFactory"></a>
@@ -83,7 +83,7 @@ ChannelFactory.</p>
         <a href="Netty3Transporter$$TransportFactory.html"><span class="name">TransportFactory</span></a><span class="params">(<span name="newTransport">newTransport: (Channel) ⇒ Transport[Any, Any]</span>)</span><span class="result"> extends Product with Serializable</span>
       </span>
       </h4>
-      <p class="comment cmt">A <a name="com.twitter.finagle.Stack.Param" class="extype" href="../Stack$$Param.html">Param</a> used to configure a transport
+      <p class="comment cmt">A com.twitter.finagle.Stack.Param used to configure a transport
 factory, a function from a netty3 channel to a finagle Transport.</p>
     </li></ol>
             </div>
@@ -184,13 +184,13 @@ factory, a function from a netty3 channel to a finagle Transport.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="params">(<span name="pipelineFactory">pipelineFactory: <span name="org.jboss.netty.channel.ChannelPipelineFactory" class="extype">ChannelPipelineFactory</span></span>, <span name="params">params: <a name="com.twitter.finagle.Stack.Params" class="extype" href="../Stack$$Params.html">Params</a></span>)</span><span class="result">: <a name="com.twitter.finagle.client.Transporter" class="extype" href="../client/Transporter.html">Transporter</a>[In, Out]</span>
+        <span class="name">apply</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="params">(<span name="pipelineFactory">pipelineFactory: <span name="org.jboss.netty.channel.ChannelPipelineFactory" class="extype">ChannelPipelineFactory</span></span>, <span name="params">params: <span name="com.twitter.finagle.Stack.Params" class="extype">Params</span></span>)</span><span class="result">: <a name="com.twitter.finagle.client.Transporter" class="extype" href="../client/Transporter.html">Transporter</a>[In, Out]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Constructs a <code>Transporter[In, Out]</code> given a netty3 <code>ChannelPipelineFactory</code>
 responsible for framing a <code>Transport</code> stream.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a <code>Transporter[In, Out]</code> given a netty3 <code>ChannelPipelineFactory</code>
 responsible for framing a <code>Transport</code> stream. The <code>Transporter</code> is configured
-via the passed in <a name="com.twitter.finagle.Stack.Param" class="extype" href="../Stack$$Param.html">Param</a>'s.
+via the passed in com.twitter.finagle.Stack.Param's.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>com.twitter.finagle.param
 </p></span>, <span class="cmt"><p><a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a></p></span>, <span class="cmt"><p><a name="com.twitter.finagle.client.Transporter" class="extype" href="../client/Transporter.html">Transporter</a></p></span></dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">

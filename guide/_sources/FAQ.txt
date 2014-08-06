@@ -6,7 +6,7 @@ General Finagle FAQ
 
 .. _propagate_failure:
 
-What's a CancelledRequestException?
+What's a Cancelled{Request, Connection}Exception?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When a client connected to a Finagle server disconnects, the server raises
@@ -16,9 +16,36 @@ client may have timed the request out, for example. Interrupts on
 futures propagate, and so if that server is in turn waiting for a response
 from a downstream server it will cancel this pending request, and so on.
 
+The topology, visually:
+
+``Upstream ---> (Finagle Server -> Finagle Client) ---> Downstream``
+
+Interrupts propagate between the Finagle Server and Client only if the
+Future returned from the Server is chained [#]_ to the Client.
+
+A simplified code snippet that exemplifies the intra-process structure:
+
+::
+
+  val client = Mysql.newService(...)
+  val service: Service[Req, Rep] = new Service[Req, Rep] {
+    def apply(req: Req): Future[Rep] = {
+      client(...)
+    }
+  }
+  val server = Http.serve(..., service)
+
+.. [#] "Chained" in this context means that calling `Future#raise`
+       will reach the interrupt handler on the Future that represents
+       the rpc call to the client. This is clearly the case in the above
+       example where the call to the client is indeed the returned Future.
+       However, this will still hold if the client call was in the context
+       of a Future combinator (ex. `Future#select`, `Future#join`, etc.)
+
 This is the source of the :API:`CancelledRequestException <com.twitter.finagle.CancelledRequestException>` --
 when a Finagle client receives the cancellation interrupt while a request is pending, it
-fails that request with this exception.
+fails that request with this exception. A special case of this is when a request is in the process
+of establishing a session and is instead interrupted with a :API:`CancelledConnectException <com.twitter.finagle.CancelledConnectException>`
 
 You can disable this behavior by using the :API:`MaskCancelFilter <com.twitter.finagle.filter.MaskCancelFilter>`:
 

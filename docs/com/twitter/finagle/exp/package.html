@@ -83,7 +83,7 @@ for curtailing tail latencies in distributed systems.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="MysqlClient.html"><span class="name">MysqlClient</span></a><span class="result"> extends StackClientLike[Request, Result, Packet, Packet, MysqlClient] with MysqlRichClient</span>
+        <a href="MysqlClient.html"><span class="name">MysqlClient</span></a><span class="result"> extends StackClientLike[Request, Result, MysqlClient] with MysqlRichClient</span>
       </span>
       </h4>
       <p class="comment cmt">Wraps a mysql client with builder semantics.</p>
@@ -163,7 +163,7 @@ builder methods for constructing a mysql client.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="MysqlStackClient$.html"><span class="name">MysqlStackClient</span></a><span class="result"> extends StackClient[Request, Result, Packet, Packet]</span>
+        <a href="MysqlStackClient$.html"><span class="name">MysqlStackClient</span></a><span class="result"> extends StackClient[Request, Result]</span>
       </span>
       </h4>
       <p class="comment cmt">Implements a mysql client in terms of a com.twitter.finagle.StackClient.</p>
