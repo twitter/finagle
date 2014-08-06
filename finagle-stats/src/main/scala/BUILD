@@ -1,17 +1,17 @@
 scala_library(name='scala',
   dependencies=[
-    pants('3rdparty:jackson-core'),
-    pants('3rdparty:jackson-databind'),
-    pants('3rdparty:jackson-module-scala'),
-    pants('3rdparty:netty'),
-    pants('3rdparty/jvm/com/twitter/common:metrics'),
-    pants('finagle/finagle-core'),
-    pants('finagle/finagle-http'),
-    pants('util/util-core'),
+    '3rdparty:jackson-core',
+    '3rdparty:jackson-databind',
+    '3rdparty:jackson-module-scala',
+    '3rdparty:netty',
+    '3rdparty/jvm/com/twitter/common:metrics',
+    'finagle/finagle-core',
+    'finagle/finagle-http',
+    'util/util-core',
   ],
   sources=rglobs('*.scala'),
   resources=[
-    pants('finagle/finagle-stats/src/main/resources')
+    'finagle/finagle-stats/src/main/resources'
   ],
   provides=artifact(org='com.twitter',
                     name='finagle-stats',

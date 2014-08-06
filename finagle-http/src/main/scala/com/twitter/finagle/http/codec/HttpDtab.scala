@@ -30,7 +30,8 @@ object HttpDtab {
   
   private def encodeValue(v: String): String = {
     val buf = ChannelBuffers.wrappedBuffer(v.getBytes(Utf8))
-    val buf64 = Base64.encode(buf)
+    val breakLines = false     // don't want newlines in http headers
+    val buf64 = Base64.encode(buf, breakLines)
     buf64.toString(Ascii)
   }
   

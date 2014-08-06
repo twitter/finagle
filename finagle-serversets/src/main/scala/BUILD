@@ -1,19 +1,19 @@
 scala_library(name='scala',
   dependencies=[
-    pants('3rdparty/jvm/com/twitter/common:service-thrift'),
-    pants('3rdparty/jvm/com/twitter/common/zookeeper:client'),
-    pants('3rdparty/jvm/com/twitter/common/zookeeper:server-set'),
-    pants('3rdparty:jackson-core'),
-    pants('3rdparty:jackson-databind'),
-    pants('3rdparty:slf4j-api'),
-    pants('3rdparty:guava'),
-    pants('finagle/finagle-core'),
-    pants('util/util-core'),
-    pants('util/util-zk-common')
+    '3rdparty/jvm/com/twitter/common:service-thrift',
+    '3rdparty/jvm/com/twitter/common/zookeeper:client',
+    '3rdparty/jvm/com/twitter/common/zookeeper:server-set',
+    '3rdparty:jackson-core',
+    '3rdparty:jackson-databind',
+    '3rdparty:slf4j-api',
+    '3rdparty:guava',
+    'finagle/finagle-core',
+    'util/util-core',
+    'util/util-zk-common'
   ],
   sources=rglobs('*.scala'),
   resources=[
-    pants('finagle/finagle-serversets/src/main/resources')
+    'finagle/finagle-serversets/src/main/resources'
   ],
   provides=artifact(org='com.twitter',
                     name='finagle-serversets',

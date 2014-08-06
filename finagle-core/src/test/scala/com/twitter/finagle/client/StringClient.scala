@@ -17,11 +17,14 @@ private[client] object StringClientPipeline extends ChannelPipelineFactory {
 }
 
 private[finagle] trait StringClient {
-  val stringClient = new StackClient[String, String, String, String] {
-    val newTransporter: Stack.Params => Transporter[String, String] =
+  val stringClient = new StackClient[String, String] {
+    protected type In = String
+    protected type Out = String
+
+    protected val newTransporter: Stack.Params => Transporter[String, String] =
       Netty3Transporter(StringClientPipeline, _)
 
-    val newDispatcher: Stack.Params => Dispatcher =
+    protected val newDispatcher: Stack.Params => Dispatcher =
       Function.const(new SerialClientDispatcher(_))
   }
 }

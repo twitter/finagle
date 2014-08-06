@@ -3,15 +3,18 @@ package com.twitter.finagle.tracing
 import com.twitter.finagle._
 
 private[finagle] object TracingFilter {
+  implicit val role = Stack.Role("Tracer")
+  
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.tracing.TracingFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]](param.Tracer) {
+    new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = TracingFilter.role
       val description = "Handle span lifecycle events to report tracing from protocols"
-      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
-        val param.Tracer(tracer) = params[param.Tracer]
-        val param.Label(label) = params[param.Label]
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+        val param.Tracer(tracer) = get[param.Tracer]
+        val param.Label(label) = get[param.Label]
         val tracingFilter = new TracingFilter[Req,Rep](tracer, label)
         tracingFilter andThen next
       }

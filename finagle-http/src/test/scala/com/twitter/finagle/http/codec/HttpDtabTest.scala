@@ -30,6 +30,15 @@ class HttpDtabTest extends FunSuite {
       assert(Equiv[Dtab].equiv(dtab, dtab1))
     }
   }
+
+  // some base64 encoders insert newlines to enforce max line length.  ensure we aren't doing that
+  test("long dest round-trips") {
+    val expectedDtab = Dtab.read("/s/a => /s/abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz")
+    val m = newMsg()
+    HttpDtab.write(expectedDtab, m)
+    val observedDtab = HttpDtab.read(m)
+    assert(Equiv[Dtab].equiv(expectedDtab, observedDtab))
+  }
   
   test("Invalid: no shared prefix") {
     val m = newMsg()

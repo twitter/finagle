@@ -3,13 +3,13 @@ package com.twitter.finagle.server
 import com.twitter.finagle._
 import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
-import com.twitter.finagle.service.{StatsFilter, TimeoutFilter, FailingFactory}
+import com.twitter.finagle.service.{StatsFilter, TimeoutFilter}
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.ServerStatsReceiver
 import com.twitter.finagle.tracing.{TracingFilter, ServerDestTracingProxy}
 import com.twitter.finagle.transport.Transport
 import com.twitter.jvm.Jvm
-import com.twitter.util.{Closable, CloseAwaitably, Future, Return, Throw, Time}
+import com.twitter.util.{Closable, CloseAwaitably, Return, Throw, Time}
 import java.net.SocketAddress
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
@@ -21,11 +21,11 @@ private[finagle] object StackServer {
   /**
    * Canonical Roles for each Server-related Stack modules.
    */
-  object Role {
-    object ServerDestTracing extends Stack.Role
-    object JvmTracing extends Stack.Role
-    object Preparer extends Stack.Role
-  }
+  object Role extends Stack.Role("StackServer") {
+    val serverDestTracing = Stack.Role("ServerDestTracing")
+    val jvmTracing = Stack.Role("JvmTracing")
+    val preparer = Stack.Role("preparer")
+   }
 
   /**
    * Creates a default finagle server [[com.twitter.finagle.Stack]].
@@ -34,8 +34,8 @@ private[finagle] object StackServer {
    * params defined in the companion objects of the respective modules.
    *
    * @see [[com.twitter.finagle.tracing.ServerDestTracingProxy]]
-   * @see [[com.twitter.finagle.filter.TimeoutFilter]]
-   * @see [[com.twitter.finagle.filter.StatsFilter]]
+   * @see [[com.twitter.finagle.service.TimeoutFilter]]
+   * @see [[com.twitter.finagle.service.StatsFilter]]
    * @see [[com.twitter.finagle.filter.RequestSemaphoreFilter]]
    * @see [[com.twitter.finagle.filter.ExceptionSourceFilter]]
    * @see [[com.twitter.finagle.filter.MkJvmFilter]]
@@ -47,14 +47,14 @@ private[finagle] object StackServer {
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](
       stack.nilStack[Req, Rep])
 
-    stk.push(Role.ServerDestTracing, ((next: ServiceFactory[Req, Rep]) => new ServerDestTracingProxy[Req, Rep](next)))
+    stk.push(Role.serverDestTracing, ((next: ServiceFactory[Req, Rep]) => new ServerDestTracingProxy[Req, Rep](next)))
     stk.push(TimeoutFilter.module)
     stk.push(StatsFilter.module)
     stk.push(RequestSemaphoreFilter.module)
     stk.push(MaskCancelFilter.module)
     stk.push(ExceptionSourceFilter.module)
-    stk.push(Role.Preparer, identity[ServiceFactory[Req, Rep]](_))
-    stk.push(Role.JvmTracing, ((next: ServiceFactory[Req, Rep]) =>
+    stk.push(Role.preparer, identity[ServiceFactory[Req, Rep]](_))
+    stk.push(Role.jvmTracing, ((next: ServiceFactory[Req, Rep]) =>
       newJvmFilter[Req, Rep]() andThen next))
     stk.push(TracingFilter.module)
     stk.push(MonitorFilter.module)
@@ -72,16 +72,20 @@ private[finagle] object StackServer {
  * by the ServiceFactory).
  *
  * If no `stack` is provided, the default in
- * [[com.twitter.finagle.StackServer#newStack]] is used.
+ * [[com.twitter.finagle.server.StackServer#newStack]] is used.
  */
-private[finagle] abstract class StackServer[Req, Rep, In, Out](
+private[finagle] abstract class StackServer[Req, Rep](
   val stack: Stack[ServiceFactory[Req, Rep]],
   val params: Stack.Params
 ) extends Server[Req, Rep] { self =>
+
+  protected type In
+  protected type Out
+
    /**
     * A convenient type alias for a server dispatcher.
     */
-  type Dispatcher = (Transport[In, Out], Service[Req, Rep]) => Closable
+  protected type Dispatcher = (Transport[In, Out], Service[Req, Rep]) => Closable
 
   /**
    * Creates a new StackServer with the default stack (StackServer#newStack)
@@ -93,7 +97,7 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
   )
 
   /**
-   * Defines a typed [[com.twitter.finagle.Listener]] for this server.
+   * Defines a typed [[com.twitter.finagle.server.Listener]] for this server.
    * Concrete StackServer implementations are expected to specify this.
    */
   protected val newListener: Stack.Params => Listener[In, Out]
@@ -112,7 +116,7 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
    * Creates a new StackServer with `p` added to the `params`
    * used to configure this StackServer's `stack`.
    */
-  def configured[P: Stack.Param](p: P): StackServer[Req, Rep, In, Out] =
+  def configured[P: Stack.Param](p: P): StackServer[Req, Rep] =
     copy(params = params+p)
 
   /**
@@ -122,8 +126,10 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
   def copy(
     stack: Stack[ServiceFactory[Req, Rep]] = self.stack,
     params: Stack.Params = self.params
-  ): StackServer[Req, Rep, In, Out] =
-    new StackServer[Req, Rep, In, Out](stack, params) {
+  ): StackServer[Req, Rep] =
+    new StackServer[Req, Rep](stack, params) {
+      protected type In = self.In
+      protected type Out = self.Out
       protected val newListener = self.newListener
       protected val newDispatcher = self.newDispatcher
     }
@@ -215,13 +221,13 @@ private[finagle] abstract class StackServer[Req, Rep, In, Out](
  * A [[com.twitter.finagle.Stack Stack]]-based server with `Like` semantics.
  */
 private[finagle]
-abstract class StackServerLike[Req, Rep, In, Out, Repr <: StackServerLike[Req, Rep, In, Out, Repr]](
-    server: StackServer[Req, Rep, In, Out])
+abstract class StackServerLike[Req, Rep, Repr <: StackServerLike[Req, Rep, Repr]](
+    server: StackServer[Req, Rep])
   extends Server[Req, Rep]
 {
   val stack = server.stack
 
-  protected def newInstance(server: StackServer[Req, Rep, In, Out]): Repr
+  protected def newInstance(server: StackServer[Req, Rep]): Repr
 
   def configured[P: Stack.Param](p: P): Repr =
     newInstance(server.configured(p))

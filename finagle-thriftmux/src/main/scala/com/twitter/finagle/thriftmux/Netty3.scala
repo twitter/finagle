@@ -8,7 +8,6 @@ import com.twitter.finagle.thrift._
 import com.twitter.finagle.thrift.thrift.{
   ResponseHeader, RequestContext, RequestHeader, UpgradeReply}
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceContext, TraceId}
-import com.twitter.io.Buf
 import com.twitter.util.{Try, Return, Throw, NonFatal}
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.atomic.AtomicInteger
@@ -248,7 +247,7 @@ private[finagle] class PipelineFactory(
         //
         //     0x80010000 | type
         //
-        // where the type of CALL is 1; the type of ONEWAY is 4. This makes 
+        // where the type of CALL is 1; the type of ONEWAY is 4. This makes
         // the first four bytes of a CALL message 0x80010001.
         //
         // Mux messages begin with

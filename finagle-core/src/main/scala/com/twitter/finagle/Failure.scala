@@ -51,7 +51,8 @@ final class Failure private[finagle](
     }
 
   override def toString: String =
-    "Failure(%s, flags=0x%02x)\nsources=%s".format(why, flags, sources.toString)
+    "Failure(%s, flags=0x%02x)\n\twith %s".format(why, flags,
+      if (sources.isEmpty) "NoSources" else sources.mkString("\n\twith "))
 
   override def getStackTrace(): Array[StackTraceElement] = stacktrace
   override def printStackTrace(p: java.io.PrintWriter) {
@@ -123,7 +124,10 @@ object Failure {
   trait Injections {
     val flag: Long
     def apply(why: String, cause: Throwable = null): Failure = new Failure(why, cause, flag)
-    def apply(cause: Throwable): Failure = apply(cause.getMessage, cause)
+    def apply(cause: Throwable): Failure =
+      if (cause == null) apply("unknown cause")
+      else if (cause.getMessage == null) apply(cause.getClass.getName, cause)
+      else apply(cause.getMessage, cause)
   }
 
   /**

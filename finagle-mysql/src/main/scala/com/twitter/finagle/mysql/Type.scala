@@ -59,6 +59,16 @@ object Type {
       Buffer.sizeOfLen(b.size) + b.size
     case RawValue(_, _, true, b)  =>
       Buffer.sizeOfLen(b.size) + b.size
+    case StringValue(s) =>
+      val bytes = s.getBytes(Charset.defaultCharset)
+      Buffer.sizeOfLen(bytes.size) + bytes.size
+    case ByteValue(_) => 1
+    case ShortValue(_) => 2
+    case IntValue(_) => 4
+    case LongValue(_) => 8
+    case FloatValue(_) => 4
+    case DoubleValue(_) => 8
+    case NullValue => 0
     case null => 0
     // This is safe because unknown
     // values are serialized as null.
@@ -90,6 +100,14 @@ object Type {
     case d: java.sql.Date => Date
     case d: java.util.Date => DateTime
     case RawValue(typ, _, _, _) => typ
+    case StringValue(_) => VarChar
+    case ByteValue(_) => Tiny
+    case ShortValue(_) => Short
+    case IntValue(_) => Long
+    case LongValue(_) => LongLong
+    case FloatValue(_) => Float
+    case DoubleValue(_) => Double
+    case NullValue => Null
     case _ => -1
   }
 }

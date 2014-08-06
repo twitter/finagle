@@ -216,6 +216,14 @@ case class ExecuteRequest(
       case d: java.util.Date        => writeParam(TimestampValue(new java.sql.Timestamp(d.getTime)), writer)
       // allows for generic binary values as params to a prepared statement.
       case RawValue(_, _, true, bytes) => writer.writeLengthCodedBytes(bytes)
+      // allows for Value types as params to prepared statements
+      case ByteValue(b) => writer.writeByte(b)
+      case ShortValue(s) => writer.writeShort(s)
+      case IntValue(i) => writer.writeInt(i)
+      case LongValue(l) => writer.writeLong(l)
+      case FloatValue(f) => writer.writeFloat(f)
+      case DoubleValue(d) => writer.writeDouble(d)
+      case StringValue(s) => writer.writeLengthCodedString(s)
       // skip null and unknown values
       case _  => writer
     }

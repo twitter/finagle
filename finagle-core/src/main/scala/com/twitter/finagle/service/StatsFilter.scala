@@ -7,16 +7,17 @@ import com.twitter.util.{Future, Stopwatch, Throw, Return}
 import java.util.concurrent.atomic.AtomicInteger
 
 private[finagle] object StatsFilter {
-  object RequestStats extends Stack.Role
+  val role = Stack.Role("RequestStats")
 
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.filter.StatsFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]](RequestStats) {
+    new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = StatsFilter.role
       val description = "Report request statistics"
-      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
-        val param.Stats(statsReceiver) = params[param.Stats]
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+        val param.Stats(statsReceiver) = get[param.Stats]
         if (statsReceiver.isNull) next
         else new StatsFilter(new RollupStatsReceiver(statsReceiver)) andThen next
       }
@@ -90,16 +91,17 @@ class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
 }
 
 private[finagle] object StatsServiceFactory {
-  object FactoryStats extends Stack.Role
+  val role = Stack.Role("FactoryStats")
 
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.StatsServiceFactory]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]](FactoryStats) {
+    new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = StatsServiceFactory.role
       val description = "Report connection statistics"
-      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
-        val param.Stats(statsReceiver) = params[param.Stats]
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+        val param.Stats(statsReceiver) = get[param.Stats]
         if (statsReceiver.isNull) next
         else new StatsServiceFactory(next, statsReceiver)
       }

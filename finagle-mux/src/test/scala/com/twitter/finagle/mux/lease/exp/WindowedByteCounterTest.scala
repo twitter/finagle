@@ -91,7 +91,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually {
         nextPeriod()
       }
 
-      assert(counter.rate() === (WindowedByteCounter.N.kilobytes).inBytes / WindowedByteCounter.W.inSeconds)
+      assert(counter.rate() === (WindowedByteCounter.N.kilobytes).inBytes / WindowedByteCounter.W.inMilliseconds)
     }
   }
 
@@ -106,14 +106,14 @@ class WindowedByteCounterTest extends FunSuite with Eventually {
         nextPeriod()
       }
 
-      assert(counter.rate() === (WindowedByteCounter.N.kilobytes).inBytes / WindowedByteCounter.W.inSeconds)
+      assert(counter.rate() === (WindowedByteCounter.N.kilobytes).inBytes / WindowedByteCounter.W.inMilliseconds)
 
       for (i <- 1 to WindowedByteCounter.N) {
         fakePool.setSnapshot(usage.copy(used = WindowedByteCounter.N.kilobytes + (i * 2).kilobytes))
         nextPeriod()
       }
 
-      assert(counter.rate() === (2 * (WindowedByteCounter.N.kilobytes).inBytes / WindowedByteCounter.W.inSeconds))
+      assert(counter.rate() === (2 * (WindowedByteCounter.N.kilobytes).inBytes / WindowedByteCounter.W.inMilliseconds))
     }
   }
 
@@ -132,7 +132,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually {
         nextPeriod()
       }
 
-      assert(counter.rate() === x.inBytes / WindowedByteCounter.W.inSeconds)
+      assert(counter.rate() === x.inBytes / WindowedByteCounter.W.inMilliseconds)
     }
   }
 
@@ -162,7 +162,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually {
         nextPeriod()
       }
 
-      assert(counter.rate() === WindowedByteCounter.N.kilobytes.inBytes / WindowedByteCounter.W.inSeconds)
+      assert(counter.rate() === WindowedByteCounter.N.kilobytes.inBytes / WindowedByteCounter.W.inMilliseconds)
     }
   }
 

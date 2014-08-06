@@ -28,15 +28,17 @@ you're using Finagle. Or even better, add the links yourself and
 * [SoundCloud](https://soundcloud.com/)
   * ["Building Products at SoundCloud—Part III: Microservices in Scala and
     Finagle"][6]
+* [SproutSocial](https://www.sproutsocial.com)
+  * ["Trendy Engineering: How We Built the Twitter Trends Report"][7]
 * [Strava](http://www.strava.com/)
-  * ["Introducing Routemaster"][7]
+  * ["Introducing Routemaster"][8]
 * [StumbleUpon](https://www.stumbleupon.com/)
 * [Tapad](http://www.tapad.com/)
-  * [Case study][8] by [Typesafe][9]
+  * [Case study][9] by [Typesafe][10]
 * [Teads.tv](http://teads.tv/)
 * [Tumblr](https://www.tumblr.com/)
 * [Twitter](https://twitter.com/)
-  * ["Finagle: A Protocol-Agnostic RPC System"][10]
+  * ["Finagle: A Protocol-Agnostic RPC System"][11]
 * [wasted.io](http://wasted.io/)
 
 [0]: https://twitter.com/finagle
@@ -46,7 +48,8 @@ you're using Finagle. Or even better, add the links yourself and
 [4]: https://github.com/rdio/thor
 [5]: http://engineering.sharethrough.com/blog/2014/04/17/finagle-at-sharethrough-twitter-conf-talk/
 [6]: http://developers.soundcloud.com/blog/building-products-at-soundcloud-part-3-microservices-in-scala-and-finagle
-[7]: http://engineering.strava.com/routemaster/
-[8]: http://typesafe.com/blog/tapad_turns_to_typesafe_platform
-[9]: http://typesafe.com/
-[10]: https://blog.twitter.com/2011/finagle-a-protocol-agnostic-rpc-system
+[7]: http://sproutsocial.com/insights/engineering-twitter-trends-report/
+[8]: http://engineering.strava.com/routemaster/
+[9]: http://typesafe.com/blog/tapad_turns_to_typesafe_platform
+[10]: http://typesafe.com/
+[11]: https://blog.twitter.com/2011/finagle-a-protocol-agnostic-rpc-system

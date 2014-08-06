@@ -141,7 +141,7 @@ Transporter
 
 A :src:`Transporter <com/twitter/finagle/clients/Transporter.scala>` is responsible for connecting
 a :ref:`Transport <transport_interface>` to a peer — it establishes a session. Our client uses a
-:src:`Netty3Transporter <com/twitter/finagle/netty3/client.scala>`, however
+:src:`Netty3Transporter <com/twitter/finagle/netty3/Netty3Transporter.scala>`, however
 the use of other Transporters is fully supported.
 
 .. includecode:: code/client-server-anatomy/EchoClient.scala#transporter

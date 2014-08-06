@@ -13,7 +13,7 @@ private[finagle] object FailureAccrualFactory {
     }
   }
 
-  object FailureAccrual extends Stack.Role
+  val role = Stack.Role("FailureAccrual")
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
@@ -22,7 +22,7 @@ private[finagle] object FailureAccrualFactory {
    * @param markDeadFor The duration to mark an endpoint as dead.
    */
   case class Param(numFailures: Int, markDeadFor: Duration)
-  implicit object Param extends Stack.Param[Param] with Stack.Role {
+  implicit object Param extends Stack.Param[Param] {
     val default = Param(5, 5.seconds)
   }
 
@@ -30,11 +30,12 @@ private[finagle] object FailureAccrualFactory {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.FailureAccrualFactory]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]](FailureAccrual) {
+    new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = FailureAccrualFactory.role
       val description = "Backoff from hosts that we cannot successfully make requests to"
-      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
-        val FailureAccrualFactory.Param(n, d) = params[FailureAccrualFactory.Param]
-        val param.Timer(timer) = params[param.Timer]
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+        val FailureAccrualFactory.Param(n, d) = get[FailureAccrualFactory.Param]
+        val param.Timer(timer) = get[param.Timer]
         wrapper(n, d)(timer) andThen next
       }
     }

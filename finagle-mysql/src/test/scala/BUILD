@@ -1,25 +1,25 @@
 scala_library(name='testing',
   dependencies=[
-    pants('3rdparty/jvm/mysql:mysql-connector-mxj-gpl'),
-    pants('3rdparty/jvm/mysql:mysql-connector-mxj-gpl-db-files'),
-    pants('3rdparty:mysql-connector-java'),
-    pants('finagle/finagle-mysql')
+    '3rdparty/jvm/mysql:mysql-connector-mxj-gpl',
+    '3rdparty/jvm/mysql:mysql-connector-mxj-gpl-db-files',
+    '3rdparty:mysql-connector-java',
+    'finagle/finagle-mysql'
   ],
   sources=rglobs('*.scala')
 )
 
 junit_tests(name='scala',
   dependencies=[
-    pants('3rdparty:junit'),
-    pants('3rdparty:mockito-all'),
-    pants('3rdparty:netty'),
-    pants('3rdparty:specs'),
-    pants('3rdparty:scalatest'),
-    pants(':testing'),
-    pants('util/util-core')
+    '3rdparty:junit',
+    '3rdparty:mockito-all',
+    '3rdparty:netty',
+    '3rdparty:specs',
+    '3rdparty:scalatest',
+    ':testing',
+    'util/util-core'
   ],
   sources=rglobs('*.scala'),
   resources=[
-    pants('finagle/finagle-mysql/src/test/resources')
+    'finagle/finagle-mysql/src/test/resources'
   ]
 )

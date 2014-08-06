@@ -107,13 +107,12 @@ trait Group[T] { outer =>
  * APIs. (And hopefully will be deprecated soon enough.)
  */
 private[finagle] case class NameGroup(name: Name.Bound) 
-    extends Group[SocketAddress] {
-
-  protected[finagle] lazy val set: Var[Set[SocketAddress]] = name.addr map {
-    case Addr.Bound(set) => set
-    case _ => Set()
+  extends Group[SocketAddress] {
+    protected[finagle] lazy val set: Var[Set[SocketAddress]] = name.addr map {
+      case Addr.Bound(set) => set
+      case _ => Set()
+    }
   }
-}
 
 trait MutableGroup[T] extends Group[T] {
   def update(newMembers: Set[T])

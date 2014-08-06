@@ -1,17 +1,14 @@
 package com.twitter.finagle.memcached.unit.util
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.FunSuite
-import org.scalatest.matchers.ShouldMatchers
+import com.google.common.base.Charsets
 import com.twitter.finagle.memcached.util.ParserUtils
 import org.jboss.netty.buffer.ChannelBuffers
-import com.google.common.base.Charsets
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ParserUtilsTest extends FunSuite
-  with ShouldMatchers
-{
+class ParserUtilsTest extends FunSuite {
 
   private def isDigits(str: String): Boolean = {
     val cb = ChannelBuffers.copiedBuffer(str, Charsets.UTF_8)
@@ -19,14 +16,12 @@ class ParserUtilsTest extends FunSuite
   }
 
   test("isDigits") {
-    isDigits("123") should be (true)
-    isDigits("1") should be (true)
-
-    isDigits("") should be (false)
-    isDigits(" ") should be (false)
-    isDigits("x") should be (false)
-    isDigits(" 9") should be (false)
-    isDigits("9 ") should be (false)
+    assert(isDigits("123"))
+    assert(isDigits("1"))
+    assert(!isDigits(""))
+    assert(!isDigits(" "))
+    assert(!isDigits("x"))
+    assert(!isDigits(" 9"))
+    assert(!isDigits("9 "))
   }
-
 }

@@ -41,13 +41,13 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
    * Read `n` number of bytes from the bytestream represented by `r`.
    */
   def readNBytes(n: Int, r: Reader): Future[Buf] = {
-    def loop(buf: Buf): Future[Buf] = (n - buf.length) match {
+    def loop(left: Buf): Future[Buf] = (n - left.length) match {
       case x if x > 0 =>
         r.read(x) flatMap {
-          case Buf.Eof => Future.value(buf)
-          case next => loop(buf concat next)
+          case Some(right) => loop(left concat right)
+          case None => Future.value(left)
         }
-      case _ => Future.value(buf)
+      case _ => Future.value(left)
     }
 
     loop(Buf.Empty)
@@ -165,6 +165,26 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       }
     }
 
+    test(name + ": symmetric reader and getContent") {
+      val s = Service.mk[Request, Response] { req =>
+        val buf = Await.result(Reader.readAll(req.reader))
+        assert(buf === Buf.Utf8("hello"))
+        assert(req.contentString === "hello")
+
+        req.response.setContent(req.getContent)
+        Future.value(req.response)
+      }
+      val req = Request()
+      req.contentString = "hello"
+      req.headers.set("Content-Length", 5)
+      val client = connect(s)
+      val res = Await.result(client(req))
+
+      val buf = Await.result(Reader.readAll(res.reader))
+      assert(buf === Buf.Utf8("hello"))
+      assert(res.contentString === "hello")
+    }
+
     test(name + ": stream") {
       val writer = Reader.writable()
       val client = connect(service(writer))
@@ -205,7 +225,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
         val res = Response()
         res.setChunked(true)
         def go = for {
-          c <- req.reader.read(Int.MaxValue)
+          Some(c) <- req.reader.read(Int.MaxValue)
           _  <- res.writer.write(c)
           _  <- res.close()
         } yield ()

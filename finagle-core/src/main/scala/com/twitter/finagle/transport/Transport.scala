@@ -1,7 +1,6 @@
 package com.twitter.finagle.transport
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.Stack
 import com.twitter.util.Duration
 import com.twitter.util.{Closable, Future, Promise, Time, Throw}

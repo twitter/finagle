@@ -5,6 +5,8 @@ import java.net.{SocketAddress, UnknownHostException, InetAddress, InetSocketAdd
 
 object InetSocketAddressUtil {
 
+  type HostPort = (String, Int)
+
   /** converts 0.0.0.0 -> public ip in bound ip */
   def toPublic(bound: SocketAddress): SocketAddress = {
     bound match {
@@ -18,6 +20,37 @@ object InetSocketAddressUtil {
   }
 
   /**
+   * Parses a comma or space-delimited string of hostname and port pairs into scala pair. For example,
+   *
+   *     InetSocketAddressUtil.parseHostPorts("127.0.0.1:11211") => Seq(("127.0.0.1", 11211))
+   *
+   * @param hosts a comma or space-delimited string of hostname and port pairs.
+   * @throws IllegalArgumentException if host and port are not both present
+   *
+   */
+  def parseHostPorts(hosts: String): Seq[HostPort] =
+    hosts split Array(' ', ',') filter (_.nonEmpty) map (_.split(":")) map { hp =>
+      require(hp.size == 2, "You must specify host and port")
+      (hp(0), hp(1).toInt)
+    }
+
+  /**
+   * Resolves a sequence of host port pairs into a set of socket addresses. For example,
+   *
+   *     InetSocketAddressUtil.resolveHostPorts(Seq(("127.0.0.1", 11211))) = Set(new InetSocketAddress("127.0.0.1", 11211))
+   *
+   * @param hostPorts a sequence of host port pairs
+   * @throws java.net.UnknownHostException if some host cannot be resolved
+   */
+  def resolveHostPorts(hostPorts: Seq[HostPort]): Set[SocketAddress] =
+    (hostPorts flatMap { case (host, port) =>
+      InetAddress.getAllByName(host) map { addr =>
+        new InetSocketAddress(addr, port)
+      }
+    }).toSet
+
+
+  /**
    * Parses a comma or space-delimited string of hostname and port pairs. For example,
    *
    *     InetSocketAddressUtil.parseHosts("127.0.0.1:11211") => Seq(new InetSocketAddress("127.0.0.1", 11211))
@@ -29,14 +62,11 @@ object InetSocketAddressUtil {
   def parseHosts(hosts: String): Seq[InetSocketAddress] = {
     if (hosts == ":*") return Seq(new InetSocketAddress(0))
 
-    val hostPorts = hosts split Array(' ', ',') filter (!_.isEmpty) map (_.split(":"))
-    hostPorts map { hp =>
-      require(hp.size == 2, "You must specify host and port")
-
-      if (hp(0) == "")
-        new InetSocketAddress(hp(1).toInt)
+    (parseHostPorts(hosts) map { case (host, port) =>
+      if (host == "")
+        new InetSocketAddress(port)
       else
-        new InetSocketAddress(hp(0), hp(1).toInt)
-    } toList
+        new InetSocketAddress(host, port)
+    }).toList
   }
 }

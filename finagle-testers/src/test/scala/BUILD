@@ -1,9 +1,9 @@
 junit_tests(name='scala',
   dependencies=[
-    pants('3rdparty:mockito-all'),
-    pants('3rdparty:junit'),
-    pants('3rdparty:scalatest'),
-    pants('finagle/finagle-testers')
+    '3rdparty:mockito-all',
+    '3rdparty:junit',
+    '3rdparty:scalatest',
+    'finagle/finagle-testers'
   ],
   sources=rglobs('*.scala')
 )

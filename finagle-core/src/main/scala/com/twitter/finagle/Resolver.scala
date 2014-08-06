@@ -1,11 +1,12 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.util.{InetSocketAddressUtil, LoadService}
-import com.twitter.util.{Closable, Return, Throw, Time, Try, Var}
+import com.twitter.conversions.time._
+import com.twitter.finagle.util._
+import com.twitter.util.{Return, Throw, Try, Var, FuturePool}
 import java.net.SocketAddress
+import java.security.{PrivilegedAction, Security}
 import java.util.WeakHashMap
-import java.util.logging.Logger
-import scala.collection.mutable
+import java.util.logging.{Level, Logger}
 
 /**
  * A resolver binds a name, represented by a string, to a
@@ -39,13 +40,77 @@ trait Resolver {
  */
 abstract class AbstractResolver extends Resolver
 
+/**
+ * Resolver for inet scheme. This Resolver resolves DNS after each TTL timeout.
+ * The TTL is gotten from "networkaddress.cache.ttl", a Java Security Property.
+ * If "networkaddress.cache.ttl" is not set or set to a non-positive value, DNS
+ * cache refresh will be turned off.
+ */
 object InetResolver extends Resolver {
   val scheme = "inet"
+  private val log = Logger.getLogger(getClass.getName)
+  private val ttlOption = {
+    val t = Try(Option(java.security.AccessController.doPrivileged(
+      new PrivilegedAction[String] {
+        override def run(): String = Security.getProperty("networkaddress.cache.ttl")
+      }
+    )) map { s => s.toInt })
 
-  def bind(arg: String) = {
-    val sockaddrs = InetSocketAddressUtil.parseHosts(arg)
-    val addr = Addr.Bound(sockaddrs:_*)
-    Var.value(addr)
+    t match {
+      case Return(Some(value)) =>
+        if (value <= 0) {
+          log.log(Level.INFO,
+            "networkaddress.cache.ttl is set as non-positive value, DNS cache refresh turned off")
+          None
+        } else {
+          val duration = value.seconds
+          log.log(Level.CONFIG, "networkaddress.cache.ttl found to be %s".format(duration) +
+            " will refresh DNS every %s.".format(duration))
+          Some(duration)
+        }
+      case Return(None) =>
+        log.log(Level.INFO, "networkaddress.cache.ttl is not set, DNS cache refresh turned off")
+        None
+      case Throw(exc: NumberFormatException) =>
+        log.log(Level.WARNING,
+          "networkaddress.cache.ttl is set as non-number, DNS cache refresh turned off", exc)
+        None
+      case Throw(exc) =>
+        log.log(Level.WARNING, "Unexpected Exception is thrown when getting " +
+          "networkaddress.cache.ttl, DNS cache refresh turned off", exc)
+        None
+    }
+  }
+  private val timer = DefaultTimer.twitter
+  private val futurePool = FuturePool.unboundedPool
+
+  /**
+   * Binds to the specified hostnames, and refreshes the DNS information periodically.
+   */
+  def bind(hosts: String): Var[Addr] = {
+    import InetSocketAddressUtil._
+
+    val hostPorts = parseHostPorts(hosts)
+    val init = Addr.Bound(resolveHostPorts(hostPorts))
+    ttlOption match {
+      case Some(ttl) =>
+        Var.async(init) { u =>
+          implicit val intPri = new Prioritized[Int] { def apply(i: Int) = i }
+          val updater = Updater { _: Int =>
+            val addr = resolveHostPorts(hostPorts)
+            u() = Addr.Bound(addr)
+          }
+          timer.schedule(ttl.fromNow, ttl) {
+            futurePool {
+              updater(0)
+            } onFailure { ex =>
+              log.log(Level.WARNING, "failed to resolve hosts ", ex)
+            }
+          }
+        }
+      case None =>
+        Var.value(init)
+    }
   }
 }
 

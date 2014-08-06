@@ -4,12 +4,13 @@ import com.twitter.finagle._
 import com.twitter.util.{Future, Time}
 
 object LeasedFactory {
-  object Leased extends Stack.Role
+  val role = Stack.Role("Leased")
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]](Leased) {
+    new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = LeasedFactory.role
       val description = "Bridge gap between ServiceFactory.isAvailable and Acting.isActive"
-      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
         val mk: () => Future[Service[Req, Rep] with Acting] = { () =>
           next() map {
             // the warning is OK, this should go away when we fix the abstraction

@@ -5,36 +5,36 @@ EXTERNAL_SOURCES = [
 
 scala_library(name='external',
   dependencies=[
-    pants('3rdparty:netty'),
-    pants('finagle/finagle-core'),
-    pants('finagle/finagle-memcached'),
-    pants('util/util-collection'),
-    pants('util/util-core')
+    '3rdparty:netty',
+    'finagle/finagle-core',
+    'finagle/finagle-memcached',
+    'util/util-collection',
+    'util/util-core'
   ],
   sources=EXTERNAL_SOURCES
 )
 
 junit_tests(name='scala',
   dependencies=[
-    pants(':external'),
-    pants('3rdparty:junit'),
-    pants('3rdparty:mockito-all'),
-    pants('3rdparty:netty'),
-    pants('3rdparty:scalatest'),
-    pants('3rdparty:specs'),
-    pants('3rdparty/jvm/com/twitter/common:application-action'),
-    pants('3rdparty/jvm/com/twitter/common:service-thrift'),
-    pants('3rdparty/jvm/com/twitter/common:zookeeper-testing'),
-    pants('3rdparty/jvm/com/twitter/common/zookeeper:client'),
-    pants('3rdparty/jvm/com/twitter/common/zookeeper:server-set'),
-    pants('finagle/finagle-core'),
-    pants('finagle/finagle-memcached'),
-    pants('finagle/finagle-serversets'),
-    pants('util/util-core'),
-    pants('util/util-hashing')
+    ':external',
+    '3rdparty:junit',
+    '3rdparty:mockito-all',
+    '3rdparty:netty',
+    '3rdparty:scalatest',
+    '3rdparty:specs',
+    '3rdparty/jvm/com/twitter/common:application-action',
+    '3rdparty/jvm/com/twitter/common:service-thrift',
+    '3rdparty/jvm/com/twitter/common:zookeeper-testing',
+    '3rdparty/jvm/com/twitter/common/zookeeper:client',
+    '3rdparty/jvm/com/twitter/common/zookeeper:server-set',
+    'finagle/finagle-core',
+    'finagle/finagle-memcached',
+    'finagle/finagle-serversets',
+    'util/util-core',
+    'util/util-hashing'
   ],
   sources=rglobs('*.scala') - EXTERNAL_SOURCES,
   resources=[
-    pants('finagle/finagle-memcached/src/test/resources')
+    'finagle/finagle-memcached/src/test/resources'
   ]
 )

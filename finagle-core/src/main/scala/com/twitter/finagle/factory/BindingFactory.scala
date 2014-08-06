@@ -11,7 +11,7 @@ import scala.collection.immutable
  * requests while it is pending.
  */
 private class DynNameFactory[Req, Rep](
-    name: Activity[Name.Bound], 
+    name: Activity[Name.Bound],
     newService: (Name.Bound, ClientConnection) => Future[Service[Req, Rep]])
   extends ServiceFactory[Req, Rep] {
 
@@ -62,7 +62,7 @@ private class DynNameFactory[Req, Rep](
       case Pending(q) =>
         val p = new Promise[Service[Req, Rep]]
         val el = (conn, p)
-        p setInterruptHandler { case exc => 
+        p setInterruptHandler { case exc =>
           synchronized {
             state match {
               case Pending(q) if q contains el =>
@@ -130,17 +130,22 @@ private[finagle] class BindingFactory[Req, Rep](
 
   private[this] val tree = NameTree.Leaf(path)
 
-  private[this] val nameCache = 
+  private[this] val nameCache =
     new ServiceFactoryCache[Name.Bound, Req, Rep](
-      bound => newFactory(bound.addr), 
+      bound => newFactory(bound.addr),
       statsReceiver.scope("namecache"), maxNameCacheSize)
+
+  private[this] def noBrokersAvailableException = {
+    val name = BindingFactory.showWithDtabLocal(path)
+    new NoBrokersAvailableException(name)
+  }
 
   private[this] val dtabCache = {
     val newFactory: Dtab => ServiceFactory[Req, Rep] = { dtab =>
       val namer = dtab orElse Namer.global
       val name: Activity[Name.Bound] = namer.bind(tree).map(_.eval) flatMap {
-        case None => Activity.exception(new NoBrokersAvailableException)
-        case Some(set) if set.isEmpty => Activity.exception(new NoBrokersAvailableException)
+        case None => Activity.exception(noBrokersAvailableException)
+        case Some(set) if set.isEmpty => Activity.exception(noBrokersAvailableException)
         case Some(set) if set.size == 1 => Activity.value(set.head)
         case Some(set) => Activity.value(Name.all(set))
       }
@@ -149,7 +154,7 @@ private[finagle] class BindingFactory[Req, Rep](
     }
 
     new ServiceFactoryCache[Dtab, Req, Rep](
-      newFactory, statsReceiver.scope("dtabcache"), 
+      newFactory, statsReceiver.scope("dtabcache"),
       maxNamerCacheSize)
   }
 
@@ -160,4 +165,10 @@ private[finagle] class BindingFactory[Req, Rep](
     Closable.sequence(dtabCache, nameCache).close(deadline)
 
   override def isAvailable = dtabCache.isAvailable
+}
+
+object BindingFactory {
+  def showWithDtabLocal(path: Path) =
+    if (Dtab.local.isEmpty) path.show
+    else path.show + " [" + Dtab.local.show + "]"
 }
