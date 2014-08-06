@@ -8,8 +8,8 @@ import com.typesafe.sbt.site.SphinxSupport.Sphinx
 object Finagle extends Build {
   val libVersion = "6.20.0"
   val zkVersion = "3.3.4"
-  val utilVersion = "6.18.3"
-  val ostrichVersion = "9.5.5"
+  val utilVersion = "6.19.0"
+  val ostrichVersion = "9.5.6"
   val jacksonVersion = "2.3.1"
   val nettyLib = "io.netty" % "netty" % "3.9.1.1.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
@@ -23,7 +23,7 @@ object Finagle extends Build {
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
   )
   val scroogeLibs = thriftLibs ++ Seq(
-    "com.twitter" %% "scrooge-core" % "3.12.3")
+    "com.twitter" %% "scrooge-core" % "3.16.1")
 
   def util(which: String) =
     "com.twitter" %% ("util-"+which) % utilVersion excludeAll(
@@ -468,7 +468,7 @@ object Finagle extends Build {
     name := "finagle-example",
     libraryDependencies ++= Seq(
       util("codec"),
-      "com.twitter.common" % "flags" % "0.0.1",
+      "com.twitter.common" % "flags" % "0.0.1" exclude("com.twitter", "util-core"),
       "org.slf4j" %  "slf4j-nop" % "1.5.8" % "provided"
     ) ++ scroogeLibs
   ).dependsOn(
