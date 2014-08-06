@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-kestrel</artifactId>
   <packaging>jar</packaging>
-  <version>6.19.1-SNAPSHOT</version>
+  <version>6.20.1-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -38,22 +38,22 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.19.1-SNAPSHOT</version>
+      <version>6.20.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-memcached</artifactId>
-      <version>6.19.1-SNAPSHOT</version>
+      <version>6.20.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift</artifactId>
-      <version>6.19.1-SNAPSHOT</version>
+      <version>6.20.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>scrooge-core</artifactId>
-      <version>3.16.2-SNAPSHOT</version>
+      <version>3.16.4-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>

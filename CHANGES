@@ -5,6 +5,33 @@
 6.x
 -----
 
+6.20.0
+~~~~~~~
+
+- `finagle`: Upgrade sbt to 0.13
+- `finagle-core`: Add a generic DtabStatsFilter
+- `finagle-core`: Add a singleton exception and a counter in WatermarkPool
+- `finagle-core`: DefaultClient in terms of StackClient
+- `finagle-core`: Disable Netty's thread renaming
+- `finagle-core`: Fix negative resolution in Namer.global
+- `finagle-core`: Improve `Failure.toString`
+- `finagle-core`: Log exceptions caught by ChannelStatsHandler
+- `finagle-core`: Make timer-based DNS resolution as default of InetResolver
+- `finagle-core`: Reduces log level for common exceptions
+- `finagle-http`: Don't emit (illegal) newlines in lengthy dtab header values
+- `finagle-http`: Fix code style from an open-source contribution
+- `finagle-http`: Migrate from specs to scalatest
+- `finagle-kestrel`: Make transaction abort timeout configurable in MultiReader
+- `finagle-mux`: Added extra client logging
+- `finagle-mux`: Fix broken draining behavior
+- `finagle-mux`: Improve granularity of rate to bytes/millisecond
+- `finagle-serversets`: Handle errors that occur when fetching endpoints
+- `finagle-serversets`: Merge WeightedSocketAddresses with same host:port but different weight in Stabilizer
+- `finagle-serversets`: Synchronize bug fixes & test coverage across ZK facades
+- `finagle-swift`: Fixes pants build warning
+- `finagle-thrift`: Add explicit dependency on libthrift
+- `finagle-thrift`: Remove usage of java_sources, should be able to depend on it normally
+
 6.19.0
 ~~~~~~~
 
