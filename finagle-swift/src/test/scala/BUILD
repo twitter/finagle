@@ -7,6 +7,7 @@ junit_tests(name='scala',
     'finagle/finagle-core',
     'finagle/finagle-test',
     'finagle/finagle-swift',
+    'finagle/finagle-swift/src/main/java',
     'util/util-core',
     '3rdparty:slf4j-nop'
   ],
