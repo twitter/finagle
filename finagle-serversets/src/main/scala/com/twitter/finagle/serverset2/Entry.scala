@@ -2,8 +2,6 @@ package com.twitter.finagle.serverset2
 
 import collection.JavaConverters._
 import collection.mutable.ArrayBuffer
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.twitter.util.NonFatal
 import java.net.InetSocketAddress
 
 /** 
@@ -86,7 +84,6 @@ object Endpoint {
 
   def parseJson(json: String): Seq[Endpoint] = {
     val d = JsonDict(json)
-    val m = new ObjectMapper
 
     val shard = for { IntObj(s) <- d("shard") } yield s
     val status = {

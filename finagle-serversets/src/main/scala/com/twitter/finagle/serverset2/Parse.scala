@@ -42,9 +42,10 @@ private[serverset2] object DictObj {
 }
 
 private[serverset2] object JsonDict {
+  private[this] val m = new ObjectMapper
+
   def apply(json: String): (Object => Option[Object]) = {
-    val m = new ObjectMapper
-    val o = try m.readValue(json, classOf[java.util.Map[Object, Object]]) catch { 
+    val o = try m.readValue(json, classOf[java.util.Map[Object, Object]]) catch {
       case NonFatal(_) => return Function.const(None)
     }
 
