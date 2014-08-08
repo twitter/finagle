@@ -8,16 +8,26 @@
 6.20.0
 ~~~~~~~
 
+- `finagle`: Smattering of minor cleanups in util and finagle
 - `finagle`: Upgrade sbt to 0.13
+- `finagle`: Upgrade to Netty 3.9.1.1.Final
+- `finagle-core`: Add NameTree.Fail to permit failing a name without fallback
 - `finagle-core`: Add a generic DtabStatsFilter
 - `finagle-core`: Add a singleton exception and a counter in WatermarkPool
 - `finagle-core`: DefaultClient in terms of StackClient
 - `finagle-core`: Disable Netty's thread renaming
+- `finagle-core`: Fix CumulativeGauge memory leak
 - `finagle-core`: Fix negative resolution in Namer.global
+- `finagle-core`: Fixed ChannelStatsHandler to properly filter exceptions
+- `finagle-core`: Forces finagle-core to use ipv4 network stack
 - `finagle-core`: Improve `Failure.toString`
+- `finagle-core`: Include path and Dtab.local in NoBrokersAvailableException
 - `finagle-core`: Log exceptions caught by ChannelStatsHandler
 - `finagle-core`: Make timer-based DNS resolution as default of InetResolver
+- `finagle-core`: Reader and getContent symmetry
 - `finagle-core`: Reduces log level for common exceptions
+- `finagle-core`: Register clients centrally
+- `finagle-doc`: Add fintop to companion projects list on Finagle website
 - `finagle-http`: Don't emit (illegal) newlines in lengthy dtab header values
 - `finagle-http`: Fix code style from an open-source contribution
 - `finagle-http`: Migrate from specs to scalatest
@@ -26,6 +36,7 @@
 - `finagle-mux`: Fix broken draining behavior
 - `finagle-mux`: Improve granularity of rate to bytes/millisecond
 - `finagle-serversets`: Handle errors that occur when fetching endpoints
+- `finagle-serversets`: Increase ZK session timeout to 10 seconds
 - `finagle-serversets`: Merge WeightedSocketAddresses with same host:port but different weight in Stabilizer
 - `finagle-serversets`: Synchronize bug fixes & test coverage across ZK facades
 - `finagle-swift`: Fixes pants build warning
