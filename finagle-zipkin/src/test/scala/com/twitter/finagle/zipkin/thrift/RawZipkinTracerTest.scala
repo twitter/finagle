@@ -4,6 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing._
+import com.twitter.finagle.zipkin.thriftscala._
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
 

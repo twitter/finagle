@@ -4,7 +4,7 @@ import com.twitter.util._
 import com.twitter.finagle.core.util.InetAddressUtil
 import com.twitter.finagle.util.LoadedReporterFactory
 import java.net.{InetAddress, InetSocketAddress}
-import com.twitter.finagle.exception.thrift.{ResultCode, LogEntry, Scribe}
+import com.twitter.finagle.exception.thriftscala.{ResultCode, LogEntry, Scribe}
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.anyObject

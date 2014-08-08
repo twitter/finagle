@@ -18,6 +18,7 @@ import org.jboss.netty.handler.codec.http._
 import scala.util.Random
 import com.twitter.app.App
 import com.twitter.logging.Logging
+import com.twitter.finagle.topo.{thriftscala => thrift}
 
 class AppService(clients: Seq[thrift.Backend.FutureIface], responseSample: Seq[(Duration, StorageUnit)])
   extends Service[HttpRequest, HttpResponse]

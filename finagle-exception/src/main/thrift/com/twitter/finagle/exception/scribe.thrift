@@ -17,7 +17,8 @@
 ## See accompanying file LICENSE or visit the Scribe site at:
 ## http://developers.facebook.com/scribe/
 
-namespace java com.twitter.finagle.exception.thrift
+namespace java com.twitter.finagle.exception.thriftjava
+#@namespace scala com.twitter.finagle.exception.thriftscala
 
 enum ResultCode
 {

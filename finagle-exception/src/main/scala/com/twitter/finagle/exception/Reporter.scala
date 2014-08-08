@@ -3,7 +3,7 @@ package com.twitter.finagle.exception
 import java.net.{SocketAddress, InetSocketAddress, InetAddress}
 
 import org.apache.thrift.protocol.TBinaryProtocol
-import com.twitter.finagle.exception.thrift.{LogEntry, ResultCode, Scribe, Scribe$FinagleClient}
+import com.twitter.finagle.exception.thriftscala.{LogEntry, ResultCode, Scribe, Scribe$FinagleClient}
 
 import com.twitter.app.GlobalFlag
 import com.twitter.util.GZIPStringEncoder

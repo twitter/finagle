@@ -6,6 +6,7 @@ import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.{ThriftClientFramedCodec, thrift}
 import com.twitter.finagle.tracing._
+import com.twitter.finagle.zipkin.thriftscala._
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Service, SimpleFilter, tracing}
 import com.twitter.util.{Time, Await, Base64StringEncoder, Future}

@@ -14,6 +14,7 @@ find . -type f -print0 | cpio -pmud0 ../../java
  */
 
 namespace java com.twitter.finagle.thrift.thrift
+#@namespace scala com.twitter.finagle.thrift.thriftscala
 namespace rb FinagleThrift
 
 /**

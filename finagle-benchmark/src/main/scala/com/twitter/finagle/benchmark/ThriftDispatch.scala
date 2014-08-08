@@ -2,7 +2,7 @@ package com.twitter.finagle.benchmark
 
 import com.google.caliper.SimpleBenchmark
 import com.twitter.finagle.Service
-import com.twitter.finagle.benchmark.thrift.Hello
+import com.twitter.finagle.benchmark.thriftscala.Hello
 import com.twitter.finagle.exp.swift._
 import com.twitter.finagle.thrift.ThriftClientRequest
 import com.twitter.util.{Await, Future}
