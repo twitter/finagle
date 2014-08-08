@@ -1,34 +1,53 @@
 package com.twitter.finagle.smtp
 
 import java.text.SimpleDateFormat
-import java.util.{Calendar, Locale, Date}
+import java.util.{Calendar, Date}
+
+import com.twitter.util.{Try, TimeFormat, Time}
 
 /** Defines email address */
 private[smtp] class MailingAddress(val local: String, val domain: String) {
-  def mailbox: String = if (isEmpty) ""
-                        else local + "@" + domain
-  def isEmpty = local.isEmpty && domain.isEmpty
+  val mailbox: String = {
+    if (isEmpty) ""
+    else local + "@" + domain
+  }
+  val isEmpty: Boolean = local.isEmpty && domain.isEmpty
+  val nonEmpty: Boolean = !isEmpty
 }
 
 /** Factory for mailing addresses. */
 object MailingAddress {
+
   /**
-   * Create a [[com.twitter.finagle.smtp.MailingAddress]] from the given string.
-   * The given string representation of a mailbox
-   * should be syntactically correct.
+   * Checks if address is syntactically correct according to
+   * [[http://tools.ietf.org/search/rfc5321#section-4.1.2]] (for example, user@domain.org)
+   */
+  def correct(address: String): Boolean = Try {
+    val Array(local, domain) = address split "@"
+    require(local.nonEmpty)
+    require(domain.nonEmpty)
+  }.isReturn
+
+  def correct(addrs: Seq[String]): Boolean = addrs.map(MailingAddress.correct(_)).contains(false)
+
+  /**
+   * Creates a [[com.twitter.finagle.smtp.MailingAddress]] from the given string.
+   * The given string representation of a mailbox should be syntactically correct
+   * (according to [[http://tools.ietf.org/search/rfc5321#section-4.1.2]], for
+   * example: user@domain.org). If it is not, an IllegalArgumentException is thrown.
    *
    * @param address String representation of a mailbox
    */
-  def apply(address: String) = {
-    val parts = address split "@"
-    require(parts.length == 2, "incorrect mailbox syntax")
-    require(!parts(0).isEmpty, "incorrect mailbox syntax: local part should not be empty")
-    require(!parts(1).isEmpty, "incorrect mailbox syntax: domain should not be empty")
-    new MailingAddress(parts(0), parts(1))
+  def apply(address: String): MailingAddress = {
+    if (MailingAddress.correct(address)) {
+      val Array(local, domain) = address split "@"
+      new MailingAddress(local, domain)
+    }
+    else throw new IllegalArgumentException("Incorrect mailbox syntax: %s" format address)
   }
 
   /** An empty mailing address */
-  val empty = new MailingAddress("","")
+  val empty: MailingAddress = new MailingAddress("","")
 
   /**
    * Creates a string representation of given list of mailboxes.
@@ -37,7 +56,12 @@ object MailingAddress {
    * @return String containing string representation of given
    *         addresses divided with a comma.
    */
-  def mailboxList(addrs: Seq[MailingAddress]) = addrs.filter(!_.isEmpty).map(_.mailbox).mkString(",")
+  def mailboxList(addrs: Seq[MailingAddress]): String = {
+    val mailboxes = addrs collect {
+      case addr: MailingAddress if addr.nonEmpty => addr.mailbox
+    }
+    mailboxes mkString ","
+  }
 }
 
 /**
@@ -64,11 +88,11 @@ trait EmailMessage {
 
   def replyTo: Seq[MailingAddress] = headers collect { case ("Reply-To", addr) => MailingAddress(addr) }
 
-  def date: Date = {
+  def date: Time =
     headers collectFirst {
       case ("Date", d) => EmailMessage.DateFormat.parse(d)
-    } getOrElse Calendar.getInstance().getTime
-  }
+    } getOrElse Time.now
+
 
   def subject: String = headers collectFirst { case ("Subject", subj) => subj } getOrElse ""
 
@@ -76,6 +100,5 @@ trait EmailMessage {
 }
 
 object EmailMessage {
-  val DateFormat = new SimpleDateFormat("EE, dd MMM yyyy HH:mm:ss ZZ", Locale.forLanguageTag("eng"))
-  def currentTime = DateFormat format Calendar.getInstance().getTime
+  val DateFormat: TimeFormat = new TimeFormat("EE, dd MMM yyyy HH:mm:ss ZZ")
 }

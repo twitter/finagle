@@ -8,7 +8,7 @@ import java.net.InetAddress
  * @param cmd Text command to send to server
  */
 class Request(val cmd: String) {
-  override def toString = cmd
+  override def toString(): String = cmd
 }
 
 /**

@@ -1,15 +1,15 @@
 package com.twitter.finagle.smtp
 
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.smtp.reply._
+import com.twitter.finagle.smtp.reply.InvalidReply
+import com.twitter.finagle.smtp.reply.OK
+import com.twitter.finagle.smtp.reply.ServiceReady
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.util.Await
-import com.twitter.finagle.smtp.reply.ServiceReady
-import com.twitter.finagle.smtp.reply.OK
-import com.twitter.finagle.smtp.reply.InvalidReply
 
 @RunWith(classOf[JUnitRunner])
 class SmtpClientDispatcherTest extends FunSuite {
@@ -39,6 +39,22 @@ class SmtpClientDispatcherTest extends FunSuite {
     assert(!dispatcher.isAvailable)
   }
 
+  test("aggregates multiline replies") {
+    val (server, dispatcher) = newTestSetWithGreeting
+    val frep = dispatcher(Request.Noop)
+
+    server.offer(NonTerminalLine(250, "nonterminal"))
+    assert(!frep.isDefined)
+
+    server.offer(OK("terminal"))
+    val rep = Await result frep
+
+    assert(rep.isMultiline)
+    assert(rep.code === 250)
+    assert(rep.lines === Seq("nonterminal", "terminal"))
+    assert(rep.info === "nonterminal")
+  }
+
   test("returns specified replies") {
     val (server, dispatcher) = newTestSetWithGreeting
     val specifiedOK = OK("specified")
@@ -65,6 +81,44 @@ class SmtpClientDispatcherTest extends FunSuite {
     assert(rep.isThrow)
   }
 
+  test("multiline replies with non-matching codes are incorrect") {
+    val (server, dispatcher) = newTestSetWithGreeting
+    val frep = dispatcher(Request.Noop)
+
+    server.offer(NonTerminalLine(230, "nonterminal"))
+    assert(!frep.isDefined)
+
+    server.offer(OK("terminal"))
+
+    frep onSuccess {
+      _ => fail("should fail")
+    } handle {
+      case rep: InvalidReply =>
+        assert(rep.isMultiline)
+        assert(rep.code === 230)
+      case _ => fail("should be InvalidReply")
+    }
+  }
+
+  test("replies with InvalidReply are aggregated into InvalidReply") {
+    val (server, dispatcher) = newTestSetWithGreeting
+    val frep = dispatcher(Request.Noop)
+
+    server.offer(NonTerminalLine(250, "nonterminal"))
+    assert(!frep.isDefined)
+
+    server.offer(InvalidReply("terminal"))
+
+    frep onSuccess {
+      _ => fail("should fail")
+    } handle {
+      case rep: InvalidReply =>
+        assert(rep.isMultiline)
+        assert(rep.code === 250)
+      case _ => fail("should be InvalidReply")
+    }
+  }
+
   test("wraps unknown replies") {
     val (server, dispatcher) = newTestSetWithGreeting
     val unknownRep = new UnspecifiedReply {
@@ -73,6 +127,13 @@ class SmtpClientDispatcherTest extends FunSuite {
     }
     val rep = dispatcher(Request.Noop)
     server.offer(unknownRep)
-    assert(Await.result(rep).isInstanceOf[UnknownReplyCodeError])
+
+    rep onSuccess {
+      _ => fail("should fail")
+    } handle {
+      case rep: UnknownReplyCodeError =>
+        assert(rep.code === 666)
+      case _ => fail("should be UnknownReplyCodeError")
+    }
   }
 }

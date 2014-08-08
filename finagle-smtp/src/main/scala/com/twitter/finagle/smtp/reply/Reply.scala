@@ -13,9 +13,16 @@ trait UnspecifiedReply {
   /**
    * @return Sequence containing reply lines
    *         (or just the informational line
-   *         in case of a single-line reply)*/
+   *         in case of a single-line reply)
+   */
   def lines: Seq[String] = Seq(info)
 }
+
+/**
+ * Basic trait for all SMTP replies whose type
+ * is already specified by decoding.
+ */
+trait Reply extends UnspecifiedReply
 
 /**
  * A non-terminal part of a multiline reply.
@@ -53,10 +60,4 @@ object ReplyCode {
 
   val INVALID_REPLY_CODE          = -1
 }
-
-/**
- * Basic trait for all SMTP replies whose type
- * is already specified by decoding.
- */
-trait Reply extends UnspecifiedReply
 

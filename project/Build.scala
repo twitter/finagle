@@ -337,8 +337,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
       name := "finagle-smtp",
-      libraryDependencies ++= Seq(util("logging")/*,
-        "org.apache.commons" % "commons-email" % "1.3.2"*/)
+      libraryDependencies ++= Seq(util("logging"))
     ).dependsOn(finagleCore)
 
 /*  notyet

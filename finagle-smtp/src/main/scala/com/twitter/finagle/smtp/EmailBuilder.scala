@@ -1,133 +1,151 @@
 package com.twitter.finagle.smtp
 
-import java.util.{Calendar, Date}
-
-/** The payload of an email. */
-case class Payload(from: Seq[String],
-                   sender: String,
-                   to: Seq[String],
-                   cc: Seq[String],
-                   bcc: Seq[String],
-                   reply_to: Seq[String],
-                   date: String,
-                   subject: String,
-                   body: Seq[String])
-
+import com.twitter.util.Time
 
 /**
- * Composes an [[com.twitter.finagle.smtp.EmailMessage]]. */
-case class EmailBuilder(payload: Payload) {  
+ * Constructs an [[com.twitter.finagle.smtp.EmailMessage]].
+ */
+case class EmailBuilder(
+  override val from: Seq[MailingAddress] = Seq.empty,
+  override val to: Seq[MailingAddress] = Seq.empty,
+  override val cc: Seq[MailingAddress] = Seq.empty,
+  override val bcc: Seq[MailingAddress] = Seq.empty,
+  override val replyTo: Seq[MailingAddress] = Seq.empty,
+  override val date: Time = Time.now,
+  override val subject: String = "",
+  whoSent: Option[MailingAddress] = None,
+  body : Seq[String] = Seq.empty
+  ) extends EmailMessage {
+
   /**
-   * Adds originator addresses, which will appear in the 'From:' field.
-   * 
+   * Adds originator addresses, which will appear in the ''From:'' field.
+   * These addresses are validated when converted to
+   * [[com.twitter.finagle.smtp.MailingAddress]]
+   *
    * @param addrs Addresses to be added
    */
-  def from(addrs: String*): EmailBuilder = setFrom(payload.from ++ addrs)
+  def from_(addrs: String*): EmailBuilder = setFrom(from ++ addrs.map(MailingAddress(_)))
 
   /**
    * Set the ''From:'' field to contain given originator addresses.
    *
    * @param addrs Addresses to be set
    */
-  def setFrom(addrs: Seq[String]): EmailBuilder = copy(payload.copy(from = addrs))
+  def setFrom(addrs: Seq[MailingAddress]): EmailBuilder = copy(from = addrs)
 
   /**
    * Sets the ''Sender:'' field to contain given mailing address.
-   * Sender should be specified if there are multiple 
-   * originator addresses. 
+   * Sender should be specified if there are multiple
+   * originator addresses.
    * If the given address is not included in ''From:'' field,
    * it is added there.
+   * This address is validated when converted to
+   * [[com.twitter.finagle.smtp.MailingAddress]]
    *
    * @param addr Address to be set
    */
-  def sender(addr: String): EmailBuilder = {
-    if(payload.from contains addr) copy(payload.copy(sender = addr))
-    else copy(payload.copy(sender = addr, from = payload.from :+ addr))
+  def sender_(addr: String): EmailBuilder = {
+    val mb = MailingAddress(addr)
+    if(from contains mb) copy(whoSent = Some(mb))
+    else copy(whoSent = Some(mb), from = from :+ mb)
   }
 
   /**
+   * Gets the sender of this message
+   */
+  override def sender = whoSent getOrElse (from.headOption getOrElse MailingAddress.empty)
+
+  /**
    * Adds recipient addresses, which will appear in the ''To:'' field.
+   * These addresses are validated when converted to
+   * [[com.twitter.finagle.smtp.MailingAddress]]
    *
    * @param addrs Addresses to be added
    */
-  def to(addrs: String*): EmailBuilder = setTo(payload.to ++ addrs)
+  def to_(addrs: String*): EmailBuilder = setTo(to ++ addrs.map(MailingAddress(_)))
 
   /**
    * Set the ''To:'' field to contain given recipient addresses.
    *
    * @param addrs Addresses to be set
    */
-  def setTo(addrs: Seq[String]): EmailBuilder = copy(payload.copy(to = addrs))
+  def setTo(addrs: Seq[MailingAddress]): EmailBuilder = copy(to = addrs)
 
   /**
    * Adds carbon copy addresses, which will appear in the ''Cc:'' field.
+   * These addresses are validated when converted to
+   * [[com.twitter.finagle.smtp.MailingAddress]]
    *
    * @param addrs Addresses to be added
    */
-  def cc(addrs: String*): EmailBuilder = setCc(payload.cc ++ addrs)
+  def cc_(addrs: String*): EmailBuilder = setCc(cc ++ addrs.map(MailingAddress(_)))
 
   /**
    * Set the ''Cc:'' field to contain given carbon copy addresses.
    *
    * @param addrs Addresses to be set
    */
-  def setCc(addrs: Seq[String]): EmailBuilder = copy(payload.copy(cc = addrs))
+  def setCc(addrs: Seq[MailingAddress]): EmailBuilder = copy(cc = addrs)
 
   /**
    * Adds blind carbon copy addresses, which will appear in the ''Bcc:'' field.
+   * These addresses are validated when converted to
+   * [[com.twitter.finagle.smtp.MailingAddress]]
    *
    * @param addrs Addresses to be added
    */
-  def bcc(addrs: String*): EmailBuilder = setBcc(payload.bcc ++ addrs)
+  def bcc_(addrs: String*): EmailBuilder = setBcc(bcc ++ addrs.map(MailingAddress(_)))
 
   /**
    * Set the ''Bcc:'' field to contain given blind carbon copy addresses.
    *
    * @param addrs Addresses to be set
    */
-  def setBcc(addrs: Seq[String]): EmailBuilder = copy(payload.copy(bcc = addrs))
+  def setBcc(addrs: Seq[MailingAddress]): EmailBuilder = copy(bcc = addrs)
 
   /**
    * Adds the addresses to reply to, which will appear in the ''Reply-To:'' field.
+   * These addresses are validated when converted to
+   * [[com.twitter.finagle.smtp.MailingAddress]]
    *
    * @param addrs Addresses to be added
    */
-  def reply_to(addrs: String*): EmailBuilder = setReplyTo(payload.reply_to ++ addrs)
+  def replyTo_(addrs: String*): EmailBuilder = setReplyTo(replyTo ++ addrs.map(MailingAddress(_)))
 
   /**
    * Set the ''Reply-To:'' field to contain given addresses to reply to.
    *
    * @param addrs Addresses to be set
    */
-  def setReplyTo(addrs: Seq[String]): EmailBuilder = copy(payload.copy(reply_to = addrs))
+  def setReplyTo(addrs: Seq[MailingAddress]): EmailBuilder = copy(replyTo = addrs)
 
   /**
    * Set the date of sending the message.
    *
    * @param dt Date to be set
    */
-  def date(dt: Date): EmailBuilder = copy(payload.copy(date = EmailMessage.DateFormat.format(dt)))
+  def date_(dt: Time): EmailBuilder = copy(date = dt)
 
   /**
    * Set the subject of the message.
    *
    * @param sbj Subject to be set
    */
-  def subject(sbj: String): EmailBuilder = copy(payload.copy(subject = sbj))
+  def subject_(sbj: String): EmailBuilder = copy(subject = sbj)
 
   /**
    * Add lines to the message text.
    *
    * @param lines Lines to be added
    */
-  def addBodyLines(lines: String*): EmailBuilder = setBodyLines(payload.body ++ lines)
+  def addBodyLines(lines: String*): EmailBuilder = setBodyLines(body ++ lines)
 
   /**
    * Add lines to the message text.
    *
    * @param lines Lines to be added
    */
-  def setBodyLines(lines: Seq[String]): EmailBuilder = copy(payload.copy(body = lines))
+  def setBodyLines(lines: Seq[String]): EmailBuilder = copy(body = lines)
 
   /**
    * Instantiate an [[com.twitter.finagle.smtp.EmailMessage]] from the payload.
@@ -135,23 +153,20 @@ case class EmailBuilder(payload: Payload) {
    * current date is used. If sender of the message
    * is not specified, the first address in ''From:'' is used.
    */
-  def build: EmailMessage = new EmailMessage {
-    def headers = {
-      payload.from.map(("From",_)) ++
-      Seq("Sender"   -> { if (payload.sender.nonEmpty) payload.sender
-                          else payload.from.head }) ++
-      payload.to.map(("To",_)) ++
-      payload.cc.map(("Cc",_)) ++
-      payload.bcc.map(("Bcc",_)) ++
-      payload.reply_to.map(("Reply-To",_)) ++
+  def headers: Seq[(String, String)] = {
+      from.map(ad => ("From", ad.mailbox)) ++
+      Seq("Sender"   -> {
+        if (!sender.isEmpty) sender.mailbox
+        else from.head.mailbox }
+      ) ++
+      to.map(ad => ("To", ad.mailbox)) ++
+      cc.map(ad => ("Cc", ad.mailbox)) ++
+      bcc.map(ad => ("Bcc", ad.mailbox)) ++
+      replyTo.map(ad => ("Reply-To", ad.mailbox)) ++
       Seq(
-        "Date"     -> { if (payload.date != null) payload.date
-                        else EmailMessage.currentTime },
-        "Subject"  -> payload.subject
+        "Date"     -> EmailMessage.DateFormat.format(date),
+        "Subject"  -> subject
       )
-    }
-
-    def body = payload.body
   }
 
 }
@@ -160,31 +175,22 @@ case class EmailBuilder(payload: Payload) {
  * Factory for [[com.twitter.finagle.smtp.EmailBuilder]] instances
  */
 object EmailBuilder {
-  /**
-   * Creates a default EmailBuilder with empty payload.
-   */
-  def apply() = new EmailBuilder(Payload(from = Seq.empty,
-                                       sender = "",
-                                       to = Seq.empty,
-                                       cc = Seq.empty,
-                                       bcc = Seq.empty,
-                                       reply_to = Seq.empty,
-                                       date = null,
-                                       subject = "",
-                                       body = Seq.empty))
 
   /**
-   * Creates an [[com.twitter.finagle.smtp.EmailBuilder]] with payload from given [[com.twitter.finagle.smtp.EmailMessage]].
+   * Creates an [[com.twitter.finagle.smtp.EmailBuilder]] with payload from given
+   * [[com.twitter.finagle.smtp.EmailMessage]].
    *
    * @param msg The message to copy payload from
    */
-  def apply(msg: EmailMessage) = new EmailBuilder(Payload(from = msg.from.map(_.mailbox),
-                                                          sender = msg.sender.mailbox,
-                                                          to = msg.to.map(_.mailbox),
-                                                          cc = msg.cc.map(_.mailbox),
-                                                          bcc = msg.bcc.map(_.mailbox),
-                                                          reply_to = msg.replyTo.map(_.mailbox),
-                                                          date = EmailMessage.DateFormat.format(msg.date),
-                                                          subject = msg.subject,
-                                                          body = msg.body))
+  def apply(msg: EmailMessage): EmailBuilder = new EmailBuilder(
+      from = msg.from,
+      whoSent = if (msg.sender.isEmpty) None else Some(msg.sender),
+      to = msg.to,
+      cc = msg.cc,
+      bcc = msg.bcc,
+      replyTo = msg.replyTo,
+      date = msg.date,
+      subject = msg.subject,
+      body = msg.body
+    )
 }

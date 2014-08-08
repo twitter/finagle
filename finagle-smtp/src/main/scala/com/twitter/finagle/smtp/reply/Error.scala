@@ -9,12 +9,11 @@ trait Error extends Exception with Reply
  * A reply that is either not syntactically an SMTP reply
  * or is not expected in given circumstances.
  *
- * @param content The string representation of what was received
+ * @param info The string representation of what was received
  *                or another useful information.
  */
-case class InvalidReply(content: String) extends Error {
+case class InvalidReply(info: String) extends Error {
   val code = ReplyCode.INVALID_REPLY_CODE
-  val info = content
 }
 
 /**
