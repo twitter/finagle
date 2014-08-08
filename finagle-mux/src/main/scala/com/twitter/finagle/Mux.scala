@@ -4,10 +4,7 @@ import com.twitter.finagle.client._
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.pool.ReusingPool
 import com.twitter.finagle.server._
-import com.twitter.finagle.stack.Endpoint
-import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
-import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Closable, CloseAwaitably, Future, Promise, Return, Time}
+import com.twitter.finagle.stats.StatsReceiver
 import java.net.SocketAddress
 import org.jboss.netty.buffer.{ChannelBuffer => CB}
 

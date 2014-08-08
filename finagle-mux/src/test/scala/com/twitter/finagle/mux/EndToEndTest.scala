@@ -4,7 +4,6 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.{Dtab, Mux, Service}
 import com.twitter.util.{Await, Future, Promise}
 import java.io.{PrintWriter, StringWriter}
-import java.nio.charset.Charset
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite}
@@ -18,7 +17,7 @@ class EndToEndTest extends FunSuite with Eventually with BeforeAndAfter {
     saveBase = Dtab.base
     Dtab.base = Dtab.read("/foo=>/bar; /baz=>/biz")
   }
-  
+
   after {
     Dtab.base = saveBase
   }
