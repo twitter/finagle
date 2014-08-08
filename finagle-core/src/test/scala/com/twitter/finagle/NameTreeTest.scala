@@ -48,6 +48,7 @@ class NameTreeTest extends FunSuite {
     }
 
     val leaves = Seq[() => NameTree[Path]](
+      () => NameTree.Fail,
       () => NameTree.Empty,
       () => NameTree.Neg,
       () => newPath())
@@ -102,7 +103,10 @@ class NameTreeTest extends FunSuite {
       "~ | /foo | /bar" -> Some(Set("/foo")),
       "~ | $ | /blah" -> Some(Set.empty),
       "~ | (~ | $) | /blah" -> Some(Set.empty),
-      "(~|$|/foo) & (/bar|/blah) & ~ & /FOO" -> Some(Set("/bar", "/FOO"))
+      "(~|$|/foo) & (/bar|/blah) & ~ & /FOO" -> Some(Set("/bar", "/FOO")),
+      "! | /ok" -> None,
+      "/ok & !" -> None,
+      "~ | /ok | !" -> Some(Set("/ok"))
     )
 
     for ((tree, res) <- cases) {

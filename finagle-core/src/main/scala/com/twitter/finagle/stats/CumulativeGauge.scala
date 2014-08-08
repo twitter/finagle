@@ -1,7 +1,7 @@
 package com.twitter.finagle.stats
 
 import scala.ref.WeakReference
-import scala.collection.mutable.WeakHashMap
+import scala.collection.mutable.HashMap
 
 /**
  * CumulativeGauge provides a gauge that is composed of the (addition)
@@ -53,7 +53,7 @@ private[finagle] trait CumulativeGauge {
 }
 
 trait StatsReceiverWithCumulativeGauges extends StatsReceiver {
-  private[this] val gaugeMap = new WeakHashMap[Seq[String], CumulativeGauge]
+  private[this] val gaugeMap = new HashMap[Seq[String], CumulativeGauge]
 
   /**
    * The StatsReceiver implements these. They provide the cumulated
@@ -66,7 +66,10 @@ trait StatsReceiverWithCumulativeGauges extends StatsReceiver {
     val cumulativeGauge = gaugeMap getOrElseUpdate(name, {
       new CumulativeGauge {
         def register()   = StatsReceiverWithCumulativeGauges.this.registerGauge(name, getValue)
-        def deregister() = StatsReceiverWithCumulativeGauges.this.deregisterGauge(name)
+        def deregister() = StatsReceiverWithCumulativeGauges.this synchronized {
+          gaugeMap.remove(name)
+          StatsReceiverWithCumulativeGauges.this.deregisterGauge(name)
+        }
       }
     })
 

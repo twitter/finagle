@@ -6,17 +6,18 @@ import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver}
 import com.twitter.util.{Future, Stopwatch, Return, Throw}
 
 private[finagle] object StatsFactoryWrapper {
-  object ServiceCreationStats extends Stack.Role
+  val role = Stack.Role("ServiceCreationStats")
 
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.StatsFactoryWrapper]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]](ServiceCreationStats) {
+    new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = StatsFactoryWrapper.role
       val description = "Track statistics on service creation failures " +
         "and service acquisition latency"
-      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
-        val param.Stats(statsReceiver) = params[param.Stats]
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+        val param.Stats(statsReceiver) = get[param.Stats]
         new StatsFactoryWrapper(
           next,
           new RollupStatsReceiver(statsReceiver.scope("service_creation"))

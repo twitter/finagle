@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.util.{Future, Duration, Timer}
 
 private[finagle] object TimeoutFactory {
-  object ServiceTimeout extends Stack.Role
+  val role = Stack.Role("ServiceTimeout")
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
@@ -19,12 +19,13 @@ private[finagle] object TimeoutFactory {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.factory.TimeoutFactory]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]](ServiceTimeout) {
+    new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = TimeoutFactory.role
       val description = "Time out service acquisition after a given period"
-      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
-        val TimeoutFactory.Param(timeout) = params[TimeoutFactory.Param]
-        val param.Label(label) = params[param.Label]
-        val param.Timer(timer) = params[param.Timer]
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+        val TimeoutFactory.Param(timeout) = get[TimeoutFactory.Param]
+        val param.Label(label) = get[param.Label]
+        val param.Timer(timer) = get[param.Timer]
 
         val exc = new ServiceTimeoutException(timeout)
         exc.serviceName = label

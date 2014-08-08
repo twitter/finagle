@@ -32,16 +32,27 @@ trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
 /**
  * Tracing filter for mysql client requests.
  */
-private object MysqlTracing extends SimpleFilter[Request, Result] {
+private object MysqlTracing extends SimpleFilter[Request, Result] { self =>
   def apply(request: Request, service: Service[Request, Result]) = {
     request match {
       case QueryRequest(sqlStatement) => Trace.recordBinary("mysql.query", sqlStatement)
       case PrepareRequest(sqlStatement) => Trace.recordBinary("mysql.prepare", sqlStatement)
       // TODO: save the prepared statement and put it in the executed request trace
       case ExecuteRequest(id, _, _, _) => Trace.recordBinary("mysql.execute", id)
-      case _ => Trace.record("mysql." + request.getClass.getName)
+      case _ => Trace.record("mysql." + request.getClass.getSimpleName.replace("$", ""))
     }
     service(request)
+  }
+
+  // TODO: We should consider adding toStackable(elem) to CanStackFrom so this sort of
+  // boiler-plate isn't necessary. For example, we should be able to do MysqlTracing +: stack
+  // and the role should be inferred (maybe as the class name).
+  val role = Stack.Role("MysqlTracing")
+  val module = new Stack.Simple[ServiceFactory[Request, Result]] {
+    val role = MysqlTracing.role
+    val description = "Trace mysql specific calls to the loaded tracer"
+    def make(next: ServiceFactory[Request, Result])(implicit params: Stack.Params) =
+      self andThen next
   }
 }
 
@@ -50,13 +61,15 @@ private object MysqlTracing extends SimpleFilter[Request, Result] {
  * The client inherits a wealth of features from finagle including connection
  * pooling and load balancing.
  */
-object MysqlStackClient extends StackClient[Request, Result, Packet, Packet] {
-  val newTransporter = MysqlTransporter(_)
-  val newDispatcher: Stack.Params => Dispatcher = { prms =>
+object MysqlStackClient extends StackClient[Request, Result](
+  MysqlTracing.module +: StackClient.newStack,
+  Stack.Params.empty
+) {
+  protected type In = Packet
+  protected type Out = Packet
+  protected val newTransporter = MysqlTransporter(_)
+  protected val newDispatcher: Stack.Params => Dispatcher = { prms =>
     trans => mysql.ClientDispatcher(trans, Handshake(prms))
-  }
-  override def newClient(dest: Name, label: String): ServiceFactory[Request, Result] = {
-    MysqlTracing andThen super.newClient(dest, label)
   }
 }
 
@@ -64,10 +77,10 @@ object MysqlStackClient extends StackClient[Request, Result, Packet, Packet] {
  * Wraps a mysql client with builder semantics. Additionally, this class provides
  * methods for constructing a rich client which exposes a rich mysql api.
  */
-class MysqlClient(client: StackClient[Request, Result, Packet, Packet])
-  extends StackClientLike[Request, Result, Packet, Packet, MysqlClient](client)
+class MysqlClient(client: StackClient[Request, Result])
+  extends StackClientLike[Request, Result, MysqlClient](client)
   with MysqlRichClient {
-  protected def newInstance(client: StackClient[Request, Result, Packet, Packet]) =
+  protected def newInstance(client: StackClient[Request, Result]) =
     new MysqlClient(client)
 
   /**
@@ -93,7 +106,7 @@ class MysqlClient(client: StackClient[Request, Result, Packet, Packet])
 /**
  * @example {{{
  * val client = Mysql
- *   .withCredentials("<username>", "<password>")
+ *   .withCredentials("username", "password")
  *   .withDatabase("db")
  *   .newRichClient("inet!localhost:3306")
  * }}}

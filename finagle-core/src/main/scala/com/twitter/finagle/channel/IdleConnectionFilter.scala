@@ -17,7 +17,7 @@ case class OpenConnectionsThresholds(
 }
 
 private[finagle] object IdleConnectionFilter {
-  object IdleConnectionAssasin extends Stack.Role
+  val role = Stack.Role("IdleConnectionAssasin")
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
@@ -32,13 +32,14 @@ private[finagle] object IdleConnectionFilter {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.channel.IdleConnectionFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]](IdleConnectionAssasin) {
+    new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = IdleConnectionFilter.role
       val description = "Refuse requests and try to close idle connections " + 
         "based on the number of active connections"
-      def make(params: Stack.Params, next: ServiceFactory[Req, Rep]) = {
-        params[IdleConnectionFilter.Param] match {
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Stack.Params) = {
+        get[IdleConnectionFilter.Param] match {
           case IdleConnectionFilter.Param(Some(thres)) =>
-            val param.Stats(sr) = params[param.Stats]
+            val param.Stats(sr) = get[param.Stats]
             new IdleConnectionFilter(next, thres, sr.scope("idle"))
           case _ => next
         }

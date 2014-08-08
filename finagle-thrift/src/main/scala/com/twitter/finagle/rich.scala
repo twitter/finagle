@@ -3,11 +3,10 @@ package com.twitter.finagle
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.ThriftClientRequest
 import com.twitter.finagle.util.Showable
-import com.twitter.util.{Future, NonFatal}
+import com.twitter.util.NonFatal
 import java.lang.reflect.{Constructor, Method}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
-import org.jboss.netty.buffer.ChannelBuffer
 
 private object ThriftUtil {
   def findClass1(name: String): Option[Class[_]] =
@@ -312,9 +311,9 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
     def tryScroogeFinagledService(iface: Class[_]): Option[BinaryService] =
       for {
         baseName   <- findRootWithSuffix(iface.getName, "$FutureIface") orElse
-                      Some(iface.getName)
+          Some(iface.getName)
         serviceCls <- findClass[BinaryService](baseName + "$FinagleService") orElse
-                      findClass[BinaryService](baseName + "$FinagledService")
+          findClass[BinaryService](baseName + "$FinagledService")
         cons       <- findConstructor(serviceCls, iface, classOf[TProtocolFactory])
       } yield cons.newInstance(impl, protocolFactory)
 

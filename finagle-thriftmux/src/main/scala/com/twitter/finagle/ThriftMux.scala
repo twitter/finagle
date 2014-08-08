@@ -13,7 +13,9 @@ import org.apache.thrift.protocol.TProtocolFactory
  */
 class ThriftMuxLike private[finagle](
   client: ThriftMuxClientLike,
-  server: ThriftMuxServerLike
+  server: ThriftMuxServerLike,
+  // TODO: consider stuffing this into Stack.Params
+  protected val protocolFactory: TProtocolFactory
 ) extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
   with Server[Array[Byte], Array[Byte]] with ThriftRichServer
 {
@@ -26,10 +28,6 @@ class ThriftMuxLike private[finagle](
     val Stats(sr) = client.params[Stats]
     sr
   }
-
-  // TODO: this should probably be threaded through via Stack.Params
-  protected val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
-
 
   /** @inheritdoc */
   def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
@@ -45,15 +43,24 @@ class ThriftMuxLike private[finagle](
    * Produce a [[com.twitter.finagle.ThriftMuxLike]] using the provided
    * client ID.
    */
-  def withClientId(clientId: ClientId) = new ThriftMuxLike(
-    client.withClientId(clientId),
-    server
-  )
+  def withClientId(clientId: ClientId): ThriftMuxLike =
+    new ThriftMuxLike(client.withClientId(clientId), server, protocolFactory)
+
+  /**
+   * Produce a [[com.twitter.finagle.ThriftMuxLike]] using the provided
+   * protocolFactory.
+   */
+  def withProtocolFactory(pf: TProtocolFactory): ThriftMuxLike =
+    new ThriftMuxLike(
+      client.withProtocolFactory(pf),
+      server.withProtocolFactory(pf),
+      pf
+    )
 }
 
 /**
- * The `ThriftMux` object is both a [[com.twitter.finagle.client.Client]] and a
- * [[com.twitter.finagle.server.Server]] for the Thrift protocol served over
+ * The `ThriftMux` object is both a [[com.twitter.finagle.Client]] and a
+ * [[com.twitter.finagle.Server]] for the Thrift protocol served over
  * [[com.twitter.finagle.mux]]. Rich interfaces are provided to adhere to those
  * generated from a [[http://thrift.apache.org/docs/idl/ Thrift IDL]] by
  * [[http://twitter.github.io/scrooge/ Scrooge]] or
@@ -83,5 +90,6 @@ object ThriftMux extends ThriftMuxLike(
     .configured(Label("thrift")),
   ThriftMuxServer
     .configured(Stats(ServerStatsReceiver))
-    .configured(Label("thrift"))
+    .configured(Label("thrift")),
+  Protocols.binaryFactory()
 )

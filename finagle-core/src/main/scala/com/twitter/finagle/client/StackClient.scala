@@ -9,7 +9,7 @@ import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.service._
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stack.nilStack
-import com.twitter.finagle.stats.{ClientStatsReceiver, RollupStatsReceiver}
+import com.twitter.finagle.stats.ClientStatsReceiver
 import com.twitter.finagle.tracing.{ClientDestTracingFilter, TracingFilter}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.Showable
@@ -19,13 +19,13 @@ private[finagle] object StackClient {
   /**
    * Canonical Roles for each Client-related Stack modules.
    */
-  object Role {
-    object LoadBalancer extends Stack.Role
-    object Pool extends Stack.Role
-    object RequestDraining extends Stack.Role
-    object PrepFactory extends Stack.Role
+  object Role extends Stack.Role("StackClient"){
+    val loadBalancer = Stack.Role("LoadBalancer")
+    val pool = Stack.Role("Pool")
+    val requestDraining = Stack.Role("RequestDraining")
+    val prepFactory = Stack.Role("PrepFactory")
     /** PrepConn is special in that it's the first role before the `Endpoint` role */
-    object PrepConn extends Stack.Role
+    val prepConn = Stack.Role("PrepConn")
   }
 
   /**
@@ -48,7 +48,7 @@ private[finagle] object StackClient {
     com.twitter.finagle.Init()
 
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](nilStack[Req, Rep])
-    stk.push(Role.PrepConn, identity[ServiceFactory[Req, Rep]](_))
+    stk.push(Role.prepConn, identity[ServiceFactory[Req, Rep]](_))
     stk.push(ExpiringService.module)
     stk.push(FailFastFactory.module)
     stk.push(DefaultPool.module)
@@ -70,20 +70,20 @@ private[finagle] object StackClient {
    *
    * @see [[com.twitter.finagle.client.StackClient#endpointStack]]
    * @see [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]]
-   * @see [[com.twitter.finagle.factory.RefCountedFactory]]
+   * @see [[com.twitter.finagle.factory.RefcountedFactory]]
    * @see [[com.twitter.finagle.factory.TimeoutFactory]]
    * @see [[com.twitter.finagle.factory.StatsFactoryWrapper]]
-   * @see [[com.twitter.finagle.filter.TracingFilter]]
+   * @see [[com.twitter.finagle.tracing.TracingFilter]]
    */
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
     val stk = new StackBuilder(endpointStack[Req, Rep])
     stk.push(LoadBalancerFactory.module)
-    stk.push(Role.RequestDraining, (fac: ServiceFactory[Req, Rep]) =>
+    stk.push(Role.requestDraining, (fac: ServiceFactory[Req, Rep]) =>
       new RefcountedFactory(fac))
     stk.push(TimeoutFactory.module)
     stk.push(StatsFactoryWrapper.module)
     stk.push(TracingFilter.module)
-    stk.push(Role.PrepFactory, identity[ServiceFactory[Req, Rep]](_))
+    stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
     stk.result
   }
 }
@@ -91,14 +91,17 @@ private[finagle] object StackClient {
 /**
  * A [[com.twitter.finagle.Stack]]-based client.
  */
-private[finagle] abstract class StackClient[Req, Rep, In, Out](
+private[finagle] abstract class StackClient[Req, Rep](
   val stack: Stack[ServiceFactory[Req, Rep]],
   val params: Stack.Params
 ) extends Client[Req, Rep] { self =>
+  protected type In
+  protected type Out
+
    /**
     * A convenient type alias for a client dispatcher.
     */
-  type Dispatcher = Transport[In, Out] => Service[Req, Rep]
+  protected type Dispatcher = Transport[In, Out] => Service[Req, Rep]
 
   /**
    * Creates a new StackClient with the default stack (StackClient#newStack)
@@ -110,7 +113,7 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
   )
 
   /**
-   * Defines a typed [[com.twitter.finagle.Transporter]] for this client.
+   * Defines a typed [[com.twitter.finagle.client.Transporter]] for this client.
    * Concrete StackClient implementations are expected to specify this.
    */
   protected val newTransporter: Stack.Params => Transporter[In, Out]
@@ -135,7 +138,7 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
    * Creates a new StackClient with `p` added to the `params`
    * used to configure this StackClient's `stack`.
    */
-  def configured[P: Stack.Param](p: P): StackClient[Req, Rep, In, Out] =
+  def configured[P: Stack.Param](p: P): StackClient[Req, Rep] =
     copy(params = params+p)
 
   /**
@@ -145,20 +148,24 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
   def copy(
     stack: Stack[ServiceFactory[Req, Rep]] = self.stack,
     params: Stack.Params = self.params
-  ): StackClient[Req, Rep, In, Out] =
-    new StackClient[Req, Rep, In, Out](stack, params) {
+  ): StackClient[Req, Rep] =
+    new StackClient[Req, Rep](stack, params) {
+      protected type In = self.In
+      protected type Out = self.Out
       protected val newTransporter = self.newTransporter
       protected val newDispatcher = self.newDispatcher
+      override protected val endpointer = self.endpointer
     }
 
   /**
    * A stackable module that creates new `Transports` (via transporter)
    * when applied.
    */
-  private[this] val endpointer = new Stack.Simple[ServiceFactory[Req, Rep]](Endpoint) {
+  protected val endpointer = new Stack.Simple[ServiceFactory[Req, Rep]] {
+    val role = Endpoint
     val description = "Send requests over the wire"
-    def make(prms: Stack.Params, next: ServiceFactory[Req, Rep]) = {
-      val Transporter.EndpointAddr(addr) = prms[Transporter.EndpointAddr]
+    def make(next: ServiceFactory[Req, Rep])(implicit prms: Stack.Params) = {
+      val Transporter.EndpointAddr(addr) = get[Transporter.EndpointAddr]
       val transporter = newTransporter(prms)
       val dispatcher = newDispatcher(prms)
       ServiceFactory(() => transporter(addr) map dispatcher)
@@ -182,12 +189,20 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
       Label(clientLabel) +
       Stats(stats.scope(clientLabel))
 
+    ClientRegistry.register(clientLabel, this)
+
     dest match {
       case Name.Bound(addr) =>
-        clientStack.make(clientParams + LoadBalancerFactory.Dest(addr))
+        clientStack.make(clientParams +
+          LoadBalancerFactory.ErrorLabel(Showable.show(dest)) +
+          LoadBalancerFactory.Dest(addr))
+
       case Name.Path(path) =>
+        val errorLabel = BindingFactory.showWithDtabLocal(path)
+        val clientParams1 = clientParams + LoadBalancerFactory.ErrorLabel(errorLabel)
+
         val newStack: Var[Addr] => ServiceFactory[Req, Rep] =
-          addr => clientStack.make(clientParams + LoadBalancerFactory.Dest(addr))
+          addr => clientStack.make(clientParams1 + LoadBalancerFactory.Dest(addr))
 
         new BindingFactory(path, newStack, stats.scope("interpreter"))
     }
@@ -198,15 +213,15 @@ private[finagle] abstract class StackClient[Req, Rep, In, Out](
  * A [[com.twitter.finagle.Stack Stack]]-based client which preserves
  * `Like` client semantics. This makes it appropriate for implementing rich
  * clients, since the rich type can be preserved without having to drop down
- * to StackClient[Req, Rep, In, Out] when making changes.
+ * to StackClient[Req, Rep] when making changes.
  */
 private[finagle]
-abstract class StackClientLike[Req, Rep, In, Out, Repr <: StackClientLike[Req, Rep, In, Out, Repr]](
-  client: StackClient[Req, Rep, In, Out]
+abstract class StackClientLike[Req, Rep, Repr <: StackClientLike[Req, Rep, Repr]](
+  client: StackClient[Req, Rep]
 ) extends Client[Req, Rep] {
   val stack = client.stack
 
-  protected def newInstance(client: StackClient[Req, Rep, In, Out]): Repr
+  protected def newInstance(client: StackClient[Req, Rep]): Repr
 
   /**
    * Creates a new `Repr` with an underlying StackClient where `p` has been

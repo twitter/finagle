@@ -37,7 +37,7 @@ class DelayedReleaseServiceTest extends FunSuite with MockitoSugar {
       verify(service, never).close()
       Reader.readAll(response.reader)
     }
-    request.response.close() // writes Buf.Eof
+    request.response.close() // EOF
     verify(service).close()
   }
 

@@ -1,9 +1,9 @@
 java_library(name='java',
   dependencies=[
-    pants('3rdparty:scala-library'),
-    pants('finagle/finagle-core'),
-    pants('finagle/finagle-kestrel'),
-    pants('util/util-core')
+    '3rdparty:scala-library',
+    'finagle/finagle-core',
+    'finagle/finagle-kestrel',
+    'util/util-core'
   ],
   sources=rglobs('*.java')
 )

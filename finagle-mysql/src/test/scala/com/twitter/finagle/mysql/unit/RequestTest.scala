@@ -113,6 +113,14 @@ class ExecuteRequestTest extends FunSuite {
     timestamp,
     sqlDate,
     datetime,
+    null,
+    StringValue(strVal),
+    ByteValue(byteVal),
+    ShortValue(shortVal),
+    IntValue(intVal),
+    LongValue(longVal),
+    FloatValue(floatVal),
+    DoubleValue(doubleVal),
     null
   )
   // create a prepared statement
@@ -200,7 +208,7 @@ class ExecuteRequestTest extends FunSuite {
       val cal = Calendar.getInstance()
       val offset = cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)
       val utcTimeStamp = new Timestamp(timestamp.getTime + offset)
-  
+
       assert(ts === utcTimeStamp)
     }
 
@@ -219,6 +227,34 @@ class ExecuteRequestTest extends FunSuite {
       val utcDateTime = new Date(datetime.getTime + offset)
 
       assert(dt.getTime === utcDateTime.getTime)
+    }
+
+    test("StringValue") {
+      assert(br.readLengthCodedString() === strVal)
+    }
+
+    test("ByteValue") {
+      assert(br.readByte() === byteVal)
+    }
+
+    test("ShortValue") {
+      assert(br.readShort() === shortVal)
+    }
+
+    test("IntValue") {
+      assert(br.readInt() === intVal)
+    }
+
+    test("LongValue") {
+      assert(br.readLong() === longVal)
+    }
+
+    test("FloatValue") {
+      assert(br.readFloat() === floatVal)
+    }
+
+    test("DoubleValue") {
+      assert(br.readDouble() === doubleVal)
     }
   }
 }

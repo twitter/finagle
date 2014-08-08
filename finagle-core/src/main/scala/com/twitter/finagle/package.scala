@@ -157,7 +157,7 @@ package object finagle {
      * and clients.
      */
     case class Tracer(tracer: tracing.Tracer)
-    implicit object Tracer extends Stack.Param[Tracer] with Stack.Role {
+    implicit object Tracer extends Stack.Param[Tracer] {
       // Note, this is lazy to avoid potential failures during
       // static initialization.
       lazy val default = Tracer(tracing.DefaultTracer)
@@ -165,7 +165,7 @@ package object finagle {
   }
 
   object stack {
-    object Endpoint extends Stack.Role
+    object Endpoint extends Stack.Role("Endpoint")
     /**
      * Creates a [[com.twitter.finagle.Stack.Leaf]] which always fails.
      */

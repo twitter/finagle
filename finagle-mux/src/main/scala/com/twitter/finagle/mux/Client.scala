@@ -69,6 +69,7 @@ private[finagle] class ClientDispatcher (
   private[this] val gauge = sr.addGauge("current_lease_ms") {
     lease.remaining.inMilliseconds
   }
+  private[this] val leaseCounter = sr.counter("lease_counter")
 
   private[this] val receive: Message => Unit = {
     case RreqOk(tag, rep) =>
@@ -105,6 +106,8 @@ private[finagle] class ClientDispatcher (
       trans.write(encode(Rdrain(tag)))
     case Tlease(unit, howMuch) =>
       Lease.parse(unit, howMuch) foreach { newLease =>
+        log.fine("leased for " + newLease + " to " + trans.remoteAddress)
+        leaseCounter.incr()
         lease = newLease
       }
     case m@Tmessage(tag) =>

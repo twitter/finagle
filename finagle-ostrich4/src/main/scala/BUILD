@@ -1,14 +1,14 @@
 scala_library(name='scala',
   dependencies=[
-    pants('3rdparty:netty'),
-    pants('finagle/finagle-core'),
-    pants('finagle/finagle-http'),
-    pants('ostrich'),
-    pants('util/util-core')
+    '3rdparty:netty',
+    'finagle/finagle-core',
+    'finagle/finagle-http',
+    'ostrich',
+    'util/util-core'
   ],
   sources=rglobs('*.scala'),
   resources=[
-    pants('finagle/finagle-ostrich4/src/main/resources')
+    'finagle/finagle-ostrich4/src/main/resources'
   ],
   provides=artifact(org='com.twitter',
                     name='finagle-ostrich4',

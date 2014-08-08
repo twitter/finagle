@@ -15,96 +15,96 @@ class LeftFoldUpstreamHandler {
 
   def channelBound(
     ctx: ChannelHandlerContext,
-    e: ChannelStateEvent): LeftFoldUpstreamHandler =
-  {
+    e: ChannelStateEvent
+  ): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }
 
   def channelClosed(
     ctx: ChannelHandlerContext,
-    e: ChannelStateEvent): LeftFoldUpstreamHandler =
-  {
+    e: ChannelStateEvent
+  ): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }
 
   def channelConnected(
     ctx: ChannelHandlerContext,
-    e: ChannelStateEvent): LeftFoldUpstreamHandler =
-  {
+    e: ChannelStateEvent
+  ): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }
 
   def channelDisconnected(
     ctx: ChannelHandlerContext,
-    e: ChannelStateEvent): LeftFoldUpstreamHandler =
-  {
+    e: ChannelStateEvent
+  ): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }
 
   def channelInterestChanged(
     ctx: ChannelHandlerContext,
-    e: ChannelStateEvent): LeftFoldUpstreamHandler =
-  {
+    e: ChannelStateEvent
+  ): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }
 
   def channelOpen(
     ctx: ChannelHandlerContext,
-    e: ChannelStateEvent): LeftFoldUpstreamHandler =
-  {
+    e: ChannelStateEvent
+  ): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }
   
   def channelUnbound(
     ctx: ChannelHandlerContext,
-    e: ChannelStateEvent): LeftFoldUpstreamHandler =
-  {
+    e: ChannelStateEvent
+  ): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }
 
   def childChannelClosed(
     ctx: ChannelHandlerContext,
-    e: ChildChannelStateEvent): LeftFoldUpstreamHandler =
-  {
+    e: ChildChannelStateEvent
+  ): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }
 
   def childChannelOpen(
     ctx: ChannelHandlerContext,
-    e: ChildChannelStateEvent): LeftFoldUpstreamHandler =
-  {
+    e: ChildChannelStateEvent
+  ): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }
 
   def exceptionCaught(
     ctx: ChannelHandlerContext,
-    e: ExceptionEvent): LeftFoldUpstreamHandler =
-  {
+    e: ExceptionEvent
+  ): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }
 
   def messageReceived(
     ctx: ChannelHandlerContext,
-    e: MessageEvent): LeftFoldUpstreamHandler =
-  {
+    e: MessageEvent
+  ): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }
 
   def writeComplete(
     ctx: ChannelHandlerContext,
-    e: WriteCompletionEvent): LeftFoldUpstreamHandler =
-  {
+    e: WriteCompletionEvent
+  ): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }

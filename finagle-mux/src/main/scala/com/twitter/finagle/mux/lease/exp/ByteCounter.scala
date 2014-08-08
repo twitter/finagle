@@ -7,7 +7,7 @@ import com.twitter.util._
 import com.twitter.util.Local.Context
 
 private[lease] trait ByteCounter {
-  def rate(): Long
+  def rate(): Double
 
   def lastGc: Time
 
@@ -74,14 +74,14 @@ private[lease] class WindowedByteCounter private[lease](
   // used to unflaky our tests--DO NOT USE
   @volatile private[lease] var passCount: Int = 0
 
-  /** @return allocation rate in bytes per second. */
-  def rate(): Long = sum().inBytes / W.inSeconds
-  private[this] def lastRate() = allocs(idx).inBytes * 1000 / P.inMilliseconds
+  /** @return allocation rate in bytes per millisecond. */
+  def rate(): Double = sum().inBytes / W.inMilliseconds
+  private[this] def lastRate(): Double = allocs(idx).inBytes / P.inMilliseconds
 
   override def toString =
     "WindowedByteCounter(windowed="+
-      rate()+"bps; last="+
-      lastRate()+"bps; count="+
+      rate()+"bpms; last="+
+      lastRate()+"bpms; count="+
       count+"; sum="+
       sum()+"bytes)"
 

@@ -157,7 +157,8 @@ class ZkTest extends FunSuite {
   }}
 
   test("factory authenticates and closes on expiry") { Time.withCurrentTimeFrozen { tc =>
-    val authInfo = "%s:%s".format(System.getProperty("user.name"), System.getProperty("user.name"))
+    val identity = Identities.get().head
+    val authInfo = "%s:%s".format(identity, identity)
     val timer = new MockTimer
     val zkState: Var[WatchState] with Updatable[WatchState] = Var(WatchState.Pending)
     val watchedZk = Watched(new OpqueueZkReader(), zkState)

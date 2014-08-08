@@ -5,7 +5,7 @@ import com.twitter.finagle.dispatch.GenSerialServerDispatcher
 import com.twitter.finagle.http._
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.Transport
-import com.twitter.io.{Reader, Buf}
+import com.twitter.io.{Reader, Buf, BufReader}
 import com.twitter.util.{Future, Promise}
 import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffers
@@ -37,7 +37,7 @@ class HttpServerDispatcher[REQUEST <: Request](
             readerFromTransport(trans, eos)
           } else {
             eos.setDone()
-            NullReader
+            BufReader(ChannelBufferBuf(reqIn.getContent))
           }
 
       }.asInstanceOf[REQUEST]

@@ -5,7 +5,7 @@ import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util.NonFatal
 import java.util.Properties
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
-import java.util.logging.{Level, Logger}
+import java.util.logging.Level
 
 
 /**

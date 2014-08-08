@@ -9,7 +9,8 @@ import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 
 /**
  * Map-based mock client for testing
- * Note: The cas method checks if value is same as previous value, if not, do a swap and return true
+ *
+ * Note: expiry and flags are ignored on update operations.
  */
 class MockClient(val map: mutable.Map[String, ChannelBuffer]) extends Client {
   def this() = this(mutable.Map[String, ChannelBuffer]())
@@ -45,11 +46,17 @@ class MockClient(val map: mutable.Map[String, ChannelBuffer]) extends Client {
   def getsResult(keys: Iterable[String]): Future[GetsResult] =
     Future.value(GetsResult(_get(keys)))
 
+  /**
+   * Note: expiry and flags are ignored.
+   */
   def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
     map.synchronized { map(key) = value }
     Future.Unit
   }
 
+  /**
+   * Note: expiry and flags are ignored.
+   */
   def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[JBoolean] =
     Future.value(
       map.synchronized {
@@ -62,6 +69,9 @@ class MockClient(val map: mutable.Map[String, ChannelBuffer]) extends Client {
       }
     )
 
+  /**
+   * Note: expiry and flags are ignored.
+   */
   def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[JBoolean] =
     Future.value(
       map.synchronized {
@@ -75,6 +85,9 @@ class MockClient(val map: mutable.Map[String, ChannelBuffer]) extends Client {
       }
     )
 
+  /**
+   * Note: expiry and flags are ignored.
+   */
   def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[JBoolean] =
     Future.value(
       map.synchronized {
@@ -88,6 +101,9 @@ class MockClient(val map: mutable.Map[String, ChannelBuffer]) extends Client {
       }
     )
 
+  /**
+   * Note: expiry and flags are ignored.
+   */
   def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[JBoolean] =
     Future.value(
       map.synchronized {
@@ -100,7 +116,18 @@ class MockClient(val map: mutable.Map[String, ChannelBuffer]) extends Client {
       }
     )
 
-  def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer): Future[JBoolean] =
+  /**
+   * Checks if value is same as previous value, if not, do a swap and return true.
+   *
+   * Note: expiry and flags are ignored.
+   */
+  def cas(
+    key: String,
+    flags: Int,
+    expiry: Time,
+    value: ChannelBuffer,
+    casUnique: ChannelBuffer
+  ): Future[JBoolean] =
     Future.value(
       map.synchronized {
         map.get(key) match {

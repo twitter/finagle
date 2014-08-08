@@ -20,5 +20,5 @@ private[finagle] object SocksProxyFlags {
     (socksUsernameFlag.get, socksPasswordFlag.get) match {
       case (Some(username), Some(password)) => Some((username,password))
       case _ => None
-  }
+    }
 }

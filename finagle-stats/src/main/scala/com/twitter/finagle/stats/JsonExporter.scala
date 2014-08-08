@@ -1,6 +1,5 @@
 package com.twitter.finagle.stats
 
-import collection.immutable
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
@@ -10,8 +9,8 @@ import com.twitter.finagle.Service
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
-import org.jboss.netty.handler.codec.http.QueryStringDecoder
-import util.matching.Regex
+import scala.collection.immutable
+import scala.util.matching.Regex
 
 /**
  * Blacklist of regex, comma-separated. Comma is a reserved character and cannot be used.

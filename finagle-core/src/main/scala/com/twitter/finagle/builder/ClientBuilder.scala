@@ -1,50 +1,5 @@
 package com.twitter.finagle.builder
 
-/**
- * Provides a class for building clients.  The main class to use is
- * [[com.twitter.finagle.builder.ClientBuilder]], as so
- *
- * {{{
- * val client = ClientBuilder()
- *   .codec(Http)
- *   .hosts("localhost:10000,localhost:10001,localhost:10003")
- *   .hostConnectionLimit(1)
- *   .tcpConnectTimeout(1.second)        // max time to spend establishing a TCP connection.
- *   .retries(2)                         // (1) per-request retries
- *   .reportTo(new OstrichStatsReceiver) // export host-level load data to ostrich
- *   .logger(Logger.getLogger("http"))
- *   .build()
- * }}}
- *
- * The `ClientBuilder` requires the definition of `cluster`, `codec`,
- * and `hostConnectionLimit`. In Scala, these are statically type
- * checked, and in Java the lack of any of the above causes a runtime
- * error.
- *
- * The `build` method uses an implicit argument to statically
- * typecheck the builder (to ensure completeness, see above). The Java
- * compiler cannot provide such implicit, so we provide a separate
- * function in Java to accomplish this. Thus, the Java code for the
- * above is
- *
- * {{{
- * Service<HttpRequest, HttpResponse> service =
- *  ClientBuilder.safeBuild(
- *    ClientBuilder.get()
- *      .codec(new Http())
- *      .hosts("localhost:10000,localhost:10001,localhost:10003")
- *      .hostConnectionLimit(1)
- *      .tcpConnectTimeout(1.second)
- *      .retries(2)
- *      .reportTo(new OstrichStatsReceiver())
- *      .logger(Logger.getLogger("http")))
- * }}}
- *
- * Alternatively, using the `unsafeBuild` method on `ClientBuilder`
- * verifies the builder dynamically, resulting in a runtime error
- * instead of a compiler error.
- */
-
 import com.twitter.finagle._
 import com.twitter.finagle.client.{DefaultPool, StackClient, Transporter}
 import com.twitter.finagle.factory.TimeoutFactory
@@ -177,6 +132,95 @@ private[builder] object ClientConfigEvidence {
  */
 private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit]
 
+/**
+ * Provides a class for building clients.  The main class to use is
+ * [[com.twitter.finagle.builder.ClientBuilder]], as so
+ *
+
+ */
+
+
+/**
+ * A builder of Finagle [[com.twitter.finagle.Client Clients]].
+ *
+ * {{{
+ * val client = ClientBuilder()
+ *   .codec(Http)
+ *   .hosts("localhost:10000,localhost:10001,localhost:10003")
+ *   .hostConnectionLimit(1)
+ *   .tcpConnectTimeout(1.second)        // max time to spend establishing a TCP connection.
+ *   .retries(2)                         // (1) per-request retries
+ *   .reportTo(new OstrichStatsReceiver) // export host-level load data to ostrich
+ *   .logger(Logger.getLogger("http"))
+ *   .build()
+ * }}}
+ *
+ * The `ClientBuilder` requires the definition of `cluster`, `codec`,
+ * and `hostConnectionLimit`. In Scala, these are statically type
+ * checked, and in Java the lack of any of the above causes a runtime
+ * error.
+ *
+ * The `build` method uses an implicit argument to statically
+ * typecheck the builder (to ensure completeness, see above). The Java
+ * compiler cannot provide such implicit, so we provide a separate
+ * function in Java to accomplish this. Thus, the Java code for the
+ * above is
+ *
+ * {{{
+ * Service<HttpRequest, HttpResponse> service =
+ *  ClientBuilder.safeBuild(
+ *    ClientBuilder.get()
+ *      .codec(new Http())
+ *      .hosts("localhost:10000,localhost:10001,localhost:10003")
+ *      .hostConnectionLimit(1)
+ *      .tcpConnectTimeout(1.second)
+ *      .retries(2)
+ *      .reportTo(new OstrichStatsReceiver())
+ *      .logger(Logger.getLogger("http")))
+ * }}}
+ *
+ * Alternatively, using the `unsafeBuild` method on `ClientBuilder`
+ * verifies the builder dynamically, resulting in a runtime error
+ * instead of a compiler error.
+ *
+ * =Defaults=
+ *
+ * The following defaults are applied to clients constructed via ClientBuilder,
+ * unless overridden with the corresponding method. These defaults were chosen
+ * carefully so as to work well for most use cases.
+ *
+ * Commonly-configured options:
+ *
+ * - `connectTimeout`: [[com.twitter.util.Duration]].Top
+ * - `tcpConnectTimeout`: 1 second
+ * - `requestTimeout`: [[com.twitter.util.Duration]].Top
+ * - `timeout`: [[com.twitter.util.Duration]].Top
+ * - `hostConnectionLimit`: Int.MaxValue
+ * - `hostConnectionCoresize`: 0
+ * - `hostConnectionIdleTime`: [[com.twitter.util.Duration]].Top
+ * - `hostConnectionMaxWaiters`: Int.MaxValue
+ * - `failFast`: true
+ * - `failureAccrualParams`, `failureAccrual`, `failureAccrualFactory`:
+ *   `numFailures` = 5, `markDeadFor` = 5 seconds
+ *
+ * Advanced options:
+ *
+ * *Before changing any of these, make sure that you know exactly how they will
+ * affect your application -- these options are typically only changed by expert
+ * users.*
+ *
+ * - `keepAlive`: Unspecified, in which case the Java default of `false` is used
+ *   (http://docs.oracle.com/javase/7/docs/api/java/net/StandardSocketOptions.html?is-external=true#SO_KEEPALIVE)
+ * - `readerIdleTimeout`: [[com.twitter.util.Duration]].Top
+ * - `writerIdleTimeout`: [[com.twitter.util.Duration]].Top
+ * - `hostConnectionMaxIdleTime`: [[com.twitter.util.Duration]].Top
+ * - `hostConnectionMaxLifeTime`: [[com.twitter.util.Duration]].Top
+ * - `sendBufferSize`, `recvBufferSize`: OS-defined default value
+ *
+ * Please see the Finagle user guide for information on a newer set of
+ * client-construction APIs introduced in Finagle v6:
+ * http://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6
+ */
 class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle](
   params: Stack.Params,
   mk: Stack.Params => Client[Req, Rep]
@@ -256,7 +300,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
           if (label.isEmpty || l != addr)
             this.name(l)
           else
-            this
+            this 
 
         cb.dest(n)
     }
@@ -328,9 +372,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       val Timer(timer) = params[Timer]
       val codec = codecFactory(ClientCodecConfig(name))
 
-      val prepConn = new Stack.Simple[ServiceFactory[Req1, Rep1]](StackClient.Role.PrepConn) {
+      val prepConn = new Stack.Simple[ServiceFactory[Req1, Rep1]] {
+        val role = StackClient.Role.prepConn
         val description = "Connection preparation phase as defined by a Codec"
-        def make(params: Params, next: ServiceFactory[Req1, Rep1]) = {
+        def make(next: ServiceFactory[Req1, Rep1])(implicit params: Params) = {
           val Stats(stats) = params[Stats]
           val underlying = codec.prepareConnFactory(next)
           new ServiceFactoryProxy(underlying) {
@@ -347,15 +392,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
       val clientStack = {
         val stack = StackClient.newStack[Req1, Rep1]
-          .replace(StackClient.Role.PrepConn, prepConn)
-          .replace(StackClient.Role.PrepFactory, (next: ServiceFactory[Req1, Rep1]) =>
+          .replace(StackClient.Role.prepConn, prepConn)
+          .replace(StackClient.Role.prepFactory, (next: ServiceFactory[Req1, Rep1]) =>
             codec.prepareServiceFactory(next))
 
         // transform stack wrt. failure accrual
         val newStack =
           if (prms.contains[FailureAccrualFac]) {
             val FailureAccrualFac(fac) = prms[FailureAccrualFac]
-            stack.replace(FailureAccrualFactory.FailureAccrual, (next: ServiceFactory[Req1, Rep1]) =>
+            stack.replace(FailureAccrualFactory.role, (next: ServiceFactory[Req1, Rep1]) =>
               fac(timer) andThen next)
           } else {
             stack
@@ -364,11 +409,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         // disable failFast if the codec requests it or it is
         // disabled via the ClientBuilder paramater.
         val FailFast(failFast) = prms[FailFast]
-        if (!codec.failFastOk || !failFast) newStack.remove(FailFastFactory.FailFast)
+        if (!codec.failFastOk || !failFast) newStack.remove(FailFastFactory.role)
         else newStack
       }
 
-      new StackClient[Req1, Rep1, Any, Any](clientStack, prms) {
+      new StackClient[Req1, Rep1](clientStack, prms) {
+        protected type In = Any
+        protected type Out = Any
+
         protected val newTransporter: Stack.Params => Transporter[Any, Any] = { ps =>
           val Stats(stats) = ps[Stats]
           val newTransport = (ch: Channel) => codec.newClientTransport(ch, stats)

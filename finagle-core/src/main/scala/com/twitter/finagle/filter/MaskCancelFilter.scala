@@ -3,8 +3,8 @@ package com.twitter.finagle.filter
 import com.twitter.finagle.{Service, ServiceFactory, SimpleFilter, Stack, Stackable}
 import com.twitter.util.{Future, Promise}
 
-object MaskCancelFilter {
-  object MaskCancel extends Stack.Role
+private[finagle] object MaskCancelFilter {
+  val role = Stack.Role("MaskCancel")
 
   case class Param(yesOrNo: Boolean)
   implicit object Param extends Stack.Param[Param] {
@@ -16,10 +16,11 @@ object MaskCancelFilter {
    * [[com.twitter.finagle.filter.MaskCancelFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]](MaskCancel) {
+    new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = MaskCancelFilter.role
       val description = "Prevent cancellations from propagating to other services"
-      def make(params: Params, next: ServiceFactory[Req, Rep]) = {
-        params[Param] match {
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+        get[Param] match {
           case Param(true) => new MaskCancelFilter[Req, Rep] andThen next
           case _ => next
         }

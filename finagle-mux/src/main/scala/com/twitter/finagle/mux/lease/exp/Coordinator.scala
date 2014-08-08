@@ -1,7 +1,7 @@
 package com.twitter.finagle.mux.lease.exp
 
 import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
-import com.twitter.util.{Duration, StorageUnit}
+import com.twitter.util.{Duration, StorageUnit, Stopwatch}
 import java.lang.management.ManagementFactory
 import java.util.logging.Logger
 import scala.collection.JavaConverters._
@@ -41,6 +41,10 @@ private[lease] class Coordinator(
     }, gc)
   }
 
+  // TODO: given that discount should be consistent for a generation, it doesn't
+  // need to be rechecked.  This means that we could just check space.discount
+  // once.  If that's the case, this will be broken without a GenerationAlarm
+  // though.
   def sleepUntilDiscountRemaining(space: MemorySpace, fn: () => Unit) {
     // Since the discount might change while we're
     // sleeping; we re-check and loop until we know
@@ -56,16 +60,16 @@ private[lease] class Coordinator(
   def sleepUntilFinishedDraining(
     space: MemorySpace,
     maxWait: Duration,
-    elapsed: () => Duration,
     npending: () => Int,
     log: Logger
   ) {
+    val elapsed = Stopwatch.start()
     // TODO: if grabbing memory info is slow, rewrite this to only check memory info occasionally
     Alarm.armAndExecute({ () =>
       new BytesAlarm(counter, () => space.left) min
       new DurationAlarm((maxWait - elapsed()) / 2) min
       new GenerationAlarm(counter) min
-      new PredicateAlarm(() => npending() > 0)
+      new PredicateAlarm(() => npending() == 0)
     }, { () =>
       // TODO MN: reenable
       if (verbose) {

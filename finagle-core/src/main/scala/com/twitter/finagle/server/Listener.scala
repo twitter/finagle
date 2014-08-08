@@ -1,6 +1,5 @@
 package com.twitter.finagle.server
 
-import com.twitter.finagle.Stack
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{ListeningServer, NullServer, Stack}
 import java.net.SocketAddress

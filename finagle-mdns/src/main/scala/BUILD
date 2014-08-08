@@ -1,12 +1,12 @@
 scala_library(name='scala',
   dependencies=[
-    pants('3rdparty:jmdns'),
-    pants('finagle/finagle-core'),
-    pants('util/util-core')
+    '3rdparty:jmdns',
+    'finagle/finagle-core',
+    'util/util-core'
   ],
   sources=rglobs('*.scala'),
   resources=[
-    pants('finagle/finagle-mdns/src/main/resources')
+    'finagle/finagle-mdns/src/main/resources'
   ],
   provides=artifact(org='com.twitter',
                     name='finagle-mdns',

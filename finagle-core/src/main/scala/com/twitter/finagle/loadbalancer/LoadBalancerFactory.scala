@@ -10,14 +10,14 @@ import java.net.{SocketAddress, InetSocketAddress}
 import java.util.logging.{Level, Logger}
 
 object defaultBalancer extends GlobalFlag("heap", "Default load balancer")
-object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n" + 
-  "\tWhen enabled,the configured stats receiver will be used,\n" + 
+object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n" +
+  "\tWhen enabled,the configured stats receiver will be used,\n" +
   "\tor the loaded stats receiver if none given.\n" +
-  "\tWhen disabled, the configured stats receiver will be used,\n" + 
+  "\tWhen disabled, the configured stats receiver will be used,\n" +
   "\tor the NullStatsReceiver if none given.")
 
 private[finagle] object LoadBalancerFactory {
-  import client.StackClient.Role.LoadBalancer
+  val role = Stack.Role("LoadBalancer")
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] per host
@@ -43,6 +43,16 @@ private[finagle] object LoadBalancerFactory {
   }
 
   /**
+    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+    * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] with a label
+    * for use in error messages.
+    */
+  case class ErrorLabel(label: String)
+  implicit object ErrorLabel extends Stack.Param[ErrorLabel] {
+    val default = ErrorLabel("unknown")
+  }
+
+  /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]].
    */
@@ -58,25 +68,27 @@ private[finagle] object LoadBalancerFactory {
    * defined by the `LoadBalancerFactory.Param` parameter.
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module[ServiceFactory[Req, Rep]](LoadBalancer) {
+    new Stack.Module[ServiceFactory[Req, Rep]] {
+      val role = LoadBalancerFactory.role
       val description = "Balance requests across multiple endpoints"
-      def make(params: Params, next: Stack[ServiceFactory[Req, Rep]]) = {
-        val Dest(dest) = params[Dest]
-        val Param(loadBalancerFactory) = params[Param]
-      
-        // Determine which stats receiver to use based on the flag 
+      def make(next: Stack[ServiceFactory[Req, Rep]])(implicit params: Params) = {
+        val ErrorLabel(errorLabel) = get[ErrorLabel]
+        val Dest(dest) = get[Dest]
+        val Param(loadBalancerFactory) = get[Param]
+
+        // Determine which stats receiver to use based on the flag
         // 'com.twitter.finagle.loadbalancer.perHostStats'
         // and the configured per-host stats receiver
         // If the per-host stats receiver is set, ignore the flag
-        val hostStatsReceiver = 
+        val hostStatsReceiver =
           if (!params.contains[HostStats]) {
             if (perHostStats()) LoadedStatsReceiver else NullStatsReceiver
-          } else params[HostStats].hostStatsReceiver
-        val param.Stats(statsReceiver) = params[param.Stats]
-        val param.Logger(log) = params[param.Logger]
-        val param.Label(label) = params[param.Label]
+          } else get[HostStats].hostStatsReceiver
+        val param.Stats(statsReceiver) = get[param.Stats]
+        val param.Logger(log) = get[param.Logger]
+        val param.Label(label) = get[param.Label]
 
-        val noBrokersException = new NoBrokersAvailableException(label)
+        val noBrokersException = new NoBrokersAvailableException(errorLabel)
 
         // TODO: load balancer consumes Var[Addr] directly,
         // or at least Var[SocketAddress]
@@ -106,15 +118,15 @@ private[finagle] object LoadBalancerFactory {
             BroadcastStatsReceiver(Seq(host, statsReceiver))
           }
 
-          val param.Monitor(monitor) = params[param.Monitor]
-          val param.Reporter(reporter) = params[param.Reporter]
+          val param.Monitor(monitor) = get[param.Monitor]
+          val param.Reporter(reporter) = get[param.Reporter]
           val composite = reporter(label, Some(sockaddr)) andThen monitor
 
           val endpointStack = (sa: SocketAddress) => next.make(
-            params +
-            Transporter.EndpointAddr(sa) +
-            param.Stats(stats) +
-            param.Monitor(composite))
+              params +
+              Transporter.EndpointAddr(sa) +
+              param.Stats(stats) +
+              param.Monitor(composite))
 
           sockaddr match {
             case WeightedSocketAddress(sa, w) => (endpointStack(sa), w)
@@ -128,7 +140,7 @@ private[finagle] object LoadBalancerFactory {
         }
 
         val balanced = loadBalancerFactory.newLoadBalancer(
-          endpoints.set, rawStatsReceiver.scope(LoadBalancer.toString),
+          endpoints.set, rawStatsReceiver.scope(role.toString),
           noBrokersException)
 
         // observeUntil fails the future on interrupts, but ready
@@ -137,7 +149,7 @@ private[finagle] object LoadBalancerFactory {
         val ready = dest.observeUntil(_ != Addr.Pending)
         val f = ready map (_ => balanced)
 
-        new Stack.Leaf(LoadBalancer, new DelayedFactory(f) {
+        Stack.Leaf(role, new DelayedFactory(f) {
           override def close(deadline: Time) =
             Future.join(observation.close(deadline), super.close(deadline)).unit
         })

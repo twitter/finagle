@@ -61,10 +61,15 @@ class P2CBalancerTest extends FunSuite {
     def meanweight = r.gauges.getOrElse(Seq("meanweight"), zero)()
   }
 
+  val noBrokers = new NoBrokersAvailableException
+
   def newBal(fs: Var[Traversable[LoadedFactory]],
     statsReceiver: StatsReceiver = NullStatsReceiver) =
-    new P2CBalancer(fs map { fs => fs map (_.tup) },
-      rng = Rng(12345L), statsReceiver = statsReceiver)
+    new P2CBalancer(
+      fs map { fs => fs map (_.tup) },
+      rng = Rng(12345L),
+      statsReceiver = statsReceiver,
+      emptyException = noBrokers)
 
   def assertEven(fs: Traversable[LoadedFactory]) {
     val nml = fs.head.normMeanLoad
@@ -185,7 +190,8 @@ class P2CBalancerTest extends FunSuite {
   test("Handle empty vectors") {
     val vec = Var(Vector.empty[LoadedFactory])
     val bal = newBal(vec)
-    intercept[NoBrokersAvailableException] { Await.result(bal()) }
+    val exc = intercept[NoBrokersAvailableException] { Await.result(bal()) }
+    assert(exc eq noBrokers)
 
     vec() :+= new LoadedFactory(0, 1)
     for (_ <- 0 until R) Await.result(bal())

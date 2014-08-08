@@ -1,13 +1,13 @@
 package com.twitter.finagle
 
+import com.twitter.util.{Return, Throw, Activity, Witness, Try}
+import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import java.net.InetSocketAddress
-import com.twitter.util.{Return, Throw, Activity, Witness, Try}
+import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 
 @RunWith(classOf[JUnitRunner])
-class NamerTest extends FunSuite {
+class NamerTest extends FunSuite with AssertionsForJUnit {
   trait Ctx {
     def ia(i: Int) = new InetSocketAddress(i)
 
@@ -39,7 +39,7 @@ class NamerTest extends FunSuite {
             }
           case _ => Activity.value(NameTree.Neg)
         }
-        
+
         def enum(prefix: Path): Activity[Dtab] = Activity.exception(new UnsupportedOperationException)
       }
 
@@ -90,7 +90,7 @@ class NamerTest extends FunSuite {
     namer("/test/2").notify(Return(NameTree.Neg))
 
     assert(res.sample().eval === Some(Set.empty))
-    
+
     namer("/test/0").notify(Return(NameTree.read("/$/inet/0/1")))
     assertEval(res, ia(1))
 
@@ -101,19 +101,49 @@ class NamerTest extends FunSuite {
     assertEval(res, ia(2))
 
     namer("/test/0").notify(Return(NameTree.read("/$/inet/0/3")))
-    assertEval(res, ia(3)) 
+    assertEval(res, ia(3))
   })
 
+  test("Namer.global: /$/inet") {
+    assert(Namer.global.lookup(Path.read("/$/inet/1234")).sample()
+        === NameTree.Leaf(Name.bound(new InetSocketAddress(1234))))
+    assert(Namer.global.lookup(Path.read("/$/inet/127.0.0.1/1234")).sample()
+        === NameTree.Leaf(Name.bound(new InetSocketAddress("127.0.0.1", 1234))))
+
+    intercept[ClassNotFoundException] {
+      Namer.global.lookup(Path.read("/$/inet")).sample()
+    }
+
+    intercept[ClassNotFoundException] {
+      Namer.global.lookup(Path.read("/$/inet/1234/foobar")).sample()
+    }
+  }
+
+  test("Namer.global: /$/fail") {
+    assert(Namer.global.lookup(Path.read("/$/fail")).sample()
+      === NameTree.Fail)
+    assert(Namer.global.lookup(Path.read("/$/fail/foo/bar")).sample()
+      === NameTree.Fail)
+  }
+
   test("Namer.global: /$/nil") {
-    assert(Namer.global.lookup(Path.read("/$/nil")).sample() === NameTree.Empty)
+    assert(Namer.global.lookup(Path.read("/$/nil")).sample()
+        === NameTree.Empty)
     assert(Namer.global.lookup(Path.read("/$/nil/foo/bar")).sample()
-      === NameTree.Empty)
+        === NameTree.Empty)
+  }
+
+  test("Namer.global: negative resolution") {
+    assert(Namer.global.lookup(Path.read("/foo/bar/bah/blah")).sample()
+        === NameTree.Neg)
+    assert(Namer.global.lookup(Path.read("/foo/bar")).sample()
+        === NameTree.Neg)
   }
 
   test("Namer.expand") {
     def assertExpand(dtab: String, path: String, expected: String) {
       val expanded = Dtab.read(dtab).expand(Path.read(path)).sample
-      assert(Equiv[Dtab].equiv(expanded, Dtab.read(expected)), 
+      assert(Equiv[Dtab].equiv(expanded, Dtab.read(expected)),
         "Expanded dtab \"%s\" does not match expected dtab \"%s\"".format(
           expanded.show, Dtab.read(expected).show))
     }

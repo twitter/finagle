@@ -1,7 +1,7 @@
 scala_library(name='scala',
   dependencies=[
-    pants('3rdparty:netty'),
-    pants('util/util-core')
+    '3rdparty:netty',
+    'util/util-core'
   ],
   sources=rglobs('*.scala'),
   provides=artifact(org='com.twitter',

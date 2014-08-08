@@ -1,7 +1,7 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle.socks.SocksProxyFlags
-import com.twitter.finagle.{Stack, Stackable}
+import com.twitter.finagle.Stack
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
 import com.twitter.util.Future

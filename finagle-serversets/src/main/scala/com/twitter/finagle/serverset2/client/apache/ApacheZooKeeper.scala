@@ -61,13 +61,18 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
           case Some(e) => rv.setException(e)
         }
     }
-    zk.create(
-      path,
-      zkData(data),
-      (acl map ApacheData.ACL.zk).asJava,
-      ApacheCreateMode.zk(createMode),
-      cb,
-      null)
+    try {
+      zk.create(
+        path,
+        zkData(data),
+        (acl map ApacheData.ACL.zk).asJava,
+        ApacheCreateMode.zk(createMode),
+        cb,
+        null)
+    } catch {
+      case t: Throwable =>
+        rv.setException(t)
+    }
     rv
   }
 
@@ -80,7 +85,12 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
           case Some(e) => rv.setException(e)
         }
     }
-    zk.delete(path, version getOrElse -1, cb, null)
+    try {
+      zk.delete(path, version getOrElse -1, cb, null)
+    } catch {
+      case t: Throwable =>
+        rv.setException(t)
+    }
     rv
   }
 
@@ -94,7 +104,12 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
           case Some(e) => rv.setException(e)
         }
     }
-    zk.exists(path, null, cb, null)
+    try {
+      zk.exists(path, null, cb, null)
+    } catch {
+      case t: Throwable =>
+        rv.setException(t)
+    }
     rv
   }
 
@@ -109,7 +124,12 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
           case Some(e) => rv.setException(e)
         }
     }
-    zk.exists(path, watcher, cb, null)
+    try {
+      zk.exists(path, watcher, cb, null)
+    } catch {
+      case t: Throwable =>
+        rv.setException(t)
+    }
     rv
   }
 
@@ -127,7 +147,12 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
           case Some(e) => rv.setException(e)
         }
     }
-    zk.getData(path, null, cb, null)
+    try {
+      zk.getData(path, null, cb, null)
+    } catch {
+      case t: Throwable =>
+        rv.setException(t)
+    }
     rv
   }
 
@@ -147,7 +172,12 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
           case Some(e) => rv.setException(e)
         }
     }
-    zk.getData(path, watcher, cb, null)
+    try {
+      zk.getData(path, watcher, cb, null)
+    } catch {
+      case t: Throwable =>
+        rv.setException(t)
+    }
     rv
   }
 
@@ -160,7 +190,12 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
           case Some(e) => rv.setException(e)
         }
     }
-    zk.setData(path, zkData(data), version getOrElse -1, cb, null)
+    try {
+      zk.setData(path, zkData(data), version getOrElse -1, cb, null)
+    } catch {
+      case t: Throwable =>
+        rv.setException(t)
+    }
     rv
   }
 
@@ -179,7 +214,12 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
           case Some(e) => rv.setException(e)
         }
     }
-    zk.getACL(path, null, cb, null)
+    try {
+      zk.getACL(path, null, cb, null)
+    } catch {
+      case t: Throwable =>
+        rv.setException(t)
+    }
     rv
   }
 
@@ -192,7 +232,12 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
           case Some(e) => rv.setException(e)
         }
     }
-    zk.setACL(path, (acl map ApacheData.ACL.zk).asJava, version getOrElse -1, cb, null)
+    try {
+      zk.setACL(path, (acl map ApacheData.ACL.zk).asJava, version getOrElse -1, cb, null)
+    } catch {
+      case t: Throwable =>
+        rv.setException(t)
+    }
     rv
   }
 
@@ -210,7 +255,12 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
           case Some(e) => rv.setException(e)
         }
     }
-    zk.getChildren(path, null, cb, null)
+    try {
+      zk.getChildren(path, null, cb, null)
+    } catch {
+      case t: Throwable =>
+        rv.setException(t)
+    }
     rv
   }
 
@@ -230,7 +280,12 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
           case Some(e) => rv.setException(e)
         }
     }
-    zk.getChildren(path, watcher, cb, null)
+    try {
+      zk.getChildren(path, watcher, cb, null)
+    } catch {
+      case t: Throwable =>
+        rv.setException(t)
+    }
     rv
   }
 
@@ -255,7 +310,12 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
           case Some(e) => rv.setException(e)
         }
     }
-    zk.getChildren(path, watcher, cb, null)
+    try {
+      zk.getChildren(path, watcher, cb, null)
+    } catch {
+      case t: Throwable =>
+        rv.setException(t)
+    }
     rv
   }
 
@@ -268,7 +328,12 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
           case Some(e) => rv.setException(e)
         }
     }
-    zk.sync(path, cb, null)
+    try {
+      zk.sync(path, cb, null)
+    } catch {
+      case t: Throwable =>
+        rv.setException(t)
+    }
     rv
   }
 

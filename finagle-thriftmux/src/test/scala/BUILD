@@ -1,17 +1,17 @@
 junit_tests(name='scala',
   dependencies=[
-    pants('3rdparty:junit'),
-    pants('3rdparty:netty'),
-    pants('3rdparty:scalatest'),
-    pants('3rdparty:thrift-0.5.0'),
-    pants('finagle/finagle-core'),
-    pants('finagle/finagle-thrift'),
-    pants('finagle/finagle-thriftmux'),
-    pants('finagle/finagle-thriftmux/src/test/thrift:thrift-scala'),
-    pants('util/util-core'),
+    '3rdparty:junit',
+    '3rdparty:netty',
+    '3rdparty:scalatest',
+    '3rdparty:thrift-0.5.0',
+    'finagle/finagle-core',
+    'finagle/finagle-thrift',
+    'finagle/finagle-thriftmux',
+    'finagle/finagle-thriftmux/src/test/thrift:thrift-scala',
+    'util/util-core',
   ],
   sources=rglobs('*.scala'),
   resources=[
-    pants('finagle/finagle-thriftmux/src/test/resources')
+    'finagle/finagle-thriftmux/src/test/resources'
   ]
 )

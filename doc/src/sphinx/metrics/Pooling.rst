@@ -13,6 +13,12 @@ WatermarkPool
 **pool_size**
   a gauge of the number of connections that are currently alive, either in use or not
 
+**pool_num_waited**
+  a counter of the number of times there were no connections immediately available and the client waited for a connection
+
+**pool_num_too_many_waiters**
+  a counter of the number of times there were no connections immediately available and there were already too many waiters
+
 ReusingPool
 <<<<<<<<<<<
 

@@ -1,5 +1,6 @@
 package com.twitter.finagle.loadbalancer
 
+import com.twitter.finagle.NoBrokersAvailableException
 import com.twitter.finagle.client.StringClient
 import com.twitter.finagle.param
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
@@ -25,23 +26,23 @@ class LoadBalancerFactoryTest extends FunSuite with StringClient {
     val label = "myclient"
     val port = "localhost:8080"
     val perHostStatKey = Seq(label, port, "available")
-    
-    def enablePerHostStats() = 
+
+    def enablePerHostStats() =
       flag.parse(Array("-com.twitter.finagle.loadbalancer.perHostStats=true"))
-    def disablePerHostStats() = 
+    def disablePerHostStats() =
       flag.parse(Array("-com.twitter.finagle.loadbalancer.perHostStats=false"))
     //ensure the per-host stats are disabled if previous test didn't call disablePerHostStats()
     disablePerHostStats()
   }
 
-  test("per-host stats flag not set, no configured per-host stats.\n" + 
+  test("per-host stats flag not set, no configured per-host stats.\n" +
     "No per-host stats should be reported") (new PerHostFlagCtx {
     val loadedStatsReceiver = new InMemoryStatsReceiver
     LoadedStatsReceiver.self = loadedStatsReceiver
     client.configured(param.Label(label))
       .newService(port)
     assert(loadedStatsReceiver.gauges.contains(perHostStatKey) === false)
-    
+
     disablePerHostStats()
   })
 
@@ -56,7 +57,7 @@ class LoadBalancerFactoryTest extends FunSuite with StringClient {
     disablePerHostStats()
   })
 
-  test("per-host stats flag set, no configured per-host stats.\n" + 
+  test("per-host stats flag set, no configured per-host stats.\n" +
     "Per-host stats should be reported to loadedStatsReceiver") (new PerHostFlagCtx {
     enablePerHostStats()
 
@@ -69,7 +70,7 @@ class LoadBalancerFactoryTest extends FunSuite with StringClient {
     disablePerHostStats()
   })
 
-  test("per-host stats flag set, configured per-host stats.\n" + 
+  test("per-host stats flag set, configured per-host stats.\n" +
     "Per-host stats should be reported to configured stats receiver") (new PerHostFlagCtx {
     enablePerHostStats()
 
@@ -95,4 +96,12 @@ class LoadBalancerFactoryTest extends FunSuite with StringClient {
 
     disablePerHostStats()
   })
+
+  test("destination name is passed to NoBrokersAvailableException") {
+    val name = "nil!"
+    val exc = intercept[NoBrokersAvailableException] {
+      Await.result(stringClient.newClient(name)())
+    }
+    assert(exc.name === name)
+  }
 }

@@ -1,16 +1,15 @@
 package com.twitter.finagle.mux
 
-import com.twitter.finagle.{CancelledRequestException, Context, Dtab, Service, WriteException}
+import com.twitter.finagle.{CancelledRequestException, Context, Dtab, Service}
 import com.twitter.finagle.mux.lease.exp.{Lessor, Lessee}
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
 import com.twitter.util.{Closable, Future, Local, Promise, Return, Throw, Time, Stopwatch, Duration}
-import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 import scala.collection.JavaConverters._
 
 /**
@@ -44,14 +43,7 @@ private[finagle] class ServerDispatcher private[finagle](
   // Used to buffer requests with in-progress local service invocation.
   private[this] val pending = new ConcurrentHashMap[Int, Future[_]]
 
-  // TagMap used specifically for tag-unmapping on receipt of Rdrain.
-  private[this] val tags = TagSet()
   private[this] val log = DefaultLogger
-
-  private[this] val localAddress = trans.localAddress match {
-    case ia: InetSocketAddress => ia
-    case _ => new InetSocketAddress(0)
-  }
 
   // TODO: rewrite Treqs into Tdispatches?
 

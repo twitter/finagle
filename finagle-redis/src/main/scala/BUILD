@@ -1,8 +1,8 @@
 scala_library(name='scala',
   dependencies=[
-    pants('finagle/finagle-core'),
-    pants('util/util-core'),
-    pants('util/util-logging')
+    'finagle/finagle-core',
+    'util/util-core',
+    'util/util-logging'
   ],
   sources=rglobs('*.scala'),
   provides=artifact(org='com.twitter',

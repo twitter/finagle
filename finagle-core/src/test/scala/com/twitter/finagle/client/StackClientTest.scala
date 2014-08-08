@@ -1,7 +1,8 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle.param
+import com.twitter.finagle.{param, Name}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -26,5 +27,17 @@ class StackClientTest extends FunSuite with StringClient {
     // use evaled label when both are set
     client.configured(param.Label("myclient")).newService("othername=localhost:8080")
     assert(sr.counters(Seq("othername", "loadbalancer", "adds")) === 1)
+  })
+
+  test("Client added to client registry") (new Ctx {
+    val name = "clientTest"
+
+    assert(ClientRegistry.clientInfo(name).isEmpty)
+    assert(!ClientRegistry.clientList().contains(name))
+
+    client.newClient(Name.bound(new InetSocketAddress(8080)), name)
+    
+    assert(ClientRegistry.clientList().contains(name))
+    assert(!ClientRegistry.clientInfo(name).isEmpty)
   })
 }

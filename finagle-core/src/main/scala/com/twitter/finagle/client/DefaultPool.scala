@@ -8,11 +8,11 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Timer, Duration}
 
 object DefaultPool {
-  object Role {
-    trait Pool extends Stack.Role
-    object BufferingPool extends Pool
-    object CachingPool extends Pool
-    object WatermarkPool extends Pool
+
+  implicit object Role extends Stack.Role("Pool") {
+    val bufferingPool = Stack.Role("BufferingPool")
+    val cachingPool = Stack.Role("CachingPool")
+    val watermarkPool = Stack.Role("WatermarkPool")
   }
 
   /**
@@ -50,27 +50,28 @@ object DefaultPool {
    * @see [[com.twitter.finagle.pool.CachingPool]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module[ServiceFactory[Req, Rep]](StackClient.Role.Pool) {
+    new Stack.Module[ServiceFactory[Req, Rep]] {
       import com.twitter.finagle.pool.{CachingPool, WatermarkPool, BufferingPool}
 
+      val role = DefaultPool.Role
       val description = "Control client connection pool"
-      def make(params: Params, next: Stack[ServiceFactory[Req, Rep]]) = {
-        val DefaultPool.Param(low, high, bufferSize, idleTime, maxWaiters) = params[DefaultPool.Param]
-        val param.Stats(statsReceiver) = params[param.Stats]
-        val param.Timer(timer) = params[param.Timer]
+      def make(next: Stack[ServiceFactory[Req, Rep]])(implicit params: Params) = {
+        val DefaultPool.Param(low, high, bufferSize, idleTime, maxWaiters) = get[DefaultPool.Param]
+        val param.Stats(statsReceiver) = get[param.Stats]
+        val param.Timer(timer) = get[param.Timer]
 
         val stack = new StackBuilder[ServiceFactory[Req, Rep]](next)
 
         if (idleTime > 0.seconds && high > low) {
-          stack.push(Role.CachingPool, (sf: ServiceFactory[Req, Rep]) =>
+          stack.push(Role.cachingPool, (sf: ServiceFactory[Req, Rep]) =>
             new CachingPool(sf, high-low, idleTime, timer, statsReceiver))
         }
 
-        stack.push(Role.WatermarkPool, (sf: ServiceFactory[Req, Rep]) =>
+        stack.push(Role.watermarkPool, (sf: ServiceFactory[Req, Rep]) =>
           new WatermarkPool(sf, low, high, statsReceiver, maxWaiters))
 
         if (bufferSize > 0) {
-          stack.push(Role.BufferingPool, (sf: ServiceFactory[Req, Rep]) =>
+          stack.push(Role.bufferingPool, (sf: ServiceFactory[Req, Rep]) =>
             new BufferingPool(sf, bufferSize))
         }
 

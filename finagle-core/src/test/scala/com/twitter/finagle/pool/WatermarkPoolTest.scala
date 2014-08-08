@@ -205,9 +205,11 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
     val statsRecv = new InMemoryStatsReceiver
     val pool = new WatermarkPool(factory, 1, 1, statsRecv, maxWaiters = 2)
     def numWaited() = statsRecv.counter("pool_num_waited")()
+    def numTooManyWaiters() = statsRecv.counter("pool_num_too_many_waiters")()
 
     it("should throw TooManyWaitersException when the number of waiters exceeds 2") {
       assert(0 === numWaited())
+      assert(0 === numTooManyWaiters())
       val f0 = pool()
       assert(f0.isDefined)
       verify(factory)()
@@ -216,17 +218,20 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
       val f1 = pool()
       assert(!f1.isDefined)
       assert(1 === numWaited())
+      assert(0 === numTooManyWaiters())
 
       // two waiters. this is *still* cool.
       val f2 = pool()
       assert(!f2.isDefined)
       assert(2 === numWaited())
+      assert(0 === numTooManyWaiters())
 
       // three waiters and i freak out.
       val f3 = pool()
       assert(f3.isDefined)
       intercept[TooManyWaitersException] { Await.result(f3) }
       assert(2 === numWaited())
+      assert(1 === numTooManyWaiters())
 
       // give back my original item, and f1 should still get something.
       Await.result(f0).close()

@@ -1,7 +1,9 @@
 package com.twitter.finagle
 
-import java.util.concurrent.Executors
+
 import com.twitter.concurrent.NamedPoolThreadFactory
+import java.util.concurrent.Executors
+import org.jboss.netty.util.{ThreadNameDeterminer, ThreadRenamingRunnable}
 
 /**
  * Package netty3 implements the bottom finagle primitives:
@@ -14,6 +16,10 @@ import com.twitter.concurrent.NamedPoolThreadFactory
  * (new-style) clients and servers that depend on netty3 bring it in.
  */
 package object netty3 {
+  // Disable Netty's thread name rewriting, to preserve the "finagle/netty3"
+  // suffix specified below.
+  ThreadRenamingRunnable.setThreadNameDeterminer(ThreadNameDeterminer.CURRENT);
+
   val Executor = Executors.newCachedThreadPool(
     new NamedPoolThreadFactory("finagle/netty3", true/*daemon*/))
 

@@ -23,7 +23,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
       /test1010=>/$/inet/0/1010
     """)
   }
-  
+
   after {
     Dtab.base = saveBase
   }
@@ -69,7 +69,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
       }
     }
   }
-  
+
   test("Uses Dtab.base") (new Ctx {
     val n1 = Dtab.read("/foo/bar=>/test1010")
     val s1 = newWith(n1)
@@ -77,6 +77,26 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     assert(v1.sample() === Addr.Bound(new InetSocketAddress(1010)))
 
     s1.close()
+  })
+
+  test("Includes path in NoBrokersAvailableException") (new Ctx {
+    val noBrokers = intercept[NoBrokersAvailableException] {
+      val s1 = Await.result(factory())
+      s1.close()
+    }
+
+    assert(noBrokers.name === "/foo/bar")
+  })
+
+  test("Includes path and Dtab.local in NoBrokersAvailableException") (new Ctx {
+    val n1 = Dtab.read("/baz=>/quux")
+
+    val noBrokers = intercept[NoBrokersAvailableException] {
+      val s1 = newWith(n1)
+      s1.close()
+    }
+
+    assert(noBrokers.name === "/foo/bar [/baz=>/quux]")
   })
 
   test("Caches namers") (new Ctx {
@@ -207,5 +227,4 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
     namew.notify(Return(Name.empty))
     assert(f2.poll === None)
   })
-} 
-
+}

@@ -1,15 +1,15 @@
 junit_tests(name='scala',
   dependencies=[
-    pants('3rdparty:junit'),
-    pants('3rdparty:mockito-all'),
-    pants('3rdparty:netty'),
-    pants('3rdparty:scalatest'),
-    pants('finagle/finagle-core'),
-    pants('finagle/finagle-mux'),
-    pants('util/util-core')
+    '3rdparty:junit',
+    '3rdparty:mockito-all',
+    '3rdparty:netty',
+    '3rdparty:scalatest',
+    'finagle/finagle-core',
+    'finagle/finagle-mux',
+    'util/util-core'
   ],
   sources=rglobs('*.scala'),
   resources=[
-    pants('finagle/finagle-mux/src/test/resources')
+    'finagle/finagle-mux/src/test/resources'
   ]
 )
