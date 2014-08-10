@@ -39,7 +39,7 @@ class InterpreterServiceSpec extends SpecificationWithJUnit {
         _ <- client(Set(queueName, Time.now, value))
         r <- client(Get(queueName))
       } yield r
-      Await.result(result, 1.second) mustEqual Values(Seq(Value(queueName, value)))
+      Await.result(result, 5.seconds) mustEqual Values(Seq(Value(queueName, value)))
     }
 
     "transactions" in {
