@@ -25,7 +25,11 @@ class TextualContentCompressor extends HttpContentCompressor {
   }
 
   private[this] def isTextual(contentType: String) = {
-    val lowerCased = contentType.toLowerCase
+    val contentTypeWithoutCharset = contentType.split(';') match {
+      case Array(charsetContentType, charset) => charsetContentType
+      case _ => contentType
+    }
+    val lowerCased = contentTypeWithoutCharset.toLowerCase
     lowerCased.startsWith("text/") || TextLike.contains(lowerCased)
   }
 }
