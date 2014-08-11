@@ -5,8 +5,8 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class EmailBuilderTest extends FunSuite {
-  val defaultBuilder = EmailBuilder()
+class DefaultEmailTest extends FunSuite {
+  val defaultBuilder = DefaultEmail()
 
   val testFrom = "from@from"
   val testTo = "to@to"
@@ -53,9 +53,9 @@ class EmailBuilderTest extends FunSuite {
   }
 
   test("body") {
-    val addlines = defaultBuilder.addBodyLines("line1").addBodyLines("line2")
+    val addlines = defaultBuilder.text("line1").text("line2")
     assert(addlines.body === Seq("line1", "line2"), "add lines to body")
-    val setlines = addlines.setBodyLines(Seq("line3"))
+    val setlines = addlines.setText(Seq("line3"))
     assert(setlines.body === Seq("line3"), "set lines of body")
   }
 

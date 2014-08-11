@@ -13,12 +13,11 @@ object Example {
 
   def main(args: Array[String]): Unit = {
     // Raw text email
-    val email = EmailBuilder()
-      .sender("from@from.com")
-      .to("first@to.com", "second@to.com")
-      .subject("test")
-      .addBodyLines("first line", "second line") //body is a sequence of lines
-      .build()
+    val email = DefaultEmail()
+      .from_("from@from.com")
+      .to_("first@to.com", "second@to.com")
+      .subject_("test")
+      .text("first line", "second line") //body is a sequence of lines
 
     // Connect to a local SMTP server
     val send = SmtpSimple.newService("localhost:2525")

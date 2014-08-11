@@ -1,7 +1,7 @@
 package com.twitter.finagle.smtp.filter
 
 import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.finagle.smtp.{EmailBuilder, EmailMessage}
+import com.twitter.finagle.smtp.{DefaultEmail, EmailMessage}
 import com.twitter.util.Future
 
 /**
@@ -13,7 +13,7 @@ object HeadersFilter extends SimpleFilter[EmailMessage, Unit] {
        case (key, values) => "%s: %s".format(key, values.map(_._2).mkString(","))
      }
 
-     val richMsg = EmailBuilder(msg) setBodyLines (fields.toSeq ++ msg.body)
+     val richMsg = DefaultEmail(msg) setText (fields.toSeq ++ msg.body)
 
      send(richMsg)
    }
