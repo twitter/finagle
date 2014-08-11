@@ -10,80 +10,88 @@ import com.twitter.util.Time
 import java.util.concurrent.{BlockingDeque, LinkedBlockingDeque}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
-import org.specs.SpecificationWithJUnit
 
-class InterpreterSpec extends SpecificationWithJUnit {
-  "Interpreter" should {
-    val queues = CacheBuilder.newBuilder()
-      .build(new CacheLoader[ChannelBuffer, BlockingDeque[ChannelBuffer]] {
-        def load(k: ChannelBuffer) = new LinkedBlockingDeque[ChannelBuffer]
-      })
-    val interpreter = new Interpreter(queues)
+import org.junit.runner.RunWith
+import org.scalatest.{FunSuite, Suites}
+import org.scalatest.junit.JUnitRunner
 
-    "set & get" in {
+@RunWith(classOf[JUnitRunner])
+class InterpreterTest extends Suites(
+  new InterpreterTests,
+  new DecodingCommandTests
+)
+
+class InterpreterTests extends FunSuite {
+  val queues = CacheBuilder.newBuilder()
+    .build(new CacheLoader[ChannelBuffer, BlockingDeque[ChannelBuffer]] {
+      def load(k: ChannelBuffer) = new LinkedBlockingDeque[ChannelBuffer]
+    })
+  val interpreter = new Interpreter(queues)
+
+  test("set & get")  {
+    interpreter(Set("name", Time.now, "rawr"))
+    assert(interpreter(Get("name")) === Values(Seq(Value("name", "rawr"))))
+  }
+
+  test("transactions") {
+    test("set & get/open & get/open") {
       interpreter(Set("name", Time.now, "rawr"))
-      interpreter(Get("name")) mustEqual
-        Values(Seq(Value("name", "rawr")))
-    }
-
-    "transactions" in {
-      "set & get/open & get/open" in {
-        interpreter(Set("name", Time.now, "rawr"))
+      interpreter(Open("name"))
+      intercept[InvalidStateTransition] {
         interpreter(Open("name"))
-        interpreter(Open("name")) must throwA[InvalidStateTransition]
-      }
-
-      "set & get/abort" in {
-        interpreter(Set("name", Time.now, "rawr"))
-        interpreter(Abort("name")) must throwA[InvalidStateTransition]
-      }
-
-      "set & get/open & get/close" in {
-        interpreter(Set("name", Time.now, "rawr"))
-        interpreter(Open("name")) mustEqual
-          Values(Seq(Value("name", "rawr")))
-        interpreter(Close("name")) mustEqual Values(Seq())
-        interpreter(Open("name")) mustEqual Values(Seq())
-      }
-
-      "set & get/open & get/abort" in {
-        interpreter(Set("name", Time.now, "rawr"))
-        interpreter(Open("name")) mustEqual
-          Values(Seq(Value("name", "rawr")))
-        interpreter(Abort("name")) mustEqual Values(Seq())
-        interpreter(Open("name")) mustEqual
-          Values(Seq(Value("name", "rawr")))
       }
     }
 
-    "timeouts" in {
-      "set & get/t=1" in {
-        interpreter(Get("name", Some(1.millisecond))) mustEqual Values(Seq())
-        interpreter(Set("name", Time.now, "rawr"))
-        interpreter(Get("name", Some(1.second))) mustEqual Values(Seq(Value("name", "rawr")))
-      }
-    }
-
-    "delete" in {
+    test("set & get/abort") {
       interpreter(Set("name", Time.now, "rawr"))
-      interpreter(Delete("name"))
-      interpreter(Get("name")) mustEqual Values(Seq.empty)
+      intercept[InvalidStateTransition] {
+        interpreter(Abort("name"))
+      }
     }
 
-    "flush" in {
+    test("set & get/open & get/close") {
       interpreter(Set("name", Time.now, "rawr"))
-      interpreter(Flush("name"))
-      interpreter(Get("name")) mustEqual Values(Seq.empty)
+      assert(interpreter(Open("name")) === Values(Seq(Value("name", "rawr"))))
+      assert(interpreter(Close("name")) === Values(Seq()))
+      assert(interpreter(Open("name")) === Values(Seq()))
     }
 
-    "flushAll" in {
+    test("set & get/open & get/abort") {
       interpreter(Set("name", Time.now, "rawr"))
-      interpreter(FlushAll())
-      interpreter(Get("name")) mustEqual Values(Seq.empty)
+      assert(interpreter(Open("name")) === Values(Seq(Value("name", "rawr"))))
+      assert(interpreter(Abort("name")) === Values(Seq()))
+      assert(interpreter(Open("name")) === Values(Seq(Value("name", "rawr"))))
     }
   }
 
-  "Decoding to command" should {
+  test("timeouts") {
+    test("set & get/t=1") {
+      assert(interpreter(Get("name", Some(1.millisecond))) === Values(Seq()))
+      interpreter(Set("name", Time.now, "rawr"))
+      assert(interpreter(Get("name", Some(1.second))) === Values(Seq(Value("name", "rawr"))))
+    }
+  }
+
+  test("delete") {
+    interpreter(Set("name", Time.now, "rawr"))
+    interpreter(Delete("name"))
+    assert(interpreter(Get("name")) === Values(Seq.empty))
+  }
+
+  test("flush") {
+    interpreter(Set("name", Time.now, "rawr"))
+    interpreter(Flush("name"))
+    assert(interpreter(Get("name")) === Values(Seq.empty))
+  }
+
+  test("flushAll") {
+    interpreter(Set("name", Time.now, "rawr"))
+    interpreter(FlushAll())
+    assert(interpreter(Get("name")) === Values(Seq.empty))
+  }
+}
+
+class DecodingCommandTests extends FunSuite {
     val dtc = new DecodingToCommand
     def getCmdSeq(subCmd: String) = {
       dtc.parseNonStorageCommand(
@@ -91,20 +99,19 @@ class InterpreterSpec extends SpecificationWithJUnit {
             copiedBuffer(subCmd.getBytes)))
     }
 
-    "parse get with timeout" in {
-      getCmdSeq("foo/t=123") mustEqual Get(copiedBuffer("foo".getBytes), Some(123.milliseconds))
+    test("parse get with timeout") {
+      assert(getCmdSeq("foo/t=123") === Get(copiedBuffer("foo".getBytes), Some(123.milliseconds)))
     }
 
-    "parse close/open with timeout" in {
-      getCmdSeq("foo/close/open/t=123") mustEqual CloseAndOpen(copiedBuffer("foo".getBytes), Some(123.milliseconds))
+    test("parse close/open with timeout") {
+      assert(getCmdSeq("foo/close/open/t=123") === CloseAndOpen(copiedBuffer("foo".getBytes), Some(123.milliseconds)))
     }
 
-    "parse close/open with timeout in between" in {
-      getCmdSeq("foo/t=123/close/open") mustEqual CloseAndOpen(copiedBuffer("foo".getBytes), Some(123.milliseconds))
+    test("parse close/open with timeout in between") {
+      assert(getCmdSeq("foo/t=123/close/open") === CloseAndOpen(copiedBuffer("foo".getBytes), Some(123.milliseconds)))
     }
 
-    "parse without timeout" in {
-      getCmdSeq("foo") mustEqual Get(copiedBuffer("foo".getBytes), None)
+    test("parse without timeout") {
+      assert(getCmdSeq("foo") === Get(copiedBuffer("foo".getBytes), None))
     }
-  }
 }

@@ -5,7 +5,6 @@ import org.junit.runner.RunWith
 import org.scalatest.{FunSuite, Suites}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-
 import org.mockito.Mockito.{verify, times, when}
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
@@ -20,6 +19,7 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.thrift.ThriftClientRequest
 import com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Item
 
+@RunWith(classOf[JUnitRunner])
 class ClientTest extends Suites(
   new ClientReadReliablyTest, 
   new ConnectedClientReadTest, 

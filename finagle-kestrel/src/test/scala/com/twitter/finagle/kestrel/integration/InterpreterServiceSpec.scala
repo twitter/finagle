@@ -8,50 +8,50 @@ import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.util.{Await, Time}
 import java.net.InetSocketAddress
-import org.specs.SpecificationWithJUnit
 
-class InterpreterServiceSpec extends SpecificationWithJUnit {
-  "InterpreterService" should {
-    var server: Server = null
-    var client: Service[Command, Response] = null
-    var address: InetSocketAddress = null
+import org.scalatest.junit.JUnitRunner
+import org.junit.runner.RunWith
+import org.scalatest.{BeforeAndAfter, FunSuite}
 
-    doBefore {
-      server = new Server(new InetSocketAddress(0))
-      address = server.start().localAddress.asInstanceOf[InetSocketAddress]
-      client = ClientBuilder()
-        .hosts("localhost:" + address.getPort)
-        .codec(Kestrel())
-        .hostConnectionLimit(1)
-        .build()
-    }
+@RunWith(classOf[JUnitRunner])
+class InterpreterServiceTest extends FunSuite with BeforeAndAfter {
+  var server: Server = null
+  var client: Service[Command, Response] = null
+  var address: InetSocketAddress = null
 
-    doAfter {
-      server.stop()
-    }
+  before {
+    server = new Server(new InetSocketAddress(0))
+    address = server.start().localAddress.asInstanceOf[InetSocketAddress]
+    client = ClientBuilder()
+      .hosts("localhost:" + address.getPort)
+      .codec(Kestrel())
+      .hostConnectionLimit(1)
+      .build()
+  }
 
-    val queueName   = "name"
-    val value = "value"
+  after {
+    server.stop()
+  }
 
-    "set & get" in {
-      val result = for {
-        _ <- client(Flush(queueName))
-        _ <- client(Set(queueName, Time.now, value))
-        r <- client(Get(queueName))
-      } yield r
-      Await.result(result, 1.second) mustEqual Values(Seq(Value(queueName, value)))
-    }
+  val queueName   = "name"
+  val value = "value"
 
-    "transactions" in {
-      "set & get/open & get/abort" in {
-        val result = for {
-          _ <- client(Set(queueName, Time.now, value))
-          _ <- client(Open(queueName))
-          _ <- client(Abort(queueName))
-          r <- client(Open(queueName))
-        } yield r
-        Await.result(result, 1.second) mustEqual Values(Seq(Value(queueName, value)))
-      }
-    }
+  test("set & get") {
+    val result = for {
+      _ <- client(Flush(queueName))
+      _ <- client(Set(queueName, Time.now, value))
+      r <- client(Get(queueName))
+    } yield r
+    assert(Await.result(result, 1.second) === Values(Seq(Value(queueName, value))))
+  }
+
+  test("transactions - set & get/open & get/abort") {
+    val result = for {
+      _ <- client(Set(queueName, Time.now, value))
+      _ <- client(Open(queueName))
+      _ <- client(Abort(queueName))
+      r <- client(Open(queueName))
+    } yield r
+    assert(Await.result(result, 1.second) === Values(Seq(Value(queueName, value))))
   }
 }

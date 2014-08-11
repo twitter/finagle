@@ -5,10 +5,12 @@ import com.twitter.finagle.kestrel._
 import com.twitter.io.Charsets
 import com.twitter.util.Await
 import org.jboss.netty.buffer.ChannelBuffers
-import org.specs.SpecificationWithJUnit
-import org.specs.mock.Mockito
 
-class ReadHandleSpec extends SpecificationWithJUnit with Mockito {
+import org.junit.runner.RunWith
+import org.scalatest.{FunSuite, Suites}
+import org.scalatest.junit.JUnitRunner
+
+trait Messaging {
   def msg_(i: Int) = {
     val ack = new Broker[Unit]
     val abort = new Broker[Unit]
@@ -16,138 +18,144 @@ class ReadHandleSpec extends SpecificationWithJUnit with Mockito {
   }
 
   def msg(i: Int) = { val (_, m) = msg_(i); m }
+}
 
-  "ReadHandle.buffered" should {
-    val N = 10
-    val messages = new Broker[ReadMessage]
-    val error = new Broker[Throwable]
-    val close = new Broker[Unit]
-    val handle = ReadHandle(messages.recv, error.recv, close.send(()))
-    val buffered = handle.buffered(N)
+@RunWith(classOf[JUnitRunner])
+class ReadHandleTest extends Suites(
+   new ReadHandleBufferedTest, 
+   new ReadHandleMergedTest
+)
 
-    "acknowledge howmany messages" in {
-      0 until N foreach { i =>
-        val (ack, m) = msg_(i)
-        messages ! m
-        (ack?).isDefined must beTrue
-      }
-      val (ack, m) = msg_(0)
-      (ack?).isDefined must beFalse
+class ReadHandleBufferedTest extends FunSuite with Messaging {
+  val N = 10
+  val messages = new Broker[ReadMessage]
+  val error = new Broker[Throwable]
+  val close = new Broker[Unit]
+  val handle = ReadHandle(messages.recv, error.recv, close.send(()))
+  val buffered = handle.buffered(N)
+
+  test("acknowledge howmany messages") {
+    0 until N foreach { i =>
+      val (ack, m) = msg_(i)
+      messages ! m
+      assert((ack?).isDefined)
+    }
+    val (ack, m) = msg_(0)
+    assert(!(ack?).isDefined)
+  }
+
+  test("not synchronize on send when buffer is full") {
+    0 until N foreach { _ =>
+      assert((messages ! msg(0)).isDefined)
+    }
+    assert(!(messages ! msg(0)).isDefined)
+  }
+
+  test("keep the buffer full") {
+    0 until N foreach { _ =>
+      messages ! msg(0)
+    }
+    val sent = messages ! msg(0)
+    assert(!sent.isDefined)
+    val recvd = (buffered.messages?)
+    assert(recvd.isDefined)
+    Await.result(recvd).ack.sync()
+    assert(sent.isDefined)
+  }
+
+  test("preserve FIFO order") {
+    0 until N foreach { i =>
+      messages ! msg(i)
     }
 
-    "not synchronize on send when buffer is full" in {
-      0 until N foreach { _ =>
-        (messages ! msg(0)).isDefined must beTrue
-      }
-      (messages ! msg(0)).isDefined must beFalse
-    }
-
-    "keep the buffer full" in {
-      0 until N foreach { _ =>
-        messages ! msg(0)
-      }
-      val sent = messages ! msg(0)
-      sent.isDefined must beFalse
+    0 until N foreach { i =>
       val recvd = (buffered.messages?)
-      recvd.isDefined must beTrue
-      Await.result(recvd).ack.sync()
-      sent.isDefined must beTrue
-    }
-
-    "preserve FIFO order" in {
-      0 until N foreach { i =>
-        messages ! msg(i)
-      }
-
-      0 until N foreach { i =>
-        val recvd = (buffered.messages?)
-        recvd.isDefined must beTrue
-        Await.result(recvd).bytes.toString(Charsets.Utf8) must be_==(i.toString)
-      }
-    }
-
-    "propagate errors" in {
-      val errd = (buffered.error?)
-      errd.isDefined must beFalse
-      val e = new Exception("sad panda")
-      error ! e
-      errd.isDefined must beTrue
-      Await.result(errd) must be(e)
-    }
-
-    "when closed" in {
-      "propagate immediately if empty" in {
-        val closed = (close?)
-        closed.isDefined must beFalse
-        buffered.close()
-        closed.isDefined must beTrue
-      }
-
-      "wait for outstanding acks before closing underlying" in {
-        val closed = (close?)
-        closed.isDefined must beFalse
-        messages ! msg(0)
-        messages ! msg(1)
-        buffered.close()
-        closed.isDefined must beFalse
-        val m0 = (buffered.messages?)
-        m0.isDefined must beTrue
-        Await.result(m0).ack.sync()
-        closed.isDefined must beFalse
-        val m1 = (buffered.messages?)
-        m1.isDefined must beTrue
-        Await.result(m1).ack.sync()
-        closed.isDefined must beTrue
-      }
+      assert(recvd.isDefined)
+      assert(Await.result(recvd).bytes.toString(Charsets.Utf8) === i.toString)
     }
   }
 
-  "ReadHandle.merged" should {
-    val messages0 = new Broker[ReadMessage]
-    val error0 = new Broker[Throwable]
-    val close0 = new Broker[Unit]
-    val handle0 = ReadHandle(messages0.recv, error0.recv, close0.send(()))
-    val messages1 = new Broker[ReadMessage]
-    val error1 = new Broker[Throwable]
-    val close1 = new Broker[Unit]
-    val handle1 = ReadHandle(messages1.recv, error1.recv, close1.send(()))
-
-    val merged = ReadHandle.merged(Seq(handle0, handle1))
-
-    "provide a merged stream of messages" in {
-      var count = 0
-      merged.messages.foreach { _ => count += 1 }
-      count must be_==(0)
-
-      messages0 ! msg(0)
-      messages1 ! msg(1)
-      messages0 ! msg(2)
-
-      count must be_==(3)
+  test("propagate errors") {
+    val errd = (buffered.error?)
+    assert(!errd.isDefined)
+    val e = new Exception("Sad panda")
+    error ! e
+    assert(errd.isDefined)
+    intercept[Exception] {
+      Await.result(errd)
     }
+  }
 
-   "provide a merged stream of errors" in {
-      var count = 0
-      merged.error.foreach { _ => count += 1 }
-      count must be_==(0)
+  test("when closed, propagate immediately if empty") {
+    val closed = (close?)
+    assert(!closed.isDefined)
+    buffered.close()
+    assert(closed.isDefined)
+  }
 
-      error0 ! new Exception("sad panda")
-      error1 ! new Exception("sad panda #2")
+  test("when closed, wait for outstanding acks before closing underlying") {
+    val closed = (close?)
+    assert(!closed.isDefined)
+    messages ! msg(0)
+    messages ! msg(1)
+    buffered.close()
+    assert(!closed.isDefined)
+    val m0 = (buffered.messages?)
+    assert(m0.isDefined)
+    Await.result(m0).ack.sync()
+    assert(!closed.isDefined)
+    val m1 = (buffered.messages?)
+    assert(m1.isDefined)
+    Await.result(m1).ack.sync()
+    assert(closed.isDefined)
+  }
+}
 
-      count must be_==(2)
-    }
+class ReadHandleMergedTest extends FunSuite with Messaging {
+  val messages0 = new Broker[ReadMessage]
+  val error0 = new Broker[Throwable]
+  val close0 = new Broker[Unit]
+  val handle0 = ReadHandle(messages0.recv, error0.recv, close0.send(()))
+  val messages1 = new Broker[ReadMessage]
+  val error1 = new Broker[Throwable]
+  val close1 = new Broker[Unit]
+  val handle1 = ReadHandle(messages1.recv, error1.recv, close1.send(()))
 
-    "propagate closes to all underlying handles" in {
-      val closed0 = (close0?)
-      val closed1 = (close1?)
+  val merged = ReadHandle.merged(Seq(handle0, handle1))
 
-      closed0.isDefined must beFalse
-      closed1.isDefined must beFalse
+  test("provide a merged stream of messages") {
+    var count = 0
+    merged.messages.foreach { _ => count += 1 }
+    assert(count === 0)
 
-      merged.close()
+    messages0 ! msg(0)
+    messages1 ! msg(1)
+    messages0 ! msg(2)
 
-      closed0.isDefined must beTrue
-      closed1.isDefined must beTrue
-    }
+    assert(count === 3)
+  }
+
+ test("provide a merged stream of errors") {
+    var count = 0
+    merged.error.foreach { _ => count += 1 }
+    assert(count === 0)
+
+    error0 ! new Exception("sad panda")
+    error1 ! new Exception("sad panda #2")
+
+    assert(count === 2)
+  }
+
+  test("propagate closes to all underlying handles") {
+    val closed0 = (close0?)
+    val closed1 = (close1?)
+
+    assert(!closed0.isDefined)
+    assert(!closed1.isDefined)
+
+    merged.close()
+
+    assert(closed0.isDefined)
+    assert(closed1.isDefined)
   }
 }
