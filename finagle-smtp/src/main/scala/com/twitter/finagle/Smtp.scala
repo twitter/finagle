@@ -7,6 +7,8 @@ import com.twitter.finagle.smtp.reply._
 import com.twitter.finagle.smtp.transport.SmtpTransporter
 import com.twitter.util.{Time, Future}
 
+// TODO: switch to StackClient
+
 /**
  * Implements an SMTP client. This type of client is capable of sending
  * separate SMTP commands and receiving replies to them.
@@ -37,7 +39,10 @@ object Smtp extends Client[Request, Reply]{
             val quitOnClose = new ServiceProxy[Request, Reply](service) {
               override def close(deadline: Time): Future[Unit] = {
                 if (service.isAvailable)
-                  service(Request.Quit)
+                  service(Request.Quit).unit
+                else
+                  Future.Done
+              } ensure {
                 service.close(deadline)
               }
             }
@@ -47,7 +52,7 @@ object Smtp extends Client[Request, Reply]{
       }
     }
 
-    DataFilter andThen defaultClient.newClient(dest, label)
+    DataFilter andThen quitOnCloseClient
   }
 }
 

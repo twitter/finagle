@@ -70,31 +70,38 @@ object MailingAddress {
 trait EmailMessage {
   def headers: Seq[(String, String)]
 
-  def from: Seq[MailingAddress] = headers collect { case ("From", addr) => MailingAddress(addr) }
+  private def getAddresses(header: String) = headers collect {
+    case (key, addr) if key.toLowerCase() == header.toLowerCase() => MailingAddress(addr)
+  }
+
+  def from: Seq[MailingAddress] = getAddresses("from")
 
   def sender: MailingAddress = {
     if (from.length > 1) {
-      headers collectFirst { case ("Sender", addr) => MailingAddress(addr) } getOrElse from.head
+      getAddresses("sender").headOption getOrElse from.head
     }
     else if (from.length == 0) MailingAddress.empty
     else from.head
   }
 
-  def to: Seq[MailingAddress] = headers collect { case ("To", addr) => MailingAddress(addr) }
+  def to: Seq[MailingAddress] = getAddresses("to")
 
-  def cc: Seq[MailingAddress] = headers collect { case ("Cc", addr) => MailingAddress(addr) }
+  def cc: Seq[MailingAddress] = getAddresses("cc")
 
-  def bcc: Seq[MailingAddress] = headers collect { case ("Bcc", addr) => MailingAddress(addr) }
+  def bcc: Seq[MailingAddress] = getAddresses("bcc")
 
-  def replyTo: Seq[MailingAddress] = headers collect { case ("Reply-To", addr) => MailingAddress(addr) }
+  def replyTo: Seq[MailingAddress] = getAddresses("reply-to")
 
   def date: Time =
     headers collectFirst {
-      case ("Date", d) => EmailMessage.DateFormat.parse(d)
+      case (key, d) if key.toLowerCase == "date" => EmailMessage.DateFormat.parse(d)
     } getOrElse Time.now
 
 
-  def subject: String = headers collectFirst { case ("Subject", subj) => subj } getOrElse ""
+  def subject: String =
+    headers collectFirst {
+      case (key, subj) if key.toLowerCase == "subject" => subj
+    } getOrElse ""
 
   def body: Seq[String]
 }

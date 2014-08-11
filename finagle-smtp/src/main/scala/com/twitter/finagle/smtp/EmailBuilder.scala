@@ -154,18 +154,18 @@ case class EmailBuilder(
    * is not specified, the first address in ''From:'' is used.
    */
   def headers: Seq[(String, String)] = {
-      from.map(ad => ("From", ad.mailbox)) ++
-      Seq("Sender"   -> {
+      from.map(ad => ("from", ad.mailbox)) ++
+      Seq("sender"   -> {
         if (!sender.isEmpty) sender.mailbox
         else from.head.mailbox }
       ) ++
-      to.map(ad => ("To", ad.mailbox)) ++
-      cc.map(ad => ("Cc", ad.mailbox)) ++
-      bcc.map(ad => ("Bcc", ad.mailbox)) ++
-      replyTo.map(ad => ("Reply-To", ad.mailbox)) ++
+      to.map(ad => ("to", ad.mailbox)) ++
+      cc.map(ad => ("cc", ad.mailbox)) ++
+      bcc.map(ad => ("bcc", ad.mailbox)) ++
+      replyTo.map(ad => ("reply-to", ad.mailbox)) ++
       Seq(
-        "Date"     -> EmailMessage.DateFormat.format(date),
-        "Subject"  -> subject
+        "date"     -> EmailMessage.DateFormat.format(date),
+        "subject"  -> subject
       )
   }
 

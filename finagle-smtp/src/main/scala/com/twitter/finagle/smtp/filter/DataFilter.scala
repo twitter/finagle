@@ -1,8 +1,8 @@
 package com.twitter.finagle.smtp.filter
 
-import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.finagle.smtp._
 import com.twitter.finagle.smtp.reply.Reply
+import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.util.Future
 
 /**
