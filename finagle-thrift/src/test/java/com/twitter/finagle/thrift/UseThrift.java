@@ -1,5 +1,6 @@
-package com.twitter.finagle;
+package com.twitter.finagle.thrift;
 
+import com.twitter.finagle.Thrift;
 import com.twitter.test.*;
 
 // Compilation test. Not actually for running.
