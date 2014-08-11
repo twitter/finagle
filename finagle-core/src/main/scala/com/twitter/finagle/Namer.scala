@@ -167,6 +167,7 @@ object Namer  {
   private def bind(namer: Namer, tree: NameTree[Path]): Activity[NameTree[Name.Bound]] =
     bind(namer, 0)(tree map { path => Name.Path(path) })
 
+  // values of the returned activity are simplified and contain no Alt nodes
   private def bind(namer: Namer, depth: Int)(tree: NameTree[Name])
   : Activity[NameTree[Name.Bound]] =
     if (depth > MaxDepth)
@@ -174,16 +175,32 @@ object Namer  {
     else tree match {
       case Leaf(Name.Path(path)) => namer.lookup(path) flatMap bind(namer, depth+1)
       case Leaf(bound@Name.Bound(_)) => Activity.value(Leaf(bound))
+
       case Fail => Activity.value(Fail)
       case Neg => Activity.value(Neg)
       case Empty => Activity.value(Empty)
-      case Union() | Alt() => Activity.value(Neg)
 
+      case Union() => Activity.value(Neg)
+      case Union(tree) => bind(namer, depth)(tree)
       case Union(trees@_*) =>
-        Activity.collect(trees map bind(namer, depth+1)) map Union.fromSeq
+        Activity.collect(trees map bind(namer, depth)) map { trees =>
+          Union.fromSeq(trees).simplified
+        }
 
+      case Alt() => Activity.value(Neg)
+      case Alt(tree) => bind(namer, depth)(tree)
       case Alt(trees@_*) =>
-        Activity.collect(trees map bind(namer, depth+1)) map Alt.fromSeq
+        def loop(trees: Seq[NameTree[Name]]): Activity[NameTree[Name.Bound]] =
+          trees match {
+            case Nil => Activity.value(Neg)
+            case Seq(head, tail@_*) =>
+              bind(namer, depth)(head) flatMap {
+                case Fail => Activity.value(Fail)
+                case Neg => loop(tail)
+                case head => Activity.value(head)
+              }
+          }
+        loop(trees)
     }
 
   private def expandTree(namer: Namer, depth: Int)(tree: NameTree[Path]): Activity[Dtab] = {

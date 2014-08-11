@@ -20,21 +20,26 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
       def contains(path: String) = acts contains Path.read(path)
 
       def apply(path: String): Witness[Try[NameTree[Path]]] = {
-        val (_, wit) = acts(Path.read(path))
+        val p = Path.read(path)
+        val (_, wit) = acts.getOrElse(p, addPath(p))
         wit
+      }
+
+      private def addPath(p: Path) = {
+        val tup = Activity[NameTree[Path]]
+        acts += p -> tup
+        tup
       }
 
       val pathNamer = new Namer {
         def lookup(path: Path): Activity[NameTree[Name]] = path match {
           // Don't capture system paths.
           case Path.Utf8("$", _*) => Activity.value(NameTree.Neg)
-          case Path.Utf8(elems@_*) =>
-            val p = Path.Utf8(elems: _*)
+          case p@Path.Utf8(elems@_*) =>
             acts.get(p) match {
               case Some((a, _)) => a map { tree => tree.map(Name(_)) }
               case None =>
-                val tup@(act, _) = Activity[NameTree[Path]]()
-                acts += p -> tup
+                val (act, _) = addPath(p)
                 act map { tree => tree.map(Name(_)) }
             }
           case _ => Activity.value(NameTree.Neg)
@@ -102,6 +107,12 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
 
     namer("/test/0").notify(Return(NameTree.read("/$/inet/0/3")))
     assertEval(res, ia(3))
+  })
+
+  test("NameTree.bind: Alt with Fail/Empty")(new Ctx {
+    assert(namer.bind(NameTree.read("(! | /test/1 | /test/2)")).sample() == NameTree.Fail)
+    assert(namer.bind(NameTree.read("(~ | /$/fail | /test/1)")).sample() == NameTree.Fail)
+    assert(namer.bind(NameTree.read("(/$/nil | /$/fail | /test/1)")).sample() == NameTree.Empty)
   })
 
   test("Namer.global: /$/inet") {

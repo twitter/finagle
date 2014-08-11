@@ -142,52 +142,43 @@ object NameTree {
       case Empty => Empty
     }
 
+  private[this] def simplifyTrees[T](
+    trees: Seq[NameTree[T]],
+    construct: Seq[NameTree[T]] => NameTree[T],
+    fail: Seq[NameTree[T]] => Seq[NameTree[T]]
+  ): NameTree[T] = {
+    @tailrec def loop(trees: Seq[NameTree[T]], accum: Seq[NameTree[T]]): Seq[NameTree[T]] =
+      trees match {
+        case Nil => accum
+        case Seq(head, tail@_*) =>
+          simplify(head) match {
+            case Fail => fail(accum)
+            case Neg => loop(tail, accum)
+            case head => loop(tail, accum :+ head)
+          }
+      }
+    loop(trees, Nil) match {
+      case Nil => Neg
+      case Seq(head) => head
+      case trees => construct(trees)
+    }
+  }
+
   /**
    * Simplify the given [[com.twitter.finagle.NameTree NameTree]],
    * yielding a new [[com.twitter.finagle.NameTree NameTree]] which
    * is evaluation-equivalent.
    */
   def simplify[T](tree: NameTree[T]): NameTree[T] = tree match {
-    case Alt() | Union() => Neg
-
+    case Alt() => Neg
     case Alt(tree) => simplify(tree)
-
     case Alt(trees@_*) =>
-      @tailrec def loop(trees: List[NameTree[T]], accum: List[NameTree[T]]): List[NameTree[T]] =
-        trees match {
-          case Nil => accum
-          case head :: tail =>
-            simplify(head) match {
-              case Fail => accum :+ Fail
-              case Neg => loop(tail, accum)
-              case head => loop(tail, accum :+ head)
-            }
-        }
-      loop(trees.toList, Nil) match {
-        case Nil => Neg
-        case List(head) => head
-        case trees => Alt(trees:_*)
-      }
+      simplifyTrees(trees, Alt.fromSeq[T], { accum: Seq[NameTree[T]] => accum :+ Fail })
 
+    case Union() => Neg
     case Union(tree) => simplify(tree)
-
     case Union(trees@_*) =>
-      @tailrec def loop(trees: List[NameTree[T]], accum: List[NameTree[T]]): List[NameTree[T]] =
-        trees match {
-          case Nil => accum
-          case head :: tail =>
-            simplify(head) match {
-              case Fail => List(Fail)
-              case Neg => loop(tail, accum)
-              case Empty => loop(tail, accum)
-              case head => loop(tail, accum :+ head)
-            }
-        }
-      loop(trees.toList, Nil) match {
-        case Nil => Neg
-        case List(head) => head
-        case trees => Union(trees:_*)
-      }
+      simplifyTrees(trees, Union.fromSeq[T], { accum: Seq[NameTree[T]] => Seq(Fail) })
 
     case other => other
   }
@@ -235,14 +226,14 @@ object NameTree {
     case Leaf(t) => Leaf(Set(t))
 
     case Union(trees@_*) =>
-      @tailrec def loop(trees: List[NameTree[T]], accum: List[Set[T]]): NameTree[Set[T]] =
+      @tailrec def loop(trees: Seq[NameTree[T]], accum: Seq[Set[T]]): NameTree[Set[T]] =
         trees match {
           case Nil =>
             accum match {
               case Nil => Neg
               case _ => Leaf(accum.flatten.toSet)
             }
-          case head :: tail =>
+          case Seq(head, tail@_*) =>
             eval(head) match {
               case Fail => Fail
               case Neg => loop(tail, accum)
@@ -250,13 +241,13 @@ object NameTree {
               case _ => scala.sys.error("bug")
             }
         }
-      loop(trees.toList, Nil)
+      loop(trees, Nil)
 
     case Alt(trees@_*) =>
-      @tailrec def loop(trees: List[NameTree[T]]): NameTree[Set[T]] =
+      @tailrec def loop(trees: Seq[NameTree[T]]): NameTree[Set[T]] =
         trees match {
           case Nil => Neg
-          case head :: tail =>
+          case Seq(head, tail@_*) =>
             eval(head) match {
               case Fail => Fail
               case Neg => loop(tail)
@@ -264,7 +255,7 @@ object NameTree {
               case _ => scala.sys.error("bug")
             }
         }
-      loop(trees.toList)
+      loop(trees)
   }
 
   implicit def equiv[T]: Equiv[NameTree[T]] = new Equiv[NameTree[T]] {
