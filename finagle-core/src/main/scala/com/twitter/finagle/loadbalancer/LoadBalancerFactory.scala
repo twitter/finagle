@@ -110,8 +110,8 @@ private[finagle] object LoadBalancerFactory {
         val endpoints = g map { sockaddr =>
           val stats = if (hostStatsReceiver.isNull) statsReceiver else {
             val scope = sockaddr match {
-              case ia: InetSocketAddress =>
-                "%s:%d".format(ia.getHostName, ia.getPort)
+              case WeightedInetSocketAddress(addr, _) =>
+                "%s:%d".format(addr.getHostName, addr.getPort)
               case other => other.toString
             }
             val host = hostStatsReceiver.scope(label).scope(scope)

@@ -2,8 +2,8 @@ package com.twitter.finagle
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.util._
-import com.twitter.util.{Return, Throw, Try, Var, FuturePool}
-import java.net.SocketAddress
+import com.twitter.util._
+import java.net.{SocketAddress, UnknownHostException}
 import java.security.{PrivilegedAction, Security}
 import java.util.WeakHashMap
 import java.util.logging.{Level, Logger}
@@ -41,12 +41,15 @@ trait Resolver {
 abstract class AbstractResolver extends Resolver
 
 /**
- * Resolver for inet scheme. This Resolver resolves DNS after each TTL timeout.
- * The TTL is gotten from "networkaddress.cache.ttl", a Java Security Property.
- * If "networkaddress.cache.ttl" is not set or set to a non-positive value, DNS
- * cache refresh will be turned off.
+ * Resolver for inet scheme.
+ *
+ * The Var is refreshed after each TTL timeout, set from "networkaddress.cache.ttl",
+ * a Java Security Property. If "networkaddress.cache.ttl" is not set or set to
+ * a non-positive value, the Var is static and no future resolution is attempted.
  */
 object InetResolver extends Resolver {
+  import InetSocketAddressUtil._
+
   val scheme = "inet"
   private val log = Logger.getLogger(getClass.getName)
   private val ttlOption = {
@@ -82,35 +85,47 @@ object InetResolver extends Resolver {
     }
   }
   private val timer = DefaultTimer.twitter
-  private val futurePool = FuturePool.unboundedPool
+
+  private[finagle] def bindWeightedHostPortsToAddr(hosts: Seq[WeightedHostPort]): Var[Addr] = {
+    def toAddr(whp: Seq[WeightedHostPort]): Future[Addr] = {
+      resolveWeightedHostPorts(whp) map { addrs: Seq[SocketAddress] =>
+        Addr.Bound(addrs.toSet)
+      } rescue {
+        case exc: UnknownHostException => Future.value(Addr.Neg: Addr)
+        case NonFatal(exc) => Future.value(Addr.Failed(exc): Addr)
+      }
+    }
+
+    Var.async(Addr.Pending: Addr) { u =>
+      toAddr(hosts) onSuccess { u() = _ }
+      ttlOption match {
+        case Some(ttl) =>
+          implicit val intPri = new Prioritized[Int] {
+            def apply(i: Int) = i
+          }
+          val updater = Updater { _: Int =>
+            u() = Await.result(toAddr(hosts))
+          }
+          timer.schedule(ttl.fromNow, ttl) {
+            FuturePool.unboundedPool(updater(0))
+          }
+        case None =>
+          Closable.nop
+      }
+    }
+  }
 
   /**
    * Binds to the specified hostnames, and refreshes the DNS information periodically.
    */
-  def bind(hosts: String): Var[Addr] = {
-    import InetSocketAddressUtil._
-
-    val hostPorts = parseHostPorts(hosts)
-    val init = Addr.Bound(resolveHostPorts(hostPorts))
-    ttlOption match {
-      case Some(ttl) =>
-        Var.async(init) { u =>
-          implicit val intPri = new Prioritized[Int] { def apply(i: Int) = i }
-          val updater = Updater { _: Int =>
-            val addr = resolveHostPorts(hostPorts)
-            u() = Addr.Bound(addr)
-          }
-          timer.schedule(ttl.fromNow, ttl) {
-            futurePool {
-              updater(0)
-            } onFailure { ex =>
-              log.log(Level.WARNING, "failed to resolve hosts ", ex)
-            }
-          }
-        }
-      case None =>
-        Var.value(init)
-    }
+  def bind(hosts: String): Var[Addr] = Try(parseHostPorts(hosts)) match {
+    case Return(hp) =>
+      val whp = hp collect { case (host, port) =>
+        (host, port, 1D)
+      }
+      bindWeightedHostPortsToAddr(whp)
+    case Throw(exc) =>
+      Var.value(Addr.Failed(exc))
   }
 }
 

@@ -1,11 +1,18 @@
 package com.twitter.finagle.util
 
+import com.twitter.finagle.WeightedSocketAddress
 import com.twitter.finagle.core.util.InetAddressUtil
+import com.twitter.util.{Future, FuturePool, Return, Throw}
+import com.twitter.concurrent.AsyncSemaphore
 import java.net.{SocketAddress, UnknownHostException, InetAddress, InetSocketAddress}
 
 object InetSocketAddressUtil {
 
   type HostPort = (String, Int)
+  type WeightedHostPort = (String, Int, Double)
+
+  private[this] val dnsConcurrency = 100
+  private[this] val dnsCond = new AsyncSemaphore(dnsConcurrency)
 
   /** converts 0.0.0.0 -> public ip in bound ip */
   def toPublic(bound: SocketAddress): SocketAddress = {
@@ -20,7 +27,8 @@ object InetSocketAddressUtil {
   }
 
   /**
-   * Parses a comma or space-delimited string of hostname and port pairs into scala pair. For example,
+   * Parses a comma or space-delimited string of hostname and port pairs into scala pairs.
+   * For example,
    *
    *     InetSocketAddressUtil.parseHostPorts("127.0.0.1:11211") => Seq(("127.0.0.1", 11211))
    *
@@ -49,6 +57,32 @@ object InetSocketAddressUtil {
       }
     }).toSet
 
+  /**
+   * Resolves host:port:weight triples into a Future[Seq[SocketAddress]. For example,
+   *
+   *     InetSocketAddressUtil.resolveWeightedHostPorts(Seq(("127.0.0.1", 11211, 1))) =>
+   *     Future.value(Seq(WeightedSocketAddress.Impl("127.0.0.1", 11211, 1)))
+   *
+   * @param weightedHostPorts a sequence of host port weight triples
+   */
+  private[finagle] def resolveWeightedHostPorts(
+    weightedHostPorts: Seq[WeightedHostPort]
+  ): Future[Seq[SocketAddress]] = {
+    def toSockAddr(host: String, port: Int, weight: Double): Seq[SocketAddress] =
+      InetAddress.getAllByName(host) map { addr =>
+        WeightedSocketAddress(new InetSocketAddress(addr, port), weight)
+      }
+
+    Future.collect(weightedHostPorts map {
+      case (host, port, weight) =>
+        dnsCond.acquire() flatMap { permit =>
+          FuturePool.unboundedPool(toSockAddr(host, port, weight)) ensure {
+            permit.release()
+          }
+        }
+    }
+    ) map { _.flatten }
+  }
 
   /**
    * Parses a comma or space-delimited string of hostname and port pairs. For example,
