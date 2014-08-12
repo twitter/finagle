@@ -35,6 +35,15 @@ class HttpClientDispatcher[Req <: HttpRequest](
     // in-line with what we already do in finagle-http. For example:
     // the body buf gets read without slicing.
     HttpDtab.write(Dtab.local, req)
+
+    if (!req.isChunked && !HttpHeaders.isContentLengthSet(req)) {
+      val len = req.getContent().readableBytes
+      // Only set the content length if we are sure there is content. This
+      // behavior complies with the specification that user agents should not
+      // set the content length header for messages without a payload body.
+      if (len > 0) HttpHeaders.setContentLength(req, len)
+    }
+
     trans.write(req) rescue(wrapWriteException) before {
       // Do these concurrently:
       Future.join(

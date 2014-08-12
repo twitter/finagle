@@ -68,6 +68,10 @@ class HttpServerDispatcher[REQUEST <: Request](
         trans.write(rep)
       }
     case _: HttpResponse =>
+      // Ensure Content-Length is set if not chunked
+      if (!response.isChunked && !HttpHeaders.isContentLengthSet(response))
+        HttpHeaders.setContentLength(response, response.getContent().readableBytes)
+
       trans.write(response)
   }
 }
