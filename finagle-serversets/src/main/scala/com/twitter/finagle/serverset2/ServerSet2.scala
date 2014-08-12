@@ -3,11 +3,11 @@ package com.twitter.finagle.serverset2
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle.WeightedSocketAddress
-import com.twitter.finagle.stats.{StatsReceiver, DefaultStatsReceiver}
+import com.twitter.finagle.stats.{Stat, StatsReceiver, DefaultStatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Addr, Resolver}
 import com.twitter.io.Buf
-import com.twitter.util.{Activity, Future, Closable, Memoize, Witness, Var}
+import com.twitter.util._
 import java.net.SocketAddress
 import java.nio.charset.Charset
 import java.util.concurrent.atomic.AtomicInteger
@@ -59,10 +59,18 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
 
   private[this] val addrOf_ = Memoize[(ServerSet2, String, Option[String]), Var[Addr]] {
     case (serverset, path, endpoint) =>
+      val scoped = {
+        val sr =
+          path.split("/").filter(_.nonEmpty).foldLeft(statsReceiver) {
+            case (sr, ns) => sr.scope(ns)
+          }
+        sr.scope("endpoint="+endpoint.getOrElse("default"))
+      }
+
       // First, convert the Op-based serverset address to a
       // Var[Addr], filtering out only the endpoints we are
       // interested in.
-      val va = serverset.weightedOf(path).run map {
+      val va = serverset.weightedOf(path, scoped).run map {
         case Activity.Pending => Addr.Pending
         case Activity.Failed(exc) => Addr.Failed(exc)
         case Activity.Ok(eps) =>
@@ -92,14 +100,6 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
           val nstable = naddr(stable)
           val nunstable = naddr(unstable)
           State(stable, nstable-nunstable, nstable)
-      }
-
-      val scoped = {
-        val sr = 
-          path.split("/").filter(_.nonEmpty).foldLeft(statsReceiver) {
-            case (sr, ns) => sr.scope(ns)
-          }
-        sr.scope("endpoint="+endpoint.getOrElse("default"))
       }
 
       @volatile var nlimbo = 0
@@ -193,13 +193,13 @@ private[serverset2] object PathCache {
 }
 
 private[serverset2] trait ServerSet2 {
-  def entriesOf(path: String, cache: PathCache): Activity[Set[Entry]]
-  def vectorsOf(path: String, cache: PathCache): Activity[Set[Vector]]
+  def entriesOf(path: String, cache: PathCache, statsReceiver: StatsReceiver): Activity[Set[Entry]]
+  def vectorsOf(path: String, cache: PathCache, statsReceiver: StatsReceiver): Activity[Set[Vector]]
 
-  def weightedOf(path: String): Activity[Set[(Entry, Double)]] = {
+  def weightedOf(path: String, statsReceiver: StatsReceiver): Activity[Set[(Entry, Double)]] = {
     val cache = PathCache(16000)
-    val vs = vectorsOf(path, cache).run
-    val es = entriesOf(path, cache).run
+    val vs = vectorsOf(path, cache, statsReceiver.scope("vectors")).run
+    val es = entriesOf(path, cache, statsReceiver.scope("entries")).run
     Activity((es join vs) map {
       case (Activity.Pending, _) => Activity.Pending
       case (f@Activity.Failed(_), _) => f
@@ -229,10 +229,10 @@ private[serverset2] object ServerSet2 {
 }
 
 private[serverset2] class VarServerSet2(v: Var[ServerSet2]) extends ServerSet2 {
-  def entriesOf(path: String, cache: PathCache): Activity[Set[Entry]] = 
-    Activity(v flatMap (_.entriesOf(path, cache).run))
-  def vectorsOf(path: String, cache: PathCache): Activity[Set[Vector]] = 
-    Activity(v flatMap (_.vectorsOf(path, cache).run))
+  def entriesOf(path: String, cache: PathCache, statsReceiver: StatsReceiver): Activity[Set[Entry]] =
+    Activity(v flatMap (_.entriesOf(path, cache, statsReceiver).run))
+  def vectorsOf(path: String, cache: PathCache, statsReceiver: StatsReceiver): Activity[Set[Vector]] =
+    Activity(v flatMap (_.vectorsOf(path, cache, statsReceiver).run))
 }
 
 private[serverset2] object ZkServerSet2 {
@@ -244,47 +244,66 @@ private[serverset2] object ZkServerSet2 {
 private[serverset2] case class ZkServerSet2(zk: Zk) extends ServerSet2 {
   import ZkServerSet2._
 
-  private[this] def dataOf(pat: String): Activity[Seq[(String, Option[Buf])]] =
-    zk.globOf(pat) flatMap zk.collectImmutableDataOf
-
-  def entriesOf(path: String, cache: PathCache): Activity[Set[Entry]] = {
-    dataOf(path+EndpointGlob) map { pathmap =>
-      val endpoints = pathmap flatMap {
-        case (_, null) => None // no data
-        case (path, Some(Buf.Utf8(data))) =>
-          cache.entries.getIfPresent(path) match {
-            case null =>
-              val ents = Entry.parseJson(path, data)
-              val entset = ents.toSet
-              cache.entries.put(path, entset)
-              entset
-            case ent => ent
-          }
-
-        case _ => None  // Invalid encoding
-      }
-      endpoints.toSet
+  private[this] def timedOf[T](stat: Stat)(f: => Activity[T]): Activity[T] = {
+    val elapsed = Stopwatch.start()
+    f map { rv =>
+      stat.add(elapsed().inMilliseconds)
+      rv
     }
   }
 
-  def vectorsOf(path: String, cache: PathCache): Activity[Set[Vector]] =
-    dataOf(path+VectorGlob) map { pathmap =>
-      val vectors = pathmap flatMap {
-        case (path, None) =>
-          cache.vectors.getIfPresent(path) match {
-            case null => None
-            case vec => vec
-          }
-        case (path, Some(Buf.Utf8(data))) =>
-          cache.vectors.getIfPresent(path) match {
-            case null =>
-              val vec = Vector.parseJson(data)
-              cache.vectors.put(path, vec)
-              vec
-            case vec =>  vec
-          }
-        case _ => None  // Invalid encoding
-      }
-      vectors.toSet
+  private[this] def dataOf(pat: String, statsReceiver: StatsReceiver): Activity[Seq[(String, Option[Buf])]] = {
+    val readStat = statsReceiver.stat("read_ms")
+    zk.globOf(pat) flatMap { paths =>
+      timedOf(readStat)(zk.collectImmutableDataOf(paths))
     }
+  }
+
+  def entriesOf(path: String, cache: PathCache, statsReceiver: StatsReceiver): Activity[Set[Entry]] = {
+    val parseStat = statsReceiver.stat("parse_ms")
+    dataOf(path+EndpointGlob, statsReceiver) flatMap { pathmap =>
+      timedOf[Set[Entry]](parseStat){
+        val endpoints = pathmap flatMap {
+          case (_, null) => None // no data
+          case (path, Some(Buf.Utf8(data))) =>
+            cache.entries.getIfPresent(path) match {
+              case null =>
+                val ents = Entry.parseJson(path, data)
+                val entset = ents.toSet
+                cache.entries.put(path, entset)
+                entset
+              case ent => ent
+            }
+
+          case _ => None  // Invalid encoding
+        }
+        Activity.value(endpoints.toSet)
+      }
+    }
+  }
+
+  def vectorsOf(path: String, cache: PathCache, statsReceiver: StatsReceiver): Activity[Set[Vector]] = {
+    val parseStat = statsReceiver.stat("parse_ms")
+    dataOf(path + VectorGlob, statsReceiver) flatMap { pathmap =>
+      timedOf[Set[Vector]](parseStat) {
+        val vectors = pathmap flatMap {
+          case (path, None) =>
+            cache.vectors.getIfPresent(path) match {
+              case null => None
+              case vec => vec
+            }
+          case (path, Some(Buf.Utf8(data))) =>
+            cache.vectors.getIfPresent(path) match {
+              case null =>
+                val vec = Vector.parseJson(data)
+                cache.vectors.put(path, vec)
+                vec
+              case vec => vec
+            }
+          case _ => None // Invalid encoding
+        }
+        Activity.value(vectors.toSet)
+      }
+    }
+  }
 }
