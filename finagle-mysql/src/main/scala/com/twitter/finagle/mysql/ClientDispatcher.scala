@@ -8,6 +8,10 @@ import com.twitter.util.{Closable, Future, Promise, Return, Time, Try, Throw}
 import java.util.ArrayDeque
 import scala.collection.JavaConverters._
 
+/**
+ * A catch-all exception class for errors returned from the upstream
+ * MySQL server.
+ */
 case class ServerError(code: Short, sqlState: String, message: String)
   extends Exception(message)
 

@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.{CancelledConnectionException, ClientConnection, ServiceClosedException,
-  Service, ServiceFactory, ServiceNotAvailableException}
+import com.twitter.finagle.{
+  CancelledConnectionException, ClientConnection, ServiceClosedException, Service, ServiceFactory}
 import com.twitter.util.{Await, Future, Promise, Return, Throw, Time, Try}
 import scala.collection.JavaConverters._
 import java.util.ArrayDeque

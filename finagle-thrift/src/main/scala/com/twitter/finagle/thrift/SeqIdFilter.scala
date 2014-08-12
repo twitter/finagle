@@ -4,6 +4,11 @@ import com.twitter.finagle.{Service, SimpleFilter, TransportException}
 import com.twitter.util.{Time, Future, Try, Return, Throw}
 import scala.util.Random
 
+/**
+ * Indicates that a Thrift response did not have the correct sequence
+ * ID according to that assigned by [[com.twitter.finagle.thrift.SeqIdFilter]]
+ * on the corresponding request.
+ */
 case class SeqMismatchException(id: Int, expected: Int) extends TransportException {
   override def toString = "SeqMismatchException: got %d, expected %d".format(id, expected)
 }
@@ -14,12 +19,12 @@ object SeqIdFilter {
 }
 
 /**
- * A filter to override the input sequence ids, replacing them with
- * ones of our own provenance. We perform checking on these and fail
- * accordingly.
+ * A [[com.twitter.finagle.Filter]] that overrides Thrift request sequence IDs,
+ * replacing them with our own randomly-assigned i32s. Upon response receipt,
+ * this filter ensures that responses have the correct corresponding sequence ID,
+ * failing any requests that do not.
  *
- * @note This only works when using BinaryProtocol, but will become
- * generic with mux support.
+ * @note This only works when using BinaryProtocol.
  */
 class SeqIdFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]] {
   import SeqIdFilter._

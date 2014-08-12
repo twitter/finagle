@@ -5,14 +5,25 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.exp.mysql.Charset.Utf8_general_ci
 import com.twitter.util.{Return, StorageUnit, Throw, Try}
 
-class IncompatibleServerError(msg: String)
-  extends Exception(msg)
+/**
+ * A base class for exceptions related to client incompatibility with an
+ * upstream MySQL server.
+ */
+class IncompatibleServerError(msg: String) extends Exception(msg)
 
+/**
+ * Indicates that the server to which the client is connected is running
+ * a version of MySQL that the client is incompatible with.
+ */
 case object IncompatibleVersion
   extends IncompatibleServerError(
     "This client is only compatible with MySQL version 4.1 and later"
   )
 
+/**
+ * Indicates that the server to which the client is connected is configured to use
+ * a charset that the client is incompatible with.
+ */
 case object IncompatibleCharset
   extends IncompatibleServerError(
     "This client is only compatible with UTF-8 and Latin-1 charset encoding"

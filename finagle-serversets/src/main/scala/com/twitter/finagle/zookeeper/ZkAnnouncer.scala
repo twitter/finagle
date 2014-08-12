@@ -9,6 +9,10 @@ import java.util.concurrent.{BlockingQueue, LinkedBlockingQueue}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
+/**
+ * Indicates that a failure occurred while attempting to announce the server
+ * using a [[com.twitter.finagle.zookeeper.ZkAnnouncer]].
+ */
 class ZkAnnouncerException(msg: String) extends Exception(msg)
 
 /**

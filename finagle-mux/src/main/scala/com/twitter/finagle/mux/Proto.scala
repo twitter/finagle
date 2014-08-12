@@ -6,6 +6,10 @@ import com.twitter.io.Charsets
 import com.twitter.util.{Duration, Time}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
+/**
+ * Indicates that encoding or decoding of a Mux message failed.
+ * Reason for failure should be provided by the `why` string.
+ */
 case class BadMessageException(why: String) extends Exception(why)
 
 // TODO: when the new com.twitter.codec.Codec arrives, define Message

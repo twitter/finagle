@@ -7,12 +7,17 @@ import org.apache.thrift.protocol.{TProtocolFactory, TMessageType}
 import org.apache.thrift.transport.TMemoryInputTransport
 import com.twitter.util.Future
 
-case class InvalidThriftConnectionException() extends ServiceException {
+/**
+ * Indicates that the connection on which a Thrift request was issued
+ * is invalid, where "validity" is determined by
+ * [[com.twitter.finagle.thrift.ValidateThriftService]].
+ */
+case class InvalidThriftConnectionException extends ServiceException {
   override def getMessage = "the thrift connection was invalidated"
 }
 
 /**
- * A filter that invalidates the a connection if it suffers an
+ * A filter that invalidates a connection if it suffers from an
  * irrecoverable application exception.
  *
  * Amazingly, an Apache Thrift server will leave a connection in a

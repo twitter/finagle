@@ -14,6 +14,11 @@ import _root_.java.net.SocketAddress
 import scala.collection.mutable
 import scala.collection.JavaConversions._
 
+/**
+ * Indicates that all [[com.twitter.finagle.kestrel.ReadHandle ReadHandles]]
+ * that are backing a given [[com.twitter.finagle.kestrel.MultiReader]] have
+ * died.
+ */
 object AllHandlesDiedException extends Exception
 
 private[finagle] object MultiReaderHelper {

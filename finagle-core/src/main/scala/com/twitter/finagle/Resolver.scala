@@ -9,6 +9,47 @@ import java.util.WeakHashMap
 import java.util.logging.{Level, Logger}
 
 /**
+ * Indicates that a [[com.twitter.finagle.Resolver]] was not found for the
+ * given `scheme`.
+ *
+ * Resolvers are discovered via Finagle's [[com.twitter.finagle.util.LoadService]]
+ * mechanism. These exceptions typically suggest that there are no libraries
+ * on the classpath that define a Resolver for the given scheme.
+ */
+class ResolverNotFoundException(scheme: String)
+  extends Exception(
+    "Resolver not found for scheme \"%s\". Please add the jar containing this resolver to your classpath".format(scheme))
+
+/**
+ * Indicates that multiple [[com.twitter.finagle.Resolver Resolvers]] were
+ * discovered for given `scheme`.
+ *
+ * Resolvers are discovered via Finagle's [[com.twitter.finagle.util.LoadService]]
+ * mechanism. These exceptions typically suggest that there are multiple
+ * libraries on the classpath with conflicting scheme definitions.
+ */
+class MultipleResolversPerSchemeException(resolvers: Map[String, Seq[Resolver]])
+  extends NoStacktrace
+{
+  override def getMessage = {
+    val msgs = resolvers map { case (scheme, rs) =>
+      "%s=(%s)".format(scheme, rs.map(_.getClass.getName).mkString(", "))
+    } mkString(" ")
+    "Multiple resolvers defined: %s".format(msgs)
+  }
+}
+
+/**
+ * Indicates that a destination name string passed to a
+ * [[com.twitter.finagle.Resolver]] was invalid according to the destination
+ * name grammar [1].
+ *
+ * [1] http://twitter.github.io/finagle/guide/Names.html
+ */
+class ResolverAddressInvalid(addr: String)
+  extends Exception("Resolver address \"%s\" is not valid".format(addr))
+
+/**
  * A resolver binds a name, represented by a string, to a
  * variable address. Resolvers have an associated scheme
  * which is used for lookup so that names may be resolved
@@ -142,24 +183,6 @@ object NilResolver extends Resolver {
 object FailResolver extends Resolver {
   val scheme = "fail"
   def bind(arg: String) = Var.value(Addr.Failed(new Exception(arg)))
-}
-
-class ResolverNotFoundException(scheme: String)
-  extends Exception(
-    "Resolver not found for scheme \"%s\". Please add the jar containing this resolver to your classpath".format(scheme))
-
-class ResolverAddressInvalid(addr: String)
-  extends Exception("Resolver address \"%s\" is not valid".format(addr))
-
-class MultipleResolversPerSchemeException(resolvers: Map[String, Seq[Resolver]])
-  extends NoStacktrace
-{
-  override def getMessage = {
-    val msgs = resolvers map { case (scheme, rs) =>
-      "%s=(%s)".format(scheme, rs.map(_.getClass.getName).mkString(", "))
-    } mkString(" ")
-    "Multiple resolvers defined: %s".format(msgs)
-  }
 }
 
 object Resolver {

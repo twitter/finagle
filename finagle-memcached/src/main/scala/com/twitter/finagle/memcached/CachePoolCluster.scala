@@ -25,9 +25,15 @@ case class CacheNode(host: String, port: Int, weight: Int, key: Option[String] =
 }
 
 /**
- * Twitter cache pool path resolver.
+ * Indicates that an error occurred while resolving a cache address.
+ * See [[com.twitter.finagle.memcached.TwitterCacheResolver]] for details.
  */
 class TwitterCacheResolverException(msg: String) extends Exception(msg)
+
+/**
+ * A [[com.twitter.finagle.Resolver]] for resolving destination names associated
+ * with Twitter cache pools.
+ */
 class TwitterCacheResolver extends Resolver {
   val scheme = "twcache"
 

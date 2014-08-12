@@ -14,6 +14,9 @@ import scala.collection.JavaConverters._
 
 /**
  * Indicates that a client requested that a given request be discarded.
+ *
+ * This implies that the client issued a Tdiscarded message for a given tagged
+ * request, as per [[com.twitter.finagle.mux]].
  */
 case class ClientDiscardedRequestException(why: String) extends Exception(why)
 

@@ -141,9 +141,8 @@ private object ClassPath {
 }
 
 /**
- * Load a singleton class in the manner of
- * [[java.util.ServiceLoader]]. It is more resilient to varying Java
- * packaging configurations than ServiceLoader.
+ * Load a singleton class in the manner of [[java.util.ServiceLoader]]. It is
+ * more resilient to varying Java packaging configurations than ServiceLoader.
  */
 object LoadService {
 

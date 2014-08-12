@@ -12,14 +12,28 @@ import com.twitter.conversions.time._
 import java.util.logging.Logger
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
+/**
+ * Indicates that a client request was denied by the server.
+ */
 object RequestNackedException
   extends Exception("The request was nackd by the server")
   with WriteException with NoStacktrace
 
+/**
+ * Indicates that the server failed to interpret or act on the request. This
+ * could mean that the client sent a [[com.twitter.finagle.mux]] message type
+ * that the server is unable to process.
+ */
 case class ServerError(what: String)
   extends Exception(what)
   with NoStacktrace
 
+/**
+ * Indicates that the server encountered an error whilst processing the client's
+ * request. In contrast to [[com.twitter.finagle.mux.ServerError]], a
+ * ServerApplicationError relates to server application failure rather than
+ * failure to interpret the request.
+ */
 case class ServerApplicationError(what: String)
   extends Exception(what)
   with NoStacktrace
