@@ -35,6 +35,7 @@ private[finagle] object StackServer {
    *
    * @see [[com.twitter.finagle.tracing.ServerDestTracingProxy]]
    * @see [[com.twitter.finagle.service.TimeoutFilter]]
+   * @see [[com.twitter.finagle.filter.DtabStatsFilter]]
    * @see [[com.twitter.finagle.service.StatsFilter]]
    * @see [[com.twitter.finagle.filter.RequestSemaphoreFilter]]
    * @see [[com.twitter.finagle.filter.ExceptionSourceFilter]]
@@ -49,6 +50,7 @@ private[finagle] object StackServer {
 
     stk.push(Role.serverDestTracing, ((next: ServiceFactory[Req, Rep]) => new ServerDestTracingProxy[Req, Rep](next)))
     stk.push(TimeoutFilter.module)
+    stk.push(DtabStatsFilter.module)
     stk.push(StatsFilter.module)
     stk.push(RequestSemaphoreFilter.module)
     stk.push(MaskCancelFilter.module)

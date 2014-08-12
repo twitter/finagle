@@ -1,15 +1,15 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle.{param, Name}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.{param, Name}
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.Eventually.eventually
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 
 @RunWith(classOf[JUnitRunner])
-class StackClientTest extends FunSuite with StringClient {
+class StackClientTest extends FunSuite with StringClient with AssertionsForJUnit {
   trait Ctx {
     val sr = new InMemoryStatsReceiver
     val client = stringClient

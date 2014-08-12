@@ -1,11 +1,11 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle._
-import com.twitter.finagle.param._
 import com.twitter.finagle.factory.{
   BindingFactory, RefcountedFactory, StatsFactoryWrapper, TimeoutFactory}
-import com.twitter.finagle.filter.{ExceptionSourceFilter, MonitorFilter}
+import com.twitter.finagle.filter.{DtabStatsFilter, ExceptionSourceFilter, MonitorFilter}
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.param._
 import com.twitter.finagle.service._
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stack.nilStack
@@ -39,6 +39,8 @@ private[finagle] object StackClient {
    * @see [[com.twitter.finagle.service.TimeoutFilter]]
    * @see [[com.twitter.finagle.service.FailureAccrualFactory]]
    * @see [[com.twitter.finagle.service.StatsServiceFactory]]
+   * @see [[com.twitter.finagle.service.StatsFilter]]
+   * @see [[com.twitter.finagle.filter.DtabStatsFilter]]
    * @see [[com.twitter.finagle.tracing.ClientDestTracingFilter]]
    * @see [[com.twitter.finagle.filter.MonitorFilter]]
    * @see [[com.twitter.finagle.filter.ExceptionSourceFilter]]
@@ -56,6 +58,7 @@ private[finagle] object StackClient {
     stk.push(FailureAccrualFactory.module)
     stk.push(StatsServiceFactory.module)
     stk.push(StatsFilter.module)
+    stk.push(DtabStatsFilter.module)
     stk.push(ClientDestTracingFilter.module)
     stk.push(MonitorFilter.module)
     stk.push(ExceptionSourceFilter.module)
