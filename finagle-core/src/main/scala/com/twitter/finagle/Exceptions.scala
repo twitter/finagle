@@ -44,9 +44,15 @@ class GlobalRequestTimeoutException(timeout: Duration)
     "waiting for a response for the request, including retries (if applicable)")
 
 class NoBrokersAvailableException(
-  val name: String = "unknown"
+  val name: String,
+  val localDtab: Dtab
 ) extends RequestException {
-  override def getMessage = "No hosts are available for " + name
+  def this(name: String = "unknown") = this(name, Dtab.empty)
+
+  override def getMessage =
+    "No hosts are available for " +
+      (if (localDtab.isEmpty) name
+      else name + " [" + localDtab.show + "]")
 }
 
 class RetryFailureException(cause: Throwable) extends RequestException(cause)

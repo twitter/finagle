@@ -2,7 +2,7 @@ package com.twitter.finagle.factory
 
 import com.twitter.finagle._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.util.{  Activity, Closable, Future, Promise,   Time, Var}
+import com.twitter.util.{Activity, Closable, Future, Promise, Return, Throw, Time, Var}
 import java.net.SocketAddress
 import scala.collection.immutable
 
@@ -135,10 +135,8 @@ private[finagle] class BindingFactory[Req, Rep](
       bound => newFactory(bound.addr),
       statsReceiver.scope("namecache"), maxNameCacheSize)
 
-  private[this] def noBrokersAvailableException = {
-    val name = BindingFactory.showWithDtabLocal(path)
-    new NoBrokersAvailableException(name)
-  }
+  private[this] val noBrokersAvailableException =
+    new NoBrokersAvailableException(path.show)
 
   private[this] val dtabCache = {
     val newFactory: Dtab => ServiceFactory[Req, Rep] = { dtab =>
@@ -158,17 +156,27 @@ private[finagle] class BindingFactory[Req, Rep](
       maxNamerCacheSize)
   }
 
-  def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
-    dtabCache(Dtab.base ++ Dtab.local, conn)
+  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
+    val service = dtabCache(Dtab.base ++ Dtab.local, conn)
+    val localDtab = Dtab.local
+    if (localDtab.isEmpty) service
+    else service transform {
+      case Throw(e: NoBrokersAvailableException) =>
+        Future.exception(new NoBrokersAvailableException(e.name, localDtab))
+      case Throw(e) =>
+        Future.exception(e)
+      case Return(service) =>
+        Future.value(new SimpleFilter[Req, Rep] {
+          def apply(req: Req, service: Service[Req, Rep]): Future[Rep] =
+            service(req) rescue { case e: NoBrokersAvailableException =>
+              Future.exception(new NoBrokersAvailableException(e.name, localDtab))
+            }
+        } andThen service)
+    }
+  }
 
   def close(deadline: Time) =
     Closable.sequence(dtabCache, nameCache).close(deadline)
 
   override def isAvailable = dtabCache.isAvailable
-}
-
-object BindingFactory {
-  def showWithDtabLocal(path: Path) =
-    if (Dtab.local.isEmpty) path.show
-    else path.show + " [" + Dtab.local.show + "]"
 }

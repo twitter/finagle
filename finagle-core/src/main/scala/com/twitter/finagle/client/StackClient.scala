@@ -194,12 +194,11 @@ private[finagle] abstract class StackClient[Req, Rep](
     dest match {
       case Name.Bound(addr) =>
         clientStack.make(clientParams +
-          LoadBalancerFactory.ErrorLabel(Showable.show(dest)) +
+          LoadBalancerFactory.ErrorLabel(clientLabel) +
           LoadBalancerFactory.Dest(addr))
 
       case Name.Path(path) =>
-        val errorLabel = BindingFactory.showWithDtabLocal(path)
-        val clientParams1 = clientParams + LoadBalancerFactory.ErrorLabel(errorLabel)
+        val clientParams1 = clientParams + LoadBalancerFactory.ErrorLabel(path.show)
 
         val newStack: Var[Addr] => ServiceFactory[Req, Rep] =
           addr => clientStack.make(clientParams1 + LoadBalancerFactory.Dest(addr))
