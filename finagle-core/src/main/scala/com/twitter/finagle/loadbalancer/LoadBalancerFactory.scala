@@ -97,13 +97,19 @@ private[finagle] object LoadBalancerFactory {
           case Addr.Bound(sockaddrs) =>
             g() = sockaddrs
           case Addr.Failed(e) =>
-            g() = Set()
-            log.log(Level.WARNING, "Name binding failure", e)
-          case Addr.Pending =>
-            log.log(Level.WARNING, "Name resolution is pending")
+            if (log.isLoggable(Level.WARNING)) {
+              log.log(Level.WARNING, "%s: name resolution failed".format(label), e)
+            }
             g() = Set()
           case Addr.Neg =>
-            log.log(Level.WARNING, "Name resolution is negative")
+            if (log.isLoggable(Level.WARNING)) {
+              log.warning("%s: name resolution is negative".format(label))
+            }
+            g() = Set()
+          case Addr.Pending =>
+            if (log.isLoggable(Level.FINE)) {
+              log.fine("%s: name resolution is pending".format(label))
+            }
             g() = Set()
         }
 
