@@ -1,14 +1,17 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.app.App
+import com.twitter.finagle.NoBrokersAvailableException
 import com.twitter.finagle.client.StringClient
-import com.twitter.finagle.{NoBrokersAvailableException, param}
+import com.twitter.finagle.param
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, LoadedStatsReceiver, NullStatsReceiver}
-import com.twitter.util.Await
+import com.twitter.util.{Await, Future, Time}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.junit.JUnitRunner
+import java.net.{SocketAddress, InetSocketAddress}
+import com.twitter.finagle.Name
+import com.twitter.app.App
 
 @RunWith(classOf[JUnitRunner])
 class LoadBalancerFactoryTest extends FunSuite with StringClient {
@@ -49,9 +52,8 @@ class LoadBalancerFactoryTest extends FunSuite with StringClient {
     client.configured(param.Label(label))
       .configured(LoadBalancerFactory.HostStats(hostStatsReceiver))
       .newService(port)
-    eventually {
-      assert(hostStatsReceiver.gauges(perHostStatKey).apply === 1.0)
-    }
+    assert(hostStatsReceiver.gauges(perHostStatKey).apply === 1.0)
+
     disablePerHostStats()
   })
 
@@ -63,9 +65,8 @@ class LoadBalancerFactoryTest extends FunSuite with StringClient {
     LoadedStatsReceiver.self = hostStatsReceiver
     client.configured(param.Label(label))
       .newService(port)
-    eventually {
-      assert(hostStatsReceiver.gauges(perHostStatKey).apply === 1.0)
-    }
+    assert(hostStatsReceiver.gauges(perHostStatKey).apply === 1.0)
+
     disablePerHostStats()
   })
 
@@ -77,9 +78,8 @@ class LoadBalancerFactoryTest extends FunSuite with StringClient {
     client.configured(param.Label(label))
       .configured(LoadBalancerFactory.HostStats(hostStatsReceiver))
       .newService(port)
-    eventually {
-      assert(hostStatsReceiver.gauges(perHostStatKey).apply === 1.0)
-    }
+    assert(hostStatsReceiver.gauges(perHostStatKey).apply === 1.0)
+
     disablePerHostStats()
   })
 

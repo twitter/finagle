@@ -1,7 +1,6 @@
 package com.twitter.finagle.util
 
-import com.twitter.finagle.WeightedSocketAddress
-import com.twitter.util.{Await, RandomSocket}
+import com.twitter.util.RandomSocket
 import java.net.{InetAddress, UnknownHostException, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -11,8 +10,6 @@ import org.scalatest.junit.JUnitRunner
 class InetSocketAddressUtilTest extends FunSuite {
   val port1 = RandomSocket.nextPort()
   val port2 = RandomSocket.nextPort()
-  val weight1: Double = 0.5
-  val weight2: Double = 0.25
 
   test("toPublic") {
     try {
@@ -68,20 +65,5 @@ class InetSocketAddressUtilTest extends FunSuite {
       Seq(new InetSocketAddress("127.0.0.1", port1), new InetSocketAddress("127.0.0.1", port2)))
 
     assert(InetSocketAddressUtil.parseHosts(":" + port1) === Seq(new InetSocketAddress("0.0.0.0", port1)))
-  }
-
-  test("resolveWeightedHostPorts") {
-    assert(Await.result(InetSocketAddressUtil.resolveWeightedHostPorts(Seq())).isEmpty)
-    intercept[UnknownHostException] {
-      Await.result(InetSocketAddressUtil.resolveWeightedHostPorts(Seq(("gobble-d-gook", port1, weight1))))
-    }
-
-    assert(Await.result(InetSocketAddressUtil.resolveWeightedHostPorts(Seq(("127.0.0.1", port1, weight1)))) ===
-      Seq(WeightedSocketAddress(new InetSocketAddress("127.0.0.1", port1), weight1)))
-    assert(Await.result(InetSocketAddressUtil.resolveWeightedHostPorts(
-      Seq(("127.0.0.1", port1, weight1), ("127.0.0.1", port2, weight2)))) ===
-      Seq(
-        WeightedSocketAddress(new InetSocketAddress("127.0.0.1", port1), weight1),
-        WeightedSocketAddress(new InetSocketAddress("127.0.0.1", port2), weight2)))
   }
 }
