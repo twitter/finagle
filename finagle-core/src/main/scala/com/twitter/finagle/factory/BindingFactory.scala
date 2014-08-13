@@ -2,7 +2,8 @@ package com.twitter.finagle.factory
 
 import com.twitter.finagle._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.util.{Activity, Closable, Future, Promise, Return, Throw, Time, Var}
+import com.twitter.finagle.tracing.Trace
+import com.twitter.util._
 import java.net.SocketAddress
 import scala.collection.immutable
 
@@ -12,7 +13,8 @@ import scala.collection.immutable
  */
 private class DynNameFactory[Req, Rep](
     name: Activity[Name.Bound],
-    newService: (Name.Bound, ClientConnection) => Future[Service[Req, Rep]])
+    newService: (Name.Bound, ClientConnection) => Future[Service[Req, Rep]],
+    trace: Try[Name.Bound] => Unit)
   extends ServiceFactory[Req, Rep] {
 
   private sealed trait State
@@ -20,7 +22,9 @@ private class DynNameFactory[Req, Rep](
     extends State
   private case class Named(name: Name.Bound) extends State
   private case class Failed(exc: Throwable) extends State
-  private case class Closed() extends State
+  private case object Closed extends State
+
+  private case class NamingException(exc: Throwable) extends Exception(exc)
 
   @volatile private[this] var state: State = Pending(immutable.Queue.empty)
 
@@ -29,32 +33,59 @@ private class DynNameFactory[Req, Rep](
       state match {
         case Pending(q) =>
           state = Named(name)
-          for ((conn, p) <- q) p.become(this(conn))
+          for ((conn, p) <- q) p.become(apply(conn))
         case Failed(_) | Named(_) =>
           state = Named(name)
-        case Closed() => //
+        case Closed =>
       }
     }
 
     case Activity.Failed(exc) => synchronized {
       state match {
         case Pending(q) =>
-          for ((_, p) <- q) p.setException(exc)
+          // wrap the exception in a NamingException, so that it can
+          // be recovered for tracing
+          for ((_, p) <- q) p.setException(NamingException(exc))
           state = Failed(exc)
         case Failed(_) =>
           state = Failed(exc)
-        case Named(_) | Closed() =>
+        case Named(_) | Closed =>
       }
     }
 
     case Activity.Pending =>
   }
 
-  def apply(conn: ClientConnection) = state match {
-    case Named(name) => newService(name, conn)
-    case Closed() => Future.exception(new ServiceClosedException)
-    case Failed(exc) => Future.exception(exc)
-    case Pending(_) => applySync(conn)
+  def apply(conn: ClientConnection) = {
+    val result = state match {
+      case Named(name) =>
+        val rtnName = Return(name)
+        // attach the trace each time the service is used
+        newService(name, conn) map { service =>
+          new ServiceProxy(service) {
+            override def apply(request: Req) = {
+              trace(rtnName)
+              super.apply(request)
+            }
+          }
+        }
+
+      // don't trace these, since they're not a namer failure
+      case Closed => Future.exception(new ServiceClosedException)
+
+      case Failed(exc) =>
+        trace(Throw(exc))
+        Future.exception(exc)
+
+      case Pending(_) => applySync(conn)
+    }
+
+    result rescue {
+      // extract the underlying exception, to trace and return
+      case NamingException(t) =>
+        trace(Throw(t))
+        Future.exception(t)
+    }
   }
 
   private[this] def applySync(conn: ClientConnection) = synchronized {
@@ -82,7 +113,7 @@ private class DynNameFactory[Req, Rep](
   def close(deadline: Time) = {
     val prev = synchronized {
       val prev = state
-      state = Closed()
+      state = Closed
       prev
     }
     prev match {
@@ -90,9 +121,27 @@ private class DynNameFactory[Req, Rep](
         val exc = new ServiceClosedException
         for ((_, p) <- q)
           p.setException(exc)
-      case _ => //
+      case _ =>
     }
     sub.close(deadline)
+  }
+}
+
+private[finagle] class NameTracer(
+    path: Path,
+    base: Dtab,
+    local: Dtab,
+    trace: (String, Any) => Unit = Trace.recordBinary)
+  extends (Try[Name.Bound] => Unit) {
+
+  def apply(nameTry: Try[Name.Bound]): Unit = {
+    trace("wily.path", path.show)
+    trace("wily.dtab.base", base.show)
+    trace("wily.dtab.local", local.show)
+    nameTry match {
+      case Return(name) => trace("wily.name", name.id)
+      case Throw(exc) => trace("wily.failure", exc.getClass.getSimpleName)
+    }
   }
 }
 
@@ -133,14 +182,15 @@ private[finagle] class BindingFactory[Req, Rep](
   private[this] val nameCache =
     new ServiceFactoryCache[Name.Bound, Req, Rep](
       bound => newFactory(bound.addr),
-      statsReceiver.scope("namecache"), maxNameCacheSize)
+      statsReceiver.scope("namecache"),
+      maxNameCacheSize)
 
   private[this] val noBrokersAvailableException =
     new NoBrokersAvailableException(path.show)
 
   private[this] val dtabCache = {
-    val newFactory: Dtab => ServiceFactory[Req, Rep] = { dtab =>
-      val namer = dtab orElse Namer.global
+    val newFactory: ((Dtab, Dtab)) => ServiceFactory[Req, Rep] = { case (base, local) =>
+      val namer = (base ++ local) orElse Namer.global
       val name: Activity[Name.Bound] = namer.bind(tree).map(_.eval) flatMap {
         case None => Activity.exception(noBrokersAvailableException)
         case Some(set) if set.isEmpty => Activity.exception(noBrokersAvailableException)
@@ -148,16 +198,19 @@ private[finagle] class BindingFactory[Req, Rep](
         case Some(set) => Activity.value(Name.all(set))
       }
 
-      new DynNameFactory(name, nameCache.apply)
+      val tracer = new NameTracer(path, base, local)
+
+      new DynNameFactory(name, nameCache.apply, tracer)
     }
 
-    new ServiceFactoryCache[Dtab, Req, Rep](
-      newFactory, statsReceiver.scope("dtabcache"),
+    new ServiceFactoryCache[(Dtab, Dtab), Req, Rep](
+      newFactory,
+      statsReceiver.scope("dtabcache"),
       maxNamerCacheSize)
   }
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-    val service = dtabCache(Dtab.base ++ Dtab.local, conn)
+    val service = dtabCache((Dtab.base, Dtab.local), conn)
     val localDtab = Dtab.local
     if (localDtab.isEmpty) service
     else service transform {

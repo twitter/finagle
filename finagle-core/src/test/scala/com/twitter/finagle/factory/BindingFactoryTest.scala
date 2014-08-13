@@ -57,7 +57,8 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
       }
 
     val factory = new BindingFactory(
-      path, newFactory,
+      path,
+      newFactory,
       statsReceiver = imsr,
       maxNamerCacheSize = 2,
       maxNameCacheSize = 2)
@@ -205,7 +206,8 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
     val newService = mock[(Name.Bound, ClientConnection) => Future[Service[String, String]]]
     val svc = mock[Service[String, String]]
     val (name, namew) = Activity[Name.Bound]()
-    val dyn = new DynNameFactory[String, String](name, newService)
+    val tracer = mock[NameTracer]
+    val dyn = new DynNameFactory[String, String](name, newService, tracer)
   }
 
   test("queue requests until name is nonpending (ok)")(new Ctx {
@@ -219,6 +221,15 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
 
     assert(f1.poll === Some(Return(svc)))
     assert(f2.poll === Some(Return(svc)))
+
+    // make sure the trace fires when each request is made
+    verify(tracer, times(0))(Return(Name.empty))
+
+    Await.result(f1)("foo")
+    Await.result(f1)("bar")
+    Await.result(f2)("baz")
+
+    verify(tracer, times(3))(Return(Name.empty))
   })
 
   test("queue requests until name is nonpending (fail)")(new Ctx {
@@ -233,6 +244,7 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
 
     assert(f1.poll === Some(Throw(exc)))
     assert(f2.poll === Some(Throw(exc)))
+    verify(tracer, times(2))(Throw(exc))
   })
 
   test("dequeue interrupted requests")(new Ctx {
@@ -248,6 +260,8 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
     f1.poll match {
       case Some(Throw(cce: CancelledConnectionException)) =>
         assert(cce.getCause === exc)
+        // no throw for cancel
+        verify(tracer, times(0))(Throw(cce))
       case _ => fail()
     }
     assert(f2.poll === None)
@@ -256,3 +270,4 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
     assert(f2.poll === None)
   })
 }
+
