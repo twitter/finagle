@@ -31,28 +31,7 @@ object Smtp extends Client[Request, Reply]{
    * it also performs dot stuffing.
    */
   override def newClient(dest: Name, label: String): ServiceFactory[Request, Reply] = {
-
-    val quitOnCloseClient = {
-      new ServiceFactoryProxy[Request, Reply](defaultClient.newClient(dest, label)) {
-        override def apply(conn: ClientConnection): Future[ServiceProxy[Request, Reply]] = {
-          self.apply(conn) map { service =>
-            val quitOnClose = new ServiceProxy[Request, Reply](service) {
-              override def close(deadline: Time): Future[Unit] = {
-                if (service.isAvailable)
-                  service(Request.Quit).unit
-                else
-                  Future.Done
-              } ensure {
-                service.close(deadline)
-              }
-            }
-            quitOnClose
-          }
-        }
-      }
-    }
-
-    DataFilter andThen quitOnCloseClient
+    DataFilter andThen defaultClient.newClient(dest, label)
   }
 }
 

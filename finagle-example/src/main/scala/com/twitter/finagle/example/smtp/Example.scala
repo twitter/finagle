@@ -34,6 +34,7 @@ object Example {
     log.info("Sending email...")
 
     Await.ready(res)
+    send.close()
 
     log.info("Sent")
   }

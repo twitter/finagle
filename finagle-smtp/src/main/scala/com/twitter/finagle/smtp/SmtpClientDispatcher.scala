@@ -100,6 +100,8 @@ class SmtpClientDispatcher(trans: Transport[Request, UnspecifiedReply])
     }
   }
 
+  override def close(deadline: Time) = apply(Request.Quit).unit ensure super.close(deadline)
+
   /**
    * Constructs a specified [[com.twitter.finagle.smtp.reply.Reply]] judging by the code
    * of a given [[com.twitter.finagle.smtp.reply.UnspecifiedReply]].
