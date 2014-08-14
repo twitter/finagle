@@ -2,7 +2,7 @@
 
 ## Getting involved
 
-* Website: http://twitter.github.io/finagle/
+* Website: https://twitter.github.io/finagle/
 * Source: https://github.com/twitter/finagle/
 * Mailing List: [finaglers@googlegroups.com](https://groups.google.com/forum/#!forum/finaglers)
 * IRC: `#finagle` on Freenode
@@ -14,8 +14,8 @@ Finagle’s code is protocol agnostic, simplifying the implementation of new
 protocols.
 
 For extensive documentation, please see the
-[user guide](http://twitter.github.io/finagle/guide/) and
-[API documentation](http://twitter.github.io/finagle/docs/#com.twitter.finagle.package)
+[user guide](https://twitter.github.io/finagle/guide/) and
+[API documentation](https://twitter.github.io/finagle/docs/#com.twitter.finagle.package)
 websites. Documentation improvements are always welcome, so please send patches
 our way.
 

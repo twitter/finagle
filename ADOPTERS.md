@@ -3,12 +3,12 @@
 Twitter isn't the only company using Finagle. We're sure the following list
 isn't complete, so please [let us know][0] if your company should be included,
 or if you'd like us to feature a link to a blog post or article about how
-you're using Finagle. Or even better, add the links yourself and
-[submit a pull request][1]!
+you're using Finagle. Or even better, add the links yourself (please use HTTPS
+URLs if possible) and [submit a pull request][1]!
 
 * [Box](https://www.box.com/)
 * [Foursquare](https://foursquare.com/)
-* [Gigya](http://www.gigya.com/)
+* [Gigya](https://www.gigya.com/)
 * [Green Man Gaming](http://www.greenmangaming.com/)
 * [Gutefrage.net](http://www.gutefrage.net/)
   * ["Introducing Gutefrage.net's Service-Oriented Architecture"][2]
@@ -21,10 +21,10 @@ you're using Finagle. Or even better, add the links yourself and
 * [Pinterest](https://www.pinterest.com/)
   * ["How we make pins more useful"][3]
 * [Qubit](http://www.qubitproducts.com/)
-* [Rdio](http://www.rdio.com/)
+* [Rdio](https://www.rdio.com/)
   * [Thor, a Finagle-based image processor][4]
 * [Reputation.com](https://www.reputation.com/)
-* [Sharethrough](http://www.sharethrough.com/)
+* [Sharethrough](https://www.sharethrough.com/)
   * ["Finagle @ Sharethrough: Twitter #Conf Presentation"][5]
 * [SoundCloud](https://soundcloud.com/)
   * ["Building Products at SoundCloud—Part III: Microservices in Scala and
@@ -36,7 +36,7 @@ you're using Finagle. Or even better, add the links yourself and
 * [StumbleUpon](https://www.stumbleupon.com/)
 * [Tapad](http://www.tapad.com/)
   * [Case study][9] by [Typesafe][10]
-* [Teads.tv](http://teads.tv/)
+* [Teads.tv](https://teads.tv/)
 * [Tumblr](https://www.tumblr.com/)
 * [Twitter](https://twitter.com/)
   * ["Finagle: A Protocol-Agnostic RPC System"][11]
@@ -48,9 +48,9 @@ you're using Finagle. Or even better, add the links yourself and
 [3]: http://engineering.pinterest.com/post/59132790640/how-we-make-pins-more-useful
 [4]: https://github.com/rdio/thor
 [5]: http://engineering.sharethrough.com/blog/2014/04/17/finagle-at-sharethrough-twitter-conf-talk/
-[6]: http://developers.soundcloud.com/blog/building-products-at-soundcloud-part-3-microservices-in-scala-and-finagle
+[6]: https://developers.soundcloud.com/blog/building-products-at-soundcloud-part-3-microservices-in-scala-and-finagle
 [7]: http://sproutsocial.com/insights/engineering-twitter-trends-report/
 [8]: http://engineering.strava.com/routemaster/
-[9]: http://typesafe.com/blog/tapad_turns_to_typesafe_platform
-[10]: http://typesafe.com/
+[9]: https://typesafe.com/blog/tapad_turns_to_typesafe_platform
+[10]: https://typesafe.com/
 [11]: https://blog.twitter.com/2011/finagle-a-protocol-agnostic-rpc-system
