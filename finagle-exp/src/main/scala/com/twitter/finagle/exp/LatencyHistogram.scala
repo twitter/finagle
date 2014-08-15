@@ -15,7 +15,7 @@ private[finagle] class LatencyHistogram(
     range: Duration, history: Duration) {
   require(range > Duration.Zero)
 
-  private[this] val N = range.inMilliseconds.toInt
+  private[this] val N = range.inMilliseconds.toInt + 1
   private[this] val n = new WindowedAdder(history, 5)
   private[this] val tab = Array.fill(N) { new WindowedAdder(history, 5) }
   

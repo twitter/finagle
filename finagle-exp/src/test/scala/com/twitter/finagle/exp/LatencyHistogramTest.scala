@@ -62,4 +62,10 @@ class LatencyHistogramTest extends FunSuite {
       assert(histo.quantile(99) === 10.milliseconds)
     }
   }
+
+  test("handles durations longer than range by not exploding") {
+    val histo = new LatencyHistogram(range=40.milliseconds,
+      history=4.seconds)
+    histo.add(40.milliseconds)
+  }
 }
