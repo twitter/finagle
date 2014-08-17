@@ -90,9 +90,10 @@ class MailFilterTest extends FunSuite {
 
 @RunWith(classOf[JUnitRunner])
 class HeaderFilterTest extends FunSuite {
-  def hasOneHeader(body: Seq[String], header: String): Boolean = body.count(_.startsWith(header)) == 1
+  def hasOneHeader(body: Seq[String], header: String): Boolean =
+    body.count(_.startsWith(header.toLowerCase)) == 1
   def checkHeader(body: Seq[String], header: String, expected: String) = {
-    val line = body.find(_.startsWith(header))
+    val line = body.find(_.startsWith(header.toLowerCase))
     line match {
       case Some(hdr) => {
         val value = hdr drop header.length

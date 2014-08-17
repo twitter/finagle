@@ -36,6 +36,8 @@ class SmtpClientDispatcherTest extends FunSuite {
     val (client, server, transport) = newTestSet
     server.offer(InvalidReply("wronggreet"))
     val dispatcher = new SmtpClientDispatcher(transport)
+    dispatcher(Request.Hello)
+    server.offer(ClosingTransmission("QUIT"))
     assert(!dispatcher.isAvailable)
   }
 

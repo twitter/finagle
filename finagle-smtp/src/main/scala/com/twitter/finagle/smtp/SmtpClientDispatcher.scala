@@ -30,8 +30,6 @@ class SmtpClientDispatcher(trans: Transport[Request, UnspecifiedReply])
         case ServiceReady(_,_) => Future.Done
         case other => Future.exception(InvalidReply(other.toString))
       }
-    } onFailure {
-      case _ =>  close()
     }
   }
 
@@ -100,7 +98,9 @@ class SmtpClientDispatcher(trans: Transport[Request, UnspecifiedReply])
     }
   }
 
-  override def close(deadline: Time) = apply(Request.Quit).unit ensure super.close(deadline)
+  override def close(deadline: Time) = connPhase flatMap { _ =>
+    apply(Request.Quit).unit
+  } ensure super.close(deadline)
 
   /**
    * Constructs a specified [[com.twitter.finagle.smtp.reply.Reply]] judging by the code
