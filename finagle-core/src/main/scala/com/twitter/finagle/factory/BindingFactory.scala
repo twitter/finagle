@@ -213,18 +213,9 @@ private[finagle] class BindingFactory[Req, Rep](
     val service = dtabCache((Dtab.base, Dtab.local), conn)
     val localDtab = Dtab.local
     if (localDtab.isEmpty) service
-    else service transform {
-      case Throw(e: NoBrokersAvailableException) =>
+    else service rescue {
+      case e: NoBrokersAvailableException =>
         Future.exception(new NoBrokersAvailableException(e.name, localDtab))
-      case Throw(e) =>
-        Future.exception(e)
-      case Return(service) =>
-        Future.value(new SimpleFilter[Req, Rep] {
-          def apply(req: Req, service: Service[Req, Rep]): Future[Rep] =
-            service(req) rescue { case e: NoBrokersAvailableException =>
-              Future.exception(new NoBrokersAvailableException(e.name, localDtab))
-            }
-        } andThen service)
     }
   }
 

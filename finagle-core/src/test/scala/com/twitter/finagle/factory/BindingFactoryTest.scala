@@ -89,7 +89,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     assert(noBrokers.localDtab === Dtab.empty)
   })
 
-  test("Includes path and Dtab.local in NoBrokersAvailableException from service creation") (new Ctx {
+  test("Includes path and Dtab.local in NoBrokersAvailableException from name resolution") (new Ctx {
     val localDtab = Dtab.read("/baz=>/quux")
 
     val noBrokers = intercept[NoBrokersAvailableException] {
@@ -100,28 +100,25 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     assert(noBrokers.localDtab === localDtab)
   })
 
-  test("Includes path and Dtab.local in NoBrokersAvailableException from service call") {
+  test("Includes path and Dtab.local in NoBrokersAvailableException from service creation") {
     val localDtab = Dtab.read("/foo/bar=>/test1010")
 
     val factory = new BindingFactory(
       Path.read("/foo/bar"),
       newFactory = { addr =>
         new ServiceFactory[Unit, Unit] {
-          def apply(conn: ClientConnection) = Future.value(new Service[Unit, Unit] {
-            def apply(_unit: Unit) = Future.exception(new NoBrokersAvailableException("/foo/bar"))
-          })
+          def apply(conn: ClientConnection) =
+            Future.exception(new NoBrokersAvailableException("/foo/bar"))
 
           def close(deadline: Time) = Future.Done
         }
       })
 
-    val service =
+    val noBrokers = intercept[NoBrokersAvailableException] {
       Dtab.unwind {
         Dtab.local = localDtab
         Await.result(factory())
       }
-    val noBrokers = intercept[NoBrokersAvailableException] {
-      Await.result(service())
     }
 
     assert(noBrokers.name === "/foo/bar")
@@ -270,4 +267,3 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
     assert(f2.poll === None)
   })
 }
-
