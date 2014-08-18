@@ -20,7 +20,7 @@ class LoadServiceTest extends FunSuite with MockitoSugar {
     val buf = mutable.Buffer[ClassPath.Info]()
     val rand = new Random()
 
-    val f = File.createTempFile("/tmp", "__finagle_loadservice" + rand.nextInt(10000))
+    val f = File.createTempFile("tmp", "__finagle_loadservice" + rand.nextInt(10000))
     f.delete
     if (f.mkdir()) {
       f.setReadable(false)
@@ -35,22 +35,16 @@ class LoadServiceTest extends FunSuite with MockitoSugar {
     val buf = mutable.Buffer[ClassPath.Info]()
     val rand = new Random()
 
-    val f = File.createTempFile("/tmp", "__finagle_loadservice" + rand.nextInt(10000))
+    val f = File.createTempFile("tmp", "__finagle_loadservice" + rand.nextInt(10000))
     f.delete
     if (f.mkdir()) {
-      val subDir = new File(f.getAbsolutePath() + "/subdir/")
+      val subDir = new File(f.getAbsolutePath(), "subdir")
       subDir.mkdir()
       assert(subDir.exists())
       subDir.setReadable(false)
 
-      try {
-        ClassPath.browseUri(f.toURI, loader, buf)
-        assert(buf.isEmpty)
-      } catch {
-        case e: NullPointerException =>
-          e.printStackTrace()
-          fail()
-      }
+      ClassPath.browseUri(f.toURI, loader, buf)
+      assert(buf.isEmpty)
 
       subDir.delete()
       f.delete()
