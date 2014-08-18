@@ -93,16 +93,16 @@ package com.twitter.finagle
  * a logical destination encoded as a UTF-8 string. A delegation table
  * follows describing rewrite rules that apply to this request.
  *
- * ''size:4 Rreq:1 status:1 body:'' replies to a request. Status
+ * ''size:4 Rreq:1 tag:3 status:1 body:'' replies to a request. Status
  * codes are as follows: 0=OK; the body contains the reply. 1=ERROR; the
  * body contains a string describing the error. 2=NACK; a negative
  * acknowledgment, the body contains a string describing the reason.
  *
- * ''size:4 Rdispatch:1 status:1 nctx:2 (key~2 value~2){nctx} body:'' replies
+ * ''size:4 Rdispatch:1 tag:3 status:1 nctx:2 (key~2 value~2){nctx} body:'' replies
  * to a Tdispatch request. Status codes are as in Rreq. Replies can include
  * request contexts.
  *
- * ''size:4 Rerr:1 why:'' indicates that the corresponding T message
+ * ''size:4 Rerr:1 tag:3 why:'' indicates that the corresponding T message
  * produced an error. Rerr is specifically for server errors: the server
  * failed to interpret or act on the message. The body carries a string
  * describing the error.
@@ -111,7 +111,7 @@ package com.twitter.finagle
  * client to stop sending new requests. A client acknowledges this with
  * an Rdrain message.
  *
- * ''size:4 Tping:1'' is sent by either party to check the liveness of
+ * ''size:4 Tping:1 tag:3'' is sent by either party to check the liveness of
  * its peer; these should be responded to immediately with a Rping
  * message.
  *
@@ -122,7 +122,7 @@ package com.twitter.finagle
  * *not* free the server from the obligation of replying to the original
  * Treq.
  *
- * ''[4]size[1]Tlease[1]unit[8]howmuch'' is a marker message indicating that a
+ * ''size:4 Tlease:1 tag:3 unit:1 howmuch:8'' is a marker message indicating that a
  * lease has been issued for ''howmuch'' unit. Unit '1' is reserved for duration in
  * milliseconds. Whenever a lease has not been issued, a client can assume it holds
  * an indefinite lease. Adhering to the lease is optional, but the server may

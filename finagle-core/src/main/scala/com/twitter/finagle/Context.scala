@@ -5,7 +5,6 @@ import com.twitter.finagle.tracing.TraceContext
 import com.twitter.io.Buf
 import com.twitter.logging.Level
 import com.twitter.util.{Local, NonFatal}
-import java.nio.charset.Charset
 
 /**
  * A context is a piece of serializable metadata managed by a

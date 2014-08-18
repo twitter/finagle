@@ -6,7 +6,6 @@ import com.twitter.finagle.mux.lease.Acting
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
-import com.twitter.io.Buf
 import com.twitter.util.{Future, Promise, Time, Duration}
 import com.twitter.conversions.time._
 import java.util.logging.Logger
@@ -159,9 +158,9 @@ private[finagle] class ClientDispatcher (
       case None =>
         Future.exception(WriteException(new Exception("Exhausted tags")))
       case Some(tag) =>
-        trans.write(encode(Tping(tag))) onFailure { case exc =>
+        trans.write(encode(Tping(tag))).onFailure { case exc =>
           reqs.unmap(tag)
-        } flatMap(Function.const(p)) map(Function.const(()))
+        }.flatMap(Function.const(p)).unit
     }
   }
 

@@ -6,15 +6,14 @@ import com.twitter.finagle.
 import com.twitter.finagle.mux._
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import com.twitter.finagle.stats.ClientStatsReceiver
-import com.twitter.finagle.tracing.{Trace, Annotation, TraceId}
+import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Logger
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 import scala.collection.JavaConverters._
 
 object Session {

@@ -28,10 +28,10 @@ object ServerDispatcher {
  * A ServerDispatcher for the mux protocol.
  */
 private[finagle] class ServerDispatcher private[finagle](
-  trans: Transport[ChannelBuffer, ChannelBuffer],
-  service: Service[ChannelBuffer, ChannelBuffer],
-  canDispatch: Boolean, // XXX: a hack to indicate whether a server understand {T,R}Dispatch
-  lessor: Lessor // the lessor that the dispatcher should register with in order to get leases
+    trans: Transport[ChannelBuffer, ChannelBuffer],
+    service: Service[ChannelBuffer, ChannelBuffer],
+    canDispatch: Boolean, // XXX: a hack to indicate whether a server understand {T,R}Dispatch
+    lessor: Lessor // the lessor that the dispatcher should register with in order to get leases
 ) extends Closable with Lessee {
   def this(
     trans: Transport[ChannelBuffer, ChannelBuffer],

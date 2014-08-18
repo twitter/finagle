@@ -15,10 +15,20 @@ case class BadMessageException(why: String) extends Exception(why)
 // TODO: when the new com.twitter.codec.Codec arrives, define Message
 // parsing as a bijection between ChannelBuffers and Message.
 
+/**
+ * Documentation details are in the [[com.twitter.finagle.mux]] package object.
+ */
 private[finagle] sealed trait Message {
-  val typ: Byte
-  val tag: Int
-  val buf: ChannelBuffer
+  /**
+   * Values should correspond to the constants defined in
+   * [[com.twitter.finagle.mux.Message.Types]]
+   */
+  def typ: Byte
+
+  /** Only 3 of its bytes are used. */
+  def tag: Int
+
+  def buf: ChannelBuffer
 }
 
 private[finagle] object Message {
@@ -57,11 +67,11 @@ private[finagle] object Message {
   private val bufOfChar = Array[ChannelBuffer](
     mkByte(0), mkByte(1), mkByte(2))
 
-  abstract class EmptyMessage(val typ: Byte) extends Message {
-    val buf = ChannelBuffers.EMPTY_BUFFER
+  abstract class EmptyMessage extends Message {
+    def buf = ChannelBuffers.EMPTY_BUFFER
   }
-  abstract class MarkerMessage(val typ: Byte) extends Message {
-    val tag = 0
+  abstract class MarkerMessage extends Message {
+    def tag = 0
   }
 
   object Treq {
@@ -71,9 +81,10 @@ private[finagle] object Message {
     }
   }
 
+  /** A transmit request message */
   case class Treq(tag: Int, traceId: Option[TraceId], req: ChannelBuffer) extends Message {
     import Treq._
-    val typ = Types.Treq
+    def typ = Types.Treq
     lazy val buf = {
       val header = traceId match {
         // Currently we require the 3-tuple, but this is not
@@ -102,8 +113,9 @@ private[finagle] object Message {
     }
   }
 
+  /** A reply to a `Treq` message */
   abstract class Rreq(rreqType: Byte, body: ChannelBuffer) extends Message {
-    val typ = Types.Rreq
+    def typ = Types.Rreq
     lazy val buf = ChannelBuffers.wrappedBuffer(bufOfChar(rreqType), body)
   }
 
@@ -118,7 +130,7 @@ private[finagle] object Message {
       dtab: Dtab,
       req: ChannelBuffer
   ) extends Message {
-    val typ = Types.Tdispatch
+    def typ = Types.Tdispatch
     lazy val buf = {
       var n = 2
       var seq = contexts
@@ -169,12 +181,13 @@ private[finagle] object Message {
     }
   }
 
+  /** A reply to a `Tdispatch` message */
   abstract class Rdispatch(
       status: Byte,
       contexts: Seq[(ChannelBuffer, ChannelBuffer)],
       body: ChannelBuffer
   ) extends Message {
-    val typ = Types.Rdispatch
+    def typ = Types.Rdispatch
     lazy val buf = {
       var n = 1+2
       var seq = contexts
@@ -218,24 +231,38 @@ private[finagle] object Message {
       contexts: Seq[(ChannelBuffer, ChannelBuffer)]
   ) extends Rdispatch(2, contexts, ChannelBuffers.EMPTY_BUFFER)
 
-  case class Tdrain(tag: Int) extends EmptyMessage(Types.Tdrain)
-  case class Rdrain(tag: Int) extends EmptyMessage(Types.Rdrain)
-  case class Tping(tag: Int) extends EmptyMessage(Types.Tping)
-  case class Rping(tag: Int) extends EmptyMessage(Types.Rping)
+  /** Indicates to the client to stop sending new requests. */
+  case class Tdrain(tag: Int) extends EmptyMessage { def typ = Types.Tdrain }
+
+  /** Response from the client to a `Tdrain` message */
+  case class Rdrain(tag: Int) extends EmptyMessage { def typ = Types.Rdrain }
+
+  /** Used to check liveness */
+  case class Tping(tag: Int) extends EmptyMessage { def typ = Types.Tping }
+
+  /** Response to a `Tping` message */
+  case class Rping(tag: Int) extends EmptyMessage { def typ = Types.Rping }
+
+  /** Indicates that the corresponding T message produced an error. */
   case class Rerr(tag: Int, error: String) extends Message {
     // Use the old Rerr type in a transition period so that we
     // can be reasonably sure we remain backwards compatible with
     // old servers.
 
-    val typ = Types.BAD_Rerr
+    def typ = Types.BAD_Rerr
     lazy val buf = encodeString(error)
   }
 
+  /**
+   * Indicates that the `Treq` with the tag indicated by `which` has been discarded
+   * by the client.
+   */
   case class Tdiscarded(which: Int, why: String)
       // Use the old Tdiscarded type in a transition period so that we
       // can be reasonably sure we remain backwards compatible with
       // old servers.
-      extends MarkerMessage(Types.BAD_Tdiscarded) {
+      extends MarkerMessage {
+    def typ = Types.BAD_Tdiscarded
     lazy val buf = ChannelBuffers.wrappedBuffer(
       ChannelBuffers.wrappedBuffer(
         Array[Byte]((which>>16 & 0xff).toByte, (which>>8 & 0xff).toByte, (which & 0xff).toByte)),
@@ -255,7 +282,8 @@ private[finagle] object Message {
     def apply(end: Time): Tlease = Tlease(1, end.sinceEpoch.inMilliseconds)
   }
 
-  case class Tlease(unit: Byte, howLong: Long) extends MarkerMessage(Types.Tlease) {
+  case class Tlease(unit: Byte, howLong: Long) extends MarkerMessage {
+    def typ = Types.Tlease
     lazy val buf = {
       val b = ChannelBuffers.buffer(9)
       b.writeByte(unit)
@@ -442,7 +470,7 @@ private[finagle] object Message {
     if (buf.readableBytes < 4)
       throw BadMessageException("short message")
     val head = buf.readInt()
-    val typ = (head>>24 & 0xff).toByte
+    def typ = (head>>24 & 0xff).toByte
     val tag = head & 0x00ffffff
     typ match {
       case Types.Treq => decodeTreq(tag, buf)
