@@ -24,7 +24,8 @@ We'll use sbt_ to build our project. Finagle is published to Maven Central,
 so little setup is needed: put the following into a file called `build.sbt` in 
 a fresh directory:
 
-::
+.. parsed-literal::
+
 	name := "quickstart"
 	
 	version := "1.0"
