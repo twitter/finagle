@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 set -e
 
 dir=/tmp/finagle.$$
