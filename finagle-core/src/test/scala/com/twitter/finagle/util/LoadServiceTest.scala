@@ -1,7 +1,13 @@
 package com.twitter.finagle.util
 
-import com.twitter.finagle.Announcer
-import java.io.File
+import java.net.{InetSocketAddress, URL}
+import java.util
+import java.util.concurrent
+import java.util.concurrent.{Callable, ExecutorService, Executors}
+
+import com.twitter.finagle.{Announcement, Announcer}
+import java.io.{InputStream, File}
+import com.twitter.util.Future
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -57,4 +63,57 @@ class LoadServiceTest extends FunSuite with MockitoSugar {
     }
   }
 
+  test("LoadService should find services on non URLClassloader") {
+    val loader = new MetaInfCodedClassloader
+    // Run LoadService in a different thread from the custom classloader
+    val clazz: Class[_] = loader.loadClass("com.twitter.finagle.util.LoadServiceCallable")
+    val executor: ExecutorService = Executors.newSingleThreadExecutor()
+    val future: concurrent.Future[Seq[Any]] = executor.submit(clazz.newInstance().asInstanceOf[Callable[Seq[Any]]])
+
+    // Get the result
+    val announcers: Seq[Any] = future.get()
+    assert(announcers.find(_.getClass.getName.endsWith("FooAnnouncer")).isDefined,
+      "Non-URLClassloader found announcer was not discovered"
+    )
+  }
+
+}
+
+class LoadServiceCallable extends Callable[Seq[Any]] {
+  override def call(): Seq[Any] = LoadService[Announcer]()
+}
+
+class MetaInfCodedClassloader extends ClassLoader {
+  override def loadClass(p1: String): Class[_] = {
+    if (p1.startsWith("com.twitter.finagle" )) {
+      try {
+        val is: InputStream = getClass.getClassLoader().getResourceAsStream(p1.replaceAll("\\.", "/") + ".class")
+        val buf = new Array[Byte](10000)
+        val len = is.read(buf)
+        defineClass(p1, buf, 0, len)
+      } catch {
+        case e => throw new ClassNotFoundException("Couldn't load class " + p1, e)
+      }
+    } else {
+      getParent().loadClass(p1)
+    }
+  }
+
+  override def getResources(p1: String): util.Enumeration[URL] = {
+    // Totally contrived example classloader that stores "META-INF" as "HIDDEN-INF"
+    // Not a good example of real-world issues, but it does the job at hiding the service definition from the
+    // com.twitter.finagle.util.ClassPath code
+    val resources: util.Enumeration[URL] = super.getResources(p1.replace("META-INF", "HIDDEN-INF"))
+    if (resources == null) {
+      super.getResources(p1)
+    } else {
+      resources
+    }
+  }
+}
+
+class FooAnnouncer extends Announcer {
+  override val scheme: String = "foo"
+
+  override def announce(addr: InetSocketAddress, name: String): Future[Announcement] = null
 }

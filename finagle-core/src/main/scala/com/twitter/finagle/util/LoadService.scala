@@ -157,8 +157,15 @@ object LoadService {
         cls <- clss
         if cls.nonEmpty
       } yield (iface -> cls)
-    
-      mappings.foldLeft(Map[String, Set[String]]()) {
+
+      val clFoundResources = for {
+        rsc <- iface.getClassLoader.getResources("META-INF/services/" + iface.getName).asScala
+        source = Source.fromURL(rsc)
+        line <- source.getLines()
+      } yield line
+      val slValues = Map(iface.getName() -> clFoundResources.toSet)
+
+      mappings.foldLeft(slValues) {
         case (m, (iface, cls)) =>
           m + (iface -> (m.getOrElse(iface, Set()) + cls))
       }
