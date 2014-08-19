@@ -190,7 +190,6 @@ case class Http(
         underlying: ServiceFactory[HttpRequest, HttpResponse]
       ): ServiceFactory[HttpRequest, HttpResponse] = {
         val checkRequest = new CheckHttpRequestFilter
-        val dtab = new DtabFilter[HttpRequest, HttpResponse]
 
         val tracing = if (_enableTracing) {
           new HttpServerTracingFilter[HttpRequest, HttpResponse](config.serviceName)
@@ -199,7 +198,7 @@ case class Http(
         }
 
         tracing andThen 
-          dtab andThen 
+          DtabFilter.Netty andThen
           checkRequest andThen 
           underlying
       }
@@ -413,7 +412,7 @@ case class RichHttp[REQUEST <: Request](
       override def prepareConnFactory(
         underlying: ServiceFactory[REQUEST, Response]
       ): ServiceFactory[REQUEST, Response] = {
-        val dtab = new DtabFilter[REQUEST, Response]
+        val dtab = new DtabFilter.Finagle[REQUEST]
         val tracing = if (httpFactory._enableTracing)
           new HttpServerTracingFilter[REQUEST, Response](config.serviceName)
         else

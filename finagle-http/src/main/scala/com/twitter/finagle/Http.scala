@@ -51,7 +51,7 @@ object HttpServer
 extends DefaultServer[HttpRequest, HttpResponse, Any, Any](
   "http", HttpListener,
   {
-    val dtab = new DtabFilter[HttpRequest, HttpResponse]
+    val dtab = DtabFilter.Netty
     val tracingFilter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("http")
     (t, s) => new HttpServerDispatcher(
       new HttpTransport(t),
@@ -167,7 +167,7 @@ package exp {
     }
 
     protected val newDispatcher: Stack.Params => Dispatcher = {
-      val dtab = new DtabFilter[HttpRequest, HttpResponse]
+      val dtab = DtabFilter.Netty
       val tracingFilter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("http")
       Function.const((t, s) => new HttpServerDispatcher(
         new HttpTransport(t),

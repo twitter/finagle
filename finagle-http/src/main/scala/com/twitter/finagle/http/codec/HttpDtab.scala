@@ -1,11 +1,11 @@
 package com.twitter.finagle.http.codec
 
-import com.twitter.finagle.{Dtab, Dentry, NameTree, Path}
-import org.jboss.netty.handler.codec.http.HttpMessage
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.base64.Base64
-import scala.collection.mutable.ArrayBuffer
+import com.google.common.io.BaseEncoding
+import com.twitter.finagle._
+import com.twitter.util.{Throw, Try, Return}
 import java.nio.charset.Charset
+import org.jboss.netty.handler.codec.http.HttpMessage
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * Dtab serialization for Http. Dtabs are encoded into Http
@@ -22,24 +22,17 @@ import java.nio.charset.Charset
 object HttpDtab {
   private val Prefix = "x-dtab-"
   private val Maxsize = 100
-  private val Utf8 = Charset.forName("UTF-8") 
-  private val Ascii = Charset.forName("ASCII") 
+  private val Utf8 = Charset.forName("UTF-8")
+  private val Base64 = BaseEncoding.base64()
 
   private val indexstr: Int => String =
-    ((0 until Maxsize) map(i => i -> "%02d".format(i))).toMap
-  
-  private def encodeValue(v: String): String = {
-    val buf = ChannelBuffers.wrappedBuffer(v.getBytes(Utf8))
-    val breakLines = false     // don't want newlines in http headers
-    val buf64 = Base64.encode(buf, breakLines)
-    buf64.toString(Ascii)
-  }
-  
-  private def decodeValue(v: String): String = {
-    val buf64 = ChannelBuffers.wrappedBuffer(v.getBytes(Ascii))
-    val buf = Base64.decode(buf64)
-    buf.toString(Utf8)
-  }
+    ((0 until Maxsize) map (i => i -> "%02d".format(i))).toMap
+
+  private def b64Encode(v: String): String =
+    Base64.encode(v.getBytes(Utf8))
+
+  private def b64Decode(v: String): Try[String] =
+    Try { Base64.decode(v) } map(new String(_, Utf8))
 
   def clear(msg: HttpMessage) {
     val names = msg.headers.names.iterator()
@@ -62,12 +55,12 @@ object HttpDtab {
     for ((Dentry(prefix, dst), i) <- dtab.zipWithIndex) {
       // TODO: now that we have a proper Dtab grammar,
       // should just embed this directly instead.
-      msg.headers.set(Prefix+indexstr(i)+"-A", encodeValue(prefix.show))
-      msg.headers.set(Prefix+indexstr(i)+"-B".format(i), encodeValue(dst.show))
+      msg.headers.set(Prefix+indexstr(i)+"-A", b64Encode(prefix.show))
+      msg.headers.set(Prefix+indexstr(i)+"-B".format(i), b64Encode(dst.show))
     }
   }
 
-  def read(msg: HttpMessage): Dtab = {
+  def read(msg: HttpMessage): Try[Dtab] = {
     // Common case: no actual overrides.
     var keys: ArrayBuffer[String] = null
     val headers = msg.headers.iterator()
@@ -79,11 +72,11 @@ object HttpDtab {
       }
     }
 
-    if (keys == null) return Dtab.empty
+    if (keys == null) return Return(Dtab.empty)
 
     keys = keys.sorted
     if (keys.size % 2 != 0)
-      return Dtab.empty
+      return Throw(new UnmatchedHeaderException)
 
     val n = keys.size/2
 
@@ -93,28 +86,63 @@ object HttpDtab {
       val j = i*2
       val prefix = keys(j)
       val dest = keys(j+1)
+      if (prefix.size != dest.size ||
+          prefix.substring(0, prefix.size-1) != dest.substring(0, dest.size-1) ||
+          prefix(prefix.size-1) != 'a' || dest(dest.size-1) != 'b')
+        return Throw(new UnmatchedHeaderException)
 
-      if (prefix.size != dest.size)
-        return Dtab.empty
+      val b64src = msg.headers.get(prefix)
+      val src = b64Decode(b64src) match {
+        case Throw(e: IllegalArgumentException) =>
+          return Throw(new HeaderDecodingException(b64src))
+        case Throw(e) =>
+          return Throw(e)
 
-      if (prefix.substring(0, prefix.size-1) != dest.substring(0, dest.size-1))
-        return Dtab.empty
-      if (prefix(prefix.size-1) != 'a' || dest(dest.size-1) != 'b')
-        return Dtab.empty
+        case Return(pathStr) =>
+          try Path.read(pathStr) catch {
+            case iae: IllegalArgumentException =>
+              return Throw(new InvalidPathException(pathStr, iae.getMessage))
+          }
+      }
 
-      dentries(i) =  
-        try {
-          val src = Path.read(decodeValue(msg.headers.get(prefix)))
-          val dst = NameTree.read(decodeValue(msg.headers.get(dest)))
-          Dentry(src, dst)
-        } catch {
-          case _: IllegalArgumentException =>
-            return Dtab.empty
-        }
+      val b64dst = msg.headers.get(dest)
+      val dst = b64Decode(b64dst) match {
+        case Throw(e: IllegalArgumentException) =>
+          return Throw(new HeaderDecodingException(b64dst))
+        case Throw(e) =>
+          return Throw(e)
 
+        case Return(nameStr) =>
+          try NameTree.read(nameStr) catch {
+            case iae: IllegalArgumentException =>
+              return Throw(new InvalidNameException(nameStr, iae.getMessage))
+          }
+      }
+
+      dentries(i) = Dentry(src, dst)
       i += 1
     }
 
-    Dtab(dentries)
+    Return(Dtab(dentries))
   }
+
+  /*
+   * X-Dtab header parsing errors
+   */
+
+  sealed class HeaderException(msg: String)
+    extends Exception(msg)
+    with NoStacktrace
+
+  class UnmatchedHeaderException
+    extends HeaderException("Unmatched X-Dtab headers")
+
+  class HeaderDecodingException(value: String)
+    extends HeaderException("Value not b64-encoded: "+value)
+
+  class InvalidPathException(path: String, msg: String)
+    extends HeaderException("Invalid path: "+path+": "+msg)
+
+  class InvalidNameException(name: String, msg: String)
+    extends HeaderException("Invalid name: "+name+": "+msg)
 }
