@@ -285,7 +285,7 @@ private[finagle] object ClockedDrainer {
   private[this] val lr = if (drainerDebug()) new DedupingLogsReceiver(log) else NullLogsReceiver
 
   lazy val flagged: Lessor = if (drainerEnabled()) {
-    Coordinator.parNewCMS() match {
+    Coordinator.create() match {
       case None =>
         log.warning("Failed to acquire a ParNew+CMS Coordinator; cannot "+
           "construct drainer")
