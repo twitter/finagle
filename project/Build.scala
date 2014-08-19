@@ -484,11 +484,14 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-benchmark",
+    // include again when we can properly depend on finagleSwift
+    excludeFilter in Compile := "ThriftDispatch.scala",
     libraryDependencies ++= Seq(
       util("codec"),
-      "com.google.caliper" % "caliper" % "0.5-rc1"
+      "com.google.caliper" % "caliper" % "0.5-rc1",
+      "com.twitter.common" % "metrics-data-sample" % "0.0.1"
     )
-  ).dependsOn(finagleCore, finagleStats, finagleOstrich4, finagleZipkin)
+  ).dependsOn(finagleCore, finagleStats, finagleOstrich4, finagleZipkin, finagleMemcached)
 
   lazy val finagleTesters = Project(
     id = "finagle-testers",
@@ -508,8 +511,8 @@ object Finagle extends Build {
     name := "finagle-spdy"
   ).dependsOn(finagleCore)
 
-  /*
-  lazy val finagleSwift = Project(
+
+/*  lazy val finagleSwift = Project(
     id = "finagle-swift",
     base = file("finagle-swift"),
     settings = Project.defaultSettings ++
@@ -519,8 +522,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       "com.twitter.com.facebook.swift" % "swift-codec" % "0.6.0"
     )
-  ).dependsOn(finagleCore, finagleThrift)
-   */
+  ).dependsOn(finagleCore, finagleThrift)*/
 
   lazy val finagleDoc = Project(
     id = "finagle-doc",

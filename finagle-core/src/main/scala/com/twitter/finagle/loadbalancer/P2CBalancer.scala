@@ -1,5 +1,6 @@
 package com.twitter.finagle.loadbalancer
 
+import com.twitter.app.GlobalFlag
 import com.twitter.finagle._
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
@@ -8,6 +9,10 @@ import com.twitter.util.{Future, Var, Time, Return, Throw, Closable}
 import java.util.concurrent.atomic.AtomicInteger
 import scala.annotation.tailrec
 import scala.collection.immutable
+
+package exp {
+  object loadMetric extends GlobalFlag("leastReq", "Metric used to measure load across endpoints (leastReq | pendingEwmaMs)")
+}
 
 object P2CBalancerFactory extends WeightedLoadBalancerFactory {
   def newLoadBalancer[Req, Rep](
@@ -18,10 +23,123 @@ object P2CBalancerFactory extends WeightedLoadBalancerFactory {
 }
 
 private object P2CBalancer {
+  trait LoadMetric {
+    /**
+     * Returns the instantaneous load which determines how
+     * the load balancer schedules work on this node.
+     */
+    def get(): Double
+
+    /**
+     * Called when the load balancer schedules a request
+     * on this node. The method is expected to return an
+     * identifying handle on the request.
+     */
+    def start(): Long
+
+    /**
+     * Called when the request associated with the handle
+     * has returned.
+     */
+    def end(h: Long): Unit
+
+    /**
+     * Returns the load rate of this node. This is usually
+     * a dimensionless quantity that can be expressed as
+     * a count.
+     */
+    def rate(): Int
+  }
+
+  object LoadMetric {
+    val MaxValue = new LoadMetric {
+      def start() = 0
+      def end(by: Long) = {}
+      def rate() = Int.MaxValue
+      def get() = Double.MaxValue
+    }
+
+    def leastReq() = new LoadMetric {
+      private[this] val load = new AtomicInteger(0)
+      def start() = { load.incrementAndGet(); 1 }
+      def end(by: Long) = load.getAndAdd(-by.toInt)
+      def rate() = load.get()
+      def get() = load.get().toDouble
+    }
+
+    /**
+     * A load metric designed to quickly converge in the face of slow
+     * endpoints. Load is determined by oustanding nanos while taking
+     * into account an endpoints latency history. The algorithm is
+     * designed to quickly react to latency spikes and cautiously recover
+     * from them.
+     */
+    def ewma(sr: StatsReceiver, name: String) = new LoadMetric {
+      private[this] val Penalty: Double = Double.MaxValue/2
+      private[this] val Sec: Long = 1000000000 // in nanos
+      // The mean lifetime that an rtt observation is weighted
+      // as part of the `cost`. A observation reaches its half-life
+      // after Tau*ln(2).
+      private[this] val Tau: Long = 2*Sec
+
+      // these are all guarded by synchronization on `this`
+      private[this] var stamp: Long = 0L         // last timestamp in nanos we updated
+      private[this] var lastRep: Long = 0L      // last timestamp in nanos we received a response
+      private[this] var pendingReq: Int = 0     // rate nanos/nanos at time t
+      private[this] var pendingTime: Long = 0L  // pending load in nanos
+      private[this] var cost: Double = 0.0      // ewma of rtt
+
+      private[this] val loadGauge = sr.addGauge("loadms") { (get()/1000000).toFloat }
+
+      @inline private[this] def update() {
+        val t1 = System.nanoTime()
+        pendingTime += (t1-stamp)*pendingReq
+        stamp = t1
+      }
+
+      def rate(): Int = synchronized { pendingReq }
+
+      def get(): Double = synchronized {
+        update()
+        // We assume the worst when we don't have any historical
+        // data but have outstanding requests (i.e. we penalize the host).
+        // To avoid arbitrarily balancing across an influx of penalized hosts,
+        // we also factor in our outstanding load.
+        if (cost == 0.0 && pendingReq != 0) Penalty+pendingTime
+        else {
+          // Consider the load if we were to schedule an additional request
+          // on to this host.
+          val pending = if (pendingReq == 0) 0 else pendingTime+(pendingTime/pendingReq)
+          math.max(cost*(pendingReq+1.0), pending.toDouble)
+        }
+      }
+
+      def start(): Long = synchronized {
+        update()
+        pendingReq += 1
+        stamp
+      }
+
+      def end(ts: Long) = synchronized {
+        update()
+        val rtt = stamp-ts
+        val td = stamp-lastRep
+        // For every Tau that elapses, we decay by 1/e
+        val weight = math.exp(-td/Tau)
+        lastRep = stamp
+        pendingReq -= 1
+        pendingTime -= rtt
+        // set a reasonable initial cost
+        if (cost == 0.0) cost = rtt
+        else cost = cost*weight + (1.0-weight)*rtt
+      }
+    }
+  }
+
   case class Node[-Req, +Rep](
     factory: ServiceFactory[Req, Rep],
     weight: Double,
-    load: AtomicInteger = new AtomicInteger(0)
+    load: LoadMetric
   )
 
   /**
@@ -40,7 +158,8 @@ private object P2CBalancer {
 
     private[this] lazy val failingNode: Node[Any, Nothing] = Node(
       new FailingFactory(emptyException),
-      1.0
+      1.0,
+      LoadMetric.MaxValue
     )
 
     { // Build the weight and down vectors.
@@ -85,15 +204,29 @@ private object P2CBalancer {
       if (vector.isEmpty)
         return failingNode
 
+      if (vector.size == 1)
+        return vector(0)
+
       // TODO: determine whether we want to pick according to
       // discretized weights. that is, for fractional load/weight,
       // should we flip another coin according to the implied ratio?
-      val a, b = vector(drv(rng))
+      val a = vector(drv(rng))
+      var b: Node[Req, Rep] = null
+      var i = 0
+      // Try to pick b, b != a, up to 10 times. This is mostly to
+      // account for pathological cases where there is only one
+      // realistically pickable element in the vector (e.g. where
+      // other weights are 0 or close to 0).
+      do {
+        b = vector(drv(rng))
+        i += 1
+      } while (a == b && i < 10)
+
       if (a.weight == 0) {
         // This only happens when all weights are 0.
-        if (a.load.get < b.load.get) a else b
+        if (a.load.get() < b.load.get()) a else b
       } else {
-        if (a.load.get/a.weight < b.load.get/b.weight) a else b
+        if (a.load.get()/a.weight < b.load.get()/b.weight) a else b
       }
     }
   }
@@ -156,8 +289,9 @@ class P2CBalancer[Req, Rep](
   private[this] val availableGauge = statsReceiver.addGauge("available") {
     nodes.factories.count(_.isAvailable)
   }
+
   private[this] val loadGauge = statsReceiver.addGauge("load") {
-    nodes.map(_.load.get).sum
+    nodes.map(_.load.rate()).sum
   }
 
   private[this] val weightGauge = statsReceiver.addGauge("meanweight") {
@@ -165,11 +299,11 @@ class P2CBalancer[Req, Rep](
     else (nodes.map(_.weight).sum / nodes.size).toFloat
   }
 
-  private[this] class Wrapped(n: Node[Req, Rep], underlying: Service[Req, Rep])
+  private[this] class Wrapped(n: Node[Req, Rep], underlying: Service[Req, Rep], handle: Long)
       extends ServiceProxy[Req, Rep](underlying) {
     override def close(deadline: Time) =
       super.close(deadline) ensure {
-        n.load.decrementAndGet()
+        n.load.end(handle)
       }
   }
 
@@ -191,12 +325,12 @@ class P2CBalancer[Req, Rep](
       n = nodes.pick2()
     }
 
-    n.load.incrementAndGet()
+    val handle = n.load.start()
     val f = n.factory(conn) transform {
       case Return(s) =>
-        Future.value(new Wrapped(n, s))
+        Future.value(new Wrapped(n, s, handle))
       case t@Throw(exc) =>
-        n.load.decrementAndGet()
+        n.load.end(handle)
         Future.const(t)
     }
 
@@ -204,6 +338,11 @@ class P2CBalancer[Req, Rep](
       update(Reweigh(nodes))
 
     f
+  }
+
+  private[this] val useEwma = exp.loadMetric() match {
+    case "pendingEwmaMs" => true
+    case _ => false
   }
 
   private[this] val update = Updater[Update[Req, Rep]] {
@@ -220,7 +359,10 @@ class P2CBalancer[Req, Rep](
         case (f, w) if transferNodes contains f =>
           transferNodes(f).copy(weight=w)
         case (f, w) =>
-          Node(f, w)
+          val metric =
+            if (useEwma) LoadMetric.ewma(statsReceiver.scope(f.toString), f.toString)
+            else LoadMetric.leastReq()
+          Node(f, w, metric)
       }
       nodes = Nodes(newNodes.toIndexedSeq, rng, emptyException)
 

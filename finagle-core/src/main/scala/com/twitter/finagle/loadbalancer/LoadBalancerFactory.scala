@@ -128,11 +128,16 @@ private[finagle] object LoadBalancerFactory {
           val param.Reporter(reporter) = get[param.Reporter]
           val composite = reporter(label, Some(sockaddr)) andThen monitor
 
-          val endpointStack = (sa: SocketAddress) => next.make(
-              params +
-              Transporter.EndpointAddr(sa) +
-              param.Stats(stats) +
-              param.Monitor(composite))
+          val endpointStack: SocketAddress => ServiceFactory[Req, Rep] =
+            (sa: SocketAddress) => {
+              val underlying = next.make(params +
+                Transporter.EndpointAddr(sa) +
+                param.Stats(stats) +
+                param.Monitor(composite))
+              new ServiceFactoryProxy(underlying) {
+                override def toString = sa.toString+"_"+underlying.toString
+              }
+            }
 
           sockaddr match {
             case WeightedSocketAddress(sa, w) => (endpointStack(sa), w)

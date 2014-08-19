@@ -22,6 +22,10 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
       def load(k: Seq[String]) = new ArrayBuffer[Float] with SynchronizedBuffer[Float]
     })
 
+  // synchronized on `this`
+  private[this] var _gauges = Map[Seq[String], () => Float]()
+  def gauges: Map[Seq[String], () => Float] = _gauges
+
   def counter(name: String*) = new Counter {
     def incr(delta: Int) { counters.addAndGet(name, delta) }
   }
@@ -31,8 +35,13 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
   }
 
   // Ignoring gauges for now, but we may consider sampling them.
-  protected[this] def registerGauge(name: Seq[String], f: => Float) {}
-  protected[this] def deregisterGauge(name: Seq[String]) {}
+  protected[this] def registerGauge(name: Seq[String], f: => Float) = synchronized {
+    _gauges += (name -> (() => f))
+  }
+
+  protected[this] def deregisterGauge(name: Seq[String]) = synchronized {
+    _gauges -= name
+  }
 
   /* Summary */
   /* ======= */
@@ -42,22 +51,27 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
   def summary: String = {
     val counterValues = counters.asMap.asScala
     val statValues = stats.asMap.asScala collect {
-      case (k, values) if !values.isEmpty =>
+      case (k, buf) if buf.nonEmpty =>
+        val n = buf.size
+        val values = new Array[Float](n)
+        buf.copyToArray(values, 0, n)
         val xs = values.sorted
-        val n = xs.size
-        val (min, med, max) = (xs(0), xs(n / 2), xs(n - 1))
-        (k, (n, min, med, max))
+        def div(p: Int, d: Int) = xs(math.ceil(((n.toLong*p.toLong)/d.toLong)).toInt)
+        val (min, med, max, p90, p99, p999, p9999) =
+          (xs(0), xs(n / 2), xs(n - 1), div(9, 10),
+          div(99, 100), div(999, 1000), div(9999, 10000))
+        (k, (n, min, med, max, p90, p99, p999, p9999))
     }
 
     val counterLines = counterValues map { case (k, v) => (variableName(k), v.toString) } toSeq
-    val statLines = statValues map { case (k, (n, min, med, max)) =>
-      (variableName(k), "n=%d min=%.1f med=%.1f max=%.1f".format(n, min, med, max))
+    val statLines = statValues map { case (k, (n, min, med, max, p90, p99, p999, p9999)) =>
+      (variableName(k), "n=%d min=%.1f med=%.1f p90=%.1f p99=%.1f p999=%.1f p9999=%.1f max=%.1f".format(n, min, med, p90, p99, p999, p9999, max))
     } toSeq
 
     val sortedCounters = counterLines.sortBy { case (k, _) => k }
     val sortedStats    = statLines.sortBy    { case (k, _) => k }
 
-    val fmt = Function.tupled { (k: String, v: String) => "%-60s %s".format(k, v) }
+    val fmt = Function.tupled { (k: String, v: String) => "%-30s %s".format(k, v) }
     val fmtCounters = sortedCounters map fmt
     val fmtStats = sortedStats map fmt
 
