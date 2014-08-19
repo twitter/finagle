@@ -17,14 +17,13 @@ class MemorySpaceTest extends FunSuite with MockitoSugar {
     val minDiscount = 5.megabytes
     val maxDiscount = StorageUnit.zero
     val rSnooper = mock[RequestSnooper]
-    val space = new MemorySpace(nfo, range, minDiscount, maxDiscount, rSnooper)
+    val space = new MemorySpace(nfo, minDiscount, maxDiscount, rSnooper)
     assert(space.left === 5.megabytes)
     verify(nfo).remaining()
   }
 
   test("MemorySpace should be able to compute a discount correctly") {
     val nfo = mock[JvmInfo]
-    val range = 10.megabytes
     val minDiscount = 5.megabytes
     val maxDiscount = 10.megabytes
     val rSnooper = mock[RequestSnooper]
@@ -32,25 +31,21 @@ class MemorySpaceTest extends FunSuite with MockitoSugar {
     val rnd = mock[GenerationalRandom]
     when(rnd.apply()).thenReturn(107.megabytes.inBytes.toInt)
     val space =
-      new MemorySpace(nfo, range, minDiscount, maxDiscount, rSnooper, NullLogsReceiver, rnd)
-    assert(space.discount() === 9.megabytes)
+      new MemorySpace(nfo, minDiscount, maxDiscount, rSnooper, NullLogsReceiver, rnd)
+    assert(space.discount() === 7.megabytes)
     verify(rnd).apply()
     verify(rSnooper).handleBytes()
   }
 
   test("MemorySpace should be able to default to a max") {
     val nfo = mock[JvmInfo]
-    val range = 10.megabytes
     val minDiscount = 5.megabytes
     val maxDiscount = 8.megabytes
     val rSnooper = mock[RequestSnooper]
-    when(rSnooper.handleBytes()).thenReturn(2.megabytes)
+    when(rSnooper.handleBytes()).thenReturn(9.megabytes)
     val rnd = mock[GenerationalRandom]
-    when(rnd.apply()).thenReturn(107.megabytes.inBytes.toInt)
     val space =
-      new MemorySpace(nfo, range, minDiscount, maxDiscount, rSnooper, NullLogsReceiver, rnd)
+      new MemorySpace(nfo, minDiscount, maxDiscount, rSnooper, NullLogsReceiver, rnd)
     assert(space.discount() === 8.megabytes)
-    verify(rnd).apply()
-    verify(rSnooper).handleBytes()
   }
 }

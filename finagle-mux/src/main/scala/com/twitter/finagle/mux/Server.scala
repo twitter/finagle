@@ -1,12 +1,14 @@
 package com.twitter.finagle.mux
 
-import com.twitter.finagle.{CancelledRequestException, Context, Dtab, Service}
-import com.twitter.finagle.mux.lease.exp.{Lessor, Lessee}
+import com.twitter.conversions.time._
+import com.twitter.finagle.mux.lease.exp.{Lessor, Lessee, nackOnExpiredLease}
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
+import com.twitter.finagle.{CancelledRequestException, Context, Dtab, Service, WriteException}
 import com.twitter.util._
+import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import org.jboss.netty.buffer.ChannelBuffer
@@ -22,6 +24,7 @@ case class ClientDiscardedRequestException(why: String) extends Exception(why)
 
 object ServerDispatcher {
   val ServerEnabledTraceMessage = "finagle.mux.serverEnabled"
+  val Epsilon = 1.second // TODO decide whether this should be hard coded or not
 }
 
 /**
@@ -43,6 +46,9 @@ private[finagle] class ServerDispatcher private[finagle](
 
   lessor.register(this)
 
+  @volatile private[this] var lease = Tlease.MaxLease
+  @volatile private[this] var curElapsed = NilStopwatch.start()
+
   // Used to buffer requests with in-progress local service invocation.
   private[this] val pending = new ConcurrentHashMap[Int, Future[_]]
 
@@ -52,35 +58,39 @@ private[finagle] class ServerDispatcher private[finagle](
 
   @volatile private[this] var receive: Message => Unit = {
     case Tdispatch(tag, contexts, /*ignore*/_dst, dtab, req) =>
-      lessor.observeArrival()
-      if (!canDispatch) {
-        // There seems to be a bug in the Scala pattern matcher:
-        // 	case Tdispatch(..) if canDispatch => ..
-        // results in a match error. Somehow the clause
-        // 	case m@Tmessage(tag) =>
-        // doesn't seem to be evaluated.
-        val msg = Rerr(tag, "Tdispatch not enabled")
-        trans.write(encode(msg))
-      } else {
-        for ((k, v) <- contexts)
-          Context.handle(ChannelBufferBuf(k), ChannelBufferBuf(v))
-        Trace.record(Annotation.ServerRecv())
-        if (dtab.length > 0)
-          Dtab.local ++= dtab
-        val elapsed = Stopwatch.start()
-        val f = service(req)
-        pending.put(tag, f)
-        f respond { tr =>
-          pending.remove(tag)
-          tr match {
-            case Return(rep) =>
-              lessor.observe(elapsed())
-              // Record tracing info to track Mux adoption across clusters.
-              Trace.record(ServerDispatcher.ServerEnabledTraceMessage)
-              Trace.record(Annotation.ServerSend())
-              trans.write(encode(RdispatchOk(tag, Seq.empty, rep)))
-            case Throw(exc) =>
-              trans.write(encode(RdispatchError(tag, Seq.empty, exc.toString)))
+      if (nackOnExpiredLease() && (lease <= Duration.Zero))
+        trans.write(encode(RdispatchNack(tag, Seq.empty)))
+      else {
+        lessor.observeArrival()
+        if (!canDispatch) {
+          // There seems to be a bug in the Scala pattern matcher:
+          // 	case Tdispatch(..) if canDispatch => ..
+          // results in a match error. Somehow the clause
+          // 	case m@Tmessage(tag) =>
+          // doesn't seem to be evaluated.
+          val msg = Rerr(tag, "Tdispatch not enabled")
+          trans.write(encode(msg))
+        } else {
+          for ((k, v) <- contexts)
+            Context.handle(ChannelBufferBuf(k), ChannelBufferBuf(v))
+          Trace.record(Annotation.ServerRecv())
+          if (dtab.length > 0)
+            Dtab.local ++= dtab
+          val elapsed = Stopwatch.start()
+          val f = service(req)
+          pending.put(tag, f)
+          f respond { tr =>
+            pending.remove(tag)
+            tr match {
+              case Return(rep) =>
+                lessor.observe(elapsed())
+                // Record tracing info to track Mux adoption across clusters.
+                Trace.record(ServerDispatcher.ServerEnabledTraceMessage)
+                Trace.record(Annotation.ServerSend())
+                trans.write(encode(RdispatchOk(tag, Seq.empty, rep)))
+              case Throw(exc) =>
+                trans.write(encode(RdispatchError(tag, Seq.empty, exc.toString)))
+            }
           }
         }
       }
@@ -206,11 +216,23 @@ private[finagle] class ServerDispatcher private[finagle](
   }
 
   /**
-   * Emit a lease to the clients of this server.
+   * Emit a lease to the clients of this server.  If howlong is less than or
+   * equal to 0, also nack all requests until a new lease is issued.
    */
   def issue(howlong: Duration) {
     require(howlong >= Tlease.MinLease)
-    trans.write(encode(Tlease(howlong min Tlease.MaxLease)))
+
+    synchronized {
+      val diff = (lease - curElapsed()).abs
+      if (diff > ServerDispatcher.Epsilon) {
+        curElapsed = Stopwatch.start()
+        lease = howlong
+        trans.write(encode(Tlease(howlong min Tlease.MaxLease)))
+      } else if ((howlong < Duration.Zero) && (lease > Duration.Zero)) {
+        curElapsed = Stopwatch.start()
+        lease = howlong
+      }
+    }
   }
 
   def npending(): Int = pending.size

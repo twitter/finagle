@@ -53,7 +53,7 @@ private[finagle] class ClockedDrainer(
   @volatile private[this] var genDrained, genOpen = 0L
 
   private[this] def calculateMaxWait: Duration = {
-    val rate = coord.counter.rate()
+    val rate = coord.counter.rate
     val r = space.left
     if (r <= StorageUnit.zero) Duration.Zero
     else if (rate <= 0) 10.milliseconds
@@ -149,6 +149,9 @@ private[finagle] class ClockedDrainer(
 
         )
       }
+
+      // discount (bytes) / rate (bytes / second) == expiry (seconds)
+      issueAll((space.discount.inBytes / coord.counter.rate).toLong.seconds)
     })
   }
 
@@ -167,9 +170,13 @@ private[finagle] class ClockedDrainer(
 
     stats.drain.incr()
     stats.pendingAtDrain.add(npending())
+    issueAll(Duration.Zero)
+  }
+
+  private[this] def issueAll(duration: Duration) {
     val iter = lessees.iterator()
     while (iter.hasNext)
-      iter.next().issue(Duration.Zero)
+      iter.next().issue(duration)
   }
 
   private[this] def finishDraining() {
@@ -261,21 +268,17 @@ private[finagle] class ClockedDrainer(
 }
 
 
-// TODO: this shouldn't be so many parameters; figure out how
-// unify them.
-
-object drainerMinDiscount extends GlobalFlag(
-  50.megabytes, "Drainer minimum discount")
-
-object drainerMaxDiscount extends GlobalFlag(
-  600.megabytes, "Drainer maximum discount")
-
 object drainerDiscountRange extends GlobalFlag(
-  600.megabytes, "Range of discount")
+  (50.megabytes, 600.megabytes), "Range of discount")
 
 object drainerPercentile extends GlobalFlag(95, "GC drainer cutoff percentile")
+
 object drainerDebug extends GlobalFlag(false, "GC drainer debug log (verbose)")
 object drainerEnabled extends GlobalFlag(false, "GC drainer enabled")
+
+object nackOnExpiredLease extends GlobalFlag(
+  false, "nack when the lease has expired")
+
 
 private[finagle] object ClockedDrainer {
   private[this] val log = Logger.getLogger("ClockedDrainer")
@@ -294,11 +297,13 @@ private[finagle] object ClockedDrainer {
           lr
         )
 
+        val (min, max) = drainerDiscountRange()
+        assert(min < max)
+
         val space = new MemorySpace(
           coord.counter.info,
-          drainerDiscountRange(),
-          drainerMinDiscount(),
-          drainerMaxDiscount(),
+          min,
+          max,
           rSnooper,
           lr
         )

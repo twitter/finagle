@@ -12,7 +12,6 @@ import com.twitter.util.StorageUnit
  */
 private[lease] class MemorySpace(
   info: JvmInfo,
-  discountRange: StorageUnit,
   val minDiscount: StorageUnit,
   maxDiscount: StorageUnit,
   rSnooper: RequestSnooper,
@@ -21,20 +20,21 @@ private[lease] class MemorySpace(
 ) {
   def this(
     info: JvmInfo,
-    discountRange: StorageUnit,
     minDiscount: StorageUnit,
     maxDiscount: StorageUnit,
     rSnooper: RequestSnooper,
     lr: LogsReceiver
-  ) = this(info, discountRange, minDiscount, maxDiscount, rSnooper, lr, new GenerationalRandom(info))
+  ) = this(info, minDiscount, maxDiscount, rSnooper, lr, new GenerationalRandom(info))
 
   def this(
     info: JvmInfo,
-    discountRange: StorageUnit,
     minDiscount: StorageUnit,
     maxDiscount: StorageUnit,
     rSnooper: RequestSnooper
-  ) = this(info, discountRange, minDiscount, maxDiscount, rSnooper, NullLogsReceiver)
+  ) = this(info, minDiscount, maxDiscount, rSnooper, NullLogsReceiver)
+
+
+  private[this] val printableZeroBytes = 0.bytes.toString
 
   /**
    * The target for lease expiration.  It should contain jitter so that not
@@ -46,15 +46,24 @@ private[lease] class MemorySpace(
     val handleBytes: StorageUnit = rSnooper.handleBytes()
     lr.record("discountHandleBytes", handleBytes.toString)
 
-    //choose a random number of bytes between 0 and discountRange
-    val discountWin = (rnd() % discountRange.inBytes).bytes
-    lr.record("discountWin", discountWin.inBytes.toString)
+    if (handleBytes < maxDiscount) {
+      val low = handleBytes max minDiscount
 
-    // take the min of jitter within a range + handlebytes, and maxDiscount
-    val discountTotal = (handleBytes + discountWin) min maxDiscount
-    lr.record("discountTotal", discountTotal.toString)
+      // choose a random number of bytes between 0 and discountRange
+      val discountWin = (rnd() % (maxDiscount - low).inBytes).bytes
+      lr.record("discountWin", discountWin.inBytes.toString)
 
-    discountTotal
+      // take the min of jitter within a range + handlebytes, and maxDiscount
+      val discountTotal = low + discountWin
+      lr.record("discountTotal", discountTotal.toString)
+
+      discountTotal
+    } else {
+      lr.record("discountWin", printableZeroBytes)
+      lr.record("discountTotal", printableZeroBytes)
+
+      maxDiscount
+    }
   }
 
   /**
