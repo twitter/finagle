@@ -192,19 +192,29 @@ private[finagle] abstract class StackClient[Req, Rep](
       Label(clientLabel) +
       Stats(stats.scope(clientLabel))
 
-    ClientRegistry.register(clientLabel, this)
+    def mkServiceFactory(params: Stack.Params): ServiceFactory[Req, Rep] = {
+      ClientRegistry.register(clientLabel, this.copy(
+        stack = clientStack,
+        params = params
+      ))
+      clientStack.make(params)
+    }
 
     dest match {
       case Name.Bound(addr) =>
-        clientStack.make(clientParams +
+        val clientParams1 = (clientParams +
           LoadBalancerFactory.ErrorLabel(clientLabel) +
           LoadBalancerFactory.Dest(addr))
+
+        mkServiceFactory(clientParams1)
 
       case Name.Path(path) =>
         val clientParams1 = clientParams + LoadBalancerFactory.ErrorLabel(path.show)
 
-        val newStack: Var[Addr] => ServiceFactory[Req, Rep] =
-          addr => clientStack.make(clientParams1 + LoadBalancerFactory.Dest(addr))
+        val newStack: Var[Addr] => ServiceFactory[Req, Rep] = { addr =>
+          val clientParams2 = clientParams1 + LoadBalancerFactory.Dest(addr)
+          mkServiceFactory(clientParams2)
+        }
 
         new BindingFactory(path, newStack, stats.scope("interpreter"))
     }
