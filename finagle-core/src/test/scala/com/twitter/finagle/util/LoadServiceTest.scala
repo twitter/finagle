@@ -64,7 +64,7 @@ class LoadServiceTest extends FunSuite with MockitoSugar {
   }
 
   test("LoadService should find services on non URLClassloader") {
-    val loader = new MetaInfCodedClassloader
+    val loader = new MetaInfCodedClassloader(getClass.getClassLoader)
     // Run LoadService in a different thread from the custom classloader
     val clazz: Class[_] = loader.loadClass("com.twitter.finagle.util.LoadServiceCallable")
     val executor: ExecutorService = Executors.newSingleThreadExecutor()
@@ -83,7 +83,7 @@ class LoadServiceCallable extends Callable[Seq[Any]] {
   override def call(): Seq[Any] = LoadService[Announcer]()
 }
 
-class MetaInfCodedClassloader extends ClassLoader {
+class MetaInfCodedClassloader(parent: ClassLoader) extends ClassLoader(parent) {
   override def loadClass(p1: String): Class[_] = {
     if (p1.startsWith("com.twitter.finagle" )) {
       try {
@@ -95,7 +95,7 @@ class MetaInfCodedClassloader extends ClassLoader {
         case e => throw new ClassNotFoundException("Couldn't load class " + p1, e)
       }
     } else {
-      getParent().loadClass(p1)
+      parent.loadClass(p1)
     }
   }
 
