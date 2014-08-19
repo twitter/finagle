@@ -2,7 +2,7 @@ package com.twitter.finagle.util
 
 import com.twitter.logging.Level
 import java.io.{IOException, File, InputStream}
-import java.net.{URI, URLClassLoader, URISyntaxException}
+import java.net.{URL, URI, URLClassLoader, URISyntaxException}
 import java.util.ServiceConfigurationError
 import java.util.jar.JarFile
 import scala.collection.JavaConverters._
@@ -147,6 +147,20 @@ private object ClassPath {
  */
 object LoadService {
 
+  private[LoadService] def readLines(resource: URL): Set[String] = {
+    val source = Source.fromURL(resource)
+    val lines = source.getLines().map { case line =>
+      val commentIdx = line.indexOf('#')
+      commentIdx match {
+        case -1 => line.trim
+        case idx => line.substring(0, idx).trim
+      }
+    }.toSet
+    source.close()
+    lines
+  }
+
+
   def apply[T: ClassManifest](): Seq[T] = {
     val iface = implicitly[ClassManifest[T]].erasure.asInstanceOf[Class[T]]
 
@@ -157,8 +171,15 @@ object LoadService {
         cls <- clss
         if cls.nonEmpty
       } yield (iface -> cls)
-    
-      mappings.foldLeft(Map[String, Set[String]]()) {
+
+      val clFoundResources = for {
+        rsc <- iface.getClassLoader.getResources("META-INF/services/" + iface.getName).asScala
+        line <- readLines(rsc)
+        if line.length > 0
+      } yield line
+      val slValues = Map(iface.getName() -> clFoundResources.toSet)
+
+      mappings.foldLeft(slValues) {
         case (m, (iface, cls)) =>
           m + (iface -> (m.getOrElse(iface, Set()) + cls))
       }
