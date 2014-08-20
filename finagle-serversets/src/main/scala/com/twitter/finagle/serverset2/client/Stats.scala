@@ -62,7 +62,6 @@ private[serverset2] trait StatsReader extends StatsClient with ZooKeeperReader {
   def getACL(path: String): Future[Node.ACL] = ReadFilter(underlying.getACL(path))
   def getChildren(path: String): Future[Node.Children] = ReadFilter(underlying.getChildren(path))
   def getChildrenWatch(path: String): Future[Watched[Node.Children]] = WatchFilter(underlying.getChildrenWatch(path))
-  def globPrefixWatch(pat: String): Future[Watched[Seq[String]]] = WatchFilter(underlying.globPrefixWatch(pat))
 
   def sync(path: String): Future[Unit] = ReadFilter(underlying.sync(path))
 }

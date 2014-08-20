@@ -92,8 +92,8 @@ private class Zk(watchedZk: Watched[ZooKeeperReader], timerIn: Timer) {
      op("existsOf", path) { zkr.existsWatch(path) }
    }
 
-   private val globPrefixWatchOp = Memoize[String, Activity[Seq[String]]] { pat =>
-       op("globPrefixWatchOp", pat) { zkr.globPrefixWatch(pat) }
+   private val getChildrenWatchOp = Memoize { path: String =>
+     op("childrenOf", path) { zkr.getChildrenWatch(path) }
    }
 
   def close() = zkr.close()
@@ -116,14 +116,14 @@ private class Zk(watchedZk: Watched[ZooKeeperReader], timerIn: Timer) {
     if (slash < 0)
       return Activity.exception(new IllegalArgumentException("Invalid pattern"))
 
-    val path = if (slash == 0) "/" else pat.substring(0, slash)
+    val (path, prefix) = ZooKeeperReader.patToPathAndPrefix(pat)
     existsOf(path) flatMap {
       case None => Activity.value(Seq.empty)
       case Some(_) =>
-        globPrefixWatchOp(pat) transform {
+        getChildrenWatchOp(path) transform {
           case Activity.Pending => Activity.pending
-          case Activity.Ok(paths) => Activity.value(paths)
-          // This can happen when exists() races with getChildren.
+          case Activity.Ok(Node.Children(children, _)) =>
+            Activity.value(children.filter(_.startsWith(prefix)).map(path + "/" + _))
           case Activity.Failed(KeeperException.NoNode(_)) => Activity.value(Seq.empty)
           case Activity.Failed(exc) => Activity.exception(exc)
         }
@@ -181,8 +181,6 @@ private class NullZooKeeperReader extends ZooKeeperReader {
   def getChildren(path: String): Future[Node.Children] = Future.never
   def getChildrenWatch(path: String): Future[Watched[Node.Children]] = Future.never
   
-  def globPrefixWatch(pat: String): Future[Watched[Seq[String]]] = Future.never
-
   def getData(path: String): Future[Node.Data] = Future.never
   def getDataWatch(path: String): Future[Watched[Node.Data]] = Future.never
 

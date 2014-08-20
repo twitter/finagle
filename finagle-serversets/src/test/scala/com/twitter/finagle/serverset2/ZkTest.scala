@@ -128,7 +128,7 @@ class ZkTest extends FunSuite {
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
     val zk = new Zk(watchedZk, timer)
 
-    val v = zk.globOf("/foo/bar/*")
+    val v = zk.globOf("/foo/bar/")
     val ref = new AtomicReference[Activity.State[Seq[String]]]
     v.states.register(Witness(ref))
     assert(ref.get === Activity.Pending)
@@ -144,9 +144,9 @@ class ZkTest extends FunSuite {
     assert(ref.get === Activity.Ok(Seq.empty))
     val ew2watchv = Var[WatchState](WatchState.Pending)
     ew2.res() = Return(Watched(Some(Data.Stat(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)), ew2watchv))
-    val Seq(`ew`, `ew2`, gw@GlobWatch("/foo/bar/*")) = watchedZk.value.opq
+    val Seq(`ew`, `ew2`, gw@GetChildrenWatch("/foo/bar")) = watchedZk.value.opq
     assert(ref.get === Activity.Pending)
-    gw.res() = Return(Watched(Seq("/foo/bar/a", "/foo/bar/b", "/foo/bar/c"), Var.value(WatchState.Pending)))
+    gw.res() = Return(Watched(Node.Children(Seq("a", "b", "c"), null), Var.value(WatchState.Pending)))
     assert(ref.get === Activity.Ok(Seq("/foo/bar/a", "/foo/bar/b", "/foo/bar/c")))
     assert(watchedZk.value.opq === Seq(ew, ew2, gw))
 

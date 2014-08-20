@@ -102,13 +102,6 @@ private[serverset2] trait ZooKeeperReader extends ZooKeeperClient {
   def getChildrenWatch(path: String): Future[Watched[Node.Children]]
 
   /**
-   * Expand paths which match the prefix. e.g. in a tree /a/b/foo_1, 
-   * /a/b/bar_2, /a/b/foo_3, globPrefixWatch("/a/b/foo_") returns 
-   * /a/b/foo_1 and /a/b/foo_3.
-   */
-  def globPrefixWatch(pat: String): Future[Watched[Seq[String]]]
-
-  /**
    * Sync. Flushes channel between process and leader.
    *
    * @param path the path of the node to sync.
