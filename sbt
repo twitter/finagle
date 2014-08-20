@@ -1,8 +1,8 @@
 #!/bin/bash
 
-sbtver=0.13.2
+sbtver=0.13.5
 sbtjar=sbt-launch.jar
-sbtsha128=d3237161dc38afd796d9e84ff202f8418cff98e2
+sbtsha128=f6308bd94bebdd37eb5e2fda732694ce0f34be74
 
 sbtrepo=http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch
 
@@ -35,6 +35,6 @@ java -ea                          \
   -XX:MaxTenuringThreshold=0      \
   -Xss8M                          \
   -Xms512M                        \
-  -Xmx1G                          \
+  -Xmx2G                          \
   -server                         \
   -jar $sbtjar "$@"
