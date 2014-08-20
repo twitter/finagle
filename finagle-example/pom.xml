@@ -17,58 +17,6 @@
   <dependencies>
     <!-- library dependencies -->
     <dependency>
-      <groupId>com.twitter.common</groupId>
-      <artifactId>flags</artifactId>
-      <version>1.0.0</version>
-      <!-- excluded to prevent conflicts with caged finagle/util -->
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-collection</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-hashing</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-reflect</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-thrift</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-logging</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-eval</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>finagle-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>finagle-thrift</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-nop</artifactId>
       <version>1.6.1</version>

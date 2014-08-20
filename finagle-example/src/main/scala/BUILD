@@ -1,6 +1,5 @@
 scala_library(name='scala',
   dependencies=[
-    '3rdparty/jvm/com/twitter/common:flags',
     'finagle/finagle-core',
     'finagle/finagle-example/src/main/thrift:thrift-scala',
     'finagle/finagle-http',

@@ -1,6 +1,7 @@
 package com.twitter.finagle.example.memcache
 
-import com.twitter.common.args.Flags
+import com.twitter.app.Flag
+import com.twitter.app.App
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{Cluster, ClientBuilder}
 import com.twitter.finagle.memcached
@@ -15,21 +16,23 @@ import com.twitter.util._
 import java.util.concurrent.atomic.AtomicLong
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 
-object KetamaClientStress {
-  private[this] case class Config(
-    hosts:       String    = "localhost:11211",
-    replicas:    String    = null,
-    op:          String    = "set",
-    keysize:     Int       = 55,
-    valuesize:   Int       = 1,
-    numkeys:     Int       = 1,
-    rwRatio:     Int       = 99, // 99% read
-    loadrate:    Int       = 0,
-    concurrency: Int       = 1,
-    stats:       Boolean   = true,
-    tracing:     Boolean   = true,
-    cap:         Int       = Int.MaxValue
-  )
+object KetamaClientStress extends App {
+
+  private[this] val config = new {
+    val hosts: Flag[String] = flag("host", "localhost:11211", "host")
+    val replicas: Flag[String] = flag("replicas", "replicas")
+    val op: Flag[String] = flag("op", "set", "op")
+    val keysize: Flag[Int] = flag("keysize", 55, "keysize")
+    val valuesize: Flag[Int] = flag("valuesize", 1, "valuesize")
+    val numkeys: Flag[Int] = flag("numkeys", 1, "numkeys")
+    val rwRatio: Flag[Int] = flag("rwRatio", 99, "rwRatio")
+    val loadrate: Flag[Int] = flag("loadrate", 0, "loadrate")
+    val concurrency: Flag[Int] = flag("concurrency", 1, "concurrency")
+    val stats: Flag[Boolean] = flag("stats", true, "stats")
+    val tracing: Flag[Boolean] = flag("tracing", true, "tracing")
+    val cap: Flag[Int] = flag("cap", Int.MaxValue, "cap")
+  }
+
   private[this] val throughput_count = new AtomicLong
   private[this] val load_count = new AtomicLong
   private[this] val timer = DefaultTimer.twitter
@@ -66,37 +69,36 @@ object KetamaClientStress {
       } toSet)
   }
 
-  def main(args: Array[String]) {
-    val config = Flags(Config(), args)
-
+  def main() {
     // the client builder
     var builder = ClientBuilder()
         .name("ketamaclient")
         .codec(Memcached())
         .failFast(false)
-        .hostConnectionCoresize(config.concurrency)
-        .hostConnectionLimit(config.concurrency)
+        .hostConnectionCoresize(config.concurrency())
+        .hostConnectionLimit(config.concurrency())
 
-    if (config.stats)    builder = builder.reportTo(new OstrichStatsReceiver)
-    if (config.tracing)  com.twitter.finagle.tracing.Trace.enable()
-    else                 com.twitter.finagle.tracing.Trace.disable()
+    if (config.stats())    builder = builder.reportTo(new OstrichStatsReceiver)
+    if (config.tracing())  com.twitter.finagle.tracing.Trace.enable()
+      else                 com.twitter.finagle.tracing.Trace.disable()
 
     println(builder)
 
     // the test keys/values
-    val keyValueSet: Seq[(String, ChannelBuffer)] = 1 to config.numkeys map { _ =>
-      (randomString(config.keysize), ChannelBuffers.wrappedBuffer(randomString(config.valuesize).getBytes)) }
-    def nextKeyValue: (String, ChannelBuffer) = keyValueSet((load_count.getAndIncrement()%config.numkeys).toInt)
+    val keyValueSet: Seq[(String, ChannelBuffer)] = 1 to config.numkeys() map { _ =>
+      (randomString(config.keysize()), ChannelBuffers.wrappedBuffer(randomString(config.valuesize()).getBytes)) }
+    def nextKeyValue: (String, ChannelBuffer) = keyValueSet((load_count.getAndIncrement()%config.numkeys()).toInt)
 
     // local admin service
     val runtime = RuntimeEnvironment(this, Array()/*no args for you*/)
     val adminService = new AdminHttpService(2000, 100/*backlog*/, runtime)
     adminService.start()
 
-    val primaryPool = createCluster(config.hosts)
-    val replicaPool =
-      if (config.replicas == null || config.replicas.equals("")) null
-      else createCluster(config.replicas)
+    val primaryPool = createCluster(config.hosts())
+    val replicaPool = config.replicas.get match {
+      case Some(r) if r != "" => createCluster(r)
+      case _ => null
+    }
 
     if (replicaPool == null) {
       val ketamaClient = memcached.KetamaClientBuilder()
@@ -105,7 +107,7 @@ object KetamaClientStress {
           .failureAccrualParams(Int.MaxValue, Duration.Top)
           .build()
 
-      val operation = config.op match {
+      val operation = config.op() match {
         case "set" =>
           () => {
             val (key, value) = nextKeyValue
@@ -150,7 +152,7 @@ object KetamaClientStress {
             }
           }
         case "add" =>
-          val (key, value) = (randomString(config.keysize), ChannelBuffers.wrappedBuffer(randomString(config.valuesize).getBytes))
+          val (key, value) = (randomString(config.keysize()), ChannelBuffers.wrappedBuffer(randomString(config.valuesize()).getBytes))
           () => {
             ketamaClient.add(key+load_count.getAndIncrement().toString, value)
           }
@@ -162,14 +164,14 @@ object KetamaClientStress {
           }
       }
 
-      proc(operation, config.loadrate)
+      proc(operation, config.loadrate())
     } else {
       val replicationClient = ReplicationClient.newBaseReplicationClient(
         Seq(primaryPool, replicaPool),
         Some(builder),
         None, (Int.MaxValue, Duration.Top))
 
-      val operation = config.op match {
+      val operation = config.op() match {
         case "set" => () => {
           val (key, value) = nextKeyValue
           replicationClient.set(key, value)
@@ -199,12 +201,12 @@ object KetamaClientStress {
             replicationClient.getOne(key, false)
           }
         case "getSetMix" =>
-          assert(config.rwRatio >=0 && config.rwRatio < 100)
+          assert(config.rwRatio() >=0 && config.rwRatio() < 100)
           keyValueSet foreach { case (k, v) => replicationClient.set(k, v)() }
           () => {
             val c = load_count.getAndIncrement()
-            val (key, value) = keyValueSet((c%config.numkeys).toInt)
-            if (c % 100 >= config.rwRatio)
+            val (key, value) = keyValueSet((c%config.numkeys()).toInt)
+            if (c % 100 >= config.rwRatio())
               replicationClient.set(key, value)
             else
               replicationClient.getOne(key, false)
@@ -243,7 +245,7 @@ object KetamaClientStress {
             }
           }
         case "add" =>
-          val (key, value) = (randomString(config.keysize), ChannelBuffers.wrappedBuffer(randomString(config.valuesize).getBytes))
+          val (key, value) = (randomString(config.keysize()), ChannelBuffers.wrappedBuffer(randomString(config.valuesize()).getBytes))
           () => {
             replicationClient.add(key+load_count.getAndIncrement().toString, value)
           }
@@ -254,7 +256,7 @@ object KetamaClientStress {
             replicationClient.replace(key, value)
           }
       }
-      proc(operation, config.loadrate)
+      proc(operation, config.loadrate())
     }
 
     val elapsed = Stopwatch.start()
@@ -269,13 +271,13 @@ object KetamaClientStress {
         howmuch_load / howlong.inSeconds, howmuch_throughput / howlong.inSeconds)
 
       // stop generating load
-      if (howmuch_load >= config.cap && loadTask != null) {
+      if (howmuch_load >= config.cap() && loadTask != null) {
         timer.stop()
         loadTask.cancel()
       }
 
       // quit the loop when all load is drained
-      if (howmuch_load >= config.cap && (config.loadrate == 0 || howmuch_throughput >= howmuch_load)) {
+      if (howmuch_load >= config.cap() && (config.loadrate() == 0 || howmuch_throughput >= howmuch_load)) {
         sys.exit()
       }
     }
