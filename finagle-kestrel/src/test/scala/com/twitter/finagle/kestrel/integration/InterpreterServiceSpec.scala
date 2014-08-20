@@ -33,6 +33,8 @@ class InterpreterServiceSpec extends SpecificationWithJUnit {
     val queueName   = "name"
     val value = "value"
 
+    if (!sys.props.contains("SKIP_FLAKY"))
+
     "set & get" in {
       val result = for {
         _ <- client(Flush(queueName))
