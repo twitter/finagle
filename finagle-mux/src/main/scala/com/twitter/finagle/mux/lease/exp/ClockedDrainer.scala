@@ -276,9 +276,7 @@ object drainerPercentile extends GlobalFlag(95, "GC drainer cutoff percentile")
 object drainerDebug extends GlobalFlag(false, "GC drainer debug log (verbose)")
 object drainerEnabled extends GlobalFlag(false, "GC drainer enabled")
 
-object nackOnExpiredLease extends GlobalFlag(
-  false, "nack when the lease has expired")
-
+object nackOnExpiredLease extends GlobalFlag(false, "nack when the lease has expired")
 
 private[finagle] object ClockedDrainer {
   private[this] val log = Logger.getLogger("ClockedDrainer")
