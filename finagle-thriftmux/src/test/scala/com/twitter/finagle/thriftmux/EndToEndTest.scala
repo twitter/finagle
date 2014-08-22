@@ -31,7 +31,7 @@ object MuxContext {
 class MuxContext extends ContextHandler {
   import MuxContext._
 
-  val key = Buf.Utf8("com.twitter.finagle.mux.MuxContext")
+  val key = Buf.Utf8("com.twitter.finagle.thriftmux.MuxContext")
 
   def handle(body: Buf) {
     handled :+= body
