@@ -49,32 +49,32 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-app</artifactId>
-      <version>6.19.1-SNAPSHOT</version>
+      <version>6.20.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-collection</artifactId>
-      <version>6.19.1-SNAPSHOT</version>
+      <version>6.20.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-core</artifactId>
-      <version>6.19.1-SNAPSHOT</version>
+      <version>6.20.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-hashing</artifactId>
-      <version>6.19.1-SNAPSHOT</version>
+      <version>6.20.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-jvm</artifactId>
-      <version>6.19.1-SNAPSHOT</version>
+      <version>6.20.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging</artifactId>
-      <version>6.19.1-SNAPSHOT</version>
+      <version>6.20.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
