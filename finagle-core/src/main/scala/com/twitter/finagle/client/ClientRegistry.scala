@@ -1,31 +1,42 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle.{Addr, param, Stack}
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.{Addr, Name, param, Stack}
 import com.twitter.util.{Future, FuturePool, Promise}
-
+import java.util.logging.Level
 import scala.collection.mutable
 
-import java.util.logging.Level
+private[twitter] case class ClientModuleInfo(
+  role: String,
+  description: String,
+  perModuleParams: Map[String, String]
+)
+
+/**
+ * Contains information about a client
+ * name: client name
+ * dest: addrs of the client
+ */
+private[twitter] case class ClientInfo(name: String, dest: Seq[String], modules: Seq[ClientModuleInfo])
 
 /**
  * Maintains information about clients that register.
  * Call ClientRegistry.register(clientLabel, client) to register a client
  */
-private[twitter] case class ClientModuleInfo(
-  role: String, 
-  description: String, 
-  perModuleParams: Map[String, String]
-)
- 
-private[twitter] case class ClientInfo(name: String, modules: List[ClientModuleInfo])
-
 private[twitter] object ClientRegistry {
 
-  private[this] val clients = mutable.Map.empty[String, StackClient[_, _]]
+  private[this] val clients = mutable.Map.empty[String, (Name, StackClient[_, _])]
 
-  private[finagle] def register(name: String, client: StackClient[_, _]): Unit = 
-    synchronized { clients += name -> client }
+  private[finagle] def register(name: String, dest: Name, client: StackClient[_, _]): Unit =
+    synchronized { clients += name -> (dest, client) }
+
+  private[this] def parseDest(dest: Name): Seq[String] = (dest match {
+    case Name.Bound(addr) => addr.sample match {
+      case Addr.Bound(addrs) => addrs.toSeq
+      case addr => Seq(addr)
+    }
+    case Name.Path(addr) => Seq(addr)
+  }).map(_.toString)
 
   // added for tests
   private[finagle] def clear() {
@@ -42,7 +53,7 @@ private[twitter] object ClientRegistry {
    *       availability as a Var.
    */
   def expAllRegisteredClientsResolved(): Future[Unit] = synchronized {
-    val fs = clients map { case (name, stackClient) =>
+    val fs = clients map { case (name, (_, stackClient)) =>
       val p = new Promise[Unit]
       val LoadBalancerFactory.Dest(va) = stackClient.params[LoadBalancerFactory.Dest]
       val param.Logger(log) = stackClient.params[param.Logger]
@@ -57,21 +68,21 @@ private[twitter] object ClientRegistry {
   }
 
   /**
-   * Get a list of all registered clients
+   * Get a list of all registered clients. No module information is included.
    */
-  def clientList(): List[String] = synchronized { 
-    clients.keySet.toList 
+  def clientList(): Seq[ClientInfo] = synchronized {
+    clients map { case (name, (dest, _)) => ClientInfo(name, parseDest(dest), Seq.empty) } toSeq
   }
 
   /**
    * Get information about a registered client with a given name
    */
   def clientInfo(name: String): Option[ClientInfo] = synchronized {
-    clients.get(name).map({ client =>
-      val modules = client.stack.tails.toList map { n => 
+    clients.get(name) map { case(dest, client) =>
+      val modules = client.stack.tails.toList map { n =>
         ClientModuleInfo(n.head.role.name, n.head.description.toString, n.head.params.toMap)
       }
-      ClientInfo(name, modules)
-    })
+      ClientInfo(name, parseDest(dest), modules)
+    }
   }
 }

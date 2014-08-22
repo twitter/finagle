@@ -34,11 +34,14 @@ class StackClientTest extends FunSuite with StringClient with AssertionsForJUnit
     val name = "clientTest"
 
     assert(ClientRegistry.clientInfo(name).isEmpty)
-    assert(!ClientRegistry.clientList().contains(name))
+    assert(ClientRegistry.clientList() filter { case ClientInfo(n, d, _) => 
+      name == n
+    } isEmpty)
 
     client.newClient(Name.bound(new InetSocketAddress(8080)), name)
-
-    assert(ClientRegistry.clientList().contains(name))
     assert(!ClientRegistry.clientInfo(name).isEmpty)
+    assert((ClientRegistry.clientList() filter { case ClientInfo(n, d, _) => 
+      name == n
+    } length) == 1)
   })
 }

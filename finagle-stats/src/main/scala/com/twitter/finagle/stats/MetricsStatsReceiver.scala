@@ -66,9 +66,10 @@ class MetricsStatsReceiver(val registry: Metrics) extends StatsReceiverWithCumul
   private[this] def format(names: Seq[String]) = names.mkString("/")
 }
 
-class MetricsExporter(registry: Metrics)
+class MetricsExporter(val registry: Metrics)
   extends JsonExporter(registry)
   with HttpMuxHandler
+  with MetricsRegistry
 {
   def this() = this(MetricsStatsReceiver.defaultRegistry)
   val pattern = "/admin/metrics.json"

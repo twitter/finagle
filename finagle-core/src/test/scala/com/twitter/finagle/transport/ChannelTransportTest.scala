@@ -15,7 +15,8 @@ import org.scalatest.{OneInstancePerTest, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class ChannelTransportTest
-  extends FunSuite with MockitoSugar
+  extends FunSuite
+  with MockitoSugar
   with OneInstancePerTest {
 
   // For some reason, the scala compiler has a difficult time with

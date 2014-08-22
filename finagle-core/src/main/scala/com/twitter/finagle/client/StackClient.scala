@@ -193,7 +193,7 @@ private[finagle] abstract class StackClient[Req, Rep](
       Stats(stats.scope(clientLabel))
 
     def mkServiceFactory(params: Stack.Params): ServiceFactory[Req, Rep] = {
-      ClientRegistry.register(clientLabel, this.copy(
+      ClientRegistry.register(clientLabel, dest, this.copy(
         stack = clientStack,
         params = params
       ))
