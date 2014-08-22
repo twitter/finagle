@@ -14,13 +14,10 @@ abstract class DtabFilter[Req <: HttpMessage, Rep <: HttpMessage]
 
   def respondToInvalid(req: Req, msg: String): Future[Rep]
 
-  def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
+  def apply(req: Req, service: Service[Req, Rep]): Future[Rep] =
     HttpDtab.read(req) match {
-      case Throw(e: HttpDtab.HeaderException) =>
-        respondToInvalid(req, e.getMessage)
-
       case Throw(e) =>
-        Future.exception(e)
+        respondToInvalid(req, e.getMessage)
 
       case Return(dtab) if dtab.isEmpty =>
         service(req)
@@ -32,7 +29,6 @@ abstract class DtabFilter[Req <: HttpMessage, Rep <: HttpMessage]
           service(req)
         }
     }
-  }
 }
 
 object DtabFilter {

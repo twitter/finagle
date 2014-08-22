@@ -34,6 +34,44 @@ object HttpDtab {
   private def b64Decode(v: String): Try[String] =
     Try { Base64.decode(v) } map(new String(_, Utf8))
 
+  private val unmatchedFailure =
+    Failure.Cause("Unmatched X-Dtab headers")
+
+  private def decodingFailure(value: String) =
+    Failure.Cause("Value not b64-encoded: "+value)
+
+  private def pathFailure(path: String, cause: IllegalArgumentException) =
+    Failure.Cause("Invalid path: "+path, cause)
+
+  private def nameFailure(name: String, cause: IllegalArgumentException) =
+    Failure.Cause("Invalid name: "+name, cause)
+
+  private def decodePath(b64path: String): Try[Path] =
+    b64Decode(b64path) match {
+      case Throw(e: IllegalArgumentException) => Throw(decodingFailure(b64path))
+      case Throw(e) => Throw(e)
+      case Return(pathStr) =>
+        Try(Path.read(pathStr)) rescue {
+          case iae: IllegalArgumentException => Throw(pathFailure(pathStr, iae))
+        }
+    }
+
+  private def decodeName(b64name: String): Try[NameTree[Path]] =
+    b64Decode(b64name) match {
+      case Throw(e: IllegalArgumentException) => Throw(decodingFailure(b64name))
+      case Throw(e) => Throw(e)
+      case Return(nameStr) =>
+        Try(NameTree.read(nameStr)) rescue {
+          case iae: IllegalArgumentException => Throw(nameFailure(nameStr, iae))
+        }
+    }
+
+  private def validHeaderPair(aKey: String, bKey: String): Boolean =
+    aKey.size == bKey.size &&
+    aKey.substring(0, aKey.size-1) == bKey.substring(0, bKey.size-1) &&
+    aKey(aKey.size-1) == 'a' &&
+    bKey(bKey.size-1) == 'b'
+
   def clear(msg: HttpMessage) {
     val names = msg.headers.names.iterator()
     while (names.hasNext()) {
@@ -72,12 +110,14 @@ object HttpDtab {
       }
     }
 
-    if (keys == null) return Return(Dtab.empty)
+
+    if (keys == null)
+      return Return(Dtab.empty)
+
+    if (keys.size % 2 != 0)
+      return Throw(unmatchedFailure)
 
     keys = keys.sorted
-    if (keys.size % 2 != 0)
-      return Throw(new UnmatchedHeaderException)
-
     val n = keys.size/2
 
     val dentries = new Array[Dentry](n)
@@ -86,63 +126,26 @@ object HttpDtab {
       val j = i*2
       val prefix = keys(j)
       val dest = keys(j+1)
-      if (prefix.size != dest.size ||
-          prefix.substring(0, prefix.size-1) != dest.substring(0, dest.size-1) ||
-          prefix(prefix.size-1) != 'a' || dest(dest.size-1) != 'b')
-        return Throw(new UnmatchedHeaderException)
 
-      val b64src = msg.headers.get(prefix)
-      val src = b64Decode(b64src) match {
-        case Throw(e: IllegalArgumentException) =>
-          return Throw(new HeaderDecodingException(b64src))
-        case Throw(e) =>
-          return Throw(e)
+      if (!validHeaderPair(prefix, dest))
+        return Throw(unmatchedFailure)
 
-        case Return(pathStr) =>
-          try Path.read(pathStr) catch {
-            case iae: IllegalArgumentException =>
-              return Throw(new InvalidPathException(pathStr, iae.getMessage))
-          }
-      }
+      val tryDentry =
+        for {
+          path <- decodePath(msg.headers.get(prefix))
+          name <- decodeName(msg.headers.get(dest))
+        } yield Dentry(path,  name)
 
-      val b64dst = msg.headers.get(dest)
-      val dst = b64Decode(b64dst) match {
-        case Throw(e: IllegalArgumentException) =>
-          return Throw(new HeaderDecodingException(b64dst))
-        case Throw(e) =>
-          return Throw(e)
+      dentries(i) =
+        tryDentry match {
+          case Return(dentry) => dentry
+          case Throw(e) =>
+            return Throw(e)
+        }
 
-        case Return(nameStr) =>
-          try NameTree.read(nameStr) catch {
-            case iae: IllegalArgumentException =>
-              return Throw(new InvalidNameException(nameStr, iae.getMessage))
-          }
-      }
-
-      dentries(i) = Dentry(src, dst)
       i += 1
     }
 
     Return(Dtab(dentries))
   }
-
-  /*
-   * X-Dtab header parsing errors
-   */
-
-  sealed class HeaderException(msg: String)
-    extends Exception(msg)
-    with NoStacktrace
-
-  class UnmatchedHeaderException
-    extends HeaderException("Unmatched X-Dtab headers")
-
-  class HeaderDecodingException(value: String)
-    extends HeaderException("Value not b64-encoded: "+value)
-
-  class InvalidPathException(path: String, msg: String)
-    extends HeaderException("Invalid path: "+path+": "+msg)
-
-  class InvalidNameException(name: String, msg: String)
-    extends HeaderException("Invalid name: "+name+": "+msg)
 }

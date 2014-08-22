@@ -9,7 +9,7 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 /**
  * A Java compilation test for DtabFilter.
  */
- 
+
 public class DtabFilterTest {
   static {
     DtabFilter<HttpRequest, HttpResponse> nettyDtabFilter = DtabFilter.Netty();

@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.codec
 
-import com.twitter.finagle.{Dentry, Dtab, NameTree, Path}
-import com.twitter.util.{Try, Throw}
+import com.twitter.finagle.{Failure, Dentry, Dtab, NameTree, Path}
+import com.twitter.util.Try
 import org.jboss.netty.handler.codec.http._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -50,15 +50,17 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     m.headers.set("X-Dtab-01-A", "a")
     m.headers.set("X-Dtab-02-B", "a")
     val result = HttpDtab.read(m)
-    intercept[HttpDtab.UnmatchedHeaderException] { result.get() }
+    val failure = intercept[Failure] { result.get() }
+    assert(failure.why === "Unmatched X-Dtab headers")
   }
 
-  test("Invalid prefix") {
+  test("Invalid path") {
     val m = newMsg()
     m.headers.set("X-Dtab-01-A", "L2ZvbyA9PiAvZmFy") // /foo => /far
     m.headers.set("X-Dtab-01-B", "L2Zhcg==") // /far
     val result = HttpDtab.read(m)
-    intercept[HttpDtab.InvalidPathException] { result.get() }
+    val failure = intercept[Failure] { result.get() }
+    assert(failure.why === "Invalid path: /foo => /far")
   }
 
   test("Invalid name") {
@@ -66,7 +68,8 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     m.headers.set("X-Dtab-01-A", "L2Zvbw==") // foo
     m.headers.set("X-Dtab-01-B", "L2ZvbyA9PiAvZmFy") // /foo => /far
     val result = HttpDtab.read(m)
-    intercept[HttpDtab.InvalidNameException] { result.get() }
+    val failure = intercept[Failure] { result.get() }
+    assert(failure.why === "Invalid name: /foo => /far")
   }
 
   test("Invalid: missing entry") {
@@ -75,7 +78,8 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     m.headers.set("X-Dtab-01-B", "a")
     m.headers.set("X-Dtab-02-B", "a")
     val result = HttpDtab.read(m)
-    intercept[HttpDtab.UnmatchedHeaderException] { result.get() }
+    val failure = intercept[Failure] { result.get() }
+    assert(failure.why === "Unmatched X-Dtab headers")
   }
   
   test("Invalid: non-ASCII encoding") {
@@ -83,7 +87,8 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     m.headers.set("X-Dtab-01-A", "☺")
     m.headers.set("X-Dtab-01-B", "☹")
     val result = HttpDtab.read(m)
-    intercept[HttpDtab.HeaderDecodingException] { result.get() }
+    val failure = intercept[Failure] { result.get() }
+    assert(failure.why === "Value not b64-encoded: ☺")
   }  
 
   test("clear()") {
