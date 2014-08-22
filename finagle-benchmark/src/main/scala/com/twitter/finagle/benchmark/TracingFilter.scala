@@ -1,12 +1,13 @@
 package com.twitter.finagle.benchmark
 
-import com.twitter.finagle.Service
-import com.twitter.finagle.tracing._
-import com.twitter.util.Future
-import com.twitter.finagle.zipkin
 import com.google.caliper.SimpleBenchmark
-import com.twitter.finagle.zipkin.thrift.ZipkinTracer
-import com.twitter.finagle.tracing.Annotation.{ServerSend, ServerRecv, Message, ClientSend}
+import com.twitter.finagle.Service
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.tracing._
+import com.twitter.finagle.zipkin
+import com.twitter.finagle.zipkin.thrift._
+import com.twitter.finagle.zipkin.thriftscala.{LogEntry, ResultCode, Scribe}
+import com.twitter.util.{Future, MockTimer}
 import java.net.InetSocketAddress
 
 // From $BIRDCAGE_HOME run:
@@ -17,28 +18,40 @@ class TracingFilterBenchmark extends SimpleBenchmark {
   val echoService = new Service[Int, Int] {
     def apply(req: Int) = {
       if (Trace.isActivelyTracing) {
-        Trace.record(ServerRecv())
+        Trace.record(Annotation.ServerRecv())
         Trace.recordServiceName("testService")
         Trace.recordRpc("testRpc")
         Trace.record("this is a string message")
-        Trace.record(Message("frog blast the vent core"))
+        Trace.record(Annotation.Message("frog blast the vent core"))
         Trace.recordBinaries(Map("fingle" -> 22, "dingle" -> 3.1415f))
         Trace.recordBinary("this is the key", "this is the value")
         Trace.recordServerAddr(addr)
       }
       val ret = Future.value(req)
-      Trace.record(ServerSend())
+      Trace.record(Annotation.ServerSend())
       ret
     }
   }
+
+  val scribe = new Scribe.FutureIface {
+    private[this] val res = Future.value(ResultCode.Ok)
+    def log(msgs: Seq[LogEntry]): Future[ResultCode] = res
+  }
+
+  def mkTracer(on: Boolean): ZipkinTracer =
+    new ZipkinTracer(
+      RawZipkinTracer(scribe, NullStatsReceiver, new MockTimer),
+      if (on) 1.0f else 0.0f)
+
   val echoServiceWithFilter = new TracingFilter(NullTracer, "echoService") andThen echoService
 
   // note the 0.0f sampleRate.  With zipkin tracer not sampling any requests, this should be as fast as
   // a bare service.
-  val echoServiceWithZipkin = new TracingFilter(ZipkinTracer.mk(sampleRate=0.0f), "echoService") andThen echoService
+  val echoServiceWithZipkin = new TracingFilter(mkTracer(false), "echoService") andThen echoService
 
+  val echoWithDoubleZipkinBroadcast = new TracingFilter(BroadcastTracer(Seq(mkTracer(false), mkTracer(false))), "echoService") andThen echoService
 
-  val echoWithDoubleZipkinBroadcast = new TracingFilter(BroadcastTracer(Seq(ZipkinTracer.mk(sampleRate=0.0f), ZipkinTracer.mk(sampleRate=0.0f))), "echoService") andThen echoService
+  val echoServiceWithZipkinOn = new TracingFilter(mkTracer(true), "echoService") andThen echoService
 
   def test(n: Int, service: Service[Int, Int]) {
     var i = 0
@@ -58,6 +71,10 @@ class TracingFilterBenchmark extends SimpleBenchmark {
 
   def timeZipkinTracer(n: Int) {
     test(n, echoServiceWithZipkin)
+  }
+
+  def timeZipkinTracerOn(n: Int) {
+    test(n, echoServiceWithZipkinOn)
   }
 
   def timeNullTracer(n: Int) {

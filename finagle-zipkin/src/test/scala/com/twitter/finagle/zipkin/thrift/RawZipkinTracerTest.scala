@@ -8,22 +8,27 @@ import com.twitter.finagle.zipkin.thriftscala._
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
 
-import org.mockito.Matchers._
-import org.mockito.Mockito._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class RawZipkinTracerTest extends FunSuite with MockitoSugar {
+class RawZipkinTracerTest extends FunSuite {
 
   val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None, Flags().setDebug)
 
-  test("formulate scribe log message correctly") {
-    val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver) {
-      override val client = mock[Scribe.FinagledClient]
+  class ScribeClient extends Scribe.FutureIface {
+    var messages: Seq[LogEntry] = Seq.empty[LogEntry]
+    var response: Future[ResultCode] = Future.value(ResultCode.Ok)
+    def log(msgs: Seq[LogEntry]): Future[ResultCode] = {
+      messages ++= msgs
+      response
     }
+  }
+
+  test("formulate scribe log message correctly") {
+    val scribe = new ScribeClient
+    val tracer = new RawZipkinTracer(scribe, NullStatsReceiver)
 
     val localEndpoint = Endpoint(2323, 23)
     val remoteEndpoint = Endpoint(333, 22)
@@ -54,17 +59,13 @@ class RawZipkinTracerTest extends FunSuite with MockitoSugar {
         "AMIAAEAAAFNBgACABYLAAMAAAALaGlja3VwcXVhaWwAAAoAAQAAAAAHVNTACwACAA" +
         "AABmxsYW1hcwwAAwgAAQAACRMGAAIAFwsAAwAAAAtoaWNrdXBxdWFpbAAAAgAJAQA=\n")
 
-    when(tracer.client.log(any[Seq[LogEntry]])).thenReturn(Future(ResultCode.Ok))
     tracer.logSpan(span)
-
-    verify(tracer.client).log(Seq(expected))
+    assert(scribe.messages === Seq(expected))
   }
 
   test("send all traces to scribe") {
-    val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver) {
-      override val client = mock[Scribe.FinagledClient]
-    }
-    when(tracer.client.log(any[Seq[LogEntry]])).thenReturn(Future(ResultCode.Ok))
+    val scribe = new ScribeClient
+    val tracer = new RawZipkinTracer(scribe, NullStatsReceiver)
 
     val localAddress = InetAddress.getByAddress(Array.fill(4) { 1 })
     val remoteAddress = InetAddress.getByAddress(Array.fill(4) { 10 })
@@ -85,7 +86,7 @@ class RawZipkinTracerTest extends FunSuite with MockitoSugar {
     tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientRecv()))
 
     // Note: Since ports are ephemeral, we can't hardcode expected message.
-    verify(tracer.client).log(any[Seq[LogEntry]])
+    assert(scribe.messages.size === 1)
   }
 
   test("logSpan if a timeout occurs") {
@@ -93,17 +94,14 @@ class RawZipkinTracerTest extends FunSuite with MockitoSugar {
     val ann2 = Annotation.Rpcname("some_service", "rpc_name")
     val ann3 = Annotation.Message(TimeoutFilter.TimeoutAnnotation)
 
-    val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver) {
-      override val client = mock[Scribe.FinagledClient]
-    }
-
-    when(tracer.client.log(any[Seq[LogEntry]])).thenReturn(Future(ResultCode.Ok))
+    val scribe = new ScribeClient
+    val tracer = new RawZipkinTracer(scribe, NullStatsReceiver)
 
     tracer.record(Record(traceId, Time.fromSeconds(1), ann1))
     tracer.record(Record(traceId, Time.fromSeconds(2), ann2))
     tracer.record(Record(traceId, Time.fromSeconds(3), ann3))
 
     // scribe Log method is in java
-    verify(tracer.client).log(any[Seq[LogEntry]])
+    assert(scribe.messages.size === 1)
   }
 }

@@ -6,10 +6,10 @@ import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.{ThriftClientFramedCodec, thrift}
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.zipkin.thriftscala._
 import com.twitter.finagle.util.DefaultTimer
+import com.twitter.finagle.zipkin.thriftscala._
 import com.twitter.finagle.{Service, SimpleFilter, tracing}
-import com.twitter.util.{Time, Await, Base64StringEncoder, Future}
+import com.twitter.util._
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeoutException
@@ -18,6 +18,22 @@ import org.apache.thrift.transport.TMemoryBuffer
 import scala.collection.mutable.{ArrayBuffer, HashMap, SynchronizedMap}
 
 object RawZipkinTracer {
+  private[this] def newClient(
+    scribeHost: String,
+    scribePort: Int
+  ): Scribe.FutureIface = {
+    val transport = ClientBuilder()
+      .hosts(new InetSocketAddress(scribeHost, scribePort))
+      .codec(ThriftClientFramedCodec())
+      .hostConnectionLimit(5)
+      .daemon(true)
+      .build()
+
+    new Scribe.FinagledClient(
+      new TracelessFilter andThen transport,
+      new TBinaryProtocol.Factory())
+  }
+
   // to make sure we only create one instance of the tracer per host and port
   private[this] val map =
     new HashMap[String, RawZipkinTracer] with SynchronizedMap[String, RawZipkinTracer]
@@ -27,19 +43,17 @@ object RawZipkinTracer {
    * @param scribePort Port to send trace data to
    * @param statsReceiver Where to log information about tracing success/failures
    */
-  def apply(scribeHost: String = "localhost",
-            scribePort: Int = 1463,
-            statsReceiver: StatsReceiver = NullStatsReceiver
-  ): Tracer = synchronized {
-    val tracer = map.getOrElseUpdate(scribeHost + ":" + scribePort, {
-      new RawZipkinTracer(
-        scribeHost,
-        scribePort,
-        statsReceiver.scope("zipkin")
-      )
-    })
-    tracer
+  def apply(
+    scribeHost: String = "localhost",
+    scribePort: Int = 1463,
+    statsReceiver: StatsReceiver = NullStatsReceiver,
+    timer: Timer = DefaultTimer.twitter
+  ): RawZipkinTracer = synchronized {
+    map.getOrElseUpdate(scribeHost + ":" + scribePort, apply(newClient(scribeHost, scribePort), statsReceiver, timer))
   }
+
+  def apply(client: Scribe.FutureIface, statsReceiver: StatsReceiver, timer: Timer): RawZipkinTracer =
+    new RawZipkinTracer(client, statsReceiver.scope("zipkin"), timer)
 
   // Try to flush the tracers when we shut
   // down. We give it 100ms.
@@ -64,9 +78,9 @@ object RawZipkinTracer {
  * @param statsReceiver We generate stats to keep track of traces sent, failures and so on
  */
 private[thrift] class RawZipkinTracer(
-  scribeHost: String,
-  scribePort: Int,
-  statsReceiver: StatsReceiver
+  client: Scribe.FutureIface,
+  statsReceiver: StatsReceiver,
+  timer: Timer = DefaultTimer.twitter
 ) extends Tracer
 {
   private[this] val protocolFactory = new TBinaryProtocol.Factory()
@@ -74,25 +88,12 @@ private[thrift] class RawZipkinTracer(
 
   // this sends off spans after the deadline is hit, no matter if it ended naturally or not.
   private[this] val spanMap: DeadlineSpanMap =
-    new DeadlineSpanMap(this, 120.seconds, statsReceiver, DefaultTimer.twitter)
+    new DeadlineSpanMap(this, 120.seconds, statsReceiver, timer)
 
   private[this] val scopedReceiver = statsReceiver.scope("log_span")
   private[this] val okCounter = scopedReceiver.counter("ok")
   private[this] val tryLaterCounter = scopedReceiver.counter("try_later")
   private[this] val errorReceiver = scopedReceiver.scope("error")
-
-  protected[thrift] val client = {
-    val transport = ClientBuilder()
-      .hosts(new InetSocketAddress(scribeHost, scribePort))
-      .codec(ThriftClientFramedCodec())
-      .hostConnectionLimit(5)
-      .daemon(true)
-      .build()
-
-    new Scribe.FinagledClient(
-      new TracelessFilter andThen transport,
-      new TBinaryProtocol.Factory())
-  }
 
   protected[thrift] def flush() = spanMap.flush()
 
@@ -123,7 +124,7 @@ private[thrift] class RawZipkinTracer(
       case _ => () /* ignore */
     } onFailure {
       case e: Throwable => errorReceiver.counter(e.getClass.getName).incr()
-    } map(_ => ())
+    } unit
   }
 
   /**
