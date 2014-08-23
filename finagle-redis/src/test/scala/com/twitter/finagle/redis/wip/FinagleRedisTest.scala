@@ -48,7 +48,7 @@ trait FinagleRedisRequestTest extends FinagleRedisTest {
   }
 }
 
-trait FinagleRedisClientSuite extends FinagleRedisTest with BeforeAndAfterAll {
+trait FinagleRedisClientTest extends FinagleRedisTest with BeforeAndAfterAll {
 
   override def beforeAll(configMap: Map[String, Any]): Unit = RedisCluster.start()
   override def afterAll(configMap: Map[String, Any]): Unit = RedisCluster.stop()
