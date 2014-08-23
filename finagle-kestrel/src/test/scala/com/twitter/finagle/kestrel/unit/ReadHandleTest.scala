@@ -6,9 +6,8 @@ import com.twitter.io.Charsets
 import com.twitter.util.Await
 import org.jboss.netty.buffer.ChannelBuffers
 import org.scalatest.FunSuite
-import org.scalatest.mock.MockitoSugar
 
-class ReadHandleTest extends FunSuite with MockitoSugar {
+class ReadHandleTest extends FunSuite {
   def msg_(i: Int) = {
     val ack = new Broker[Unit]
     val abort = new Broker[Unit]
@@ -39,19 +38,19 @@ class ReadHandleTest extends FunSuite with MockitoSugar {
     val merged = ReadHandle.merged(Seq(handle0, handle1))
   }
 
-  test("ReadHandle.buffered should acknowledge howmany messages"){
+  test("ReadHandle.buffered should acknowledge howmany messages") {
     new BufferedReadHandle {
       0 until N foreach { i =>
         val (ack, m) = msg_(i)
         messages ! m
-        assert((ack?).isDefined === true)
+        assert((ack ?).isDefined === true)
       }
       val (ack, m) = msg_(0)
-      assert((ack?).isDefined === false)
+      assert((ack ?).isDefined === false)
     }
   }
 
-  test("ReadHandle.buffered should not synchronize on send when buffer is full"){
+  test("ReadHandle.buffered should not synchronize on send when buffer is full") {
     new BufferedReadHandle {
       0 until N foreach { _ =>
         assert((messages ! msg(0)).isDefined === true)
@@ -60,7 +59,7 @@ class ReadHandleTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("ReadHandle.buffered should keep the buffer full"){
+  test("ReadHandle.buffered should keep the buffer full") {
     new BufferedReadHandle {
       0 until N foreach { _ =>
         messages ! msg(0)
@@ -74,7 +73,7 @@ class ReadHandleTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("ReadHandle.buffered should preserve FIFO order"){
+  test("ReadHandle.buffered should preserve FIFO order") {
     new BufferedReadHandle {
       0 until N foreach { i =>
         messages ! msg(i)
@@ -88,7 +87,7 @@ class ReadHandleTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("ReadHandle.buffered should propagate errors"){
+  test("ReadHandle.buffered should propagate errors") {
     new BufferedReadHandle {
       val errd = (buffered.error ?)
       assert(errd.isDefined === false)
@@ -99,7 +98,7 @@ class ReadHandleTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("ReadHandle.buffered should when closed propagate immediately if empty"){
+  test("ReadHandle.buffered should when closed propagate immediately if empty") {
     new BufferedReadHandle {
       val closed = (close ?)
       assert(closed.isDefined === false)
@@ -108,7 +107,7 @@ class ReadHandleTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("ReadHandle.buffered should when closed wait for outstanding acks before closing underlying"){
+  test("ReadHandle.buffered should when closed wait for outstanding acks before closing underlying") {
     new BufferedReadHandle {
       val closed = (close ?)
       assert(closed.isDefined === false)
@@ -127,7 +126,7 @@ class ReadHandleTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("ReadHandle.merged should"){
+  test("ReadHandle.merged should") {
     new MergedReadHandle {
       var count = 0
       merged.messages.foreach { _ => count += 1 }
@@ -141,7 +140,7 @@ class ReadHandleTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("ReadHandle.merged should provide a merged stream of errors provide a merged stream of messages"){
+  test("ReadHandle.merged should provide a merged stream of errors provide a merged stream of messages") {
     new MergedReadHandle {
       var count = 0
       merged.error.foreach { _ => count += 1 }
@@ -154,7 +153,7 @@ class ReadHandleTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("ReadHandle.merged should propagate closes to all underlying handles"){
+  test("ReadHandle.merged should propagate closes to all underlying handles") {
     new MergedReadHandle {
       val closed0 = close0 ?
       val closed1 = close1 ?

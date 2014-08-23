@@ -13,7 +13,8 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class ClientTest extends FunSuite {
-  ignore("Connected client should set & get") {
+  ignore("This test requires a Kestrel server to run. Please run manually. " +
+    "Connected client should set & get") {
     val serviceFactory = ClientBuilder()
       .hosts("localhost:22133")
       .codec(Kestrel())
@@ -31,7 +32,8 @@ class ClientTest extends FunSuite {
     assert(rep === Some("bar"))
   }
 
-  ignore("ThriftConnectedClient should set & get") {
+  ignore("This test requires a Kestrel server to run. Please run manually. " +
+    "ThriftConnectedClient should set & get") {
     val serviceFactory = ClientBuilder()
       .hosts("localhost:2229")
       .codec(ThriftClientFramedCodec(Some(ClientId("testcase"))))

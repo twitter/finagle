@@ -6,6 +6,7 @@ import _root_.java.util.concurrent.{BlockingDeque, ExecutorService, Executors, L
 
 import com.google.common.cache.{CacheBuilder, CacheLoader, LoadingCache}
 import com.twitter.concurrent.{Broker, Spool}
+import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig, Cluster}
 import com.twitter.finagle.kestrel._
 import com.twitter.finagle.kestrel.protocol.{Command, Response, Set}
@@ -237,6 +238,27 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       }
 
       assert(messages === sentMessages)
+    }
+  }
+
+  ignore("This test stopped working. " +
+    "static ReadHandle cluster should round robin from multiple available queues") {
+    // We use frozen time for deterministic randomness.
+    // The message output order was simply determined empirically.
+    new MultiReaderHelper {
+      Time.withTimeAt(Time.epoch + 1.seconds) { _ =>
+        // stuff the queues beforehand
+        val ms = handles map { h =>
+          val m = mock[ReadMessage]
+          h._messages ! m
+          m
+        }
+
+        val handle = MultiReaderHelper.merge(va)
+        assert((handle.messages ??) === ms(0))
+        assert((handle.messages ??) === ms(2))
+        assert((handle.messages ??) === ms(1))
+      }
     }
   }
 
