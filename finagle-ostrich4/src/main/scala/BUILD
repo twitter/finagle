@@ -1,4 +1,9 @@
 scala_library(name='scala',
+  provides = artifact(
+    org = 'com.twitter',
+    name = 'finagle-ostrich4',
+    repo = pants('pants-support/ivy:internal'),
+  ),
   dependencies=[
     '3rdparty:netty',
     'finagle/finagle-core',
@@ -10,7 +15,4 @@ scala_library(name='scala',
   resources=[
     'finagle/finagle-ostrich4/src/main/resources'
   ],
-  provides=artifact(org='com.twitter',
-                    name='finagle-ostrich4',
-                    repo='pants-support/ivy:internal',),
 )

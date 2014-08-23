@@ -1,4 +1,9 @@
 scala_library(name='scala',
+  provides = artifact(
+    org = 'com.twitter',
+    name = 'finagle-serversets',
+    repo = pants('pants-support/ivy:internal'),
+  ),
   dependencies=[
     '3rdparty/jvm/com/twitter/common:service-thrift',
     '3rdparty/jvm/com/twitter/common/zookeeper:client',
@@ -15,7 +20,4 @@ scala_library(name='scala',
   resources=[
     'finagle/finagle-serversets/src/main/resources'
   ],
-  provides=artifact(org='com.twitter',
-                    name='finagle-serversets',
-                    repo='pants-support/ivy:internal',),
 )

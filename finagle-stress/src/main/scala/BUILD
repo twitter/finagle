@@ -1,4 +1,9 @@
 scala_library(name='scala',
+  provides = artifact(
+    org = 'com.twitter',
+    name = 'finagle-stress',
+    repo = pants('pants-support/ivy:internal'),
+  ),
   dependencies=[
     '3rdparty:caliper',
     '3rdparty:netty',
@@ -14,9 +19,6 @@ scala_library(name='scala',
     'util/util-logging',
   ],
   sources=rglobs('*.scala'),
-  provides=artifact(org='com.twitter',
-                    name='finagle-stress',
-                    repo='pants-support/ivy:internal',),
 )
 
 benchmark(name='bench',

@@ -1,4 +1,9 @@
 scala_library(name='scala',
+  provides = artifact(
+    org = 'com.twitter',
+    name = 'finagle-kestrel',
+    repo = pants('pants-support/ivy:internal'),
+  ),
   dependencies=[
     '3rdparty:guava',
     '3rdparty:netty',
@@ -10,7 +15,4 @@ scala_library(name='scala',
     'util/util-core',
   ],
   sources=rglobs('*.scala'),
-  provides=artifact(org='com.twitter',
-                    name='finagle-kestrel',
-                    repo='pants-support/ivy:internal',),
 )

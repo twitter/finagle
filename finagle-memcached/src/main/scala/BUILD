@@ -1,4 +1,9 @@
 scala_library(name='scala',
+  provides = artifact(
+    org = 'com.twitter',
+    name = 'finagle-memcached',
+    repo = pants('pants-support/ivy:internal'),
+  ),
   dependencies=[
     '3rdparty:gson',
     '3rdparty:guava',
@@ -20,7 +25,4 @@ scala_library(name='scala',
   resources=[
     'finagle/finagle-memcached/src/main/resources'
   ],
-  provides=artifact(org='com.twitter',
-                    name='finagle-memcached',
-                    repo='pants-support/ivy:internal',),
 )

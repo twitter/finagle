@@ -1,4 +1,9 @@
 scala_library(name='scala',
+  provides = artifact(
+    org = 'com.twitter',
+    name = 'finagle-exp',
+    repo = pants('pants-support/ivy:internal'),
+  ),
   dependencies=[
     '3rdparty:jsr166e',
     'finagle/finagle-core',
@@ -6,9 +11,6 @@ scala_library(name='scala',
     'util/util-core',
   ],
   sources=rglobs('com/twitter/finagle/exp/*.scala'),
-  provides=artifact(org='com.twitter',
-                    name='finagle-exp',
-                    repo='pants-support/ivy:internal',),
 )
 
 benchmark(name='benchmark',

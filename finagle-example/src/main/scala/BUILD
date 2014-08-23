@@ -1,4 +1,9 @@
 scala_library(name='scala',
+  provides = artifact(
+    org = 'com.twitter',
+    name = 'finagle-example',
+    repo = pants('pants-support/ivy:internal'),
+  ),
   dependencies=[
     'finagle/finagle-core',
     'finagle/finagle-example/src/main/thrift:thrift-scala',
@@ -14,9 +19,6 @@ scala_library(name='scala',
     'util/util-codec',
   ],
   sources=rglobs('*.scala'),
-  provides=artifact(org='com.twitter',
-                    name='finagle-example',
-                    repo='pants-support/ivy:internal',),
 )
 
 def binary(name, main=None):
