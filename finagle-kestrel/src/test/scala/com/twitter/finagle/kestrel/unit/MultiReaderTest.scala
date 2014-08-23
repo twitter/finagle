@@ -51,15 +51,17 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
     val executor = Executors.newCachedThreadPool()
 
-    def newKestrelService(executor: Option[ExecutorService],
-      queues: LoadingCache[ChannelBuffer, BlockingDeque[ChannelBuffer]]): Service[Command, Response] = {
+    def newKestrelService(
+      executor: Option[ExecutorService],
+      queues: LoadingCache[ChannelBuffer, BlockingDeque[ChannelBuffer]]
+    ): Service[Command, Response] = {
       val interpreter = new Interpreter(queues)
       new Service[Command, Response] {
         def apply(request: Command) = {
           val promise = new Promise[Response]()
           executor match {
-            case Some(executor) =>
-              executor.submit(new Runnable {
+            case Some(exec) =>
+              exec.submit(new Runnable {
                 def run() {
                   promise.setValue(interpreter(request))
                 }
@@ -93,7 +95,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
           def apply(conn: ClientConnection) =
             Future.value(newKestrelService(Some(executor), queues))
           def close(deadline: Time) = Future.Done
-          override def toString = "ServiceFactory for %s".format(host)
+          override def toString() = "ServiceFactory for %s".format(host)
         }
         when(mockHostClientBuilder.buildFactory()) thenReturn factory
       }
@@ -150,15 +152,17 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
     val executor = Executors.newCachedThreadPool()
 
-    def newKestrelService(executor: Option[ExecutorService],
-      queues: LoadingCache[ChannelBuffer, BlockingDeque[ChannelBuffer]]): Service[Command, Response] = {
+    def newKestrelService(
+      executor: Option[ExecutorService],
+      queues: LoadingCache[ChannelBuffer, BlockingDeque[ChannelBuffer]]
+    ): Service[Command, Response] = {
       val interpreter = new Interpreter(queues)
       new Service[Command, Response] {
         def apply(request: Command) = {
           val promise = new Promise[Response]()
           executor match {
-            case Some(executor) =>
-              executor.submit(new Runnable {
+            case Some(exec) =>
+              exec.submit(new Runnable {
                 def run() {
                   promise.setValue(interpreter(request))
                 }
@@ -191,7 +195,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
           // use an executor so readReliably doesn't block waiting on an empty queue
           def apply(conn: ClientConnection) = Future(newKestrelService(Some(executor), queues))
           def close(deadline: Time) = Future.Done
-          override def toString = "ServiceFactory for %s".format(host)
+          override def toString() = "ServiceFactory for %s".format(host)
         }
         when(mockHostClientBuilder.buildFactory()) thenReturn factory
       }
@@ -290,7 +294,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       }
 
       // 0, 3, 6 ...
-      eventually{
+      eventually {
         assert(messages === sentMessages.grouped(N).map { _.head }.toSet)
       }
       messages.clear()
@@ -334,7 +338,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
         // expect fewer to be read on each pass
         val expectFirstN = N - hostIndex - 1
-        eventually{
+        eventually {
           assert(messages === sentMessages.grouped(N).map { _.take(expectFirstN) }.flatten.toSet)
         }
       }
@@ -472,12 +476,13 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
     }
   }
 
-  test("dynamic SocketAddress cluster should wait for cluster to become ready before snapping initial hosts") {
+  test("dynamic SocketAddress cluster should wait " +
+    "for cluster to become ready before snapping initial hosts") {
     new DynamicClusterHelper {
       val cluster = new DynamicCluster[SocketAddress](Seq())
       val handle = MultiReader(cluster, "the_queue").clientBuilder(mockClientBuilder).build()
       val messages = configureMessageReader(handle)
-      val errors = handle.error ?
+      val errors = (handle.error ?)
       val sentMessages = 0 until N * 10 map { i => "message %d".format(i) }
       assert(messages.size === 0)
 
@@ -508,7 +513,8 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
     }
   }
 
-  test("dynamic SocketAddress cluster should silently handle the removal of a host that was never added") {
+  test("dynamic SocketAddress cluster should silently" +
+    " handle the removal of a host that was never added") {
     new DynamicClusterHelper {
       val cluster = new DynamicCluster[SocketAddress](hosts)
       val handle = MultiReader(cluster, "the_queue").clientBuilder(mockClientBuilder).build()

@@ -1,13 +1,12 @@
 package com.twitter.finagle.kestrel.integration
 
-import java.net.InetSocketAddress
-
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.kestrel.Server
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import java.net.InetSocketAddress
 import com.twitter.util.{Await, Time}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
