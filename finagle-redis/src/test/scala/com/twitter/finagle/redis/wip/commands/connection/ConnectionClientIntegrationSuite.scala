@@ -1,11 +1,11 @@
 package com.twitter.finagle.redis.integration
 
-import com.twitter.finagle.redis.naggati.FinagleRedisClientSuite
+import com.twitter.finagle.redis.naggati.FinagleRedisClientTest
 import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
 import com.twitter.util.Await
 import com.twitter.finagle.redis.util.{CBToString, StringToChannelBuffer}
 
-final class ConnectionClientIntegrationSuite extends FinagleRedisClientSuite {
+final class ConnectionClientIntegrationSuite extends FinagleRedisClientTest {
 
   test("Correctly perform the SELECT command", RedisTest, ClientTest) {
     withRedisClient { client =>
