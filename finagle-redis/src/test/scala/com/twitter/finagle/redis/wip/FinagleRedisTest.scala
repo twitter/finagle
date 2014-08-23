@@ -16,6 +16,7 @@ import com.twitter.finagle.redis.Client
 trait FinagleRedisTest extends FunSuite {
   protected def wrap(s: String): ChannelBuffer = StringToChannelBuffer(s)
   protected def string2ChanBuf(s: String): ChannelBuffer = wrap(s)
+  protected def chanBuf2String(cb: ChannelBuffer): String = CBToString(cb)
 
   protected val foo = StringToChannelBuffer("foo")
   protected val bar = StringToChannelBuffer("bar")
@@ -125,7 +126,7 @@ trait FinagleRedisClientServerIntegrationTest extends FinagleRedisTest with Befo
           })
         case false =>
           val actualMessages = ReplyFormat.toChannelBuffers(msgs).map({ msg =>
-            CBToString(msg)
+            chanBuf2String(msg)
           })
           assert(actualMessages == expects)
       }
