@@ -6,6 +6,7 @@ import com.twitter.util.{Throw, Try, Return}
 import java.nio.charset.Charset
 import org.jboss.netty.handler.codec.http.HttpMessage
 import scala.collection.mutable.ArrayBuffer
+import scala.collection.JavaConverters._
 
 /**
  * Dtab serialization for Http. Dtabs are encoded into Http
@@ -20,6 +21,7 @@ import scala.collection.mutable.ArrayBuffer
  * Utf8 strings.
  */
 object HttpDtab {
+  private val Header = "dtab-local"
   private val Prefix = "x-dtab-"
   private val Maxsize = 100
   private val Utf8 = Charset.forName("UTF-8")
@@ -72,9 +74,12 @@ object HttpDtab {
     aKey(aKey.size-1) == 'a' &&
     bKey(bKey.size-1) == 'b'
 
+  private val EmptyReturn = Return(Dtab.empty)
+
   def clear(msg: HttpMessage) {
     val names = msg.headers.names.iterator()
-    while (names.hasNext()) {
+    msg.headers.remove(Header)
+    while (names.hasNext) {
       val n = names.next()
       if (n.toLowerCase startsWith Prefix)
         msg.headers.remove(n)
@@ -98,7 +103,37 @@ object HttpDtab {
     }
   }
 
-  def read(msg: HttpMessage): Try[Dtab] = {
+  /**
+   * Parse old-style X-Dtab pairs and then new-style Dtab-Local headers,
+   * Dtab-Local taking precedence.
+   */
+  def read(msg: HttpMessage): Try[Dtab] =
+    for {
+      dtab0 <- readXDtabPairs(msg)
+      dtab1 <- readDtabLocal(msg)
+    } yield dtab0 ++ dtab1
+
+  /**
+   * Parse Dtab-Local headers into a Dtab.
+   *
+   * If multiple Dtab-Local headers are present, they are concatenated.
+   * A Dtab-Local header may contain a comma-separated list of Dtabs.
+   *
+   * N.B. Comma is not a showable character in Paths nor is it meaningful in Dtabs.
+   */
+  private def readDtabLocal(msg: HttpMessage): Try[Dtab] =
+    if (!msg.headers.contains(Header)) EmptyReturn else Try {
+      val headers = msg.headers().getAll(Header).asScala
+      val dentries = headers.view flatMap(_ split ',') flatMap(Dtab.read(_))
+      Dtab(dentries.toIndexedSeq)
+    }
+
+  /**
+   * Parse header pairs into a Dtab:
+   *   X-Dtab-00-A: base64(/prefix)
+   *   X-Dtab-00-B: base64(/dstA & /dstB)
+   */
+  private def readXDtabPairs(msg: HttpMessage): Try[Dtab] = {
     // Common case: no actual overrides.
     var keys: ArrayBuffer[String] = null
     val headers = msg.headers.iterator()
@@ -110,9 +145,8 @@ object HttpDtab {
       }
     }
 
-
     if (keys == null)
-      return Return(Dtab.empty)
+      return EmptyReturn
 
     if (keys.size % 2 != 0)
       return Throw(unmatchedFailure)

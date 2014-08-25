@@ -31,8 +31,37 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     }
   }
 
+  test("Dtab-Local: read multiple, with commas") {
+    val m = newMsg()
+    m.headers.add("Dtab-Local", "/srv#/prod/local/role=>/$/fail;/srv=>/srv#/staging")
+    m.headers.add("Dtab-Local", "/srv/local=>/srv/other,/srv=>/srv#/devel")
+    val expected = Dtab.read(
+      "/srv#/prod/local/role => /$/fail;"+
+      "/srv => /srv#/staging;"+
+      "/srv/local => /srv/other;"+
+      "/srv => /srv#/devel"
+    )
+    assert(HttpDtab.read(m).get() === expected)
+  }
+
+  test("Dtab-Local takes precedence over X-Dtab") {
+    val m = newMsg()
+    m.headers.add("Dtab-Local", "/srv#/prod/local/role=>/$/fail;/srv=>/srv#/staging")
+    // HttpDtab.write encodes X-Dtab headers
+    HttpDtab.write(Dtab.read("/srv => /$/nil"), m)
+    m.headers.add("Dtab-Local", "/srv/local=>/srv/other,/srv=>/srv#/devel")
+    val expected = Dtab.read(
+      "/srv => /$/nil;"+
+      "/srv#/prod/local/role => /$/fail;"+
+      "/srv => /srv#/staging;"+
+      "/srv/local => /srv/other;"+
+      "/srv => /srv#/devel"
+    )
+    assert(HttpDtab.read(m).get() === expected)
+  }
+
   // some base64 encoders insert newlines to enforce max line length.  ensure we aren't doing that
-  test("long dest round-trips") {
+  test("X-Dtab: long dest round-trips") {
     val expectedDtab = Dtab.read("/s/a => /s/abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz")
     val m = newMsg()
     HttpDtab.write(expectedDtab, m)
@@ -45,7 +74,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     assert(Equiv[Dtab].equiv(Dtab.empty, HttpDtab.read(m).get()))
   }
 
-  test("Invalid: no shared prefix") {
+  test("X-Dtab: Invalid: no shared prefix") {
     val m = newMsg()
     m.headers.set("X-Dtab-01-A", "a")
     m.headers.set("X-Dtab-02-B", "a")
@@ -54,7 +83,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     assert(failure.why === "Unmatched X-Dtab headers")
   }
 
-  test("Invalid path") {
+  test("X-Dtab: Invalid prefix") {
     val m = newMsg()
     m.headers.set("X-Dtab-01-A", "L2ZvbyA9PiAvZmFy") // /foo => /far
     m.headers.set("X-Dtab-01-B", "L2Zhcg==") // /far
@@ -63,7 +92,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     assert(failure.why === "Invalid path: /foo => /far")
   }
 
-  test("Invalid name") {
+  test("X-Dtab: Invalid name") {
     val m = newMsg()
     m.headers.set("X-Dtab-01-A", "L2Zvbw==") // foo
     m.headers.set("X-Dtab-01-B", "L2ZvbyA9PiAvZmFy") // /foo => /far
@@ -72,7 +101,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     assert(failure.why === "Invalid name: /foo => /far")
   }
 
-  test("Invalid: missing entry") {
+  test("X-Dtab: Invalid: missing entry") {
     val m = newMsg()
     m.headers.set("X-Dtab-01-A", "a")
     m.headers.set("X-Dtab-01-B", "a")
@@ -82,7 +111,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     assert(failure.why === "Unmatched X-Dtab headers")
   }
   
-  test("Invalid: non-ASCII encoding") {
+  test("X-Dtab: Invalid: non-ASCII encoding") {
     val m = newMsg()
     m.headers.set("X-Dtab-01-A", "☺")
     m.headers.set("X-Dtab-01-B", "☹")
@@ -94,21 +123,23 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
   test("clear()") {
     val m = newMsg()
     HttpDtab.write(Dtab.read("/a=>/b;/a=>/c"), m)
+    m.headers.set("Dtab-Local", "/srv=>/srv#/staging")
     m.headers.set("onetwothree", "123")
 
     val headers = Seq(
       "X-Dtab-00-A", "X-Dtab-00-B", 
-      "X-Dtab-01-A", "X-Dtab-01-B")
+      "X-Dtab-01-A", "X-Dtab-01-B",
+      "Dtab-Local")
 
     for (h <- headers)
-      assert(m.headers.contains(h))
+      assert(m.headers.contains(h), h+" not in headers")
 
-    assert(m.headers.contains("onetwothree"))
+    assert(m.headers.contains("onetwothree"), "onetwothree not in headers")
     
     HttpDtab.clear(m)
     
-    assert(m.headers.contains("onetwothree"))
+    assert(m.headers.contains("onetwothree"), "onetwothree was removed from headers")
     for (h <- headers)
-      assert(!m.headers.contains(h))
+      assert(!m.headers.contains(h), h+" was not removed from headers")
   }
 }
