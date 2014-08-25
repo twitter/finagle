@@ -88,13 +88,4 @@ extends ServiceFactoryProxy[Req, Rep](underlying) {
         }
     }
   }
-
-  /**
-   * isAvailable in this context means that there is an already made service
-   * that can be used immediately, or else a service can be made.
-   */
-  override def isAvailable = underlying.isAvailable && (current.get.poll match {
-    case Some(Return(svc)) => svc.isAvailable
-    case _ => true
-  })
 }

@@ -38,32 +38,6 @@ class ReusingPoolTest extends FunSuite with MockitoSugar {
     verify(underlying, times(2)).isAvailable
   }
 
-  test("available when underlying service is") {
-    val ctx = new Ctx
-    import ctx._
-
-    assert(pool.isAvailable)
-    pool()
-    assert(pool.isAvailable)
-    underlyingP.setValue(service)
-    assert(pool.isAvailable)
-    when(service.isAvailable).thenReturn(false)
-    assert(!pool.isAvailable)
-  }
-
-  test("underlying availability takes priority") {
-    val ctx = new Ctx
-    import ctx._
-
-    assert(pool.isAvailable)
-    pool()
-    assert(pool.isAvailable)
-    underlyingP.setValue(service)
-    assert(pool.isAvailable)
-    when(underlying.isAvailable).thenReturn(false)
-    assert(!pool.isAvailable)
-  }
-
   test("first attempt establishes a connection, subsequent attempts don't") {
     val ctx = new Ctx
     import ctx._
