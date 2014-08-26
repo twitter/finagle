@@ -160,10 +160,12 @@ private[finagle] object LoadBalancerFactory {
         val ready = dest.observeUntil(_ != Addr.Pending)
         val f = ready map (_ => balanced)
 
-        Stack.Leaf(role, new DelayedFactory(f) {
-          override def close(deadline: Time) =
-            Future.join(observation.close(deadline), super.close(deadline)).unit
-        })
+        val delayed = DelayedFactory.swapOnComplete(f)
+        val factory = new ServiceFactoryProxy(delayed) {
+          override def close(deadline: Time): Future[Unit] =
+            Future.join(Seq(observation.close(deadline), self.close(deadline)))
+        }
+        Stack.Leaf(role, factory)
       }
     }
 }
