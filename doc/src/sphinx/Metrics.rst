@@ -90,3 +90,12 @@ Understanding these stats often requires deep knowledge of the protocol, or indi
 (e.g. Netty) internals.
 
 .. include:: metrics/Transport.rst
+
+ServerSets
+----------
+
+.. _serverset_stats:
+
+These metrics track the current state of ServerSets if you are using them for name resolution. They are scoped under "zk2".
+
+.. include:: metrics/ServerSets.rst
