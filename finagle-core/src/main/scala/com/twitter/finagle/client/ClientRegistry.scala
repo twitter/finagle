@@ -52,19 +52,19 @@ private[twitter] object ClientRegistry {
    * @note Experimental feature which will eventually be solved by exposing Service
    *       availability as a Var.
    */
-  def expAllRegisteredClientsResolved(): Future[Unit] = synchronized {
+  def expAllRegisteredClientsResolved(): Future[Set[String]] = synchronized {
     val fs = clients map { case (name, (_, stackClient)) =>
-      val p = new Promise[Unit]
       val LoadBalancerFactory.Dest(va) = stackClient.params[LoadBalancerFactory.Dest]
       val param.Logger(log) = stackClient.params[param.Logger]
 
       val resolved = va.changes.filter(_ != Addr.Pending).toFuture
-      resolved onSuccess { resolution =>
+      resolved map { resolution =>
         log.log(Level.INFO, "ClientRegistery: %s resolved to %s".format(name, resolution))
+        name
       }
     }
 
-    Future.join(fs.toSeq)
+    Future.collect(fs.toSeq).map(_.toSet)
   }
 
   /**

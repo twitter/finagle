@@ -192,12 +192,11 @@ private[finagle] abstract class StackClient[Req, Rep](
       Label(clientLabel) +
       Stats(stats.scope(clientLabel))
 
-    def mkServiceFactory(params: Stack.Params): ServiceFactory[Req, Rep] = {
+    def register(params: Stack.Params) {
       ClientRegistry.register(clientLabel, dest, this.copy(
         stack = clientStack,
         params = params
       ))
-      clientStack.make(params)
     }
 
     dest match {
@@ -206,14 +205,18 @@ private[finagle] abstract class StackClient[Req, Rep](
           LoadBalancerFactory.ErrorLabel(clientLabel) +
           LoadBalancerFactory.Dest(addr))
 
-        mkServiceFactory(clientParams1)
+        register(clientParams1)
+        clientStack.make(clientParams1)
 
       case Name.Path(path) =>
         val clientParams1 = clientParams + LoadBalancerFactory.ErrorLabel(path.show)
 
+        val vaddr = (Dtab.base orElse Namer.global).bindAndEval(NameTree.Leaf(path))
+        // Register this client once as evaluated against the base dtab
+        register(clientParams1 + LoadBalancerFactory.Dest(vaddr))
+
         val newStack: Var[Addr] => ServiceFactory[Req, Rep] = { addr =>
-          val clientParams2 = clientParams1 + LoadBalancerFactory.Dest(addr)
-          mkServiceFactory(clientParams2)
+          clientStack.make(clientParams1 + LoadBalancerFactory.Dest(addr))
         }
 
         new BindingFactory(path, newStack, stats.scope("interpreter"))
