@@ -67,6 +67,11 @@ private object P2CBalancer {
       def get() = load.get().toDouble
     }
 
+    // temporary logger to help debug ewma load metric
+    import java.util.logging.{Logger, Level}
+    private val epoch = System.nanoTime()
+    private val log = Logger.getLogger("com.twitter.finagle.loadbalancer.loadMetric")
+
     /**
      * A load metric designed to quickly converge in the face of slow
      * endpoints. Load is determined by oustanding nanos while taking
@@ -83,7 +88,7 @@ private object P2CBalancer {
       private[this] val Tau: Long = 2*Sec
 
       // these are all guarded by synchronization on `this`
-      private[this] var stamp: Long = 0L         // last timestamp in nanos we updated
+      private[this] var stamp: Long = 0L        // last timestamp in nanos we updated
       private[this] var lastRep: Long = 0L      // last timestamp in nanos we received a response
       private[this] var pendingReq: Int = 0     // rate nanos/nanos at time t
       private[this] var pendingTime: Long = 0L  // pending load in nanos
@@ -124,7 +129,7 @@ private object P2CBalancer {
         update()
         val rtt = stamp-ts
         val td = stamp-lastRep
-        // For every Tau that elapses, we decay by 1/e
+        // `rtt` decays by 1/e for every Tau that elapses
         val weight = math.exp(-td/Tau)
         lastRep = stamp
         pendingReq -= 1
@@ -132,6 +137,11 @@ private object P2CBalancer {
         // set a reasonable initial cost
         if (cost == 0.0) cost = rtt
         else cost = cost*weight + (1.0-weight)*rtt
+
+        if (log.isLoggable(Level.FINEST)) {
+          log.finest("[%s] clock=%d, rtt=%d, cost=%f, pendingTime=%d".format(
+            name, (stamp-epoch), rtt, cost, pendingTime))
+        }
       }
     }
   }
