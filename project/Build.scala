@@ -16,7 +16,8 @@ object Finagle extends Build {
   val jacksonLibs = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
     "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion exclude("com.google.guava", "guava"),
+    "com.google.guava" % "guava" % "16.0.1"
   )
   val thriftLibs = Seq(
     "org.apache.thrift" % "libthrift" % "0.5.0" intransitive(),
@@ -298,7 +299,8 @@ object Finagle extends Build {
     name := "finagle-http",
     libraryDependencies ++= Seq(
       util("codec"), util("logging"),
-      "commons-lang" % "commons-lang" % "2.6"
+      "commons-lang" % "commons-lang" % "2.6",
+      "com.google.guava" % "guava" % "16.0.1"
     )
   ).dependsOn(finagleCore)
 
