@@ -9,11 +9,16 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class ChannelBufferTransportTest extends FunSuite with MockitoSugar {
-  val buf = mock[ChannelBuffer]
-  val t = new ChannelBufferToTransport(buf)
+
+  case class ChannelContext(buf: ChannelBuffer){
+    lazy val t = new ChannelBufferToTransport(buf)
+  }
   val bb = "hello".getBytes
 
   test("ChannelBufferToTransport writes bytes to the underlying ChannelBuffer"){
+    val c = ChannelContext(mock[ChannelBuffer])
+    import c._
+
     t.write(bb, 0, 1)
     verify(buf).writeBytes(bb, 0, 1)
 
@@ -25,6 +30,9 @@ class ChannelBufferTransportTest extends FunSuite with MockitoSugar {
   }
 
   test("ChannelBufferToTransport reads bytes from the underlying ChannelBuffer") {
+    val c = ChannelContext(mock[ChannelBuffer])
+    import c._
+
     val nReadable = 5
     when(buf.readableBytes).thenReturn(nReadable)
     val b = new Array[Byte](nReadable)
@@ -35,12 +43,16 @@ class ChannelBufferTransportTest extends FunSuite with MockitoSugar {
 
 @RunWith(classOf[JUnitRunner])
 class DuplexChannelBufferTransportTest extends FunSuite with MockitoSugar {
-  val in = mock[ChannelBuffer]
-  val out = mock[ChannelBuffer]
-  val t = new DuplexChannelBufferTransport(in, out)
+
+  case class DuplexChannelContext(in: ChannelBuffer, out: ChannelBuffer){
+    lazy val t = new DuplexChannelBufferTransport(in, out)
+  }
   val bb = "hello".getBytes
 
   test("DuplexChannelBufferTransport writes to the output ChannelBuffer"){
+    val c = DuplexChannelContext(mock[ChannelBuffer], mock[ChannelBuffer])
+    import c._
+
     t.write(bb, 0, 1)
     verify(out).writeBytes(bb, 0, 1)
 
@@ -52,10 +64,13 @@ class DuplexChannelBufferTransportTest extends FunSuite with MockitoSugar {
   }
 
   test("DuplexChannelBufferTransport reads from the input ChannelBuffer"){
+    val c = DuplexChannelContext(mock[ChannelBuffer], mock[ChannelBuffer])
+    import c._
+
     val nReadable = 5
     when(in.readableBytes).thenReturn(nReadable)
     val b = new Array[Byte](nReadable)
     assert(t.read(b, 0, 10) === nReadable)
     assert(t.read(b, 0, 3) === 3)
-}
+  }
 }

@@ -12,13 +12,17 @@ import org.scalatest.mock.MockitoSugar
 @RunWith(classOf[JUnitRunner])
 class ClientIdRequiredFilterTest extends FunSuite with MockitoSugar {
 
+  case class ClientIdRequiredFilterContext(underlying: Service[String,String]) {
+    lazy val service = new ClientIdRequiredFilter andThen underlying
+  }
+
   val request = "request"
   val response = Future.value("response")
   val clientId = ClientId("test")
   
   test("ClientIdRequiredFilter passes through when ClientId exists") {
-    val underlying = mock[Service[String, String]]
-    val service = new ClientIdRequiredFilter andThen underlying
+    val c = ClientIdRequiredFilterContext(mock[Service[String,String]])
+    import c._
 
     when(underlying(request)).thenReturn(response)
     clientId.asCurrent {
@@ -29,8 +33,8 @@ class ClientIdRequiredFilterTest extends FunSuite with MockitoSugar {
   }
 
   test("ClientIdRequiredFilter throws NoClientIdSpecifiedException when ClientId does not exist") {
-    val underlying = mock[Service[String, String]]
-    val service = new ClientIdRequiredFilter andThen underlying
+    val c = ClientIdRequiredFilterContext(mock[Service[String,String]])
+    import c._
 
     ClientId.clear()
     intercept[NoClientIdSpecifiedException]{

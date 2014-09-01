@@ -142,28 +142,34 @@ trait ThriftTest { self: FunSuite =>
     "api" -> newAPIServer
   )
 
+  lazy val notSkipFlaky = !Option(System.getProperty("SKIP_FLAKY")).isDefined
+
+  def testOrSkipFlaky(name: String)(testFun: => Unit) = {
+    if(notSkipFlaky){
+      test(name)(testFun)
+    } else {
+      ignore(name)(testFun)
+    }
+  }
+
   /** Invoke this in your test to run all defined thrift tests */
   def runThriftTests() = {
-    val notSkipFlaky = !Option(System.getProperty("SKIP_FLAKY")).isDefined
-
-    if (notSkipFlaky){
-      for {
-        (protoName, proto) <- protocols
-        (clientName, newClient) <- clients
-        (serverName, newServer) <- servers
-        testDef <- thriftTests
-      } test("ThriftTest: server:%s client:%s proto:%s %s".format(
-        clientName, serverName, protoName, testDef.label)) {
-        val tracer = new BufferingTracer
-        val previous = DefaultTracer.self
-        DefaultTracer.self = tracer
-        val server = newServer(proto)
-        val client = newClient(proto, server.boundAddr, testDef.clientIdOpt)
-        try testDef.testFunction(client.client, tracer) finally {
-          DefaultTracer.self = previous
-          server.close()
-          client.close()
-        }
+    for {
+      (protoName, proto) <- protocols
+      (clientName, newClient) <- clients
+      (serverName, newServer) <- servers
+      testDef <- thriftTests
+    } testOrSkipFlaky("ThriftTest: server:%s client:%s proto:%s %s".format(
+      clientName, serverName, protoName, testDef.label)) {
+      val tracer = new BufferingTracer
+      val previous = DefaultTracer.self
+      DefaultTracer.self = tracer
+      val server = newServer(proto)
+      val client = newClient(proto, server.boundAddr, testDef.clientIdOpt)
+      try testDef.testFunction(client.client, tracer) finally {
+        DefaultTracer.self = previous
+        server.close()
+        client.close()
       }
     }
   }

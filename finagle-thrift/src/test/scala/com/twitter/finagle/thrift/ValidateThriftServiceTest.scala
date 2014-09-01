@@ -7,23 +7,31 @@ import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
 import org.junit.runner.RunWith
 import org.mockito.Matchers
 import org.mockito.Mockito.{verify, when, times}
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class ValidateThriftServiceTest extends FunSuite with MockitoSugar with OneInstancePerTest {
-  val protocolFactory = new TBinaryProtocol.Factory()
+class ValidateThriftServiceTest extends FunSuite with MockitoSugar {
 
-  val p = new Promise[Array[Byte]]
-  val service = mock[Service[ThriftClientRequest, Array[Byte]]]
-  when(service(Matchers.any[ThriftClientRequest])).thenReturn(p)
-  when(service.isAvailable).thenReturn(true)
-  def newValidate() = new ValidateThriftService(service, new TBinaryProtocol.Factory())
-  val validate = newValidate()
-  val req = mock[ThriftClientRequest]
+  case class ValidateThriftServiceContext(p: Promise[Array[Byte]] = new Promise[Array[Byte]]){
+    def newValidate() = new ValidateThriftService(service, protocolFactory)
+
+    lazy val service: Service[ThriftClientRequest, Array[Byte]] = {
+      val service = mock[Service[ThriftClientRequest, Array[Byte]]]
+      when(service(Matchers.any[ThriftClientRequest])).thenReturn(p)
+      when(service.isAvailable).thenReturn(true)
+      service
+    }
+    val req: ThriftClientRequest = mock[ThriftClientRequest]
+    lazy val validate = newValidate()
+    lazy val protocolFactory = new TBinaryProtocol.Factory()
+  }
 
   test("ValidateThriftService should query availability from underlying") {
+    val c = ValidateThriftServiceContext()
+    import c._
+
     when(service.isAvailable).thenReturn(true)
     assert(validate.isAvailable)
     verify(service).isAvailable
@@ -33,6 +41,9 @@ class ValidateThriftServiceTest extends FunSuite with MockitoSugar with OneInsta
   }
 
   test("ValidateThriftService should handle no-exception messages") {
+    val c = ValidateThriftServiceContext()
+    import c._
+
     val buf = new OutputBuffer(protocolFactory)
     buf().writeMessageBegin(new TMessage("ok123", TMessageType.REPLY, 0))
     buf().writeMessageEnd()
@@ -45,6 +56,9 @@ class ValidateThriftServiceTest extends FunSuite with MockitoSugar with OneInsta
   }
 
   test("ValidateThriftService should invalidate connection on bad TApplicationException") {
+    val c = ValidateThriftServiceContext()
+    import c._
+
     val codes = Seq(
       TApplicationException.BAD_SEQUENCE_ID,
       TApplicationException.INVALID_MESSAGE_TYPE,
@@ -78,6 +92,9 @@ class ValidateThriftServiceTest extends FunSuite with MockitoSugar with OneInsta
   }
 
   test("ValidateThriftService should not invalidate connection on OK TApplicationException") {
+    val c = ValidateThriftServiceContext()
+    import c._
+
     val codes = Seq(TApplicationException.INTERNAL_ERROR,
       TApplicationException.UNKNOWN_METHOD)
 

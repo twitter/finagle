@@ -6,7 +6,10 @@ import org.scalatest.{OneInstancePerTest, BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ClientIdContextTest extends FunSuite with BeforeAndAfter with OneInstancePerTest {
+class ClientIdContextTest extends FunSuite
+  with BeforeAndAfter
+  with OneInstancePerTest
+{
 
   before { ClientId.clear() }
   after { ClientId.clear() }

@@ -13,9 +13,9 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 import org.jboss.netty.channel.{ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, ChannelState, ChannelStateEvent, ChannelUpstreamHandler, Channels, MessageEvent, WriteCompletionEvent}
 import org.jboss.netty.handler.codec.http._
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.FunSuite
 
-class EndToEndTest extends FunSuite with OneInstancePerTest {
+class EndToEndTest extends FunSuite {
 
   case class MyStreamResponse(
       httpResponse: HttpResponse,
@@ -34,68 +34,78 @@ class EndToEndTest extends FunSuite with OneInstancePerTest {
   }
   val notSkipFlaky = !Option(System.getProperty("SKIP_FLAKY")).isDefined
 
-  val httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
-  val httpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-  val messages = new Broker[ChannelBuffer]
-  val error = new Broker[Throwable]
-  val serverRes = MyStreamResponse(httpResponse, messages.recv, error.recv)
+  def testOrSkipFlaky(name: String)(testFun: => Unit) = {
+    if(notSkipFlaky){
+      test(name)(testFun)
+    } else {
+      ignore(name)(testFun)
+    }
+  }
 
-  def workIt(what: String)(mkClient: => (Service[HttpRequest, StreamResponse], SocketAddress)) {
-    if (notSkipFlaky) {
-      test("Streams %s: writes from the server arrive on the client's channel".format(what)) {
-        val (client, _) = mkClient
-        val clientRes = Await.result(client(httpRequest), 1.second)
-        var result = ""
-        val latch = new CountDownLatch(1)
-        (clientRes.error?) ensure {
-          Future { latch.countDown() }
-        }
+  case class WorkItContext(httpRequest: DefaultHttpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"),
+                           httpResponse: DefaultHttpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK),
+                           messages: Broker[ChannelBuffer] = new Broker[ChannelBuffer],
+                           error: Broker[Throwable] = new Broker[Throwable]){
+    lazy val serverRes = MyStreamResponse(httpResponse, messages.recv, error.recv)
+  }
 
-        clientRes.messages foreach { channelBuffer =>
-          Future {
-            result += channelBuffer.toString(Charset.defaultCharset)
-          }
-        }
-
-        messages !! ChannelBuffers.wrappedBuffer("1".getBytes)
-        messages !! ChannelBuffers.wrappedBuffer("2".getBytes)
-        messages !! ChannelBuffers.wrappedBuffer("3".getBytes)
-        error !! EOF
-
-        latch.within(1.second)
-        assert(result === "123")
-        client.close()
+  def workIt(what: String)(mkClient: (MyStreamResponse) => (Service[HttpRequest, StreamResponse], SocketAddress)) {
+    testOrSkipFlaky("Streams %s: writes from the server arrive on the client's channel".format(what)) {
+      val c = WorkItContext()
+      import c._
+      val (client, _) = mkClient(serverRes)
+      val clientRes = Await.result(client(httpRequest), 1.second)
+      var result = ""
+      val latch = new CountDownLatch(1)
+      (clientRes.error?) ensure {
+        Future { latch.countDown() }
       }
+
+      clientRes.messages foreach { channelBuffer =>
+        Future {
+          result += channelBuffer.toString(Charset.defaultCharset)
+        }
+      }
+
+      messages !! ChannelBuffers.wrappedBuffer("1".getBytes)
+      messages !! ChannelBuffers.wrappedBuffer("2".getBytes)
+      messages !! ChannelBuffers.wrappedBuffer("3".getBytes)
+      error !! EOF
+
+      latch.within(1.second)
+      assert(result === "123")
+      client.close()
     }
 
     // Flaky test. See https://jira.twitter.biz/browse/DPB-1358
-    if (notSkipFlaky) {
-      test("Streams %s: writes from the server are queued before the client responds".format(what)) {
-        val (client, _) = mkClient
-        val clientRes = Await.result(client(httpRequest), 1.second)
-        messages !! ChannelBuffers.wrappedBuffer("1".getBytes)
-        messages !! ChannelBuffers.wrappedBuffer("2".getBytes)
-        messages !! ChannelBuffers.wrappedBuffer("3".getBytes)
+    testOrSkipFlaky("Streams %s: writes from the server are queued before the client responds".format(what)) {
+      val c = WorkItContext()
+      import c._
+      val (client, _) = mkClient(serverRes)
+      val clientRes = Await.result(client(httpRequest), 1.second)
+      messages !! ChannelBuffers.wrappedBuffer("1".getBytes)
+      messages !! ChannelBuffers.wrappedBuffer("2".getBytes)
+      messages !! ChannelBuffers.wrappedBuffer("3".getBytes)
 
-        val latch = new CountDownLatch(3)
-        var result = ""
-        clientRes.messages foreach { channelBuffer =>
-          Future {
-            result += channelBuffer.toString(Charset.defaultCharset)
-            latch.countDown()
-          }
+      val latch = new CountDownLatch(3)
+      var result = ""
+      clientRes.messages foreach { channelBuffer =>
+        Future {
+          result += channelBuffer.toString(Charset.defaultCharset)
+          latch.countDown()
         }
-
-        latch.within(1.second)
-        error !! EOF
-        assert(result === "123")
-        client.close()
       }
+
+      latch.within(1.second)
+      error !! EOF
+      assert(result === "123")
+      client.close()
     }
 
-    if (notSkipFlaky)
-      test("Streams %s: the client does not admit concurrent requests".format(what)) {
-      val (client, _) = mkClient
+    testOrSkipFlaky("Streams %s: the client does not admit concurrent requests".format(what)) {
+      val c = WorkItContext()
+      import c._
+      val (client, _) = mkClient(serverRes)
       val clientRes = Await.result(client(httpRequest), 1.second)
       assert(client(httpRequest).poll match {
         case Some(Throw(_: TooManyConcurrentRequestsException)) => true
@@ -106,7 +116,9 @@ class EndToEndTest extends FunSuite with OneInstancePerTest {
 
     //"the server does not admit concurrent requests"
     ignore("Streams %s: the server does not admit concurrent requests".format(what)) {
-      val (client, address) = mkClient
+      val c = WorkItContext()
+      import c._
+      val (client, address) = mkClient(serverRes)
       // The finagle client, by nature, doesn't allow for this, so
       // we need to go through the trouble of establishing our own
       // pipeline.
@@ -213,7 +225,9 @@ class EndToEndTest extends FunSuite with OneInstancePerTest {
     }
 
     test("Streams %s: server ignores channel buffer messages after channel close".format(what)) {
-      val (client, address) = mkClient
+      val c = WorkItContext()
+      import c._
+      val (client, address) = mkClient(serverRes)
 
       val clientRes = Await.result(client(httpRequest), 1.second)
       var result = ""
@@ -241,7 +255,7 @@ class EndToEndTest extends FunSuite with OneInstancePerTest {
     }
   }
 
-  workIt("straight") {
+  workIt("straight") { serverRes =>
     val server = ServerBuilder()
       .codec(new Stream)
       .bindTo(new InetSocketAddress(0))
@@ -263,8 +277,8 @@ class EndToEndTest extends FunSuite with OneInstancePerTest {
     (client, address)
   }
 
-  workIt("proxy") {
-    val server = ServerBuilder()
+  workIt("proxy") { serverRes =>
+  val server = ServerBuilder()
       .codec(new Stream)
       .bindTo(new InetSocketAddress(0))
       .name("streamserver")
@@ -298,40 +312,40 @@ class EndToEndTest extends FunSuite with OneInstancePerTest {
   }
 
   // TODO: investigate test flakiness (CSL-117)
-  test("Streams: delay release until complete response") {
-    if (notSkipFlaky) {
-      @volatile var count: Int = 0
+  testOrSkipFlaky("Streams: delay release until complete response") {
+    @volatile var count: Int = 0
+    val c = WorkItContext()
+    import c.{synchronized => _sync, _}
 
-      val server = ServerBuilder()
-        .codec(new Stream)
-        .bindTo(new InetSocketAddress(0))
-        .name("Streams")
-        .build((new MyService(serverRes)) map { r: HttpRequest =>
-          synchronized { count += 1 }
-          r
-        })
-      val client = ClientBuilder()
-        .codec(new Stream)
-        .hosts(Seq(server.localAddress))
-        .hostConnectionLimit(1)
-        .retries(2)
-        .build()
+    val server = ServerBuilder()
+      .codec(new Stream)
+      .bindTo(new InetSocketAddress(0))
+      .name("Streams")
+      .build((new MyService(serverRes)) map { r: HttpRequest =>
+        synchronized { count += 1 }
+        r
+      })
+    val client = ClientBuilder()
+      .codec(new Stream)
+      .hosts(Seq(server.localAddress))
+      .hostConnectionLimit(1)
+      .retries(2)
+      .build()
 
-      val res = Await.result(client(httpRequest), 1.second)
-      assert(count === 1)
-      val f2 = client(httpRequest)
-      assert(f2.poll.isEmpty)  // because of the host connection limit
+    val res = Await.result(client(httpRequest), 1.second)
+    assert(count === 1)
+    val f2 = client(httpRequest)
+    assert(f2.poll.isEmpty)  // because of the host connection limit
 
-      messages !! ChannelBuffers.wrappedBuffer("1".getBytes)
-      assert((res.messages??).toString(Charset.defaultCharset) === "1")
-      assert(count === 1)
-      error !! EOF
-      res.release()
-      val res2 = Await.result(f2, 1.second)
-      assert(count === 2)
-      res2.release()
+    messages !! ChannelBuffers.wrappedBuffer("1".getBytes)
+    assert((res.messages??).toString(Charset.defaultCharset) === "1")
+    assert(count === 1)
+    error !! EOF
+    res.release()
+    val res2 = Await.result(f2, 1.second)
+    assert(count === 2)
+    res2.release()
 
-      Closable.all(client, server)
-    }
+    Closable.all(client, server)
   }
 }

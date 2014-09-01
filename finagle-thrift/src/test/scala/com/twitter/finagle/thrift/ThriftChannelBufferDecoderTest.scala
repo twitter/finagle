@@ -8,12 +8,16 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class ThriftChannelBufferDecoderTest extends FunSuite with MockitoSugar with OneInstancePerTest {
-  val decoder = new ThriftChannelBufferDecoder
-  val ctx = mock[ChannelHandlerContext]
-  val ch = mock[Channel]
+class ThriftChannelBufferDecoderTest extends FunSuite with MockitoSugar {
+
+  case class ThriftChannelBufferDecoderContext(decoder: ThriftChannelBufferDecoder = new ThriftChannelBufferDecoder,
+                                               ctx: ChannelHandlerContext = mock[ChannelHandlerContext],
+                                               ch: Channel = mock[Channel])
 
   test("ThriftChannelBufferDecoder convert channel buffers to arrays directly") {
+    val c = ThriftChannelBufferDecoderContext()
+    import c._
+
     val arr = "hello, world!".getBytes
     val buf = ChannelBuffers.wrappedBuffer(arr)
     decoder.decode(ctx, ch, buf) match {
@@ -23,6 +27,9 @@ class ThriftChannelBufferDecoderTest extends FunSuite with MockitoSugar with One
   }
 
   test("ThriftChannelBufferDecoder convert channel buffers to arrays with offset") {
+    val c = ThriftChannelBufferDecoderContext()
+    import c._
+
     val arr = "hello, world!".getBytes
     val buf = ChannelBuffers.wrappedBuffer(arr)
     buf.readByte()
@@ -33,6 +40,9 @@ class ThriftChannelBufferDecoderTest extends FunSuite with MockitoSugar with One
   }
 
   test("ThriftChannelBufferDecoder convert composite buffers to arrays"){
+    val c = ThriftChannelBufferDecoderContext()
+    import c._
+
     val arr = "hello, world!".getBytes
     val buf = ChannelBuffers.wrappedBuffer(arr take 2, arr drop 2)
     decoder.decode(ctx, ch, buf) match {
@@ -41,6 +51,9 @@ class ThriftChannelBufferDecoderTest extends FunSuite with MockitoSugar with One
   }
 
   test("ThriftChannelBufferDecoder fail to convert non buffers") {
+    val c = ThriftChannelBufferDecoderContext()
+    import c._
+
     intercept[IllegalArgumentException]{
       decoder.decode(ctx, ch, new {})
     }
