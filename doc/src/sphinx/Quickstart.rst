@@ -24,7 +24,12 @@ We'll use sbt_ to build our project. Finagle is published to Maven Central,
 so little setup is needed: put the following into a file called `build.sbt` in 
 a fresh directory:
 
-.. includecode:: code/quickstart/build.sbt
+.. parsed-literal::
+	name = "quickstart"
+
+	version = "1.0"
+
+	libraryDependencies += "com.twitter" %% "finagle-http" % "|release|"
 
 Any file in this directory will now be compiled by `sbt`. In order to simplify
 installation, we recommend that you use the bootstrap `sbt` script available
