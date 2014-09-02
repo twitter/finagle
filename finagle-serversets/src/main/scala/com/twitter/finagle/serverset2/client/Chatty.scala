@@ -27,6 +27,7 @@ private[serverset2] trait ChattyClient extends ZooKeeperClient {
   def close(deadline: Time): Future[Unit] =
     printOp("close", underlying.close(deadline))
 
+  def getEphemerals(): Future[Seq[String]] = printOp("getEphemerals", underlying.getEphemerals())
   def sessionId: Long = underlying.sessionId
   def sessionPasswd: Buf = underlying.sessionPasswd
   def sessionTimeout: Duration = underlying.sessionTimeout

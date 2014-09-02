@@ -42,6 +42,10 @@ private object ZkOp {
      type Res = Watched[Node.Data]
   }
 
+  case class GetEphemerals() extends ZkOp {
+     type Res = Seq[String]
+  }
+
   case class Sync(path: String) extends ZkOp {
      type Res = Unit
   }
@@ -81,6 +85,8 @@ private class OpqueueZkReader(
 
   def getData(path: String) = enqueue(GetData(path))
   def getDataWatch(path: String) = enqueue(GetDataWatch(path))
+
+  def getEphemerals() = enqueue(GetEphemerals())
 
   def sync(path: String) = enqueue(Sync(path))
   def close(deadline: Time) = enqueue(Close(deadline))

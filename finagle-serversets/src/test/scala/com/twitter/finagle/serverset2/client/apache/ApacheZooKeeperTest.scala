@@ -94,6 +94,12 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     verify(mockZK).addAuthInfo(scheme, auth)
   }
 
+  "getEphemerals" should "raise unimplemented exception" in {
+    intercept[KeeperException.Unimplemented] {
+      Await.result(zk.getEphemerals())
+    }
+  }
+
   "close" should "submit properly constructed close" in {
     doNothing().when(mockZK).close()
 

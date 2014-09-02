@@ -184,6 +184,8 @@ private class NullZooKeeperReader extends ZooKeeperReader {
   def getData(path: String): Future[Node.Data] = Future.never
   def getDataWatch(path: String): Future[Watched[Node.Data]] = Future.never
 
+  def getEphemerals(): Future[Seq[String]] = Future.never
+
   def sync(path: String): Future[Unit] = Future.never
   def close(deadline: Time): Future[Unit] = Future.never
 

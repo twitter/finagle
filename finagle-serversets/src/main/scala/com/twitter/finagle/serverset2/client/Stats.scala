@@ -47,6 +47,7 @@ private[serverset2] trait StatsClient extends ZooKeeperClient {
 
   def addAuthInfo(scheme: String, auth: Buf): Future[Unit] = underlying.addAuthInfo(scheme, auth)
   def close(deadline: Time): Future[Unit] = underlying.close()
+  def getEphemerals(): Future[Seq[String]] = underlying.getEphemerals()
   def sessionId: Long = underlying.sessionId
   def sessionPasswd: Buf = underlying.sessionPasswd
   def sessionTimeout: Duration = underlying.sessionTimeout

@@ -41,6 +41,17 @@ private[serverset2] trait ZooKeeperClient extends Closable {
    def addAuthInfo(scheme: String, auth: Buf): Future[Unit]
 
   /**
+   * Get the existing ephemeral nodes created with the current session ID.
+   *
+   * NOTE: This method is not universally implemented. The Future will fail
+   * with KeeperException.Unimplemented if this is the case.
+   *
+   * @return a Future[Seq[String]] of ephemeral node paths.
+   */
+
+  def getEphemerals(): Future[Seq[String]]
+
+  /**
    * String representation of this ZooKeeper client. Suitable for things
    * like logging.
    *

@@ -48,6 +48,8 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
     zk.close()
   }
 
+  def getEphemerals(): Future[Seq[String]] = Future.exception(KeeperException.Unimplemented(None))
+
   def create(
       path: String,
       data: Option[Buf],
