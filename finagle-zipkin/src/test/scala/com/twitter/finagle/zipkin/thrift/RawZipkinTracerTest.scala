@@ -59,7 +59,7 @@ class RawZipkinTracerTest extends FunSuite {
         "AMIAAEAAAFNBgACABYLAAMAAAALaGlja3VwcXVhaWwAAAoAAQAAAAAHVNTACwACAA" +
         "AABmxsYW1hcwwAAwgAAQAACRMGAAIAFwsAAwAAAAtoaWNrdXBxdWFpbAAAAgAJAQA=\n")
 
-    tracer.logSpan(span)
+    tracer.logSpans(Seq(span))
     assert(scribe.messages === Seq(expected))
   }
 

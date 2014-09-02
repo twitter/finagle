@@ -50,20 +50,25 @@ case class Span(
     val span = new thrift.Span
 
     span.setId(traceId.spanId.toLong)
-    traceId._parentId foreach { parentId => span.setParent_id(parentId.toLong) }
+    traceId._parentId match {
+      case Some(id) => span.setParent_id(id.toLong)
+      case None => ()
+    }
     span.setTrace_id(traceId.traceId.toLong)
     span.setName(name)
     span.setDebug(traceId.flags.isDebug)
 
     // fill in the host/service data for all the annotations
-    annotations map ( _.toThrift ) foreach { a =>
+    annotations foreach { ann =>
+      val a = ann.toThrift
       val ep = if (a.isSetHost) a.getHost() else endpoint.boundEndpoint.toThrift
       ep.setService_name(serviceName)
       a.setHost(ep)
       span.addToAnnotations(a)
     }
 
-    bAnnotations map ( _.toThrift ) foreach { a =>
+    bAnnotations foreach { ann =>
+      val a = ann.toThrift
       val ep = if (a.isSetHost) a.getHost() else endpoint.boundEndpoint.toThrift
       ep.setService_name(serviceName)
       a.setHost(ep)
