@@ -5,26 +5,31 @@ import com.twitter.common.zookeeper.ServerSetImpl
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Addr, Resolver, Name, WeightedSocketAddress}
 import com.twitter.finagle.zookeeper.ZkInstance
-import com.twitter.thrift.Status._
 import com.twitter.util.{Duration, RandomSocket, Var}
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.{FunSuite, BeforeAndAfter, Tag}
 import org.scalatest.concurrent.Eventually._
-import org.scalatest.concurrent.Timeouts._
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.time._
 
 @RunWith(classOf[JUnitRunner])
-class ZkResolverTest extends FunSuite with BeforeAndAfter {
+class ZkResolverTest extends FunSuite with BeforeAndAfter with AssertionsForJUnit {
   val zkTimeout = 100.milliseconds
   @volatile var inst: ZkInstance = _
 
-  def toSpan(d: Duration): Span = Span(d.inNanoseconds, Nanoseconds)
+  implicit def toSpan(d: Duration): Span = Span(d.inNanoseconds, Nanoseconds)
 
   implicit val patienceConfig = PatienceConfig(
-    timeout = toSpan(5.seconds),
-    interval = toSpan(zkTimeout))
+    timeout = 5.seconds,
+    interval = zkTimeout)
+
+  // The Zk2 resolver has a hardcoded session timeout of 10 seconds and a stabilization epoch of
+  // 40 seconds. We give these tests double that to observe nodes leaving a serverset.
+  // Because this is so high, we don't check more than once every 5 seconds.
+  val stabilizationEpoch = 40.seconds
+  val stabilizationTimeout = Timeout(stabilizationEpoch * 2)
+  val stabilizationInterval = Interval(5.seconds)
 
   before {
     inst = new ZkInstance
@@ -36,55 +41,64 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
   }
 
   override def test(testName: String, testTags: Tag*)(f: => Unit) {
-    // COORD-329
+    // Since this test currently relies on timing, it's currently best to treat it as flaky for CI.
+    // It should be runnable, if a little slow, however.
     if (!sys.props.contains("SKIP_FLAKY"))
       super.test(testName, testTags:_*)(f)
   }
 
+  private[this] def zk2resolve(path: String): Name =
+    Resolver.eval("zk2!"+inst.zookeeperConnectstring+"!"+path)
+
   test("end-to-end: service endpoint") {
+    val Name.Bound(va) = zk2resolve("/foo/bar")
+    eventually {
+      assert(va.sample() === Addr.Neg,
+        "resolution is not negative before serverset exists")
+    }
+
     val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar")
-    val Name.Bound(va) = Resolver.eval("zk2!"+inst.zookeeperConnectstring+"!/foo/bar")
-    eventually { assert(Var.sample(va) === Addr.Neg) }
-
-    val joinAddr = RandomSocket.nextAddress
-    val status = serverSet.join(joinAddr, Map[String, InetSocketAddress]().asJava, ALIVE)
-
-    eventually { assert(Var.sample(va) === Addr.Bound(WeightedSocketAddress(joinAddr, 1.0))) }
+    val joinAddr = RandomSocket()
+    val status = serverSet.join(joinAddr, Map.empty[String, InetSocketAddress].asJava)
+    eventually {
+      assert(va.sample() === Addr.Bound(WeightedSocketAddress(joinAddr, 1.0)),
+        "resolution is not bound once the serverset exists")
+    }
 
     status.leave()
-
-    eventually { assert(Var.sample(va) === Addr.Neg) }
+    eventually(stabilizationTimeout, stabilizationInterval) {
+      assert(va.sample() === Addr.Neg,
+        "resolution is not negative after the serverset disappears")
+    }
   }
 
   test("end-to-end: additional endpoints") {
+    val Name.Bound(va1) = zk2resolve("/foo/bar")
+    val Name.Bound(va2) = zk2resolve("/foo/bar!epep")
+    eventually {
+      assert(va1.sample() === Addr.Neg,
+        "resolution is not negative before serverset exists")
+      assert(va2.sample() === Addr.Neg,
+        "resolution is not negative before serverset exists")
+    }
+
     val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar")
-    val Name.Bound(va1) = Resolver.eval("zk2!"+inst.zookeeperConnectstring+"!/foo/bar")
-    val Name.Bound(va2) = Resolver.eval("zk2!"+inst.zookeeperConnectstring+"!/foo/bar!epep")
-
+    val serviceAddr = RandomSocket()
+    val epepAddr = RandomSocket()
+    val status = serverSet.join(serviceAddr,  Map("epep" -> epepAddr).asJava)
     eventually {
-      assert(Var.sample(va1) === Addr.Neg)
-      assert(Var.sample(va2) === Addr.Neg)
+      assert(va1.sample() === Addr.Bound(WeightedSocketAddress(serviceAddr, 1.0)),
+        "resolution is not bound once the serverset exists")
+      assert(va2.sample() === Addr.Bound(WeightedSocketAddress(epepAddr, 1.0)),
+        "resolution is not bound once the serverset exists")
     }
 
-    val serviceAddr = RandomSocket.nextAddress
-    val epepAddr = RandomSocket.nextAddress
-
-    val status = serverSet.join(
-      serviceAddr, 
-      Map[String, InetSocketAddress]("epep" -> epepAddr).asJava, 
-      ALIVE
-    )
-
-    eventually {
-      assert(Var.sample(va1) === Addr.Bound(WeightedSocketAddress(serviceAddr, 1.0)))
-      assert(Var.sample(va2) === Addr.Bound(WeightedSocketAddress(epepAddr, 1.0)))
-    }
-    
     status.leave()
-
-    eventually {
-      assert(Var.sample(va1) === Addr.Neg)
-      assert(Var.sample(va2) === Addr.Neg)
+    eventually(stabilizationTimeout, stabilizationInterval) {
+      assert(va1.sample() === Addr.Neg,
+        "resolution is not negative after the serverset disappears")
+      assert(va2.sample() === Addr.Neg,
+        "resolution is not negative after the serverset disappears")
     }
   }
 }
