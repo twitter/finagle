@@ -2,14 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.twitter</groupId>
-  <artifactId>finagle-swift</artifactId>
+  <artifactId>finagle-swift_2.10</artifactId>
   <packaging>jar</packaging>
-  <version>6.20.1-SNAPSHOT</version>
+  <version>6.20.1-TWOTEN-1407871523</version>
   <parent>
     <groupId>com.twitter</groupId>
-    <artifactId>scala-parent-292</artifactId>
-    <version>0.1.6</version>
-    <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
+    <artifactId>scala-parent-2104_2.10</artifactId>
+    <version>0.1.13-TWOTEN</version>
+    <relativePath>../../parents/scala-parent-2104/pom.xml</relativePath>
   </parent>
   <properties>
     <git.dir>${project.basedir}/../../.git</git.dir>
@@ -62,26 +62,26 @@
     </dependency>
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_2.9.2</artifactId>
+      <artifactId>scalatest_2.10</artifactId>
       <version>1.9.1</version>
       <scope>test</scope>
     </dependency>
     <!-- project dependencies -->
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>finagle-core</artifactId>
-      <version>6.20.1-SNAPSHOT</version>
+      <artifactId>finagle-core_2.10</artifactId>
+      <version>6.20.1-TWOTEN-1407871523</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>finagle-thrift</artifactId>
-      <version>6.20.1-SNAPSHOT</version>
+      <artifactId>finagle-thrift_2.10</artifactId>
+      <version>6.20.1-TWOTEN-1407871523</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>finagle-test</artifactId>
+      <artifactId>finagle-test_2.10</artifactId>
       <scope>test</scope>
-      <version>6.20.1-SNAPSHOT</version>
+      <version>6.20.1-TWOTEN-1407871523</version>
     </dependency>
   </dependencies>
 </project>

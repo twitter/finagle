@@ -2,14 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.twitter</groupId>
-  <artifactId>finagle-example</artifactId>
+  <artifactId>finagle-example_2.10</artifactId>
   <packaging>jar</packaging>
-  <version>6.20.1-SNAPSHOT</version>
+  <version>6.20.1-TWOTEN-1407871523</version>
   <parent>
     <groupId>com.twitter</groupId>
-    <artifactId>scala-parent-292</artifactId>
-    <version>0.1.6</version>
-    <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
+    <artifactId>scala-parent-2104_2.10</artifactId>
+    <version>0.1.13-TWOTEN</version>
+    <relativePath>../../parents/scala-parent-2104/pom.xml</relativePath>
   </parent>
   <properties>
     <git.dir>${project.basedir}/../../.git</git.dir>
@@ -25,63 +25,63 @@
     <!-- project dependencies -->
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>finagle-core</artifactId>
-      <version>6.20.1-SNAPSHOT</version>
+      <artifactId>finagle-core_2.10</artifactId>
+      <version>6.20.1-TWOTEN-1407871523</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>finagle-http</artifactId>
-      <version>6.20.1-SNAPSHOT</version>
+      <artifactId>finagle-http_2.10</artifactId>
+      <version>6.20.1-TWOTEN-1407871523</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>finagle-kestrel</artifactId>
-      <version>6.20.1-SNAPSHOT</version>
+      <artifactId>finagle-kestrel_2.10</artifactId>
+      <version>6.20.1-TWOTEN-1407871523</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>finagle-memcached</artifactId>
-      <version>6.20.1-SNAPSHOT</version>
+      <artifactId>finagle-memcached_2.10</artifactId>
+      <version>6.20.1-TWOTEN-1407871523</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>finagle-mysql</artifactId>
-      <version>6.20.1-SNAPSHOT</version>
+      <artifactId>finagle-mysql_2.10</artifactId>
+      <version>6.20.1-TWOTEN-1407871523</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>finagle-ostrich4</artifactId>
-      <version>6.20.1-SNAPSHOT</version>
+      <artifactId>finagle-ostrich4_2.10</artifactId>
+      <version>6.20.1-TWOTEN-1407871523</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>finagle-redis</artifactId>
-      <version>6.20.1-SNAPSHOT</version>
+      <artifactId>finagle-redis_2.10</artifactId>
+      <version>6.20.1-TWOTEN-1407871523</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>finagle-stats</artifactId>
-      <version>6.20.1-SNAPSHOT</version>
+      <artifactId>finagle-stats_2.10</artifactId>
+      <version>6.20.1-TWOTEN-1407871523</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>finagle-stream</artifactId>
-      <version>6.20.1-SNAPSHOT</version>
+      <artifactId>finagle-stream_2.10</artifactId>
+      <version>6.20.1-TWOTEN-1407871523</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>finagle-thrift</artifactId>
-      <version>6.20.1-SNAPSHOT</version>
+      <artifactId>finagle-thrift_2.10</artifactId>
+      <version>6.20.1-TWOTEN-1407871523</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>util-codec</artifactId>
-      <version>6.20.1-SNAPSHOT</version>
+      <artifactId>util-codec_2.10</artifactId>
+      <version>6.20.1-TWOTEN-1407871523</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>scrooge-core</artifactId>
-      <version>3.16.4-SNAPSHOT</version>
+      <artifactId>scrooge-core_2.10</artifactId>
+      <version>3.16.4-TWOTEN-1407871523</version>
     </dependency>
   </dependencies>
   <build>
@@ -90,7 +90,7 @@
         <groupId>com.twitter</groupId>
         <artifactId>scrooge-maven-plugin</artifactId>
         <!-- this version must match the version from scrooge-gen.ivy.xml -->
-        <version>3.14.1</version>
+        <version>3.16.1-TWOTEN</version>
       </plugin>
     </plugins>
   </build>
