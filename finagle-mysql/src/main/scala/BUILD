@@ -8,6 +8,7 @@ scala_library(name='scala',
     '3rdparty:netty',
     'finagle/finagle-core',
     'util/util-core',
+    'util/util-cache',
     'util/util-logging'
   ],
   sources=rglobs('*.scala'),

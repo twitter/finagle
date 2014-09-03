@@ -419,7 +419,7 @@ object Finagle extends Build {
       sharedSettings
     ).settings(
       name := "finagle-mysql",
-      libraryDependencies ++= Seq(util("logging")),
+      libraryDependencies ++= Seq(util("logging"), util("cache")),
       excludeFilter in unmanagedSources := { "EmbeddableMysql.scala" || "ClientTest.scala" }
     ).dependsOn(finagleCore)
 

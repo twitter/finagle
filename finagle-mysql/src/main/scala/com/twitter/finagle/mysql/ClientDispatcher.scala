@@ -1,12 +1,12 @@
 package com.twitter.finagle.exp.mysql
 
+import com.google.common.cache.{CacheBuilder, RemovalListener, RemovalNotification}
+import com.twitter.cache.guava.GuavaCache
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader, Packet}
+import com.twitter.finagle.exp.mysql.transport.{BufferReader, Packet}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{CancelledRequestException, Service, SimpleFilter, WriteException}
-import com.twitter.util.{Closable, Future, Promise, Return, Time, Try, Throw}
-import java.util.ArrayDeque
-import scala.collection.JavaConverters._
+import com.twitter.finagle.{CancelledRequestException, Service, WriteException, ServiceProxy}
+import com.twitter.util.{Future, Promise, Return, Try, Throw}
 
 /**
  * A catch-all exception class for errors returned from the upstream
@@ -26,60 +26,38 @@ case class LostSyncException(underlying: Throwable)
  * managed by the underlying service (a ClientDispatcher). This decreases
  * the chances of leaking prepared statements and can simplify the
  * implementation of prepared statements in the presence of a connection pool.
- * The cache is capped at `max` and eldest elements are evicted.
+ * The cache is capped at `max` and least recently used elements are evicted.
  */
-private[mysql] class PrepareCache(max: Int = 20) extends SimpleFilter[Request, Result] {
-  // TODO: consider using a more suitable cache as an lru.
-  private[this] val lru = new ArrayDeque[(String, Future[Result])]()
-  private[this] val iter = lru.asScala
+private[mysql] class PrepareCache(
+  svc: Service[Request, Result],
+  max: Int = 20
+) extends ServiceProxy[Request, Result](svc) {
+
+  private[this] val fn = {
+    val listener = new RemovalListener[Request, Future[Result]] {
+      // make sure prepared futures get removed eventually
+      def onRemoval(notification: RemovalNotification[Request, Future[Result]]): Unit = {
+        notification.getValue() onSuccess {
+          case r: PrepareOK => svc(CloseRequest(r.id))
+          case _ => // nop
+        }
+      }
+    }
+    val underlying = CacheBuilder.newBuilder()
+      .maximumSize(max)
+      .removalListener(listener)
+      .build[Request, Future[Result]]()
+
+    GuavaCache.fromCache(svc, underlying)
+  }
 
   /**
    * Populate cache with unique prepare requests identified by their
-   * sql queries. Note, access to `lru` is synchronized, however, because
-   * the finagle default pool guarantees us exlusive access to a service
-   * per dispatch, there should not be contention here.
+   * sql queries.
    */
-  def apply(req: Request, svc: Service[Request, Result]) = {
-    // remove the eldest entry in the lru and
-    // dispatch a CloseRequest for the corresponding
-    // entry over `svc`.
-    def removeEldest() = synchronized {
-      if (lru.size > max) lru.peekLast match {
-        case null => // ignore
-        case eldest =>
-          lru.remove(eldest)
-          val (_, ok) = eldest
-          ok onSuccess {
-            case r: PrepareOK => svc(CloseRequest(r.id))
-            case _ => // ignore
-          }
-      }
-    }
-
-    req match {
-      case PrepareRequest(sql) => synchronized {
-        iter.find(_._1 == sql) match {
-          // maintain access order.
-          case Some(entry) =>
-            lru.remove(entry)
-            lru.push(entry)
-            entry._2
-
-          // dispatch prepare request and
-          // populate cache preemptively.
-          case None =>
-            val ok = svc(req)
-            val entry = (sql, ok)
-            lru.push(entry)
-            ok respond {
-              case Throw(_) => synchronized { lru.remove(entry) }
-              case Return(_) => removeEldest()
-            }
-        }
-      }
-
-      case _ => svc(req)
-    }
+  override def apply(req: Request): Future[Result] = req match {
+    case _: PrepareRequest => fn(req)
+    case _ => super.apply(req)
   }
 }
 
@@ -101,7 +79,7 @@ object ClientDispatcher {
     trans: Transport[Packet, Packet],
     handshake: HandshakeInit => Try[HandshakeResponse]
   ): Service[Request, Result] = {
-    new PrepareCache andThen new ClientDispatcher(trans, handshake)
+    new PrepareCache(new ClientDispatcher(trans, handshake))
   }
 
   /**

@@ -18,7 +18,7 @@ class PrepareCacheTest extends FunSuite with MockitoSugar {
     when(dispatcher(any[Request])).thenReturn(Future.value(
       PrepareOK(stmtId, 1, 1, 0)))
 
-    val svc = new PrepareCache(11) andThen dispatcher
+    val svc = new PrepareCache(dispatcher, 11)
     val r0 = PrepareRequest("SELECT 0")
     svc(r0)
     svc(r0)
