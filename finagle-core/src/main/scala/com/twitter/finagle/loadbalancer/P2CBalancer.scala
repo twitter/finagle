@@ -4,8 +4,8 @@ import com.twitter.app.GlobalFlag
 import com.twitter.finagle._
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.util.{Drv, Rng, Updater, Prioritized}
-import com.twitter.util.{Future, Var, Time, Return, Throw, Closable}
+import com.twitter.finagle.util.{OnReady, Drv, Rng, Updater, Prioritized}
+import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
 import scala.annotation.tailrec
 import scala.collection.immutable
@@ -16,10 +16,23 @@ package exp {
 
 object P2CBalancerFactory extends WeightedLoadBalancerFactory {
   def newLoadBalancer[Req, Rep](
-    weighted: Var[Set[(ServiceFactory[Req, Rep], Double)]],
+    factories: Var[Set[(ServiceFactory[Req, Rep], Double)]],
     statsReceiver: StatsReceiver,
-    emptyException: NoBrokersAvailableException): ServiceFactory[Req, Rep] =
-    new P2CBalancer[Req,Rep](weighted, statsReceiver=statsReceiver, emptyException=emptyException)
+    emptyException: NoBrokersAvailableException
+  ): ServiceFactory[Req, Rep] =
+    new P2CBalancer[Req, Rep](
+      Activity(factories map(Activity.Ok(_))),
+      statsReceiver = statsReceiver,
+      emptyException = emptyException)
+
+  def newWeightedLoadBalancer[Req, Rep](
+    activity: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
+    statsReceiver: StatsReceiver,
+    emptyException: NoBrokersAvailableException
+  ): ServiceFactory[Req, Rep] =
+    new P2CBalancer[Req, Rep](activity,
+      statsReceiver = statsReceiver,
+      emptyException = emptyException)
 }
 
 private object P2CBalancer {
@@ -262,8 +275,8 @@ private object P2CBalancer {
  * coin flipping through the aliasing method, described in
  * [[com.twitter.finagle.util.Drv Drv]].
  *
- * @param underlying the set of (node, weight) pairs over which we
- * distribute load according to the given distribution.
+ * @param underlying An activity that updates with the set of
+ * (node, weight) pairs over which we distribute load.
  *
  * @param maxEffort the maximum amount of "effort" we're willing to
  * expend on a load balancing decision without reweighing.
@@ -279,15 +292,19 @@ private object P2CBalancer {
  * 10 (October 2001), 1094-1104.
  */
 class P2CBalancer[Req, Rep](
-  underlying: Var[Traversable[(ServiceFactory[Req, Rep], Double)]],
+  underlying: Activity[Traversable[(ServiceFactory[Req, Rep], Double)]],
   maxEffort: Int = 5,
   rng: Rng = Rng.threadLocal,
   statsReceiver: StatsReceiver = NullStatsReceiver,
   emptyException: NoBrokersAvailableException = new NoBrokersAvailableException
-) extends ServiceFactory[Req, Rep] {
+) extends ServiceFactory[Req, Rep] with OnReady {
+
   import P2CBalancer._
 
   require(maxEffort > 0)
+
+  private[this] val ready = new Promise[Unit]
+  def onReady: Future[Unit] = ready
 
   private[this] val sizeGauge = statsReceiver.addGauge("size") { nodes.size }
   private[this] val adds = statsReceiver.counter("adds")
@@ -385,7 +402,18 @@ class P2CBalancer[Req, Rep](
   }
 
   // Start your engines!
-  underlying observe { newList => update(Rebuild(newList)) }
+  private[this] val observation = underlying.run.changes respond {
+    case Activity.Pending =>
 
-  def close(deadline: Time) = nodes.close(deadline)
+    case Activity.Ok(newList) =>
+      update(Rebuild(newList))
+      ready.setDone()
+
+    case Activity.Failed(_) =>
+      // On resolution failure, consider the load balancer ready (to serve errors).
+      ready.setDone()
+  }
+
+  def close(deadline: Time) =
+    Closable.sequence(observation, Closable.make(nodes.close)).close(deadline)
 }

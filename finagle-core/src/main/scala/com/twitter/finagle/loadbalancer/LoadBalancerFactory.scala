@@ -5,8 +5,9 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.service.DelayedFactory
 import com.twitter.finagle.stats._
-import com.twitter.util.{Future, Time, Var}
-import java.net.{SocketAddress, InetSocketAddress}
+import com.twitter.finagle.util.OnReady
+import com.twitter.util.{Activity, Future, Var}
+import java.net.{InetSocketAddress, SocketAddress}
 import java.util.logging.{Level, Logger}
 
 object defaultBalancer extends GlobalFlag("heap", "Default load balancer")
@@ -87,33 +88,14 @@ private[finagle] object LoadBalancerFactory {
         val param.Stats(statsReceiver) = get[param.Stats]
         val param.Logger(log) = get[param.Logger]
         val param.Label(label) = get[param.Label]
+        val param.Monitor(monitor) = get[param.Monitor]
+        val param.Reporter(reporter) = get[param.Reporter]
 
         val noBrokersException = new NoBrokersAvailableException(errorLabel)
 
-        // TODO: load balancer consumes Var[Addr] directly,
-        // or at least Var[SocketAddress]
-        val g = Group.mutable[SocketAddress]()
-        val observation = dest observe {
-          case Addr.Bound(sockaddrs) =>
-            g() = sockaddrs
-          case Addr.Failed(e) =>
-            if (log.isLoggable(Level.WARNING)) {
-              log.log(Level.WARNING, "%s: name resolution failed".format(label), e)
-            }
-            g() = Set()
-          case Addr.Neg =>
-            if (log.isLoggable(Level.WARNING)) {
-              log.warning("%s: name resolution is negative".format(label))
-            }
-            g() = Set()
-          case Addr.Pending =>
-            if (log.isLoggable(Level.FINE)) {
-              log.fine("%s: name resolution is pending".format(label))
-            }
-            g() = Set()
-        }
+        type WeightedFactory = (ServiceFactory[Req, Rep], Double)
 
-        val endpoints = g map { sockaddr =>
+        def mkFactory(sockaddr: SocketAddress): WeightedFactory = {
           val stats = if (hostStatsReceiver.isNull) statsReceiver else {
             val scope = sockaddr match {
               case ia: InetSocketAddress =>
@@ -124,18 +106,16 @@ private[finagle] object LoadBalancerFactory {
             BroadcastStatsReceiver(Seq(host, statsReceiver))
           }
 
-          val param.Monitor(monitor) = get[param.Monitor]
-          val param.Reporter(reporter) = get[param.Reporter]
           val composite = reporter(label, Some(sockaddr)) andThen monitor
 
           val endpointStack: SocketAddress => ServiceFactory[Req, Rep] =
             (sa: SocketAddress) => {
               val underlying = next.make(params +
-                Transporter.EndpointAddr(sa) +
-                param.Stats(stats) +
-                param.Monitor(composite))
+                  Transporter.EndpointAddr(sa) +
+                  param.Stats(stats) +
+                  param.Monitor(composite))
               new ServiceFactoryProxy(underlying) {
-                override def toString = sa.toString+"_"+underlying.toString
+                override def toString = sa.toString + "_" + underlying.toString
               }
             }
 
@@ -145,54 +125,128 @@ private[finagle] object LoadBalancerFactory {
           }
         }
 
+        // Ensure that at most one WeightedFactory is built for each SocketAddress.
+        var cachedFactories = Map[SocketAddress, WeightedFactory]()
+        var lastAddrs = Set[SocketAddress]()
+        def mkFactories(sockaddrs: Set[SocketAddress]): Set[WeightedFactory] =
+          synchronized {
+            cachedFactories ++= (sockaddrs &~ lastAddrs) map { sa =>
+              sa -> mkFactory(sa)
+            }
+            cachedFactories --= lastAddrs &~ sockaddrs
+            lastAddrs = sockaddrs
+            cachedFactories.values.toSet
+          }
+
+        val endpoints = Activity(dest map {
+          case Addr.Bound(sockaddrs) =>
+            Activity.Ok(mkFactories(sockaddrs))
+
+          case Addr.Neg =>
+            if (log.isLoggable(Level.WARNING)) {
+              log.warning("%s: name resolution is negative".format(label))
+            }
+            Activity.Ok(mkFactories(Set.empty))
+
+          case Addr.Failed(e) =>
+            if (log.isLoggable(Level.WARNING)) {
+              log.log(Level.WARNING, "%s: name resolution failed".format(label), e)
+            }
+            Activity.Failed(e)
+
+          case Addr.Pending =>
+            if (log.isLoggable(Level.FINE)) {
+              log.fine("%s: name resolution is pending".format(label))
+            }
+            Activity.Pending
+        })
+
         val rawStatsReceiver = statsReceiver match {
           case sr: RollupStatsReceiver => sr.self
           case sr => sr
         }
 
-        val balanced = loadBalancerFactory.newLoadBalancer(
-          endpoints.set, rawStatsReceiver.scope(role.toString),
+        val lb = loadBalancerFactory.newWeightedLoadBalancer(
+          endpoints,
+          rawStatsReceiver.scope(role.toString),
           noBrokersException)
 
-        // observeUntil fails the future on interrupts, but ready
-        // should not interruptible DelayedFactory implicitly masks
-        // this future--interrupts will not be propagated to it
-        val ready = dest.observeUntil(_ != Addr.Pending)
-        val f = ready map (_ => balanced)
-
-        val delayed = DelayedFactory.swapOnComplete(f)
-        val factory = new ServiceFactoryProxy(delayed) {
-          override def close(deadline: Time): Future[Unit] =
-            Future.join(Seq(observation.close(deadline), self.close(deadline)))
+        val lbReady = lb match {
+          case onReady: OnReady =>
+            onReady.onReady before Future.value(lb)
+          case _ =>
+            log.warning("Load balancer cannot signal readiness and may throw "+
+                "NoBrokersAvailableExceptions during resolution.")
+            Future.value(lb)
         }
-        Stack.Leaf(role, factory)
+
+        val delayed = DelayedFactory.swapOnComplete(lbReady)
+        Stack.Leaf(role, delayed)
       }
     }
 }
 
 trait WeightedLoadBalancerFactory {
+
+  /** Build a load balancer from a set of endpoint-weight pairs. */
+  @deprecated("Use newWeightedLoadbalancer.", "6.21.0")
   def newLoadBalancer[Req, Rep](
     weighted: Var[Set[(ServiceFactory[Req, Rep], Double)]],
+    statsReceiver: StatsReceiver,
+    emptyException: NoBrokersAvailableException): ServiceFactory[Req, Rep]
+
+  /**
+   * Build a load balancer from an Activity that updates with
+   */
+  def newWeightedLoadBalancer[Req, Rep](
+    weighted: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
     statsReceiver: StatsReceiver,
     emptyException: NoBrokersAvailableException): ServiceFactory[Req, Rep]
 }
 
 abstract class LoadBalancerFactory {
+
+  /** Build a load balancer from a Group of endpoints. */
+  @deprecated("Use the newLoadbalancer that takes an Activity.", "6.21.0")
   def newLoadBalancer[Req, Rep](
     group: Group[ServiceFactory[Req, Rep]],
     statsReceiver: StatsReceiver,
     emptyException: NoBrokersAvailableException): ServiceFactory[Req, Rep]
 
+  /**
+   * Asychronously build a load balancer.
+   *
+   * The returned Future is not satisfied until the load balancer has observed a non-pending
+   * set of endpoints from the provided Activity.
+   */
+  def newLoadBalancer[Req, Rep](
+    factories: Activity[Set[ServiceFactory[Req, Rep]]],
+    statsReceiver: StatsReceiver,
+    emptyException: NoBrokersAvailableException): ServiceFactory[Req, Rep]
+
+  /** Coerce this LoadBalancerFactory to be a WeightedLoadBalancerFactory (that ignores weights). */
   def toWeighted: WeightedLoadBalancerFactory = new WeightedLoadBalancerFactory {
     def newLoadBalancer[Req, Rep](
-        weighted: Var[Set[(ServiceFactory[Req, Rep], Double)]],
-        statsReceiver: StatsReceiver,
-        emptyException: NoBrokersAvailableException) = {
+      weighted: Var[Set[(ServiceFactory[Req, Rep], Double)]],
+      statsReceiver: StatsReceiver,
+      emptyException: NoBrokersAvailableException
+    ): ServiceFactory[Req, Rep] = {
       val unweighted = weighted map { set =>
         set map { case (f, _) => f }
       }
       LoadBalancerFactory.this.newLoadBalancer(
         Group.fromVar(unweighted), statsReceiver, emptyException)
+    }
+
+    def newWeightedLoadBalancer[Req, Rep](
+      weighted: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
+      statsReceiver: StatsReceiver,
+      emptyException: NoBrokersAvailableException
+    ): ServiceFactory[Req, Rep] = {
+      val unweighted = weighted map { set =>
+        set map { case (f, _) => f }
+      }
+      LoadBalancerFactory.this.newLoadBalancer(unweighted, statsReceiver, emptyException)
     }
   }
 }
@@ -211,6 +265,14 @@ object DefaultBalancerFactory extends WeightedLoadBalancerFactory {
   def newLoadBalancer[Req, Rep](
     weighted: Var[Set[(ServiceFactory[Req, Rep], Double)]],
     statsReceiver: StatsReceiver,
-    emptyException: NoBrokersAvailableException): ServiceFactory[Req, Rep] =
-      underlying.newLoadBalancer(weighted, statsReceiver, emptyException)
+    emptyException: NoBrokersAvailableException
+  ): ServiceFactory[Req, Rep] =
+    underlying.newLoadBalancer(weighted, statsReceiver, emptyException)
+
+  def newWeightedLoadBalancer[Req, Rep](
+    weighted: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
+    statsReceiver: StatsReceiver,
+    emptyException: NoBrokersAvailableException
+  ): ServiceFactory[Req, Rep] =
+    underlying.newWeightedLoadBalancer(weighted, statsReceiver, emptyException)
 }

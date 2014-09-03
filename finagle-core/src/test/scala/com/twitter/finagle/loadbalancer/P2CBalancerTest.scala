@@ -66,7 +66,7 @@ class P2CBalancerTest extends FunSuite {
   def newBal(fs: Var[Traversable[LoadedFactory]],
     statsReceiver: StatsReceiver = NullStatsReceiver) =
     new P2CBalancer(
-      fs map { fs => fs map (_.tup) },
+      Activity(fs map { fs => Activity.Ok(fs map(_.tup)) }),
       rng = Rng(12345L),
       statsReceiver = statsReceiver,
       emptyException = noBrokers)

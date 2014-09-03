@@ -11,10 +11,10 @@ import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.Eventually
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.junit.{JUnitRunner, AssertionsForJUnit}
 
 @RunWith(classOf[JUnitRunner])
-class DefaultClientTest extends FunSuite with Eventually {
+class DefaultClientTest extends FunSuite with Eventually with AssertionsForJUnit {
   trait StatsReceiverHelper {
     val statsReceiver = new InMemoryStatsReceiver()
   }
@@ -187,10 +187,10 @@ class DefaultClientTest extends FunSuite with Eventually {
         }
       })
       val svc = client.newService(dest, "test")
-      assert(closed === false)
+      assert(!closed, "client closed too early")
       val f = svc.close()
       eventually { assert(f.poll === Some(Return(()))) }
-      assert(closed === true)
+      assert(closed, "client not closed")
     }
   }
 }

@@ -109,7 +109,8 @@ private[finagle] object P2CBenchmark extends com.twitter.app.App {
   val stable: Seq[ServiceFactory[Unit, Unit]] = Seq.tabulate(9) { i => newFactory(i, dist) }
 
   val underlying = Var(stable)
-  val p2c = new P2CBalancer[Unit, Unit](underlying map { facs => facs map { fac => (fac, 1D) } },
+  val p2c = new P2CBalancer[Unit, Unit](
+    Activity(underlying map { facs => Activity.Ok(facs map { fac => (fac, 1D) }) }),
     statsReceiver=stats.scope("p2c"))
   val balancer = p2c.toService
 

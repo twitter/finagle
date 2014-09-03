@@ -1,7 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.finagle.{ClientConnection, Group, Service, ServiceFactory, Addr}
-import com.twitter.util.{Await, Future, Stopwatch, Time, Var}
+import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
+import com.twitter.util.{Promise, Activity, Await, Future, Stopwatch, Time}
 
 object Benchmark {
   // todo: simulate distributions of loads.
@@ -55,7 +55,7 @@ object Benchmark {
   }
 
   def main(args: Array[String]) {
-    val heap = new HeapBalancer[Int, Int](Var.value(factories.toSet))
+    val heap = new HeapBalancer[Int, Int](Activity.value(factories.toSet))
     go(heap, "Heap")
   }
 }

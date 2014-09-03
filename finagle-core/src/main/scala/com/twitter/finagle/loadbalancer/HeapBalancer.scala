@@ -2,8 +2,8 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.{
-  ClientConnection, Group, NoBrokersAvailableException, Service, ServiceFactory, ServiceProxy}
+import com.twitter.finagle.util.OnReady
+import com.twitter.finagle.{Group, ClientConnection, NoBrokersAvailableException, Service, ServiceFactory, ServiceProxy}
 import com.twitter.util._
 import scala.annotation.tailrec
 import scala.util.Random
@@ -16,31 +16,54 @@ object HeapBalancer {
 object HeapBalancerFactory
     extends LoadBalancerFactory
     with WeightedLoadBalancerFactory {
-  def newLoadBalancer[Req, Rep](
-      group: Group[ServiceFactory[Req, Rep]],
-      statsReceiver: StatsReceiver,
-      emptyException: NoBrokersAvailableException) =
-    new HeapBalancer[Req, Rep](group.set, statsReceiver, emptyException)
 
   def newLoadBalancer[Req, Rep](
-      weighted: Var[Set[(ServiceFactory[Req, Rep], Double)]],
-      statsReceiver: StatsReceiver,
-      emptyException: NoBrokersAvailableException) =
-    new HeapBalancer[Req, Rep](
-      weighted map { set => set map { case (f, _) => f } },
-      statsReceiver, emptyException)
+    group: Group[ServiceFactory[Req, Rep]],
+    statsReceiver: StatsReceiver,
+    emptyException: NoBrokersAvailableException
+  ): ServiceFactory[Req, Rep] = {
+    val activity = Activity(group.set map(Activity.Ok(_)))
+    new HeapBalancer[Req, Rep](activity, statsReceiver, emptyException)
+  }
+
+  def newLoadBalancer[Req, Rep](
+    weighted: Var[Set[(ServiceFactory[Req, Rep], Double)]],
+    statsReceiver: StatsReceiver,
+    emptyException: NoBrokersAvailableException
+  ): ServiceFactory[Req, Rep] = {
+    val activity = Activity(weighted map { set =>
+      Activity.Ok(set map { case (f, _) => f })
+    })
+    new HeapBalancer[Req, Rep](activity, statsReceiver, emptyException)
+  }
+
+  def newLoadBalancer[Req, Rep](
+    activity: Activity[Set[ServiceFactory[Req, Rep]]],
+    statsReceiver: StatsReceiver,
+    emptyException: NoBrokersAvailableException
+  ): ServiceFactory[Req, Rep] =
+    new HeapBalancer(activity, statsReceiver, emptyException)
+
+  def newWeightedLoadBalancer[Req, Rep](
+    weighted: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
+    statsReceiver: StatsReceiver,
+    emptyException: NoBrokersAvailableException
+  ): ServiceFactory[Req, Rep] = {
+    val unweighted = weighted map { set => set map { case (f, _) => f } }
+    newLoadBalancer(unweighted, statsReceiver, emptyException)
+  }
 }
 
 
 /**
- * An efficient load balancer that operates on Groups.
+ * An efficient load balancer that operates on Activity[Set[ServiceFactory[Req, Rep]]].
  */
 class HeapBalancer[Req, Rep](
-  factories: Var[Set[ServiceFactory[Req, Rep]]],
+  factories: Activity[Set[ServiceFactory[Req, Rep]]],
   statsReceiver: StatsReceiver = NullStatsReceiver,
   emptyException: Throwable = new NoBrokersAvailableException,
   rng: Random = new Random
-) extends ServiceFactory[Req, Rep] {
+) extends ServiceFactory[Req, Rep] with OnReady {
 
   import HeapBalancer._
 
@@ -86,8 +109,20 @@ class HeapBalancer[Req, Rep](
     heap
   }
   private[this] var snap = Set[ServiceFactory[Req, Rep]]()
-  factories observe { newSet =>
-    updateGroup(newSet)
+
+  private[this] val ready = new Promise[Unit]
+  def onReady: Future[Unit] = ready
+
+  private[this] val observation = factories.run.changes respond {
+    case Activity.Pending =>
+
+    case Activity.Ok(newSet) =>
+      updateGroup(newSet)
+      ready.setDone()
+
+    case Activity.Failed(_) =>
+      // On resolution failure, consider the load balancer ready (to serve errors).
+      ready.setDone()
   }
 
   private[this] val availableGauge = statsReceiver.addGauge("available") {
@@ -215,8 +250,13 @@ class HeapBalancer[Req, Rep](
     node.factory(conn) map { new Wrapped(node, _) } onFailure { _ => put(node) }
   }
 
-  def close(deadline: Time) =
-    Closable.all(heap.map(_.factory):_*).close(deadline)
+  private[this] val nodesClosable: Closable = Closable.make { deadline =>
+    Closable.all(synchronized(heap).map(_.factory):_*).close(deadline)
+  }
+
+  def close(deadline: Time) = {
+    Closable.sequence(observation, nodesClosable).close(deadline)
+  }
 
   override def isAvailable = true
   override val toString = synchronized("HeapBalancer(%d)".format(size))

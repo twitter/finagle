@@ -1,17 +1,14 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.finagle.NoBrokersAvailableException
+import com.twitter.app.App
 import com.twitter.finagle.client.StringClient
 import com.twitter.finagle.param
-import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, LoadedStatsReceiver, NullStatsReceiver}
-import com.twitter.util.{Await, Future, Time}
+import com.twitter.finagle.NoBrokersAvailableException
+import com.twitter.util.Await
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import java.net.{SocketAddress, InetSocketAddress}
-import com.twitter.finagle.Name
-import com.twitter.app.App
 
 @RunWith(classOf[JUnitRunner])
 class LoadBalancerFactoryTest extends FunSuite with StringClient {
