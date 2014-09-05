@@ -232,7 +232,7 @@ case class Netty3Transporter[In, Out](
     statsHandlers.get(statsReceiver)
   }
 
-  private def newPipeline(addr: SocketAddress, statsReceiver: StatsReceiver) = {
+  private[netty3] def newPipeline(addr: SocketAddress, statsReceiver: StatsReceiver) = {
     val pipeline = pipelineFactory.getPipeline()
 
     pipeline.addFirst("channelStatsHandler", channelStatsHandler(statsReceiver))
@@ -274,14 +274,17 @@ case class Netty3Transporter[In, Out](
     }
 
     (socksProxy, addr) match {
-      case (Some(proxyAddr), (inetAddr : InetSocketAddress)) if !inetAddr.getAddress.isLoopbackAddress =>
-        val authentication = socksUsernameAndPassword match {
-          case (Some((username, password))) =>
-            UsernamePassAuthenticationSetting(username, password)
-          case _ => Unauthenticated
+      case (Some(proxyAddr), (inetSockAddr : InetSocketAddress)) =>
+        val inetAddr = inetSockAddr.getAddress
+        if (!inetAddr.isLoopbackAddress && !inetAddr.isLinkLocalAddress) {
+          val authentication = socksUsernameAndPassword match {
+            case (Some((username, password))) =>
+              UsernamePassAuthenticationSetting(username, password)
+            case _ => Unauthenticated
+          }
+          pipeline.addFirst("socksConnect",
+            new SocksConnectHandler(proxyAddr, inetSockAddr, Seq(authentication)))
         }
-        pipeline.addFirst("socksConnect",
-          new SocksConnectHandler(proxyAddr, inetAddr, Seq(authentication)))
       case _ =>
     }
 
