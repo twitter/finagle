@@ -158,7 +158,7 @@ What service behavior will change when upgrading to Mux?
 
 With Mux, Finagle multiplexes several requests onto a single connection. As a
 consequence, traditional forms of connection-pooling are no longer required. Thus
-Mux employs `com.twitter.finagle.pool.ReusingPool <http://twitter.github.io/finagle/docs/#com.twitter.finagle.pool.ReusingPool>`_,
+Mux employs `com.twitter.finagle.pool.SingletonPool <http://twitter.github.io/finagle/docs/#com.twitter.finagle.pool.SingletonPool>`_,
 which exposes new stats:
 
 - ``connects``, ``connections``, and ``closechans`` stats should drop, since

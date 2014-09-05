@@ -10,7 +10,7 @@ import com.twitter.finagle.memcached.protocol.text.{
 import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.memcached.{Client => MClient, Server => MServer, _}
 import com.twitter.finagle.netty3._
-import com.twitter.finagle.pool.ReusingPool
+import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
@@ -86,7 +86,7 @@ object MemcachedClient extends DefaultClient[Command, Response](
   name = "memcached",
   endpointer = Bridge[Command, Response, Command, Response](
     MemcachedTransporter, new PipeliningDispatcher(_)),
-  pool = (sr: StatsReceiver) => new ReusingPool(_, sr)
+  pool = (sr: StatsReceiver) => new SingletonPool(_, sr)
 ) with MemcachedRichClient with MemcachedKetamaClient
 
 private[finagle] object MemcachedFailureAccrualClient {
@@ -108,7 +108,7 @@ private[finagle] class MemcachedFailureAccrualClient(
   name = "memcached",
   endpointer = Bridge[Command, Response, Command, Response](
     MemcachedTransporter, new PipeliningDispatcher(_)),
-  pool = (sr: StatsReceiver) => new ReusingPool(_, sr),
+  pool = (sr: StatsReceiver) => new SingletonPool(_, sr),
   failureAccrual = {
     new KetamaFailureAccrualFactory(
       _,

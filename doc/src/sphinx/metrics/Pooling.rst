@@ -19,7 +19,7 @@ WatermarkPool
 **pool_num_too_many_waiters**
   a counter of the number of times there were no connections immediately available and there were already too many waiters
 
-ReusingPool
+SingletonPool
 <<<<<<<<<<<
 
 **conn/fail**

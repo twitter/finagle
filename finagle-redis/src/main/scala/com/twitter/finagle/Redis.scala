@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.PipeliningDispatcher
 import com.twitter.finagle.netty3.Netty3Transporter
-import com.twitter.finagle.pool.ReusingPool
+import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.redis.protocol.{Command, Reply}
 import com.twitter.finagle.stats.StatsReceiver
 import java.net.SocketAddress
@@ -24,7 +24,7 @@ object RedisTransporter extends Netty3Transporter[Command, Reply]("redis", redis
 object RedisClient extends DefaultClient[Command, Reply](
   name = "redis",
   endpointer = Bridge[Command, Reply, Command, Reply](RedisTransporter, new PipeliningDispatcher(_)),
-  pool = (sr: StatsReceiver) => new ReusingPool(_, sr)
+  pool = (sr: StatsReceiver) => new SingletonPool(_, sr)
 ) with RedisRichClient
 
 object Redis extends Client[Command, Reply] with RedisRichClient {

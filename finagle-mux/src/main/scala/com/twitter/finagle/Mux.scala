@@ -2,7 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.finagle.client._
 import com.twitter.finagle.netty3._
-import com.twitter.finagle.pool.ReusingPool
+import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.stats.StatsReceiver
 import java.net.SocketAddress
@@ -17,7 +17,7 @@ class MuxClient extends DefaultClient[CB, CB](
   endpointer = (sa, sr) =>
     (mux.lease.LeasedBridge[CB, CB, CB, CB](
       MuxTransporter, new mux.ClientDispatcher(_, sr))(sa, sr)),
-  pool = (sr: StatsReceiver) => new ReusingPool(_, sr.scope("reusingpool"))
+  pool = (sr: StatsReceiver) => new SingletonPool(_, sr.scope("reusingpool"))
 )
 
 object MuxListener extends Netty3Listener[CB, CB]("mux", mux.PipelineFactory)
@@ -34,7 +34,7 @@ package exp {
   private[finagle] object MuxClient extends StackClient[CB, CB](
     // LeasedFactory.module needs to be directly before the stack endpoint.
     StackClient.newStack
-      .replace(StackClient.Role.pool, ReusingPool.module[CB, CB])
+      .replace(StackClient.Role.pool, SingletonPool.module[CB, CB])
       .replace(StackClient.Role.prepConn, mux.lease.LeasedFactory.module[CB, CB]),
     Stack.Params.empty) {
     protected type In = CB
