@@ -1,10 +1,11 @@
 package com.twitter.finagle.util
 
 import com.twitter.logging.Level
-import java.io.{IOException, File, InputStream}
-import java.net.{URI, URLClassLoader, URISyntaxException}
-import java.util.ServiceConfigurationError
+import java.io.{File, IOException}
+import java.net.{URI, URISyntaxException, URLClassLoader}
+import java.nio.charset.MalformedInputException
 import java.util.jar.JarFile
+import java.util.ServiceConfigurationError
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.io.Source
@@ -19,7 +20,7 @@ import scala.io.Source
 private object ClassPath {
 
   private val ignoredPackages = Seq(
-    "apple/", "ch/epfl/", "com/apple/", "com/oracle/", 
+    "apple/", "ch/epfl/", "com/apple/", "com/oracle/",
     "com/sun/", "java/", "javax/", "scala/", "sun/", "sunw/")
 
   /**
@@ -49,18 +50,18 @@ private object ClassPath {
 
   private def getEntries(loader: ClassLoader): Seq[(URI, ClassLoader)] = {
     val ents = mutable.Buffer[(URI, ClassLoader)]()
-    val parent = loader.getParent()
+    val parent = loader.getParent
     if (parent != null)
       ents ++= getEntries(parent)
 
     loader match {
       case urlLoader: URLClassLoader =>
-        for (url <- urlLoader.getURLs()) {
-          ents += (url.toURI() -> loader)
+        for (url <- urlLoader.getURLs) {
+          ents += (url.toURI -> loader)
         }
       case _ =>
     }
-    
+
     ents
   }
 
@@ -68,7 +69,7 @@ private object ClassPath {
     if (uri.getScheme != "file")
       return
     val f = new File(uri)
-    if (!(f.exists() && f.canRead()))
+    if (!(f.exists() && f.canRead))
       return
 
     if (f.isDirectory)
@@ -78,18 +79,17 @@ private object ClassPath {
   }
 
   private def browseDir(
-      dir: File, loader: ClassLoader, 
+      dir: File, loader: ClassLoader,
       prefix: String, buf: mutable.Buffer[Info]) {
     if (ignoredPackages contains prefix)
       return
 
     for (f <- dir.listFiles)
-      if (f.isDirectory() && f.canRead())
+      if (f.isDirectory && f.canRead)
         browseDir(f, loader, prefix + f.getName + "/", buf)
       else for (iface <- ifaceOfName(prefix + f.getName)) {
         val source = Source.fromFile(f, "UTF-8")
-        val lines = source.getLines().toList
-        source.close()
+        val lines = readLines(source)
         buf += Info(prefix + f.getName, iface, lines)
       }
   }
@@ -111,8 +111,7 @@ private object ClassPath {
         iface <- ifaceOfName(n)
       } {
         val source = Source.fromInputStream(jarFile.getInputStream(e))
-        val lines = source.getLines().toList
-        source.close()
+        val lines = readLines(source)
         buf += Info(n, iface, lines)
       }
     } finally {
@@ -124,7 +123,7 @@ private object ClassPath {
 
   private def jarClasspath(jarFile: File, manifest: java.util.jar.Manifest): Seq[URI] = for {
     m <- Option(manifest).toSeq
-    attr <- Option(m.getMainAttributes().getValue("Class-Path")).toSeq
+    attr <- Option(m.getMainAttributes.getValue("Class-Path")).toSeq
     el <- attr.split(" ")
     uri <- uriFromJarClasspath(jarFile, el)
   } yield uri
@@ -138,6 +137,21 @@ private object ClassPath {
   } catch {
     case _: URISyntaxException => None
   }
+
+  private def readLines(source: Source): Seq[String] = {
+    try {
+      source.getLines().toArray.flatMap { line =>
+        val commentIdx = line.indexOf('#')
+        val end = if (commentIdx != -1) commentIdx else line.length
+        val str = line.substring(0, end).trim
+        if (str.isEmpty) Seq.empty else Seq(str)
+      }
+    } catch {
+      case ex: MalformedInputException => Seq.empty /* skip malformed files (e.g. non UTF-8) */
+    } finally {
+      source.close()
+    }
+  }
 }
 
 /**
@@ -146,37 +160,27 @@ private object ClassPath {
  */
 object LoadService {
 
-  def apply[T: ClassManifest](): Seq[T] = {
+  private val cache: mutable.Map[ClassLoader, Seq[ClassPath.Info]] = mutable.Map.empty
+
+  def apply[T: ClassManifest](): Seq[T] = synchronized {
     val iface = implicitly[ClassManifest[T]].erasure.asInstanceOf[Class[T]]
+    val ifaceName = iface.getName
+    val loader = iface.getClassLoader
 
-    val classesOfIface = {
-      val loader = iface.getClassLoader()
-      val mappings = for {
-        ClassPath.Info(_, iface, clss) <- ClassPath.browse(loader)
-        cls <- clss
-        if cls.nonEmpty
-      } yield (iface -> cls)
-    
-      mappings.foldLeft(Map[String, Set[String]]()) {
-        case (m, (iface, cls)) =>
-          m + (iface -> (m.getOrElse(iface, Set()) + cls))
-      }
-    }
-
-    if (!(classesOfIface contains iface.getName))
-      return Seq.empty
-
-    for (n <- classesOfIface(iface.getName).toSeq) yield {
-      val cls = Class.forName(n)
-      if (!(iface isAssignableFrom cls)) {
-        throw new ServiceConfigurationError(
-          ""+n+" not a subclass of "+iface.getName)
-      }
+    for {
+      info <- cache.getOrElseUpdate(loader, ClassPath.browse(loader))
+      if info.iface == ifaceName
+      className <- info.lines
+    } yield {
+      val cls = Class.forName(className)
+      if (!(iface isAssignableFrom cls))
+        throw new ServiceConfigurationError("%s not a subclass of %s".format(className, ifaceName))
 
       DefaultLogger.log(
         Level.DEBUG,
-        "LoadService: loaded instance of class %s for requested service %s".format(n, iface.getName)
+        "LoadService: loaded instance of class %s for requested service %s".format(className, ifaceName)
       )
+
       cls.newInstance().asInstanceOf[T]
     }
   }
