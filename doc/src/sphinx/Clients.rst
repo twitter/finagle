@@ -91,7 +91,7 @@ The ``Expiration`` module is attached at the connection level and expires a serv
 certain amount of idle time. The module is implemented by
 :src:`ExpiringService <com/twitter/finagle/service/ExpiringService.scala>`.
 
-:ref:`Stats <idle_apoptosis_stats>`
+:ref:`Related stats <idle_apoptosis_stats>`
 
 Finally, timeouts can be enforced outside of these modules on a per-request level using
 `Future#within` [#]_:
@@ -129,7 +129,7 @@ by `ServiceFactory#isAvailable`). If all endpoints are unavailable the load bala
 ignores this field and continues to balance on least loaded. This remains true until
 a host becomes available again.
 
-:ref:`Stats <loadbalancer_stats>`
+:ref:`Related stats <loadbalancer_stats>`
 
 Failure Accrual
 ^^^^^^^^^^^^^^^
@@ -168,7 +168,9 @@ maintaining the low watermark (as long as request concurrency exists),
 queuing requests above the high watermark, and applying a TTL for
 services that are between [low, high].
 
-:ref:`Stats <pool_stats>`
+:ref:`Related stats <pool_stats>`
+
+.. _client_fail_fast:
 
 Fail Fast
 ^^^^^^^^^
@@ -181,7 +183,10 @@ During the time that a host is marked down, the factory is marked unavailable (a
 the load balancer above it will avoid its use). The factory becomes available
 again on success or when the back-off schedule runs out.
 
-:ref:`Stats <fail_fast_stats>`
+See the FAQ to :ref:`better understand <faq_failedfastexception>` why clients
+might be seeing ``com.twitter.finagle.FailedFastException``'s.
+
+:ref:`Related stats <fail_fast_stats>`
 
 Retries
 ^^^^^^^

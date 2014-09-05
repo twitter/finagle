@@ -6,8 +6,8 @@ General Finagle FAQ
 
 .. _propagate_failure:
 
-What's a Cancelled{Request, Connection}Exception?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+What are CancelledRequestException and CancelledConnectionException?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When a client connected to a Finagle server disconnects, the server raises
 a *cancellation* interrupt on the pending Future. This is done to
@@ -147,6 +147,30 @@ the mailing list with any questions.
        defaults and leave room for application specific behavior
        to be built on top of the base layer via filters or
        synchronization mechanisms.
+
+.. _faq_failedfastexception:
+
+Why do clients see com.twitter.finagle.FailedFastException's?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+While the :src:`FailFast <com/twitter/finagle/service/FailFastFactory.scala>` service
+factory generally shields clients from downed hosts, sometimes clients will see
+:src:`FailedFastExceptions <com/twitter/finagle/Exceptions.scala>`.
+A common cause is when all endpoints in the load balancer's pool are
+marked down as fail fast, then the load balancer will pass requests through, resulting in a
+``com.twitter.finagle.FailedFastException``.
+
+A related issue is when the load balancer's pool is a single endpoint that is itself a
+load balancer (for example an nginx server or a hardware load balancer).
+It is important to disable fail fast as the remote load balancer has
+the visibility into which endpoints are up.
+Disabling fail fast can be done with ``ClientBuilder``:
+
+::
+
+  clientBuilder.failFast(false)
+
+Refer to the :ref:`fail fast <client_fail_fast>` section for further context.
 
 Mux-specific FAQ
 ----------------

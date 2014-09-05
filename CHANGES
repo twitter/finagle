@@ -87,7 +87,7 @@
 - `finagle-serversets`: Randomizes backoff interval in ZK2
 - `finagle-serversets`: Start resolution eagerly in ZK2
 - `finagle-stats`: Add a stat-filtration GlobalFlag
-- `release ostrich v9.5.2
+- `ostrich`: release ostrich v9.5.2
 - `user guide`: Add Google Analytics tracking code
 - `user guide`: Add sections about review process and starter issues
 - `user guide`: Update Finagle adopter list on user guide website

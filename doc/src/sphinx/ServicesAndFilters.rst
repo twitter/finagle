@@ -139,7 +139,7 @@ ServiceFactory
 In certain modules, it's important to take into account the process of acquiring
 a `Service`. For example, a connection pool would need to play a significant role
 in the `Service` acquisition phase. The `ServiceFactory` exists for this exact reason.
-It produces `Service`s over which requests can be dispatched. Its definition:
+It produces `Service`'s over which requests can be dispatched. Its definition:
 
 ::
 
