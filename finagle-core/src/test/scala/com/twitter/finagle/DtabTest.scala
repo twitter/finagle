@@ -35,7 +35,7 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
   test("d1 ++ d2") {
     val d1 = Dtab.read("/foo => /bar")
     val d2 = Dtab.read("/foo=>/biz;/biz=>/$/inet/0/8080;/bar=>/$/inet/0/9090")
-    
+
     assert(d1++d2 === Dtab.read("""
       /foo=>/bar;
       /foo=>/biz;
@@ -43,17 +43,20 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
       /bar=>/$/inet/0/9090
     """))
 
-    def assertEval(dtab: Dtab, path: Path, expect: Name*) {
-      assert((dtab orElse Namer.global).bind(NameTree.Leaf(path)).sample().eval === Some(expect.toSet))
+    def assertEval(dtab: Dtab, path: Path, expected: Name.Bound*) {
+      (dtab orElse Namer.global).bind(NameTree.Leaf(path)).sample().eval match {
+        case Some(actual) => assert(actual.map(_.addr.sample) === expected.map(_.addr.sample).toSet)
+        case _ => assert(false)
+      }
     }
 
     assertEval(d1 ++ d2, Path.read("/foo"), Name.bound(new InetSocketAddress(8080)))
     assertEval(d2 ++ d1, Path.read("/foo"), Name.bound(new InetSocketAddress(9090)))
   }
-  
+
   test("d1 ++ Dtab.empty") {
     val d1 = Dtab.read("/foo=>/bar;/biz=>/baz")
-    
+
     assert(d1 ++ Dtab.empty === d1)
   }
 

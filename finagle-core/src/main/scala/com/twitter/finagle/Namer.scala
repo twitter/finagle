@@ -133,7 +133,10 @@ object Namer  {
     }
 
     def lookup(path: Path): Activity[NameTree[Name]] = path match {
-      case InetPath(addr) => Activity.value(Leaf(Name.bound(addr)))
+      // Clients may depend on Name.Bound ids being Paths which resolve
+      // back to the same Name.Bound.
+      case InetPath(addr) => Activity.value(Leaf(Name.Bound(Var.value(Addr.Bound(addr)), path)))
+
       case FailPath() => Activity.value(Fail)
       case NilPath() => Activity.value(Empty)
       case NamerPath(namer, rest) => namer.lookup(rest)

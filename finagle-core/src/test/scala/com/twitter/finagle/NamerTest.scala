@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.util.{Return, Throw, Activity, Witness, Try}
-import java.net.InetSocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
@@ -55,7 +55,10 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
   }
 
   def assertEval(res: Activity[NameTree[Name.Bound]], ias: InetSocketAddress*) {
-    assert(res.sample().eval === Some((ias map { ia => Name.bound(ia) }).toSet))
+    res.sample().eval match {
+      case Some(actual) => assert(actual.map(_.addr.sample) === ias.map(Addr.Bound(_)).toSet)
+      case _ => assert(false)
+    }
   }
 
   test("NameTree.bind: union")(new Ctx {
@@ -115,11 +118,16 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
     assert(namer.bind(NameTree.read("(/$/nil | /$/fail | /test/1)")).sample() == NameTree.Empty)
   })
 
+  def assertLookup(path: String, ias: SocketAddress*) {
+    Namer.global.lookup(Path.read(path)).sample() match {
+      case NameTree.Leaf(Name.Bound(addr)) => assert(addr.sample() === Addr.Bound(ias.toSet))
+      case _ => assert(false)
+    }
+  }
+
   test("Namer.global: /$/inet") {
-    assert(Namer.global.lookup(Path.read("/$/inet/1234")).sample()
-        === NameTree.Leaf(Name.bound(new InetSocketAddress(1234))))
-    assert(Namer.global.lookup(Path.read("/$/inet/127.0.0.1/1234")).sample()
-        === NameTree.Leaf(Name.bound(new InetSocketAddress("127.0.0.1", 1234))))
+    assertLookup("/$/inet/1234", new InetSocketAddress(1234))
+    assertLookup("/$/inet/127.0.0.1/1234", new InetSocketAddress("127.0.0.1", 1234))
 
     intercept[ClassNotFoundException] {
       Namer.global.lookup(Path.read("/$/inet")).sample()
