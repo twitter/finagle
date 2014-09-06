@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-stress_2.10</artifactId>
   <packaging>jar</packaging>
-  <version>6.20.1-TWOTEN-1407871523</version>
+  <version>6.20.2-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>service-2104_2.10</artifactId>
@@ -37,47 +37,47 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.20.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-http_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.20.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.20.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thriftmux_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.20.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.20.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>ostrich_2.10</artifactId>
-      <version>9.5.7-TWOTEN-1407871523</version>
+      <version>9.5.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.21.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-app_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.21.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>scrooge-runtime_2.10</artifactId>
-      <version>3.16.4-TWOTEN-1407871523</version>
+      <version>3.16.5-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>

@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-example_2.10</artifactId>
   <packaging>jar</packaging>
-  <version>6.20.1-TWOTEN-1407871523</version>
+  <version>6.20.2-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-2104_2.10</artifactId>
@@ -26,62 +26,62 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.20.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-http_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.20.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-kestrel_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.20.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-memcached_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.20.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-mysql_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.20.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.20.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-redis_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.20.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-stats_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.20.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-stream_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.20.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.20.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-codec_2.10</artifactId>
-      <version>6.20.1-TWOTEN-1407871523</version>
+      <version>6.21.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>scrooge-core_2.10</artifactId>
-      <version>3.16.4-TWOTEN-1407871523</version>
+      <version>3.16.5-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
