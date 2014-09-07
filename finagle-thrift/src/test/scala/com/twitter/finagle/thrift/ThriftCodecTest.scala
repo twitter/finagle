@@ -13,12 +13,16 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class ThriftCodecTest extends FunSuite {
 
-  def thriftToBuffer(method: String, `type`: Byte, seqid: Int,
-      message: { def write(p: TProtocol) }): ChannelBuffer = {
+  def thriftToBuffer(
+    method: String,
+    `type`: Byte,
+    seqId: Int,
+    message: { def write(p: TProtocol) }
+  ): ChannelBuffer = {
     val buffer = ChannelBuffers.dynamicBuffer()
     val transport = new ChannelBufferToTransport(buffer)
     val protocol = new TBinaryProtocol(transport, true, true)
-    protocol.writeMessageBegin(new TMessage(method, `type`, seqid))
+    protocol.writeMessageBegin(new TMessage(method, `type`, seqId))
     message.write(protocol)
     protocol.writeMessageEnd()
     buffer

@@ -15,7 +15,7 @@ class ChannelBufferTransportTest extends FunSuite with MockitoSugar {
   }
   val bb = "hello".getBytes
 
-  test("ChannelBufferToTransport writes bytes to the underlying ChannelBuffer"){
+  test("ChannelBufferToTransport writes bytes to the underlying ChannelBuffer") {
     val c = ChannelContext(mock[ChannelBuffer])
     import c._
 
@@ -44,12 +44,13 @@ class ChannelBufferTransportTest extends FunSuite with MockitoSugar {
 @RunWith(classOf[JUnitRunner])
 class DuplexChannelBufferTransportTest extends FunSuite with MockitoSugar {
 
-  case class DuplexChannelContext(in: ChannelBuffer, out: ChannelBuffer){
+  case class DuplexChannelContext(in: ChannelBuffer, out: ChannelBuffer) {
     lazy val t = new DuplexChannelBufferTransport(in, out)
   }
+
   val bb = "hello".getBytes
 
-  test("DuplexChannelBufferTransport writes to the output ChannelBuffer"){
+  test("DuplexChannelBufferTransport writes to the output ChannelBuffer") {
     val c = DuplexChannelContext(mock[ChannelBuffer], mock[ChannelBuffer])
     import c._
 
@@ -63,7 +64,7 @@ class DuplexChannelBufferTransportTest extends FunSuite with MockitoSugar {
     verify(out).writeBytes(bb, 1, 2)
   }
 
-  test("DuplexChannelBufferTransport reads from the input ChannelBuffer"){
+  test("DuplexChannelBufferTransport reads from the input ChannelBuffer") {
     val c = DuplexChannelContext(mock[ChannelBuffer], mock[ChannelBuffer])
     import c._
 

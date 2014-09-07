@@ -18,20 +18,19 @@ import org.scalatest.FunSuite
 class EndToEndTest extends FunSuite {
 
   case class MyStreamResponse(
-      httpResponse: HttpResponse,
-      messages: Offer[ChannelBuffer],
-      error: Offer[Throwable])
-      extends StreamResponse
-  {
+    httpResponse: HttpResponse,
+    messages: Offer[ChannelBuffer],
+    error: Offer[Throwable]
+  ) extends StreamResponse {
+
     val released = new Promise[Unit]
     def release() = released.updateIfEmpty(Return(()))
   }
 
-  class MyService(response: StreamResponse)
-    extends Service[HttpRequest, StreamResponse]
-  {
+  class MyService(response: StreamResponse) extends Service[HttpRequest, StreamResponse] {
     def apply(request: HttpRequest) = Future.value(response)
   }
+
   val notSkipFlaky = !Option(System.getProperty("SKIP_FLAKY")).isDefined
 
   def testOrSkipFlaky(name: String)(testFun: => Unit) = {
@@ -42,10 +41,12 @@ class EndToEndTest extends FunSuite {
     }
   }
 
-  case class WorkItContext(httpRequest: DefaultHttpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"),
-                           httpResponse: DefaultHttpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK),
-                           messages: Broker[ChannelBuffer] = new Broker[ChannelBuffer],
-                           error: Broker[Throwable] = new Broker[Throwable]){
+  case class WorkItContext(
+    httpRequest: DefaultHttpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"),
+    httpResponse: DefaultHttpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK),
+    messages: Broker[ChannelBuffer] = new Broker[ChannelBuffer],
+    error: Broker[Throwable] = new Broker[Throwable]
+  ) {
     lazy val serverRes = MyStreamResponse(httpResponse, messages.recv, error.recv)
   }
 
