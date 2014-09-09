@@ -98,8 +98,8 @@ private[finagle] object LoadBalancerFactory {
         def mkFactory(sockaddr: SocketAddress): WeightedFactory = {
           val stats = if (hostStatsReceiver.isNull) statsReceiver else {
             val scope = sockaddr match {
-              case ia: InetSocketAddress =>
-                "%s:%d".format(ia.getHostName, ia.getPort)
+              case WeightedInetSocketAddress(addr, _) =>
+                "%s:%d".format(addr.getHostName, addr.getPort)
               case other => other.toString
             }
             val host = hostStatsReceiver.scope(label).scope(scope)

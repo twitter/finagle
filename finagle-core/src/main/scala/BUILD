@@ -5,6 +5,7 @@ scala_library(name='scala',
     repo = pants('pants-support/ivy:internal'),
   ),
   dependencies=[
+    '3rdparty:guava',
     '3rdparty:netty',
     'util/util-app',
     'util/util-collection',

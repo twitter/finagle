@@ -1,10 +1,13 @@
 package com.twitter.finagle
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util._
-import com.twitter.util.{Return, Throw, Try, Var, FuturePool}
-import java.net.SocketAddress
+import com.twitter.util._
+import com.google.common.cache.{Cache, CacheBuilder}
+import java.net.{InetAddress, SocketAddress, UnknownHostException}
 import java.security.{PrivilegedAction, Security}
+import java.util.concurrent.TimeUnit.SECONDS
 import java.util.WeakHashMap
 import java.util.logging.{Level, Logger}
 
@@ -82,13 +85,26 @@ trait Resolver {
 abstract class AbstractResolver extends Resolver
 
 /**
- * Resolver for inet scheme. This Resolver resolves DNS after each TTL timeout.
- * The TTL is gotten from "networkaddress.cache.ttl", a Java Security Property.
- * If "networkaddress.cache.ttl" is not set or set to a non-positive value, DNS
- * cache refresh will be turned off.
+ * Resolver for inet scheme.
+ *
+ * The Var is refreshed after each TTL timeout, set from "networkaddress.cache.ttl",
+ * a Java Security Property. If "networkaddress.cache.ttl" is not set or set to
+ * a non-positive value, the Var is static and no future resolution is attempted.
  */
-object InetResolver extends Resolver {
+object InetResolver {
+  def apply() = new InetResolver(DefaultStatsReceiver)
+  def apply(statsReceiver: StatsReceiver) = new InetResolver(statsReceiver.scope("inet").scope("dns"))
+}
+
+class InetResolver(statsReceiver: StatsReceiver) extends Resolver {
+  import InetSocketAddressUtil._
+
+  private[this] val CACHE_SIZE = 16000L
+
   val scheme = "inet"
+  private[this] val latencyStat = statsReceiver.stat("lookup_ms")
+  private[this] val successes = statsReceiver.counter("successes")
+  private[this] val failures = statsReceiver.counter("failures")
   private val log = Logger.getLogger(getClass.getName)
   private val ttlOption = {
     val t = Try(Option(java.security.AccessController.doPrivileged(
@@ -123,35 +139,60 @@ object InetResolver extends Resolver {
     }
   }
   private val timer = DefaultTimer.twitter
-  private val futurePool = FuturePool.unboundedPool
+
+  private[this] val addressCacheBuilder =
+    CacheBuilder.newBuilder().maximumSize(CACHE_SIZE)
+  private[this] val addressCache: Cache[String, Seq[InetAddress]] = ttlOption match {
+    case Some(t) => addressCacheBuilder.expireAfterWrite(t.inSeconds, SECONDS).build()
+    case None => addressCacheBuilder.build()
+  }
+
+  private[finagle] def bindWeightedHostPortsToAddr(hosts: Seq[WeightedHostPort]): Var[Addr] = {
+    def toAddr(whp: Seq[WeightedHostPort]): Future[Addr] = {
+      val elapsed = Stopwatch.start()
+      resolveWeightedHostPorts(whp, addressCache) map { addrs: Seq[SocketAddress] =>
+        Addr.Bound(addrs.toSet)
+      } onSuccess { _ =>
+        successes.incr()
+        latencyStat.add(elapsed().inMilliseconds)
+      } onFailure { _ =>
+        failures.incr()
+      } rescue {
+        case exc: UnknownHostException => Future.value(Addr.Neg: Addr)
+        case NonFatal(exc) => Future.value(Addr.Failed(exc): Addr)
+      }
+    }
+
+    Var.async(Addr.Pending: Addr) { u =>
+      toAddr(hosts) onSuccess { u() = _ }
+      ttlOption match {
+        case Some(ttl) =>
+          implicit val intPri = new Prioritized[Int] {
+            def apply(i: Int) = i
+          }
+          val updater = Updater { _: Int =>
+            u() = Await.result(toAddr(hosts))
+          }
+          timer.schedule(ttl.fromNow, ttl) {
+            FuturePool.unboundedPool(updater(0))
+          }
+        case None =>
+          Closable.nop
+      }
+    }
+  }
 
   /**
    * Binds to the specified hostnames, and refreshes the DNS information periodically.
    */
-  def bind(hosts: String): Var[Addr] = {
-    import InetSocketAddressUtil._
-
-    val hostPorts = parseHostPorts(hosts)
-    val init = Addr.Bound(resolveHostPorts(hostPorts))
-    ttlOption match {
-      case Some(ttl) =>
-        Var.async(init) { u =>
-          implicit val intPri = new Prioritized[Int] { def apply(i: Int) = i }
-          val updater = Updater { _: Int =>
-            val addr = resolveHostPorts(hostPorts)
-            u() = Addr.Bound(addr)
-          }
-          timer.schedule(ttl.fromNow, ttl) {
-            futurePool {
-              updater(0)
-            } onFailure { ex =>
-              log.log(Level.WARNING, "failed to resolve hosts ", ex)
-            }
-          }
-        }
-      case None =>
-        Var.value(init)
-    }
+  def bind(hosts: String): Var[Addr] = Try(parseHostPorts(hosts)) match {
+    case Return(hp) =>
+      val whp = hp collect { case (host, port) =>
+        (host, port, 1D)
+      }
+      bindWeightedHostPortsToAddr(whp)
+    case Throw(exc) =>
+      Var.value(Addr.Failed(exc))
   }
 }
 
@@ -171,10 +212,12 @@ object FailResolver extends Resolver {
 }
 
 object Resolver {
+  private[this] val inetResolver = InetResolver()
+
   private[this] lazy val resolvers = {
     val rs = LoadService[Resolver]()
     val log = Logger.getLogger(getClass.getName)
-    val resolvers = Seq(InetResolver, NegResolver, NilResolver, FailResolver) ++ rs
+    val resolvers = Seq(inetResolver, NegResolver, NilResolver, FailResolver) ++ rs
 
     val dups = resolvers groupBy(_.scheme) filter { case (_, rs) => rs.size > 1 }
     if (dups.size > 0) throw new MultipleResolversPerSchemeException(dups)
@@ -267,7 +310,7 @@ object Resolver {
             case None => throw new ResolverNotFoundException(scheme)
           }
 
-        case ts => (InetResolver, delex(ts))
+        case ts => (inetResolver, delex(ts))
       }
 
       Name.Bound(resolver.bind(arg), name)

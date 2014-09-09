@@ -19,15 +19,21 @@ class StackClientTest extends FunSuite with StringClient with AssertionsForJUnit
   test("client stats are scoped to label")(new Ctx {
     // use dest when no label is set
     client.newService("inet!localhost:8080")
-    assert(sr.counters(Seq("inet!localhost:8080", "loadbalancer", "adds")) === 1)
+    eventually {
+      assert(sr.counters(Seq("inet!localhost:8080", "loadbalancer", "adds")) === 1)
+    }
 
     // use param.Label when set
     client.configured(param.Label("myclient")).newService("localhost:8080")
-    assert(sr.counters(Seq("myclient", "loadbalancer", "adds")) === 1)
+    eventually {
+      assert(sr.counters(Seq("myclient", "loadbalancer", "adds")) === 1)
+    }
 
     // use evaled label when both are set
     client.configured(param.Label("myclient")).newService("othername=localhost:8080")
-    assert(sr.counters(Seq("othername", "loadbalancer", "adds")) === 1)
+    eventually {
+      assert(sr.counters(Seq("othername", "loadbalancer", "adds")) === 1)
+    }
   })
 
   test("Client added to client registry") (new Ctx {
