@@ -9,10 +9,19 @@ import org.scalatest.mock.MockitoSugar
 import scala.util.Random
 import scala.collection.mutable
 
+trait LoadServiceRandomInterface
+
+class LoadServiceRandomInterfaceImpl extends LoadServiceRandomInterface
+
 @RunWith(classOf[JUnitRunner])
 class LoadServiceTest extends FunSuite with MockitoSugar {
   test("LoadService should apply[T] and return a set of instances of T") {
     assert(LoadService[Announcer]().nonEmpty)
+  }
+
+  test("LoadService should only load 1 instance of T, even when there's multiple occurence of T") {
+    val randomIfaces = LoadService[LoadServiceRandomInterface]()
+    assert(randomIfaces.size == 1)
   }
 
   test("LoadService shouldn't fail on un-readable dir") {

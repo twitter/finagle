@@ -1,0 +1,4 @@
+com.twitter.finagle.util.LoadServiceRandomInterfaceImpl
+# here's a comment that should be ignored
+com.twitter.finagle.util.LoadServiceRandomInterfaceImpl # duplicate class name, should be ignore too
+
