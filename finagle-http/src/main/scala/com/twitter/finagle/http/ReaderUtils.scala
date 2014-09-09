@@ -4,7 +4,7 @@ import com.twitter.concurrent.AsyncMutex
 import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Buf, Reader}
-import com.twitter.util.{Future, Promise, Throw}
+import com.twitter.util.{Future, Promise, Return, Throw}
 import org.jboss.netty.handler.codec.http.{HttpChunk, DefaultHttpChunk}
 import org.jboss.netty.buffer.ChannelBuffers
 
@@ -40,13 +40,13 @@ private[http] object ReaderUtils {
         }
       }
 
-      def read(n: Int): Future[Option[Buf]] = 
+      def read(n: Int): Future[Option[Buf]] =
         mu.acquire() flatMap { permit =>
           def go(): Future[Option[Buf]] = buf match {
             case None =>
               done.setDone()
               Future.None
-            case Some(buf) if buf.isEmpty => 
+            case Some(buf) if buf.isEmpty =>
               fill() before go()
             case Some(nonempty) =>
               val f = Future.value(Some(nonempty.slice(0, n)))
@@ -92,6 +92,9 @@ private[http] object ReaderUtils {
       case None =>
         trans.write(HttpChunk.LAST_CHUNK)
       case Some(buf) =>
-        trans.write(chunkOfBuf(buf)) before streamChunks(trans, r)
+        trans.write(chunkOfBuf(buf)) transform {
+          case Return(_) => streamChunks(trans, r)
+          case _ => Future(r.discard())
+        }
     }
 }

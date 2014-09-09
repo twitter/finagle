@@ -122,29 +122,4 @@ class HttpClientDispatcherTest extends FunSuite {
     intercept[IllegalArgumentException] { Await.result(cc) }
     verify(inSpy, times(1)).close()
   }
-
-  test("upstream interrupt on request triggers discard") {
-    val (in, out) = mkPair[Any,Any]
-    val inSpy = spy(in)
-    val disp = new HttpClientDispatcher[Request](inSpy)
-
-    val discardp = new Promise[Unit]
-    val reqIn = Request()
-    val req = new Request {
-      val httpRequest = reqIn
-      override val httpMessage = reqIn
-      lazy val remoteSocketAddress = reqIn.remoteSocketAddress
-      override val reader = new Reader {
-        def read(n: Int) = Future.value(None)
-        def discard() {
-          discardp.setDone()
-        }
-      }
-    }
-    req.setChunked(true)
-
-    val f = disp(req)
-    f.raise(new Exception)
-    assert(discardp.poll === Some(Return.Unit))
-  }
 }

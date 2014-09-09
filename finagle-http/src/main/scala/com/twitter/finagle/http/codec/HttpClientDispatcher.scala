@@ -40,12 +40,7 @@ class HttpClientDispatcher[Req <: HttpRequest](
       Future.join(
         // 1. Drain the Request body into the Transport.
         req match {
-          case r: Request if r.isChunked =>
-            // TODO Interim solution for ensuring upstream interrupts trigger
-            // discards. Failure handling ideally should happen at the very
-            // ends, e.g. in ChannelTransport. See: CSL-978.
-            trans.onClose ensure { r.reader.discard() }
-            streamChunks(trans, r.reader)
+          case r: Request if r.isChunked => streamChunks(trans, r.reader)
           case _ => Future.Done
         },
         // 2. Drain the Transport into Response body.
