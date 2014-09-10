@@ -7,6 +7,73 @@ import com.twitter.util._
 import java.net.SocketAddress
 import scala.collection.immutable
 
+private[finagle] object NamerTracingFilter {
+  /**
+   * Trace a lookup from [[com.twitter.finagle.Path]] to
+   * [[com.twitter.finagle.Name.Bound]] with the given `record` function.
+   */
+  def trace(
+    path: Path,
+    nameTry: Try[Name.Bound],
+    record: (String, Any) => Unit = Trace.recordBinary
+  ): Unit = {
+    record("wily.path", path.show)
+    record("wily.dtab.base", Dtab.base.show)
+    record("wily.dtab.local", Dtab.local.show)
+    nameTry match {
+      case Return(name) => record("wily.name", name.id)
+      case Throw(exc) => record("wily.failure", exc.getClass.getSimpleName)
+    }
+  }
+
+  implicit val role = Stack.Role("NamerTracer")
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.tracing.NamerTracingFilter]].
+   */
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = NamerTracingFilter.role
+      val description = "Trace the details of the Namer lookup"
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+        get[BoundPath] match {
+          case BoundPath(Some((path, bound))) =>
+            new NamerTracingFilter[Req, Rep](path, bound) andThen next
+          case _ => next
+        }
+      }
+    }
+
+  /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.factory.NamerTracingFilter]] with a
+   * [[com.twitter.finagle.Path]] and [[com.twitter.fiangle.Name.Bound]]
+   */
+  case class BoundPath(boundPath: Option[(Path, Name.Bound)])
+  implicit object BoundPath extends Stack.Param[BoundPath] {
+    val default = BoundPath(None)
+  }
+}
+
+/**
+ * A filter to trace a lookup from [[com.twitter.finagle.Path]] to
+ * [[com.twitter.finagle.Name.Bound]] with the given `record` function.
+ */
+private[finagle] class NamerTracingFilter[Req, Rep](
+    path: Path,
+    bound: Name.Bound,
+    record: (String, Any) => Unit = Trace.recordBinary)
+  extends Filter[Req, Rep, Req, Rep] {
+
+  private[this] val nameTry = Return(bound)
+
+  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+    NamerTracingFilter.trace(path, nameTry, record)
+    service(request)
+  }
+}
+
 /**
  * Proxies requests to the current definiton of 'name', queueing
  * requests while it is pending.
@@ -14,7 +81,7 @@ import scala.collection.immutable
 private class DynNameFactory[Req, Rep](
     name: Activity[Name.Bound],
     newService: (Name.Bound, ClientConnection) => Future[Service[Req, Rep]],
-    trace: Try[Name.Bound] => Unit)
+    traceNamerFailure: Throwable => Unit)
   extends ServiceFactory[Req, Rep] {
 
   private sealed trait State
@@ -22,7 +89,7 @@ private class DynNameFactory[Req, Rep](
     extends State
   private case class Named(name: Name.Bound) extends State
   private case class Failed(exc: Throwable) extends State
-  private case object Closed extends State
+  private case class Closed() extends State
 
   private case class NamingException(exc: Throwable) extends Exception(exc)
 
@@ -36,7 +103,7 @@ private class DynNameFactory[Req, Rep](
           for ((conn, p) <- q) p.become(apply(conn))
         case Failed(_) | Named(_) =>
           state = Named(name)
-        case Closed =>
+        case Closed() =>
       }
     }
 
@@ -48,47 +115,38 @@ private class DynNameFactory[Req, Rep](
           for ((_, p) <- q) p.setException(NamingException(exc))
           state = Failed(exc)
         case Failed(_) =>
+          // if already failed, just update the exception; the promises
+          // must already be satisfied.
           state = Failed(exc)
-        case Named(_) | Closed =>
+        case Named(_) | Closed() =>
       }
     }
 
     case Activity.Pending =>
   }
 
-  def apply(conn: ClientConnection) = {
-    val result = state match {
-      case Named(name) =>
-        val rtnName = Return(name)
-        // attach the trace each time the service is used
-        newService(name, conn) map { service =>
-          new ServiceProxy(service) {
-            override def apply(request: Req) = {
-              trace(rtnName)
-              super.apply(request)
-            }
-          }
-        }
+  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
+    state match {
+      case Named(name) => newService(name, conn)
 
       // don't trace these, since they're not a namer failure
-      case Closed => Future.exception(new ServiceClosedException)
+      case Closed() => Future.exception(new ServiceClosedException)
 
       case Failed(exc) =>
-        trace(Throw(exc))
+        traceNamerFailure(exc)
         Future.exception(exc)
 
-      case Pending(_) => applySync(conn)
-    }
-
-    result rescue {
-      // extract the underlying exception, to trace and return
-      case NamingException(t) =>
-        trace(Throw(t))
-        Future.exception(t)
+      case Pending(_) =>
+        applySync(conn) rescue {
+          // extract the underlying exception, to trace and return
+          case NamingException(exc) =>
+            traceNamerFailure(exc)
+            Future.exception(exc)
+        }
     }
   }
 
-  private[this] def applySync(conn: ClientConnection) = synchronized {
+  private[this] def applySync(conn: ClientConnection): Future[Service[Req, Rep]] = synchronized {
     state match {
       case Pending(q) =>
         val p = new Promise[Service[Req, Rep]]
@@ -113,7 +171,7 @@ private class DynNameFactory[Req, Rep](
   def close(deadline: Time) = {
     val prev = synchronized {
       val prev = state
-      state = Closed
+      state = Closed()
       prev
     }
     prev match {
@@ -124,24 +182,6 @@ private class DynNameFactory[Req, Rep](
       case _ =>
     }
     sub.close(deadline)
-  }
-}
-
-private[finagle] class NameTracer(
-    path: Path,
-    base: Dtab,
-    local: Dtab,
-    trace: (String, Any) => Unit = Trace.recordBinary)
-  extends (Try[Name.Bound] => Unit) {
-
-  def apply(nameTry: Try[Name.Bound]): Unit = {
-    trace("wily.path", path.show)
-    trace("wily.dtab.base", base.show)
-    trace("wily.dtab.local", local.show)
-    nameTry match {
-      case Return(name) => trace("wily.name", name.id)
-      case Throw(exc) => trace("wily.failure", exc.getClass.getSimpleName)
-    }
   }
 }
 
@@ -171,7 +211,7 @@ private[finagle] class NameTracer(
  */
 private[finagle] class BindingFactory[Req, Rep](
     path: Path,
-    newFactory: Var[Addr] => ServiceFactory[Req, Rep],
+    newFactory: Name.Bound => ServiceFactory[Req, Rep],
     statsReceiver: StatsReceiver = NullStatsReceiver,
     maxNameCacheSize: Int = 8,
     maxNamerCacheSize: Int = 4)
@@ -181,7 +221,7 @@ private[finagle] class BindingFactory[Req, Rep](
 
   private[this] val nameCache =
     new ServiceFactoryCache[Name.Bound, Req, Rep](
-      bound => newFactory(bound.addr),
+      bound => newFactory(bound),
       statsReceiver.scope("namecache"),
       maxNameCacheSize)
 
@@ -189,8 +229,8 @@ private[finagle] class BindingFactory[Req, Rep](
     new NoBrokersAvailableException(path.show)
 
   private[this] val dtabCache = {
-    val newFactory: ((Dtab, Dtab)) => ServiceFactory[Req, Rep] = { case (base, local) =>
-      val namer = (base ++ local) orElse Namer.global
+    val newFactory: Dtab => ServiceFactory[Req, Rep] = { dtab =>
+      val namer = dtab orElse Namer.global
       val name: Activity[Name.Bound] = namer.bind(tree).map(_.eval) flatMap {
         case None => Activity.exception(noBrokersAvailableException)
         case Some(set) if set.isEmpty => Activity.exception(noBrokersAvailableException)
@@ -198,20 +238,21 @@ private[finagle] class BindingFactory[Req, Rep](
         case Some(set) => Activity.value(Name.all(set))
       }
 
-      val tracer = new NameTracer(path, base, local)
-
-      new DynNameFactory(name, nameCache.apply, tracer)
+      new DynNameFactory(
+        name,
+        nameCache.apply,
+        exc => NamerTracingFilter.trace(path, Throw(exc)))
     }
 
-    new ServiceFactoryCache[(Dtab, Dtab), Req, Rep](
+    new ServiceFactoryCache[Dtab, Req, Rep](
       newFactory,
       statsReceiver.scope("dtabcache"),
       maxNamerCacheSize)
   }
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-    val service = dtabCache((Dtab.base, Dtab.local), conn)
     val localDtab = Dtab.local
+    val service = dtabCache(Dtab.base ++ localDtab, conn)
     if (localDtab.isEmpty) service
     else service rescue {
       case e: NoBrokersAvailableException =>

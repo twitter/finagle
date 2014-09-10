@@ -1,7 +1,7 @@
 package com.twitter.finagle.factory
 
 import com.twitter.finagle._
-import com.twitter.util.{Await, Future, Time, Var, Activity, Promise, Throw, Return}
+import com.twitter.util._
 import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
@@ -43,11 +43,11 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     var news = 0
     var closes = 0
 
-    val newFactory: Var[Addr] => ServiceFactory[Unit, Var[Addr]] =
-      addr => new ServiceFactory[Unit, Var[Addr]] {
+    val newFactory: Name.Bound => ServiceFactory[Unit, Var[Addr]] =
+      bound => new ServiceFactory[Unit, Var[Addr]] {
         news += 1
         def apply(conn: ClientConnection) = Future.value(new Service[Unit, Var[Addr]] {
-          def apply(_unit: Unit) = Future.value(addr)
+          def apply(_unit: Unit) = Future.value(bound.addr)
         })
 
         def close(deadline: Time) = {
@@ -126,7 +126,6 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
   }
 
   test("Caches namers") (new Ctx {
-
     val n1 = Dtab.read("/foo/bar=>/$/inet/0/1")
     val n2 = Dtab.read("/foo/bar=>/$/inet/0/2")
     val n3 = Dtab.read("/foo/bar=>/$/inet/0/3")
@@ -198,13 +197,51 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
 }
 
 @RunWith(classOf[JUnitRunner])
+class NamerTracingFilterTest extends FunSuite with MockitoSugar with BeforeAndAfter {
+   private trait Ctx {
+    val record = mock[(String, Any) => Unit]
+    val service = mock[Service[Int, Int]]
+    val addr = mock[SocketAddress]
+    val name = Name.Bound(Var(Addr.Bound(addr)), "dat-name")
+    when(service(any[Int])).thenReturn(Future.value(0))
+  }
+
+  var saveBase: Dtab = Dtab.empty
+  var saveLocal: Dtab = Dtab.empty
+
+  before {
+    saveBase = Dtab.base
+    saveLocal = Dtab.local
+    Dtab.base = Dtab.read("/foo => /bar")
+    Dtab.local = Dtab.read("/bar => /baz")
+  }
+
+  after {
+    Dtab.base = saveBase
+    Dtab.local = saveLocal
+  }
+
+  test("trace path/name")(new Ctx {
+    val filter = new NamerTracingFilter[Int, Int](Path.Utf8("foo"), name, record)
+    val filteredService = filter andThen service
+
+    Await.result(filteredService(3))
+    verify(record)("wily.path", "/foo")
+    verify(record)("wily.dtab.base", "/foo=>/bar")
+    verify(record)("wily.dtab.local", "/bar=>/baz")
+    verify(record)("wily.name", "dat-name")
+    verify(record, times(4))(any[String], any)
+  })
+}
+
+@RunWith(classOf[JUnitRunner])
 class DynNameFactoryTest extends FunSuite with MockitoSugar {
   private trait Ctx {
     val newService = mock[(Name.Bound, ClientConnection) => Future[Service[String, String]]]
     val svc = mock[Service[String, String]]
     val (name, namew) = Activity[Name.Bound]()
-    val tracer = mock[NameTracer]
-    val dyn = new DynNameFactory[String, String](name, newService, tracer)
+    val traceNamerFailure = mock[Throwable => Unit]
+    val dyn = new DynNameFactory[String, String](name, newService, traceNamerFailure)
   }
 
   test("queue requests until name is nonpending (ok)")(new Ctx {
@@ -219,14 +256,11 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
     assert(f1.poll === Some(Return(svc)))
     assert(f2.poll === Some(Return(svc)))
 
-    // make sure the trace fires when each request is made
-    verify(tracer, times(0))(Return(Name.empty))
-
     Await.result(f1)("foo")
     Await.result(f1)("bar")
     Await.result(f2)("baz")
 
-    verify(tracer, times(3))(Return(Name.empty))
+    verify(traceNamerFailure, times(0))(any[Throwable])
   })
 
   test("queue requests until name is nonpending (fail)")(new Ctx {
@@ -241,7 +275,7 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
 
     assert(f1.poll === Some(Throw(exc)))
     assert(f2.poll === Some(Throw(exc)))
-    verify(tracer, times(2))(Throw(exc))
+    verify(traceNamerFailure, times(2))(exc)
   })
 
   test("dequeue interrupted requests")(new Ctx {
@@ -258,7 +292,7 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
       case Some(Throw(cce: CancelledConnectionException)) =>
         assert(cce.getCause === exc)
         // no throw for cancel
-        verify(tracer, times(0))(Throw(cce))
+        verify(traceNamerFailure, times(0))(any[Throwable])
       case _ => fail()
     }
     assert(f2.poll === None)

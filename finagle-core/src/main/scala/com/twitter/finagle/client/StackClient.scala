@@ -2,7 +2,7 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle._
 import com.twitter.finagle.factory.{
-  BindingFactory, RefcountedFactory, StatsFactoryWrapper, TimeoutFactory}
+  BindingFactory, NamerTracingFilter, RefcountedFactory, StatsFactoryWrapper, TimeoutFactory}
 import com.twitter.finagle.filter.{DtabStatsFilter, ExceptionSourceFilter, MonitorFilter}
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.param._
@@ -85,6 +85,7 @@ private[finagle] object StackClient {
       new RefcountedFactory(fac))
     stk.push(TimeoutFactory.module)
     stk.push(StatsFactoryWrapper.module)
+    stk.push(NamerTracingFilter.module)
     stk.push(TracingFilter.module)
     stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
     stk.result
@@ -215,8 +216,10 @@ private[finagle] abstract class StackClient[Req, Rep](
         // Register this client once as evaluated against the base dtab
         register(clientParams1 + LoadBalancerFactory.Dest(vaddr))
 
-        val newStack: Var[Addr] => ServiceFactory[Req, Rep] = { addr =>
-          clientStack.make(clientParams1 + LoadBalancerFactory.Dest(addr))
+        val newStack: Name.Bound => ServiceFactory[Req, Rep] = { bound =>
+          clientStack.make(clientParams1 +
+            NamerTracingFilter.BoundPath(Some(path, bound)) +
+            LoadBalancerFactory.Dest(bound.addr))
         }
 
         new BindingFactory(path, newStack, stats.scope("interpreter"))
