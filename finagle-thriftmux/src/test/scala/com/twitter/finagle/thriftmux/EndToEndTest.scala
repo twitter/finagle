@@ -360,20 +360,20 @@ class EndToEndTest extends FunSuite {
       def query(x: String) = Future.value(x+x)
     }
     val mem = new InMemoryStatsReceiver
-    val label = Label("foobar")
     val sr = Stats(mem)
     val server = ThriftMuxServer
       .configured(sr)
-      .configured(label)
+      .configured(Label("server"))
       .serveIface(":*", iface)
 
     val client = ThriftMuxClient
       .configured(sr)
-      .configured(label)
+      .configured(Label("client"))
       .newIface[TestService.FutureIface](server)
 
     assert(Await.result(client.query("ok")) === "okok")
-    assert(mem.counters(Seq("foobar", "protocol", "thriftmux")) === 2)
+    assert(mem.gauges(Seq("server", "protocol", "thriftmux"))() === 1.0)
+    assert(mem.gauges(Seq("client", "protocol", "thriftmux"))() === 1.0)
   }
 
   test("ThriftMuxClients are properly labeled and scoped") {

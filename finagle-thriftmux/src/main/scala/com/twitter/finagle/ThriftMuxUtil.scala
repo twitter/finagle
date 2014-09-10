@@ -25,7 +25,7 @@ private object ThriftMuxUtil {
     val description = "Record ThriftMux protocol usage"
     def make(next: ServiceFactory[CB, CB])(implicit params: Stack.Params) = {
       val param.Stats(stats) = params[param.Stats]
-      stats.scope("protocol").counter("thriftmux").incr()
+      stats.scope("protocol").provideGauge("thriftmux")(1)
       next
     }
   }
