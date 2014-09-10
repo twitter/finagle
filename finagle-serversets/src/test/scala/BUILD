@@ -1,4 +1,4 @@
-dependencies(name='scala',
+target(name='scala',
   dependencies=[
     ':client',
     ':defaultloader',
@@ -6,7 +6,7 @@ dependencies(name='scala',
   ]
 )
 
-dependencies(name='core',
+target(name='core',
   dependencies=[
     '3rdparty:junit',
     '3rdparty:mockito-all',

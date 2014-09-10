@@ -2,7 +2,7 @@ java_library(name='java',
   provides = artifact(
     org = 'com.twitter',
     name = 'finagle-kestrel-java',
-    repo = pants('pants-support/ivy:internal'),
+    repo = 'pants-support/ivy:internal',
   ),
   dependencies=[
     '3rdparty:netty',
