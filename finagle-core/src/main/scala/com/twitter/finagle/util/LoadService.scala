@@ -138,7 +138,7 @@ private object ClassPath {
     case _: URISyntaxException => None
   }
 
-  private def readLines(source: Source): Seq[String] = {
+  private[util] def readLines(source: Source): Seq[String] = {
     try {
       source.getLines().toArray.flatMap { line =>
         val commentIdx = line.indexOf('#')
@@ -173,7 +173,12 @@ object LoadService {
       className <- info.lines
     } yield className
 
-    classNames.distinct map { className =>
+    val classNamesFromRessources = for {
+      rsc <- loader.getResources("META-INF/services/" + ifaceName).asScala
+      line <- ClassPath.readLines(Source.fromURL(rsc))
+    } yield line
+
+    (classNames ++ classNamesFromRessources).distinct map { className =>
       val cls = Class.forName(className)
       if (!(iface isAssignableFrom cls))
         throw new ServiceConfigurationError("%s not a subclass of %s".format(className, ifaceName))
