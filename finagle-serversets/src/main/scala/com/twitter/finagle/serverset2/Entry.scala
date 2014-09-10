@@ -9,6 +9,11 @@ import java.net.InetSocketAddress
  */
 sealed trait Entry
 
+/**
+ * Represents an Endpoint's host address and port.
+ */
+case class HostPort(host: String, port: Int)
+
 /** 
  * Endpoints encode a destination announced via serversets.
  *
@@ -26,7 +31,7 @@ sealed trait Entry
  */
 case class Endpoint(
   name: Option[String],
-  addr: InetSocketAddress, 
+  addr: Option[HostPort],
   shard: Option[Int],
   status: Endpoint.Status.Value,
   memberId: String
@@ -47,7 +52,7 @@ object Entry {
 
 object Endpoint {
   val Empty = Endpoint(
-    None, new InetSocketAddress(0), 
+    None, None,
     None, Endpoint.Status.Unknown, "")
 
   object Status extends Enumeration {
@@ -65,7 +70,7 @@ object Endpoint {
     def ofString(s: String): Option[Value] = map.get(s)
   }
   
-  private def parseEndpoint(m: Any): Option[InetSocketAddress] =
+  private def parseEndpoint(m: Any): Option[HostPort] =
     m match {
       case ep: java.util.Map[_, _] =>
         val p = Option(ep.get("port")) collect {
@@ -77,7 +82,7 @@ object Endpoint {
         }
 
         for (h <- h; p <- p)
-          yield new InetSocketAddress(h, p.toInt)
+          yield HostPort(h, p.toInt)
 
       case _ => None
     }
@@ -97,7 +102,7 @@ object Endpoint {
     val eps = new ArrayBuffer[Endpoint]
 
     for (map <- d("serviceEndpoint"); addr <- parseEndpoint(map))
-      eps += tmpl.copy(addr=addr)
+      eps += tmpl.copy(addr=Some(addr))
 
     for {
       map <- d("additionalEndpoints") collect {
@@ -106,7 +111,7 @@ object Endpoint {
       key <- map.keySet().asScala collect { case k: String => k }
       if key.isInstanceOf[String]
       addr <- parseEndpoint(map.get(key))
-    } eps += tmpl.copy(name=Some(key), addr=addr)
+    } eps += tmpl.copy(name=Some(key), addr=Some(addr))
     
     eps.result
   }

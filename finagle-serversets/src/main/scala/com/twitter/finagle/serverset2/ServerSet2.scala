@@ -2,16 +2,14 @@ package com.twitter.finagle.serverset2
 
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
-import com.twitter.finagle.WeightedSocketAddress
 import com.twitter.finagle.stats.{Stat, StatsReceiver, DefaultStatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{Addr, Resolver}
+import com.twitter.finagle.{Addr, InetResolver, Resolver}
 import com.twitter.io.Buf
 import com.twitter.util._
-import java.net.SocketAddress
 import java.nio.charset.Charset
 import java.util.concurrent.atomic.AtomicInteger
-import com.google.common.cache.{Cache, CacheBuilder, CacheLoader}
+import com.google.common.cache.{Cache, CacheBuilder}
 
 object chatty extends GlobalFlag(false, "Log resolved ServerSet2 addresses")
 
@@ -28,12 +26,14 @@ private[serverset2] object eprintln {
  * paths.
  */
 class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
+
   def this() = this(DefaultStatsReceiver.scope("zk2"))
 
   val scheme = "zk2"
 
   private[this] implicit val injectTimer = DefaultTimer.twitter
 
+  private[this] val inetResolver = InetResolver(statsReceiver)
   private[this] val sessionTimeout = 10.seconds
   private[this] val zkFactory = Zk.withTimeout(sessionTimeout)
   private[this] var cache = Map.empty[String, ServerSet2]
@@ -70,17 +70,18 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
       // First, convert the Op-based serverset address to a
       // Var[Addr], filtering out only the endpoints we are
       // interested in.
-      val va = serverset.weightedOf(path, scoped).run map {
-        case Activity.Pending => Addr.Pending
-        case Activity.Failed(exc) => Addr.Failed(exc)
+      val va: Var[Addr] = serverset.weightedOf(path, scoped).run flatMap {
+        case Activity.Pending => Var.value(Addr.Pending)
+        case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
         case Activity.Ok(eps) =>
-          val sockaddrs = eps collect {
-            case (Endpoint(`endpoint`, addr, _, Endpoint.Status.Alive, _), weight) =>
-              WeightedSocketAddress(addr, weight): SocketAddress
+          val subset = eps collect {
+            case (Endpoint(`endpoint`, Some(HostPort(host, port)), _, Endpoint.Status.Alive, _), weight) =>
+              (host, port, weight)
           }
           if (chatty())
             eprintf("Received new serverset vector: %s\n", eps mkString ",")
-          if (sockaddrs.isEmpty) Addr.Neg else Addr.Bound(sockaddrs)
+          if (subset.isEmpty) Var.value(Addr.Neg)
+            else inetResolver.bindWeightedHostPortsToAddr(subset.toSeq)
       }
       
       // The stabilizer ensures that we qualify removals by putting

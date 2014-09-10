@@ -18,15 +18,15 @@ class EntryTest extends FunSuite {
     assert(epByName.size === 3)
 
     assert(epByName(None) ===
-      Endpoint(None, new InetSocketAddress("10.0.0.3", port),
+      Endpoint(None, Some(HostPort("10.0.0.3", port)),
       Some(0), Endpoint.Status.Alive, ""))
 
     assert(epByName(Some("aurora")) ===
-      Endpoint(Some("aurora"), new InetSocketAddress("10.0.0.1", port),
+      Endpoint(Some("aurora"), Some(HostPort("10.0.0.1", port)),
       Some(0), Endpoint.Status.Alive, ""))
 
     assert(epByName(Some("http")) ===
-      Endpoint(Some("http"), new InetSocketAddress("10.0.0.2", port),
+      Endpoint(Some("http"), Some(HostPort("10.0.0.2", port)),
       Some(0), Endpoint.Status.Alive, ""))
   }
 
