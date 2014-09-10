@@ -1,11 +1,12 @@
 package com.twitter.finagle.stats
 
 import com.twitter.common.metrics.Metrics
+import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 import scala.util.matching.Regex
-import com.twitter.finagle.http.{Response, Request}
+import com.twitter.finagle.http.{MediaType, Response, Request}
 import com.twitter.util.Await
 
 @RunWith(classOf[JUnitRunner])
@@ -47,8 +48,11 @@ class JsonExporterTest extends FunSuite {
     assert(! responseFiltered.contains("jvm_gcs"), "'jvm_gcs' should be present - jvm.* matches it")
 
     val requestUnfiltered = Request("/admin/metrics.json")
-    val responseUnfiltered = Response(Await.result(exporter.apply(requestUnfiltered))).contentString
-    assert(responseUnfiltered.contains("views"), "'Views' should be present - 'vie' is not a match")
-    assert(responseUnfiltered.contains("jvm_gcs"), "'jvm_gcs' should be present - jvm.* matches it")
+    val responseUnfiltered = Response(Await.result(exporter.apply(requestUnfiltered)))
+    assert(MediaType.Json.equals(responseUnfiltered.headers().get(HttpHeaders.Names.CONTENT_TYPE)))
+
+    val responseUnfilteredContent = responseUnfiltered.contentString
+    assert(responseUnfilteredContent.contains("views"), "'Views' should be present - 'vie' is not a match")
+    assert(responseUnfilteredContent.contains("jvm_gcs"), "'jvm_gcs' should be present - jvm.* matches it")
   }
 }

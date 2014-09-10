@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.twitter.app.GlobalFlag
 import com.twitter.common.metrics.Metrics
 import com.twitter.finagle.Service
+import com.twitter.finagle.http.MediaType
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
@@ -33,6 +34,7 @@ class JsonExporter(registry: Metrics) extends Service[HttpRequest, HttpResponse]
 
   def apply(request: HttpRequest): Future[HttpResponse] = {
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+    response.headers.add(HttpHeaders.Names.CONTENT_TYPE, MediaType.Json)
 
     val pretty = readBooleanParam(request, name = "pretty", default = false)
     val filtered = readBooleanParam(request, name = "filtered", default = false)
