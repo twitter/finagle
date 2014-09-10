@@ -157,9 +157,11 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar {
       assert(pp.poll === Some(Throw(e)))
       assert(pp2.poll === Some(Throw(e)))
 
-      intercept[FailedFastException] {
+      val ffe = intercept[FailedFastException] {
         failfast().poll.get.get
       }
+      assert(ffe.getMessage().contains("twitter.github.io/finagle/guide/FAQ.html"))
     }
   }
+
 }

@@ -36,10 +36,13 @@ object NoStacktrace {
  * A base class for request failures. Indicates that some failure occurred
  * before a request could be successfully serviced.
  */
-class RequestException(cause: Throwable)
-  extends Exception(cause) with NoStacktrace with SourcedException
+class RequestException(message: String, cause: Throwable)
+  extends Exception(message, cause)
+  with NoStacktrace
+  with SourcedException
 {
-  def this() = this(null)
+  def this() = this(null, null)
+  def this(cause: Throwable) = this(null, cause)
   override def getStackTrace = if (cause != null) cause.getStackTrace else super.getStackTrace
 }
 
@@ -172,7 +175,9 @@ class ReplyCastException extends RequestException
  * connected have been marked as failed. See FailFastFactory for details on
  * this behavior.
  */
-class FailedFastException extends RequestException
+class FailedFastException(message: String) extends RequestException(message, cause = null) {
+  def this() = this(null)
+}
 
 /**
  * Indicates that the request was not servable, according to some policy. See
