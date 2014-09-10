@@ -102,4 +102,14 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
       } catch { case _: IllegalArgumentException => Dtab.empty }
     assert(dtab.length === 2)
   }
+
+  test("/ prefix rewrites non-/#/ paths") {
+    assert(Dtab.read("/ => /foo").lookup(Path.read("/bar/baz/quux")).sample()
+      === NameTree.Leaf(Name.Path(Path.read("/foo/bar/baz/quux"))))
+  }
+
+  test("/ prefix doesn't rewrite /#/ paths") {
+    assert(Dtab.read("/ => /foo").lookup(Path.read("/#/bar/baz/quux")).sample()
+      === NameTree.Neg)
+  }
 }

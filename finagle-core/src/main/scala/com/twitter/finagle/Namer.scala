@@ -127,7 +127,7 @@ object Namer  {
 
     private[this] object NamerPath {
       def unapply(path: Path): Option[(Namer, Path)] = path match {
-        case Path.Utf8("$", kind, rest@_*) => Some((namerOfKind(kind), Path.Utf8(rest: _*)))
+        case Path.Utf8(("$" | "#"), kind, rest@_*) => Some((namerOfKind(kind), Path.Utf8(rest: _*)))
         case _ => None
       }
     }

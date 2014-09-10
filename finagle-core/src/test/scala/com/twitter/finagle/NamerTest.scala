@@ -152,6 +152,14 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
         === NameTree.Empty)
   }
 
+  test("Namer.global: /{$,#}/{className}") {
+    assert(Namer.global.lookup(Path.read("/$/com.twitter.finagle.TestNamer/foo")).sample()
+      === NameTree.Leaf(Name.Path(Path.Utf8("bar"))))
+
+    assert(Namer.global.lookup(Path.read("/#/com.twitter.finagle.TestNamer/foo")).sample()
+      === NameTree.Leaf(Name.Path(Path.Utf8("bar"))))
+  }
+
   test("Namer.global: negative resolution") {
     assert(Namer.global.lookup(Path.read("/foo/bar/bah/blah")).sample()
         === NameTree.Neg)
@@ -193,4 +201,16 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
       /3=>/bar3
       """)
   }
+}
+
+class TestNamer extends Namer {
+  def lookup(path: Path): Activity[NameTree[Name]] =
+    Activity.value(
+      path match {
+        case Path.Utf8("foo") => NameTree.Leaf(Name.Path(Path.Utf8("bar")))
+        case _ => NameTree.Neg
+      })
+
+  def enum(prefix: Path): Activity[Dtab] =
+    Activity.exception(new UnsupportedOperationException)
 }

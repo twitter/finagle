@@ -23,17 +23,24 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
   def length = dentries0.length
   override def isEmpty = length == 0
 
+  private def rewriteApplies(prefix: Path, path: Path) =
+    (prefix, path) match {
+      case (Path(), Path.Utf8("#", _*)) => false
+      case _ => path startsWith prefix
+    }
+
   private def lookup0(path: Path): NameTree[Path] = {
     val matches = dentries collect {
-      case Dentry(prefix, dst) if path startsWith prefix =>
+      case Dentry(prefix, dst) if rewriteApplies(prefix, path) =>
         val suff = path drop prefix.size
         dst map { pfx => pfx ++ suff }
     }
 
-    if (matches.nonEmpty)
-      NameTree.Alt(matches:_*)
-    else
-      NameTree.Neg
+    matches.size match {
+      case 0 => NameTree.Neg
+      case 1 => matches(0)
+      case _ => NameTree.Alt(matches:_*)
+    }
   }
 
   def lookup(path: Path): Activity[NameTree[Name]] =
