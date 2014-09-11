@@ -59,13 +59,24 @@ case class DefaultServer[Req, Rep, In, Out](
     
   private type _In = In
   private type _Out = Out
+  
+  private case class Server(
+    stack: Stack[ServiceFactory[Req, Rep]] = stack, 
+    params: Stack.Params = Stack.Params.empty
+  ) extends StdStackServer[Req, Rep, Server] {
+    protected def copy1(
+      stack: Stack[ServiceFactory[Req, Rep]] = this.stack,
+      params: Stack.Params = this.params
+    ) = copy(stack, params)
 
-  val underlying = new StackServer[Req, Rep](stack, Stack.Params.empty) {
     protected type In = _In
     protected type Out = _Out
-    protected val newListener = Function.const(listener) _
-    protected val newDispatcher = Function.const(serviceTransport) _
+    protected def newListener() = listener
+    protected def newDispatcher(transport: Transport[In, Out], service: Service[Req, Rep]) =
+      serviceTransport(transport, service)
   }
+
+  val underlying: StackServer[Req, Rep] = Server()
 
   val configured = underlying
     .configured(param.Label(name))

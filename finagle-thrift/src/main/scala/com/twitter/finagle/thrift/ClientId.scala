@@ -3,11 +3,7 @@ package com.twitter.finagle.thrift
 import com.twitter.util.Local
 
 case class ClientId(name: String) {
-  private[thrift] def toThrift = {
-    val clientId = new thrift.ClientId
-    clientId.setName(name)
-    clientId
-  }
+  def toThrift: thrift.ClientId = new thrift.ClientId(name)
 
   /**
    * Executes the given function with this ClientId set as the current
@@ -29,7 +25,7 @@ case class ClientId(name: String) {
  */
 object ClientId {
   private[this] val _current = new Local[ClientId]
-  def current = _current()
+  def current: Option[ClientId] = _current()
 
   private[finagle] def set(clientId: Option[ClientId]) {
     clientId match {

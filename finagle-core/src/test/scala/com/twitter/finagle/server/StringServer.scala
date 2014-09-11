@@ -1,7 +1,8 @@
 package com.twitter.finagle.server
 
-import com.twitter.finagle.Stack
 import com.twitter.finagle.Stack.Params
+import com.twitter.finagle._
+import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.dispatch.SerialServerDispatcher
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.io.Charsets
@@ -20,14 +21,21 @@ private[finagle] object StringServerPipeline extends ChannelPipelineFactory {
 }
 
 private[finagle] trait StringServer {
-  val stringServer = new StackServer[String, String] {
+  case class Server(stack: Stack[ServiceFactory[String, String]] = StackServer.newStack,
+      params: Stack.Params = StackServer.defaultParams)
+    extends StdStackServer[String, String, Server] {
+    protected def copy1(
+      stack: Stack[ServiceFactory[String, String]] = this.stack,
+      params: Stack.Params = this.params
+    ) = copy(stack, params)
+
     protected type In = String
     protected type Out = String
 
-    protected val newListener: (Params) => Listener[In, Out] =
-      Netty3Listener(StringServerPipeline, _)
-
-    protected val newDispatcher: Stack.Params => Dispatcher =
-      Function.const(new SerialServerDispatcher(_, _))
+    protected def newListener() = Netty3Listener(StringServerPipeline, params)
+    protected def newDispatcher(transport: Transport[In, Out], service: Service[String, String]) =
+      new SerialServerDispatcher(transport, service)
   }
+  
+  val stringServer = Server()
 }

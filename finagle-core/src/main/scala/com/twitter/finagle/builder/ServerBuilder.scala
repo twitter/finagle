@@ -6,7 +6,7 @@ import com.twitter.finagle.channel.OpenConnectionsThresholds
 import com.twitter.finagle.dispatch.ExpiringServerDispatcher
 import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter}
 import com.twitter.finagle.netty3.Netty3Listener
-import com.twitter.finagle.server.{Listener, NullListener, StackServer}
+import com.twitter.finagle.server.{Listener, NullListener, StackServer, StdStackServer}
 import com.twitter.finagle.service.ExpiringService
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.ssl.{Ssl, Engine}
@@ -203,30 +203,43 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         StackServer.Role.preparer, (next: ServiceFactory[Req1, Rep1]) =>
           codec.prepareConnFactory(next)
       )
-      new StackServer[Req1, Rep1](newStack, ps) {
+      
+      case class Server(
+        stack: Stack[ServiceFactory[Req1, Rep1]] = newStack,
+        params: Stack.Params = ps
+      ) extends StdStackServer[Req1, Rep1, Server] {
         protected type In = Any
         protected type Out = Any
+        
+        protected def copy1(
+          stack: Stack[ServiceFactory[Req1, Rep1]] = this.stack,
+          params: Stack.Params = this.params
+        ) = copy(stack, params)
 
-        protected val newListener: Stack.Params => Listener[Any, Any] =
-          Netty3Listener(codec.pipelineFactory, _)
-
-        protected val newDispatcher: Stack.Params => Dispatcher = { _ =>
+        protected def newListener(): Listener[Any, Any] =
+          Netty3Listener(codec.pipelineFactory, params)
+          
+        protected def newDispatcher(transport: Transport[In, Out], service: Service[Req1, Rep1]) = {
           // TODO: Expiration logic should be installed using ExpiringService
           // in StackServer#newStack. Then we can thread through "closes"
           // via ClientConnection.
-          val Timer(timer) = ps[Timer]
-          val ExpiringService.Param(idleTime, lifeTime) = ps[ExpiringService.Param]
-          val Stats(sr) = ps[Stats]
+          val Timer(timer) = params[Timer]
+          val ExpiringService.Param(idleTime, lifeTime) = params[ExpiringService.Param]
+          val Stats(sr) = params[Stats]
           val idle = if (idleTime.isFinite) Some(idleTime) else None
           val life = if (lifeTime.isFinite) Some(lifeTime) else None
-          val f = codec.newServerDispatcher(_, _)
+          val dispatcher = codec.newServerDispatcher(transport, service)
           (idle, life) match {
-            case (None, None) => f
-            case _ => ExpiringServerDispatcher[Req1, Rep1, Any, Any](
-              idle, life, timer, sr.scope("expired"), f)
+            case (None, None) => dispatcher
+            case _ =>
+              new ExpiringService(service, idle, life, timer, sr.scope("expired")) {
+                protected def onExpire() { dispatcher.close(Time.now) }
+              }
           }
         }
       }
+
+      Server()
     })
 
   /**
@@ -240,6 +253,11 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     mk: Stack.Params => FinagleServer[Req1, Rep1]
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
     copy(params, mk)
+
+  def stack[Req1, Rep1](
+    server: Stack.Parameterized[com.twitter.finagle.Server[Req1, Rep1]]
+  ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
+    copy(params, server.withParams)
 
   def reportTo(receiver: StatsReceiver): This =
     configured(Stats(receiver))

@@ -18,7 +18,7 @@ class ThriftServerFramedCodecSpec extends SpecificationWithJUnit with Mockito {
       val bufferingTracer = new BufferingTracer
       Trace.pushTracer(bufferingTracer)
 
-      val filter = new ThriftServerTracingFilter("service", new InetSocketAddress(0), protocolFactory)
+      val filter = new TTwitterServerFilter("service", protocolFactory)
 
       val upgradeMsg = new OutputBuffer(protocolFactory)
       upgradeMsg().writeMessageBegin(new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.CALL, 0))

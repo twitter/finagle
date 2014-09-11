@@ -288,8 +288,8 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       val Seq(innerTrace, innerSpan, innerParent) =
         response.contentString.split('.').toSeq
       assert(innerTrace === outerTrace, "traceId")
-      assert(outerSpan === innerParent, "outter span vs inner parent")
-      assert(innerSpan != outerSpan, "inner (%s) vs outter (%s) spanId".format(innerSpan, outerSpan))
+      assert(outerSpan === innerParent, "outer span vs inner parent")
+      assert(innerSpan != outerSpan, "inner (%s) vs outer (%s) spanId".format(innerSpan, outerSpan))
 
       outer.close()
       inner.close()

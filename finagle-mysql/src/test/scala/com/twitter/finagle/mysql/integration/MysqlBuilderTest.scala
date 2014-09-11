@@ -22,7 +22,7 @@ class MysqlBuilderTest extends FunSuite {
     }
     Trace.pushTracerAndSetNextId(mockTracer)
 
-    val client = Mysql
+    val client = Mysql.client
       .configured(param.Label("myclient"))
       .withDatabase("test")
       .newRichClient("localhost:3306")

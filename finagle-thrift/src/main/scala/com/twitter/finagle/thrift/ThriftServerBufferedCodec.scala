@@ -4,6 +4,19 @@ import org.jboss.netty.channel.ChannelPipelineFactory
 import com.twitter.finagle.{CodecFactory, ServerCodecConfig}
 import org.apache.thrift.protocol.TProtocolFactory
 
+private[finagle] 
+case class ThriftServerBufferedPipelineFactory(protocolFactory: TProtocolFactory)
+    extends ChannelPipelineFactory {
+
+  def getPipeline() = {
+    val pipeline = ThriftServerFramedPipelineFactory.getPipeline()
+    pipeline.replace(
+      "thriftFrameCodec", "thriftBufferDecoder",
+      new ThriftBufferDecoder(protocolFactory))
+    pipeline
+  }
+}
+
 /**
  * ThriftServerBufferedCodec implements a buffered thrift transport.
  */
@@ -36,24 +49,7 @@ class ThriftServerBufferedCodecFactory(protocolFactory: TProtocolFactory)
   }
 }
 
-class ThriftServerBufferedCodec(
-  protocolFactory: TProtocolFactory,
-  config: ServerCodecConfig
-)
-  extends ThriftServerFramedCodec(config)
-{
-  override def pipelineFactory = {
-    val framedPipelineFactory = super.pipelineFactory
-
-    new ChannelPipelineFactory {
-      def getPipeline() = {
-        val pipeline = framedPipelineFactory.getPipeline
-        pipeline.replace(
-          "thriftFrameCodec", "thriftBufferDecoder",
-          new ThriftBufferDecoder(protocolFactory))
-        pipeline
-      }
-    }
-  }
+class ThriftServerBufferedCodec(protocolFactory: TProtocolFactory, config: ServerCodecConfig)
+    extends ThriftServerFramedCodec(config) {
+  override def pipelineFactory = ThriftServerBufferedPipelineFactory(protocolFactory)
 }
-

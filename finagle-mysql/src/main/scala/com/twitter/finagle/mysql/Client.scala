@@ -55,7 +55,7 @@ object Client {
     logLevel: Level = Level.OFF,
     statsReceiver: StatsReceiver = NullStatsReceiver
   ): Client = {
-    val factory = com.twitter.finagle.exp.Mysql
+    val factory = com.twitter.finagle.exp.Mysql.client
       .withCredentials(username, password)
       .withDatabase(dbname)
       .newClient(host)

@@ -16,8 +16,10 @@ import scala.collection.immutable
  * transformations; they are designed to represent 'template' stacks
  * which can be configured in various ways before materializing the
  * stack itself.
+ *
+ * Note: Stacks are advanced and sometimes subtle. For expert use
+ * only!
  */
-private[finagle]
 sealed trait Stack[T] {
   import Stack._
 
@@ -27,7 +29,6 @@ sealed trait Stack[T] {
    * @note `head` does not give access to the value `T`, use `make` instead
    * @see [[com.twitter.finagle.Stack.Head]]
    */
-
   val head: Stack.Head
 
   /**
@@ -125,7 +126,7 @@ sealed trait Stack[T] {
   }
 }
 
-private[finagle] object Stack {
+object Stack {
   /**
    * Base trait for Stack roles. A stack's role is indicative of its
    * functionality. Roles provide a way to group similarly-purposed stacks and
@@ -259,6 +260,19 @@ private[finagle] object Stack {
      */
     val empty: Params = Prms(Map.empty)
   }
+  
+  /**
+   * A mix-in for describing an object that is parameterized.
+   */
+  trait Parameterized[+T] {
+    def params: Stack.Params
+  
+    def configured[P: Stack.Param](p: P): T = 
+      withParams(params+p)
+  
+    def withParams(ps: Stack.Params): T
+  }
+
 
   /**
    * A convenient class to construct stackable modules. This variant
@@ -304,7 +318,6 @@ private[finagle] object Stack {
       Node(this, (params, next) => make(next)(params), next)
     }
   }
-     
 }
 
 /**

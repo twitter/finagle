@@ -10,6 +10,7 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 
 import com.twitter.finagle.Service;
+import com.twitter.finagle.Client;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.http.Http;
 import com.twitter.util.Future;
@@ -57,5 +58,10 @@ public class HttpClientTest {
         public void onFailure(Throwable cause) {}
       });
     */
+    
+    // New APIs
+    com.twitter.finagle.Http.newClient(":80");
+    Client<HttpRequest, HttpResponse> newStyleClient = 
+      com.twitter.finagle.Http.client().withTls("foo.com");
   }
 }

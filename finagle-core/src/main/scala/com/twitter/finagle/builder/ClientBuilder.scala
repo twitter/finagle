@@ -1,7 +1,7 @@
 package com.twitter.finagle.builder
 
 import com.twitter.finagle._
-import com.twitter.finagle.client.{DefaultPool, StackClient, Transporter}
+import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.factory.{BindingFactory, TimeoutFactory}
 import com.twitter.finagle.filter.ExceptionSourceFilter
 import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, WeightedLoadBalancerFactory}
@@ -421,20 +421,29 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         else newStack
       }
 
-      new StackClient[Req1, Rep1](clientStack, prms) {
+      case class Client(
+        stack: Stack[ServiceFactory[Req1, Rep1]] = clientStack, 
+        params: Stack.Params = prms
+      ) extends StdStackClient[Req1, Rep1, Client] {
+        protected def copy1(
+          stack: Stack[ServiceFactory[Req1, Rep1]] = this.stack,
+          params: Stack.Params = this.params): Client = copy(stack, params)
+
         protected type In = Any
         protected type Out = Any
 
-        protected val newTransporter: Stack.Params => Transporter[Any, Any] = { ps =>
-          val Stats(stats) = ps[Stats]
+        protected def newTransporter(): Transporter[Any, Any] = {
+          val Stats(stats) = params[Stats]
           val newTransport = (ch: Channel) => codec.newClientTransport(ch, stats)
           Netty3Transporter[Any, Any](codec.pipelineFactory,
-            ps + Netty3Transporter.TransportFactory(newTransport))
+            params + Netty3Transporter.TransportFactory(newTransport))
         }
-
-        protected val newDispatcher: Stack.Params => Dispatcher =
-          Function.const(trans => codec.newClientDispatcher(trans))
+        
+        protected def newDispatcher(transport: Transport[In, Out]) =
+          codec.newClientDispatcher(transport)
       }
+
+      Client()
     })
 
   /** Used internally by `codec` to require hostConnectionLimit */
@@ -453,10 +462,16 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * For this reason, the builder assumes that hostConnectionLimit is irrelevant
    * when using `stack`.
    */
+  @deprecated("Use stack(client: Stack.Parameterized)", "7.0.0")
   def stack[Req1, Rep1](
     mk: Stack.Params => Client[Req1, Rep1]
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, Yes] =
     copy(params, mk)
+
+  def stack[Req1, Rep1](
+    client: Stack.Parameterized[Client[Req1, Rep1]]
+  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, Yes] =
+    copy(params, client.withParams)
 
   @deprecated("Use tcpConnectTimeout instead", "5.0.1")
   def connectionTimeout(duration: Duration): This = tcpConnectTimeout(duration)

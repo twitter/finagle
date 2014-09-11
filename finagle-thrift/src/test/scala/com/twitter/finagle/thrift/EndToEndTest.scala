@@ -61,6 +61,7 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually with BeforeA
         assert(f1.poll === anException)
       }
       val idSet1 = (tracer map(_.traceId.traceId)).toSet
+
       tracer.clear()
 
       val f2 = client.add(2, 3)
@@ -69,15 +70,18 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually with BeforeA
       }
       val idSet2 = (tracer map(_.traceId.traceId)).toSet
 
+      assert(idSet1.nonEmpty)
+      assert(idSet2.nonEmpty)
+      
       assert(idSet1 != idSet2)
     }
   }
 
   testThrift("propagate Dtab") { (client, tracer) =>
     Dtab.unwind {
-      Dtab.read("/a=>/b; /b=>/$/inet/google.com/80")
+      Dtab.local = Dtab.read("/a=>/b; /b=>/$/inet/google.com/80")
       val clientDtab = Await.result(client.show_me_your_dtab())
-      assert(clientDtab === "Dtab(2)\n\t/a -> /b\n\t/b -> /$/inet/google.com/80\n")
+      assert(clientDtab === "Dtab(2)\n\t/a => /b\n\t/b => /$/inet/google.com/80\n")
     }
   }
 
@@ -119,41 +123,62 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually with BeforeA
 
   testThrift("end-to-end tracing potpourri") { (client, tracer) =>
     Trace.unwind {
-      Trace.setId(Trace.nextId)  // set an ID so we don't use the default one
+      val id = Trace.nextId
+      Trace.setId(id)  // set an ID so we don't use the default one
       assert(Await.result(client.multiply(10, 30)) === 300)
+
       assert(!tracer.isEmpty)
-      val idSet = (tracer map(_.traceId)).toSet
-      assert(idSet.size === 1)
-      val theId = idSet.head
-      assert(theId.parentId === Trace.id.spanId)
-      assert(theId.traceId === Trace.id.traceId)
+      val idSet = tracer.map(_.traceId).toSet
+
+      // We'll generate 2 ids for the upgrade negotiation; 
+      // 1 for our transaction.
+      assert(idSet.size === 3)
+      val ids = idSet.filter(_.traceId == id.traceId)
+      assert(ids.size === 1)
+      val theId = ids.head
 
       // Compare two annotation records, ignoring time.
       // This is simpler than trying to freeze time in the listening threads of
       // the various servers we are constructing.
-      def annotationMatches(rec: Record, ann: Annotation): Boolean = {
-        rec.traceId == theId && rec.annotation == ann
+      def assertAnn(rec: Record, ann: Annotation) {
+        assert(rec.annotation === ann)
       }
 
-      val trace = tracer.toSeq
+      val trace = tracer
+        .filter(_.traceId == theId)
+        .filter {
+          // Skip spurious GC messages
+          case Record(_, _, Annotation.Message(msg), _) => !msg.startsWith("Gc")
+          case _ => true
+        }
+        .toSeq
+
       val Seq(clientAddr1, clientAddr2) =
         trace collect { case Record(_, _, Annotation.ClientAddr(addr), _) => addr }
       val Seq(serverAddr1, serverAddr2) =
         trace collect { case Record(_, _, Annotation.ServerAddr(addr), _) => addr }
 
       // verify the count and ordering of the annotations
-      assert(trace.size === 11)
-      assert(annotationMatches(trace(0), Annotation.Rpcname("thriftclient", "multiply")))
-      assert(annotationMatches(trace(1), Annotation.ClientSend()))
-      assert(annotationMatches(trace(2), Annotation.ServerAddr(serverAddr1)))
-      assert(annotationMatches(trace(3), Annotation.ClientAddr(clientAddr1)))
-      assert(annotationMatches(trace(4), Annotation.Rpcname("thriftserver", "multiply")))
-      assert(annotationMatches(trace(5), Annotation.ServerRecv()))
-      assert(annotationMatches(trace(6), Annotation.LocalAddr(serverAddr2)))
-      assert(annotationMatches(trace(7), Annotation.ServerAddr(serverAddr2)))
-      assert(annotationMatches(trace(8), Annotation.ClientAddr(clientAddr2)))
-      assert(annotationMatches(trace(9), Annotation.ServerSend()))
-      assert(annotationMatches(trace(10), Annotation.ClientRecv()))
+      var i = 0
+      def nextTrace = { i += 1; trace(i-1) }
+
+      nextTrace // finagle.version
+      assertAnn(nextTrace, Annotation.ServiceName("thriftclient"))
+      assertAnn(nextTrace, Annotation.Rpc("multiply"))
+      assertAnn(nextTrace, Annotation.ClientSend())
+      assertAnn(nextTrace, Annotation.ServerAddr(serverAddr1))
+      assertAnn(nextTrace, Annotation.ClientAddr(clientAddr1))
+      assertAnn(nextTrace, Annotation.ServiceName("thriftserver"))
+      assertAnn(nextTrace, Annotation.Rpc("multiply"))
+      assertAnn(nextTrace, Annotation.ServerRecv())
+      assertAnn(nextTrace, Annotation.LocalAddr(serverAddr2))
+      assertAnn(nextTrace, Annotation.ServerAddr(serverAddr2))
+      assertAnn(nextTrace, Annotation.ClientAddr(clientAddr2))
+      assertAnn(nextTrace, Annotation.ServerSend())
+      assertAnn(nextTrace, Annotation.ClientRecv())
+      
+      assert(trace.size === i)
+
 
       assert(Await.result(client.complex_return("a string")).arg_two
         === "%s".format(Trace.id.spanId.toString))

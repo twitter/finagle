@@ -1,7 +1,7 @@
 package com.twitter.finagle.exp
 
 import com.twitter.finagle._
-import com.twitter.finagle.client.{StackClient, StackClientLike, DefaultPool, Transporter}
+import com.twitter.finagle.client.{StackClient, StdStackClient, DefaultPool, Transporter}
 import com.twitter.finagle.exp.mysql._
 import com.twitter.finagle.exp.mysql.transport.{MysqlTransporter, Packet}
 import com.twitter.finagle.tracing.Trace
@@ -56,65 +56,95 @@ private object MysqlTracing extends SimpleFilter[Request, Result] { self =>
   }
 }
 
-/**
- * Implements a mysql client in terms of a [[com.twitter.finagle.StackClient]].
- * The client inherits a wealth of features from finagle including connection
- * pooling and load balancing.
- */
-object MysqlStackClient extends StackClient[Request, Result](
-  MysqlTracing.module +: StackClient.newStack,
-  Stack.Params.empty
-) {
-  protected type In = Packet
-  protected type Out = Packet
-  protected val newTransporter = MysqlTransporter(_)
-  protected val newDispatcher: Stack.Params => Dispatcher = { prms =>
-    trans => mysql.ClientDispatcher(trans, Handshake(prms))
-  }
-}
 
 /**
- * Wraps a mysql client with builder semantics. Additionally, this class provides
- * methods for constructing a rich client which exposes a rich mysql api.
+ * @example {{{
+ * val client = Mysql.client
+ *   .withCredentials("<username>", "<password>")
+ *   .withDatabase("<db>")
+ *   .newRichClient("inet!localhost:3306")
+ * }}}
  */
-class MysqlClient(client: StackClient[Request, Result])
-  extends StackClientLike[Request, Result, MysqlClient](client)
-  with MysqlRichClient {
-  protected def newInstance(client: StackClient[Request, Result]) =
-    new MysqlClient(client)
+object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichClient {
+
+  /**
+   * Implements a mysql client in terms of a
+   * [[com.twitter.finagle.StackClient]]. The client inherits a wealth
+   * of features from finagle including connection pooling and load
+   * balancing.
+   *
+   * Additionally, this class provides methods for constructing a rich
+   * client which exposes a rich mysql api.
+   */
+  case class Client(
+    stack: Stack[ServiceFactory[Request, Result]] = MysqlTracing.module +: StackClient.newStack,
+    params: Stack.Params = StackClient.defaultParams + DefaultPool.Param(
+        low = 0, high = 1, bufferSize = 0,
+        idleTime = Duration.Top,
+        maxWaiters = Int.MaxValue)
+  ) extends StdStackClient[Request, Result, Client] with MysqlRichClient {
+    protected def copy1(
+      stack: Stack[ServiceFactory[Request, Result]] = this.stack,
+      params: Stack.Params = this.params
+    ): Client = copy(stack, params)
+    
+    protected type In = Packet
+    protected type Out = Packet
+    protected def newTransporter() = MysqlTransporter(params)
+    protected def newDispatcher(transport: Transport[Packet, Packet]):  Service[Request, Result] =
+      mysql.ClientDispatcher(transport, Handshake(params))
+  
+    /**
+     * The credentials to use when authenticating a new session.
+     */
+    def withCredentials(u: String, p: String): Client =
+      configured(Handshake.Credentials(Option(u), Option(p)))
+  
+    /**
+     * Database to use when this client establishes a new session.
+     */
+    def withDatabase(db: String): Client =
+      configured(Handshake.Database(Option(db)))
+
+    /**
+     * The default character set used when establishing
+     * a new session.
+     */
+    def withCharset(charset: Short): Client =
+      configured(Handshake.Charset(charset))
+  }
+  
+  val client = Client()
+
+  def newClient(dest: Name, label: String): ServiceFactory[Request, Result] =
+    client.newClient(dest, label)
 
   /**
    * The credentials to use when authenticating a new session.
    */
-  def withCredentials(u: String, p: String): MysqlClient =
-    configured(Handshake.Credentials(Option(u), Option(p)))
+  @deprecated("Use client.withCredentials", "6.22.0")
+  def withCredentials(u: String, p: String): Client =
+    client.configured(Handshake.Credentials(Option(u), Option(p)))
 
   /**
    * Database to use when this client establishes a new session.
    */
-  def withDatabase(db: String): MysqlClient =
-    configured(Handshake.Database(Option(db)))
+  @deprecated("Use client.withDatabase", "6.22.0")
+  def withDatabase(db: String): Client =
+    client.configured(Handshake.Database(Option(db)))
 
   /**
    * The default character set used when establishing
    * a new session.
    */
-  def withCharset(charset: Short): MysqlClient =
-    configured(Handshake.Charset(charset))
-}
+  @deprecated("Use client.withCharset", "6.22.0")
+  def withCharset(charset: Short): Client =
+    client.configured(Handshake.Charset(charset))
 
-/**
- * @example {{{
- * val client = Mysql
- *   .withCredentials("username", "password")
- *   .withDatabase("db")
- *   .newRichClient("inet!localhost:3306")
- * }}}
- */
-object Mysql extends MysqlClient(
-  MysqlStackClient
-    .configured(DefaultPool.Param(
-      low = 0, high = 1, bufferSize = 0,
-      idleTime = Duration.Top,
-      maxWaiters = Int.MaxValue))
-)
+  /**
+   * A client configured with parameter p.
+   */
+  @deprecated("Use client.configured", "6.22.0")
+  def configured[P: Stack.Param](p: P): Client = 
+    client.configured(p)
+}

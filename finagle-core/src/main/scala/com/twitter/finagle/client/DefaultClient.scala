@@ -4,11 +4,15 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.filter.{ExceptionSourceFilter, MonitorFilter}
-import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, DefaultBalancerFactory, WeightedLoadBalancerFactory}
-import com.twitter.finagle.service.{ExpiringService, FailureAccrualFactory, FailFastFactory, TimeoutFilter}
+import com.twitter.finagle.loadbalancer.{
+  DefaultBalancerFactory, LoadBalancerFactory, WeightedLoadBalancerFactory}
+import com.twitter.finagle.service.{
+  ExpiringService, FailFastFactory, FailureAccrualFactory, TimeoutFilter}
 import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.util.{DefaultMonitor, DefaultTimer, LoadedReporterFactory, ReporterFactory}
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.util.{
+  DefaultMonitor, DefaultTimer, LoadedReporterFactory, ReporterFactory}
 import com.twitter.util.{Duration, Monitor, Timer, Var}
 import java.net.{SocketAddress, InetSocketAddress}
 
@@ -92,16 +96,23 @@ case class DefaultClient[Req, Rep](
     TimeoutFactory.Param(serviceTimeout) +
     TimeoutFilter.Param(requestTimeout) +
     ExpiringService.Param(maxIdletime, maxLifetime)
+    
+  private[this] case class Client(stack: Stack[ServiceFactory[Req, Rep]] = clientStack,
+    params: Stack.Params = params)
+      extends StdStackClient[Req, Rep, Client] {
 
-  private[this] val underlying = new StackClient[Req, Rep](clientStack, params) {
+    protected def copy1(
+      stack: Stack[ServiceFactory[Req, Rep]] = this.stack,
+      params: Stack.Params = this.params) = copy(stack, params)
+
     protected type In = Req
     protected type Out = Rep
     // The default client forces users to compose these two as part of
     // the `endpointer`. We ignore them and instead override the
     // endpointer directly.
-    lazy val unimplemented = throw new Exception("unimplemented")
-    val newTransporter = Function.const(unimplemented) _
-    val newDispatcher = Function.const(unimplemented) _
+    private[this] val unimpl = new Exception("unimplemented")
+    def newTransporter() = throw unimpl
+    protected def newDispatcher(transport: Transport[In, Out]) = throw unimpl
 
     override protected val endpointer = new Stack.Simple[ServiceFactory[Req, Rep]] {
       val role = com.twitter.finagle.stack.Endpoint
@@ -113,6 +124,8 @@ case class DefaultClient[Req, Rep](
       }
     }
   }
+  
+  private[this] val underlying = Client()
 
   def newClient(dest: Name, label: String) =
     underlying.newClient(dest, label)

@@ -35,6 +35,8 @@ does exactly this. For cases like Thrift, where IDLs are part of
 the rich API, a more specialized API is exposed. See the protocols section on
 :ref:`Thrift <thrift_and_scrooge>` for more details.
 
+.. _client_modules:
+
 Client Modules
 --------------
 

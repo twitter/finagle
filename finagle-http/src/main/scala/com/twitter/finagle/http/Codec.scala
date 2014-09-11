@@ -233,6 +233,24 @@ object HttpTracing {
   }
 }
 
+object HttpClientTracingFilter {
+  val role = Stack.Role("HttpClientTracing")
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]] 
+   * [[com.twitter.finagle.http.HttpClientTracingFilter]].
+   */
+  def module[Req <: HttpRequest, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = HttpClientTracingFilter.role
+      val description = "Add tracing info to the http request."
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+        val param.Label(label) = get[param.Label]
+        new HttpClientTracingFilter[Req, Rep](label) andThen next
+      }
+    }
+}
+
 /**
  * Pass along headers with the required tracing information.
  */

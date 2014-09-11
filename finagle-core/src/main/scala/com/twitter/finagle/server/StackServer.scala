@@ -15,7 +15,7 @@ import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import scala.collection.JavaConverters._
 
-private[finagle] object StackServer {
+object StackServer {
   private[this] val newJvmFilter = new MkJvmFilter(Jvm())
 
   /**
@@ -48,61 +48,61 @@ private[finagle] object StackServer {
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](
       stack.nilStack[Req, Rep])
 
-    stk.push(Role.serverDestTracing, ((next: ServiceFactory[Req, Rep]) => new ServerDestTracingProxy[Req, Rep](next)))
+    stk.push(Role.serverDestTracing, ((next: ServiceFactory[Req, Rep]) => 
+      new ServerDestTracingProxy[Req, Rep](next)))
     stk.push(TimeoutFilter.module)
     stk.push(DtabStatsFilter.module)
     stk.push(StatsFilter.module)
     stk.push(RequestSemaphoreFilter.module)
     stk.push(MaskCancelFilter.module)
     stk.push(ExceptionSourceFilter.module)
-    stk.push(Role.preparer, identity[ServiceFactory[Req, Rep]](_))
     stk.push(Role.jvmTracing, ((next: ServiceFactory[Req, Rep]) =>
       newJvmFilter[Req, Rep]() andThen next))
+    stk.push(HandletimeFilter.module)
+    stk.push(Role.preparer, identity[ServiceFactory[Req, Rep]](_))
     stk.push(TracingFilter.module)
     stk.push(MonitorFilter.module)
-    stk.push(HandletimeFilter.module)
     stk.result
   }
+  
+  /**
+   * The default params used for StackServers.
+   */
+  val defaultParams: Stack.Params =
+    Stack.Params.empty + Stats(ServerStatsReceiver)
 }
 
 /**
- * A [[com.twitter.finagle.Stack Stack]]-based server.
- * Concrete implementations are required to define a
- * [[com.twitter.finagle.server.Listener]] and a dispatcher which
- * bridges each incoming [[com.twitter.finagle.transport.Transport]]
- * with the materialized `stack` (i.e. services produced
- * by the ServiceFactory).
- *
- * If no `stack` is provided, the default in
- * [[com.twitter.finagle.server.StackServer#newStack]] is used.
+ * A [[com.twitter.finagle.Server]] that composes a 
+ * [[com.twitter.finagle.Stack]].
  */
-private[finagle] abstract class StackServer[Req, Rep](
-  val stack: Stack[ServiceFactory[Req, Rep]],
-  val params: Stack.Params
-) extends Server[Req, Rep] { self =>
+trait StackServer[Req, Rep] 
+    extends Server[Req, Rep] 
+    with Stack.Parameterized[StackServer[Req, Rep]] {
+  /** The current stack used in this StackServer. */
+  def stack: Stack[ServiceFactory[Req, Rep]]
+  /** The current parameter map used in this StackServer */
+  def params: Stack.Params
+  /** A new StackServer with the provided Stack. */
+  def withStack(stack: Stack[ServiceFactory[Req, Rep]]): StackServer[Req, Rep]
+
+}
+
+/**
+ * A standard template implementation for 
+ * [[com.twitter.finagle.server.StackServer]].
+ */
+trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]] 
+    extends StackServer[Req, Rep] { self =>
 
   protected type In
   protected type Out
-
-   /**
-    * A convenient type alias for a server dispatcher.
-    */
-  protected type Dispatcher = (Transport[In, Out], Service[Req, Rep]) => Closable
-
-  /**
-   * Creates a new StackServer with the default stack (StackServer#newStack)
-   * and [[com.twitter.finagle.stats.ServerStatsReceiver]].
-   */
-  def this() = this(
-    StackServer.newStack[Req, Rep],
-    Stack.Params.empty + Stats(ServerStatsReceiver)
-  )
 
   /**
    * Defines a typed [[com.twitter.finagle.server.Listener]] for this server.
    * Concrete StackServer implementations are expected to specify this.
    */
-  protected val newListener: Stack.Params => Listener[In, Out]
+  protected def newListener(): Listener[In, Out]
 
   /**
    * Defines a dispatcher, a function which binds a transport to a
@@ -112,31 +112,30 @@ private[finagle] abstract class StackServer[Req, Rep](
    *
    * @see [[com.twitter.finagle.dispatch.GenSerialServerDispatcher]]
    */
-  protected val newDispatcher: Stack.Params => Dispatcher
+  protected def newDispatcher(transport: Transport[In, Out], service: Service[Req, Rep]): Closable
+  
+  override def configured[P: Stack.Param](p: P): This = 
+    withParams(params+p)
 
   /**
    * Creates a new StackServer with `p` added to the `params`
    * used to configure this StackServer's `stack`.
    */
-  def configured[P: Stack.Param](p: P): StackServer[Req, Rep] =
-    copy(params = params+p)
+  def withParams(params: Stack.Params): This =
+    copy1(params = params)
+    
+  def withStack(stack: Stack[ServiceFactory[Req, Rep]]): This =
+    copy1(stack = stack)
 
   /**
    * A copy constructor in lieu of defining StackServer as a
    * case class.
    */
-  def copy(
-    stack: Stack[ServiceFactory[Req, Rep]] = self.stack,
-    params: Stack.Params = self.params
-  ): StackServer[Req, Rep] =
-    new StackServer[Req, Rep](stack, params) {
-      protected type In = self.In
-      protected type Out = self.Out
-      protected val newListener = self.newListener
-      protected val newDispatcher = self.newDispatcher
-    }
+  protected def copy1(
+    stack: Stack[ServiceFactory[Req, Rep]] = this.stack,
+    params: Stack.Params = this.params
+  ): This { type In = self.In; type Out = self.Out }
 
-  /** @inheritdoc */
   def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
     new ListeningServer with CloseAwaitably {
       // Ensure that we have performed global initialization.
@@ -180,15 +179,16 @@ private[finagle] abstract class StackServer[Req, Rep](
 
       val serviceFactory = (stack ++ Stack.Leaf(Endpoint, factory))
         .make(serverParams)
+        
+      val server = copy1(params=serverParams)
 
       // Listen over `addr` and serve traffic from incoming transports to
       // `serviceFactory` via `newDispatcher`.
-      val listener = newListener(serverParams)
-      val dispatcher = newDispatcher(serverParams)
+      val listener = server.newListener()
       val underlying = listener.listen(addr) { transport =>
         serviceFactory(newConn(transport)) respond {
           case Return(service) =>
-            val d = dispatcher(transport, service)
+            val d = server.newDispatcher(transport, service)
             connections.add(d)
             transport.onClose ensure connections.remove(d)
           case Throw(_) => transport.close()
@@ -217,23 +217,4 @@ private[finagle] abstract class StackServer[Req, Rep](
 
       def boundAddress = underlying.boundAddress
     }
-}
-
-/**
- * A [[com.twitter.finagle.Stack Stack]]-based server with `Like` semantics.
- */
-private[finagle]
-abstract class StackServerLike[Req, Rep, Repr <: StackServerLike[Req, Rep, Repr]](
-    server: StackServer[Req, Rep])
-  extends Server[Req, Rep]
-{
-  val stack = server.stack
-
-  protected def newInstance(server: StackServer[Req, Rep]): Repr
-
-  def configured[P: Stack.Param](p: P): Repr =
-    newInstance(server.configured(p))
-
-  def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]) =
-    server.serve(addr, factory)
 }

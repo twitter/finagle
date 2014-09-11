@@ -6,7 +6,7 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
-  val libVersion = "6.20.0"
+  val libVersion = "6.22.0"
   val zkVersion = "3.3.4"
   val utilVersion = "6.21.1"
   val ostrichVersion = "9.5.6"

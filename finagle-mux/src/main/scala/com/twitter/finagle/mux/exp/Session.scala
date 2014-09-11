@@ -1,13 +1,13 @@
 package com.twitter.finagle.mux.exp
 
 import com.twitter.concurrent.{Spool, SpoolSource}
-import com.twitter.finagle.
-  {Dtab, CancelledRequestException, Context, ListeningServer, MuxListener, MuxTransporter}
 import com.twitter.finagle.mux._
-import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
+import com.twitter.finagle.netty3.{
+  BufChannelBuffer, ChannelBufferBuf, Netty3Listener, Netty3Transporter}
 import com.twitter.finagle.stats.ClientStatsReceiver
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.{Dtab, CancelledRequestException, Context, ListeningServer, Stack}
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.SocketAddress
@@ -22,13 +22,15 @@ object Session {
    * MuxService which will handle incoming messages from the other
    * party.
    */
-  def connect(addr: SocketAddress): Future[SessionFactory] =
-    MuxTransporter(addr, ClientStatsReceiver) map { transport =>
+  def connect(addr: SocketAddress): Future[SessionFactory] = {
+    val transporter = new Netty3Transporter[ChannelBuffer, ChannelBuffer]("mux", PipelineFactory)
+    transporter(addr, ClientStatsReceiver) map { transport =>
       (serverImpl: MuxService) => {
         val clientDispatcher = new ClientDispatcher(transport)
         new Session(clientDispatcher, serverImpl, transport)
       }
     }
+  }
 
   /**
    * Listen for connections on addr. For each connection,
@@ -42,7 +44,8 @@ object Session {
   ): ListeningServer with CloseAwaitably =
     new ListeningServer with CloseAwaitably {
       private[this] val serverDeadlinep = new Promise[Time]
-      private[this] val listener = MuxListener.listen(addr) { transport =>
+      private[this] val listener = new Netty3Listener[ChannelBuffer, ChannelBuffer]("mux", PipelineFactory)
+      private[this] val server = listener.listen(addr) { transport =>
         sessionHandler { receiver =>
           val clientDispatcher = new ClientDispatcher(transport)
           val session = new Session(clientDispatcher, receiver, transport)
@@ -53,11 +56,11 @@ object Session {
         }
       }
 
-      def boundAddress = listener.boundAddress
+      def boundAddress = server.boundAddress
 
       def closeServer(deadline: Time) = closeAwaitably {
         serverDeadlinep.setValue(deadline)
-        listener.close(deadline)
+        server.close(deadline)
       }
     }
 }
