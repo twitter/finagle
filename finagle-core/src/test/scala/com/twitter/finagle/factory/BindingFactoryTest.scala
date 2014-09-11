@@ -80,6 +80,17 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     s1.close()
   })
 
+  test("Respects Dtab.base changes after service factory creation") (new Ctx {
+    // factory is already created here
+    Dtab.base ++= Dtab.read("/test1010=>/$/inet/0/1011")
+    val n1 = Dtab.read("/foo/bar=>/test1010")
+    val s1 = newWith(n1)
+    val v1 = Await.result(s1(()))
+    assert(v1.sample() === Addr.Bound(new InetSocketAddress(1011)))
+
+    s1.close()
+  })
+
   test("Includes path in NoBrokersAvailableException") (new Ctx {
     val noBrokers = intercept[NoBrokersAvailableException] {
       Await.result(factory())
@@ -222,7 +233,7 @@ class NamerTracingFilterTest extends FunSuite with MockitoSugar with BeforeAndAf
   }
 
   test("trace path/name")(new Ctx {
-    val filter = new NamerTracingFilter[Int, Int](Path.Utf8("foo"), name, record)
+    val filter = new NamerTracingFilter[Int, Int](Path.Utf8("foo"), () => Dtab.base, name, record)
     val filteredService = filter andThen service
 
     Await.result(filteredService(3))

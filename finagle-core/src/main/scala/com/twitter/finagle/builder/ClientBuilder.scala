@@ -2,7 +2,7 @@ package com.twitter.finagle.builder
 
 import com.twitter.finagle._
 import com.twitter.finagle.client.{DefaultPool, StackClient, Transporter}
-import com.twitter.finagle.factory.TimeoutFactory
+import com.twitter.finagle.factory.{BindingFactory, TimeoutFactory}
 import com.twitter.finagle.filter.ExceptionSourceFilter
 import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, WeightedLoadBalancerFactory}
 import com.twitter.finagle.netty3.Netty3Transporter
@@ -300,7 +300,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
           if (label.isEmpty || l != addr)
             this.name(l)
           else
-            this 
+            this
 
         cb.dest(n)
     }
@@ -314,6 +314,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     name: Name
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
     configured(DestName(name))
+
+  /**
+   * The base [[com.twitter.finagle.Dtab]] used to interpret logical
+   * destinations for this client. (This is given as a function to
+   * permit late initialization of [[Dtab.base]].)
+   */
+  def baseDtab(baseDtab: () => Dtab): This =
+    configured(BindingFactory.BaseDtab(baseDtab))
 
   /**
    * Specify a cluster directly.  A

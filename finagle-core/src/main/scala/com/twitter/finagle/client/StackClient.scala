@@ -210,9 +210,11 @@ private[finagle] abstract class StackClient[Req, Rep](
         clientStack.make(clientParams1)
 
       case Name.Path(path) =>
+        val BindingFactory.BaseDtab(baseDtab) = params[BindingFactory.BaseDtab]
+
         val clientParams1 = clientParams + LoadBalancerFactory.ErrorLabel(path.show)
 
-        val vaddr = (Dtab.base orElse Namer.global).bindAndEval(NameTree.Leaf(path))
+        val vaddr = (baseDtab() orElse Namer.global).bindAndEval(NameTree.Leaf(path))
         // Register this client once as evaluated against the base dtab
         register(clientParams1 + LoadBalancerFactory.Dest(vaddr))
 
@@ -222,7 +224,7 @@ private[finagle] abstract class StackClient[Req, Rep](
             LoadBalancerFactory.Dest(bound.addr))
         }
 
-        new BindingFactory(path, newStack, stats.scope("interpreter"))
+        new BindingFactory(path, newStack, baseDtab, stats.scope("interpreter"))
     }
   }
 }

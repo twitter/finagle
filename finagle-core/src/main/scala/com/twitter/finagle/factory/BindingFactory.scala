@@ -14,11 +14,12 @@ private[finagle] object NamerTracingFilter {
    */
   def trace(
     path: Path,
+    baseDtab: Dtab,
     nameTry: Try[Name.Bound],
     record: (String, Any) => Unit = Trace.recordBinary
   ): Unit = {
     record("wily.path", path.show)
-    record("wily.dtab.base", Dtab.base.show)
+    record("wily.dtab.base", baseDtab.show)
     record("wily.dtab.local", Dtab.local.show)
     nameTry match {
       case Return(name) => record("wily.name", name.id)
@@ -37,9 +38,10 @@ private[finagle] object NamerTracingFilter {
       val role = NamerTracingFilter.role
       val description = "Trace the details of the Namer lookup"
       def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+        val BindingFactory.BaseDtab(baseDtab) = get[BindingFactory.BaseDtab]
         get[BoundPath] match {
           case BoundPath(Some((path, bound))) =>
-            new NamerTracingFilter[Req, Rep](path, bound) andThen next
+            new NamerTracingFilter[Req, Rep](path, baseDtab, bound) andThen next
           case _ => next
         }
       }
@@ -62,6 +64,7 @@ private[finagle] object NamerTracingFilter {
  */
 private[finagle] class NamerTracingFilter[Req, Rep](
     path: Path,
+    baseDtab: () => Dtab,
     bound: Name.Bound,
     record: (String, Any) => Unit = Trace.recordBinary)
   extends Filter[Req, Rep, Req, Rep] {
@@ -69,7 +72,7 @@ private[finagle] class NamerTracingFilter[Req, Rep](
   private[this] val nameTry = Return(bound)
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
-    NamerTracingFilter.trace(path, nameTry, record)
+    NamerTracingFilter.trace(path, baseDtab(), nameTry, record)
     service(request)
   }
 }
@@ -212,6 +215,7 @@ private class DynNameFactory[Req, Rep](
 private[finagle] class BindingFactory[Req, Rep](
     path: Path,
     newFactory: Name.Bound => ServiceFactory[Req, Rep],
+    baseDtab: () => Dtab = BindingFactory.DefaultBaseDtab,
     statsReceiver: StatsReceiver = NullStatsReceiver,
     maxNameCacheSize: Int = 8,
     maxNamerCacheSize: Int = 4)
@@ -241,7 +245,7 @@ private[finagle] class BindingFactory[Req, Rep](
       new DynNameFactory(
         name,
         nameCache.apply,
-        exc => NamerTracingFilter.trace(path, Throw(exc)))
+        exc => NamerTracingFilter.trace(path, baseDtab(), Throw(exc)))
     }
 
     new ServiceFactoryCache[Dtab, Req, Rep](
@@ -252,7 +256,7 @@ private[finagle] class BindingFactory[Req, Rep](
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
     val localDtab = Dtab.local
-    val service = dtabCache(Dtab.base ++ localDtab, conn)
+    val service = dtabCache(baseDtab() ++ localDtab, conn)
     if (localDtab.isEmpty) service
     else service rescue {
       case e: NoBrokersAvailableException =>
@@ -264,4 +268,18 @@ private[finagle] class BindingFactory[Req, Rep](
     Closable.sequence(dtabCache, nameCache).close(deadline)
 
   override def isAvailable = dtabCache.isAvailable
+}
+
+object BindingFactory {
+  val DefaultBaseDtab = () => Dtab.base
+
+  /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.factory.BindingFactory]] with a
+   * [[com.twitter.finagle.Dtab]].
+   */
+  case class BaseDtab(baseDtab: () => Dtab)
+  implicit object BaseDtab extends Stack.Param[BaseDtab] {
+    val default = BaseDtab(DefaultBaseDtab)
+  }
 }
