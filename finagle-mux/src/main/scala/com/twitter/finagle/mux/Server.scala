@@ -55,8 +55,7 @@ private[finagle] class ServerDispatcher private[finagle](
   private[this] val log = DefaultLogger
 
   // TODO: rewrite Treqs into Tdispatches?
-
-  @volatile private[this] var receive: Message => Unit = {
+  @volatile protected var receive: Message => Unit = {
     case Tdispatch(tag, contexts, /*ignore*/_dst, dtab, req) =>
       if (nackOnExpiredLease() && (lease <= Duration.Zero))
         trans.write(encode(RdispatchNack(tag, Seq.empty)))
@@ -155,7 +154,7 @@ private[finagle] class ServerDispatcher private[finagle](
       }
     }
 
-  loop() onFailure { case cause =>
+  Local.letClear { loop() } onFailure { case cause =>
     // We know that if we have a failure, we cannot from this point forward
     // insert new entries in the pending map.
     val exc = new CancelledRequestException(cause)

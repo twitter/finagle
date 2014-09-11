@@ -161,8 +161,15 @@ class EndToEndTest extends FunSuite {
       protected val newListener = Function.const(ThriftMuxListener)_
       protected val newDispatcher: Stack.Params => Dispatcher =
       Function.const((trans, service) => Trace.unwind {
-        Trace.pushTracer(tracer)
-        new mux.ServerDispatcher(trans, service, true)
+        new mux.ServerDispatcher(trans, service, true) {
+          private var saveReceive = receive
+          receive = { msg =>
+            Trace.unwind {
+              Trace.pushTracer(tracer)
+              saveReceive(msg)
+            }
+          }
+        }
       })_
     }
 
@@ -171,7 +178,7 @@ class EndToEndTest extends FunSuite {
     val testService = new TestService.FutureIface {
       def query(x: String) = Future.value(x + x)
     }
-   val server = TestThriftMuxServer.serveIface(":*", testService)
+    val server = TestThriftMuxServer.serveIface(":*", testService)
     val client = Thrift.newIface[TestService.FutureIface](server)
     var p: Future[String] = null
     Trace.unwind {
@@ -180,11 +187,8 @@ class EndToEndTest extends FunSuite {
       p = client.query("ok")
     }
     Await.result(p)
-
-    (srvTraceId, cltTraceId) match {
-      case (Some(id1), Some(id2)) => assert(id1 === id2)
-      case _ => assert(false, "the trace ids sent by client and received by server do not match")
-    }
+    
+    assert(srvTraceId === cltTraceId)
   }
 
   test("thriftmux server + Finagle thrift client: clientId should be passed from client to server") {

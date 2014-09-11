@@ -48,7 +48,7 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     verify(trans, times(2)).read()
   })
 
-  test("Delimit com.twitter.util.Local") (new Ctx {
+  test("Clear and delimit com.twitter.util.Local") (new Ctx {
     val l = new Local[String]
     var ncall = 0
 
@@ -61,8 +61,8 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
       }
     }
 
-    val disp = new SerialServerDispatcher(trans, s)
     l() = "orig"
+    val disp = new SerialServerDispatcher(trans, s)
 
     readp.setValue("blah")
     assert(ncall === 1)

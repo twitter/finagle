@@ -39,7 +39,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   extends FunSuite with OneInstancePerTest with MockitoSugar
 {
   val tracer = new BufferingTracer
-  Trace.pushTracer(tracer)
+  Trace.pushTracer(tracer)  /* For the client */
   val clientToServer = new AsyncQueue[ChannelBuffer]
   val serverToClient = new AsyncQueue[ChannelBuffer]
   val serverTransport =
@@ -48,7 +48,15 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     new QueueTransport(writeq=clientToServer, readq=serverToClient)
   val service = mock[Service[ChannelBuffer, ChannelBuffer]]
   val client = new ClientDispatcher(clientTransport, NullStatsReceiver)
-  val server = new ServerDispatcher(serverTransport, service, canDispatch)
+  val server = new ServerDispatcher(serverTransport, service, canDispatch) {
+    private val saveReceive = receive
+    receive = { msg =>
+      Trace.unwind {
+        Trace.pushTracer(tracer)
+        saveReceive(msg)
+      }
+    }
+  }
 
   def buf(b: Byte*) = ChannelBuffers.wrappedBuffer(Array[Byte](b:_*))
 

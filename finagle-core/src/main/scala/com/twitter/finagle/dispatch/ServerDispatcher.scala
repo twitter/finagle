@@ -60,8 +60,9 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
         trans.close()
     }
   }
-
-  private[this] val looping = loop()
+  
+  // Clear all locals to start the loop; we want a clean slate.
+  private[this] val looping = Local.letClear { loop() }
 
   trans.onClose ensure {
     looping.raise(cancelled)
