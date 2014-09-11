@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>service-2104_2.10</artifactId>
-    <version>0.1.10-TWOTEN</version>
+    <version>0.1.11</version>
     <relativePath>../../parents/service-2104/pom.xml</relativePath>
   </parent>
   <properties>
