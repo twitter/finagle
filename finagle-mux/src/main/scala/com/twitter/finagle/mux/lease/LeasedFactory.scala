@@ -29,16 +29,16 @@ object LeasedFactory {
  * way of doing State inspection.
  */
 private[finagle] class LeasedFactory[Req, Rep](mk: () => Future[Service[Req, Rep] with Acting])
-    extends ServiceFactory[Req, Rep] {
+    extends ServiceFactory[Req, Rep] { self =>
   private[this] var current: List[Acting] = Nil
 
   private[this] def newService(svc: Service[Req, Rep] with Acting) = {
-    synchronized {
+    self.synchronized {
       current ::= svc
     }
     new ServiceProxy(svc) {
       override def close(deadline: Time) = {
-        synchronized {
+        self.synchronized {
           current = current.filterNot(_ == svc)
         }
         super.close(deadline)
@@ -51,7 +51,7 @@ private[finagle] class LeasedFactory[Req, Rep](mk: () => Future[Service[Req, Rep
       newService(dispatcher)
     }
 
-  override def isAvailable: Boolean = current forall (_.isActive)
+  override def isAvailable: Boolean = self.synchronized { current forall (_.isActive) }
 
   def close(deadline: Time): Future[Unit] = Future.Done
 }
