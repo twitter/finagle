@@ -95,58 +95,59 @@ private[finagle] class LatencyFactory(sr: StatsReceiver) {
 }
 
 private[finagle] object P2CBenchmark extends com.twitter.app.App {
-  // TODO: parameterize these.
-  val Qps = 1250
-  val Dur = 30.seconds
-  val Qpms = Qps/1000
-  val Rem = Qps%1000
+  val qps = flag("qps", 1250, "QPS at which to run the benchmark")
+  val dur = flag("dur", 45.seconds, "Benchmark duration")
+  def main() {
+    val Qpms = qps()/1000
+    val Rem = qps()%1000
 
-  val stats = new SummarizingStatsReceiver
-  val newFactory = new LatencyFactory(stats)
+    val stats = new SummarizingStatsReceiver
+    val newFactory = new LatencyFactory(stats)
 
-  val data = getClass.getClassLoader.getResource("resources/real_latencies.data")
-  val dist = LatencyProfile.fromFile(data)
-  val stable: Seq[ServiceFactory[Unit, Unit]] = Seq.tabulate(9) { i => newFactory(i, dist) }
+    val data = getClass.getClassLoader.getResource("resources/real_latencies.data")
+    val dist = LatencyProfile.fromFile(data)
+    val stable: Seq[ServiceFactory[Unit, Unit]] = Seq.tabulate(9) { i => newFactory(i, dist) }
 
-  val underlying = Var(stable)
-  val p2c = new P2CBalancer[Unit, Unit](
-    Activity(underlying map { facs => Activity.Ok(facs map { fac => (fac, 1D) }) }),
-    statsReceiver=stats.scope("p2c"))
-  val balancer = p2c.toService
+    val underlying = Var(stable)
+    val p2c = new P2CBalancer[Unit, Unit](
+      Activity(underlying map { facs => Activity.Ok(facs map { fac => (fac, 1D) }) }),
+      statsReceiver=stats.scope("p2c"))
+    val balancer = p2c.toService
 
-  val latstat = stats.stat("latency")
-  def call() = stats.timeFuture(TimeUnit.MILLISECONDS, latstat) { balancer(()) }
+    val latstat = stats.stat("latency")
+    def call() = stats.timeFuture(TimeUnit.MILLISECONDS, latstat) { balancer(()) }
 
-  val stopWatch = Stopwatch.start()
-  val p = new LatencyProfile(stopWatch)
+    val stopWatch = Stopwatch.start()
+    val p = new LatencyProfile(stopWatch)
 
-  val coldStart = p.warmup(10.seconds)_ andThen p.slowWithin(19.seconds, 23.seconds, 10)
-  underlying() :+= newFactory(10, coldStart(dist))
-  underlying() :+= newFactory(11, p.slowBy(2)(dist))
+    val coldStart = p.warmup(10.seconds)_ andThen p.slowWithin(19.seconds, 23.seconds, 10)
+    underlying() :+= newFactory(10, coldStart(dist))
+    underlying() :+= newFactory(11, p.slowBy(2)(dist))
 
-  var ms = 0
-  while (stopWatch() < Dur) {
-    Thread.sleep(1)
+    var ms = 0
+    while (stopWatch() < dur()) {
+      Thread.sleep(1)
 
-    var n = 0
-    while (n < Qpms) {
-      call()
-      n += 1
+      var n = 0
+      while (n < Qpms) {
+        call()
+        n += 1
+      }
+
+      if (Rem > 0 && ms%(1000/Rem) == 0) { call() }
+
+      ms += 1
+
+      if (ms%1000==0) {
+        println("-"*100)
+        println("Requests at %s".format(stopWatch()))
+
+        val lines = for ((name, fn) <- stats.gauges.toSeq) yield (name.mkString("/"), fn())
+        for ((name, value) <- lines.sortBy(_._1))
+          println(name+" "+value)
+      }
     }
 
-    if (Rem > 0 && ms%(1000/Rem) == 0) { call() }
-
-    ms += 1
-
-    if (ms%1000==0) {
-      println("-"*100)
-      println("Requests at %s".format(stopWatch()))
-
-      val lines = for ((name, fn) <- stats.gauges.toSeq) yield (name.mkString("/"), fn())
-      for ((name, value) <- lines.sortBy(_._1))
-        println(name+" "+value)
-    }
+    println(stats.summary(includeTails = true))
   }
-
-  stats.print()
 }

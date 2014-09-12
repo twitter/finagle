@@ -1,17 +1,21 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.app.GlobalFlag
+import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.{OnReady, Drv, Rng, Updater, Prioritized}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.TimeUnit
+import java.util.logging.{Logger, Level}
 import scala.annotation.tailrec
 import scala.collection.immutable
 
 package exp {
-  object loadMetric extends GlobalFlag("leastReq", "Metric used to measure load across endpoints (leastReq | pendingEwmaMs)")
+  object loadMetric extends GlobalFlag("leastReq", "Metric used to measure load across endpoints (leastReq | ewma)")
+  object decayTime extends GlobalFlag(10.seconds, "The window of latency observations")
 }
 
 object P2CBalancerFactory extends WeightedLoadBalancerFactory {
@@ -81,79 +85,73 @@ private object P2CBalancer {
     }
 
     // temporary logger to help debug ewma load metric
-    import java.util.logging.{Logger, Level}
-    private val epoch = System.nanoTime()
     private val log = Logger.getLogger("com.twitter.finagle.loadbalancer.loadMetric")
 
     /**
      * A load metric designed to quickly converge in the face of slow
-     * endpoints. Load is determined by oustanding nanos while taking
-     * into account an endpoints latency history. The algorithm is
-     * designed to quickly react to latency spikes and cautiously recover
-     * from them.
+     * endpoints. The algorithm is quick to react to latency spikes and
+     * cautious to recover from them. Load is determined by latency history
+     * while taking into account outstanding requests.
+     *
+     * @note The fact that `nanoTime` is not guaranteed to be monotonic is
+     * accounted for internally.
      */
-    def ewma(sr: StatsReceiver, name: String) = new LoadMetric {
+    def ewma(sr: StatsReceiver, name: String, nanoTime: () => Long) = new LoadMetric {
+      private[this] val epoch = nanoTime()
       private[this] val Penalty: Double = Double.MaxValue/2
-      private[this] val Sec: Long = 1000000000 // in nanos
-      // The mean lifetime that an rtt observation is weighted
-      // as part of the `cost`. A observation reaches its half-life
-      // after Tau*ln(2).
-      private[this] val Tau: Long = 2*Sec
+      // The mean lifetime of `cost`, it reaches its half-life after Tau*ln(2).
+      private[this] val Tau: Double = exp.decayTime().inNanoseconds.toDouble
+      require(Tau > 0)
 
       // these are all guarded by synchronization on `this`
-      private[this] var stamp: Long = 0L        // last timestamp in nanos we updated
-      private[this] var lastRep: Long = 0L      // last timestamp in nanos we received a response
-      private[this] var pendingReq: Int = 0     // rate nanos/nanos at time t
-      private[this] var pendingTime: Long = 0L  // pending load in nanos
-      private[this] var cost: Double = 0.0      // ewma of rtt
+      private[this] var stamp: Long = epoch   // last timestamp in nanos we observed an rtt
+      private[this] var pending: Int = 0      // instantaneous rate
+      private[this] var cost: Double = 0D     // ewma of rtt, sensitive to peaks.
 
-      private[this] val loadGauge = sr.addGauge("loadms") { (get()/1000000).toFloat }
-
-      @inline private[this] def update() {
-        val t1 = System.nanoTime()
-        pendingTime += (t1-stamp)*pendingReq
-        stamp = t1
+      private[this] val loadGauge = sr.addGauge("loadms") {
+        TimeUnit.NANOSECONDS.toMillis(get().toLong).toFloat
       }
 
-      def rate(): Int = synchronized { pendingReq }
+      def rate(): Int = synchronized { pending }
+
+      // Calculate the exponential weighted moving average of our
+      // round trip time. It isn't exactly an ewma, but rather a
+      // "peak-ewma", since `cost` is hyper-sensitive to latency peaks.
+      // Note, because the frequency of observations represents an
+      // unevenly spaced time-series[1], we consider the time between
+      // observations when calculating our weight.
+      // [1] http://www.eckner.com/papers/ts_alg.pdf
+      private[this] def observe(rtt: Double): Unit = {
+        val t = nanoTime()
+        val td = math.max(t-stamp, 0)
+        val w = math.exp(-td/Tau)
+        if (rtt > cost) cost = rtt
+        else cost = cost*w + rtt*(1.0-w)
+        stamp = t
+      }
 
       def get(): Double = synchronized {
-        update()
-        // We assume the worst when we don't have any historical
-        // data but have outstanding requests (i.e. we penalize the host).
-        // To avoid arbitrarily balancing across an influx of penalized hosts,
-        // we also factor in our outstanding load.
-        if (cost == 0.0 && pendingReq != 0) Penalty+pendingTime
-        else {
-          // Consider the load if we were to schedule an additional request
-          // on to this host.
-          val pending = if (pendingReq == 0) 0 else pendingTime+(pendingTime/pendingReq)
-          math.max(cost*(pendingReq+1.0), pending.toDouble)
-        }
+        // update our view of the decay on `cost`
+        observe(0.0)
+
+        // If we don't have any latency history, we penalize the host on
+        // the first probe. Otherwise, we factor in our current rate
+        // assuming we were to schedule an additional request.
+        if (cost == 0.0 && pending != 0) Penalty+pending
+        else cost*(pending+1)
       }
 
       def start(): Long = synchronized {
-        update()
-        pendingReq += 1
-        stamp
+        pending += 1
+        nanoTime()
       }
 
-      def end(ts: Long) = synchronized {
-        update()
-        val rtt = stamp-ts
-        val td = stamp-lastRep
-        // `rtt` decays by 1/e for every Tau that elapses
-        val weight = math.exp(-td/Tau)
-        lastRep = stamp
-        pendingReq -= 1
-        pendingTime -= rtt
-        // set a reasonable initial cost
-        if (cost == 0.0) cost = rtt
-        else cost = cost*weight + (1.0-weight)*rtt
-
+      def end(ts: Long): Unit = synchronized {
+        val rtt = math.max(nanoTime()-ts, 0)
+        pending -= 1
+        observe(rtt)
         if (log.isLoggable(Level.FINEST)) {
-          log.finest("[%s] clock=%d, rtt=%d, cost=%f, pendingTime=%d".format(
-            name, (stamp-epoch), rtt, cost, pendingTime))
+          log.finest(f"[$name] clock=${stamp-epoch}%d, rtt=$rtt%d, cost=$cost%f, pending=$pending%d")
         }
       }
     }
@@ -367,9 +365,19 @@ class P2CBalancer[Req, Rep](
     f
   }
 
-  private[this] val useEwma = exp.loadMetric() match {
-    case "pendingEwmaMs" => true
-    case _ => false
+  // clock used by p2c's load metrics, useful to override for testing.
+  protected def nanoTime(): Long = System.nanoTime()
+
+  private[this] val newMetric: ((StatsReceiver, String) => LoadMetric) = {
+    val log = Logger.getLogger("com.twitter.finagle.loadbalancer.P2CBalancer")
+    exp.loadMetric() match {
+      case "ewma" =>
+        log.info("Using load metric ewma")
+        LoadMetric.ewma(_, _, nanoTime)
+      case _ =>
+        log.info("Using load metric leastReq")
+        (_, _) => LoadMetric.leastReq()
+    }
   }
 
   private[this] val update = Updater[Update[Req, Rep]] {
@@ -386,10 +394,7 @@ class P2CBalancer[Req, Rep](
         case (f, w) if transferNodes contains f =>
           transferNodes(f).copy(weight=w)
         case (f, w) =>
-          val metric =
-            if (useEwma) LoadMetric.ewma(statsReceiver.scope(f.toString), f.toString)
-            else LoadMetric.leastReq()
-          Node(f, w, metric)
+          Node(f, w, newMetric(statsReceiver.scope(f.toString), f.toString))
       }
       nodes = Nodes(newNodes.toIndexedSeq, rng, emptyException)
 
