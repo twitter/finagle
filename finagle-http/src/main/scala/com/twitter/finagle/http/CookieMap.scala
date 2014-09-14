@@ -47,10 +47,18 @@ class CookieMap(message: Message)
     message.headers.remove(cookieHeaderName)
 
     // Add cookies back again
-    foreach { case (_, cookie) =>
-      val encoder = new NettyCookieEncoder(message.isResponse)
-      encoder.addCookie(cookie.underlying)
-      message.headers.add(cookieHeaderName, encoder.encode())
+    if (message.isRequest) {
+      val encoder = new NettyCookieEncoder(false)
+      foreach { case (_, cookie) =>
+        encoder.addCookie(cookie.underlying)
+      }
+      message.headers.set(cookieHeaderName, encoder.encode())
+    } else {
+      val encoder = new NettyCookieEncoder(true)
+      foreach { case (_, cookie) =>
+        encoder.addCookie(cookie.underlying)
+        message.headers.add(cookieHeaderName, encoder.encode())
+      }
     }
   }
 
