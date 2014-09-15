@@ -170,30 +170,6 @@ private class Zk(watchedZk: Watched[ZooKeeperReader], timerIn: Timer) {
   def sessionTimeout: Duration = zkr.sessionTimeout
 }
 
-private class NullZooKeeperReader extends ZooKeeperReader {
-  def addAuthInfo(scheme: String, auth: Buf): Future[Unit] = Future.never
-
-  def exists(path: String): Future[Option[Data.Stat]] = Future.never
-  def existsWatch(path: String): Future[Watched[Option[Data.Stat]]] = Future.never
-
-  def getACL(path: String): Future[Node.ACL] = Future.never
-
-  def getChildren(path: String): Future[Node.Children] = Future.never
-  def getChildrenWatch(path: String): Future[Watched[Node.Children]] = Future.never
-  
-  def getData(path: String): Future[Node.Data] = Future.never
-  def getDataWatch(path: String): Future[Watched[Node.Data]] = Future.never
-
-  def getEphemerals(): Future[Seq[String]] = Future.never
-
-  def sync(path: String): Future[Unit] = Future.never
-  def close(deadline: Time): Future[Unit] = Future.never
-
-  def sessionId: Long = -1
-  def sessionPasswd: Buf = Buf.Empty
-  def sessionTimeout: Duration = 0.seconds
-}
-
 private[serverset2] trait ZkFactory {
   def apply(hosts: String): Zk
   def withTimeout(d: Duration): ZkFactory
@@ -220,7 +196,7 @@ private[serverset2] object Zk extends FnZkFactory(
 
   private val authUser = Identities.get().headOption getOrElse(("/null"))
   private val authInfo: String = "%s:%s".format(authUser, authUser)
-  val nil: Zk = new Zk(Watched(new NullZooKeeperReader, Var(WatchState.Pending)), Timer.Nil)
+  val nil: Zk = new Zk(Watched(NullZooKeeperReader, Var(WatchState.Pending)), Timer.Nil)
 
   private def randomizedDelay(minDelay: Duration): Duration =
     minDelay + Duration.fromMilliseconds(Rng.threadLocal.nextInt(minDelay.inMilliseconds.toInt))

@@ -1,19 +1,19 @@
 package com.twitter.finagle.serverset2.client.apache
 
-import com.twitter.io.Buf
 import com.twitter.conversions.time._
-import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, TimeoutException}
 import com.twitter.finagle.serverset2.client._
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.io.Buf
+import com.twitter.util.Await
+import java.util.concurrent.ExecutionException
 import org.apache.zookeeper
 import org.junit.runner.RunWith
-import org.mockito.Matchers.{eq => meq}
 import org.mockito.ArgumentCaptor
+import org.mockito.Matchers.{eq => meq}
 import org.mockito.Mockito.{doNothing, doThrow, verify, when}
+import org.scalatest.{FlatSpec, OneInstancePerTest}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.{FlatSpec, OneInstancePerTest}
-import java.util.concurrent.ExecutionException
 import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
