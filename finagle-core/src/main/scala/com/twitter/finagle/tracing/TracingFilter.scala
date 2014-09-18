@@ -4,7 +4,7 @@ import com.twitter.finagle._
 
 private[finagle] object TracingFilter {
   implicit val role = Stack.Role("Tracer")
-  
+
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.tracing.TracingFilter]].
    */
@@ -22,10 +22,10 @@ private[finagle] object TracingFilter {
 }
 
 /**
- * The TracingFilter takes care of span lifecycle events. It is always
- * placed first in the server filter chain so that protocols with
- * trace support will override the span resets, and still be properly
- * reported here.
+ * The TracingFilter takes care of span lifecycle events. It is always placed
+ * first in the service [[com.twitter.finagle.Filter]] chain (or last in the
+ * [[com.twitter.finagle.Stack]]) so that protocols with trace support will
+ * override the span resets, and still be properly reported here.
  *
  * @param tracer An instance of a tracer to use. Eg: ZipkinTracer
  * @param label The name of the service being traced
@@ -34,7 +34,7 @@ class TracingFilter[Req, Rep](tracer: Tracer, label: String) extends SimpleFilte
 
   @deprecated("Please add a label to the tracing filter constructor", "6.13.x")
   def this(tracer: Tracer) = this(tracer, "Unknown")
-  
+
   def apply(request: Req, service: Service[Req, Rep]) = {
     Trace.unwind {
       Trace.pushTracerAndSetNextId(tracer)

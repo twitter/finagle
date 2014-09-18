@@ -80,17 +80,20 @@ object StackClient {
    */
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
     val stk = new StackBuilder(endpointStack[Req, Rep])
-    stk.push(TracingFilter.module)
     stk.push(LoadBalancerFactory.module)
     stk.push(Role.requestDraining, (fac: ServiceFactory[Req, Rep]) =>
       new RefcountedFactory(fac))
     stk.push(TimeoutFactory.module)
     stk.push(StatsFactoryWrapper.module)
     stk.push(NamerTracingFilter.module)
+    // The TracingFilter must be pushed after most other modules so that
+    // any Tracing produced by those modules is enclosed in the appropriate
+    // span.
+    stk.push(TracingFilter.module)
     stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
     stk.result
   }
-  
+
   /**
    * The default params used for client stacks.
    */
@@ -98,11 +101,11 @@ object StackClient {
 }
 
 /**
- * A [[com.twitter.finagle.Client Client]] that composes a 
+ * A [[com.twitter.finagle.Client Client]] that composes a
  * [[com.twitter.finagle.Stack Stack]].
  */
-trait StackClient[Req, Rep] 
-    extends Client[Req, Rep] 
+trait StackClient[Req, Rep]
+    extends Client[Req, Rep]
     with Stack.Parameterized[StackClient[Req, Rep]] {
   /** The current stack. */
   def stack: Stack[ServiceFactory[Req, Rep]]
@@ -113,9 +116,9 @@ trait StackClient[Req, Rep]
 }
 
 /**
- * The standard template implementation for 
- * [[com.twitter.finagle.client.StackClient]]. 
- * 
+ * The standard template implementation for
+ * [[com.twitter.finagle.client.StackClient]].
+ *
  */
 trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
     extends StackClient[Req, Rep] { self =>
@@ -138,12 +141,12 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
    * @see [[com.twitter.finagle.dispatch.GenSerialServerDispatcher]]
    */
   protected def newDispatcher(transport: Transport[In, Out]): Service[Req, Rep]
-  
+
   def withStack(stack: Stack[ServiceFactory[Req, Rep]]): This =
     copy1(stack = stack)
 
   /**
-   * Creates a new StackClient with `f` applied to `stack`. 
+   * Creates a new StackClient with `f` applied to `stack`.
    *
    * For expert users only.
    */
@@ -153,7 +156,7 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
   /**
    * Creates a new StackClient with parameter `p`.
    */
-  override def configured[P: Stack.Param](p: P): This = 
+  override def configured[P: Stack.Param](p: P): This =
     withParams(params+p)
 
   /**
@@ -228,7 +231,7 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
         register(clientParams1 + LoadBalancerFactory.Dest(vaddr))
 
         def newStack(bound: Name.Bound) = {
-          clientStack.make(clientParams1 + 
+          clientStack.make(clientParams1 +
             NamerTracingFilter.BoundPath(Some(path, bound)) +
             LoadBalancerFactory.Dest(bound.addr))
         }

@@ -48,7 +48,7 @@ object StackServer {
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](
       stack.nilStack[Req, Rep])
 
-    stk.push(Role.serverDestTracing, ((next: ServiceFactory[Req, Rep]) => 
+    stk.push(Role.serverDestTracing, ((next: ServiceFactory[Req, Rep]) =>
       new ServerDestTracingProxy[Req, Rep](next)))
     stk.push(TimeoutFilter.module)
     stk.push(DtabStatsFilter.module)
@@ -60,11 +60,14 @@ object StackServer {
       newJvmFilter[Req, Rep]() andThen next))
     stk.push(HandletimeFilter.module)
     stk.push(Role.preparer, identity[ServiceFactory[Req, Rep]](_))
+    // The TracingFilter must be pushed after most other modules so that
+    // any Tracing produced by those modules is enclosed in the appropriate
+    // span.
     stk.push(TracingFilter.module)
     stk.push(MonitorFilter.module)
     stk.result
   }
-  
+
   /**
    * The default params used for StackServers.
    */
@@ -73,11 +76,11 @@ object StackServer {
 }
 
 /**
- * A [[com.twitter.finagle.Server]] that composes a 
+ * A [[com.twitter.finagle.Server]] that composes a
  * [[com.twitter.finagle.Stack]].
  */
-trait StackServer[Req, Rep] 
-    extends Server[Req, Rep] 
+trait StackServer[Req, Rep]
+    extends Server[Req, Rep]
     with Stack.Parameterized[StackServer[Req, Rep]] {
   /** The current stack used in this StackServer. */
   def stack: Stack[ServiceFactory[Req, Rep]]
@@ -89,10 +92,10 @@ trait StackServer[Req, Rep]
 }
 
 /**
- * A standard template implementation for 
+ * A standard template implementation for
  * [[com.twitter.finagle.server.StackServer]].
  */
-trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]] 
+trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
     extends StackServer[Req, Rep] { self =>
 
   protected type In
@@ -113,8 +116,8 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
    * @see [[com.twitter.finagle.dispatch.GenSerialServerDispatcher]]
    */
   protected def newDispatcher(transport: Transport[In, Out], service: Service[Req, Rep]): Closable
-  
-  override def configured[P: Stack.Param](p: P): This = 
+
+  override def configured[P: Stack.Param](p: P): This =
     withParams(params+p)
 
   /**
@@ -123,7 +126,7 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
    */
   def withParams(params: Stack.Params): This =
     copy1(params = params)
-    
+
   def withStack(stack: Stack[ServiceFactory[Req, Rep]]): This =
     copy1(stack = stack)
 
@@ -179,7 +182,7 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
 
       val serviceFactory = (stack ++ Stack.Leaf(Endpoint, factory))
         .make(serverParams)
-        
+
       val server = copy1(params=serverParams)
 
       // Listen over `addr` and serve traffic from incoming transports to
