@@ -221,7 +221,7 @@ object Dentry {
    * where the productions ``path`` and ``tree`` are from the grammar
    * documented in [[com.twitter.finagle.NameTree$ NameTree.read]].
    */
-  def read(s: String): Dentry = DentryParser(s)
+  def read(s: String): Dentry = NameTreeParsers.parseDentry(s)
 
   // The prefix to this is an illegal path in the sense that the
   // concrete syntax will not admit it. It will do for a no-op.
@@ -309,7 +309,7 @@ object Dtab {
    * [[com.twitter.finagle.Dentry$ Dentry.read]]
    *
    */
-  def read(s: String): Dtab = DtabParser(s)
+  def read(s: String): Dtab = NameTreeParsers.parseDtab(s)
 
   /** Scala collection plumbing required to build new dtabs */
   def newBuilder: DtabBuilder = new DtabBuilder
@@ -332,35 +332,4 @@ final class DtabBuilder extends Builder[Dentry, Dtab] {
   def clear() = builder.clear()
 
   def result(): Dtab = Dtab(builder.result)
-}
-
-private trait DtabParsers extends NameTreePathParsers {
-  lazy val dtab: Parser[Dtab] = repsep(dentry, ";") <~ opt(";") ^^ { dentries =>
-    Dtab(dentries.toIndexedSeq)
-  }
-
-  lazy val dentry: Parser[Dentry] =
-    path ~ "=>" ~ tree ^^ {
-      case p ~ "=>" ~ t => Dentry(p, t)
-    }
-}
-
-private object DtabParser extends DtabParsers {
-  def apply(str: String): Dtab = synchronized {
-    parseAll(dtab, str) match {
-      case Success(dtab, _) => dtab
-      case err: NoSuccess =>
-        throw new IllegalArgumentException(err.msg+" at "+err.next.first)
-    }
-  }
-}
-
-private object DentryParser extends DtabParsers {
-  def apply(str: String): Dentry = synchronized {
-    parseAll(dentry, str) match {
-      case Success(dentry, _) => dentry
-      case err: NoSuccess =>
-        throw new IllegalArgumentException(err.msg+" at "+err.next.first)
-    }
-  }
 }

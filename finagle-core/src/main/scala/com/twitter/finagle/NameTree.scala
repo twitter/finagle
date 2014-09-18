@@ -1,10 +1,8 @@
 package com.twitter.finagle
 
 import com.twitter.util.{Activity, Var}
-import com.twitter.io.Buf
 import com.twitter.finagle.util.Showable
 import scala.annotation.tailrec
-import scala.util.parsing.combinator.{RegexParsers, JavaTokenParsers}
 import java.net.{InetSocketAddress, SocketAddress}
 import scala.collection.breakOut
 
@@ -296,105 +294,5 @@ object NameTree {
    * @throws IllegalArgumentException when the string does not
    * represent a valid name tree.
    */
-  def read(s: String): NameTree[Path] = NameTreeParser(s)
-}
-
-private  trait NameTreeParsers extends RegexParsers with JavaTokenParsers {
-  import NameTree._
-
-  // The type of leaves.
-  type T
-
-  // Note that since these are predictive parsers, we have to
-  // refactor the grammar so that it does not contain any left
-  // recursion; this accounts for the ugliness here.
-
-  lazy val tree: Parser[NameTree[T]] =
-    rep1sep(tree1, "|") ^^ {
-      case tree :: Nil => tree
-      case trees => Alt(trees:_*)
-    }
-
-  lazy val tree1: Parser[NameTree[T]] =
-    rep1sep(node, "&") ^^ {
-      case tree :: Nil => tree
-      case trees => Union(trees:_*)
-    }
-
-  lazy val node: Parser[NameTree[T]] = (
-      "(" ~> tree <~ ")"
-    | simple
-  )
-
-  lazy val simple: Parser[NameTree[T]] = (
-      leaf ^^ { case l => Leaf(l) }
-    | address
-  )
-
-  lazy val address: Parser[NameTree[T]] = (
-      "!" ^^^ Fail
-    | "~" ^^^ Neg
-    | "$" ^^^ Empty
-  )
-
-  def leaf: Parser[T]
-
-  lazy val weight: Parser[Double] =
-    floatingPointNumber ^^ (_.toDouble)
-}
-
-private trait NameTreePathParsers extends NameTreeParsers {
-  import NameTree._
-
-  type T = Path
-
-  val showableChar = new Parser[Char] {
-    def apply(in: Input) = {
-      val source = in.source
-      val offset = in.offset
-      val start = handleWhiteSpace(source, offset)
-      if (start < source.length) {
-        val chr = source.charAt(start)
-        if (Path.isShowable(chr))
-          Success(chr, in.drop(start-offset+1))
-        else
-          Failure("Did not find a showable char", in.drop(start-offset))
-      } else {
-        Failure("Empty source", in.drop(start-offset))
-      }
-    }
-  }
-
-  val hexChar: Parser[Char] = """[0-9a-fA-F]""".r ^^ { s => s.head }
-
-  val escapedByte: Parser[Byte] =
-    "\\x" ~> hexChar ~ hexChar ^^ {
-      case fst ~ snd =>
-        ((Character.digit(fst, 16) << 4) | Character.digit(snd, 16)).toByte
-    }
-
-  val byte: Parser[Byte] = escapedByte | showableChar ^^ (_.toByte)
-
-  val label: Parser[Buf] =
-      rep1(byte)  ^^ {
-        case bytes => Buf.ByteArray(bytes:_*)
-      }
-
-  val path: Parser[Path] = (
-      rep1("/" ~> label) ^^ { labels => Path(labels:_*) }
-    | "/" ^^^ Path.empty
-  )
-
-  val leaf = path
-}
-
-private object NameTreeParser extends NameTreePathParsers {
-  import NameTree._
-
-  def apply(str: String): NameTree[Path] = synchronized {
-    parseAll(tree, str) match {
-      case Success(n, _) => n
-      case err: NoSuccess => throw new IllegalArgumentException(err.msg)
-    }
-  }
+  def read(s: String): NameTree[Path] = NameTreeParsers.parseNameTree(s)
 }

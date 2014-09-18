@@ -16,7 +16,7 @@ case class Path(elems: Buf*) {
 
   def take(n: Int) = Path((elems take n):_*)
   def drop(n: Int) = Path((elems drop n):_*)
-  def ++(that: Path) = 
+  def ++(that: Path) =
     if (that.isEmpty) this
     else Path((elems ++ that.elems):_*)
   def size = elems.size
@@ -28,19 +28,19 @@ case class Path(elems: Buf*) {
     // to strings
     val nbuf = buf.length
     val bytes = buf match {
-      case Buf.ByteArray(bytes, 0, `nbuf`) => bytes
+      case Buf.ByteArray(bytes, 0, _) => bytes
       case buf =>
         val bytes = new Array[Byte](nbuf)
         buf.write(bytes, 0)
         bytes
     }
 
-    if (Path.showableAsString(bytes))
-      new String(bytes, Path.Utf8Charset)
+    if (Path.showableAsString(bytes, nbuf))
+      new String(bytes, 0, nbuf, Path.Utf8Charset)
     else {
-      val str = new StringBuilder(bytes.length * 4)
+      val str = new StringBuilder(nbuf * 4)
       var i = 0
-      while (i < bytes.length) {
+      while (i < nbuf) {
         str.append("\\x")
         str.append(Integer.toString((bytes(i) >> 4) & 0xf, 16))
         str.append(Integer.toString(bytes(i) & 0xf, 16))
@@ -61,12 +61,12 @@ object Path {
   implicit val showable: Showable[Path] = new Showable[Path] {
     def show(path: Path) = path.show
   }
-  
+
   val empty = Path()
 
   private val Utf8Charset = Charset.forName("UTF-8")
-  
-  val showableChars: Seq[Char] = 
+
+  val showableChars: Seq[Char] =
     ('0' to '9') ++ ('A' to 'Z') ++ ('a' to 'z') ++ "_:.#$%-".toSeq
 
   private val charSet = {
@@ -85,9 +85,9 @@ object Path {
    */
   def isShowable(ch: Char): Boolean = charSet.get(ch.toInt)
 
-  private def showableAsString(bytes: Array[Byte]): Boolean = {
+  private def showableAsString(bytes: Array[Byte], size: Int): Boolean = {
     var i = 0
-    while (i < bytes.size) {
+    while (i < size) {
       if (!isShowable(bytes(i).toChar))
         return false
       i += 1
@@ -100,7 +100,7 @@ object Path {
    *
    * {{{
    * path       ::= '/' labels
-   * 
+   *
    * labels     ::= label '/' label
    *                label
    *
@@ -115,7 +115,7 @@ object Path {
    * /
    * }}}
    *
-   * parses into the path 
+   * parses into the path
    *
    * {{{
    * Path(foo,bar,baz)
@@ -124,11 +124,8 @@ object Path {
    *
    * @throws IllegalArgumentException when `s` is not a syntactically valid path.
    */
-  def read(s: String): Path = NameTreeParser(s) match {
-    case NameTree.Leaf(p) => p
-    case _ => throw new IllegalArgumentException("Invalid path "+s)
-  }
- 
+  def read(s: String): Path = NameTreeParsers.parsePath(s)
+
  /**
   * Utilities for constructing and pattern matching over
   * Utf8-typed paths.
@@ -154,7 +151,7 @@ object Path {
         }
         i += 1
       }
-      
+
       Some(elemss)
     }
   }
