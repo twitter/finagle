@@ -1,9 +1,53 @@
 .. Author notes: this file is formatted with restructured text
-  (http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
-  as it is included in Finagle's user's guide.
+(http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
+as it is included in Finagle's user's guide.
 
 6.x
 -----
+
+6.21.0
+~~~~~~~
+
+- `finagle`: Upgrade to scala_2.10
+- `finagle-core`: Add weighted address support to InetResolver.
+- `finagle-core`: Adds ClientRegistry.expAllRegisteredClientsResolved
+- `finagle-core`: Attach Dtab.local to NoBrokersAvailableException in filter
+- `finagle-core`: Attempt to add dtab stats to all clients and servers
+- `finagle-core`: Avoid SOCKS proxy for both loopback and link-local addresses
+- `finagle-core`: Bind names lazily under Alt so we don't do needless lookups
+- `finagle-core`: DelayedFactory to detachable implementation
+- `finagle-core`: Fix a race in load balancer initialization
+- `finagle-core`: Improve loadbalancer logging
+- `finagle-core`: Introduce ewma load metric
+- `finagle-core`: Log state for ewma load metric
+- `finagle-core`: Redesign of twitter-server admin page
+- `finagle-core`: Register StackClient with Path dest in ClientRegistry as evaluated against Dtab.base Problem
+- `finagle-core`: Rewrote ServiceLoader to avoid creating
+- `finagle-core`: SingletonPool: a single-service pool with good semantics
+- `finagle-core`: Zipkin tracing for name resolution
+- `finagle-core`: fix synchronization in SummarizingStatsReceiver
+- `finagle-core`: reusing pool: isAvailable === underlying.isAvailable
+- `finagle-docs`: A better picture for filters. (Replaces hand-drawn monstrosity.)
+- `finagle-docs`: Add Scaladocs for all public exception classes in Finagle.
+- `finagle-docs`: Add a section to the FAQ regarding FailedFastExceptions
+- `finagle-exp`: Generify the DarkTrafficFilter problem
+- `finagle-guide`: Document stabilizing serverset metrics.
+- `finagle-http`: Add support for a Dtab-Local header
+- `finagle-http`: Fail requests with invalid X-Dtab headers
+- `finagle-http`: Fail requests with invalid X-Dtab headers
+- `finagle-http`: TextualContentCompressor should compress textual Content-Type's even when containing a charset
+- `finagle-mux`,thriftmux: explain why the files are named Netty3
+- `finagle-mux`: Better gc avoidance flags for experimentation
+- `finagle-mux`: Enable gc avoidance for parallel gc
+- `finagle-mux`: Improve mux's handling of client disconnects
+- `finagle-mux`: Improved Garbage Collection Avoidance Docs
+- `finagle-mux`: docs and minor cleansing in Message subclasses
+- `finagle-mysql`: Switches PreparedCache over to util-cache FutureCache
+- `finagle-serversets`: Add support for getEphemerals ZooKeeper call
+- `finagle-serversets`: Memoize getChildrenWatchOp instead of globPrefixWatchOp
+- `finagle-serversets`: Reuse ObjectMapper in JSON parser.
+- `finagle-serversets`: add latency metrics for ServerSet2.
+- `finagle-zipkin`: Reduce allocations when tracing
 
 6.20.0
 ~~~~~~~

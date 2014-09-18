@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-stress_2.10</artifactId>
   <packaging>jar</packaging>
-  <version>6.20.2-SNAPSHOT</version>
+  <version>6.21.1-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>service-2104_2.10</artifactId>
@@ -37,27 +37,27 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core_2.10</artifactId>
-      <version>6.20.2-SNAPSHOT</version>
+      <version>6.21.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-http_2.10</artifactId>
-      <version>6.20.2-SNAPSHOT</version>
+      <version>6.21.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4_2.10</artifactId>
-      <version>6.20.2-SNAPSHOT</version>
+      <version>6.21.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thriftmux_2.10</artifactId>
-      <version>6.20.2-SNAPSHOT</version>
+      <version>6.21.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift_2.10</artifactId>
-      <version>6.20.2-SNAPSHOT</version>
+      <version>6.21.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
@@ -67,17 +67,17 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging_2.10</artifactId>
-      <version>6.21.2-SNAPSHOT</version>
+      <version>6.21.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-app_2.10</artifactId>
-      <version>6.21.2-SNAPSHOT</version>
+      <version>6.21.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>scrooge-runtime_2.10</artifactId>
-      <version>3.16.5-SNAPSHOT</version>
+      <version>3.16.7-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
