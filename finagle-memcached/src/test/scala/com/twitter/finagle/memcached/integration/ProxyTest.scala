@@ -12,7 +12,7 @@ import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffers
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
 
 @RunWith(classOf[JUnitRunner])
 class ProxyTest extends FunSuite with BeforeAndAfter {
@@ -61,8 +61,11 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
     }
   }
 
-  override def withFixture(test: NoArgTest) = {
-    if (testServer == None) info("Cannot start memcached. skipping test...")
+  override def withFixture(test: NoArgTest): Outcome = {
+    if (testServer == None) {
+      info("Cannot start memcached. skipping test...")
+      cancel()
+    }
     else test()
   }
 

@@ -31,7 +31,7 @@ class SeqIdFilterSpec extends SpecificationWithJUnit with Mockito {
     "SeqIdFilter(%s)".format(how) should {
       val service = mock[Service[ThriftClientRequest, Array[Byte]]]
       val p = new Promise[Array[Byte]]
-      service(any) returns p
+      service(any[ThriftClientRequest]) returns p
       val filter = new SeqIdFilter
       val filtered = filter andThen service
 
@@ -77,7 +77,7 @@ class SeqIdFilterSpec extends SpecificationWithJUnit with Mockito {
         val reqBuf = mkmsg(new TMessage("proc", TMessageType.CALL, 0))
         val origBuf = reqBuf.clone()
         filtered(new ThriftClientRequest(reqBuf, false))
-        there was one(service).apply(any)
+        there was one(service).apply(any[ThriftClientRequest])
         reqBuf.toSeq must be_==(origBuf.toSeq)
       }
 

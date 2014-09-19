@@ -47,15 +47,11 @@ object Finagle extends Build {
   val sharedSettings = Seq(
     version := libVersion,
     organization := "com.twitter",
-    crossScalaVersions := Seq("2.9.2", "2.10.4"),
-    scalaVersion := "2.9.2",
+    crossScalaVersions := Seq("2.10.4"),
+    scalaVersion := "2.10.4",
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "1.9.1" % "test",
-      "org.scala-tools.testing" %% "specs" % "1.6.9" % "test" cross CrossVersion.binaryMapped {
-        case "2.9.2" => "2.9.1"
-        case "2.10.4" => "2.10"
-        case x => x
-      },
+      "org.scala-tools.testing" %% "specs" % "1.6.9" % "test",
       "junit" % "junit" % "4.10" % "test",
       "org.mockito" % "mockito-all" % "1.9.5" % "test"
     ),
@@ -67,10 +63,12 @@ object Finagle extends Build {
     publishM2 <<= Classpaths.publishTask(publishM2Configuration, deliverLocal),
     otherResolvers += m2Repo,
 
+    /*
     testOptions in Test <<= scalaVersion map {
       case "2.10" | "2.10.4" => Seq(Tests.Filter(_ => false))
       case _ => Seq()
     },
+     */
     javaOptions in Test := Seq("-DSKIP_FLAKY=1"),
 
     ivyXML :=

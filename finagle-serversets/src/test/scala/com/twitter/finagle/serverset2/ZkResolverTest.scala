@@ -1,35 +1,34 @@
 package com.twitter.finagle.serverset2
 
-import collection.JavaConverters._
 import com.twitter.common.zookeeper.ServerSetImpl
-import com.twitter.conversions.time._
-import com.twitter.finagle.{Addr, Resolver, Name, WeightedSocketAddress}
 import com.twitter.finagle.zookeeper.ZkInstance
+import com.twitter.finagle.{Addr, Resolver, Name, WeightedSocketAddress}
 import com.twitter.util.{Duration, RandomSocket, Var}
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
-import org.scalatest.{FunSuite, BeforeAndAfter, Tag}
-import org.scalatest.concurrent.Eventually._
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
-import org.scalatest.time._
+import org.scalatest.time.{Span, SpanSugar}
+import org.scalatest.{FunSuite, BeforeAndAfter, Tag}
+import scala.collection.JavaConverters.mapAsJavaMapConverter
+import scala.language.implicitConversions
 
 @RunWith(classOf[JUnitRunner])
-class ZkResolverTest extends FunSuite with BeforeAndAfter with AssertionsForJUnit {
-  val zkTimeout = 100.milliseconds
-  @volatile var inst: ZkInstance = _
+class ZkResolverTest extends FunSuite with BeforeAndAfter with Eventually with PatienceConfiguration with SpanSugar {
+  val zkTimeout: Span = 100.milliseconds
 
-  implicit def toSpan(d: Duration): Span = Span(d.inNanoseconds, Nanoseconds)
-
-  implicit val patienceConfig = PatienceConfig(
+  implicit val config = PatienceConfig(
     timeout = 5.seconds,
     interval = zkTimeout)
 
   // The Zk2 resolver has a hardcoded session timeout of 10 seconds and a stabilization epoch of
   // 40 seconds. We give these tests double that to observe nodes leaving a serverset.
   // Because this is so high, we don't check more than once every 5 seconds.
+  @volatile var inst: ZkInstance = _
   val stabilizationEpoch = 40.seconds
-  val stabilizationTimeout = Timeout(stabilizationEpoch * 2)
-  val stabilizationInterval = Interval(5.seconds)
+  val stabilizationTimeout = PatienceConfiguration.Timeout(stabilizationEpoch * 2)
+  val stabilizationInterval = PatienceConfiguration.Interval(5.seconds)
 
   before {
     inst = new ZkInstance

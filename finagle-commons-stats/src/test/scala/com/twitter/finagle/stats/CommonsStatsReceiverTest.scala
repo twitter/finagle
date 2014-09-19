@@ -35,9 +35,9 @@ class CommonsStatsReceiverTest extends FunSuite with BeforeAndAfter with OneInst
   test("stat should work") {
     val stat = (new CommonsStatsReceiver()).stat("bar")
 
-    assert(Stats.getVariable("bar_50_0_percentile").read == 0.0f)
-    assert(Stats.getVariable("bar_95_0_percentile").read == 0.0f)
-    assert(Stats.getVariable("bar_99_0_percentile").read == 0.0f)
+    assert(Stats.getVariable[Float]("bar_50_0_percentile").read === 0.0f)
+    assert(Stats.getVariable[Float]("bar_95_0_percentile").read === 0.0f)
+    assert(Stats.getVariable[Float]("bar_99_0_percentile").read === 0.0f)
 
     for (i <- 0.until(10000)) {
       stat.add(i.toFloat)

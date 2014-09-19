@@ -19,7 +19,7 @@ import com.twitter.io.Charsets
 import com.twitter.util.{Await, Duration, Future}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
 import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
@@ -85,9 +85,12 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
     }
   }
 
-  override def withFixture(test: NoArgTest) {
+  override def withFixture(test: NoArgTest): Outcome = {
     if (!testServers.isEmpty) test()
-    else info("Cannot start memcached. Skipping test...")
+    else {
+      info("Cannot start memcached. Skipping test...")
+      cancel()
+    }
   }
 
   test("Simple ClusterClient using finagle load balancing - many keys") {

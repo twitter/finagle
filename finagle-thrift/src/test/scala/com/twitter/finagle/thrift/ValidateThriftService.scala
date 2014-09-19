@@ -13,7 +13,7 @@ class ValidateThriftServiceSpec extends SpecificationWithJUnit with Mockito {
   "ValidateThriftService" should {
     val p = new Promise[Array[Byte]]
     val service = mock[Service[ThriftClientRequest, Array[Byte]]]
-    service(any) returns p
+    service(any[ThriftClientRequest]) returns p
     service.isAvailable returns true
     def newValidate() = new ValidateThriftService(service, new TBinaryProtocol.Factory())
     val validate = newValidate()
@@ -56,7 +56,7 @@ class ValidateThriftServiceSpec extends SpecificationWithJUnit with Mockito {
         buf().writeMessageEnd()
         val validate = newValidate()
         val arr = buf.toArray
-        service(any) returns Future.value(arr)
+        service(any[ThriftClientRequest]) returns Future.value(arr)
         validate.isAvailable must beTrue
         val f = validate(req)
         f.isDefined must beTrue
@@ -85,7 +85,7 @@ class ValidateThriftServiceSpec extends SpecificationWithJUnit with Mockito {
         buf().writeMessageEnd()
         val validate = newValidate()
         val arr = buf.toArray
-        service(any) returns Future.value(arr)
+        service(any[ThriftClientRequest]) returns Future.value(arr)
         validate.isAvailable must beTrue
         val f = validate(req)
         f.isDefined must beTrue
