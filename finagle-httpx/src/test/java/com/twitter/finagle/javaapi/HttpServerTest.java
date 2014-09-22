@@ -1,0 +1,51 @@
+package com.twitter.finagle.javaapi;
+
+import java.net.InetSocketAddress;
+
+import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
+import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import org.jboss.netty.handler.codec.http.HttpVersion;
+
+import com.twitter.finagle.Service;
+import com.twitter.finagle.builder.ServerBuilder;
+import com.twitter.finagle.httpx.Http;
+import com.twitter.finagle.httpx.Request;
+import com.twitter.finagle.httpx.Response;
+import com.twitter.util.Future;
+import com.twitter.util.RandomSocket;
+
+public class HttpServerTest {
+  private static void runServer() {
+    Service<Request, Response> service =
+      new Service<Request, Response>() {
+        public Future<Response> apply(Request request) {
+          Response response = Response.apply();
+          // Respond right away.
+          response.setContent(ChannelBuffers.wrappedBuffer("yo".getBytes()));
+
+          Future<Response> future = Future.value(response);
+          return future;
+        }
+      };
+
+    ServerBuilder.safeBuild(
+      service,
+      ServerBuilder.get()
+      .codec(Http.get())
+      .bindTo(new InetSocketAddress(0))
+      .name("HttpServer"));
+  }
+
+  public static void main(String args[]) {
+    try {
+      runServer();
+    } catch (Throwable e) {
+      System.err.println("Caught top level exception: " + e);
+      e.printStackTrace();
+      System.exit(-1);
+    }
+  }
+}
