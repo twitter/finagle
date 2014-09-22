@@ -36,6 +36,7 @@ you're using Finagle. Or even better, add the links yourself and
 * [Tapad](http://www.tapad.com/)
   * [Case study][9] by [Typesafe][10]
 * [Teads.tv](http://teads.tv/)
+* [Tendril](http://www.tendrilinc.com)
 * [Tumblr](https://www.tumblr.com/)
 * [Twitter](https://twitter.com/)
   * ["Finagle: A Protocol-Agnostic RPC System"][11]
