@@ -4,20 +4,28 @@ import com.twitter.finagle.CodecFactory
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.test.{AnException, B, SomeStruct}
 import com.twitter.util.{Await, Future, Promise, RandomSocket, Return}
-import java.net.ServerSocket
+import java.net.{InetSocketAddress, ServerSocket}
 import java.util.concurrent.CyclicBarrier
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.server.TSimpleServer
 import org.apache.thrift.transport.{TFramedTransport, TServerSocket, TTransportFactory}
-import org.specs.SpecificationWithJUnit
+import org.junit.runner.RunWith
+import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.junit.JUnitRunner
 
-class FinagleClientThriftServerSpec extends SpecificationWithJUnit {
+@RunWith(classOf[JUnitRunner])
+class FinagleClientThriftServerTest extends FunSuite with OneInstancePerTest {
   /* The entire block is marked as flaky because both tests are flaky.
    * If only one test is fixed, and is longer flaky, then this guard
    * can be moved back down to the individual test.
    */
+
+  trait TestServer {
+    def server: InetSocketAddress
+    def shutdown: Unit
+  }
+
   if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
-    "finagle client vs. synchronous thrift server" should {
       var somewayPromise = new Promise[Unit]
       def makeServer(transportFactory: TTransportFactory)(f: (Int, Int) => Int) = {
         val processor = new B.Iface {
@@ -54,27 +62,26 @@ class FinagleClientThriftServerSpec extends SpecificationWithJUnit {
         }
         thriftServerThread.start()
 
-        doAfter {
-          thriftServer.stop()
-          thriftServerThread.join()
+        new TestServer {
+          def shutdown: Unit = thriftServer.stop()
+
+          def server: InetSocketAddress = thriftServerAddr
         }
-
-        thriftServerAddr
       }
-
 
       def doit(
         transportFactory: TTransportFactory,
-        codec: CodecFactory[ThriftClientRequest, Array[Byte]]#Client
+        codec: CodecFactory[ThriftClientRequest, Array[Byte]]#Client,
+        named: String
       ) {
-        "talk to each other" in {
+        test("%s:finagle client vs. synchronous thrift server should talk to each other".format(named)) {
           // TODO: interleave requests (to test seqids, etc.)
 
-          val thriftServerAddr = makeServer(transportFactory) { (a, b) => a + b }
+          val testServer = makeServer(transportFactory) { (a, b) => a + b }
 
           // ** Set up the client & query the server.
           val service = ClientBuilder()
-            .hosts(Seq(thriftServerAddr))
+            .hosts(Seq(testServer.server))
             .codec(codec)
             .hostConnectionLimit(1)
             .build()
@@ -82,30 +89,34 @@ class FinagleClientThriftServerSpec extends SpecificationWithJUnit {
           val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
           val future = client.multiply(1, 2)
-          Await.result(future) must be_==(3)
+          assert(Await.result(future) === 3)
+          testServer.shutdown
         }
 
-        "handle exceptions" in {
-          val thriftServerAddr = makeServer(transportFactory) { (a, b) => a + b }
+        test("%s:finagle client vs. synchronous thrift server should handle exceptions".format(named)) {
+          val testServer = makeServer(transportFactory) { (a, b) => a + b }
 
           // ** Set up the client & query the server.
           val service = ClientBuilder()
-            .hosts(Seq(thriftServerAddr))
+            .hosts(Seq(testServer.server))
             .codec(codec)
             .hostConnectionLimit(1)
             .build()
 
           val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
-          Await.result(client.add(1, 2)) must throwA[AnException]
+          intercept[Exception]{
+            Await.result(client.add(1, 2))
+          }
+          testServer.shutdown
         }
 
-        "handle void returns" in {
-          val thriftServerAddr = makeServer(transportFactory) { (a, b) => a + b }
+        test("%s:finagle client vs. synchronous thrift server should handle void returns".format(named)) {
+          val testServer = makeServer(transportFactory) { (a, b) => a + b }
 
           // ** Set up the client & query the server.
           val service = ClientBuilder()
-            .hosts(Seq(thriftServerAddr))
+            .hosts(Seq(testServer.server))
             .codec(codec)
             .hostConnectionLimit(1)
             .build()
@@ -113,28 +124,31 @@ class FinagleClientThriftServerSpec extends SpecificationWithJUnit {
           val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
           Await.result(client.add_one(1, 2))
-          true must beTrue
+          assert(true === true)
+          testServer.shutdown
         }
 
         // race condition..
-        "handle one-way calls" in {
-          val thriftServerAddr = makeServer(transportFactory) { (a, b) => a + b }
+        test("%s:finagle client vs. synchronous thrift server should handle one-way calls".format(named)) {
+          val testServer = makeServer(transportFactory) { (a, b) => a + b }
 
           // ** Set up the client & query the server.
           val service = ClientBuilder()
-            .hosts(Seq(thriftServerAddr))
+            .hosts(Seq(testServer.server))
             .codec(codec)
             .hostConnectionLimit(1)
             .build()
 
           val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
-          somewayPromise.isDefined must beFalse
-          Await.result(client.someway()) must beNull  // returns
-          Await.result(somewayPromise) must be_==(())
+          assert(somewayPromise.isDefined === false)
+          assert(Await.result(client.someway()) === null)  // returns
+          assert(Await.result(somewayPromise) === (()))
+
+          testServer.shutdown
         }
 
-        "talk to multiple servers" in {
+        test("%s:finagle client vs. synchronous thrift server should talk to multiple servers".format(named)) {
           val NumParties = 10
           val barrier = new CyclicBarrier(NumParties)
 
@@ -144,7 +158,7 @@ class FinagleClientThriftServerSpec extends SpecificationWithJUnit {
 
           // ** Set up the client & query the server.
           val service = ClientBuilder()
-            .hosts(addrs)
+            .hosts(addrs.map(_.server))
             .codec(codec)
             .hostConnectionLimit(1)
             .build()
@@ -154,20 +168,17 @@ class FinagleClientThriftServerSpec extends SpecificationWithJUnit {
           {
             val futures = 0 until NumParties map { _ => client.multiply(1, 2) }
             val resolved = futures map(Await.result(_))
-            resolved foreach { r => r must be_==(3) }
+            resolved foreach { r => assert(r === (3)) }
           }
+
+          addrs.foreach(_.shutdown)
         }
       }
 
       // Flaky test
-      "framed transport" in {
-        doit(new TFramedTransport.Factory(), ThriftClientFramedCodec())
-      }
+      doit(new TFramedTransport.Factory(), ThriftClientFramedCodec(), "framed transport")
 
       // Flaky test
-      "buffered transport" in {
-        doit(new TTransportFactory, ThriftClientBufferedCodec())
-      }
-    }
+      doit(new TTransportFactory, ThriftClientBufferedCodec(), "buffered transport")
   }
 }
