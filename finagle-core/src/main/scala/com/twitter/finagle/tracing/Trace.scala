@@ -35,9 +35,9 @@ object Trace  {
   private case object NoState extends TraceState
 
   private[this] val rng = new Random
-
   private[this] val defaultId = TraceId(None, None, SpanId(rng.nextLong()), None, Flags())
   private[this] val local = new Local[State]
+
   @volatile private[this] var tracingEnabled = true
 
   /**
