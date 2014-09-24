@@ -48,7 +48,9 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
 
   private[this] def variableName(name: Seq[String]) = name mkString "/"
 
-  def summary(includeTails: Boolean = false): String = {
+  def summary(): String = summary(false)
+
+  def summary(includeTails: Boolean): String = {
     val counterValues = counters.asMap.asScala
     val statValues = stats.asMap.asScala collect {
       case (k, buf) if buf.nonEmpty =>
@@ -59,13 +61,13 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
         (k, xs)
     }
 
-    val counterLines = counterValues map { case (k, v) => (variableName(k), v.toString) } toSeq
-    val statLines = statValues map { case (k, xs) =>
+    val counterLines = (counterValues map { case (k, v) => (variableName(k), v.toString) }).toSeq
+    val statLines = (statValues map { case (k, xs) =>
       val n = xs.size
-      def idx(ptile: Double) = math.ceil(ptile*n).toInt
+      def idx(ptile: Double) = math.floor(ptile*n).toInt
       (variableName(k), "n=%d min=%.1f med=%.1f p90=%.1f p95=%.1f p99=%.1f p999=%.1f p9999=%.1f max=%.1f".format(
         n, xs(0), xs(n/2), xs(idx(.9D)), xs(idx(.95D)), xs(idx(.99D)), xs(idx(.999D)), xs(idx(.9999D)), xs(n-1)))
-    } toSeq
+    }).toSeq
 
     lazy val tailValues = statValues map { case (k, xs) =>
       val n = xs.size
