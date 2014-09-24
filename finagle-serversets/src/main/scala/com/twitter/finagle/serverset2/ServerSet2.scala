@@ -83,7 +83,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
           if (subset.isEmpty) Var.value(Addr.Neg)
             else inetResolver.bindWeightedHostPortsToAddr(subset.toSeq)
       }
-      
+
       // The stabilizer ensures that we qualify removals by putting
       // them in a limbo state for at least one epoch.
       val stabilized = Stabilizer(va, epoch)
@@ -105,8 +105,8 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
 
       @volatile var nlimbo = 0
       @volatile var size = 0
-      
-      // The lifetimes of these gauges need to be managed if we 
+
+      // The lifetimes of these gauges need to be managed if we
       // ever de-memoize addrOf.
       scoped.provideGauge("limbo") { nlimbo }
       scoped.provideGauge("size") { size }
@@ -118,7 +118,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
 
         val reg = states.register(Witness { state: State =>
           if (chatty()) {
-            eprintf("New state for %s!%s: %s\n", 
+            eprintf("New state for %s!%s: %s\n",
               path, endpoint getOrElse "default", state)
           }
 
@@ -139,7 +139,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
           }
         }
       }
-      
+
       // Kick off resolution eagerly. This isn't needed to comply to
       // the resolver interface, but users of ServerSetv1 have come
       // to rely on this behavior in order to ensure that their
@@ -157,7 +157,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
       stabilizedVa
   }
 
-  def addrOf(hosts: String, path: String, endpoint: Option[String]): Var[Addr] = 
+  def addrOf(hosts: String, path: String, endpoint: Option[String]): Var[Addr] =
     addrOf_(serverSetOf(hosts), path, endpoint)
 
   def bind(arg: String): Var[Addr] = arg.split("!") match {
@@ -181,12 +181,12 @@ private[serverset2] trait PathCache {
 
 private[serverset2] object PathCache {
   def apply(maxSize: Int): PathCache = new PathCache {
-    val entries: Cache[String, Set[Entry]] = 
+    val entries: Cache[String, Set[Entry]] =
       CacheBuilder.newBuilder()
         .maximumSize(maxSize)
         .build()
 
-    val vectors: Cache[String, Option[Vector]] = 
+    val vectors: Cache[String, Option[Vector]] =
       CacheBuilder.newBuilder()
         .maximumSize(maxSize)
         .build()
@@ -215,7 +215,7 @@ private[serverset2] trait ServerSet2 {
 private[serverset2] object ServerSet2 {
   val DefaultRetrying = 5.seconds
 
-  def apply(hosts: String): ServerSet2 = 
+  def apply(hosts: String): ServerSet2 =
     apply(Zk.retrying(DefaultRetrying, () => Zk(hosts)))
 
   def apply(zk: Var[Zk]): ServerSet2 =
@@ -239,7 +239,7 @@ private[serverset2] class VarServerSet2(v: Var[ServerSet2]) extends ServerSet2 {
 private[serverset2] object ZkServerSet2 {
   private val Utf8 = Charset.forName("UTF-8")
   private val EndpointGlob = "/member_"
-  private val VectorGlob = "/vector_" 
+  private val VectorGlob = "/vector_"
 }
 
 private[serverset2] case class ZkServerSet2(zk: Zk) extends ServerSet2 {

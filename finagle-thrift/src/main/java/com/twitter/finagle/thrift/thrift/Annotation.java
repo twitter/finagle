@@ -116,13 +116,13 @@ public class Annotation implements TBase<Annotation, Annotation._Fields>, java.i
   public static final Map<_Fields, FieldMetaData> metaDataMap;
   static {
     Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
-    tmpMap.put(_Fields.TIMESTAMP, new FieldMetaData("timestamp", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.TIMESTAMP, new FieldMetaData("timestamp", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.I64)));
-    tmpMap.put(_Fields.VALUE, new FieldMetaData("value", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.VALUE, new FieldMetaData("value", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.STRING)));
-    tmpMap.put(_Fields.HOST, new FieldMetaData("host", TFieldRequirementType.OPTIONAL, 
+    tmpMap.put(_Fields.HOST, new FieldMetaData("host", TFieldRequirementType.OPTIONAL,
         new StructMetaData(TType.STRUCT, Endpoint.class)));
-    tmpMap.put(_Fields.DURATION, new FieldMetaData("duration", TFieldRequirementType.OPTIONAL, 
+    tmpMap.put(_Fields.DURATION, new FieldMetaData("duration", TFieldRequirementType.OPTIONAL,
         new FieldValueMetaData(TType.I32)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     FieldMetaData.addStructMetaDataMap(Annotation.class, metaDataMap);
@@ -457,7 +457,7 @@ public class Annotation implements TBase<Annotation, Annotation._Fields>, java.i
     while (true)
     {
       field = iprot.readFieldBegin();
-      if (field.type == TType.STOP) { 
+      if (field.type == TType.STOP) {
         break;
       }
       switch (field.id) {
@@ -465,14 +465,14 @@ public class Annotation implements TBase<Annotation, Annotation._Fields>, java.i
           if (field.type == TType.I64) {
             this.timestamp = iprot.readI64();
             setTimestampIsSet(true);
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
         case 2: // VALUE
           if (field.type == TType.STRING) {
             this.value = iprot.readString();
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
@@ -480,7 +480,7 @@ public class Annotation implements TBase<Annotation, Annotation._Fields>, java.i
           if (field.type == TType.STRUCT) {
             this.host = new Endpoint();
             this.host.read(iprot);
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
@@ -488,7 +488,7 @@ public class Annotation implements TBase<Annotation, Annotation._Fields>, java.i
           if (field.type == TType.I32) {
             this.duration = iprot.readI32();
             setDurationIsSet(true);
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;

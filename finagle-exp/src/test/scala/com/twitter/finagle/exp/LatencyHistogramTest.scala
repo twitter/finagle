@@ -22,19 +22,19 @@ class LatencyHistogramTest extends FunSuite {
     for (q <- 0 until 100)
       assert(histo.quantile(q) === sorted(q*N/100))
   }
-  
+
   val tests = Seq(
     (130827L, 300),
     (130655L, 200),
     (127290L, 800),
     (128163L, 123)
   )
-  
+
   for ((seed, n) <- tests)
     test("random: %d %d".format(seed, n)) {
       testRandom(new Random(seed), n)
     }
-  
+
   // Since the sliding window internally is sliced, we shouldn't make
   // too many assumptions about which updates are dropped, only that
   // they are dropped by the windowed time.
@@ -46,7 +46,7 @@ class LatencyHistogramTest extends FunSuite {
   // directly.
   test("maintains sliding window by time") {
     Time.withCurrentTimeFrozen { tc =>
-    val histo = new LatencyHistogram(range=40.milliseconds, 
+    val histo = new LatencyHistogram(range=40.milliseconds,
       history=4.seconds)
       for (_ <- 0 until 100) histo.add(30.milliseconds)
       tc.advance(1.second)

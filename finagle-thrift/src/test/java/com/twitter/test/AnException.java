@@ -176,7 +176,7 @@ public class AnException extends Exception implements TBase<AnException, AnExcep
     while (true)
     {
       field = iprot.readFieldBegin();
-      if (field.type == TType.STOP) { 
+      if (field.type == TType.STOP) {
         break;
       }
       switch (field.id) {

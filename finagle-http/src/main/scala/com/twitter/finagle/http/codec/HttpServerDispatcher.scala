@@ -41,7 +41,7 @@ class HttpServerDispatcher[REQUEST <: Request](
           }
 
       }.asInstanceOf[REQUEST]
-      
+
       service(req)
 
     case invalid =>

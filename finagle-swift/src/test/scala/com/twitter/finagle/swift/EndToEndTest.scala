@@ -23,7 +23,7 @@ class EndToEndTest extends FunSuite {
 
     val server = Thrift.serveIface(":*", impl)
     val client = Thrift.newIface[Test1](server)
-    
+
     val map = new java.util.HashMap[String, java.lang.Integer]
     map.put("okay", 1234)
     map.put("nope", 4321)
@@ -36,16 +36,16 @@ class EndToEndTest extends FunSuite {
   test("exceptions") {
     val impl = new Test1 {
       def ping(x: String) = Future.exception(new Exception("WTF"))
-      def ab(a: String, b: java.util.Map[String, java.lang.Integer]) = 
+      def ab(a: String, b: java.util.Map[String, java.lang.Integer]) =
         Future.exception(Test1Exc("hello, exceptional world", 123))
     }
-    
+
     val server = Thrift.serveIface(":*", impl)
     val client = Thrift.newIface[Test1](server)
-    
+
     val exc = intercept[TApplicationException] { Await.result(client.ping("ok")) }
     assert(exc.getMessage === "Internal error processing ping: 'java.lang.Exception: WTF'")
-    
+
     val exc1 = intercept[Test1Exc] { Await.result(client.ab("blah", new java.util.HashMap)) }
     assert(exc1 === Test1Exc("hello, exceptional world", 123))
   }

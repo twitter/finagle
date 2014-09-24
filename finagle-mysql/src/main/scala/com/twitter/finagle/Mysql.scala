@@ -87,19 +87,19 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       stack: Stack[ServiceFactory[Request, Result]] = this.stack,
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
-    
+
     protected type In = Packet
     protected type Out = Packet
     protected def newTransporter() = MysqlTransporter(params)
     protected def newDispatcher(transport: Transport[Packet, Packet]):  Service[Request, Result] =
       mysql.ClientDispatcher(transport, Handshake(params))
-  
+
     /**
      * The credentials to use when authenticating a new session.
      */
     def withCredentials(u: String, p: String): Client =
       configured(Handshake.Credentials(Option(u), Option(p)))
-  
+
     /**
      * Database to use when this client establishes a new session.
      */
@@ -113,7 +113,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     def withCharset(charset: Short): Client =
       configured(Handshake.Charset(charset))
   }
-  
+
   val client = Client()
 
   def newClient(dest: Name, label: String): ServiceFactory[Request, Result] =
@@ -145,6 +145,6 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
    * A client configured with parameter p.
    */
   @deprecated("Use client.configured", "6.22.0")
-  def configured[P: Stack.Param](p: P): Client = 
+  def configured[P: Stack.Param](p: P): Client =
     client.configured(p)
 }

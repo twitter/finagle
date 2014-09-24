@@ -17,7 +17,7 @@ class DispatchTest extends FunSuite with MockitoSugar {
   test("dispatches to the right method") {
     val processor = mock[Test1]
     val service = new SwiftService(processor)
-    
+
     val message = newMessage("ping", TMessageType.CALL) { out =>
       out.writeFieldBegin(new TField("msg", TType.STRING, 1))
       out.writeString("HELLO")

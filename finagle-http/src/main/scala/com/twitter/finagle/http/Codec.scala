@@ -197,9 +197,9 @@ case class Http(
           Filter.identity[HttpRequest, HttpResponse]
         }
 
-        tracing andThen 
+        tracing andThen
           DtabFilter.Netty andThen
-          checkRequest andThen 
+          checkRequest andThen
           underlying
       }
     }
@@ -237,7 +237,7 @@ object HttpClientTracingFilter {
   val role = Stack.Role("HttpClientTracing")
 
   /**
-   * Creates a [[com.twitter.finagle.Stackable]] 
+   * Creates a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.http.HttpClientTracingFilter]].
    */
   def module[Req <: HttpRequest, Rep]: Stackable[ServiceFactory[Req, Rep]] =
@@ -423,7 +423,7 @@ case class RichHttp[REQUEST <: Request](
       }
 
       override def newServerDispatcher(
-          transport: Transport[Any, Any], 
+          transport: Transport[Any, Any],
           service: Service[REQUEST, Response]): Closable =
         new HttpServerDispatcher(new HttpTransport(transport), service)
 

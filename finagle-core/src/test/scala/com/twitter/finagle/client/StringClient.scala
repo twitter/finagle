@@ -4,9 +4,9 @@ import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Stack, ServiceFactory}
-import com.twitter.io.Charsets 
+import com.twitter.io.Charsets
 import org.jboss.netty.channel.{
-  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent, 
+  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent,
   SimpleChannelHandler}
 import org.jboss.netty.handler.codec.string.{StringEncoder, StringDecoder}
 
@@ -20,7 +20,7 @@ private class DelimEncoder(delim: Char) extends SimpleChannelHandler {
     Channels.write(ctx, evt.getFuture, newMessage, evt.getRemoteAddress)
   }
 }
- 
+
 private[client] object StringClientPipeline extends ChannelPipelineFactory {
   def getPipeline = {
     val pipeline = Channels.pipeline()

@@ -168,7 +168,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     assert(Await.result(created) === expected)
     assert(statsReceiver.counter("write_successes")() === 1)
   }
-  
+
   "create" should "handle ZK error" in {
     val created = zk.create(path, Some(data), List(acl), mode)
 

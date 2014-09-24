@@ -4,7 +4,7 @@ import org.jboss.netty.channel.ChannelPipelineFactory
 import com.twitter.finagle.{CodecFactory, ServerCodecConfig}
 import org.apache.thrift.protocol.TProtocolFactory
 
-private[finagle] 
+private[finagle]
 case class ThriftServerBufferedPipelineFactory(protocolFactory: TProtocolFactory)
     extends ChannelPipelineFactory {
 

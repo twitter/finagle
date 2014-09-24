@@ -13,7 +13,7 @@ import com.twitter.util.{Future, Return, Throw, Duration, Timer, Stopwatch}
  * the filter's operating behavior:
  *
  *  - counter `timeouts` indicates the number of original requests
- *    that timed out and subsequently caused a backup request to 
+ *    that timed out and subsequently caused a backup request to
  *    be issued;
  *  - counter `won` indicates the number of original requests that won,
  *    including those that didn't actually race with a backup;
@@ -43,9 +43,9 @@ import com.twitter.util.{Future, Return, Throw, Duration, Timer, Stopwatch}
  * should be implemented as a sort of queueing policy.
  */
 class BackupRequestFilter[Req, Rep](
-    quantile: Int, 
-    range: Duration, 
-    timer: Timer, 
+    quantile: Int,
+    range: Duration,
+    timer: Timer,
     statsReceiver: StatsReceiver,
     history: Duration
 ) extends SimpleFilter[Req, Rep] {
@@ -60,7 +60,7 @@ class BackupRequestFilter[Req, Rep](
   private[this] val timeouts = statsReceiver.counter("timeouts")
   private[this] val won = statsReceiver.counter("won")
   private[this] val lost = statsReceiver.counter("lost")
-  private[this] val cutoffGauge = 
+  private[this] val cutoffGauge =
     statsReceiver.addGauge("cutoff_ms") { cutoff().inMilliseconds.toFloat }
 
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
@@ -79,7 +79,7 @@ class BackupRequestFilter[Req, Rep](
       case (Return(res), Seq(other)) =>
         if (other eq orig) lost.incr() else {
           won.incr()
-          // Currently we use only latency data only from the 
+          // Currently we use only latency data only from the
           // first request, since that is simplest.
           histo.add(elapsed())
         }

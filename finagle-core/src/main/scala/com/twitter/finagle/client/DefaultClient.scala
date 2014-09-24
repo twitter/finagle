@@ -96,7 +96,7 @@ case class DefaultClient[Req, Rep](
     TimeoutFactory.Param(serviceTimeout) +
     TimeoutFilter.Param(requestTimeout) +
     ExpiringService.Param(maxIdletime, maxLifetime)
-    
+
   private[this] case class Client(stack: Stack[ServiceFactory[Req, Rep]] = clientStack,
     params: Stack.Params = params)
       extends StdStackClient[Req, Rep, Client] {
@@ -124,7 +124,7 @@ case class DefaultClient[Req, Rep](
       }
     }
   }
-  
+
   private[this] val underlying = Client()
 
   def newClient(dest: Name, label: String) =

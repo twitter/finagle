@@ -5,7 +5,7 @@ import com.twitter.finagle.serverset2.client.KeeperException
 private[serverset2] object ApacheKeeperException {
   /**
    * Transform ZooKeeper Error Codes to KeeperExceptions
-   * 
+   *
    * @param err error code
    * @param path path associated with exception. May be null
    * @return Some(KeeperException) or None if no error is raised (OK)

@@ -49,7 +49,7 @@ object Addr {
       Bound(Set(addrs:_*))
 
     /**
-     * Provided for Java compatibility. 
+     * Provided for Java compatibility.
      */
     def apply(addrs: java.util.List[SocketAddress]): Addr =
       apply(addrs.asScala: _*)

@@ -9,7 +9,7 @@ import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType, TPro
 import org.apache.thrift.transport.TMemoryInputTransport
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{
-  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent, 
+  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent,
   SimpleChannelDownstreamHandler}
 
 /**
@@ -23,7 +23,7 @@ object ThriftClientFramedCodec {
    * Passing a ClientId will propagate that information to the server iff the server is a finagle
    * server.
    */
-  def apply(clientId: Option[ClientId] = None) = 
+  def apply(clientId: Option[ClientId] = None) =
     new ThriftClientFramedCodecFactory(clientId)
 
   def get() = apply()
@@ -150,7 +150,7 @@ private[finagle] case class ThriftClientPreparer(
     }
   }
 
-  def prepare(underlying: ServiceFactory[ThriftClientRequest, Array[Byte]]) = 
+  def prepare(underlying: ServiceFactory[ThriftClientRequest, Array[Byte]]) =
     underlying flatMap prepareService
 }
 

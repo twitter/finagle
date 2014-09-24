@@ -79,7 +79,7 @@ class EndToEndTest extends FunSuite {
       }
     }
   }
-  
+
   /* While we're supporting both old & new APIs, temporarily test
    * the cross-product */
   val clientId = ClientId("test.service")
@@ -87,7 +87,7 @@ class EndToEndTest extends FunSuite {
          "new" -> ClientBuilder().stack(ThriftMux.client.withClientId(clientId)),
          "old" -> ClientBuilder().stack(ThriftMuxClient.withClientId(clientId)));
        (serverWhich, serverBuilder) <- Seq(
-         "new" -> ServerBuilder().stack(ThriftMux.server), 
+         "new" -> ServerBuilder().stack(ThriftMux.server),
          "old" -> ServerBuilder().stack(ThriftMuxServer))) {
     test(s"ServerBuilder ($serverWhich) thriftmux server + ClientBuilder ($clientWhich) thriftmux client") {
       val address = RandomSocket()
@@ -96,21 +96,21 @@ class EndToEndTest extends FunSuite {
           if (x.isEmpty) Future.value(ClientId.current map { _.name } getOrElse(""))
           else Future.value(x+x)
       }
-  
+
       val service = new TestService$FinagleService(iface, Thrift.protocolFactory)
-  
+
       val server = serverBuilder
         .bindTo(address)
         .name("ThriftMuxServer")
         .build(service)
-  
+
       val clientId = "test.service"
       val cbService = clientBuilder
         .dest("localhost:" + address.getPort)
         .build()
-  
+
       val client = new TestService.FinagledClient(cbService, Thrift.protocolFactory)
-  
+
       1 to 5 foreach { _ =>
         assert(Await.result(client.query("ok")) === "okok")
       }
@@ -211,8 +211,8 @@ class EndToEndTest extends FunSuite {
 
       protected def newListener() = ThriftMuxListener
       protected def newDispatcher(
-          transport: Transport[In, Out], 
-          service: Service[ChannelBuffer, ChannelBuffer]) = 
+          transport: Transport[In, Out],
+          service: Service[ChannelBuffer, ChannelBuffer]) =
         new mux.ServerDispatcher(transport, service, true) {
           private val saveReceive = receive
           receive = { msg =>
@@ -221,7 +221,7 @@ class EndToEndTest extends FunSuite {
               saveReceive(msg)
             }
           }
-        } 
+        }
     }
 
    val testThriftMuxServer = ThriftMux.Server(TestThriftMuxer())
@@ -358,7 +358,7 @@ class EndToEndTest extends FunSuite {
     val server = ThriftMux.serveIface(":*", testService)
 
     object OldPlainPipeliningThriftClient extends Thrift.Client(stack=StackClient.newStack) {
-      override protected def newDispatcher(transport: Transport[ThriftClientRequest, Array[Byte]]) = 
+      override protected def newDispatcher(transport: Transport[ThriftClientRequest, Array[Byte]]) =
         new PipeliningDispatcher(transport)
     }
 

@@ -62,7 +62,7 @@ class CommonsStatsReceiverTest extends FunSuite with BeforeAndAfter with OneInst
     inner = 3.14f
     assert(Stats.getVariable("bam").read.asInstanceOf[Float] === 3.14f)
   }
-  
+
   test("Loaded receiver") {
     DefaultStatsReceiver.counter("loadedfoo").incr()
     assert(Stats.getVariable("loadedfoo").read.asInstanceOf[Long] === 1)

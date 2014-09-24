@@ -18,7 +18,7 @@ private[finagle] class LatencyHistogram(
   private[this] val N = range.inMilliseconds.toInt + 1
   private[this] val n = new WindowedAdder(history, 5)
   private[this] val tab = Array.fill(N) { new WindowedAdder(history, 5) }
-  
+
   /**
    * Compute the quantile `which` from the underlying
    * dataset using the normal algorithm without

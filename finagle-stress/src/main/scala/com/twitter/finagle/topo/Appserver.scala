@@ -50,7 +50,7 @@ class AppService(clients: Seq[thrift.Backend.FutureIface], responseSample: Seq[(
 object Appserver extends App with Logging {
   val useThriftmux = flag("thriftmux", true, "Use thriftmux")
   val basePort = flag("baseport", 3000, "Base port")
-  val responseSample = flag("responsesample", 
+  val responseSample = flag("responsesample",
     Seq((0.millisecond, 0.bytes)), "Response sample")
   val clientAddrs = flag("clients", Seq(":2000", ":2020"), "clients")
 
@@ -76,7 +76,7 @@ object Appserver extends App with Logging {
     val adminService = new AdminHttpService(basePort()+1, 100/*backlog*/, runtime)
     adminService.start()
 
-    val server = Http.serve(":"+basePort(), 
+    val server = Http.serve(":"+basePort(),
       new AppService(clients.toSeq, responseSample()))
     Await.ready(server)
   }

@@ -181,7 +181,7 @@ public class F {
         __args__.setA(a);
         __args__.write(__prot__);
         __prot__.writeMessageEnd();
-      
+
 
         byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
         ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
@@ -279,7 +279,7 @@ public class F {
               TApplicationException x = new TApplicationException(TApplicationException.PROTOCOL_ERROR, e.getMessage());
               TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
               TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
-          
+
               oprot.writeMessageBegin(new TMessage("another_method", TMessageType.EXCEPTION, seqid));
               x.write(oprot);
               oprot.writeMessageEnd();
@@ -292,7 +292,7 @@ public class F {
           } catch (Exception e) {
             return Future.exception(e);
           }
-          
+
           try {
             iprot.readMessageEnd();
           } catch (Exception e) {
@@ -310,15 +310,15 @@ public class F {
                 another_method_result result = new another_method_result();
                 result.success = value;
                 result.setSuccessIsSet(true);
-          
+
                 try {
                   TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
                   TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
-                   
+
                   oprot.writeMessageBegin(new TMessage("another_method", TMessageType.REPLY, seqid));
                   result.write(oprot);
                   oprot.writeMessageEnd();
-                   
+
                   return Future.value(Arrays.copyOfRange(memoryBuffer.getArray(), 0, memoryBuffer.length()));
                 } catch (Exception e) {
                   return Future.exception(e);
@@ -334,20 +334,20 @@ public class F {
           }
         }
       });
-      
+
     }
-    
+
     public Future<byte[]> apply(byte[] request) {
       TTransport inputTransport = new TMemoryInputTransport(request);
       TProtocol iprot = protocolFactory.getProtocol(inputTransport);
-    
+
       TMessage msg;
       try {
         msg = iprot.readMessageBegin();
       } catch (Exception e) {
         return Future.exception(e);
       }
-    
+
       Function2<TProtocol, Integer, Future<byte[]>> fn = functionMap.get(msg.name);
       if (fn == null) {
         try {
@@ -365,7 +365,7 @@ public class F {
           return Future.exception(e);
         }
       }
-    
+
       return fn.apply(iprot, msg.seqid);
     }
 
@@ -443,7 +443,7 @@ public class F {
     public static final Map<_Fields, FieldMetaData> metaDataMap;
     static {
       Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
-      tmpMap.put(_Fields.A, new FieldMetaData("a", TFieldRequirementType.DEFAULT, 
+      tmpMap.put(_Fields.A, new FieldMetaData("a", TFieldRequirementType.DEFAULT,
           new FieldValueMetaData(TType.I32)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       FieldMetaData.addStructMetaDataMap(another_method_args.class, metaDataMap);
@@ -598,7 +598,7 @@ public class F {
       while (true)
       {
         field = iprot.readFieldBegin();
-        if (field.type == TType.STOP) { 
+        if (field.type == TType.STOP) {
           break;
         }
         switch (field.id) {
@@ -606,7 +606,7 @@ public class F {
             if (field.type == TType.I32) {
               this.a = iprot.readI32();
               setAIsSet(true);
-            } else { 
+            } else {
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
@@ -722,7 +722,7 @@ public class F {
     public static final Map<_Fields, FieldMetaData> metaDataMap;
     static {
       Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
-      tmpMap.put(_Fields.SUCCESS, new FieldMetaData("success", TFieldRequirementType.DEFAULT, 
+      tmpMap.put(_Fields.SUCCESS, new FieldMetaData("success", TFieldRequirementType.DEFAULT,
           new FieldValueMetaData(TType.I32)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       FieldMetaData.addStructMetaDataMap(another_method_result.class, metaDataMap);
@@ -877,7 +877,7 @@ public class F {
       while (true)
       {
         field = iprot.readFieldBegin();
-        if (field.type == TType.STOP) { 
+        if (field.type == TType.STOP) {
           break;
         }
         switch (field.id) {
@@ -885,7 +885,7 @@ public class F {
             if (field.type == TType.I32) {
               this.success = iprot.readI32();
               setSuccessIsSet(true);
-            } else { 
+            } else {
               TProtocolUtil.skip(iprot, field.type);
             }
             break;

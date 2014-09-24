@@ -16,9 +16,9 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     dest <- okDests
   } yield Dentry(Path.read(prefix), NameTree.read(dest))
 
-  val okDtabs = 
+  val okDtabs =
     Dtab.empty +: (okDentries.permutations map(ds => Dtab(ds))).toIndexedSeq
-  
+
   def newMsg(): HttpMessage =
     new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
 
@@ -110,7 +110,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     val failure = intercept[Failure] { result.get() }
     assert(failure.why === "Unmatched X-Dtab headers")
   }
-  
+
   test("X-Dtab: Invalid: non-ASCII encoding") {
     val m = newMsg()
     m.headers.set("X-Dtab-01-A", "☺")
@@ -118,7 +118,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     val result = HttpDtab.read(m)
     val failure = intercept[Failure] { result.get() }
     assert(failure.why === "Value not b64-encoded: ☺")
-  }  
+  }
 
   test("clear()") {
     val m = newMsg()
@@ -127,7 +127,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     m.headers.set("onetwothree", "123")
 
     val headers = Seq(
-      "X-Dtab-00-A", "X-Dtab-00-B", 
+      "X-Dtab-00-A", "X-Dtab-00-B",
       "X-Dtab-01-A", "X-Dtab-01-B",
       "Dtab-Local")
 
@@ -135,9 +135,9 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
       assert(m.headers.contains(h), h+" not in headers")
 
     assert(m.headers.contains("onetwothree"), "onetwothree not in headers")
-    
+
     HttpDtab.clear(m)
-    
+
     assert(m.headers.contains("onetwothree"), "onetwothree was removed from headers")
     for (h <- headers)
       assert(!m.headers.contains(h), h+" was not removed from headers")

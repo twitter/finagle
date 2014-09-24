@@ -43,7 +43,7 @@ class ThriftDispatchBenchmark extends SimpleBenchmark {
     out.writeMessageEnd()
     Arrays.copyOfRange(buf.getArray(), 0, buf.length())
   }
-  
+
   val service = new Service[ThriftClientRequest, Array[Byte]] {
     val response = Future.value {
       val buf = new TMemoryBuffer(32)
@@ -72,7 +72,7 @@ class ThriftDispatchBenchmark extends SimpleBenchmark {
       i += 1
     }
   }
-  
+
   def timeSwiftDispatch(nreps: Int) {
     var i = 0
     while (i < nreps) {
@@ -80,7 +80,7 @@ class ThriftDispatchBenchmark extends SimpleBenchmark {
       i += 1
     }
   }
-  
+
   def timeScroogeProxy(nreps: Int) {
     var i = 0
     while (i < nreps) {

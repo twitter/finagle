@@ -9,6 +9,6 @@ trait Showable[-T] {
 }
 
 object Showable {
-  def show[T](t: T)(implicit showable: Showable[T]): String = 
+  def show[T](t: T)(implicit showable: Showable[T]): String =
     showable.show(t)
 }

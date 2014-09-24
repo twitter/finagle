@@ -56,12 +56,12 @@ case class DefaultServer[Req, Rep, In, Out](
 
   val stack = StackServer.newStack[Req, Rep]
     .replace(StackServer.Role.preparer, prepare)
-    
+
   private type _In = In
   private type _Out = Out
-  
+
   private case class Server(
-    stack: Stack[ServiceFactory[Req, Rep]] = stack, 
+    stack: Stack[ServiceFactory[Req, Rep]] = stack,
     params: Stack.Params = Stack.Params.empty
   ) extends StdStackServer[Req, Rep, Server] {
     protected def copy1(

@@ -87,7 +87,7 @@ object CacheNodeGroup {
     // by WeightedInetSocketAddress are doubles -- should we discretize these?
     case WeightedInetSocketAddress(ia, weight)
     if useOnlyResolvedAddress && !ia.isUnresolved =>
-      //Note: unresolvedAddresses won't be added even if they are able 
+      //Note: unresolvedAddresses won't be added even if they are able
       // to be resolved after added
       new CacheNode(ia.getHostName, ia.getPort, 1,
         Some(ia.getAddress.getHostAddress + ":" + ia.getPort))

@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 private[serverset2] object Stabilizer {
   // Create an event of epochs for the given duration.
-  def epochs(period: Duration)(implicit timer: Timer): Event[Unit] = 
+  def epochs(period: Duration)(implicit timer: Timer): Event[Unit] =
     new Event[Unit] {
       def register(w: Witness[Unit]) = {
         timer.schedule(period) {
@@ -63,14 +63,14 @@ private[serverset2] object Stabilizer {
           case Addr.Bound(bound) =>
             State(limbo, merge(active, bound), addr)
 
-          case addr => 
+          case addr =>
             // Any other address simply propagates the address while
             // leaving the active/limbo set unchanged. Both active
             // and limbo have to expire in order for this address to
             // propagate.
             st.copy(addr=addr)
         }
-      
+
       // The epoch turned
       case (st@State(limbo, active, last), Right(())) =>
         last match {

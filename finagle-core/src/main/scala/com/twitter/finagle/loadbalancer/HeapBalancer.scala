@@ -230,7 +230,7 @@ class HeapBalancer[Req, Rep](
       }
   }
 
-  private[this] def updateGroup(newSnap: Set[ServiceFactory[Req, Rep]]): Unit = 
+  private[this] def updateGroup(newSnap: Set[ServiceFactory[Req, Rep]]): Unit =
     synchronized {
       for (n <- snap &~ newSnap) remNode(n)
       for (n <- newSnap &~ snap) addNode(n)

@@ -35,7 +35,7 @@ class DarkTrafficFilter[Req, Rep](
       darkService(request).onFailure { t: Throwable =>
         // This may not count if you're using a one-way service
         failedCounter.incr()
-        
+
         log.error(t, t.getMessage)
       }
     } else {

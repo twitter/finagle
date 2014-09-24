@@ -18,7 +18,7 @@ class InterpreterTest extends FunSuite {
   val map = mutable.Map[ChannelBuffer, Entry]()
   val atomicMap = new AtomicMap(Seq(map))
   val interpreter = new Interpreter(atomicMap)
-        
+
   test("correctly perform the GET & SET commands") {
     val key   = "foo"
     val value = "bar"

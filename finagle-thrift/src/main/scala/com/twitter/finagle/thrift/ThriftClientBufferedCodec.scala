@@ -4,8 +4,8 @@ import org.jboss.netty.channel.ChannelPipelineFactory
 import com.twitter.finagle.{CodecFactory, ClientCodecConfig}
 import org.apache.thrift.protocol.TProtocolFactory
 
-private[finagle] 
-case class ThriftClientBufferedPipelineFactory(protocolFactory: TProtocolFactory) 
+private[finagle]
+case class ThriftClientBufferedPipelineFactory(protocolFactory: TProtocolFactory)
     extends ChannelPipelineFactory {
   def getPipeline() = {
     val pipeline = ThriftClientFramedPipelineFactory.getPipeline()

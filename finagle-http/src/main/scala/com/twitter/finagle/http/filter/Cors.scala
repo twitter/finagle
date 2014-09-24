@@ -58,7 +58,7 @@ object Cors {
     /*
      * Simple Cross-Origin Request, Actual Request, and Redirects
      */
-    
+
     protected[this] def getOrigin(request: Request): Option[String] = {
       /*
        * If the Origin header is not present terminate this set of steps. The request is outside

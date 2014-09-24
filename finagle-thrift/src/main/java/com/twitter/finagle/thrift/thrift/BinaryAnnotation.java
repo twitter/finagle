@@ -39,7 +39,7 @@ public class BinaryAnnotation implements TBase<BinaryAnnotation, BinaryAnnotatio
   public String key;
   public ByteBuffer value;
   /**
-   * 
+   *
    * @see AnnotationType
    */
   public AnnotationType annotation_type;
@@ -50,7 +50,7 @@ public class BinaryAnnotation implements TBase<BinaryAnnotation, BinaryAnnotatio
     KEY((short)1, "key"),
     VALUE((short)2, "value"),
     /**
-     * 
+     *
      * @see AnnotationType
      */
     ANNOTATION_TYPE((short)3, "annotation_type"),
@@ -121,13 +121,13 @@ public class BinaryAnnotation implements TBase<BinaryAnnotation, BinaryAnnotatio
   public static final Map<_Fields, FieldMetaData> metaDataMap;
   static {
     Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
-    tmpMap.put(_Fields.KEY, new FieldMetaData("key", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.KEY, new FieldMetaData("key", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.STRING)));
-    tmpMap.put(_Fields.VALUE, new FieldMetaData("value", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.VALUE, new FieldMetaData("value", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.STRING)));
-    tmpMap.put(_Fields.ANNOTATION_TYPE, new FieldMetaData("annotation_type", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.ANNOTATION_TYPE, new FieldMetaData("annotation_type", TFieldRequirementType.DEFAULT,
         new EnumMetaData(TType.ENUM, AnnotationType.class)));
-    tmpMap.put(_Fields.HOST, new FieldMetaData("host", TFieldRequirementType.OPTIONAL, 
+    tmpMap.put(_Fields.HOST, new FieldMetaData("host", TFieldRequirementType.OPTIONAL,
         new StructMetaData(TType.STRUCT, Endpoint.class)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     FieldMetaData.addStructMetaDataMap(BinaryAnnotation.class, metaDataMap);
@@ -237,7 +237,7 @@ public class BinaryAnnotation implements TBase<BinaryAnnotation, BinaryAnnotatio
   }
 
   /**
-   * 
+   *
    * @see AnnotationType
    */
   public AnnotationType getAnnotation_type() {
@@ -245,7 +245,7 @@ public class BinaryAnnotation implements TBase<BinaryAnnotation, BinaryAnnotatio
   }
 
   /**
-   * 
+   *
    * @see AnnotationType
    */
   public BinaryAnnotation setAnnotation_type(AnnotationType annotation_type) {
@@ -484,28 +484,28 @@ public class BinaryAnnotation implements TBase<BinaryAnnotation, BinaryAnnotatio
     while (true)
     {
       field = iprot.readFieldBegin();
-      if (field.type == TType.STOP) { 
+      if (field.type == TType.STOP) {
         break;
       }
       switch (field.id) {
         case 1: // KEY
           if (field.type == TType.STRING) {
             this.key = iprot.readString();
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
         case 2: // VALUE
           if (field.type == TType.STRING) {
             this.value = iprot.readBinary();
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
         case 3: // ANNOTATION_TYPE
           if (field.type == TType.I32) {
             this.annotation_type = AnnotationType.findByValue(iprot.readI32());
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
@@ -513,7 +513,7 @@ public class BinaryAnnotation implements TBase<BinaryAnnotation, BinaryAnnotatio
           if (field.type == TType.STRUCT) {
             this.host = new Endpoint();
             this.host.read(iprot);
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;

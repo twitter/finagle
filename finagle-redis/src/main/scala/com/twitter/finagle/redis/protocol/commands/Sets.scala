@@ -93,7 +93,7 @@ case class SRandMember(key: ChannelBuffer, count: Option[Int] = None) extends St
 }
 
 object SRandMember {
-  def apply(args: Seq[Array[Byte]]): SRandMember = 
+  def apply(args: Seq[Array[Byte]]): SRandMember =
     SRandMember(GetMonadArg(args, CommandBytes.SRANDMEMBER))
 }
 

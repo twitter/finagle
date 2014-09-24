@@ -45,7 +45,7 @@ class ThriftMuxServerLike private[finagle](server: ThriftMux.Server)
    * the stack.
    */
   def params = server.params
-  
+
   protected val protocolFactory = server.protocolFactory
 
   /**

@@ -203,14 +203,14 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         StackServer.Role.preparer, (next: ServiceFactory[Req1, Rep1]) =>
           codec.prepareConnFactory(next)
       )
-      
+
       case class Server(
         stack: Stack[ServiceFactory[Req1, Rep1]] = newStack,
         params: Stack.Params = ps
       ) extends StdStackServer[Req1, Rep1, Server] {
         protected type In = Any
         protected type Out = Any
-        
+
         protected def copy1(
           stack: Stack[ServiceFactory[Req1, Rep1]] = this.stack,
           params: Stack.Params = this.params
@@ -218,7 +218,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
         protected def newListener(): Listener[Any, Any] =
           Netty3Listener(codec.pipelineFactory, params)
-          
+
         protected def newDispatcher(transport: Transport[In, Out], service: Service[Req1, Rep1]) = {
           // TODO: Expiration logic should be installed using ExpiringService
           // in StackServer#newStack. Then we can thread through "closes"

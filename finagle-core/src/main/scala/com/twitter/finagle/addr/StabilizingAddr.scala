@@ -19,7 +19,7 @@ private[finagle] object StabilizingAddr {
     val Unhealthy = Value(-1)
   }
 
-  private def qcontains[T](q: Queue[(T, _)], elem: T): Boolean = 
+  private def qcontains[T](q: Queue[(T, _)], elem: T): Boolean =
     q exists { case (e, _) => e == elem }
 
   /**
@@ -52,7 +52,7 @@ private[finagle] object StabilizingAddr {
     val health = statsReceiver.addGauge("health") { healthStat }
     val limbo = statsReceiver.addGauge("limbo") { nq }
     val stabilized = new Broker[Addr]
-    
+
     /**
      * Exclusively maintains the elements in current
      * based on adds, removes, and health transitions.
@@ -60,8 +60,8 @@ private[finagle] object StabilizingAddr {
      * transition resets the grace period.
      */
     def loop(
-        remq: Queue[(SocketAddress, Time)], 
-        h: Health, 
+        remq: Queue[(SocketAddress, Time)],
+        h: Health,
         active: Set[SocketAddress],
         needPush: Boolean,
         srcAddr: Addr): Future[Unit] = {
@@ -69,7 +69,7 @@ private[finagle] object StabilizingAddr {
       Offer.select(
         pulse map { newh =>
           healthStat = newh.id
-  
+
           // If our health transitions into healthy, reset removal
           // times foreach elem in remq.
           newh match {
@@ -87,8 +87,8 @@ private[finagle] object StabilizingAddr {
 
         addr map {
           case addr@Addr.Bound(newSet) =>
-            // Update our pending queue so that newly added 
-            // entries aren't later removed. 
+            // Update our pending queue so that newly added
+            // entries aren't later removed.
             var q = remq filter { case (e, _) => !(newSet contains e) }
 
             // Add newly removed elements to the remove queue.
@@ -120,13 +120,13 @@ private[finagle] object StabilizingAddr {
         if (!needPush) Offer.never else {
           // We always bind if active is nonempty. Otherwise we
           // pass through the current active address.
-          val addr = 
+          val addr =
             if (active.nonEmpty) Addr.Bound(active)
             else srcAddr
           stabilized.send(addr) map { _ =>
             loop(remq, h, active, false, srcAddr)
           }
-        } 
+        }
       )
     }
 

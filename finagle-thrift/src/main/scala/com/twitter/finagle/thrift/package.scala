@@ -3,7 +3,7 @@ package com.twitter.finagle
 /**
  * =Deprecation=
  *
- * Please use the new interface, [[com.twitter.finagle.Thrift]], 
+ * Please use the new interface, [[com.twitter.finagle.Thrift]],
  * for constructing thrift clients and servers.
  *
  * ==Thrift codecs==

@@ -23,7 +23,7 @@ private[finagle] object SingletonPool {
         new SingletonPool(next, sr.scope("singletonpool"))
       }
     }
-    
+
   /**
    * A wrapper service to maintain a reference count. The count is
    * set to 1 on construction; the count is decreased for each
@@ -34,7 +34,7 @@ private[finagle] object SingletonPool {
    * from crossing the 0 boundary multiple times -- it may thus call
    * 'close' on the underlying service multiple times.
    */
-  class RefcountedService[Req, Rep](underlying: Service[Req, Rep]) 
+  class RefcountedService[Req, Rep](underlying: Service[Req, Rep])
       extends ServiceProxy[Req, Rep](underlying) {
     private[this] val count = new AtomicInteger(1)
     private[this] val future = Future.value(this)
@@ -166,7 +166,7 @@ extends ServiceFactory[Req, Rep] {
   /**
    * @inheritdoc
    *
-   * SingletonPool closes asynchronously; the underlying connection is 
+   * SingletonPool closes asynchronously; the underlying connection is
    * closed once all references are returned.
    */
   @tailrec
@@ -185,7 +185,7 @@ extends ServiceFactory[Req, Rep] {
         Future.Done
       }
 
-    case Closed => 
+    case Closed =>
       Future.Done
   }
 }

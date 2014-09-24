@@ -49,7 +49,7 @@ object SpnegoAuthenticator {
          extends RequestProxy
          with Authenticated[Request]
   }
-  
+
   class HttpFilter(
     loginContext: String,
     principal: Option[GSSName] = None,
@@ -69,7 +69,7 @@ object SpnegoAuthenticator {
       rsp.headers.set(HttpHeaders.Names.WWW_AUTHENTICATE, auth)
       rsp
     }
-    
+
     /** Return a spnego 'challenge' */
     protected[this] def unauthorized(req: HttpRequest): HttpResponse =
       setWwwAuthenticate(
@@ -99,7 +99,7 @@ object SpnegoAuthenticator {
       rsp.wwwAuthenticate = auth
       rsp
     }
-    
+
     protected[this] def unauthorized(req: Request): Response = {
       val rsp = req.response
       rsp.status = Status.Unauthorized
@@ -109,7 +109,7 @@ object SpnegoAuthenticator {
     protected[this] def authenticated(req: Request, context: GSSContext): Authenticated.RichHttp =
       Authenticated.RichHttp(req, context)
   }
-}  
+}
 
 /**
  * A SPNEGO HTTP authenticator as defined in https://tools.ietf.org/html/rfc4559.
@@ -160,7 +160,7 @@ abstract class SpnegoAuthenticator[Req, Rsp](
     } onSuccess { cred =>
       log.debug("Got credential: %s", cred)
     }
- 
+
   protected[this] case class Negotiated(
     established: Option[GSSContext],
     wwwAuthenticate: Option[String])
@@ -191,7 +191,7 @@ abstract class SpnegoAuthenticator[Req, Rsp](
         case e: GSSException => {
           log.error(e, "authenticating")
           unauthorized(req)
-        }      
+        }
       }
     } getOrElse {
       Future value unauthorized(req)

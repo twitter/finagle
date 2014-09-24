@@ -102,7 +102,7 @@ public class ClientId implements TBase<ClientId, ClientId._Fields>, java.io.Seri
   public static final Map<_Fields, FieldMetaData> metaDataMap;
   static {
     Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
-    tmpMap.put(_Fields.NAME, new FieldMetaData("name", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.NAME, new FieldMetaData("name", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     FieldMetaData.addStructMetaDataMap(ClientId.class, metaDataMap);
@@ -256,14 +256,14 @@ public class ClientId implements TBase<ClientId, ClientId._Fields>, java.io.Seri
     while (true)
     {
       field = iprot.readFieldBegin();
-      if (field.type == TType.STOP) { 
+      if (field.type == TType.STOP) {
         break;
       }
       switch (field.id) {
         case 1: // NAME
           if (field.type == TType.STRING) {
             this.name = iprot.readString();
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;

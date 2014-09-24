@@ -2,7 +2,7 @@ package com.twitter.finagle.protobuf.rpc.channel
 
 /**
  * Lookup repository that maps method names to 4 bytes.
- * 
+ *
  * */
 trait MethodLookup {
 

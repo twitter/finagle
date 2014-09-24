@@ -114,7 +114,7 @@ class ZkTest extends FunSuite {
     val o = v.states.register(Witness(ref))
     assert(watchedZk.value.opq === Seq(ExistsWatch("/foo/bar")))
     assert(ref.get === Activity.Pending)
-    
+
     assert(timer.tasks.isEmpty)
     watchedZk.value.opq(0).res() = Throw(new KeeperException.ConnectionLoss(None))
     assert(timer.tasks.size === 1)
@@ -122,13 +122,13 @@ class ZkTest extends FunSuite {
     timer.tick()
     assert(watchedZk.value.opq === Seq(ExistsWatch("/foo/bar"), ExistsWatch("/foo/bar")))
     assert(ref.get === Activity.Pending)
-    
+
     watchedZk.value.opq(1).res() = Throw(new KeeperException.SessionExpired(None))
     assert(watchedZk.value.opq === Seq(ExistsWatch("/foo/bar"), ExistsWatch("/foo/bar")))
     val Activity.Failed(exc) = ref.get
     assert(exc.isInstanceOf[KeeperException.SessionExpired])
   }}
-  
+
   test("Zk.globOf") { Time.withCurrentTimeFrozen { tc =>
     val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
@@ -138,7 +138,7 @@ class ZkTest extends FunSuite {
     val ref = new AtomicReference[Activity.State[Seq[String]]]
     v.states.register(Witness(ref))
     assert(ref.get === Activity.Pending)
-    
+
     val Seq(ew@ExistsWatch("/foo/bar")) = watchedZk.value.opq
     val ewwatchv = Var[WatchState](WatchState.Pending)
     ew.res() = Return(Watched(None, ewwatchv))

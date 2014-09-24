@@ -15,7 +15,7 @@ import scala.collection.mutable
 class ProtoTest extends FunSuite {
   def buf(n: Int) = ChannelBuffers.wrappedBuffer((0 until n).toArray.map(_.toByte))
   val body = buf(4)
-  
+
   val goodTags = Seq(8388607, 1, 123)
   val goodTraceIds = Seq(None, Some(tracing.Trace.nextId))
   val goodBufs = Seq(ChannelBuffers.EMPTY_BUFFER, buf(1), buf(4), buf(100))
@@ -44,21 +44,21 @@ class ProtoTest extends FunSuite {
       traceId <- goodTraceIds
       body <- goodBufs
     } yield Treq(tag, traceId, body))
-    
+
     ms ++= (for {
       tag <- goodTags
       body <- goodBufs
     } yield RreqOk(tag, body))
-    
+
     ms ++= (for {
       tag <- goodTags
     } yield Tdrain(tag))
-    
+
     ms ++= (for {
       tag <- goodTags
       reason <- goodStrings
     } yield Tdiscarded(tag, reason))
-    
+
     ms ++= (for {
       tag <- goodTags
       ctx <- goodContexts
@@ -66,19 +66,19 @@ class ProtoTest extends FunSuite {
       dtab <- goodDtabs
       body <- goodBufs
     } yield Tdispatch(tag, ctx, dest, dtab, body))
-    
+
     ms ++= (for {
       tag <- goodTags
       ctx <- goodContexts
       body <- goodBufs
     } yield RdispatchOk(tag, ctx, body))
-    
+
     ms ++= (for {
       tag <- goodTags
       ctx <- goodContexts
       err <- goodStrings
     } yield RdispatchError(tag, ctx, err))
-    
+
     ms ++= (for {
       tag <- goodTags
       ctx <- goodContexts
@@ -93,10 +93,10 @@ class ProtoTest extends FunSuite {
     } yield Tlease(lease))
 
     def assertEquiv(a: Message, b: Message) = (a, b) match {
-      case (Tdispatch(tag1, ctxs1, dst1, dtab1, req1), 
+      case (Tdispatch(tag1, ctxs1, dst1, dtab1, req1),
           Tdispatch(tag2, ctxs2, dst2, dtab2, req2)) =>
         assert(
-          tag1 == tag2 && ctxs1 == ctxs2 && dst1 == dst2 && 
+          tag1 == tag2 && ctxs1 == ctxs2 && dst1 == dst2 &&
           Equiv[Dtab].equiv(dtab1, dtab2) && req1 == req2)
       case (a, b) => assert(a === b)
     }

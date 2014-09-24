@@ -18,7 +18,7 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually with BeforeA
     saveBase = Dtab.base
     Dtab.base = Dtab.read("/foo=>/bar; /baz=>/biz")
   }
-  
+
   after {
     Dtab.base = saveBase
   }
@@ -41,7 +41,7 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually with BeforeA
       Dtab.local.print(printer)
       stringer.toString
     }
-    
+
     def show_me_your_dtab_size() = Future {
       Dtab.local.length
     }
@@ -72,7 +72,7 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually with BeforeA
 
       assert(idSet1.nonEmpty)
       assert(idSet2.nonEmpty)
-      
+
       assert(idSet1 != idSet2)
     }
   }
@@ -130,7 +130,7 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually with BeforeA
       assert(!tracer.isEmpty)
       val idSet = tracer.map(_.traceId).toSet
 
-      // We'll generate 2 ids for the upgrade negotiation; 
+      // We'll generate 2 ids for the upgrade negotiation;
       // 1 for our transaction.
       assert(idSet.size === 3)
       val ids = idSet.filter(_.traceId == id.traceId)
@@ -176,7 +176,7 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually with BeforeA
       assertAnn(nextTrace, Annotation.ClientAddr(clientAddr2))
       assertAnn(nextTrace, Annotation.ServerSend())
       assertAnn(nextTrace, Annotation.ClientRecv())
-      
+
       assert(trace.size === i)
 
 

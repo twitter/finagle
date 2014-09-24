@@ -422,7 +422,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       }
 
       case class Client(
-        stack: Stack[ServiceFactory[Req1, Rep1]] = clientStack, 
+        stack: Stack[ServiceFactory[Req1, Rep1]] = clientStack,
         params: Stack.Params = prms
       ) extends StdStackClient[Req1, Rep1, Client] {
         protected def copy1(
@@ -438,7 +438,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
           Netty3Transporter[Any, Any](codec.pipelineFactory,
             params + Netty3Transporter.TransportFactory(newTransport))
         }
-        
+
         protected def newDispatcher(transport: Transport[In, Out]) =
           codec.newClientDispatcher(transport)
       }

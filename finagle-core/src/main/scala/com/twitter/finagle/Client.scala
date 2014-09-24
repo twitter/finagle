@@ -26,7 +26,7 @@ import java.net.SocketAddress
  * Create a new client connected to `dest`.
  *
  * @define label
- * 
+ *
  * Argument `label` is used to assign a label to this client.
  * The label is used to display stats, etc.
  */
@@ -37,10 +37,10 @@ trait Client[Req, Rep] {
     val client = newClient(dest, label)
     new FactoryToService[Req, Rep](client)
   }
-  
+
   @deprecated("Use destination names", "6.7.x")
   /** $newService */
-  final def newService(dest: Group[SocketAddress]): Service[Req, Rep] = 
+  final def newService(dest: Group[SocketAddress]): Service[Req, Rep] =
     dest match {
       case LabelledGroup(g, label) => newService(Name.fromGroup(g), label)
       case _ => newService(Name.fromGroup(dest), "")
@@ -51,7 +51,7 @@ trait Client[Req, Rep] {
     val (n, l) = Resolver.evalLabeled(dest)
     newService(n, l)
   }
-  
+
   /** $newClient */
   final def newClient(dest: String): ServiceFactory[Req, Rep] = {
     val (n, l) = Resolver.evalLabeled(dest)
@@ -67,7 +67,7 @@ trait Client[Req, Rep] {
 
   @deprecated("Use destination names", "6.7.x")
   /** $newClient */
-  final def newClient(dest: Group[SocketAddress]): ServiceFactory[Req, Rep] = 
+  final def newClient(dest: Group[SocketAddress]): ServiceFactory[Req, Rep] =
     dest match {
       case LabelledGroup(g, label) => newClient(Name.fromGroup(g), label)
       case _ => newClient(Name.fromGroup(dest), "")

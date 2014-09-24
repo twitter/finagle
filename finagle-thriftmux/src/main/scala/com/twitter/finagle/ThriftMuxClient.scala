@@ -14,7 +14,7 @@ import org.jboss.netty.buffer.{ChannelBuffer => CB, ChannelBuffers}
  */
 
 @deprecated("Use object ThriftMux", "7.0.0")
-class ThriftMuxClientLike private[finagle](client: ThriftMux.Client) 
+class ThriftMuxClientLike private[finagle](client: ThriftMux.Client)
     extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
     with (Stack.Params => Client[ThriftClientRequest, Array[Byte]]) {
 
@@ -29,7 +29,7 @@ class ThriftMuxClientLike private[finagle](client: ThriftMux.Client)
    * the stack.
    */
   def params = client.params
-  
+
   protected val protocolFactory = client.protocolFactory
 
   protected lazy val defaultClientName = {

@@ -40,13 +40,13 @@ private[httpx] object ReaderUtils {
         }
       }
 
-      def read(n: Int): Future[Option[Buf]] = 
+      def read(n: Int): Future[Option[Buf]] =
         mu.acquire() flatMap { permit =>
           def go(): Future[Option[Buf]] = buf match {
             case None =>
               done.setDone()
               Future.None
-            case Some(buf) if buf.isEmpty => 
+            case Some(buf) if buf.isEmpty =>
               fill() before go()
             case Some(nonempty) =>
               val f = Future.value(Some(nonempty.slice(0, n)))

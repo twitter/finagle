@@ -34,7 +34,7 @@ object Backendserver extends App with Logging {
     val runtime = RuntimeEnvironment(this, Array()/*no args for you*/)
     val adminService = new AdminHttpService(basePort()+1, 100/*backlog*/, runtime)
     adminService.start()
-    
+
     if (useThriftmux())
       Await.ready(ThriftMux.serveIface(":"+basePort(), BackendService))
     else {

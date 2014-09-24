@@ -105,9 +105,9 @@ public class SomeStruct implements TBase<SomeStruct, SomeStruct._Fields>, java.i
   public static final Map<_Fields, FieldMetaData> metaDataMap;
   static {
     Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
-    tmpMap.put(_Fields.ARG_ONE, new FieldMetaData("arg_one", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.ARG_ONE, new FieldMetaData("arg_one", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.I32)));
-    tmpMap.put(_Fields.ARG_TWO, new FieldMetaData("arg_two", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.ARG_TWO, new FieldMetaData("arg_two", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     FieldMetaData.addStructMetaDataMap(SomeStruct.class, metaDataMap);
@@ -324,7 +324,7 @@ public class SomeStruct implements TBase<SomeStruct, SomeStruct._Fields>, java.i
     while (true)
     {
       field = iprot.readFieldBegin();
-      if (field.type == TType.STOP) { 
+      if (field.type == TType.STOP) {
         break;
       }
       switch (field.id) {
@@ -332,14 +332,14 @@ public class SomeStruct implements TBase<SomeStruct, SomeStruct._Fields>, java.i
           if (field.type == TType.I32) {
             this.arg_one = iprot.readI32();
             setArg_oneIsSet(true);
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
         case 2: // ARG_TWO
           if (field.type == TType.STRING) {
             this.arg_two = iprot.readString();
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;

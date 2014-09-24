@@ -58,10 +58,10 @@ public class HttpClientTest {
         public void onFailure(Throwable cause) {}
       });
     */
-    
+
     // New APIs
     com.twitter.finagle.Http.newClient(":80");
-    Client<HttpRequest, HttpResponse> newStyleClient = 
+    Client<HttpRequest, HttpResponse> newStyleClient =
       com.twitter.finagle.Http.client().withTls("foo.com");
   }
 }

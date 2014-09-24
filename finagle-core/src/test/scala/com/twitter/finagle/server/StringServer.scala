@@ -36,6 +36,6 @@ private[finagle] trait StringServer {
     protected def newDispatcher(transport: Transport[In, Out], service: Service[String, String]) =
       new SerialServerDispatcher(transport, service)
   }
-  
+
   val stringServer = Server()
 }

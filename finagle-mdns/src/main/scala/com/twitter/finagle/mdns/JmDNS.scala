@@ -46,10 +46,10 @@ private object JmDNSResolver {
   def resolve(regType: String): Var[Addr] = {
     val services = new mutable.HashMap[String, MdnsRecord]()
     val v = Var[Addr](Addr.Pending)
-  
+
     DNS.addServiceListener(regType, new ServiceListener {
       def serviceResolved(event: ServiceEvent) {}
-  
+
       def serviceAdded(event: ServiceEvent) {
         DNS.getServiceInfo(event.getType, event.getName) foreach { info =>
           val addresses = info.getInetAddresses
@@ -58,14 +58,14 @@ private object JmDNSResolver {
             info.getApplication + "." + info.getProtocol,
             info.getDomain,
             new InetSocketAddress(addresses(0), info.getPort))
-  
+
           synchronized {
             services.put(info.getName, mdnsRecord)
             v() = Addr.Bound(services.values.toSet: Set[SocketAddress])
           }
         }
       }
-  
+
       def serviceRemoved(event: ServiceEvent) {
         synchronized {
           if (services.remove(event.getName).isDefined)

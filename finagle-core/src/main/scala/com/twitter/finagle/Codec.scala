@@ -57,7 +57,7 @@ trait Codec[Req, Rep] {
     new SerialClientDispatcher(transport.cast[Req, Rep])
 
   def newServerDispatcher(
-    transport: Transport[Any, Any], 
+    transport: Transport[Any, Any],
     service: Service[Req, Rep]
   ): Closable =
     new SerialServerDispatcher[Req, Rep](transport.cast[Rep, Req], service)
@@ -75,7 +75,7 @@ trait Codec[Req, Rep] {
 abstract class AbstractCodec[Req, Rep] extends Codec[Req, Rep]
 
 object Codec {
-  def ofPipelineFactory[Req, Rep](makePipeline: => ChannelPipeline) = 
+  def ofPipelineFactory[Req, Rep](makePipeline: => ChannelPipeline) =
     new Codec[Req, Rep] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline = makePipeline

@@ -40,7 +40,7 @@ private[thrift] class TTwitterClientFilter(
       case Some(clientId) =>
         header.setClient_id(clientId.toThrift)
 
-      case None => 
+      case None =>
     }
 
     header.setSpan_id(Trace.id.spanId.toLong)
@@ -76,7 +76,7 @@ private[thrift] class TTwitterClientFilter(
       clientIdBuf match {
         case Some(buf) =>
           val ctx = new thrift.RequestContext(
-            Buf.toByteBuffer(ClientIdContext.Key), 
+            Buf.toByteBuffer(ClientIdContext.Key),
             Buf.toByteBuffer(buf))
           ctxs.add(i, ctx)
 
@@ -104,7 +104,7 @@ private[thrift] class TTwitterClientFilter(
     )
   }
 
-  def apply(request: ThriftClientRequest, 
+  def apply(request: ThriftClientRequest,
       service: Service[ThriftClientRequest, Array[Byte]]): Future[Array[Byte]] = {
     // Create a new span identifier for this request.
     val msg = new InputBuffer(request.message, protocolFactory)().readMessageBegin()

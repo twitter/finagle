@@ -40,8 +40,8 @@ import com.twitter.util.{Future, Time, Local}
  * @define clientExampleObject ThriftMux
  * @define serverExampleObject ThriftMux
  */
- 
-object ThriftMux 
+
+object ThriftMux
     extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
     with Server[Array[Byte], Array[Byte]] with ThriftRichServer {
   case class Client(
@@ -50,7 +50,7 @@ object ThriftMux
     // TODO: consider stuffing these into Stack.Params
     clientId: Option[ClientId] = None,
     protocolFactory: TProtocolFactory = Protocols.binaryFactory()
-  ) extends com.twitter.finagle.Client[ThriftClientRequest, Array[Byte]] 
+  ) extends com.twitter.finagle.Client[ThriftClientRequest, Array[Byte]]
       with ThriftRichClient with Stack.Parameterized[Client] {
     def stack = muxer.stack
     def params = muxer.params
@@ -74,7 +74,7 @@ object ThriftMux
      */
     def withClientId(clientId: ClientId): Client =
       copy(clientId=Some(clientId))
-  
+
     /**
      * Produce a [[com.twitter.finagle.ThriftMux.Client]] using the provided
      * protocolFactory.
@@ -88,7 +88,7 @@ object ThriftMux
           def apply(req: ThriftClientRequest): Future[Array[Byte]] = {
             if (req.oneway) return Future.exception(
               new Exception("ThriftMux does not support one-way messages"))
-  
+
             // We do a dance here to ensure that the proper ClientId is set when
             // `service` is applied because Mux relies on
             // com.twitter.finagle.thrift.ClientIdContext to propagate ClientIds.
@@ -102,7 +102,7 @@ object ThriftMux
               Local.restore(save)
             }
           }
-  
+
           override def isAvailable = service.isAvailable
           override def close(deadline: Time) = service.close(deadline)
         }
@@ -124,9 +124,9 @@ object ThriftMux
   }
 
   protected val protocolFactory = client.protocolFactory
- 
+
   def newClient(dest: Name, label: String) = client.newClient(dest, label)
-  
+
   /**
    * Produce a [[com.twitter.finagle.ThriftMux.Client]] using the provided
    * client ID.
@@ -142,7 +142,7 @@ object ThriftMux
   @deprecated("Use client.withProtocolFactory", "6.22.0")
   def withProtocolFactory(pf: TProtocolFactory): Client =
     client.copy(protocolFactory=pf)
-  
+
   /**
    * A server for the Thrift protocol served over [[com.twitter.finagle.mux]].
    * ThriftMuxServer is backwards-compatible with Thrift clients that use the
@@ -164,7 +164,7 @@ object ThriftMux
    */
 
   case class ServerMuxer(
-    stack: Stack[ServiceFactory[CB, CB]] = 
+    stack: Stack[ServiceFactory[CB, CB]] =
       ThriftMuxUtil.protocolRecorder +: Mux.server.stack,
     params: Stack.Params = Mux.server.params
   ) extends StdStackServer[CB, CB, ServerMuxer] {
@@ -180,7 +180,7 @@ object ThriftMux
       val Label(label) = params[Label]
       val Stats(sr) = params[Stats]
       val scoped = sr.scope(label).scope("thriftmux")
-  
+
       // Create a Listener that maintains gauges of how many ThriftMux and non-Mux
       // downgraded connections are listening to clients.
       new Listener[CB, CB] {
@@ -188,23 +188,23 @@ object ThriftMux
           new thriftmux.PipelineFactory(scoped),
           params
         )
-  
+
         def listen(addr: SocketAddress)(
           serveTransport: Transport[CB, CB] => Unit
         ): ListeningServer = underlying.listen(addr)(serveTransport)
       }
     }
-  
+
     protected def newDispatcher(transport: Transport[In, Out], service: Service[CB, CB]) =
       new mux.ServerDispatcher(transport, service, true, mux.lease.exp.ClockedDrainer.flagged)
   }
-  
+
   val serverMuxer = ServerMuxer()
 
   case class Server(
     muxer: StackServer[CB, CB] = serverMuxer,
     protocolFactory: TProtocolFactory = Protocols.binaryFactory()
-  ) extends com.twitter.finagle.Server[Array[Byte], Array[Byte]] 
+  ) extends com.twitter.finagle.Server[Array[Byte], Array[Byte]]
       with ThriftRichServer with Stack.Parameterized[Server] {
     def stack = muxer.stack
     def params = muxer.params
@@ -228,7 +228,7 @@ object ThriftMux
           service(arr) map ChannelBuffers.wrappedBuffer
         }
       }
-    
+
     def serve(addr: SocketAddress, factory: ServiceFactory[Array[Byte], Array[Byte]]) = {
       muxer.serve(addr, factory map { service =>
         // Need a HandleUncaughtApplicationExceptions filter here to maintain
@@ -245,7 +245,7 @@ object ThriftMux
     .configured(Label("thrift"))
     .configured(Stats(ServerStatsReceiver))
 
-  def serve(addr: SocketAddress, factory: ServiceFactory[Array[Byte], Array[Byte]]) = 
+  def serve(addr: SocketAddress, factory: ServiceFactory[Array[Byte], Array[Byte]]) =
     server.serve(addr, factory)
 }
 

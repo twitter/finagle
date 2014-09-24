@@ -106,9 +106,9 @@ public class Delegation implements TBase<Delegation, Delegation._Fields>, java.i
   public static final Map<_Fields, FieldMetaData> metaDataMap;
   static {
     Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
-    tmpMap.put(_Fields.SRC, new FieldMetaData("src", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.SRC, new FieldMetaData("src", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.STRING)));
-    tmpMap.put(_Fields.DST, new FieldMetaData("dst", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.DST, new FieldMetaData("dst", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     FieldMetaData.addStructMetaDataMap(Delegation.class, metaDataMap);
@@ -324,21 +324,21 @@ public class Delegation implements TBase<Delegation, Delegation._Fields>, java.i
     while (true)
     {
       field = iprot.readFieldBegin();
-      if (field.type == TType.STOP) { 
+      if (field.type == TType.STOP) {
         break;
       }
       switch (field.id) {
         case 1: // SRC
           if (field.type == TType.STRING) {
             this.src = iprot.readString();
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
         case 2: // DST
           if (field.type == TType.STRING) {
             this.dst = iprot.readString();
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;

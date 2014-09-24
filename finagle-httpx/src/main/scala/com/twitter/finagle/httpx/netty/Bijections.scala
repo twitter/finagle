@@ -80,7 +80,7 @@ object Bijections {
   implicit val statusFromNetty = new Injection[HttpResponseStatus, Status] {
     def apply(s: HttpResponseStatus) = Status.fromCode(s.getCode)
   }
-  
+
   // Request
 
   implicit val requestToNetty = new Injection[Request, HttpRequest] {

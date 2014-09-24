@@ -45,7 +45,7 @@ class GetResultTest extends FunSuite with MockitoSugar {
       hits = Map("h1" -> value1, "h2" -> value2),
       misses = immutable.Set("m1", "m2"),
       failures = Map("f1" -> ex1, "f2" -> ex2)
-    ))    
+    ))
   }
 
   test("merged of empty seq produces empty GetResult") {
@@ -73,7 +73,7 @@ class GetResultTest extends FunSuite with MockitoSugar {
         misses = immutable.Set("m" + i),
         failures = Map("f" + i -> mock[Exception]))
     }
-    
+
     assert(GetResult.merged(subResults) === (subResults.reduceLeft { _ ++ _ }))
   }
 }

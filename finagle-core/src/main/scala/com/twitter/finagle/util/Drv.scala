@@ -47,7 +47,7 @@ object Drv {
    * [1]. This algorithm is simple, efficient, and intuitive. Vose's
    * algorithm is O(n) in the distribution size. The paper below
    * contains correctness and complexity proofs.
-   * 
+   *
    * [1] Michael D. Vose. 1991. A Linear Algorithm for Generating Random
    * Numbers with a Given Distribution. IEEE Trans. Softw. Eng. 17, 9
    * (September 1991), 972-975. DOI=10.1109/32.92917
@@ -113,7 +113,7 @@ object Drv {
     val sum = weights.sum
     if (sum == 0)
       Drv(Seq.fill(weights.size) { 1D/weights.size })
-    else 
+    else
       Drv(weights map (_/sum))
   }
 }

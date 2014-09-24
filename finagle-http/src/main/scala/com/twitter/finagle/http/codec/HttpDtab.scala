@@ -89,7 +89,7 @@ object HttpDtab {
   def write(dtab: Dtab, msg: HttpMessage) {
     if (dtab.isEmpty)
       return
-    
+
     if (dtab.size >= Maxsize) {
       throw new IllegalArgumentException(
         "Dtabs with length greater than 100 are not serializable with HTTP")

@@ -8,7 +8,7 @@ import com.twitter.finagle.server.{StackServer, Listener, StdStackServer}
 import com.twitter.finagle.service.{RetryingFilter, RetryPolicy, TimeoutFilter}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Future, Await}           
+import com.twitter.util.{Future, Await}
 import java.net.SocketAddress
 
 object Echo extends Client[String, String] with Server[String, String] {
@@ -21,27 +21,27 @@ object Echo extends Client[String, String] with Server[String, String] {
     protected type Out = String
 
     protected def copy1(
-        stack: Stack[ServiceFactory[String, String]], 
-        params: Stack.Params): Client = 
+        stack: Stack[ServiceFactory[String, String]],
+        params: Stack.Params): Client =
       copy(stack, params)
 
     //#transporter
     protected def newTransporter(): Transporter[String, String] =
       Netty3Transporter(StringClientPipeline, params)
     //#transporter
-    
+
     protected def newDispatcher(
         transport: Transport[String, String]): Service[String, String] =
       new SerialClientDispatcher(transport)
   }
   //#client
-  
+
   val client = Client()
-  
+
   def newClient(dest: Name, label: String): ServiceFactory[String, String] =
     client.newClient(dest, label)
-    
-    
+
+
   //#server
   case class Server(
     stack: Stack[ServiceFactory[String, String]] = StackServer.newStack,
@@ -49,27 +49,27 @@ object Echo extends Client[String, String] with Server[String, String] {
   ) extends StdStackServer[String, String, Server] {
     protected type In = String
     protected type Out = String
-    
+
     protected def copy1(
       stack: Stack[ServiceFactory[String, String]] = this.stack,
       params: Stack.Params = this.params
     ): Server = copy(stack, params)
 
     //#serverlistener
-    protected def newListener(): Listener[String, String] = 
+    protected def newListener(): Listener[String, String] =
       Netty3Listener(StringServerPipeline, params)
     //#serverlistener
 
     protected def newDispatcher(
-        transport: Transport[String, String], 
+        transport: Transport[String, String],
         service: Service[String, String]) =
       new SerialServerDispatcher(transport, service)
   }
   //#server
-  
+
   val server = Server()
 
-  def serve(addr: SocketAddress, 
+  def serve(addr: SocketAddress,
       service: ServiceFactory[String, String]): ListeningServer =
     server.serve(addr, service)
 }

@@ -14,15 +14,15 @@ import com.google.common.reflect.TypeToken
 
 /**
  * SwiftService is given a Swift-annotated processor, to which
- * it dispatches message frames. SwiftService multiplexes over 
+ * it dispatches message frames. SwiftService multiplexes over
  * several MethodDispatchers.
  */
-class SwiftService(processor: Object) 
+class SwiftService(processor: Object)
     extends Service[Array[Byte], Array[Byte]] {
 
   private[this] val sym = ServiceSym(processor.getClass)
   private[this] val methods = Map() ++ (
-    for (m@MethodSym(name, _, _, _, _) <- sym.methods) yield 
+    for (m@MethodSym(name, _, _, _, _) <- sym.methods) yield
       name -> new MethodDispatcher(m, processor))
 
   def apply(req: Array[Byte]): Future[Array[Byte]] = {
@@ -32,7 +32,7 @@ class SwiftService(processor: Object)
     val seqid = msg.seqid
     val m = methods.get(name) getOrElse {
       return Future.exception(new TApplicationException(
-        TApplicationException.UNKNOWN_METHOD, 
+        TApplicationException.UNKNOWN_METHOD,
         "Unknown method "+name))
     }
 
@@ -50,10 +50,10 @@ class SwiftService(processor: Object)
 
 /**
  * Responsible for dispatching to the method described by
- * the given symbol onto processor. This implements a 
+ * the given symbol onto processor. This implements a
  * Service -- SwiftService multiplexes over these.
  */
-private class MethodDispatcher(sym: MethodSym, processor: Object) 
+private class MethodDispatcher(sym: MethodSym, processor: Object)
     extends Service[TProtocol, TProtocol => Unit] {
 
   private[this] val exceptions = (
@@ -77,7 +77,7 @@ private class MethodDispatcher(sym: MethodSym, processor: Object)
   private[this] def readArgs(in: TProtocol) = {
     val args = new Array[Object](nargs)
     val prot = new TProtocolReader(in)
-    
+
     prot.readStructBegin()
     while (prot.nextField()) {
       val id = prot.getFieldId()

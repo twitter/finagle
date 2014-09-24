@@ -91,7 +91,7 @@ class StackTest extends FunSuite {
 
   test("Head params get param in map") {
     val params = Stack.Params.empty + TestParam(5)
-    val stack = newStack().replace(testRole3, 
+    val stack = newStack().replace(testRole3,
       new Stack.Simple[List[Int]] {
         val role = testRole3
         val description = testRole3.toString
@@ -111,7 +111,7 @@ class StackTest extends FunSuite {
 
   test("Head params get param not in map") {
     val params = Stack.Params.empty + TestParam(5)
-    val stack = newStack().replace(testRole3, 
+    val stack = newStack().replace(testRole3,
       new Stack.Simple[List[Int]] {
         val role = testRole3
         val description = testRole3.toString
@@ -127,10 +127,10 @@ class StackTest extends FunSuite {
       case _ => fail("Getting non-existant param from params did not return None")
     }
   }
-  
+
   test("Head params when fields/values of params class unequal lengths") {
     val params = Stack.Params.empty + TestParamInnerVar(5)
-    val stack = newStack().replace(testRole3, 
+    val stack = newStack().replace(testRole3,
       new Stack.Simple[List[Int]] {
         val role = testRole3
         val description = testRole3.toString

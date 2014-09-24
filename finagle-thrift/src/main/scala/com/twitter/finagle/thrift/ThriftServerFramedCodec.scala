@@ -9,7 +9,7 @@ import org.apache.thrift.protocol.{  TMessage, TMessageType, TProtocolFactory}
 import org.apache.thrift.{TApplicationException, TException}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{
-  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent, 
+  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent,
   SimpleChannelDownstreamHandler}
 
 private[finagle] object ThriftServerFramedPipelineFactory  extends ChannelPipelineFactory {

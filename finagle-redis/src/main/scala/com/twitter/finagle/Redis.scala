@@ -11,7 +11,7 @@ import java.net.SocketAddress
 trait RedisRichClient { self: Client[Command, Reply] =>
   @deprecated("Use destination names via newRichClient(String) or newRichClinet(Name)", "6.7.x")
   def newRichClient(group: Group[SocketAddress]): redis.Client = redis.Client(newClient(group).toService)
-  
+
   def newRichClient(dest: String): redis.Client =
      redis.Client(newService(dest))
 

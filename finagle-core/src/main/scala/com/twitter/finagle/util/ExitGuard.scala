@@ -29,7 +29,7 @@ object ExitGuard {
           }
         }
         Some(1, t)
-      case Some((n, t)) => 
+      case Some((n, t)) =>
         Some((n+1, t))
     }
     updateName()

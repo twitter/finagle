@@ -18,7 +18,7 @@ private[serverset2] object Selector {
       case _ => false
     }
   }
-  
+
   case class Shard(which: Int) extends Selector {
     def matches(e: Entry) = e match {
       case Endpoint(_, _, Some(id), _, _) => which == id
@@ -70,7 +70,7 @@ private[serverset2] case class Vector(vector: Seq[Descriptor]) {
 private[serverset2] object Vector {
   def parseJson(json: String): Option[Vector] = {
     val d = JsonDict(json)
-    val vec = for { 
+    val vec = for {
       SeqObj(vec) <- d("vector").toSeq
       DictObj(d) <- vec
       desc <- Descriptor.parseDict(d)

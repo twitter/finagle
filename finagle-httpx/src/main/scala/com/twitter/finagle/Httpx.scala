@@ -140,7 +140,7 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
       Netty3Listener(httpPipeline, params)
     }
 
-    protected def newDispatcher(transport: Transport[In, Out], 
+    protected def newDispatcher(transport: Transport[In, Out],
         service: Service[Request, Response]) = {
       val dtab = new DtabFilter.Finagle[Request]
       val tracingFilter = new HttpServerTracingFilter[Request, Response]("http")

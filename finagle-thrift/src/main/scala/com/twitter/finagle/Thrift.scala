@@ -57,7 +57,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
   val protocolFactory = Protocols.binaryFactory()
   protected val defaultClientName = "thrift"
-  
+
   object param {
     case class ClientId(clientId: thrift.ClientId)
     implicit object ClientId extends Stack.Param[ClientId] {
@@ -76,12 +76,12 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
           val param.ClientId(id) = get[param.ClientId]
           Some(id)
         } else None
-  
+
         val preparer = new ThriftClientPreparer(protocolFactory, label, clientId)
         preparer.prepare(next)
       }
     }
-    
+
     // We must do 'preparation' this way in order to let Finagle set up tracing & so on.
     val stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = StackClient.newStack
       .replace(StackClient.Role.prepConn, preparer)
@@ -97,14 +97,14 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
       stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = this.stack,
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
-    
+
     protected val defaultClientName = "thrift"
 
     protected type In = ThriftClientRequest
     protected type Out = Array[Byte]
 
     protected def newTransporter(): Transporter[In, Out] = {
-      val pipeline = 
+      val pipeline =
         if (framed) ThriftClientFramedPipelineFactory
         else ThriftClientBufferedPipelineFactory(protocolFactory)
       Netty3Transporter(pipeline, params)
@@ -116,7 +116,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
     def withProtocolFactory(protocolFactory: TProtocolFactory): Client =
       copy(protocolFactory=protocolFactory)
-    
+
     def withClientId(clientId: thrift.ClientId): Client =
       configured(param.ClientId(clientId))
 
@@ -152,7 +152,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
         preparer.prepare(next)
       }
     }
-    
+
     val stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = StackServer.newStack
       .replace(StackServer.Role.preparer, preparer)
   }
@@ -170,7 +170,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
     protected type In = Array[Byte]
     protected type Out = Array[Byte]
-    
+
     protected def newListener(): Listener[In, Out] = {
       val pipeline =
         if (framed) thrift.ThriftServerFramedPipelineFactory

@@ -28,6 +28,6 @@ private object ThriftCatalog extends ThriftCatalog {
 }
 
 private object ThriftCodecManager extends ThriftCodecManager(
-  new CompilerThriftCodecFactory, ThriftCatalog, 
+  new CompilerThriftCodecFactory, ThriftCatalog,
   Collections.emptySet[ThriftCodec[_]]())
 

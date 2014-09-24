@@ -25,7 +25,7 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     val underlyingP = new Promise[Service[Int, Int]]
     when(underlying(any[ClientConnection])).thenReturn(underlyingP)
     val pool = new SingletonPool(underlying, NullStatsReceiver)
-    
+
     def assertClosed() {
       pool().poll match {
         case Some(Throw(Failure.Cause(_: ServiceClosedException))) =>
@@ -43,7 +43,7 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     assert(!pool.isAvailable)
 
     verify(underlying, times(2)).isAvailable
-    
+
     when(underlying.isAvailable).thenReturn(true)
     assert(pool.isAvailable)
     pool.close()
@@ -92,7 +92,7 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     when(underlying(any[ClientConnection])).thenReturn(Future.value(service2))
     verify(service, never).close(any[Time])
     verify(service, times(2)).isAvailable
-    
+
     val snd = pool()
     assert(snd.poll === Some(Return(service2)))
     verify(service, times(3)).isAvailable
@@ -117,11 +117,11 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     assert(pool().poll === Some(Throw(exc)))
     verify(underlying, times(2)).apply(any[ClientConnection])
   }
-  
+
   test("fail when connected service is unavailable") {
     val ctx = new Ctx
     import ctx._
-    
+
     when(service.isAvailable).thenReturn(false)
     val f = pool()
     assert(!f.isDefined)
@@ -139,7 +139,7 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     assert(pool().poll === Some(Return(service)))
     verify(service, times(1)).close(any[Time])
   }
-  
+
   test("close(): before connection creation") {
     val ctx = new Ctx
     import ctx._
@@ -149,7 +149,7 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
 
     verify(underlying, never).apply(any[ClientConnection])
   }
-  
+
   test("close(): after connection creation, before underlying") {
     val ctx = new Ctx
     import ctx._
@@ -166,7 +166,7 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     assert(pool.close().poll === Some(Return.Unit))
     assert(!f.isDefined)
     exc match {
-      case Some(_: ServiceClosedException) => 
+      case Some(_: ServiceClosedException) =>
       case _ => fail()
     }
 
@@ -176,17 +176,17 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
 
     assertClosed()
   }
-  
+
   test("close(): after connection creation, after underlying") {
     val ctx = new Ctx
     import ctx._
-    
+
     val f = pool()
     assert(!f.isDefined)
     underlyingP.setValue(service)
     assert(f.poll === Some(Return(service)))
     verify(service, never).close(any[Time])
-    
+
     assert(pool.close().poll === Some(Return.Unit))
     assertClosed()
     verify(service, never).close(any[Time])
@@ -197,13 +197,13 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
   test("does not close, reuses idle connections") {
     val ctx = new Ctx
     import ctx._
-    
+
     val f = pool()
     assert(!f.isDefined)
     underlyingP.setValue(service)
     assert(f.poll === Some(Return(service)))
     Await.result(Await.result(f).close())
-    
+
     val g = pool()
     assert(g.poll === Some(Return(service)))
     Await.result(Await.result(g).close())

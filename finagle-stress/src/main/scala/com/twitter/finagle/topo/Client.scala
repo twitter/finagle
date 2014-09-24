@@ -33,7 +33,7 @@ object Client {
     val runtime = RuntimeEnvironment(this, Array()/*no args for you*/)
     val adminService = new AdminHttpService(statsPort, 100/*backlog*/, runtime)
     adminService.start()
-    
+
     val service = Http.newService(hostport)
 
     for (which <- 0 until n)

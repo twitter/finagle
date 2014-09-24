@@ -1,7 +1,7 @@
 package com.twitter.finagle.exp.swift
 
 import com.facebook.swift.codec.ThriftCodec
-import com.facebook.swift.codec.internal.{TProtocolReader, TProtocolWriter} 
+import com.facebook.swift.codec.internal.{TProtocolReader, TProtocolWriter}
 import com.twitter.finagle.Service
 import com.twitter.finagle.thrift.ThriftClientRequest
 import com.twitter.util.Future
@@ -9,7 +9,7 @@ import java.lang.reflect.{InvocationHandler, Method, Proxy}
 import java.util.Arrays
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessageType, TMessage}
-import org.apache.thrift.transport.{TMemoryBuffer, TMemoryInputTransport} 
+import org.apache.thrift.transport.{TMemoryBuffer, TMemoryInputTransport}
 
 object SwiftProxy {
   /**
@@ -28,8 +28,8 @@ object SwiftProxy {
 }
 
 private class ProxyHandler(
-    sym: ServiceSym, 
-    service: Service[ThriftClientRequest, Array[Byte]]) 
+    sym: ServiceSym,
+    service: Service[ThriftClientRequest, Array[Byte]])
 extends InvocationHandler {
 
   private[this] val codecs = Map() ++ (
@@ -41,7 +41,7 @@ extends InvocationHandler {
     if (m.getDeclaringClass() == classOf[Object]) {
       return m.getName() match {
         case "toString" => "Service("+sym+")"
-        case "equals" => 
+        case "equals" =>
           val eq = equals(Proxy.getInvocationHandler(args(0)))
           new java.lang.Boolean(eq)
         case "hashCode" => new java.lang.Integer(hashCode())
@@ -55,7 +55,7 @@ extends InvocationHandler {
         service(new ThriftClientRequest(encoded, false)) map codec.decode
       case None =>
         val exc = new TApplicationException(
-          TApplicationException.UNKNOWN_METHOD, 
+          TApplicationException.UNKNOWN_METHOD,
           "Unknown method "+m)
         Future.exception(exc)
     }
@@ -106,17 +106,17 @@ class MethodCodec(sym: MethodSym) {
     reader.readStructBegin()
     while (reader.nextField()) {
       reader.getFieldId() match {
-        case 0 => 
+        case 0 =>
           return reader.readField(returnCodec)
-        case id if exceptions contains id => 
+        case id if exceptions contains id =>
           throw reader.readField(exceptions(id)).asInstanceOf[Exception]
-        case _ => 
+        case _ =>
           reader.skipFieldData()
         }
     }
 
     throw new TApplicationException(
-      TApplicationException.MISSING_RESULT, 
+      TApplicationException.MISSING_RESULT,
       sym.name + " failed: unknown result")
   }
 }

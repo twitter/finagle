@@ -34,7 +34,7 @@ private[serverset2] object SeqObj {
 
 private[serverset2] object DictObj {
   def unapply(o: Object): Option[Object => Option[Object]] = o match {
-    case m: java.util.Map[_, _] => 
+    case m: java.util.Map[_, _] =>
       val mm = m.asInstanceOf[java.util.Map[Object, Object]]
       Some(key => Option(mm.get(key)))
     case _ => None

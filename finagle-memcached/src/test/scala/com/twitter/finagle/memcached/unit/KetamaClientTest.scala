@@ -129,7 +129,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
       verify(serviceA, times(2)).apply(any())
       broker !! NodeRevived(nodeKeyB)
     }
-    
+
     info("primary leaves and rejoins")
     new KetamaClientBuilder {
       mutableGroup.update(immutable.Set(nodeB)) // nodeA leaves

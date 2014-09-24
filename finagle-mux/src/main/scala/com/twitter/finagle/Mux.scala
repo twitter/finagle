@@ -32,7 +32,7 @@ object Mux extends Client[CB, CB] with Server[CB, CB] {
     protected type In = CB
     protected type Out = CB
 
-    protected def newTransporter(): Transporter[In, Out] = 
+    protected def newTransporter(): Transporter[In, Out] =
       Netty3Transporter(mux.PipelineFactory, params)
     protected def newDispatcher(transport: Transport[CB, CB]) = {
       val param.Stats(sr) = params[param.Stats]
@@ -41,10 +41,10 @@ object Mux extends Client[CB, CB] with Server[CB, CB] {
   }
 
   val client = Client()
-  
-  def newClient(dest: Name, label: String): ServiceFactory[CB, CB] = 
+
+  def newClient(dest: Name, label: String): ServiceFactory[CB, CB] =
     client.newClient(dest, label)
-  
+
   case class Server(
     stack: Stack[ServiceFactory[CB, CB]] = StackServer.newStack,
     params: Stack.Params = StackServer.defaultParams
@@ -57,12 +57,12 @@ object Mux extends Client[CB, CB] with Server[CB, CB] {
     protected type In = CB
     protected type Out = CB
 
-    protected def newListener(): Listener[In, Out] = 
+    protected def newListener(): Listener[In, Out] =
       Netty3Listener(mux.PipelineFactory, params)
     protected def newDispatcher(transport: Transport[In, Out], service: Service[CB, CB]) =
       new mux.ServerDispatcher(transport, service, true, mux.lease.exp.ClockedDrainer.flagged)
   }
-  
+
   val server = Server()
 
   def serve(addr: SocketAddress, service: ServiceFactory[CB, CB]): ListeningServer =

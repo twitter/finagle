@@ -56,9 +56,9 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
         .maxRequestSize(params[MaxRequestSize].size)
         .maxResponseSize(params[MaxResponseSize].size)
   }
-  
+
   object Client {
-    val stack: Stack[ServiceFactory[HttpRequest, HttpResponse]] = 
+    val stack: Stack[ServiceFactory[HttpRequest, HttpResponse]] =
       HttpClientTracingFilter.module[HttpRequest, HttpResponse] +: StackClient.newStack
   }
 
@@ -68,7 +68,7 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
   ) extends StdStackClient[HttpRequest, HttpResponse, Client] {
     protected type In = Any
     protected type Out = Any
-  
+
     protected def newTransporter(): Transporter[Any, Any] = {
       val com.twitter.finagle.param.Label(label) = params[com.twitter.finagle.param.Label]
       val httpPipeline =
@@ -93,17 +93,17 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
 
     def withTls(hostname: String): Client =
       withTls(new Netty3TransporterTLSConfig({ () => Ssl.client() }, Some(hostname)))
-  
+
     def withTlsWithoutValidation(): Client =
       configured(Transport.TLSEngine(Some({ () => Ssl.clientWithoutCertificateValidation() })))
-  
+
     def withMaxRequestSize(size: StorageUnit): Client =
       configured(param.MaxRequestSize(size))
-  
+
     def withMaxResponseSize(size: StorageUnit): Client =
       configured(param.MaxResponseSize(size))
   }
-  
+
   val client = Client()
 
   def newClient(dest: Name, label: String): ServiceFactory[HttpRequest, HttpResponse] =
@@ -115,7 +115,7 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
   ) extends StdStackServer[HttpRequest, HttpResponse, Server] {
     protected type In = Any
     protected type Out = Any
-  
+
     protected def newListener(): Listener[Any, Any] = {
       val com.twitter.finagle.param.Label(label) = params[com.twitter.finagle.param.Label]
       val httpPipeline =
@@ -124,8 +124,8 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
           .pipelineFactory
       Netty3Listener(httpPipeline, params)
     }
-  
-    protected def newDispatcher(transport: Transport[In, Out], 
+
+    protected def newDispatcher(transport: Transport[In, Out],
         service: Service[HttpRequest, HttpResponse]) = {
       val dtab = DtabFilter.Netty
       val tracingFilter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("http")
@@ -142,16 +142,16 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
 
     def withTls(cfg: Netty3ListenerTLSConfig): Server =
       configured(Transport.TLSEngine(Some(cfg.newEngine)))
-    
+
     def withMaxRequestSize(size: StorageUnit): Server =
       configured(param.MaxRequestSize(size))
-    
+
     def withMaxResponseSize(size: StorageUnit): Server =
       configured(param.MaxResponseSize(size))
   }
-  
+
   val server = Server()
-  
+
   def serve(addr: SocketAddress, service: ServiceFactory[HttpRequest, HttpResponse]): ListeningServer =
     server.serve(addr, service)
 }

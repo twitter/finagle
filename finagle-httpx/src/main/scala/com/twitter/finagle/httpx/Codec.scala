@@ -187,9 +187,9 @@ case class Http(
           Filter.identity[Request, Response]
         }
 
-        tracing andThen 
+        tracing andThen
           new DtabFilter.Finagle[Request] andThen
-          checkRequest andThen 
+          checkRequest andThen
           underlying
       }
     }
@@ -410,7 +410,7 @@ case class RichHttp[REQUEST <: Request](
       }
 
       override def newServerDispatcher(
-          transport: Transport[Any, Any], 
+          transport: Transport[Any, Any],
           service: Service[REQUEST, Response]): Closable =
         new HttpServerDispatcher(new HttpTransport(transport), service)
 
