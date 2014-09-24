@@ -1,13 +1,13 @@
 package com.twitter.finagle.tracing
 
-import com.twitter.finagle.{Context, ContextHandler}
+import com.twitter.finagle.{ContextHelpers, ContextHandler}
 import com.twitter.finagle.util.ByteArrays
 import com.twitter.io.Buf
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 
 private[finagle] object TraceContext {
   val Key = Buf.Utf8("com.twitter.finagle.tracing.TraceContext")
-  val KeyBytes = Context.keyBytes(Key)
+  val KeyBytes = ContextHelpers.keyBytes(Key)
   val KeyBytesChannelBuffer = ChannelBuffers.wrappedBuffer(KeyBytes)
 
   /**

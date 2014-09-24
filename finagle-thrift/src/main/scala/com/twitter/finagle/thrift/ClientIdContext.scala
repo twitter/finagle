@@ -1,12 +1,12 @@
 package com.twitter.finagle.thrift
 
-import com.twitter.finagle.{Context, ContextHandler}
+import com.twitter.finagle.{ContextHelpers, ContextHandler}
 import com.twitter.io.Buf
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 
 private[finagle] object ClientIdContext {
   val Key = Buf.Utf8("com.twitter.finagle.thrift.ClientIdContext")
-  val KeyBytes = Context.keyBytes(Key)
+  val KeyBytes = ContextHelpers.keyBytes(Key)
   val KeyBytesChannelBuffer = ChannelBuffers.wrappedBuffer(KeyBytes)
 
   /**
