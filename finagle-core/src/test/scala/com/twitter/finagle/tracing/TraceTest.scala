@@ -297,4 +297,15 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     when(tracer.sampleTrace(any[TraceId])).thenReturn(Some(false))
     assert(Trace.isActivelyTracing === true) // false/true again prefer the id's opinion
   }
+
+  test("Trace.isActivelyTracing: trace id with SamplingKnown flag set") {
+    val id = TraceId(Some(SpanId(12)), Some(SpanId(13)), SpanId(14), Some(true), Flags(Flags.SamplingKnown | Flags.Sampled))
+    val tracer = mock[Tracer]
+    Trace.clear()
+    Trace.pushTracer(tracer)
+    Trace.setId(id)
+    assert(Trace.isActivelyTracing === true)
+    Trace.setId(id.copy(_sampled = Some(false), flags = Flags(Flags.SamplingKnown)))
+    assert(Trace.isActivelyTracing === false)
+  }
 }
