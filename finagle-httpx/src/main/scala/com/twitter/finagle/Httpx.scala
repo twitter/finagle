@@ -20,7 +20,7 @@ import java.net.{InetSocketAddress, SocketAddress}
  * A rich client with a *very* basic URL fetcher. (It does not handle
  * redirects, does not have a cookie jar, etc.)
  */
-trait HttpRichClient { self: Client[Request, Response] =>
+trait HttpxRichClient { self: Client[Request, Response] =>
   def fetchUrl(url: String): Future[Response] = fetchUrl(new java.net.URL(url))
   def fetchUrl(url: java.net.URL): Future[Response] = {
     val addr = {
@@ -39,7 +39,7 @@ trait HttpRichClient { self: Client[Request, Response] =>
 /**
  * Http protocol support, including client and server.
  */
-object Http extends Client[Request, Response] with HttpRichClient
+object Httpx extends Client[Request, Response] with HttpxRichClient
     with Server[Request, Response] {
 
   object param {
@@ -58,7 +58,7 @@ object Http extends Client[Request, Response] with HttpRichClient
       val default = Streaming(false)
     }
 
-    private[Http] def applyToCodec(
+    private[Httpx] def applyToCodec(
       params: Stack.Params, codec: httpx.Http): httpx.RichHttp[Request] = {
       val richCodec = httpx.RichHttp[Request](
         codec
@@ -67,7 +67,7 @@ object Http extends Client[Request, Response] with HttpRichClient
       applyToCodec(params, richCodec)
     }
 
-    private[Http] def applyToCodec(
+    private[Httpx] def applyToCodec(
       params: Stack.Params, codec: httpx.RichHttp[Request]): httpx.RichHttp[Request] =
       codec.copy(aggregateChunks = !params[Streaming].enabled)
   }

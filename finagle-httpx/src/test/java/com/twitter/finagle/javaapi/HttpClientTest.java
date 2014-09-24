@@ -57,8 +57,8 @@ public class HttpClientTest {
     */
 
     // New APIs
-    com.twitter.finagle.Http.newClient(":80");
+    com.twitter.finagle.Httpx.newClient(":80");
     Client<Request, Response> newStyleClient =
-      com.twitter.finagle.Http.client().withTls("foo.com");
+      com.twitter.finagle.Httpx.client().withTls("foo.com");
   }
 }
