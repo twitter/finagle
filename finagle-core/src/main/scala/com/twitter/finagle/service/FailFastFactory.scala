@@ -20,15 +20,6 @@ private[finagle] object FailFastFactory {
   private val defaultBackoffs = (Backoff.exponential(1.second, 2) take 5) ++ Backoff.const(32.seconds)
   private val rng = new Random
 
-  // This perhaps should be a write exception, but in reality it's
-  // only dispatched when all hosts in the cluster are failed, and so
-  // we don't want to retry. This is a bit of a kludge--we should
-  // reconsider having this logic in the load balancer instead.
-  private val failedFastExc = Future.exception {
-    val url = "https://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s"
-    new FailedFastException(s"Endpoint is marked down. For more details see: $url")
-  }
-
   val role = Stack.Role("FailFast")
 
   /**
@@ -67,6 +58,15 @@ private[finagle] class FailFastFactory[Req, Rep](
   backoffs: Stream[Duration] = FailFastFactory.defaultBackoffs
 ) extends ServiceFactoryProxy(self) {
   import FailFastFactory._
+
+  // This perhaps should be a write exception, but in reality it's
+  // only dispatched when all hosts in the cluster are failed, and so
+  // we don't want to retry. This is a bit of a kludge--we should
+  // reconsider having this logic in the load balancer instead.
+  private[this] val failedFastExc = Future.exception {
+    val url = "https://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s"
+    new FailedFastException(s"Endpoint is marked down. For more details see: $url")
+  }
 
   private[this] def getBackoffs(): Stream[Duration] = backoffs map { duration =>
     // Add a 10% jitter to reduce correlation.

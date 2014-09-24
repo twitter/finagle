@@ -5,15 +5,17 @@ import com.twitter.util._
 import com.twitter.finagle.MockTimer
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.conversions.time._
+import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify, when, times}
+import org.scalatest.concurrent.Conductors
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class FailFastFactoryTest extends FunSuite with MockitoSugar {
+class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
 
   def newCtx() = new {
     val timer = new MockTimer
@@ -161,6 +163,45 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar {
         failfast().poll.get.get
       }
       assert(ffe.getMessage().contains("twitter.github.io/finagle/guide/FAQ.html"))
+    }
+  }
+
+  test("maintains separate exception state in separate threads") {
+    Time.withCurrentTimeFrozen { tc =>
+      val conductor = new Conductor
+      import conductor._
+
+      val threadCompletionCount = new AtomicInteger(0)
+
+      thread("threadOne") {
+        val ctx = newCtx()
+        ctx.p() = Throw(new Exception)
+        ctx.failfast().poll match {
+          case Some(Throw(ex: FailedFastException)) => {
+            ex.serviceName = "threadOne"
+            assert(beat === 0)
+          }
+          case _ => throw new Exception
+        }
+        threadCompletionCount.incrementAndGet()
+      }
+
+      thread("threadTwo") {
+        waitForBeat(1)
+        val ctx = newCtx()
+        ctx.p() = Throw(new Exception)
+        ctx.failfast().poll match {
+          case Some(Throw(ex: FailedFastException)) => {
+            assert(ex.serviceName === "unspecified")
+          }
+          case _ => throw new Exception
+        }
+        threadCompletionCount.incrementAndGet()
+      }
+
+      whenFinished {
+        assert(threadCompletionCount.get === 2)
+      }
     }
   }
 
