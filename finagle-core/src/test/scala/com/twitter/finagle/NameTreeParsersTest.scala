@@ -19,6 +19,15 @@ class NameTreeParsersTest extends FunSuite with AssertionsForJUnit {
     intercept[IllegalArgumentException] { NameTreeParsers.parsePath("/\\x0?") }
   }
 
+  test("error messages") {
+    assert(
+      intercept[IllegalArgumentException] { NameTreeParsers.parsePath("/foo^bar") }
+        .getMessage contains "'/foo[^]bar'")
+    assert(
+      intercept[IllegalArgumentException] { NameTreeParsers.parsePath("/foo/bar/") }
+        .getMessage contains "'/foo/bar/[]'")
+  }
+
   test("parseNameTree") {
     assert(NameTreeParsers.parseNameTree("! | ~ | $") === NameTree.Alt(NameTree.Fail, NameTree.Neg, NameTree.Empty))
     assert(NameTreeParsers.parseNameTree("/foo/bar") === NameTree.Leaf(Path.Utf8("foo", "bar")))

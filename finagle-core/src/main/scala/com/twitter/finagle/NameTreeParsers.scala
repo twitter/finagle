@@ -20,8 +20,12 @@ private class NameTreeParsers private (str: String) {
     if (char == EOI) "end of input"
     else "'" + char + "'"
 
-  private[this] def illegal(expected: String, found: String): Nothing =
-    throw new IllegalArgumentException(expected + " expected but " + found + " found")
+  private[this] def illegal(expected: String, found: String): Nothing = {
+    val displayStr =
+      if (atEnd) s"$str[]"
+      else s"${str.take(idx)}[${str(idx)}]${str.drop(idx+1)}"
+    throw new IllegalArgumentException(s"$expected expected but $found found at '$displayStr'")
+  }
 
   private[this] def illegal(expected: Char, found: String): Nothing =
     illegal(stringOfChar(expected), found)
