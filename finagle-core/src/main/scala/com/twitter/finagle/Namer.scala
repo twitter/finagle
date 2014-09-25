@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Var, Try, NonFatal, Memoize, Activity}
+import com.twitter.util._
 import java.net.{InetSocketAddress, SocketAddress}
 
 /**
@@ -154,6 +154,23 @@ object Namer  {
 
     override def toString = "Namer.global"
   }
+
+  /**
+   * Resolve a path to an address set (taking [[Dtab.local]] into account).
+   */
+  def resolve(path: Path): Var[Addr] = {
+    val namer = (Dtab.base ++ Dtab.local) orElse global
+    namer.bindAndEval(NameTree.Leaf(path))
+  }
+
+  /**
+   * Resolve a path to an address set (taking [[Dtab.local]] into account).
+   */
+  def resolve(path: String): Var[Addr] =
+    Try { Path.read(path) } match {
+      case Return(path) => resolve(path)
+      case Throw(e) => Var.value(Addr.Failed(e))
+    }
 
   private object IntegerString {
     def unapply(s: String): Option[Int] =

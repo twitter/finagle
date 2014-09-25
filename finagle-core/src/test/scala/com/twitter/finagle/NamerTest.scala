@@ -201,6 +201,13 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
       /3=>/bar3
       """)
   }
+
+  test("Namer.resolve") {
+    assert(Namer.resolve("invalid").sample() match {
+      case Addr.Failed(_: IllegalArgumentException) => true
+      case _ => false
+    })
+  }
 }
 
 class TestNamer extends Namer {
