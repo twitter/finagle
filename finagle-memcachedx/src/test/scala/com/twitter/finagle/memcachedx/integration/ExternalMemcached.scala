@@ -3,7 +3,7 @@ package com.twitter.finagle.memcachedx.integration
 import collection.JavaConversions._
 import com.twitter.conversions.time._
 import com.twitter.util.{Stopwatch, Duration, RandomSocket}
-import java.lang.ProcessBuilder
+import _root_.java.lang.ProcessBuilder
 import java.net.{BindException, ServerSocket, InetSocketAddress}
 import scala.collection._
 

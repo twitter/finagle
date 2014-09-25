@@ -3,7 +3,7 @@ package com.twitter.finagle.memcachedx.migration
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.twitter.common.zookeeper.ZooKeeperClient
-import com.twitter.finagle.MemcachedClient
+import com.twitter.finagle.MemcachedxClient
 import com.twitter.finagle.memcachedx._
 import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.zookeeper.DefaultZkClientFactory
@@ -288,8 +288,8 @@ object MigrationClient {
     assert(zkClient.get().exists(newPoolPath, false) != null)
 
     // create client for old and new pool
-    val oldClient = MemcachedClient.newKetamaClient("twcache!"+zkHosts+"!"+oldPoolPath, ejectFailedHost = false)
-    val newClient = MemcachedClient.newKetamaClient("twcache!"+zkHosts+"!"+newPoolPath, ejectFailedHost = false)
+    val oldClient = MemcachedxClient.newKetamaClient("twcache!"+zkHosts+"!"+oldPoolPath, ejectFailedHost = false)
+    val newClient = MemcachedxClient.newKetamaClient("twcache!"+zkHosts+"!"+newPoolPath, ejectFailedHost = false)
 
     val migrationStatsReceiver = ClientStatsReceiver.scope("migrationclient")
 

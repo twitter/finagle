@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcachedx.replication
 
-import java.lang.{Boolean => JBoolean, Long => JLong}
+import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 
 import scala.collection.JavaConversions._
 import scala.util.Random

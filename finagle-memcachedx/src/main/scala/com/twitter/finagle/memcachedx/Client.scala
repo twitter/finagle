@@ -1,13 +1,10 @@
 package com.twitter.finagle.memcachedx
 
-import com.twitter.finagle.memcachedx.util.Bufs.{nonEmptyStringToBuf, seqOfNonEmptyStringToBuf}
-import com.twitter.io.Buf
-
-import scala.collection.{immutable, mutable}
-
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 import _root_.java.net.{SocketAddress, InetSocketAddress}
 import _root_.java.util.{Map => JMap}
+
+import scala.collection.{immutable, mutable}
 
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._
@@ -16,10 +13,11 @@ import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig, Static
 import com.twitter.finagle.memcachedx.protocol._
 import com.twitter.finagle.memcachedx.protocol.text.Memcached
 import com.twitter.finagle.memcachedx.util.Bufs.RichBuf
+import com.twitter.finagle.memcachedx.util.Bufs.{nonEmptyStringToBuf, seqOfNonEmptyStringToBuf}
 import com.twitter.finagle.service.{FailureAccrualFactory, FailedService}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.hashing._
-import com.twitter.io.Charsets
+import com.twitter.io.{Buf, Charsets}
 import com.twitter.util.{Command => _, Function => _, _}
 
 
@@ -728,7 +726,7 @@ class KetamaClient private[finagle](
       }
       val faClient: Client = legacyFAClientBuilder map { builder =>
         TwemcacheClient(builder(node, key, nodeHealthBroker, failureAccrualParams))
-      } getOrElse MemcachedFailureAccrualClient(
+      } getOrElse MemcachedxFailureAccrualClient(
         key, nodeHealthBroker, failureAccrualParams
       ).newTwemcacheClient(node.host+":"+node.port)
 

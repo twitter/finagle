@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcachedx
 
-import java.lang.{Boolean => JBoolean}
+import _root_.java.lang.{Boolean => JBoolean}
 import com.twitter.finagle.memcachedx.protocol._
 import com.twitter.finagle.memcachedx.protocol.Stored
 import com.twitter.finagle.memcachedx.protocol.Exists

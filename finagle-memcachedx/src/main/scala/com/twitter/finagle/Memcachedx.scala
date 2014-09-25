@@ -17,14 +17,14 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.hashing.KeyHasher
 import com.twitter.util.Duration
 
-trait MemcachedRichClient { self: Client[Command, Response] =>
+trait MemcachedxRichClient { self: Client[Command, Response] =>
   def newRichClient(group: Group[SocketAddress]): memcachedx.Client = memcachedx.Client(newClient(group).toService)
   def newRichClient(group: String): memcachedx.Client = memcachedx.Client(newClient(group).toService)
   def newTwemcacheClient(group: Group[SocketAddress]) = memcachedx.TwemcacheClient(newClient(group).toService)
   def newTwemcacheClient(group: String) = memcachedx.TwemcacheClient(newClient(group).toService)
 }
 
-trait MemcachedKetamaClient {
+trait MemcachedxKetamaClient {
   // TODO: make everything use varaddrs directly.
 
   def newKetamaClient(
@@ -74,40 +74,40 @@ trait MemcachedKetamaClient {
   }
 
   private def faParams(ejectFailedHost: Boolean) = {
-    if (ejectFailedHost) MemcachedFailureAccrualClient.DefaultFailureAccrualParams
+    if (ejectFailedHost) MemcachedxFailureAccrualClient.DefaultFailureAccrualParams
     else (Int.MaxValue, Duration.Zero)
   }
 }
 
-object MemcachedTransporter extends Netty3Transporter[Command, Response](
+object MemcachedxTransporter extends Netty3Transporter[Command, Response](
   "memcached", MemcachedClientPipelineFactory)
 
-object MemcachedClient extends DefaultClient[Command, Response](
+object MemcachedxClient extends DefaultClient[Command, Response](
   name = "memcached",
   endpointer = Bridge[Command, Response, Command, Response](
-    MemcachedTransporter, new PipeliningDispatcher(_)),
+    MemcachedxTransporter, new PipeliningDispatcher(_)),
   pool = (sr: StatsReceiver) => new SingletonPool(_, sr)
-) with MemcachedRichClient with MemcachedKetamaClient
+) with MemcachedxRichClient with MemcachedxKetamaClient
 
-private[finagle] object MemcachedFailureAccrualClient {
+private[finagle] object MemcachedxFailureAccrualClient {
   val DefaultFailureAccrualParams = (5, 30.seconds)
 
   def apply(
       key: KetamaClientKey,
       broker: Broker[NodeHealth],
       failureAccrualParams: (Int, Duration) = DefaultFailureAccrualParams
-  ): Client[Command, Response] with MemcachedRichClient = {
-    new MemcachedFailureAccrualClient(key, broker, failureAccrualParams)
+  ): Client[Command, Response] with MemcachedxRichClient = {
+    new MemcachedxFailureAccrualClient(key, broker, failureAccrualParams)
   }
 }
-private[finagle] class MemcachedFailureAccrualClient(
+private[finagle] class MemcachedxFailureAccrualClient(
   key: KetamaClientKey,
   broker: Broker[NodeHealth],
   failureAccrualParams: (Int, Duration)
 ) extends DefaultClient[Command, Response](
   name = "memcached",
   endpointer = Bridge[Command, Response, Command, Response](
-    MemcachedTransporter, new PipeliningDispatcher(_)),
+    MemcachedxTransporter, new PipeliningDispatcher(_)),
   pool = (sr: StatsReceiver) => new SingletonPool(_, sr),
   failureAccrual = {
     new KetamaFailureAccrualFactory(
@@ -116,18 +116,18 @@ private[finagle] class MemcachedFailureAccrualClient(
       failureAccrualParams._2,
       DefaultTimer.twitter, key, broker)
   }
-) with MemcachedRichClient
+) with MemcachedxRichClient
 
-object MemcachedListener extends Netty3Listener[Response, Command](
+object MemcachedxListener extends Netty3Listener[Response, Command](
   "memcached", MemcachedServerPipelineFactory)
-object MemcachedServer extends DefaultServer[Command, Response, Response, Command](
-  "memcached", MemcachedListener, new SerialServerDispatcher(_, _)
+object MemcachedxServer extends DefaultServer[Command, Response, Response, Command](
+  "memcached", MemcachedxListener, new SerialServerDispatcher(_, _)
 )
 
-object Memcached extends Client[Command, Response] with MemcachedRichClient with MemcachedKetamaClient with Server[Command, Response] {
+object Memcachedx extends Client[Command, Response] with MemcachedxRichClient with MemcachedxKetamaClient with Server[Command, Response] {
   def newClient(dest: Name, label: String): ServiceFactory[Command, Response] =
-    MemcachedClient.newClient(dest, label)
+    MemcachedxClient.newClient(dest, label)
 
   def serve(addr: SocketAddress, service: ServiceFactory[Command, Response]): ListeningServer =
-    MemcachedServer.serve(addr, service)
+    MemcachedxServer.serve(addr, service)
 }

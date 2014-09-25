@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcachedx
 
-import java.lang.{Boolean => JBoolean, Long => JLong}
+import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 
 import com.twitter.io.Buf
 import com.twitter.util.{Time, Future, Bijection}

@@ -1,7 +1,7 @@
 package com.twitter.finagle.memcachedx.integration
 
 import java.io.ByteArrayOutputStream
-import java.lang.{Boolean => JBoolean, UnsupportedOperationException}
+import _root_.java.lang.{Boolean => JBoolean, UnsupportedOperationException}
 
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfterEach, FunSuite}

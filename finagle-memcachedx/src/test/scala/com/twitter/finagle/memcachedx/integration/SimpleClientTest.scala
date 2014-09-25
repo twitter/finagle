@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcachedx.integration
 
-import java.lang.{Boolean => JBoolean}
+import _root_.java.lang.{Boolean => JBoolean}
 
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

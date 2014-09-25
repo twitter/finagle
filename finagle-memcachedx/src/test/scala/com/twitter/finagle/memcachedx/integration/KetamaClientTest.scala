@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcachedx.integration
 
-import java.lang.{Boolean => JBoolean}
+import _root_.java.lang.{Boolean => JBoolean}
 import java.net.{SocketAddress, InetSocketAddress}
 
 import org.jboss.netty.buffer.ChannelBuffers
