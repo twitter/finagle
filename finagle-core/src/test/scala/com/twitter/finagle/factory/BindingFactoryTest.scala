@@ -208,40 +208,77 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
 }
 
 @RunWith(classOf[JUnitRunner])
-class NamerTracingFilterTest extends FunSuite with MockitoSugar with BeforeAndAfter {
+class NamerTracingFilterTest extends FunSuite {
    private trait Ctx {
-    val record = mock[(String, Any) => Unit]
-    val service = mock[Service[Int, Int]]
-    val addr = mock[SocketAddress]
-    val name = Name.Bound(Var(Addr.Bound(addr)), "dat-name")
-    when(service(any[Int])).thenReturn(Future.value(0))
+    var records = Seq.empty[(String, String)]
+    def record(key: String, value: String) {
+      records :+= key -> value
+    }
+
+    val addr = RandomSocket.nextAddress()
+    val path = Path.read("/foo")
+
+    val baseDtab = () => Dtab.read("/foo => /bar")
+    val localDtab = Dtab.read("/bar => /baz")
+
+    def mkName(id: Any) = Name.Bound(Var(Addr.Bound(addr)), id)
+
+    def run(f: => Unit) {
+      Dtab.unwind {
+        Dtab.local = localDtab
+        f
+      }
+    }
+
+    def verifyRecord(nameOrFailure: Either[String, String]) {
+      val expected = Seq(
+        "wily.path" -> "/foo",
+        "wily.dtab.base" -> "/foo=>/bar",
+        "wily.dtab.local" -> "/bar=>/baz",
+        nameOrFailure match {
+          case Left(id) => "wily.name" -> id
+          case Right(failure) => "wily.failure" -> failure
+        }
+      )
+      expectResult(expected)(records)
+    }
   }
 
-  var saveBase: Dtab = Dtab.empty
-  var saveLocal: Dtab = Dtab.empty
+  test("NamerTracingFilter.trace with string id")(new Ctx {
+    run {
+      NamerTracingFilter.trace(path, baseDtab(), Return(mkName("dat-name")), record)
+      verifyRecord(Left("dat-name"))
+    }
+  })
 
-  before {
-    saveBase = Dtab.base
-    saveLocal = Dtab.local
-    Dtab.base = Dtab.read("/foo => /bar")
-    Dtab.local = Dtab.read("/bar => /baz")
-  }
+  test("NamerTracingFilter.trace name with path id")(new Ctx {
+    run {
+      NamerTracingFilter.trace(path, baseDtab(), Return(mkName(Path.read("/foo/bar/baz"))), record)
+      verifyRecord(Left("/foo/bar/baz"))
+    }
+  })
 
-  after {
-    Dtab.base = saveBase
-    Dtab.local = saveLocal
-  }
+  test("NamerTracingFilter.trace name with object id")(new Ctx {
+    run {
+      NamerTracingFilter.trace(path, baseDtab(), Return(mkName(Some("foo"))), record)
+      verifyRecord(Left("Some(foo)"))
+    }
+  })
 
-  test("trace path/name")(new Ctx {
-    val filter = new NamerTracingFilter[Int, Int](Path.Utf8("foo"), () => Dtab.base, name, record)
-    val filteredService = filter andThen service
+  test("NamerTracingFilter.trace throwable")(new Ctx {
+    run {
+      NamerTracingFilter.trace(path, baseDtab(), Throw(new RuntimeException), record)
+      verifyRecord(Right("java.lang.RuntimeException"))
+    }
+  })
 
-    Await.result(filteredService(3))
-    verify(record)("wily.path", "/foo")
-    verify(record)("wily.dtab.base", "/foo=>/bar")
-    verify(record)("wily.dtab.local", "/bar=>/baz")
-    verify(record)("wily.name", "dat-name")
-    verify(record, times(4))(any[String], any)
+  test("NamerTracingFilter.apply trace path/name with string id")(new Ctx {
+    run {
+      val filter = new NamerTracingFilter[Int, Int](path, baseDtab, mkName("dat-name"), record)
+      val service = filter andThen Service.mk[Int, Int](Future.value(_))
+      Await.result(service(3))
+      verifyRecord(Left("dat-name"))
+    }
   })
 }
 

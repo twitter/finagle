@@ -16,14 +16,22 @@ private[finagle] object NamerTracingFilter {
     path: Path,
     baseDtab: Dtab,
     nameTry: Try[Name.Bound],
-    record: (String, Any) => Unit = Trace.recordBinary
+    record: (String, String) => Unit = Trace.recordBinary
   ): Unit = {
     record("wily.path", path.show)
     record("wily.dtab.base", baseDtab.show)
     record("wily.dtab.local", Dtab.local.show)
+
     nameTry match {
-      case Return(name) => record("wily.name", name.id)
-      case Throw(exc) => record("wily.failure", exc.getClass.getSimpleName)
+      case Return(name) =>
+        val id = name.id match {
+          case strId: String => strId
+          case pathId: Path => pathId.show
+          case _ => name.id.toString
+        }
+        record("wily.name", id)
+
+      case Throw(exc) => record("wily.failure", exc.getClass.getName)
     }
   }
 
@@ -66,7 +74,7 @@ private[finagle] class NamerTracingFilter[Req, Rep](
     path: Path,
     baseDtab: () => Dtab,
     bound: Name.Bound,
-    record: (String, Any) => Unit = Trace.recordBinary)
+    record: (String, String) => Unit = Trace.recordBinary)
   extends Filter[Req, Rep, Req, Rep] {
 
   private[this] val nameTry = Return(bound)
