@@ -4,6 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
+import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.transport.{ChannelTransport, Transport}
 import java.net.SocketAddress
 import org.jboss.netty.channel.{Channel, ChannelFactory, ChannelPipeline,
@@ -57,6 +58,8 @@ trait IntegrationBase extends FunSuite with MockitoSugar {
         }
       }
     }
+
+    when(codec.newTraceInitializer) thenReturn TraceInitializerFilter.clientModule[String, String]
 
     val clientAddress = new SocketAddress {}
 

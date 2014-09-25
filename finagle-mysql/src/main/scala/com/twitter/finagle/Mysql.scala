@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.{StackClient, StdStackClient, DefaultPool, Transporter}
 import com.twitter.finagle.exp.mysql._
 import com.twitter.finagle.exp.mysql.transport.{MysqlTransporter, Packet}
-import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
 
@@ -29,30 +29,32 @@ trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
     mysql.Client(newClient(dest))
 }
 
-/**
- * Tracing filter for mysql client requests.
- */
-private object MysqlTracing extends SimpleFilter[Request, Result] { self =>
-  def apply(request: Request, service: Service[Request, Result]) = {
-    request match {
-      case QueryRequest(sqlStatement) => Trace.recordBinary("mysql.query", sqlStatement)
-      case PrepareRequest(sqlStatement) => Trace.recordBinary("mysql.prepare", sqlStatement)
-      // TODO: save the prepared statement and put it in the executed request trace
-      case ExecuteRequest(id, _, _, _) => Trace.recordBinary("mysql.execute", id)
-      case _ => Trace.record("mysql." + request.getClass.getSimpleName.replace("$", ""))
+object MySqlClientTracingFilter {
+  object Stackable extends Stack.Simple[ServiceFactory[Request, Result]] {
+    val role = ClientTracingFilter.role
+    val description = "Add MySql client specific annotations to the trace"
+    def make(next: ServiceFactory[Request, Result])(implicit params: Params) = {
+      val param.Label(label) = get[param.Label]
+      // TODO(jeff): should be able to get this directly from ClientTracingFilter
+      val annotations = new AnnotatingTracingFilter[Request, Result](
+        label, Annotation.ClientSend(), Annotation.ClientRecv())
+      annotations andThen TracingFilter andThen next
     }
-    service(request)
   }
 
-  // TODO: We should consider adding toStackable(elem) to CanStackFrom so this sort of
-  // boiler-plate isn't necessary. For example, we should be able to do MysqlTracing +: stack
-  // and the role should be inferred (maybe as the class name).
-  val role = Stack.Role("MysqlTracing")
-  val module = new Stack.Simple[ServiceFactory[Request, Result]] {
-    val role = MysqlTracing.role
-    val description = "Trace mysql specific calls to the loaded tracer"
-    def make(next: ServiceFactory[Request, Result])(implicit params: Stack.Params) =
-      self andThen next
+  object TracingFilter extends SimpleFilter[Request, Result] {
+    def apply(request: Request, service: Service[Request, Result]) = {
+      if (Trace.isActivelyTracing) {
+        request match {
+          case QueryRequest(sqlStatement) => Trace.recordBinary("mysql.query", sqlStatement)
+          case PrepareRequest(sqlStatement) => Trace.recordBinary("mysql.prepare", sqlStatement)
+          // TODO: save the prepared statement and put it in the executed request trace
+          case ExecuteRequest(id, _, _, _) => Trace.recordBinary("mysql.execute", id)
+          case _ => Trace.record("mysql." + request.getClass.getSimpleName.replace("$", ""))
+        }
+      }
+      service(request)
+    }
   }
 }
 
@@ -77,7 +79,8 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
    * client which exposes a rich mysql api.
    */
   case class Client(
-    stack: Stack[ServiceFactory[Request, Result]] = MysqlTracing.module +: StackClient.newStack,
+    stack: Stack[ServiceFactory[Request, Result]] = StackClient.newStack
+      .replace(ClientTracingFilter.role, MySqlClientTracingFilter.Stackable),
     params: Stack.Params = StackClient.defaultParams + DefaultPool.Param(
         low = 0, high = 1, bufferSize = 0,
         idleTime = Duration.Top,

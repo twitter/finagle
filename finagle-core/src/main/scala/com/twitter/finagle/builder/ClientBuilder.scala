@@ -11,7 +11,7 @@ import com.twitter.finagle.ssl.{Engine, Ssl}
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.{
   NullStatsReceiver, ClientStatsReceiver, StatsReceiver, RollupStatsReceiver}
-import com.twitter.finagle.tracing.NullTracer
+import com.twitter.finagle.tracing.{NullTracer, TraceInitializerFilter}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
 import com.twitter.util.TimeConversions._
@@ -403,6 +403,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
           .replace(StackClient.Role.prepConn, prepConn)
           .replace(StackClient.Role.prepFactory, (next: ServiceFactory[Req1, Rep1]) =>
             codec.prepareServiceFactory(next))
+          .replace(TraceInitializerFilter.role, codec.newTraceInitializer)
 
         // transform stack wrt. failure accrual
         val newStack =

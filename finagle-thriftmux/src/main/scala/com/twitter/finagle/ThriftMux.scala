@@ -195,8 +195,10 @@ object ThriftMux
       }
     }
 
-    protected def newDispatcher(transport: Transport[In, Out], service: Service[CB, CB]) =
-      new mux.ServerDispatcher(transport, service, true, mux.lease.exp.ClockedDrainer.flagged)
+    protected def newDispatcher(transport: Transport[In, Out], service: Service[CB, CB]) = {
+      val param.Tracer(tracer) = params[param.Tracer]
+      new mux.ServerDispatcher(transport, service, true, mux.lease.exp.ClockedDrainer.flagged, tracer)
+    }
   }
 
   val serverMuxer = ServerMuxer()
@@ -248,4 +250,3 @@ object ThriftMux
   def serve(addr: SocketAddress, factory: ServiceFactory[Array[Byte], Array[Byte]]) =
     server.serve(addr, factory)
 }
-

@@ -116,7 +116,6 @@ private[thrift] class TTwitterClientFilter(
       else
         request
 
-    Trace.record(Annotation.ClientSend())
     val reply = service(thriftRequest)
 
     if (thriftRequest.oneway) {
@@ -124,7 +123,6 @@ private[thrift] class TTwitterClientFilter(
       reply
     } else {
       reply map { response =>
-        Trace.record(Annotation.ClientRecv())
 
         if (isUpgraded) {
           // Peel off the ResponseHeader.

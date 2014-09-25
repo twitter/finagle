@@ -10,7 +10,7 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.ClientStatsReceiver
-import com.twitter.finagle.tracing.{ClientDestTracingFilter, TracingFilter}
+import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.Showable
 import com.twitter.util.{Future, Var}
@@ -76,7 +76,8 @@ object StackClient {
    * @see [[com.twitter.finagle.factory.RefcountedFactory]]
    * @see [[com.twitter.finagle.factory.TimeoutFactory]]
    * @see [[com.twitter.finagle.factory.StatsFactoryWrapper]]
-   * @see [[com.twitter.finagle.tracing.TracingFilter]]
+   * @see [[com.twitter.finagle.tracing.ClientTracingFilter]]
+   * @see [[com.twitter.finagle.tracing.TraceInitializerFilter]]
    */
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
     val stk = new StackBuilder(endpointStack[Req, Rep])
@@ -86,11 +87,12 @@ object StackClient {
     stk.push(TimeoutFactory.module)
     stk.push(StatsFactoryWrapper.module)
     stk.push(NamerTracingFilter.module)
-    // The TracingFilter must be pushed after most other modules so that
+    stk.push(ClientTracingFilter.module)
+    stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
+    // The TraceInitializerFilter must be pushed after most other modules so that
     // any Tracing produced by those modules is enclosed in the appropriate
     // span.
-    stk.push(TracingFilter.module)
-    stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
+    stk.push(TraceInitializerFilter.clientModule)
     stk.result
   }
 

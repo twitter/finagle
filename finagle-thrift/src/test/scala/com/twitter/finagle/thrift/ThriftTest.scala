@@ -3,7 +3,7 @@ package com.twitter.finagle.thrift
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ServerBuilder, ClientBuilder}
 import com.twitter.finagle.thrift._
-import com.twitter.finagle.tracing.{DefaultTracer, BufferingTracer}
+import com.twitter.finagle.tracing.{DefaultTracer, BufferingTracer, Trace}
 import java.net.{SocketAddress, InetSocketAddress}
 import org.apache.thrift.protocol._
 import org.scalatest.FunSuite
@@ -148,10 +148,13 @@ trait ThriftTest { self: FunSuite =>
     DefaultTracer.self = tracer
     val server = newServer(proto)
     val client = newClient(proto, server.boundAddr, testDef.clientIdOpt)
-    try testDef.testFunction(client.client, tracer) finally {
-      DefaultTracer.self = previous
-      server.close()
-      client.close()
+    Trace.unwind {
+      Trace.clear()
+      try testDef.testFunction(client.client, tracer) finally {
+        DefaultTracer.self = previous
+        server.close()
+        client.close()
+      }
     }
   }
 }

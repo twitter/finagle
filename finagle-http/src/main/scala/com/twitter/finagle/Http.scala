@@ -5,11 +5,12 @@ import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.SerialServerDispatcher
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.filter.DtabFilter
-import com.twitter.finagle.http.{HttpTransport, HttpServerTracingFilter, HttpClientTracingFilter}
+import com.twitter.finagle.http._
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.server._
 import com.twitter.finagle.ssl.Ssl
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.tracing._
 import com.twitter.util.{Future, StorageUnit}
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.handler.codec.http._
@@ -58,12 +59,12 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
   }
 
   object Client {
-    val stack: Stack[ServiceFactory[HttpRequest, HttpResponse]] =
-      HttpClientTracingFilter.module[HttpRequest, HttpResponse] +: StackClient.newStack
+    val stack: Stack[ServiceFactory[HttpRequest, HttpResponse]] = StackClient.newStack
   }
 
   case class Client(
-    stack: Stack[ServiceFactory[HttpRequest, HttpResponse]] = Client.stack,
+    stack: Stack[ServiceFactory[HttpRequest, HttpResponse]] = Client.stack
+      .replace(TraceInitializerFilter.role, new HttpClientTraceInitializer[HttpRequest, HttpResponse]),
     params: Stack.Params = StackClient.defaultParams
   ) extends StdStackClient[HttpRequest, HttpResponse, Client] {
     protected type In = Any
@@ -110,7 +111,8 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
     client.newClient(dest, label)
 
   case class Server(
-    stack: Stack[ServiceFactory[HttpRequest, HttpResponse]] = StackServer.newStack,
+    stack: Stack[ServiceFactory[HttpRequest, HttpResponse]] = StackServer.newStack
+      .replace(TraceInitializerFilter.role, new HttpServerTraceInitializer[HttpRequest, HttpResponse]),
     params: Stack.Params = StackServer.defaultParams
   ) extends StdStackServer[HttpRequest, HttpResponse, Server] {
     protected type In = Any
@@ -128,11 +130,8 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
     protected def newDispatcher(transport: Transport[In, Out],
         service: Service[HttpRequest, HttpResponse]) = {
       val dtab = DtabFilter.Netty
-      val tracingFilter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("http")
       new HttpServerDispatcher(
-        new HttpTransport(transport),
-        tracingFilter andThen dtab andThen service
-      )
+        new HttpTransport(transport), dtab andThen service)
     }
 
     protected def copy1(

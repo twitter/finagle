@@ -3,7 +3,7 @@ package com.twitter.finagle.mux
 import com.twitter.conversions.time._
 import com.twitter.finagle.mux.lease.exp.{Lessor, Lessee, nackOnExpiredLease}
 import com.twitter.finagle.netty3.ChannelBufferBuf
-import com.twitter.finagle.tracing.{Trace, Annotation}
+import com.twitter.finagle.tracing.{Annotation, DefaultTracer, Trace, Tracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
 import com.twitter.finagle.{CancelledRequestException, Context, Dtab, Service, WriteException}
@@ -34,13 +34,28 @@ private[finagle] class ServerDispatcher private[finagle](
     trans: Transport[ChannelBuffer, ChannelBuffer],
     service: Service[ChannelBuffer, ChannelBuffer],
     canDispatch: Boolean, // XXX: a hack to indicate whether a server understand {T,R}Dispatch
-    lessor: Lessor // the lessor that the dispatcher should register with in order to get leases
+    lessor: Lessor, // the lessor that the dispatcher should register with in order to get leases
+    tracer: Tracer
 ) extends Closable with Lessee {
   def this(
     trans: Transport[ChannelBuffer, ChannelBuffer],
     service: Service[ChannelBuffer, ChannelBuffer],
     canDispatch: Boolean
-  ) = this(trans, service, canDispatch, Lessor.nil)
+  ) = this(trans, service, canDispatch, Lessor.nil, DefaultTracer)
+
+  def this(
+    trans: Transport[ChannelBuffer, ChannelBuffer],
+    service: Service[ChannelBuffer, ChannelBuffer],
+    canDispatch: Boolean,
+    lessor: Lessor
+  ) = this(trans, service, canDispatch, lessor, DefaultTracer)
+
+  def this(
+    trans: Transport[ChannelBuffer, ChannelBuffer],
+    service: Service[ChannelBuffer, ChannelBuffer],
+    canDispatch: Boolean,
+    tracer: Tracer
+  ) = this(trans, service, canDispatch, Lessor.nil, tracer)
 
   import Message._
 
@@ -70,25 +85,26 @@ private[finagle] class ServerDispatcher private[finagle](
           val msg = Rerr(tag, "Tdispatch not enabled")
           trans.write(encode(msg))
         } else {
-          for ((k, v) <- contexts)
-            Context.handle(ChannelBufferBuf(k), ChannelBufferBuf(v))
-          Trace.record(Annotation.ServerRecv())
-          if (dtab.length > 0)
-            Dtab.local ++= dtab
-          val elapsed = Stopwatch.start()
-          val f = service(req)
-          pending.put(tag, f)
-          f respond { tr =>
-            pending.remove(tag)
-            tr match {
-              case Return(rep) =>
-                lessor.observe(elapsed())
-                // Record tracing info to track Mux adoption across clusters.
-                Trace.record(ServerDispatcher.ServerEnabledTraceMessage)
-                Trace.record(Annotation.ServerSend())
-                trans.write(encode(RdispatchOk(tag, Seq.empty, rep)))
-              case Throw(exc) =>
-                trans.write(encode(RdispatchError(tag, Seq.empty, exc.toString)))
+          Trace.unwind {
+            Trace.pushTracer(tracer)
+            for ((k, v) <- contexts)
+              Context.handle(ChannelBufferBuf(k), ChannelBufferBuf(v))
+            if (dtab.length > 0)
+              Dtab.local ++= dtab
+            val elapsed = Stopwatch.start()
+            val f = service(req)
+            pending.put(tag, f)
+            f respond { tr =>
+              pending.remove(tag)
+              tr match {
+                case Return(rep) =>
+                  lessor.observe(elapsed())
+                  // Record tracing info to track Mux adoption across clusters.
+                  Trace.record(ServerDispatcher.ServerEnabledTraceMessage)
+                  trans.write(encode(RdispatchOk(tag, Seq.empty, rep)))
+                case Throw(exc) =>
+                  trans.write(encode(RdispatchError(tag, Seq.empty, exc.toString)))
+              }
             }
           }
         }
@@ -96,11 +112,10 @@ private[finagle] class ServerDispatcher private[finagle](
 
     case Treq(tag, traceId, req) =>
       lessor.observeArrival()
-      val saved = Trace.state
-      try {
+      Trace.unwind {
+        Trace.pushTracer(tracer)
         for (traceId <- traceId)
           Trace.setId(traceId)
-        Trace.record(Annotation.ServerRecv())
 
         // Record tracing info to track Mux adoption across clusters.
         Trace.record(ServerDispatcher.ServerEnabledTraceMessage)
@@ -113,14 +128,11 @@ private[finagle] class ServerDispatcher private[finagle](
           tr match {
             case Return(rep) =>
               lessor.observe(elapsed())
-              Trace.record(Annotation.ServerSend())
               trans.write(encode(RreqOk(tag, rep)))
             case Throw(exc) =>
               trans.write(encode(RreqError(tag, exc.toString)))
           }
         }
-      } finally {
-        Trace.state = saved
       }
 
     case Tdiscarded(tag, why) =>

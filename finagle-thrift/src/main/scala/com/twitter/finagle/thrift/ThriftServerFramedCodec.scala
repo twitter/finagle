@@ -3,6 +3,7 @@ package com.twitter.finagle.thrift
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.{
   Codec, CodecFactory, ServerCodecConfig, Service, ServiceFactory, SimpleFilter}
+import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.util.Future
 import java.net.InetSocketAddress
 import org.apache.thrift.protocol.{  TMessage, TMessageType, TProtocolFactory}
@@ -55,6 +56,8 @@ class ThriftServerFramedCodec(
 
   override def prepareConnFactory(factory: ServiceFactory[Array[Byte], Array[Byte]]) =
     preparer.prepare(factory)
+
+  override def newTraceInitializer = TraceInitializerFilter.serverModule[Array[Byte], Array[Byte]]
 }
 
 private[finagle] case class ThriftServerPreparer(

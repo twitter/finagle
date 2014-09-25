@@ -5,7 +5,7 @@ import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.dispatch.{PipeliningDispatcher, SerialClientDispatcher}
 import com.twitter.finagle.netty3.Netty3Listener
-import com.twitter.finagle.param.{Label, Stats}
+import com.twitter.finagle.param.{Label, Stats, Tracer => PTracer}
 import com.twitter.finagle.server.{StackServer, StdStackServer}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientRequest}
@@ -192,56 +192,21 @@ class EndToEndTest extends FunSuite {
       def sampleTrace(traceId: TraceId): Option[Boolean] = None
     }
 
-    object ThriftMuxListener extends Netty3Listener[ChannelBuffer, ChannelBuffer](
-      "thrift", new thriftmux.PipelineFactory)
+    val server = ThriftMux.server
+      .configured(PTracer(tracer))
+      .serveIface(":*", new TestService.FutureIface {
+        def query(x: String) = Future.value(x + x)
+      })
 
-    // TODO: temporary workaround to capture the ServerRecv record.
-    case class TestThriftMuxer(
-        stack: Stack[ServiceFactory[ChannelBuffer, ChannelBuffer]] = StackServer.newStack,
-        params: Stack.Params = StackServer.defaultParams)
-          extends StdStackServer[ChannelBuffer, ChannelBuffer, TestThriftMuxer] {
+    val client = Thrift.client
+      .configured(PTracer(tracer))
+      .newIface[TestService.FutureIface](server)
 
-      protected def copy1(
-        stack: Stack[ServiceFactory[ChannelBuffer, ChannelBuffer]] = this.stack,
-        params: Stack.Params = this.params
-      ) = copy(stack, params)
-
-      protected type In = ChannelBuffer
-      protected type Out = ChannelBuffer
-
-      protected def newListener() = ThriftMuxListener
-      protected def newDispatcher(
-          transport: Transport[In, Out],
-          service: Service[ChannelBuffer, ChannelBuffer]) =
-        new mux.ServerDispatcher(transport, service, true) {
-          private val saveReceive = receive
-          receive = { msg =>
-            Trace.unwind {
-              Trace.pushTracer(tracer)
-              saveReceive(msg)
-            }
-          }
-        }
-    }
-
-   val testThriftMuxServer = ThriftMux.Server(TestThriftMuxer())
-
-    val testService = new TestService.FutureIface {
-      def query(x: String) = Future.value(x + x)
-    }
-   val server = testThriftMuxServer.serveIface(":*", testService)
-    val client = Thrift.newIface[TestService.FutureIface](server)
-    var p: Future[String] = null
-    Trace.unwind {
-      Trace.pushTracer(tracer)
-      Trace.setId(TraceId(Some(SpanId(123)), Some(SpanId(456)), SpanId(789), None))
-      p = client.query("ok")
-    }
-    Await.result(p)
+    Await.result(client.query("ok"))
 
     (srvTraceId, cltTraceId) match {
       case (Some(id1), Some(id2)) => assert(id1 === id2)
-      case _ => assert(false, "the trace ids sent by client and received by server do not match")
+      case _ => assert(false, s"the trace ids sent by client and received by server do not match srv: $srvTraceId clt: $cltTraceId")
     }
   }
 

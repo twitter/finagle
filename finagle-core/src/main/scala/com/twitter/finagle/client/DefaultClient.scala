@@ -70,13 +70,15 @@ case class DefaultClient[Req, Rep](
   tracer: Tracer  = DefaultTracer,
   monitor: Monitor = DefaultMonitor,
   reporter: ReporterFactory = LoadedReporterFactory,
-  loadBalancer: WeightedLoadBalancerFactory = DefaultBalancerFactory
+  loadBalancer: WeightedLoadBalancerFactory = DefaultBalancerFactory,
+  newTraceInitializer: Stack.Simple[ServiceFactory[Req, Rep]] = TraceInitializerFilter.clientModule[Req, Rep]
 ) extends Client[Req, Rep] { outer =>
 
   private[this] def transform(stack: Stack[ServiceFactory[Req, Rep]]) = {
     val stk = stack
       .replace(FailureAccrualFactory.role, failureAccrual)
       .replace(StackClient.Role.pool, pool(statsReceiver))
+      .replace(TraceInitializerFilter.role, newTraceInitializer)
 
     if (!failFast) stk.remove(FailFastFactory.role) else stk
   }

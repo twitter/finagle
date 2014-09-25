@@ -1,7 +1,8 @@
 package com.twitter.finagle.mux
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Dtab, Mux, Service}
+import com.twitter.finagle.{param, Dtab, Mux, Service}
+import com.twitter.finagle.tracing._
 import com.twitter.util.{Await, Future, Promise}
 import java.io.{PrintWriter, StringWriter}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
@@ -82,5 +83,47 @@ class EndToEndTest extends FunSuite with Eventually with BeforeAndAfter {
     val buf = Await.result(client(ChannelBuffers.EMPTY_BUFFER), 30.seconds)
     assert(buf.readableBytes() === 4)
     assert(buf.readInt() === 0)
+  }
+
+  def assertAnnotationsInOrder(tracer: Seq[Record], annos: Seq[Annotation]) {
+    assert(tracer.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } === annos)
+  }
+
+  test("trace propagation") {
+    val tracer = new BufferingTracer
+
+    var count: Int = 0
+    var client: Service[ChannelBuffer, ChannelBuffer] = null
+
+    val server = Mux.server
+      .configured(param.Tracer(tracer))
+      .configured(param.Label("theServer"))
+      .serve(":*", new Service[ChannelBuffer, ChannelBuffer] {
+        def apply(req: ChannelBuffer) = {
+          count += 1
+          if (count >= 1) Future.value(req)
+          else client(req)
+        }
+      })
+
+    client = Mux.client
+      .configured(param.Tracer(tracer))
+      .configured(param.Label("theClient"))
+      .newService(server)
+
+    Await.result(client(ChannelBuffers.EMPTY_BUFFER), 30.seconds)
+
+    assertAnnotationsInOrder(tracer.toSeq, Seq(
+      Annotation.ServiceName("theClient"),
+      Annotation.ClientSend(),
+      Annotation.Message(ClientDispatcher.ClientEnabledTraceMessage),
+      Annotation.ServiceName("theServer"),
+      Annotation.ServerRecv(),
+      Annotation.ServerSend(),
+      Annotation.Message(ServerDispatcher.ServerEnabledTraceMessage),
+      Annotation.ClientRecv()
+    ))
+
+    //throw new Exception("\n" + tracer.mkString("\n"))
   }
 }

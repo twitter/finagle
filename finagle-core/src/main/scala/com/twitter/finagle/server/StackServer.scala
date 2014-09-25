@@ -6,7 +6,7 @@ import com.twitter.finagle.param._
 import com.twitter.finagle.service.{StatsFilter, TimeoutFilter}
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.ServerStatsReceiver
-import com.twitter.finagle.tracing.{TracingFilter, ServerDestTracingProxy}
+import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.jvm.Jvm
 import com.twitter.util.{Closable, CloseAwaitably, Return, Throw, Time}
@@ -40,7 +40,8 @@ object StackServer {
    * @see [[com.twitter.finagle.filter.RequestSemaphoreFilter]]
    * @see [[com.twitter.finagle.filter.ExceptionSourceFilter]]
    * @see [[com.twitter.finagle.filter.MkJvmFilter]]
-   * @see [[com.twitter.finagle.tracing.TracingFilter]]
+   * @see [[com.twitter.finagle.tracing.ServerTracingFilter]]
+   * @see [[com.twitter.finagle.tracing.TraceInitializerFilter]]
    * @see [[com.twitter.finagle.filter.MonitorFilter]]
    * @see [[com.twitter.finagle.filter.HandletimeFilter]]
    */
@@ -59,11 +60,12 @@ object StackServer {
     stk.push(Role.jvmTracing, ((next: ServiceFactory[Req, Rep]) =>
       newJvmFilter[Req, Rep]() andThen next))
     stk.push(HandletimeFilter.module)
+    stk.push(ServerTracingFilter.module)
     stk.push(Role.preparer, identity[ServiceFactory[Req, Rep]](_))
-    // The TracingFilter must be pushed after most other modules so that
+    // The TraceInitializerFilter must be pushed after most other modules so that
     // any Tracing produced by those modules is enclosed in the appropriate
     // span.
-    stk.push(TracingFilter.module)
+    stk.push(TraceInitializerFilter.serverModule)
     stk.push(MonitorFilter.module)
     stk.result
   }

@@ -6,6 +6,7 @@ import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.tracing._
 import java.net.SocketAddress
 import org.jboss.netty.buffer.{ChannelBuffer => CB}
 
@@ -46,7 +47,8 @@ object Mux extends Client[CB, CB] with Server[CB, CB] {
     client.newClient(dest, label)
 
   case class Server(
-    stack: Stack[ServiceFactory[CB, CB]] = StackServer.newStack,
+    stack: Stack[ServiceFactory[CB, CB]] = StackServer.newStack
+      .remove(TraceInitializerFilter.role),
     params: Stack.Params = StackServer.defaultParams
   ) extends StdStackServer[CB, CB, Server] {
     protected def copy1(
@@ -59,8 +61,10 @@ object Mux extends Client[CB, CB] with Server[CB, CB] {
 
     protected def newListener(): Listener[In, Out] =
       Netty3Listener(mux.PipelineFactory, params)
-    protected def newDispatcher(transport: Transport[In, Out], service: Service[CB, CB]) =
-      new mux.ServerDispatcher(transport, service, true, mux.lease.exp.ClockedDrainer.flagged)
+    protected def newDispatcher(transport: Transport[In, Out], service: Service[CB, CB]) = {
+      val param.Tracer(tracer) = params[param.Tracer]
+      new mux.ServerDispatcher(transport, service, true, mux.lease.exp.ClockedDrainer.flagged, tracer)
+    }
   }
 
   val server = Server()

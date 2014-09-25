@@ -7,15 +7,55 @@ import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.{SerialServerDispatcher, PipeliningDispatcher}
 import com.twitter.finagle.memcached.protocol.text.{
   MemcachedClientPipelineFactory, MemcachedServerPipelineFactory}
-import com.twitter.finagle.memcached.protocol.{Command, Response}
+import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
 import com.twitter.finagle.memcached.{Client => MClient, Server => MServer, _}
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
+import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.hashing.KeyHasher
-import com.twitter.util.Duration
+import com.twitter.io.Charsets.Utf8
+import com.twitter.util.{Duration, Future}
+import scala.collection.mutable
+
+private object MemcachedTraceInitializer {
+  object Module extends Stack.Simple[ServiceFactory[Command, Response]] {
+    val role = TraceInitializerFilter.role
+    val description = "Initialize traces for the client and record hits/misses"
+    def make(next: ServiceFactory[Command, Response])(implicit params: Params) = {
+      val param.Tracer(tracer) = get[param.Tracer]
+      val filter = new Filter(tracer)
+      filter andThen next
+    }
+  }
+
+  class Filter(tracer: Tracer) extends SimpleFilter[Command, Response] {
+    def apply(command: Command, service: Service[Command, Response]): Future[Response] = Trace.unwind {
+      Trace.pushTracerAndSetNextId(tracer)
+      val response = service(command)
+      command match {
+        case command: RetrievalCommand if Trace.isActivelyTracing =>
+          response onSuccess {
+            case Values(vals) =>
+              val cmd = command.asInstanceOf[RetrievalCommand]
+              val misses = mutable.Set.empty[String]
+              cmd.keys foreach { key => misses += key.toString(Utf8) }
+              vals foreach { value =>
+                val key = value.key.toString(Utf8)
+                Trace.recordBinary(key, "Hit")
+                misses.remove(key)
+              }
+              misses foreach { Trace.recordBinary(_, "Miss") }
+            case _ =>
+          }
+        case _ =>
+      }
+      response
+    }
+  }
+}
 
 trait MemcachedRichClient { self: Client[Command, Response] =>
   def newRichClient(group: Group[SocketAddress]): memcached.Client = memcached.Client(newClient(group).toService)
@@ -86,7 +126,8 @@ object MemcachedClient extends DefaultClient[Command, Response](
   name = "memcached",
   endpointer = Bridge[Command, Response, Command, Response](
     MemcachedTransporter, new PipeliningDispatcher(_)),
-  pool = (sr: StatsReceiver) => new SingletonPool(_, sr)
+  pool = (sr: StatsReceiver) => new SingletonPool(_, sr),
+  newTraceInitializer = MemcachedTraceInitializer.Module
 ) with MemcachedRichClient with MemcachedKetamaClient
 
 private[finagle] object MemcachedFailureAccrualClient {
@@ -115,7 +156,8 @@ private[finagle] class MemcachedFailureAccrualClient(
       failureAccrualParams._1,
       failureAccrualParams._2,
       DefaultTimer.twitter, key, broker)
-  }
+  },
+  newTraceInitializer = MemcachedTraceInitializer.Module
 ) with MemcachedRichClient
 
 object MemcachedListener extends Netty3Listener[Response, Command](

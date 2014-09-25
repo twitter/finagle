@@ -130,37 +130,6 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     assert(f.poll === Some(Throw(exc)))
   }
 
-  test("end-to-end with tracing: client-to-service") {
-    val p = new Promise[ChannelBuffer]
-    when(service(buf(1))).thenReturn(p)
-
-    verify(service, never())(any[ChannelBuffer])
-    val id = TraceId(Some(SpanId(1)), Some(SpanId(2)), SpanId(3), None)
-    val f = Trace.unwind {
-      Trace.setId(id)
-      client(buf(1))
-    }
-    verify(service)(buf(1))
-    assert(f.poll === None)
-    p.setValue(buf(2))
-    assert(f.poll === Some(Return(buf(2))))
-
-    val ia = new InetSocketAddress(0)
-    val recs = tracer.toSeq.sortBy(_.timestamp)
-    assert(recs match {
-      case Seq(
-        Record(`id`, _, Annotation.Message(ClientDispatcher.ClientEnabledTraceMessage), None),
-        Record(`id`, _, Annotation.ClientSend(), None),
-        Record(`id`, _, Annotation.ServerRecv(), None),
-        Record(`id`, _, Annotation.Message(ServerDispatcher.ServerEnabledTraceMessage), None),
-        Record(`id`, _, Annotation.ServerSend(), None),
-        Record(`id`, _, Annotation.ClientRecv(), None)
-      ) => true
-
-      case _ => false
-    })
-  }
-
   test("propagate trace ids") {
     when(service(any[ChannelBuffer])).thenAnswer(
       new Answer[Future[ChannelBuffer]]() {

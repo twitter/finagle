@@ -130,9 +130,6 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually with BeforeA
       assert(!tracer.isEmpty)
       val idSet = tracer.map(_.traceId).toSet
 
-      // We'll generate 2 ids for the upgrade negotiation;
-      // 1 for our transaction.
-      assert(idSet.size === 3)
       val ids = idSet.filter(_.traceId == id.traceId)
       assert(ids.size === 1)
       val theId = ids.head
@@ -164,12 +161,13 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually with BeforeA
 
       nextTrace // finagle.version
       assertAnn(nextTrace, Annotation.ServiceName("thriftclient"))
-      assertAnn(nextTrace, Annotation.Rpc("multiply"))
       assertAnn(nextTrace, Annotation.ClientSend())
+      assertAnn(nextTrace, Annotation.Rpc("multiply"))
       assertAnn(nextTrace, Annotation.ServerAddr(serverAddr1))
       assertAnn(nextTrace, Annotation.ClientAddr(clientAddr1))
-      assertAnn(nextTrace, Annotation.ServiceName("thriftserver"))
       assertAnn(nextTrace, Annotation.Rpc("multiply"))
+      nextTrace // finagle.version
+      assertAnn(nextTrace, Annotation.ServiceName("thriftserver"))
       assertAnn(nextTrace, Annotation.ServerRecv())
       assertAnn(nextTrace, Annotation.LocalAddr(serverAddr2))
       assertAnn(nextTrace, Annotation.ServerAddr(serverAddr2))

@@ -15,15 +15,19 @@ class MysqlBuilderTest extends FunSuite {
   // Flaky test, see FLAKEY-530
   if (!sys.props.contains("SKIP_FLAKY")) {
   test("clients have granular tracing") {
+    var records = List.empty[Record]
     var annotations: List[Annotation] = Nil
     val mockTracer = new Tracer {
-      def record(record: Record) = annotations ::= record.annotation
+      def record(record: Record) = {
+        annotations ::= record.annotation
+        records ::= record
+      }
       def sampleTrace(traceId: TraceId): Option[Boolean] = Some(true)
     }
-    Trace.pushTracerAndSetNextId(mockTracer)
 
     val client = Mysql.client
       .configured(param.Label("myclient"))
+      .configured(param.Tracer(mockTracer))
       .withDatabase("test")
       .newRichClient("localhost:3306")
 

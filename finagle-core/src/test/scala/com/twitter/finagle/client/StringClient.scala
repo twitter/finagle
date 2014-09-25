@@ -21,7 +21,7 @@ private class DelimEncoder(delim: Char) extends SimpleChannelHandler {
   }
 }
 
-private[client] object StringClientPipeline extends ChannelPipelineFactory {
+private[finagle] object StringClientPipeline extends ChannelPipelineFactory {
   def getPipeline = {
     val pipeline = Channels.pipeline()
     pipeline.addLast("stringEncode", new StringEncoder(Charsets.Utf8))

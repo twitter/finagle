@@ -13,6 +13,7 @@ import com.twitter.finagle.ssl.{Ssl, Engine}
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.util._
 import com.twitter.util.{Closable, Duration, Future, NullMonitor, Time}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
@@ -202,7 +203,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       val newStack = StackServer.newStack[Req1, Rep1].replace(
         StackServer.Role.preparer, (next: ServiceFactory[Req1, Rep1]) =>
           codec.prepareConnFactory(next)
-      )
+      ).replace(TraceInitializerFilter.role, codec.newTraceInitializer)
 
       case class Server(
         stack: Stack[ServiceFactory[Req1, Rep1]] = newStack,

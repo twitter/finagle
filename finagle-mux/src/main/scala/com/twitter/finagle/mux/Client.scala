@@ -201,7 +201,6 @@ private[finagle] class ClientDispatcher (
     if (traceWrite) {
       // Record tracing info to track Mux adoption across clusters.
       Trace.record(ClientDispatcher.ClientEnabledTraceMessage)
-      Trace.record(Annotation.ClientSend())
     }
 
     trans.write(encode(msg)) onFailure { case exc =>
@@ -213,12 +212,7 @@ private[finagle] class ClientDispatcher (
           reqP.setException(cause)
         }
       }
-
-      p onSuccess { _ =>
-        // Note: Client receipt is unconditional on `traceWrite`, so we do not
-        // need to guard this trace.
-        Trace.record(Annotation.ClientRecv())
-      }
+      p
     }
 
     if (couldDispatch == Cap.Unknown) {

@@ -71,9 +71,7 @@ private[finagle] class TTwitterServerFilter(
       }
 
       val msg = new InputBuffer(request_, protocolFactory)().readMessageBegin()
-      Trace.recordServiceName(serviceName)
       Trace.recordRpc(msg.name)
-      Trace.record(Annotation.ServerRecv())
 
       if (header.contexts != null) {
         val iter = header.contexts.iterator()
@@ -90,7 +88,6 @@ private[finagle] class TTwitterServerFilter(
       service(request_) map {
         case response if response.isEmpty => response
         case response =>
-          Trace.record(Annotation.ServerSend())
           val responseHeader = new thrift.ResponseHeader
           ByteArrays.concat(
             OutputBuffer.messageToArray(responseHeader, protocolFactory),
@@ -113,14 +110,8 @@ private[finagle] class TTwitterServerFilter(
       } else {
         // request from client without tracing support
         Trace.recordRpc(msg.name)
-
-        Trace.record(Annotation.ServerRecv())
         Trace.record("finagle.thrift.noUpgrade")
-
-        service(request) map { response =>
-          Trace.record(Annotation.ServerSend())
-          response
-        }
+        service(request)
       }
     }
   }

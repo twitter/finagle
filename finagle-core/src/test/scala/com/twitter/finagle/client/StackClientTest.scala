@@ -1,6 +1,7 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.tracing._
 import com.twitter.finagle.{param, Name}
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
