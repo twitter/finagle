@@ -326,13 +326,13 @@ object Stack {
 trait Stackable[T] extends Stack.Head {
   private val _params = mutable.Map.empty[String, String]
 
-  def params: immutable.Map[String, String] = _params.toMap
+  def params: immutable.Map[String, String] = synchronized { _params.toMap }
 
   def toStack(next: Stack[T]): Stack[T]
 
 
   // Record the parameter names and values
-  private def register(paramVal: Product): Unit = {
+  private def register(paramVal: Product): Unit = synchronized {
     // zip two lists, and pair any unmatched values with `padding`
     def zipWithPadding[T](l1: List[T], l2: List[T], padding: T): List[(T, T)] =
       (l1.length - l2.length) match {
