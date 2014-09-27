@@ -3,11 +3,12 @@ package com.twitter.finagle.tracing
 import com.twitter.conversions.time._
 import com.twitter.util.Time
 import org.junit.runner.RunWith
-import org.scalatest.{OneInstancePerTest, BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
+import org.scalatest.{OneInstancePerTest, BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
-class TraceTest extends FunSuite with BeforeAndAfter with OneInstancePerTest {
+class TraceTest extends FunSuite with BeforeAndAfter with OneInstancePerTest with MockitoSugar {
   before { Trace.clear() }
   after { Trace.clear() }
 
@@ -328,5 +329,16 @@ class TraceTest extends FunSuite with BeforeAndAfter with OneInstancePerTest {
     Trace.setId(id.copy(_sampled = None))
     tracer.doSample = Some(true)
     assert(Trace.isActivelyTracing) // tracer would like to trace this
+  }
+
+  test("Trace.isActivelyTracing: trace id with SamplingKnown flag set") {
+    val id = TraceId(Some(SpanId(12)), Some(SpanId(13)), SpanId(14), Some(true), Flags(Flags.SamplingKnown | Flags.Sampled))
+    val tracer = mock[Tracer]
+    Trace.clear()
+    Trace.pushTracer(tracer)
+    Trace.setId(id)
+    assert(Trace.isActivelyTracing === true)
+    Trace.setId(id.copy(_sampled = Some(false), flags = Flags(Flags.SamplingKnown)))
+    assert(Trace.isActivelyTracing === false)
   }
 }
