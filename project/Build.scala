@@ -11,7 +11,7 @@ object Finagle extends Build {
   val utilVersion = "6.21.2"
   val ostrichVersion = "9.5.6"
   val jacksonVersion = "2.3.1"
-  val nettyLib = "io.netty" % "netty" % "3.9.1.1.Final"
+  val nettyLib = "io.netty" % "netty" % "3.9.4.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonLibs = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
