@@ -208,6 +208,8 @@ object ChannelException {
       case _: java.nio.channels.ClosedChannelException     => new ChannelClosedException(cause, remoteAddress)
       case e: java.io.IOException
         if "Connection reset by peer" == e.getMessage      => new ChannelClosedException(cause, remoteAddress)
+      case e: java.io.IOException
+        if "Connection timed out" == e.getMessage          => new ConnectionFailedException(cause, remoteAddress)
       case e                                               => new UnknownChannelException(cause, remoteAddress)
     }
   }
