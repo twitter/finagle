@@ -52,6 +52,9 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
 
   def summary(includeTails: Boolean): String = {
     val counterValues = counters.asMap.asScala
+    val gaugeValues = gauges.toSeq map {
+      case (names, gauge) => variableName(names) -> gauge().toString
+    }
     val statValues = stats.asMap.asScala collect {
       case (k, buf) if buf.nonEmpty =>
         val n = buf.size
@@ -69,7 +72,7 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
         n, xs(0), xs(n/2), xs(idx(.9D)), xs(idx(.95D)), xs(idx(.99D)), xs(idx(.999D)), xs(idx(.9999D)), xs(n-1)))
     }).toSeq
 
-    lazy val tailValues = statValues map { case (k, xs) =>
+    lazy val tailValues = (statValues map { case (k, xs) =>
       val n = xs.size
       def slice(ptile: Double) = {
         val end = math.ceil(ptile*n).toInt
@@ -77,19 +80,22 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
         for (i <- start to end) yield xs(i)
       }
       (variableName(k), "p999=%s, p9999=%s".format(slice(.999D), slice(.9999D)))
-    } toSeq
+    }).toSeq
 
     val sortedCounters      = counterLines.sortBy { case (k, _) => k }
+    val sortedGauges        = gaugeValues.sortBy  { case (k, _) => k }
     val sortedStats         = statLines.sortBy    { case (k, _) => k }
     lazy val sortedTails    = tailValues.sortBy   { case (k, _) => k }
 
     val fmt = Function.tupled { (k: String, v: String) => "%-30s %s".format(k, v) }
-    val fmtCounters = sortedCounters map fmt
-    val fmtStats = sortedStats map fmt
-    lazy val fmtTails = sortedTails map fmt
+    val fmtCounters = sortedCounters.map(fmt)
+    val fmtGauges = gaugeValues.map(fmt)
+    val fmtStats = sortedStats.map(fmt)
+    lazy val fmtTails = sortedTails.map(fmt)
 
-    "# counters\n" + (fmtCounters mkString "\n") +
-    "\n# stats\n" + (fmtStats mkString "\n") +
+    "# counters\n" + fmtCounters.mkString("\n") +
+    "\n# gauges\n" + fmtGauges.sorted.mkString("\n") +
+    "\n# stats\n" + fmtStats.mkString("\n") +
     (if (includeTails) "\n# stats-tails\n" + (fmtTails mkString "\n") else "")
   }
 
