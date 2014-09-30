@@ -5,12 +5,14 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.{Addr, Group, Name, ServiceFactory}
 import com.twitter.finagle.builder._
 import com.twitter.finagle.kestrel.protocol.{Response, Command, Kestrel}
+import com.twitter.finagle.stats.{Gauge, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.{ThriftClientFramedCodec, ClientId, ThriftClientRequest}
+import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util.{Closable, Duration, Future, Return, Throw, Try, Timer, Var, Witness}
 import _root_.java.{util => ju}
 import _root_.java.lang.UnsupportedOperationException
-import _root_.java.util.logging.Level
 import _root_.java.net.SocketAddress
+import _root_.java.util.concurrent.atomic.AtomicInteger
 import scala.collection.mutable
 import scala.collection.JavaConversions._
 
@@ -22,11 +24,62 @@ import scala.collection.JavaConversions._
 object AllHandlesDiedException extends Exception
 
 private[finagle] object MultiReaderHelper {
-  private[finagle] def merge(readHandles: Var[Try[Set[ReadHandle]]]): ReadHandle = {
+
+  private[finagle] val logger = DefaultLogger
+
+  private[finagle] def merge(
+    readHandles: Var[Try[Set[ReadHandle]]],
+    trackOutstandingRequests: Boolean = false,
+    statsReceiver: StatsReceiver = NullStatsReceiver
+  ): ReadHandle = {
     val error = new Broker[Throwable]
     val messages = new Broker[ReadMessage]
     val close = new Broker[Unit]
     val clusterUpdate = new Broker[Set[ReadHandle]]
+
+    // number of read handles
+    @volatile var numReadHandles = 0
+    val numReadHandlesGauge = statsReceiver.addGauge("num_read_handles") {
+      numReadHandles
+    }
+
+    // outstanding reads
+    val outstandingReads = new AtomicInteger(0)
+    val outstandingReadsGauge = statsReceiver.addGauge("outstanding_reads") {
+      outstandingReads.get
+    }
+
+    // counters
+    val msgStatsReceiver = statsReceiver.scope("messages")
+    val receivedCounter = msgStatsReceiver.counter("received")
+    val ackCounter = msgStatsReceiver.counter("ack")
+    val abortCounter = msgStatsReceiver.counter("abort")
+
+    def trackMessage(msg: ReadMessage): ReadMessage = {
+      if (trackOutstandingRequests) {
+        receivedCounter.incr()
+        outstandingReads.incrementAndGet()
+        ReadMessage(
+          msg.bytes,
+          msg.ack.map { v =>
+            ackCounter.incr()
+            outstandingReads.decrementAndGet()
+            v
+          },
+          msg.abort.map { v =>
+            abortCounter.incr()
+            outstandingReads.decrementAndGet()
+            v
+          }
+        )
+      } else {
+        msg
+      }
+    }
+
+    def exposeNumReadHandles(handles: Set[ReadHandle]) {
+      numReadHandles = handles.size
+    }
 
     def onClose(handles: Set[ReadHandle]) {
       handles foreach { _.close }
@@ -40,7 +93,13 @@ private[finagle] object MultiReaderHelper {
       }
 
       val queues = handles.map { _.messages }.toSeq
-      val errors = handles.map { h => h.error map { _ => h } }.toSeq
+      val errors = handles.map { h =>
+        h.error map { e =>
+          logger.warning("Read handle %d encountered exception : %s".format(
+            _root_.java.lang.System.identityHashCode(h), e.getMessage))
+          h
+        }
+      }.toSeq
       val closeOf = close.recv { _ => onClose(handles) }
 
       // We sequence here to ensure that `close` gets priority over reads.
@@ -48,16 +107,25 @@ private[finagle] object MultiReaderHelper {
         Offer.choose(
           closeOf,
           Offer.choose(queues:_*) { m =>
-            messages ! m
+            messages ! trackMessage(m)
             loop(handles)
           },
           Offer.choose(errors:_*) { h =>
+            logger.info("Closed read handle %d due to it encountered error".format(
+              _root_.java.lang.System.identityHashCode(h)))
             h.close()
-            loop(handles - h)
+            val newHandles = handles - h
+            exposeNumReadHandles(newHandles)
+            loop(newHandles)
           },
           clusterUpdate.recv { newHandles =>
           // Close any handles that exist in old set but not the new one.
-            (handles &~ newHandles) foreach { _.close() }
+            (handles &~ newHandles) foreach { h =>
+              logger.info("Closed read handle %d due to its host disappeared".format(
+                _root_.java.lang.System.identityHashCode(h)))
+              h.close()
+            }
+            exposeNumReadHandles(newHandles)
             loop(newHandles)
           }
         )
@@ -75,7 +143,8 @@ private[finagle] object MultiReaderHelper {
       // Flatten the Future[Try[T]] to Future[T].
       Future.const
     } map { handles =>
-    // Once the cluster is non-empty, start looping and observing updates.
+      // Once the cluster is non-empty, start looping and observing updates.
+      exposeNumReadHandles(handles)
       loop(handles)
 
       // Send cluster updates on the appropriate broker.
@@ -95,7 +164,23 @@ private[finagle] object MultiReaderHelper {
       closeWitness onSuccess { _.close() }
     }
 
-    ReadHandle(messages.recv, error.recv, closeHandleOf)
+    def createReadHandle(
+      _messages: Offer[ReadMessage],
+      _error: Offer[Throwable],
+      _closeHandleOf: Offer[Unit],
+      _numReadHandlesGauge: Gauge,
+      _outstandingReadsGauge: Gauge
+    ): ReadHandle = new ReadHandle {
+      val messages = _messages
+      val error = _error
+      def close() = _closeHandleOf.sync()
+
+      // keep gauge references here since addGauge are weekly referenced.
+      val numReadHandlesGauge = _numReadHandlesGauge
+      val outstandingReadsGauge = _outstandingReadsGauge
+    }
+
+    createReadHandle(messages.recv, error.recv, closeHandleOf, numReadHandlesGauge, outstandingReadsGauge)
   }
 }
 
@@ -317,7 +402,9 @@ final case class MultiReaderConfig[Req, Rep] private[kestrel](
   private val _clientBuilder:
     Option[ClientBuilder[Req, Rep, Nothing, ClientConfig.Yes, ClientConfig.Yes]] = None,
   private val _timer: Option[Timer] = None,
-  private val _retryBackoffs: Option[() => Stream[Duration]] = None) {
+  private val _retryBackoffs: Option[() => Stream[Duration]] = None,
+  private val _trackOutstandingRequests: Boolean = false,
+  private val _statsReceiver: StatsReceiver = NullStatsReceiver) {
 
   // Delegators to make a friendly public API
   val va = _va
@@ -327,6 +414,8 @@ final case class MultiReaderConfig[Req, Rep] private[kestrel](
   val retryBackoffs = _retryBackoffs
   val clientId = _clientId
   val txnAbortTimeout = _txnAbortTimeout
+  val trackOutstandingRequests = _trackOutstandingRequests
+  val statsReceiver = _statsReceiver
 }
 
 @deprecated("Use MultiReaderConfig[Req, Rep] instead", "6.15.1")
@@ -367,6 +456,8 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
   config: MultiReaderConfig[Req, Rep]) {
   type ClientBuilderBase = ClientBuilder[Req, Rep, Nothing, ClientConfig.Yes, ClientConfig.Yes]
 
+  private[this] val logger = DefaultLogger
+
   private[this] val ReturnEmptySet = Return(Set.empty[ReadHandle])
 
   protected[kestrel] def copy(config: MultiReaderConfig[Req, Rep]): Builder
@@ -403,6 +494,26 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
   def clientId(clientId: ClientId): Builder =
     withConfig(_.copy(_clientId = Some(clientId)))
 
+  /**
+   * Specify whether to track outstanding requests.
+   *
+   * @param trackOutstandingRequests
+   *          flag to track outstanding requests.
+   * @return multi reader builder
+   */
+  def trackOutstandingRequests(trackOutstandingRequests: Boolean): Builder =
+    withConfig(_.copy(_trackOutstandingRequests = trackOutstandingRequests))
+
+  /**
+   * Specify the statsReceiver to use to expose multi reader stats.
+   *
+   * @param statsReceiver
+   *          stats receiver
+   * @return multi reader builder
+   */
+  def statsReceiver(statsReceiver: StatsReceiver): Builder =
+    withConfig(_.copy(_statsReceiver = statsReceiver))
+
   private[this] def buildReadHandleVar(): Var[Try[Set[ReadHandle]]] = {
     val baseClientBuilder = config.clientBuilder match {
       case Some(clientBuilder) => clientBuilder
@@ -414,6 +525,9 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
 
     val event = config.va.changes map {
       case Addr.Bound(socketAddrs) => {
+        (currentHandles.keySet &~ socketAddrs) map { socketAddr =>
+          logger.info("Host %s left for reading %s.".format(socketAddr, config.queueName))
+        }
         val newHandles = (socketAddrs &~ currentHandles.keySet) map { socketAddr =>
           val factory = baseClientBuilder
             .hosts(socketAddr)
@@ -426,6 +540,9 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
               client.readReliably(config.queueName, timer, backoffs())
             case _ => client.readReliably(config.queueName)
           }
+
+          logger.info("Host %s joined for reading %s (handle = %d).".format(
+            socketAddr, config.queueName, _root_.java.lang.System.identityHashCode(handle)))
 
           (socketAddr, handle)
         }
@@ -450,7 +567,9 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
    * Constructs a merged ReadHandle over the members of the configured cluster.
    * The handle is updated as members are added or removed.
    */
-  def build(): ReadHandle = MultiReaderHelper.merge(buildReadHandleVar())
+  def build(): ReadHandle = MultiReaderHelper.merge(buildReadHandleVar(),
+    config.trackOutstandingRequests,
+    config.statsReceiver.scope("multireader").scope(config.queueName))
 }
 
 abstract class MultiReaderBuilderMemcacheBase[Builder] private[kestrel](
