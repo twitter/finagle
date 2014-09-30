@@ -13,10 +13,7 @@ import org.scalatest.matchers.ShouldMatchers
 import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
-class TFinagleBinaryProtocolTest extends FunSuite
-  with BeforeAndAfter
-  with ShouldMatchers
-{
+class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with ShouldMatchers {
 
   private def assertSerializedBytes(
     expectedBytes: Array[Byte],

@@ -1,13 +1,15 @@
 package com.twitter.finagle.service
 
+import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import com.twitter.finagle.{NotServableException, Service}
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.Matchers._
 import com.twitter.util.{Await, Future}
 
-
+@RunWith(classOf[JUnitRunner])
 class OptionallyServableFilterTest extends FunSuite with MockitoSugar {
 
   class OptionnallyServableFilterHelper {

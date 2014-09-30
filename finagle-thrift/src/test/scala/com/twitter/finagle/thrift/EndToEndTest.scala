@@ -77,7 +77,7 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually with BeforeA
     }
   }
 
-  testThrift("propagate Dtab") { (client, tracer) =>
+  skipTestThrift("propagate Dtab") { (client, tracer) =>
     Dtab.unwind {
       Dtab.local = Dtab.read("/a=>/b; /b=>/$/inet/google.com/80")
       val clientDtab = Await.result(client.show_me_your_dtab())
@@ -121,7 +121,7 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually with BeforeA
     assert(bytes.toSeq != decoded.toSeq, "Add JSON support back")
   }
 
-  testThrift("end-to-end tracing potpourri") { (client, tracer) =>
+  skipTestThrift("end-to-end tracing potpourri") { (client, tracer) =>
     Trace.unwind {
       val id = Trace.nextId
       Trace.setId(id)  // set an ID so we don't use the default one

@@ -5,8 +5,11 @@ import com.twitter.finagle.kestrel.{ReadHandle, ReadMessage}
 import com.twitter.io.Charsets
 import com.twitter.util.Await
 import org.jboss.netty.buffer.ChannelBuffers
+import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class ReadHandleTest extends FunSuite {
   def msg_(i: Int) = {
     val ack = new Broker[Unit]

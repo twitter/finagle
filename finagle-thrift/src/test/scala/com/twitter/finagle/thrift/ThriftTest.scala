@@ -42,6 +42,13 @@ trait ThriftTest { self: FunSuite =>
     thriftTests += ThriftTestDefinition(label, clientIdOpt, theTest)
   }
 
+  def skipTestThrift(
+    label: String,
+    clientIdOpt: Option[ClientId] = None
+  )(theTest: (Iface, BufferingTracer) => Unit) {
+    () // noop
+  }
+
   private val newBuilderServer = (protocolFactory: TProtocolFactory) => new {
     val server = ServerBuilder()
       .codec(ThriftServerFramedCodec(protocolFactory))
@@ -134,6 +141,16 @@ trait ThriftTest { self: FunSuite =>
     "builder" -> newBuilderServer,
     "api" -> newAPIServer
   )
+
+  lazy val notSkipFlaky = !Option(System.getProperty("SKIP_FLAKY")).isDefined
+
+  def testOrSkipFlaky(name: String)(testFun: => Unit) = {
+    if(notSkipFlaky){
+      test(name)(testFun)
+    } else {
+      ignore(name)(testFun)
+    }
+  }
 
   /** Invoke this in your test to run all defined thrift tests */
   def runThriftTests() = for {
