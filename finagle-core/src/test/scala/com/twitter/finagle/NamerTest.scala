@@ -5,6 +5,7 @@ import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class NamerTest extends FunSuite with AssertionsForJUnit {

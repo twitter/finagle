@@ -12,6 +12,7 @@ import org.scalatest.junit.JUnitRunner
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.collection.SortedMap
+import scala.language.reflectiveCalls
 
 private[loadbalancer] trait P2CSuite {
   // number of servers

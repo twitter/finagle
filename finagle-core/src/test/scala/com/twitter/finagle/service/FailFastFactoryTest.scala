@@ -13,6 +13,7 @@ import org.scalatest.concurrent.Conductors
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 import org.scalatest.mock.MockitoSugar
+import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {

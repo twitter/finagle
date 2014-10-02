@@ -12,6 +12,7 @@ import org.mockito.{Matchers, ArgumentCaptor}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{OneInstancePerTest, FunSuite}
+import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class ChannelTransportTest

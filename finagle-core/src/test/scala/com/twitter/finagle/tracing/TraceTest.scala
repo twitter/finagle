@@ -6,6 +6,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{OneInstancePerTest, BeforeAndAfter, FunSuite}
+import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class TraceTest extends FunSuite with BeforeAndAfter with OneInstancePerTest with MockitoSugar {

@@ -9,6 +9,7 @@ import org.mockito.Matchers.any
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
+import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
