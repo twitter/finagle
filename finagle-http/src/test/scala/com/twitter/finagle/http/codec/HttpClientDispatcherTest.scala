@@ -74,7 +74,7 @@ class HttpClientDispatcherTest extends FunSuite {
     val httpRes = new DefaultHttpResponse(HTTP_1_1, OK)
     val req = Request()
     val f = disp(req)
-    assert(Await.result(out.read()) === req)
+    Await.result(out.read())
     out.write(httpRes)
     val res = Await.result(f)
     assert(res.httpResponse === httpRes)

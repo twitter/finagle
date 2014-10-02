@@ -23,7 +23,7 @@ class HttpClientDispatcher[Req <: HttpRequest](
 ) extends GenSerialClientDispatcher[Req, Response, Any, Any](trans) {
 
   import GenSerialClientDispatcher.wrapWriteException
-  import ReaderUtils.{readerFromTransport, streamChunks}
+  import ReaderUtils.{readChunk, streamChunks}
 
   // BUG: if there are multiple requests queued, this will close a connection
   // with pending dispatches.  That is the right thing to do, but they should be
@@ -64,14 +64,18 @@ class HttpClientDispatcher[Req <: HttpRequest](
             Future.Done
 
           case res: HttpResponse =>
-            val done = new Promise[Unit]
+            val readr = Reader.writable()
             val response = new Response {
               final val httpResponse = res
-              override val reader = readerFromTransport(trans, done)
+              override val reader = readr
             }
-
             p.updateIfEmpty(Return(response))
-            done
+            Transport.copyToWriter(trans, readr)(readChunk) respond {
+              case Throw(exc) =>
+                readr.fail(exc)
+                trans.close()
+              case Return(_) => readr.close()
+            }
 
           case invalid =>
             // We rely on the base class to satisfy p.

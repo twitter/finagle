@@ -2,6 +2,7 @@ package com.twitter.finagle.transport
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Stack
+import com.twitter.io.{Buf, Writer}
 import com.twitter.util.Duration
 import com.twitter.util.{Closable, Future, Promise, Time, Throw}
 import java.net.SocketAddress
@@ -121,6 +122,37 @@ private[finagle] object Transport {
   implicit object TLSEngine extends Stack.Param[TLSEngine] {
     val default = TLSEngine(None)
   }
+
+  /**
+   * Serializes the object stream from a `Transport` into a
+   * [[com.twitter.io.Writer]].
+   *
+   * The serialization function `f` can return `Future.None` to interrupt the
+   * stream to faciliate using the transport with multiple writers and vice
+   * versa.
+   *
+   * Both transport and writer are unmanaged, the caller must close when
+   * done using them.
+   *
+   * {{{
+   * copyToWriter(trans, w)(f) ensure {
+   *   trans.close()
+   *   w.close()
+   * }
+   * }}}
+   *
+   * @param trans The source Transport.
+   *
+   * @param writer The destination [[com.twitter.io.Writer]].
+   *
+   * @param f A mapping from `A` to `Future[Option[Buf]]`.
+   */
+  def copyToWriter[A](trans: Transport[_, A], w: Writer)
+                     (f: A => Future[Option[Buf]]): Future[Unit] =
+    trans.read().flatMap(f).flatMap {
+      case None => Future.Done
+      case Some(buf) => w.write(buf) before copyToWriter(trans, w)(f)
+    }
 }
 
 /**

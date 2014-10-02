@@ -39,6 +39,12 @@
       <version>2.2.2</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.scalacheck</groupId>
+      <artifactId>scalacheck_2.10</artifactId>
+      <version>1.11.3</version>
+      <scope>test</scope>
+    </dependency>
     <!-- project dependencies -->
     <dependency>
       <groupId>com.twitter</groupId>

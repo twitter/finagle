@@ -24,7 +24,7 @@ class HttpClientDispatcher[Req <: Request](
 ) extends GenSerialClientDispatcher[Req, Response, Any, Any](trans) {
 
   import GenSerialClientDispatcher.wrapWriteException
-  import ReaderUtils.{readerFromTransport, streamChunks}
+  import ReaderUtils.{readChunk, streamChunks}
 
   // BUG: if there are multiple requests queued, this will close a connection
   // with pending dispatches.  That is the right thing to do, but they should be
@@ -36,6 +36,15 @@ class HttpClientDispatcher[Req <: Request](
     // in-line with what we already do in finagle.httpx. For example:
     // the body buf gets read without slicing.
     HttpDtab.write(Dtab.local, req)
+
+    if (!req.isChunked && !HttpHeaders.isContentLengthSet(req)) {
+      val len = req.getContent().readableBytes
+      // Only set the content length if we are sure there is content. This
+      // behavior complies with the specification that user agents should not
+      // set the content length header for messages without a payload body.
+      if (len > 0) HttpHeaders.setContentLength(req, len)
+    }
+
     trans.write(from[Request, HttpRequest](req)) rescue(wrapWriteException) before {
       // Do these concurrently:
       Future.join(
@@ -53,14 +62,18 @@ class HttpClientDispatcher[Req <: Request](
             Future.Done
 
           case res: HttpResponse =>
-            val done = new Promise[Unit]
+            val readr = Reader.writable()
             val response = new Response {
               final val httpResponse = res
-              override val reader = readerFromTransport(trans, done)
+              override val reader = readr
             }
-
             p.updateIfEmpty(Return(response))
-            done
+            Transport.copyToWriter(trans, readr)(readChunk) respond {
+              case Throw(exc) =>
+                trans.close()
+                readr.fail(exc)
+              case Return(_) => readr.close()
+            }
 
           case invalid =>
             // We rely on the base class to satisfy p.
