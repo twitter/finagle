@@ -40,6 +40,7 @@ you're using Finagle. Or even better, add the links yourself and
 * [Twitter](https://twitter.com/)
   * ["Finagle: A Protocol-Agnostic RPC System"][11]
 * [wasted.io](http://wasted.io/)
+* [Quanttus](http://www.Quanttus.com)
 
 [0]: https://twitter.com/finagle
 [1]: https://github.com/twitter/finagle/blob/master/CONTRIBUTING.md
