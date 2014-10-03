@@ -21,6 +21,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Pellucid Analytics](http://www.pellucid.com/)
 * [Pinterest](https://www.pinterest.com/)
   * ["How we make pins more useful"][3]
+* [Quanttus](http://www.Quanttus.com)
 * [Qubit](http://www.qubitproducts.com/)
 * [Rdio](https://www.rdio.com/)
   * [Thor, a Finagle-based image processor][4]
