@@ -140,6 +140,12 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     verify(trans).read()
   }
 
+  test("isClosing") ( new Ictx {
+    assert(!disp.isClosing)
+    disp.close(Time.now)
+    assert(disp.isClosing)
+  })
+
   test("drain: while reading") (new Dctx {
     disp.close(Time.now)
     verify(trans).close(any[Time])

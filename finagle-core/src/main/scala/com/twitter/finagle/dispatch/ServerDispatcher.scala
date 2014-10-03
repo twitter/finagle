@@ -69,6 +69,9 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
     state.getAndSet(Closed).raise(cancelled)
   }
 
+  /** Exposed for testing */
+  protected[dispatch] def isClosing: Boolean = state.get() eq Closed
+
   // Note: this is racy, but that's inherent in draining (without
   // protocol support). Presumably, half-closing TCP connection is
   // also possible.

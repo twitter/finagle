@@ -8,7 +8,6 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Reader, Buf, BufReader}
 import com.twitter.util.{Future, Promise, Throw, Return}
 import java.net.InetSocketAddress
-import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
 
 class HttpServerDispatcher[REQUEST <: Request](
@@ -54,9 +53,10 @@ class HttpServerDispatcher[REQUEST <: Request](
       Future.exception(new IllegalArgumentException("Invalid message "+invalid))
   }
 
-  protected def handle(response: HttpResponse): Future[Unit] = response match {
-    case rep: Response =>
-      if (rep.isChunked) {
+  protected def handle(response: HttpResponse): Future[Unit] = {
+    HttpHeaders.setKeepAlive(response, !isClosing)
+    response match {
+      case rep: Response if rep.isChunked =>
         val p = new Promise[Unit]
         val f = trans.write(rep) before streamChunks(trans, rep.reader)
         // This awkwardness is unfortunate but necessary for now as you may be
@@ -65,18 +65,18 @@ class HttpServerDispatcher[REQUEST <: Request](
         p.become(f onFailure { _ => rep.reader.discard() })
         p setInterruptHandler { case _ => rep.reader.discard() }
         p
-      } else {
+      case rep: Response =>
         // Ensure Content-Length is set if not chunked
         if (!rep.headers.contains(HttpHeaders.Names.CONTENT_LENGTH))
           rep.contentLength = rep.getContent().readableBytes
 
         trans.write(rep)
-      }
-    case _: HttpResponse =>
-      // Ensure Content-Length is set if not chunked
-      if (!response.isChunked && !HttpHeaders.isContentLengthSet(response))
-        HttpHeaders.setContentLength(response, response.getContent().readableBytes)
+      case _ =>
+        // Ensure Content-Length is set if not chunked
+        if (!response.isChunked && !HttpHeaders.isContentLengthSet(response))
+          HttpHeaders.setContentLength(response, response.getContent().readableBytes)
 
-      trans.write(response)
+        trans.write(response)
+    }
   }
 }
