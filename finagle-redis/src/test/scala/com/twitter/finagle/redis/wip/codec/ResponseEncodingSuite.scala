@@ -4,8 +4,12 @@ import com.twitter.finagle.redis.protocol.{BulkReply, ErrorReply, IntegerReply, 
                                           StatusReply, ReplyCodec}
 import com.twitter.finagle.redis.tags.CodecTest
 import com.twitter.finagle.redis.util.StringToChannelBuffer
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
-final class ResponseEncodingSuite extends FinagleRedisResponseTest {
+
+@RunWith(classOf[JUnitRunner])
+final class ResponseEncodingSuite extends RedisResponseTest {
 
   test("Correctly encode status replies", CodecTest) {
     val actualEncoding = codec.send(StatusReply("OK"))

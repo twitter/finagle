@@ -12,8 +12,7 @@ import java.net.InetSocketAddress
 import com.twitter.finagle.Service
 import com.twitter.finagle.redis.Client
 
-
-trait FinagleRedisTest extends FunSuite {
+trait RedisTest extends FunSuite {
   protected def wrap(s: String): ChannelBuffer = StringToChannelBuffer(s)
   protected def string2ChanBuf(s: String): ChannelBuffer = wrap(s)
   protected def chanBuf2String(cb: ChannelBuffer): String = CBToString(cb)
@@ -26,12 +25,12 @@ trait FinagleRedisTest extends FunSuite {
 
 }
 
-trait FinagleRedisResponseTest extends FinagleRedisTest {
+trait RedisResponseTest extends RedisTest {
   protected val replyCodec = new ReplyCodec
   protected val (codec, counter) = TestCodec(replyCodec.decode, replyCodec.encode)
 }
 
-trait FinagleRedisRequestTest extends FinagleRedisTest {
+trait RedisRequestTest extends RedisTest {
   protected val commandCodec = new CommandCodec
   protected val (codec, counter) = TestCodec(commandCodec.decode, commandCodec.encode)
 
@@ -48,7 +47,7 @@ trait FinagleRedisRequestTest extends FinagleRedisTest {
   }
 }
 
-trait FinagleRedisClientTest extends FinagleRedisTest with BeforeAndAfterAll {
+trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
 
   override def beforeAll(configMap: Map[String, Any]): Unit = RedisCluster.start()
   override def afterAll(configMap: Map[String, Any]): Unit = RedisCluster.stop()
@@ -70,7 +69,7 @@ trait FinagleRedisClientTest extends FinagleRedisTest with BeforeAndAfterAll {
   }
 }
 
-trait FinagleRedisClientServerIntegrationTest extends FinagleRedisTest with BeforeAndAfterAll {
+trait RedisClientServerIntegrationTest extends RedisTest with BeforeAndAfterAll {
 
   private[this] lazy val svcClient = ClientBuilder()
     .name("redis-client")

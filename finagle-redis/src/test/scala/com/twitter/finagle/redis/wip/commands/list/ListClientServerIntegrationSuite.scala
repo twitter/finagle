@@ -1,11 +1,14 @@
 package com.twitter.finagle.redis.integration
 
-import com.twitter.finagle.redis.naggati.FinagleRedisClientServerIntegrationTest
+import com.twitter.finagle.redis.naggati.RedisClientServerIntegrationTest
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.tags.{ClientServerTest, RedisTest}
 import com.twitter.util.Await
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
-final class ListClientServerIntegrationSuite extends FinagleRedisClientServerIntegrationTest {
+@RunWith(classOf[JUnitRunner])
+final class ListClientServerIntegrationSuite extends RedisClientServerIntegrationTest {
 
   test("LLEN should return the length of the list", ClientServerTest, RedisTest) {
     withRedisClient { client =>
