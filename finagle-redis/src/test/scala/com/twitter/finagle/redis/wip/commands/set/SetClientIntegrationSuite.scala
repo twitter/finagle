@@ -1,11 +1,14 @@
 package com.twitter.finagle.redis.integration
 
-import com.twitter.finagle.redis.naggati.FinagleRedisClientTest
+import com.twitter.finagle.redis.naggati.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.util.Await
 import scala.collection.{Set => CollectionSet}
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
-final class SetClientIntegrationSuite extends FinagleRedisClientTest {
+@RunWith(classOf[JUnitRunner])
+final class SetClientIntegrationSuite extends RedisClientTest {
 
   private[this] val oneElemAdded           = 1
   private[this] val oneElemAddErrorMessage = "Could not add one element"

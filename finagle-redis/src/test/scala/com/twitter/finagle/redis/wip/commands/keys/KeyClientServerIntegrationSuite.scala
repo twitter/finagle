@@ -2,13 +2,16 @@ package com.twitter.finagle.redis.integration
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.redis.ClientError
-import com.twitter.finagle.redis.naggati.FinagleRedisClientServerIntegrationTest
+import com.twitter.finagle.redis.naggati.RedisClientServerIntegrationTest
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.tags.{ClientServerTest, RedisTest}
 import com.twitter.util.{Await, Future, Time}
 import org.jboss.netty.buffer.ChannelBuffer
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
-final class KeyClientServerIntegrationSuite extends FinagleRedisClientServerIntegrationTest {
+@RunWith(classOf[JUnitRunner])
+final class KeyClientServerIntegrationSuite extends RedisClientServerIntegrationTest {
 
   test("DELETE two keys", ClientServerTest, RedisTest) {
     withRedisClient { client =>

@@ -2,11 +2,14 @@ package com.twitter.finagle.redis.protocol
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.redis.ClientError
-import com.twitter.finagle.redis.naggati.FinagleRedisRequestTest
+import com.twitter.finagle.redis.naggati.RedisRequestTest
 import com.twitter.finagle.redis.tags.CodecTest
 import com.twitter.util.Time
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
-final class KeyCodecSuite extends FinagleRedisRequestTest {
+@RunWith(classOf[JUnitRunner])
+final class KeyCodecSuite extends RedisRequestTest {
 
   test("Correctly encode DELETE for one key", CodecTest) {
     val actualEncoding = codec(wrap("DEL foo\r\n"))

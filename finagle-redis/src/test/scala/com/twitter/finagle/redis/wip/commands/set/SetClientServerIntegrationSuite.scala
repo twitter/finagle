@@ -1,13 +1,16 @@
 package com.twitter.finagle.redis.integration
 
-import com.twitter.finagle.redis.naggati.FinagleRedisClientServerIntegrationTest
+import com.twitter.finagle.redis.naggati.RedisClientServerIntegrationTest
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.finagle.redis.tags.{ClientServerTest, RedisTest}
 import com.twitter.util.Await
 import scala.collection.{Set => CollectionSet}
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
-final class SetClientServerIntegrationSuite extends FinagleRedisClientServerIntegrationTest {
+@RunWith(classOf[JUnitRunner])
+final class SetClientServerIntegrationSuite extends RedisClientServerIntegrationTest {
 
   private[this] val key              = string2ChanBuf("member")
   private[this] val addMemErrMessage = "Could not add a member to the set"

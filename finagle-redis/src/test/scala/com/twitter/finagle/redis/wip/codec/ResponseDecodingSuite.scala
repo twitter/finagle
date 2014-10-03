@@ -13,8 +13,11 @@ import com.twitter.finagle.redis.util.StringToChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffer
 import org.scalatest.FunSuite
 import com.twitter.finagle.redis.protocol.{EmptyBulkReply, EmptyMBulkReply}
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
-final class ResponseDecodingSuite extends FinagleRedisResponseTest {
+@RunWith(classOf[JUnitRunner])
+final class ResponseDecodingSuite extends RedisResponseTest {
   ignore("Multi-bulk replies") {
     val actualEncoding = codec(wrap("*4\r\n"))
     val expectedEncoding = Nil

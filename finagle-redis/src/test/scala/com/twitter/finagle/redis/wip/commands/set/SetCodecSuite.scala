@@ -1,10 +1,13 @@
 package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.redis.ClientError
-import com.twitter.finagle.redis.naggati.FinagleRedisRequestTest
+import com.twitter.finagle.redis.naggati.RedisRequestTest
 import com.twitter.finagle.redis.tags.CodecTest
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
-final class SetCodecSuite extends FinagleRedisRequestTest {
+@RunWith(classOf[JUnitRunner])
+final class SetCodecSuite extends RedisRequestTest {
 
   test("Correctly encode SADD", CodecTest) {
     unwrap(codec(wrap("SADD foo bar\r\n"))) {
