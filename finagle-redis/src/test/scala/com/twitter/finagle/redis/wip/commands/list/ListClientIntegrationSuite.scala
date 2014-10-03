@@ -1,10 +1,13 @@
 package com.twitter.finagle.redis.integration
 
-import com.twitter.finagle.redis.naggati.FinagleRedisClientTest
+import com.twitter.finagle.redis.naggati.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.util.Await
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
-final class ListClientIntegrationSuite extends FinagleRedisClientTest {
+@RunWith(classOf[JUnitRunner])
+final class ListClientIntegrationSuite extends RedisClientTest {
 
   val IndexFailureMessage = "Unknown failure calling Index"
   val PopFailureMessage   = "Failure popping element from list"
