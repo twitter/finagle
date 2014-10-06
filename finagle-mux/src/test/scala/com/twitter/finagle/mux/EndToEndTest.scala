@@ -61,11 +61,13 @@ class EndToEndTest extends FunSuite with Eventually with BeforeAndAfter {
 
     Dtab.unwind {
       Dtab.local ++= Dtab.read("/foo=>/bar; /web=>/$/inet/twitter.com/80")
-      val buf = Await.result(client(ChannelBuffers.EMPTY_BUFFER), 30.seconds)
-      val bytes = new Array[Byte](buf.readableBytes())
-      buf.readBytes(bytes)
-      val str = new String(bytes)
-      assert(str === "Dtab(2)\n\t/foo => /bar\n\t/web => /$/inet/twitter.com/80\n")
+      for (n <- 0 until 2) {
+        val buf = Await.result(client(ChannelBuffers.EMPTY_BUFFER), 30.seconds)
+        val bytes = new Array[Byte](buf.readableBytes())
+        buf.readBytes(bytes)
+        val str = new String(bytes)
+        assert(str === "Dtab(2)\n\t/foo => /bar\n\t/web => /$/inet/twitter.com/80\n")
+      }
     }
   }
 

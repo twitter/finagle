@@ -226,18 +226,16 @@ class Session private[finagle](
   private[this] def loop(): Future[Nothing] =
     trans.read() flatMap { buf =>
       val save = Local.save()
-      try {
-        val m = decode(buf)
-        dispatch(m)
-        loop()
-      } catch {
+      val m = try decode(buf) catch {
         case exc: BadMessageException =>
           // We could just ignore this message, but in reality it
           // probably means something is really FUBARd.
-          Future.exception(exc)
-      } finally {
-        Local.restore(save)
+          return Future.exception(exc)
       }
+
+      dispatch(m)
+      Local.restore(save)
+      loop()
     }
 
   loop() onFailure { case cause =>
