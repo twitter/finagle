@@ -825,34 +825,34 @@ class KetamaClient private[finagle](
   // with non-empty content, after that group can still be updated with empty endpoints
   // which will throw NoShardAvailableException to users indicating the lost of cache access
   val ready = ketamaNodeGrp.set.changes.filter(_.nonEmpty).toFuture.unit
-  override def getsResult(keys: Iterable[String]) = ready before super.getsResult(keys)
+  override def getsResult(keys: Iterable[String]) = ready.interruptible before super.getsResult(keys)
 
-  override def getResult(keys: Iterable[String]) = ready before super.getResult(keys)
+  override def getResult(keys: Iterable[String]) = ready.interruptible before super.getResult(keys)
 
   override def set(key: String, flags: Int, expiry: Time, value: Buf) =
-    ready before super.set(key, flags, expiry, value)
+    ready.interruptible before super.set(key, flags, expiry, value)
 
-  override def delete(key: String) = ready before super.delete(key)
+  override def delete(key: String) = ready.interruptible before super.delete(key)
 
   override def cas(key: String, flags: Int, expiry: Time,
       value: Buf, casUnique: Buf) =
-    ready before super.cas(key, flags, expiry, value, casUnique)
+    ready.interruptible before super.cas(key, flags, expiry, value, casUnique)
 
   override def add(key: String, flags: Int, expiry: Time, value: Buf) =
-    ready before super.add(key, flags, expiry, value)
+    ready.interruptible before super.add(key, flags, expiry, value)
 
   override def replace(key: String, flags: Int, expiry: Time, value: Buf) =
-    ready before super.replace(key, flags, expiry, value)
+    ready.interruptible before super.replace(key, flags, expiry, value)
 
   override def prepend(key: String, flags: Int, expiry: Time, value: Buf) =
-    ready before super.prepend(key, flags, expiry, value)
+    ready.interruptible before super.prepend(key, flags, expiry, value)
 
   override def append(key: String, flags: Int, expiry: Time, value: Buf) =
-    ready before super.append(key, flags, expiry, value)
+    ready.interruptible before super.append(key, flags, expiry, value)
 
-  override def incr(key: String, delta: Long) = ready before super.incr(key, delta)
+  override def incr(key: String, delta: Long) = ready.interruptible before super.incr(key, delta)
 
-  override def decr(key: String, delta: Long) = ready before super.decr(key, delta)
+  override def decr(key: String, delta: Long) = ready.interruptible before super.decr(key, delta)
 
   def release() = synchronized {
     for ((_, Node(node, _)) <- nodes)
