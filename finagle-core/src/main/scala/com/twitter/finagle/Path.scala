@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.app.Flaggable
 import com.twitter.io.Buf
 import com.twitter.finagle.util.Showable
 import java.nio.charset.Charset
@@ -60,6 +61,17 @@ object Path {
 
   implicit val showable: Showable[Path] = new Showable[Path] {
     def show(path: Path) = path.show
+  }
+
+  /**
+   * implicit conversion from [[com.twitter.finagle.Path]] to
+   * [[com.twitter.app.Flaggable]], allowing Paths to be easily used as
+   * [[com.twitter.app.Flag]]s
+   */
+  implicit val flaggable: Flaggable[Path] = new Flaggable[Path] {
+    override def default = None
+    def parse(s: String) = Path.read(s)
+    override def show(path: Path) = path.show
   }
 
   val empty = Path()

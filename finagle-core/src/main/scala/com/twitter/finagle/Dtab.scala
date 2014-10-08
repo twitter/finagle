@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.app.Flaggable
 import com.twitter.util.{Local, Var, Activity}
 import java.io.PrintWriter
 import java.net.SocketAddress
@@ -319,6 +320,17 @@ object Dtab {
       def apply(_ign: TraversableOnce[Dentry]): DtabBuilder = newBuilder
       def apply(): DtabBuilder = newBuilder
     }
+
+  /**
+   * implicit conversion from [[com.twitter.finagle.Dtab]] to
+   * [[com.twitter.app.Flaggable]], allowing Dtabs to be easily used as
+   * [[com.twitter.app.Flag]]s
+   */
+  implicit val flaggable: Flaggable[Dtab] = new Flaggable[Dtab] {
+    override def default = None
+    def parse(s: String) = Dtab.read(s)
+    override def show(dtab: Dtab) = dtab.show
+  }
 }
 
 final class DtabBuilder extends Builder[Dentry, Dtab] {
