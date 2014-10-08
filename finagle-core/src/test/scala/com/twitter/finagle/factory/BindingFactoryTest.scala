@@ -232,12 +232,11 @@ class NamerTracingFilterTest extends FunSuite {
 
     def verifyRecord(nameOrFailure: Either[String, String]) {
       val expected = Seq(
-        "wily.path" -> "/foo",
-        "wily.dtab.base" -> "/foo=>/bar",
-        "wily.dtab.local" -> "/bar=>/baz",
+        "namer.path" -> "/foo",
+        "namer.dtab.base" -> "/foo=>/bar",
         nameOrFailure match {
-          case Left(id) => "wily.name" -> id
-          case Right(failure) => "wily.failure" -> failure
+          case Left(id) => "namer.name" -> id
+          case Right(failure) => "namer.failure" -> failure
         }
       )
       expectResult(expected)(records)

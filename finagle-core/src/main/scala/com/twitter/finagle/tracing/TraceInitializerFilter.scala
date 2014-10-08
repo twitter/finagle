@@ -107,20 +107,36 @@ class TraceInitializerFilter[Req, Rep](tracer: Tracer, newId: Boolean) extends S
  * of a trace. Finagle-specific trace information should live here.
  *
  * @param label The given name of the service
+ * @param prefix A prefix for `finagle.version` and `dtab.local`.
+ * [[com.twitter.finagle.tracing.Annotation Annotation]] keys.
  * @param before An [[com.twitter.finagle.tracing.Annotation]] to be recorded
  * before the service is called
  * @param after An [[com.twitter.finagle.tracing.Annotation]] to be recorded
  * after the service's [[com.twitter.util.Future]] is satisfied.
+ * @param finagleVersion A thunk that returns the version of finagle. Useful
+ * for testing.
  */
 sealed class AnnotatingTracingFilter[Req, Rep](
   label: String,
+  prefix: String,
   before: Annotation,
-  after: Annotation
+  after: Annotation,
+  finagleVersion: () => String = () => Init.finagleVersion
 ) extends SimpleFilter[Req, Rep] {
+  def this(label: String, before: Annotation, after: Annotation) =
+    this(label, "unknown", before, after)
+
+  private[this] val finagleVersionKey = s"$prefix/finagle.version"
+  private[this] val dtabLocalKey = s"$prefix/dtab.local"
+
   def apply(request: Req, service: Service[Req, Rep]) = {
     if (Trace.isActivelyTracing) {
-      Trace.recordBinary("finagle.version", Init.finagleVersion)
       Trace.recordServiceName(label)
+      Trace.recordBinary(finagleVersionKey, finagleVersion())
+      // Trace dtab propagation on all requests that have them.
+      if (Dtab.local.nonEmpty) {
+        Trace.recordBinary(dtabLocalKey, Dtab.local.show)
+      }
       Trace.record(before)
       service(request) ensure {
         Trace.record(after)
@@ -137,15 +153,19 @@ sealed class AnnotatingTracingFilter[Req, Rep](
 private[finagle] object ServerTracingFilter {
   val role = Stack.Role("ServerTracingFilter")
 
+  case class TracingFilter[Req, Rep](
+    label: String,
+    finagleVersion: () => String = () => Init.finagleVersion
+  ) extends AnnotatingTracingFilter[Req, Rep](label, "srv",
+    Annotation.ServerRecv(), Annotation.ServerSend(), finagleVersion)
+
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]] {
       val role = ServerTracingFilter.role
       val description = "Report finagle information and server recv/send events"
       def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
         val param.Label(label) = get[param.Label]
-        val tracingFilter = new AnnotatingTracingFilter[Req, Rep](
-          label, Annotation.ServerRecv(), Annotation.ServerSend())
-        tracingFilter andThen next
+        TracingFilter[Req, Rep](label) andThen next
       }
     }
 }
@@ -156,15 +176,19 @@ private[finagle] object ServerTracingFilter {
 private[finagle] object ClientTracingFilter {
   val role = Stack.Role("ClientTracingFilter")
 
+  case class TracingFilter[Req, Rep](
+    label: String,
+    finagleVersion: () => String = () => Init.finagleVersion
+  ) extends AnnotatingTracingFilter[Req, Rep](label, "clnt",
+      Annotation.ClientSend(), Annotation.ClientRecv(), finagleVersion)
+
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Simple[ServiceFactory[Req, Rep]] {
       val role = ClientTracingFilter.role
       val description = "Report finagle information and client send/recv events"
       def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
         val param.Label(label) = get[param.Label]
-        val tracingFilter = new AnnotatingTracingFilter[Req, Rep](
-          label, Annotation.ClientSend(), Annotation.ClientRecv())
-        tracingFilter andThen next
+        TracingFilter[Req, Rep](label) andThen next
       }
     }
 }
