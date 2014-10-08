@@ -73,20 +73,24 @@ object StackClient {
    *
    * @see [[com.twitter.finagle.client.StackClient#endpointStack]]
    * @see [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]]
+   * @see [[com.twitter.finagle.factory.BindingFactory]]
    * @see [[com.twitter.finagle.factory.RefcountedFactory]]
    * @see [[com.twitter.finagle.factory.TimeoutFactory]]
    * @see [[com.twitter.finagle.factory.StatsFactoryWrapper]]
+   * @see [[com.twitter.finagle.FactoryToService]]
    * @see [[com.twitter.finagle.tracing.ClientTracingFilter]]
    * @see [[com.twitter.finagle.tracing.TraceInitializerFilter]]
    */
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
     val stk = new StackBuilder(endpointStack[Req, Rep])
     stk.push(LoadBalancerFactory.module)
+    stk.push(NamerTracingFilter.module)
+    stk.push(BindingFactory.module)
     stk.push(Role.requestDraining, (fac: ServiceFactory[Req, Rep]) =>
       new RefcountedFactory(fac))
     stk.push(TimeoutFactory.module)
     stk.push(StatsFactoryWrapper.module)
-    stk.push(NamerTracingFilter.module)
+    stk.push(FactoryToService.module)
     stk.push(ClientTracingFilter.module)
     stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
     // The TraceInitializerFilter must be pushed after most other modules so that
@@ -203,42 +207,31 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
     }
 
     val clientStack = stack ++ (endpointer +: nilStack)
-    val clientParams = params +
+    val clientParams = (params +
       Label(clientLabel) +
-      Stats(stats.scope(clientLabel))
+      Stats(stats.scope(clientLabel)) +
+      BindingFactory.Dest(dest))
 
-    def register(params: Stack.Params) {
-      ClientRegistry.register(clientLabel, dest, this.copy1(
-        stack = clientStack,
-        params = params
-      ))
-    }
+    // for the benefit of ClientRegistry.expAllRegisteredClientsResolved
+    // which waits for these to become non-Pending
+    val va =
+      dest match {
+        case Name.Bound(va) => va
+        case Name.Path(path) => Namer.resolve(path)
+      }
 
-    dest match {
-      case Name.Bound(addr) =>
-        val clientParams1 = (clientParams +
-          LoadBalancerFactory.ErrorLabel(clientLabel) +
-          LoadBalancerFactory.Dest(addr))
+    ClientRegistry.register(clientLabel, dest, copy1(
+      stack = clientStack,
+      params = clientParams + LoadBalancerFactory.Dest(va)
+    ))
 
-        register(clientParams1)
-        clientStack.make(clientParams1)
+    clientStack.make(clientParams)
+  }
 
-      case Name.Path(path) =>
-        val BindingFactory.BaseDtab(baseDtab) = params[BindingFactory.BaseDtab]
-
-        val clientParams1 = clientParams + LoadBalancerFactory.ErrorLabel(path.show)
-
-        val vaddr = (baseDtab() orElse Namer.global).bindAndEval(NameTree.Leaf(path))
-        // Register this client once as evaluated against the base dtab
-        register(clientParams1 + LoadBalancerFactory.Dest(vaddr))
-
-        def newStack(bound: Name.Bound) = {
-          clientStack.make(clientParams1 +
-            NamerTracingFilter.BoundPath(Some(path, bound)) +
-            LoadBalancerFactory.Dest(bound.addr))
-        }
-
-        new BindingFactory(path, newStack, baseDtab, stats.scope("interpreter"))
-    }
+  override def newService(dest: Name, label: String): Service[Req, Rep] = {
+    val client = copy1(
+      params = params + FactoryToService.Enabled(true)
+    ).newClient(dest, label)
+    new FactoryToService[Req, Rep](client)
   }
 }

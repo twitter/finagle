@@ -824,7 +824,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
       ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
   ): Service[Req, Rep] = {
-    val service: Service[Req, Rep] = new FactoryToService[Req, Rep](buildFactory())
+    val factory = configured(FactoryToService.Enabled(true)).buildFactory()
+    val service: Service[Req, Rep] = new FactoryToService[Req, Rep](factory)
 
     val Label(label) = params[Label]
     val Timer(timer) = params[Timer]

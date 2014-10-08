@@ -1,6 +1,8 @@
 package com.twitter.finagle.factory
 
 import com.twitter.finagle._
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util._
@@ -278,7 +280,20 @@ private[finagle] class BindingFactory[Req, Rep](
   override def isAvailable = dtabCache.isAvailable
 }
 
-object BindingFactory {
+private[finagle] object BindingFactory {
+  val role = Stack.Role("Binding")
+
+  /**
+   * A class eligible for configuring a
+   * [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.factory.BindingFactory]] with a destination
+   * [[com.twitter.finagle.Name]] to bind.
+   */
+  case class Dest(dest: Name)
+  implicit object Dest extends Stack.Param[Dest] {
+    val default = Dest(Name.Path(Path.read("/$/fail")))
+  }
+
   val DefaultBaseDtab = () => Dtab.base
 
   /**
@@ -290,4 +305,45 @@ object BindingFactory {
   implicit object BaseDtab extends Stack.Param[BaseDtab] {
     val default = BaseDtab(DefaultBaseDtab)
   }
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.factory.BindingFactory]]. The module
+   * creates a new `ServiceFactory` based on the module above it for
+   * each distinct [[com.twitter.finagle.Name.Bound]] resolved from
+   * `BindingFactory.Dest` (with caching of previously seen
+   * `Name.Bound`s).
+   */
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Module[ServiceFactory[Req, Rep]] {
+      val role = BindingFactory.role
+      val description = "Bind destination names to endpoints"
+      def make(next: Stack[ServiceFactory[Req, Rep]])(implicit params: Params) = {
+        val Label(label) = get[Label]
+        val Stats(stats) = get[Stats]
+        val Dest(dest) = get[Dest]
+
+        val factory =
+          dest match {
+            case Name.Bound(addr) =>
+              val params1 = (params +
+                LoadBalancerFactory.ErrorLabel(label) +
+                LoadBalancerFactory.Dest(addr))
+              next.make(params1)
+
+            case Name.Path(path) =>
+              val BaseDtab(baseDtab) = params[BaseDtab]
+              val params1 = params + LoadBalancerFactory.ErrorLabel(path.show)
+
+              def newStack(bound: Name.Bound) =
+                next.make(params1 +
+                  NamerTracingFilter.BoundPath(Some(path, bound)) +
+                  LoadBalancerFactory.Dest(bound.addr))
+
+              new BindingFactory(path, newStack, baseDtab, stats.scope("interpreter"))
+          }
+
+        Stack.Leaf(role, factory)
+      }
+    }
 }
