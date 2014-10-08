@@ -25,9 +25,11 @@
     <module>finagle-exception</module>
     <module>finagle-exp</module>
     <module>finagle-http</module>
+    <module>finagle-httpx</module>
     <module>finagle-kestrel</module>
     <module>finagle-mdns</module>
     <module>finagle-memcached</module>
+    <module>finagle-memcachedx</module>
     <module>finagle-mux</module>
     <module>finagle-mysql</module>
     <module>finagle-native</module>
