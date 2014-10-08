@@ -1,0 +1,13 @@
+junit_tests(name='scala',
+  dependencies=[
+    '3rdparty:guava',
+    '3rdparty:junit',
+    '3rdparty:mockito-all',
+    '3rdparty:netty',
+    'finagle/finagle-core',
+    'finagle/finagle-kestrelx',
+    'finagle/finagle-memcachedx',
+    'util/util-core'
+  ],
+  sources=rglobs('*.scala')
+)

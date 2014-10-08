@@ -4,7 +4,7 @@ import com.google.common.base.Strings
 
 import com.twitter.io.Buf
 
-private[memcachedx] object Bufs {
+private[finagle] object Bufs {
 
   final val INVALID_KEY_CHARACTERS = Set('\n'.toByte, '\0'.toByte, '\r'.toByte, ' '.toByte)
 
@@ -32,6 +32,22 @@ private[memcachedx] object Bufs {
   }
 
   implicit class RichBuf(buffer: Buf) extends Seq[Byte] {
+
+    /**
+     * decode the Buf as a UTF8 string and split on delimiter
+     * @param delimiter
+     * @return the UTF8 Buf encoded Strings resulting from the split
+     */
+    def split(delimiter: Char): Seq[Buf] = {
+      val Buf.Utf8(decoded) = buffer
+      decoded.split(delimiter) map { Buf.Utf8(_) }
+    }
+
+    /**
+     * @return true if the Buf has prefix `prefix`, else false
+     */
+    def startsWith(prefix: Buf): Boolean =
+      buffer.slice(0, prefix.length) == prefix
 
     /**
      * @return the decimal UTF-8 String (Long) decoding of the Buf
