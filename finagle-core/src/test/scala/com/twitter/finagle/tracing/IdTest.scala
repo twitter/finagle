@@ -26,6 +26,18 @@ class IdTest extends FunSuite {
       TraceId(None, Some(SpanId(1L)), SpanId(1L), None))
   }
 
+  test("serialize and deserialize") {
+    val traceIdOne = TraceId(None, Some(SpanId(1L)), SpanId(1L), None)
+    assert(traceIdOne === TraceId.deserialize(TraceId.serialize(traceIdOne)).get())
+    val traceIdTwo = TraceId(None, None, SpanId(0L), None, Flags().setDebug)
+    assert(traceIdTwo === TraceId.deserialize(TraceId.serialize(traceIdTwo)).get())
+  }
+
+  test("fail to deserialize incorrect traces") {
+    val badTrace = "not-a-trace".getBytes()
+    assert(TraceId.deserialize(badTrace).isThrow) 
+  }
+
   test("return sampled true if debug mode") {
     assert(TraceId(None, None, SpanId(0L), None, Flags().setDebug).sampled === Some(true))
   }

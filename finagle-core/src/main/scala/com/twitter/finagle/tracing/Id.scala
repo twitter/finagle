@@ -2,6 +2,7 @@ package com.twitter.finagle.tracing
 
 import com.twitter.finagle.util.ByteArrays
 import com.twitter.util.RichU64String
+import com.twitter.util.{Try, Return, Throw}
 
 /**
  * Defines trace identifiers.  Span IDs name a particular (unique)
@@ -66,7 +67,7 @@ object TraceId {
   /**
    * Serialize a TraceId into an array of bytes.
    */
-  private[finagle] def serialize(traceId: TraceId): Array[Byte] = {
+  def serialize(traceId: TraceId): Array[Byte] = {
     val flags = traceId._sampled match {
       case None =>
         traceId.flags
@@ -82,6 +83,33 @@ object TraceId {
     ByteArrays.put64be(bytes, 16, traceId.traceId.toLong)
     ByteArrays.put64be(bytes, 24, flags.toLong)
     bytes
+  }
+
+  /**
+   * Deserialize a TraceId from an array of bytes.
+   */
+  def deserialize(bytes: Array[Byte]): Try[TraceId] = {
+    if (bytes.length != 32) {
+      Throw(new IllegalArgumentException("Expected 32 bytes"))
+    } else {
+      val span64 = ByteArrays.get64be(bytes, 0)
+      val parent64 = ByteArrays.get64be(bytes, 8)
+      val trace64 = ByteArrays.get64be(bytes, 16)
+      val flags64 = ByteArrays.get64be(bytes, 24)
+
+      val flags = Flags(flags64)
+      val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
+        Some(flags.isFlagSet(Flags.Sampled))
+      } else None
+
+      val traceId = TraceId(
+        if (trace64 == parent64) None else Some(SpanId(trace64)),
+        if (parent64 == span64) None else Some(SpanId(parent64)),
+        SpanId(span64),
+        sampled,
+        flags)
+      Return(traceId)
+    }
   }
 }
 
