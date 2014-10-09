@@ -1,7 +1,7 @@
 package com.twitter.finagle.thrift
 
 import com.google.common.base.Charsets
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.finagle.thrift.Protocols.TFinagleBinaryProtocol
 import java.nio.ByteBuffer
 import org.apache.thrift.transport.TMemoryBuffer
@@ -14,6 +14,8 @@ import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
 class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with ShouldMatchers {
+
+  private val NullCounter = NullStatsReceiver.counter("")
 
   private def assertSerializedBytes(
     expectedBytes: Array[Byte],
@@ -34,13 +36,15 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Shoul
 
   test("writeString") {
     val stats = new InMemoryStatsReceiver
+    val fastEncodeFailed = stats.counter("fastEncodeFailed")
+    val largerThanTlOutBuffer = stats.counter("largerThanTlOutBuffer")
     val trans = new TMemoryBuffer(128)
-    val proto = new TFinagleBinaryProtocol(trans, statsReceiver = stats)
+    val proto = new TFinagleBinaryProtocol(trans, fastEncodeFailed, largerThanTlOutBuffer)
 
     proto.writeString("abc")
     assertSerializedBytes("abc", trans)
-    stats.counter("larger_than_threadlocal_out_buffer")() should be (0)
-    stats.counter("fast_encode_failed")() should be (0)
+    fastEncodeFailed() should be (0)
+    largerThanTlOutBuffer() should be (0)
   }
 
   test("writeString fallsback on encoding failure") {
@@ -52,9 +56,11 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Shoul
 
     val trans = new TMemoryBuffer(128)
     val stats = new InMemoryStatsReceiver
-    val proto = new TFinagleBinaryProtocol(trans, statsReceiver = stats)
+    val fastEncodeFailed = stats.counter("fastEncodeFailed")
+    val proto = new TFinagleBinaryProtocol(
+      trans, fastEncodeFailed = fastEncodeFailed, largerThanTlOutBuffer = NullCounter)
     proto.writeString(str)
-    stats.counter("fast_encode_failed")() should be (1)
+    fastEncodeFailed() should be (1)
     assertSerializedBytes(str, trans)
   }
 
@@ -64,7 +70,7 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Shoul
       val plainProto = new TBinaryProtocol(plainTrans)
 
       val optTrans = new TMemoryBuffer(128)
-      val optProto = new TFinagleBinaryProtocol(optTrans)
+      val optProto = new TFinagleBinaryProtocol(optTrans, NullCounter, NullCounter)
 
       plainProto.writeString(str)
       optProto.writeString(str)
@@ -82,9 +88,11 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Shoul
 
     val trans = new TMemoryBuffer(128)
     val stats = new InMemoryStatsReceiver
-    val proto = new TFinagleBinaryProtocol(trans, statsReceiver = stats)
+    val largerThanTlOutBuffer = stats.counter("largerThanTlOutBuffer")
+    val proto = new TFinagleBinaryProtocol(
+      trans, fastEncodeFailed = NullCounter, largerThanTlOutBuffer = largerThanTlOutBuffer)
     proto.writeString(longStr)
-    stats.counter("larger_than_threadlocal_out_buffer")() should be (1)
+    largerThanTlOutBuffer() should be (1)
     assertSerializedBytes(longStr, trans)
   }
 
@@ -99,7 +107,7 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Shoul
     withOffset.arrayOffset() should be (offset)
 
     val trans = new TMemoryBuffer(128)
-    val proto = new TFinagleBinaryProtocol(trans)
+    val proto = new TFinagleBinaryProtocol(trans, NullCounter, NullCounter)
     proto.writeBinary(withOffset)
 
     val expected = bbuf.array().drop(offset)

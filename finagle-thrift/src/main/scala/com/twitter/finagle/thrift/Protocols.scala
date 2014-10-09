@@ -1,7 +1,7 @@
 package com.twitter.finagle.thrift
 
 import com.google.common.base.Charsets
-import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{NullStatsReceiver, Counter, DefaultStatsReceiver, StatsReceiver}
 import com.twitter.logging.Logger
 import com.twitter.util.NonFatal
 import java.nio.{ByteBuffer, CharBuffer}
@@ -57,10 +57,14 @@ object Protocols {
     if (!optimizedBinarySupported) {
       new TBinaryProtocol.Factory(strictRead, strictWrite, readLength)
     } else {
+      // Factories are created rarely while the creation of their TProtocol's
+      // is a common event. Minimize counter creation to just once per Factory.
+      val fastEncodeFailed = statsReceiver.counter("fast_encode_failed")
+      val largerThanTlOutBuffer = statsReceiver.counter("larger_than_threadlocal_out_buffer")
       new TProtocolFactory {
         override def getProtocol(trans: TTransport): TProtocol = {
           val proto = new TFinagleBinaryProtocol(
-            trans, strictRead, strictWrite, statsReceiver.scope("TFinagleBinaryProtocol"))
+            trans, fastEncodeFailed, largerThanTlOutBuffer, strictRead, strictWrite)
           if (readLength != 0) {
             proto.setReadLength(readLength)
           }
@@ -134,18 +138,16 @@ object Protocols {
    */
   private[thrift] class TFinagleBinaryProtocol(
       trans: TTransport,
+      fastEncodeFailed: Counter,
+      largerThanTlOutBuffer: Counter,
       strictRead: Boolean = false,
-      strictWrite: Boolean = true,
-      statsReceiver: StatsReceiver = DefaultStatsReceiver)
+      strictWrite: Boolean = true)
     extends TBinaryProtocol(
       trans,
       strictRead,
       strictWrite)
   {
     import TFinagleBinaryProtocol._
-
-    private[this] val fastEncodeFailed = statsReceiver.counter("fast_encode_failed")
-    private[this] val largerThanTlOutBuffer = statsReceiver.counter("larger_than_threadlocal_out_buffer")
 
     override def writeString(str: String) {
       if (str.length == 0) {
