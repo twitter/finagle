@@ -2,7 +2,7 @@ java_library(name='java',
   provides = artifact(
     org = 'com.twitter',
     name = 'finagle-memcachedx-java',
-    repo = 'pants-support/ivy:internal',
+    repo = artifactory
   ),
   dependencies=[
     '3rdparty:guava',

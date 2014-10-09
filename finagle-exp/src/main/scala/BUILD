@@ -2,7 +2,7 @@ scala_library(name='scala',
   provides = scala_artifact(
     org = 'com.twitter',
     name = 'finagle-exp',
-    repo = 'pants-support/ivy:internal',
+    repo = artifactory,
   ),
   dependencies=[
     '3rdparty:jsr166e',
