@@ -3,8 +3,10 @@ package com.twitter.finagle.exp.mysql
 import java.util.{Calendar, TimeZone}
 import java.util.logging.Logger
 import java.sql.{Date, Timestamp, Time}
+import java.text.ParsePosition
 import java.text.SimpleDateFormat
 import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader, BufferWriter}
+
 
 /**
  * Defines a Value ADT that represents the domain of values
@@ -83,7 +85,7 @@ class TimestampValue(
     bw.writeByte(cal.get(Calendar.HOUR_OF_DAY))
     bw.writeByte(cal.get(Calendar.MINUTE))
     bw.writeByte(cal.get(Calendar.SECOND))
-    bw.writeInt(ts.getNanos)
+    bw.writeInt(ts.getNanos / 1000) // subsecond part is written as microseconds
     RawValue(Type.Timestamp, Charset.Binary, true, bytes)
   }
 
@@ -96,17 +98,12 @@ class TimestampValue(
   def unapply(v: Value): Option[Timestamp] = v match {
     case RawValue(t, Charset.Binary, false, bytes) if (t == Type.Timestamp || t == Type.DateTime) =>
       val str = new String(bytes, Charset(Charset.Binary))
-      if (str == Zero.toString) Some(Zero)
-      else {
-        val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        format.setTimeZone(extractionTimeZone)
-        val timeInMillis = format.parse(str).getTime
-        Some(new Timestamp(timeInMillis))
-      }
+      val ts = fromString(str, extractionTimeZone)
+      Some(ts)
 
     case RawValue(t, Charset.Binary, true, bytes) if (t == Type.Timestamp || t == Type.DateTime) =>
       val ts = fromBytes(bytes, extractionTimeZone)
-      Some(new Timestamp(ts.getTime))
+      Some(ts)
 
     case _ => None
   }
@@ -120,6 +117,55 @@ class TimestampValue(
     override val toString = "0000-00-00 00:00:00"
   }
 
+  /**
+   * Convert a string-encoded timestamp into a [[java.sql.Timestamp]] in a given
+   * timezone.
+   *
+   * Invalid DATETIME or TIMESTAMP values are converted to the “zero” value
+   * ('0000-00-00 00:00:00').
+   *
+   * @param str A string representing a TIMESTAMP written in the
+   * MySQL text protocol.
+   * @param timeZone The timezone in which to interpret the timestamp.
+   */
+  private[this] def fromString(str: String, timeZone: TimeZone): Timestamp = {
+    if (str == Zero.toString) {
+      return Zero
+    }
+    
+    val parsePosition = new ParsePosition(0)
+    val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    format.setTimeZone(extractionTimeZone)
+    val timeInMillis = format.parse(str, parsePosition).getTime
+        
+    /**
+     * Extracts the fractional part of a timestamp, up to the
+     * nanoseconds. It takes care of padding properly so that .1
+     * is interpreted as 100 millis and not 1 nanoseconds (like
+     * SimpleDateFormat wrongly does.)
+     */
+    object Nanos {
+      def unapply(str: String) : Option[Int] = {
+        str match {
+          case "" => Some(0)
+          case s : String if !s.startsWith(".") => None
+          case s : String if s.length() > 10 => None
+          case s : String => Some(s.stripPrefix(".").padTo(9,'0').toInt)
+          case _ => None
+        }
+      }
+    }
+    
+    // Parse fractional part
+    str.substring(parsePosition.getIndex) match {
+      case Nanos(nanos) => 
+        val ts = new Timestamp(timeInMillis)
+        ts.setNanos(nanos)
+        ts
+      case _ => Zero
+    }
+  }
+  
   /**
    * Convert a binary-encoded timestamp into a [[java.sql.Timestamp]] in a given
    * timezone.
@@ -136,7 +182,7 @@ class TimestampValue(
       return Zero
     }
 
-    var year, month, day, hour, min, sec, nano = 0
+    var year, month, day, hour, min, sec, micro = 0
     val br = BufferReader(bytes)
 
     // If the len was not zero, we can strictly
@@ -158,7 +204,7 @@ class TimestampValue(
 
     // if the sub-seconds are 0, they aren't included.
     if (br.readable(4)) {
-      nano = br.readInt()
+      micro = br.readInt()
     }
 
     val cal = Calendar.getInstance(timeZone)
@@ -166,7 +212,7 @@ class TimestampValue(
 
     val ts = new Timestamp(0)
     ts.setTime(cal.getTimeInMillis)
-    ts.setNanos(nano)
+    ts.setNanos(micro * 1000)
     ts
   }
 }
