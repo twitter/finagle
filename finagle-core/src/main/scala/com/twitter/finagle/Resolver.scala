@@ -92,8 +92,9 @@ abstract class AbstractResolver extends Resolver
  * a non-positive value, the Var is static and no future resolution is attempted.
  */
 object InetResolver {
-  def apply() = new InetResolver(DefaultStatsReceiver)
-  def apply(statsReceiver: StatsReceiver) = new InetResolver(statsReceiver.scope("inet").scope("dns"))
+  def apply(): InetResolver = apply(DefaultStatsReceiver)
+  def apply(statsReceiver: StatsReceiver): InetResolver =
+    new InetResolver(statsReceiver.scope("inet").scope("dns"))
 }
 
 class InetResolver(statsReceiver: StatsReceiver) extends Resolver {
