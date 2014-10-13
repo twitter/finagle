@@ -55,32 +55,32 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-app_2.10</artifactId>
-      <version>6.21.3-SNAPSHOT</version>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-collection_2.10</artifactId>
-      <version>6.21.3-SNAPSHOT</version>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-core_2.10</artifactId>
-      <version>6.21.3-SNAPSHOT</version>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-hashing_2.10</artifactId>
-      <version>6.21.3-SNAPSHOT</version>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-jvm_2.10</artifactId>
-      <version>6.21.3-SNAPSHOT</version>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging_2.10</artifactId>
-      <version>6.21.3-SNAPSHOT</version>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
@@ -89,9 +89,9 @@
         <groupId>com.twitter</groupId>
         <artifactId>maven-build-properties-plugin</artifactId>
         <version>0.0.2</version>
-	<configuration>
-	  <buildPropertiesPackage>com.twitter.finagle-core</buildPropertiesPackage>
-	</configuration>
+        <configuration>
+          <buildPropertiesPackage>com.twitter.finagle-core</buildPropertiesPackage>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

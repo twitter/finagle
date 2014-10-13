@@ -59,12 +59,12 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-codec_2.10</artifactId>
-      <version>6.21.3-SNAPSHOT</version>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging_2.10</artifactId>
-      <version>6.21.3-SNAPSHOT</version>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
