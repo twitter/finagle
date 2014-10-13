@@ -200,7 +200,7 @@ processing is done in the `Dispatcher`.
 
 Finally, we make use of our service:
 
-.. includecode:: code/client-server-anatomy/EchoServer.scala#defaultserverexample
+.. includecode:: code/client-server-anatomy/Echo.scala#serveruse
 
 
 Client Protocol
@@ -297,7 +297,7 @@ on :ref:`client modules <client_modules>` for more details.
 
 Putting together a `StdStackClient` is simple:
 
-.. includecode:: code/client-server-anatomy/Echo.scala#defaultclient
+.. includecode:: code/client-server-anatomy/Echo.scala#client
 
 Armed with this new client, we can connect to a destination :src:`Name
 <com/twitter/finagle/Name.scala>`, representing multiple hosts:

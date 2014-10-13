@@ -20,7 +20,7 @@ WatermarkPool
   a counter of the number of times there were no connections immediately available and there were already too many waiters
 
 SingletonPool
-<<<<<<<<<<<
+<<<<<<<<<<<<<
 
 **conn/fail**
   a counter of the number of times the connection could not be established and must be retried
