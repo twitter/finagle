@@ -5,6 +5,15 @@
 6.x
 -----
 
+6.22.0
+~~~~~~
+
+  Breaking API Changes
+  * finagle-core:
+      Removed unused `com.twitter.finagle.service.ProxyService`. It wasn't
+      sufficiently general to be used outside of finagle, and was no longer used
+      in finagle.
+
 6.21.0
 ~~~~~~~
 
