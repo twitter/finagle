@@ -131,7 +131,7 @@ object ThriftMux
    * Produce a [[com.twitter.finagle.ThriftMux.Client]] using the provided
    * client ID.
    */
-  @deprecated("Use client.withClientId", "6.22.0")
+  @deprecated("Use `ThriftMux.client.withClientId`", "6.22.0")
   def withClientId(clientId: ClientId): Client =
     client.copy(clientId=Some(clientId))
 
@@ -139,7 +139,7 @@ object ThriftMux
    * Produce a [[com.twitter.finagle.ThriftMux.Client]] using the provided
    * protocolFactory.
    */
-  @deprecated("Use client.withProtocolFactory", "6.22.0")
+  @deprecated("Use `ThriftMux.client.withProtocolFactory`", "6.22.0")
   def withProtocolFactory(pf: TProtocolFactory): Client =
     client.copy(protocolFactory=pf)
 

@@ -145,11 +145,11 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     dest: Name, label: String
   ): ServiceFactory[ThriftClientRequest, Array[Byte]] = client.newClient(dest, label)
 
-  @deprecated("Use client.withProtocolFactory", "6.22.0")
+  @deprecated("Use `Thrift.client.withProtocolFactory`", "6.22.0")
   def withProtocolFactory(protocolFactory: TProtocolFactory): Client =
     client.copy(protocolFactory=protocolFactory)
 
-  @deprecated("Use client.withClientId", "6.22.0")
+  @deprecated("Use `Thrift.client.withClientId`", "6.22.0")
   def withClientId(clientId: thrift.ClientId): Client =
     client.configured(param.ClientId(clientId))
 
