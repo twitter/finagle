@@ -22,7 +22,7 @@ private[finagle] object FinagleScheduler {
       try {
         Some(str.toInt)
       } catch {
-        case _ => None
+        case _: java.lang.NumberFormatException => None
       }
     }
   }

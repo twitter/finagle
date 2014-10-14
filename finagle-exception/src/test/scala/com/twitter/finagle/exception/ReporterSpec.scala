@@ -116,4 +116,14 @@ class ExceptionReporterTest extends FunSuite with MockitoSugar {
     reporter.copy(client = logger).handle(tse.throwable)
     verify(logger).log(captor.capture())
   }
+
+  test("appends the client address to the exception when provided") {
+    val reporter = new ExceptionReporter
+    val addr = new InetSocketAddress("8.8.8.8", 342)
+    val factoryWithClient = reporter("qux", Some(addr))
+    val factoryWithout = reporter("qux", None)
+
+    assert(factoryWithClient != factoryWithout)
+    assert(factoryWithClient === factoryWithout.withClient(addr.getAddress))
+  }
 }

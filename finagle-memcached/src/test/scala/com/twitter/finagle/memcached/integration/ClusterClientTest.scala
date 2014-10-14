@@ -52,10 +52,12 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
 
     // start five memcached server and join the cluster
     (0 to 4) foreach { _ =>
-      TestMemcachedServer.start() match  {
+      TestMemcachedServer.start() match {
         case Some(server) =>
           testServers :+= server
           zkServerSetCluster.join(server.address)
+        case None =>
+          throw new Exception("could not start TestMemcachedServer")
       }
     }
 

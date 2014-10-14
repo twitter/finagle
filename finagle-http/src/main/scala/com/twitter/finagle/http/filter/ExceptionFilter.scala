@@ -3,7 +3,7 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle.{CancelledRequestException, Service, SimpleFilter}
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.logging.Logger
-import com.twitter.util.Future
+import com.twitter.util.{NonFatal, Future}
 import org.jboss.netty.handler.codec.http.HttpResponseStatus
 
 
@@ -26,7 +26,7 @@ class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response
         service(request)
       } catch {
         // apply() threw an exception - convert to Future
-        case e => Future.exception(e)
+        case NonFatal(e) => Future.exception(e)
       }
     } rescue {
       case e: CancelledRequestException =>
