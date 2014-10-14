@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-benchmark_2.10</artifactId>
   <packaging>jar</packaging>
-  <version>6.21.1-SNAPSHOT</version>
+  <version>6.22.1-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-2104_2.10</artifactId>
@@ -37,37 +37,37 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core_2.10</artifactId>
-      <version>6.21.1-SNAPSHOT</version>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-stats_2.10</artifactId>
-      <version>6.21.1-SNAPSHOT</version>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4_2.10</artifactId>
-      <version>6.21.1-SNAPSHOT</version>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-zipkin_2.10</artifactId>
-      <version>6.21.1-SNAPSHOT</version>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-swift_2.10</artifactId>
-      <version>6.21.1-SNAPSHOT</version>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift_2.10</artifactId>
-      <version>6.21.1-SNAPSHOT</version>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-memcached_2.10</artifactId>
-      <version>6.21.1-SNAPSHOT</version>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>

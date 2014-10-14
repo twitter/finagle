@@ -8,11 +8,72 @@
 6.22.0
 ~~~~~~
 
-  Breaking API Changes
-  * finagle-core:
-      Removed unused `com.twitter.finagle.service.ProxyService`. It wasn't
-      sufficiently general to be used outside of finagle, and was no longer used
-      in finagle.
+Breaking API Changes
+--------------------
+
+  * finagle-core: Removed unused `com.twitter.finagle.service.ProxyService`. It wasn't
+    sufficiently general to be used outside of finagle, and was no longer used
+    in finagle.
+
+New Features
+------------
+
+  * finagle-core: BroadcastStatsReceiver, introduce specialized implementation
+  * finagle-core: Introduce gauges in SummarizingStatsReceiver
+  * finagle-core: Introduce Transport#copyToWriter
+  * finagle-core: Make base Dtab used in BindingFactory a Stack.Param
+  * finagle-core: Proper decay in experimental ewma load metric
+  * finagle-core: Simplify Stack{Client, Server} and unify around them
+
+
+Runtime Behavior Changes
+------------------------
+
+  * finagle-core: Add support for non-URLClassloaders to LoadService
+  * finagle-core: clear locals before entering server dispatch loop
+  * finagle-core: Defer DNS Resolution in InetResolver to FuturePool
+  * finagle-core: for paths starting with /#/, skip rewrites where prefix is /
+  * finagle-core: include name resolution in tracing request span
+  * finagle-core: Properly wrap some IOException into ConnectionFailedException
+  * finagle-core: Scope InetResolver's stats properly
+  * finagle-http: Send "Connection: close" header while dispatcher is closing
+  * finagle-http: Set content length header when appropriate
+  * finagle-memcached: Use interruptible future for the client request readiness
+  * finagle-stats: Add content-type response header to JsonExporter
+  * finagle-thrift: Add back connection_preparation_latency stat in Thrift
+  * finagle-thriftmux: Record protocol as a gauge rather than a counter
+
+Documentation
+-------------
+
+  * finagle-core: Add Scaladocs for ChannelBufferBuf and BufChannelBuffer
+  * finagle-core: link to the FAQ in FailedFastException
+  * finagle-serversets: Defer DNS resolution for endpoints to InetResolver
+  * finagle-thrift{,mux}: Clarified with* deprecation warning
+  * Fix minor issues and missing code blocks in Finagle documentation
+
+Optimization
+------------
+
+  * finagle-core: GlobalFlag isn't caching the property value
+  * finagle-core: recursive-descent Path / NameTree / Dentry / Dtab parsers to reduce heap allocation
+
+Bug Fixes
+---------
+
+  * finagle-core: Fix a deadlock in Contexts
+  * finagle-core: Fix breaking ABI change in SummarizingStatsReceiver
+  * finagle-core: Fix bug in computing array index in SummarizingStatsReceiver
+  * finagle-core: Fix build.properties location for maven builds
+  * finagle-core: Fix synchronization in LeasedFactory
+  * finagle-core: Fix tracing with Stack{Client, Server}
+  * finagle-core: Make FailedFastException an instance variable.
+  * finagle-core: Synchronized access to the Stackable mutable.params map
+  * finagle-http: Fix CookieMap.rewriteCookieHeaders()
+  * finagle-http: Fix the memory leak in HttpClientDispatcher
+  * finagle-mysql: Fix timestamp fractional seconds encoding
+  * finagle-mysql: Properly heed timezone when extracting TimestampValue
+  * mux: clear contexts after receive, not in 'finally' clause
 
 6.21.0
 ~~~~~~~
