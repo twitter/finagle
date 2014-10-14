@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &mdash; Finagle 6.20.0 documentation</title>
+    <title>Clients &mdash; Finagle 6.22.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.20.0',
+        VERSION:     '6.22.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.20.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.22.0 documentation" href="index.html" />
     <link rel="next" title="Names and Naming in Finagle" href="Names.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -94,7 +94,7 @@ does exactly this. For cases like Thrift, where IDLs are part of
 the rich API, a more specialized API is exposed. See the protocols section on
 <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><em>Thrift</em></a> for more details.</p>
 <div class="section" id="client-modules">
-<h2>Client Modules<a class="headerlink" href="#client-modules" title="Permalink to this headline">¶</a></h2>
+<span id="id1"></span><h2>Client Modules<a class="headerlink" href="#client-modules" title="Permalink to this headline">¶</a></h2>
 <p>A default Finagle client is designed to maximize success and minimize latency.
 Each request dispatched through a client will flow through various modules that
 help it achieve these goals. The modules are logically separated into three
@@ -138,17 +138,17 @@ already been dispatched, the only way to cancel the request is to terminate the 
 <p>The <tt class="docutils literal"><span class="pre">Expiration</span></tt> module is attached at the connection level and expires a service after a
 certain amount of idle time. The module is implemented by
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/ExpiringService.scala">ExpiringService</a>.</p>
-<p><a class="reference internal" href="Metrics.html#idle-apoptosis-stats"><em>Stats</em></a></p>
+<p><a class="reference internal" href="Metrics.html#idle-apoptosis-stats"><em>Related stats</em></a></p>
 <p>Finally, timeouts can be enforced outside of these modules on a per-request level using
-<cite>Future#within</cite> <a class="footnote-reference" href="#id2" id="id1">[1]</a>:</p>
+<cite>Future#within</cite> <a class="footnote-reference" href="#id3" id="id2">[1]</a>:</p>
 <div class="highlight-text"><div class="highlight"><pre>val f = client(request)
 f.within(1.seconds) onSuccess { ... } onFailure { ... }
 </pre></div>
 </div>
-<table class="docutils footnote" frame="void" id="id2" rules="none">
+<table class="docutils footnote" frame="void" id="id3" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>The <cite>Future#raiseWithin</cite> variant creates a new future
+<tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td>The <cite>Future#raiseWithin</cite> variant creates a new future
 that attempts to cancels the original future if a timeout
 occurs.</td></tr>
 </tbody>
@@ -162,7 +162,7 @@ a <a class="reference external" href="https://github.com/twitter/finagle/blob/ma
 </div>
 <div class="section" id="load-balancer">
 <h3>Load Balancer<a class="headerlink" href="#load-balancer" title="Permalink to this headline">¶</a></h3>
-<p id="id3">The role of the load balancer is to equally distribute requests over a collection
+<p id="id4">The role of the load balancer is to equally distribute requests over a collection
 of endpoints. The default balancing strategy, implemented by the
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/loadbalancer/HeapBalancer.scala">HeapBalancer</a>, is
 to pick the host with the least number of outstanding requests, which is similar to a
@@ -173,7 +173,7 @@ The load balancer also takes endpoint availability into consideration (as define
 by <cite>ServiceFactory#isAvailable</cite>). If all endpoints are unavailable the load balancer
 ignores this field and continues to balance on least loaded. This remains true until
 a host becomes available again.</p>
-<p><a class="reference internal" href="Metrics.html#loadbalancer-stats"><em>Stats</em></a></p>
+<p><a class="reference internal" href="Metrics.html#loadbalancer-stats"><em>Related stats</em></a></p>
 </div>
 <div class="section" id="failure-accrual">
 <h3>Failure Accrual<a class="headerlink" href="#failure-accrual" title="Permalink to this headline">¶</a></h3>
@@ -203,10 +203,10 @@ and then slowly decays, based on the TTL.</p>
 maintaining the low watermark (as long as request concurrency exists),
 queuing requests above the high watermark, and applying a TTL for
 services that are between [low, high].</p>
-<p><a class="reference internal" href="Metrics.html#pool-stats"><em>Stats</em></a></p>
+<p><a class="reference internal" href="Metrics.html#pool-stats"><em>Related stats</em></a></p>
 </div>
 <div class="section" id="fail-fast">
-<h3>Fail Fast<a class="headerlink" href="#fail-fast" title="Permalink to this headline">¶</a></h3>
+<span id="client-fail-fast"></span><h3>Fail Fast<a class="headerlink" href="#fail-fast" title="Permalink to this headline">¶</a></h3>
 <p>The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/FailFastFactory.scala">FailFast</a> module
 attempts to reduce the number of requests dispatched to endpoints that are likely
 to fail. It works by marking downed hosts when a connection fails, and launching a
@@ -214,7 +214,9 @@ background process that repeatedly attempts to reconnect with a given backoff sc
 During the time that a host is marked down, the factory is marked unavailable (and thus
 the load balancer above it will avoid its use). The factory becomes available
 again on success or when the back-off schedule runs out.</p>
-<p><a class="reference internal" href="Metrics.html#fail-fast-stats"><em>Stats</em></a></p>
+<p>See the FAQ to <a class="reference internal" href="FAQ.html#faq-failedfastexception"><em>better understand</em></a> why clients
+might be seeing <tt class="docutils literal"><span class="pre">com.twitter.finagle.FailedFastException</span></tt>&#8216;s.</p>
+<p><a class="reference internal" href="Metrics.html#fail-fast-stats"><em>Related stats</em></a></p>
 </div>
 <div class="section" id="retries">
 <h3>Retries<a class="headerlink" href="#retries" title="Permalink to this headline">¶</a></h3>

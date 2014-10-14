@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.redis.naggati.test</title>
+          <title>test - com.twitter.finagle.redis.naggati.test</title>
+          <meta name="description" content="test - com.twitter.finagle.redis.naggati.test" />
+          <meta name="keywords" content="test com.twitter.finagle.redis.naggati.test" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../../index.html';
+            var hash = 'com.twitter.finagle.redis.naggati.test.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../../package.html">finagle</a>.<a name="com.twitter.finagle.redis" class="extype" href="../../package.html">redis</a>.<a name="com.twitter.finagle.redis.naggati" class="extype" href="../package.html">naggati</a></p>
+        <p id="owner"><a href="../../../../../package.html" class="extype" name="com">com</a>.<a href="../../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle.redis">redis</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.redis.naggati">naggati</a></p>
         <h1>test</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,9 +56,10 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.redis.naggati.test.Counter" data-isabs="false">
+              <ol><li name="com.twitter.finagle.redis.naggati.test.Counter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CounterextendsAnyRef"></a>
       <a id="Counter:Counter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,19 +67,20 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Counter.html"><span class="name">Counter</span></a><span class="result"> extends AnyRef</span>
+        <a href="Counter.html"><span class="name">Counter</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.redis.naggati.test.TestCodec" data-isabs="false">
-      <a id="TestCodec:TestCodec[A]"></a>
+    </li><li name="com.twitter.finagle.redis.naggati.test.TestCodec" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TestCodec[A]extendsAnyRef"></a>
+      <a id="TestCodec[A]:TestCodec[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="TestCodec.html"><span class="name">TestCodec</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends AnyRef</span>
+        <a href="TestCodec.html"><span class="name">TestCodec</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">Netty doesn't appear to have a good set of fake objects yet, so this wraps a Codec in a fake
@@ -78,9 +90,10 @@ environment that collects emitted objects and returns them.</p>
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.redis.naggati.test.TestCodec" data-isabs="false">
+              <ol><li name="com.twitter.finagle.redis.naggati.test.TestCodec" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TestCodec"></a>
       <a id="TestCodec:TestCodec"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -88,7 +101,7 @@ environment that collects emitted objects and returns them.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="TestCodec$.html"><span class="name">TestCodec</span></a><span class="result"> extends AnyRef</span>
+        <a href="TestCodec$.html"><span class="name">TestCodec</span></a>
       </span>
       </h4>
       
@@ -96,10 +109,20 @@ environment that collects emitted objects and returns them.</p>
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -107,7 +130,6 @@ environment that collects emitted objects and returns them.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../../lib/template.js"></script>
     </body>
       </html>

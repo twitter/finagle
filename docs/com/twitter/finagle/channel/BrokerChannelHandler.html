@@ -2,51 +2,73 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.channel.BrokerChannelHandler</title>
+          <title>BrokerChannelHandler - com.twitter.finagle.channel.BrokerChannelHandler</title>
+          <meta name="description" content="BrokerChannelHandler - com.twitter.finagle.channel.BrokerChannelHandler" />
+          <meta name="keywords" content="BrokerChannelHandler com.twitter.finagle.channel.BrokerChannelHandler" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.channel.BrokerChannelHandler';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
+        <body class="type">
       <div id="definition">
         <img src="../../../../lib/class_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.channel" class="extype" href="package.html">channel</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.channel">channel</a></p>
         <h1>BrokerChannelHandler</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">BrokerChannelHandler</span><span class="result"> extends <span name="org.jboss.netty.channel.SimpleChannelHandler" class="extype">SimpleChannelHandler</span></span>
+        <span class="name">BrokerChannelHandler</span><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.SimpleChannelHandler">SimpleChannelHandler</span></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="org.jboss.netty.channel.SimpleChannelHandler" class="extype">SimpleChannelHandler</span>, <span name="org.jboss.netty.channel.ChannelDownstreamHandler" class="extype">ChannelDownstreamHandler</span>, <span name="org.jboss.netty.channel.ChannelUpstreamHandler" class="extype">ChannelUpstreamHandler</span>, <span name="org.jboss.netty.channel.ChannelHandler" class="extype">ChannelHandler</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="org.jboss.netty.channel.SimpleChannelHandler">SimpleChannelHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelDownstreamHandler">ChannelDownstreamHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelUpstreamHandler">ChannelUpstreamHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelHandler">ChannelHandler</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
-    
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         <div id="order">
               <span class="filtertype">Ordering</span>
-              <ol><li class="alpha in"><span>Alphabetic</span></li><li class="inherit out"><span>By inheritance</span></li></ol>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
             </div>
         <div id="ancestors">
-              <span class="filtertype">Inherited</span>
-              <ol><li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.channel.BrokerChannelHandler" class="in"><span>BrokerChannelHandler</span></li><li name="org.jboss.netty.channel.SimpleChannelHandler" class="in"><span>SimpleChannelHandler</span></li><li name="org.jboss.netty.channel.ChannelDownstreamHandler" class="in"><span>ChannelDownstreamHandler</span></li><li name="org.jboss.netty.channel.ChannelUpstreamHandler" class="in"><span>ChannelUpstreamHandler</span></li><li name="org.jboss.netty.channel.ChannelHandler" class="in"><span>ChannelHandler</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
-            </div>
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="com.twitter.finagle.channel.BrokerChannelHandler"><span>BrokerChannelHandler</span></li><li class="in" name="org.jboss.netty.channel.SimpleChannelHandler"><span>SimpleChannelHandler</span></li><li class="in" name="org.jboss.netty.channel.ChannelDownstreamHandler"><span>ChannelDownstreamHandler</span></li><li class="in" name="org.jboss.netty.channel.ChannelUpstreamHandler"><span>ChannelUpstreamHandler</span></li><li class="in" name="org.jboss.netty.channel.ChannelHandler"><span>ChannelHandler</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
             <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
@@ -55,10 +77,11 @@
 
       <div id="template">
         <div id="allMembers">
-        <div class="members" id="constructors">
+        <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#this" data-isabs="false">
-      <a id="this:BrokerChannelHandler"></a>
+              <ol><li name="com.twitter.finagle.channel.BrokerChannelHandler#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;():com.twitter.finagle.channel.BrokerChannelHandler"></a>
+      <a id="&lt;init&gt;:BrokerChannelHandler"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
@@ -72,9 +95,10 @@
     </li></ol>
             </div>
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.Bind" data-isabs="false">
+              <ol><li name="com.twitter.finagle.channel.BrokerChannelHandler.Bind" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BindextendsBrokerChannelHandler.this.DownstreamEventwithProductwithSerializable"></a>
       <a id="Bind:Bind"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -82,11 +106,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$Bind.html"><span class="name">Bind</span></a><span class="params">(<span name="e">e: ChannelStateEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends DownstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$Bind.html"><span class="name">Bind</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$DownstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.DownstreamEvent">DownstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.Bound" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.Bound" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BoundextendsBrokerChannelHandler.this.UpstreamEventwithProductwithSerializable"></a>
       <a id="Bound:Bound"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -94,11 +119,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$Bound.html"><span class="name">Bound</span></a><span class="params">(<span name="e">e: ChannelStateEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends UpstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$Bound.html"><span class="name">Bound</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$UpstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent">UpstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.ChildClosed" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.ChildClosed" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ChildClosedextendsBrokerChannelHandler.this.UpstreamEventwithProductwithSerializable"></a>
       <a id="ChildClosed:ChildClosed"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -106,11 +132,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$ChildClosed.html"><span class="name">ChildClosed</span></a><span class="params">(<span name="e">e: ChildChannelStateEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends UpstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$ChildClosed.html"><span class="name">ChildClosed</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChildChannelStateEvent">ChildChannelStateEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$UpstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent">UpstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.ChildOpen" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.ChildOpen" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ChildOpenextendsBrokerChannelHandler.this.UpstreamEventwithProductwithSerializable"></a>
       <a id="ChildOpen:ChildOpen"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -118,11 +145,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$ChildOpen.html"><span class="name">ChildOpen</span></a><span class="params">(<span name="e">e: ChildChannelStateEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends UpstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$ChildOpen.html"><span class="name">ChildOpen</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChildChannelStateEvent">ChildChannelStateEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$UpstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent">UpstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.Close" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.Close" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CloseextendsBrokerChannelHandler.this.DownstreamEventwithProductwithSerializable"></a>
       <a id="Close:Close"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -130,11 +158,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$Close.html"><span class="name">Close</span></a><span class="params">(<span name="e">e: ChannelStateEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends DownstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$Close.html"><span class="name">Close</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$DownstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.DownstreamEvent">DownstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.Closed" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.Closed" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClosedextendsBrokerChannelHandler.this.UpstreamEventwithProductwithSerializable"></a>
       <a id="Closed:Closed"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -142,11 +171,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$Closed.html"><span class="name">Closed</span></a><span class="params">(<span name="e">e: ChannelStateEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends UpstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$Closed.html"><span class="name">Closed</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$UpstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent">UpstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.Connect" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.Connect" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ConnectextendsBrokerChannelHandler.this.DownstreamEventwithProductwithSerializable"></a>
       <a id="Connect:Connect"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -154,11 +184,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$Connect.html"><span class="name">Connect</span></a><span class="params">(<span name="e">e: ChannelStateEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends DownstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$Connect.html"><span class="name">Connect</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$DownstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.DownstreamEvent">DownstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.Connected" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.Connected" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ConnectedextendsBrokerChannelHandler.this.UpstreamEventwithProductwithSerializable"></a>
       <a id="Connected:Connected"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -166,11 +197,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$Connected.html"><span class="name">Connected</span></a><span class="params">(<span name="e">e: ChannelStateEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends UpstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$Connected.html"><span class="name">Connected</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$UpstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent">UpstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.Disconnect" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.Disconnect" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DisconnectextendsBrokerChannelHandler.this.DownstreamEventwithProductwithSerializable"></a>
       <a id="Disconnect:Disconnect"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -178,11 +210,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$Disconnect.html"><span class="name">Disconnect</span></a><span class="params">(<span name="e">e: ChannelStateEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends DownstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$Disconnect.html"><span class="name">Disconnect</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$DownstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.DownstreamEvent">DownstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.Disconnected" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.Disconnected" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DisconnectedextendsBrokerChannelHandler.this.UpstreamEventwithProductwithSerializable"></a>
       <a id="Disconnected:Disconnected"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -190,11 +223,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$Disconnected.html"><span class="name">Disconnected</span></a><span class="params">(<span name="e">e: ChannelStateEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends UpstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$Disconnected.html"><span class="name">Disconnected</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$UpstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent">UpstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.DownstreamEvent" data-isabs="true">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.DownstreamEvent" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="DownstreamEventextendsBrokerChannelHandler.this.Event"></a>
       <a id="DownstreamEvent:DownstreamEvent"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -202,11 +236,12 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$DownstreamEvent.html"><span class="name">DownstreamEvent</span></a><span class="result"> extends Event</span>
+        <a href="BrokerChannelHandler$DownstreamEvent.html"><span class="name">DownstreamEvent</span></a><span class="result"> extends <a href="BrokerChannelHandler$Event.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.Event">Event</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.Event" data-isabs="true">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.Event" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="EventextendsAnyRef"></a>
       <a id="Event:Event"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -214,11 +249,12 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$Event.html"><span class="name">Event</span></a><span class="result"> extends AnyRef</span>
+        <a href="BrokerChannelHandler$Event.html"><span class="name">Event</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.Exception" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.Exception" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExceptionextendsBrokerChannelHandler.this.UpstreamEventwithProductwithSerializable"></a>
       <a id="Exception:Exception"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -226,11 +262,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$Exception.html"><span class="name">Exception</span></a><span class="params">(<span name="e">e: ExceptionEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends UpstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$Exception.html"><span class="name">Exception</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.ExceptionEvent">ExceptionEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$UpstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent">UpstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.InterestChanged" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.InterestChanged" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InterestChangedextendsBrokerChannelHandler.this.UpstreamEventwithProductwithSerializable"></a>
       <a id="InterestChanged:InterestChanged"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -238,11 +275,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$InterestChanged.html"><span class="name">InterestChanged</span></a><span class="params">(<span name="e">e: ChannelStateEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends UpstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$InterestChanged.html"><span class="name">InterestChanged</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$UpstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent">UpstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.InterestOps" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.InterestOps" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InterestOpsextendsBrokerChannelHandler.this.DownstreamEventwithProductwithSerializable"></a>
       <a id="InterestOps:InterestOps"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -250,11 +288,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$InterestOps.html"><span class="name">InterestOps</span></a><span class="params">(<span name="e">e: ChannelStateEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends DownstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$InterestOps.html"><span class="name">InterestOps</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$DownstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.DownstreamEvent">DownstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.Message" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.Message" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MessageextendsBrokerChannelHandler.this.UpstreamEventwithProductwithSerializable"></a>
       <a id="Message:Message"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -262,11 +301,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$Message.html"><span class="name">Message</span></a><span class="params">(<span name="e">e: MessageEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends UpstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$Message.html"><span class="name">Message</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.MessageEvent">MessageEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$UpstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent">UpstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.Open" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.Open" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OpenextendsBrokerChannelHandler.this.UpstreamEventwithProductwithSerializable"></a>
       <a id="Open:Open"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -274,11 +314,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$Open.html"><span class="name">Open</span></a><span class="params">(<span name="e">e: ChannelStateEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends UpstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$Open.html"><span class="name">Open</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$UpstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent">UpstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.Unbind" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.Unbind" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="UnbindextendsBrokerChannelHandler.this.DownstreamEventwithProductwithSerializable"></a>
       <a id="Unbind:Unbind"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -286,11 +327,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$Unbind.html"><span class="name">Unbind</span></a><span class="params">(<span name="e">e: ChannelStateEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends DownstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$Unbind.html"><span class="name">Unbind</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$DownstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.DownstreamEvent">DownstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.Unbound" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.Unbound" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="UnboundextendsBrokerChannelHandler.this.UpstreamEventwithProductwithSerializable"></a>
       <a id="Unbound:Unbound"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -298,11 +340,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$Unbound.html"><span class="name">Unbound</span></a><span class="params">(<span name="e">e: ChannelStateEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends UpstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$Unbound.html"><span class="name">Unbound</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$UpstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent">UpstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent" data-isabs="true">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="UpstreamEventextendsBrokerChannelHandler.this.Event"></a>
       <a id="UpstreamEvent:UpstreamEvent"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -310,11 +353,12 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$UpstreamEvent.html"><span class="name">UpstreamEvent</span></a><span class="result"> extends Event</span>
+        <a href="BrokerChannelHandler$UpstreamEvent.html"><span class="name">UpstreamEvent</span></a><span class="result"> extends <a href="BrokerChannelHandler$Event.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.Event">Event</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.Write" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.Write" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="WriteextendsBrokerChannelHandler.this.DownstreamEventwithProductwithSerializable"></a>
       <a id="Write:Write"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -322,11 +366,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$Write.html"><span class="name">Write</span></a><span class="params">(<span name="e">e: MessageEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends DownstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$Write.html"><span class="name">Write</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.MessageEvent">MessageEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$DownstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.DownstreamEvent">DownstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.WriteComplete" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.WriteComplete" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="WriteCompleteextendsBrokerChannelHandler.this.UpstreamEventwithProductwithSerializable"></a>
       <a id="WriteComplete:WriteComplete"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -334,7 +379,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$WriteComplete.html"><span class="name">WriteComplete</span></a><span class="params">(<span name="e">e: WriteCompletionEvent</span>, <span name="ctx">ctx: ChannelHandlerContext</span>)</span><span class="result"> extends UpstreamEvent with Product with Serializable</span>
+        <a href="BrokerChannelHandler$WriteComplete.html"><span class="name">WriteComplete</span></a><span class="params">(<span name="e">e: <span class="extype" name="org.jboss.netty.channel.WriteCompletionEvent">WriteCompletionEvent</span></span>, <span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result"> extends <a href="BrokerChannelHandler$UpstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent">UpstreamEvent</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -343,9 +388,10 @@
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:AnyRef):Boolean"></a>
       <a id="!=(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -353,11 +399,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#!=" data-isabs="false">
+    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -365,11 +412,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef###" data-isabs="false">
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
       <a id="##():Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -377,11 +425,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $hash$hash">##</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:AnyRef):Boolean"></a>
       <a id="==(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -389,11 +438,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#==" data-isabs="false">
+    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -401,11 +451,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.MessageValue" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.MessageValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MessageValue"></a>
       <a id="MessageValue:MessageValue"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -413,11 +464,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$MessageValue$.html"><span class="name">MessageValue</span></a><span class="result"> extends AnyRef</span>
+        <a href="BrokerChannelHandler$MessageValue$.html"><span class="name">MessageValue</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler.WriteValue" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler.WriteValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="WriteValue"></a>
       <a id="WriteValue:WriteValue"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -425,11 +477,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="BrokerChannelHandler$WriteValue$.html"><span class="name">WriteValue</span></a><span class="result"> extends AnyRef</span>
+        <a href="BrokerChannelHandler$WriteValue$.html"><span class="name">WriteValue</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -437,11 +490,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: T0</span>
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#bindRequested" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#bindRequested" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bindRequested(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
       <a id="bindRequested(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -449,11 +503,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">bindRequested</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ChannelStateEvent" class="extype">ChannelStateEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">bindRequested</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#channelBound" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#channelBound" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="channelBound(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
       <a id="channelBound(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -461,11 +516,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">channelBound</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ChannelStateEvent" class="extype">ChannelStateEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">channelBound</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#channelClosed" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#channelClosed" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="channelClosed(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
       <a id="channelClosed(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -473,11 +529,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">channelClosed</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ChannelStateEvent" class="extype">ChannelStateEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">channelClosed</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#channelConnected" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#channelConnected" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="channelConnected(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
       <a id="channelConnected(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -485,11 +542,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">channelConnected</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ChannelStateEvent" class="extype">ChannelStateEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">channelConnected</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#channelDisconnected" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#channelDisconnected" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="channelDisconnected(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
       <a id="channelDisconnected(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -497,11 +555,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">channelDisconnected</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ChannelStateEvent" class="extype">ChannelStateEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">channelDisconnected</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#channelInterestChanged" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#channelInterestChanged" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="channelInterestChanged(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
       <a id="channelInterestChanged(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -509,11 +568,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">channelInterestChanged</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ChannelStateEvent" class="extype">ChannelStateEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">channelInterestChanged</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#channelOpen" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#channelOpen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="channelOpen(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
       <a id="channelOpen(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -521,11 +581,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">channelOpen</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ChannelStateEvent" class="extype">ChannelStateEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">channelOpen</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#channelUnbound" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#channelUnbound" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="channelUnbound(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
       <a id="channelUnbound(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -533,11 +594,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">channelUnbound</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ChannelStateEvent" class="extype">ChannelStateEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">channelUnbound</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#childChannelClosed" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#childChannelClosed" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="childChannelClosed(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChildChannelStateEvent):Unit"></a>
       <a id="childChannelClosed(ChannelHandlerContext,ChildChannelStateEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -545,11 +607,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">childChannelClosed</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ChildChannelStateEvent" class="extype">ChildChannelStateEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">childChannelClosed</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChildChannelStateEvent">ChildChannelStateEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#childChannelOpen" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#childChannelOpen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="childChannelOpen(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChildChannelStateEvent):Unit"></a>
       <a id="childChannelOpen(ChannelHandlerContext,ChildChannelStateEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -557,11 +620,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">childChannelOpen</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ChildChannelStateEvent" class="extype">ChildChannelStateEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">childChannelOpen</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChildChannelStateEvent">ChildChannelStateEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -569,14 +633,18 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: AnyRef</span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#closeRequested" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#closeRequested" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="closeRequested(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
       <a id="closeRequested(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -584,11 +652,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">closeRequested</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ChannelStateEvent" class="extype">ChannelStateEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">closeRequested</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#connectRequested" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#connectRequested" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="connectRequested(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
       <a id="connectRequested(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -596,11 +665,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">connectRequested</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ChannelStateEvent" class="extype">ChannelStateEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">connectRequested</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#disconnectRequested" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#disconnectRequested" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="disconnectRequested(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
       <a id="disconnectRequested(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -608,11 +678,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">disconnectRequested</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ChannelStateEvent" class="extype">ChannelStateEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">disconnectRequested</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#downstreamBroker" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#downstreamBroker" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="downstreamBroker:com.twitter.concurrent.Broker[BrokerChannelHandler.this.DownstreamEvent]"></a>
       <a id="downstreamBroker:Broker[DownstreamEvent]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -620,11 +691,12 @@
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">downstreamBroker</span><span class="result">: <span name="com.twitter.concurrent.Broker" class="extype">Broker</span>[<a name="com.twitter.finagle.channel.BrokerChannelHandler.DownstreamEvent" class="extype" href="BrokerChannelHandler$DownstreamEvent.html">DownstreamEvent</a>]</span>
+        <span class="name">downstreamBroker</span><span class="result">: <span class="extype" name="com.twitter.concurrent.Broker">Broker</span>[<a href="BrokerChannelHandler$DownstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.DownstreamEvent">DownstreamEvent</a>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#downstreamEvent" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#downstreamEvent" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="downstreamEvent:com.twitter.concurrent.Offer[BrokerChannelHandler.this.DownstreamEvent]"></a>
       <a id="downstreamEvent:Offer[DownstreamEvent]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -632,11 +704,12 @@
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">downstreamEvent</span><span class="result">: <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<a name="com.twitter.finagle.channel.BrokerChannelHandler.DownstreamEvent" class="extype" href="BrokerChannelHandler$DownstreamEvent.html">DownstreamEvent</a>]</span>
+        <span class="name">downstreamEvent</span><span class="result">: <span class="extype" name="com.twitter.concurrent.Offer">Offer</span>[<a href="BrokerChannelHandler$DownstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.DownstreamEvent">DownstreamEvent</a>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -644,11 +717,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#equals" data-isabs="false">
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
       <a id="equals(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -656,11 +730,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#exceptionCaught" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#exceptionCaught" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="exceptionCaught(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ExceptionEvent):Unit"></a>
       <a id="exceptionCaught(ChannelHandlerContext,ExceptionEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -668,11 +743,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">exceptionCaught</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ExceptionEvent" class="extype">ExceptionEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">exceptionCaught</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ExceptionEvent">ExceptionEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -680,26 +756,31 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
-      <a id="getClass():java.lang.Class[_]"></a>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getClass</span><span class="params">()</span><span class="result">: java.lang.Class[_]</span>
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="org.jboss.netty.channel.SimpleChannelHandler#handleDownstream" data-isabs="false">
+    </li><li name="org.jboss.netty.channel.SimpleChannelHandler#handleDownstream" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="handleDownstream(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelEvent):Unit"></a>
       <a id="handleDownstream(ChannelHandlerContext,ChannelEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -707,14 +788,18 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">handleDownstream</span><span class="params">(<span name="arg0">arg0: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span name="org.jboss.netty.channel.ChannelEvent" class="extype">ChannelEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">handleDownstream</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelEvent">ChannelEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SimpleChannelHandler → ChannelDownstreamHandler</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="org.jboss.netty.channel.SimpleChannelHandler#handleUpstream" data-isabs="false">
+    </li><li name="org.jboss.netty.channel.SimpleChannelHandler#handleUpstream" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="handleUpstream(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelEvent):Unit"></a>
       <a id="handleUpstream(ChannelHandlerContext,ChannelEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -722,14 +807,18 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">handleUpstream</span><span class="params">(<span name="arg0">arg0: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span name="org.jboss.netty.channel.ChannelEvent" class="extype">ChannelEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">handleUpstream</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelEvent">ChannelEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SimpleChannelHandler → ChannelUpstreamHandler</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -737,11 +826,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -749,11 +839,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#messageReceived" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#messageReceived" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="messageReceived(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.MessageEvent):Unit"></a>
       <a id="messageReceived(ChannelHandlerContext,MessageEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -761,11 +852,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">messageReceived</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.MessageEvent" class="extype">MessageEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">messageReceived</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.MessageEvent">MessageEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -773,11 +865,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
       <a id="notify():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -785,11 +878,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#notifyAll" data-isabs="false">
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
       <a id="notifyAll():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -797,11 +891,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="prt" name="com.twitter.finagle.channel.BrokerChannelHandler#proxy" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#proxy" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="proxy():Unit"></a>
       <a id="proxy():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -809,12 +904,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">proxy</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">proxy</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Proxy both upstream &amp; downstream events.</p><div class="fullcomment"><div class="comment cmt"><p>Proxy both upstream &amp; downstream events.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
-    </li><li visbl="prt" name="com.twitter.finagle.channel.BrokerChannelHandler#proxyDownstream" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#proxyDownstream" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="proxyDownstream():Unit"></a>
       <a id="proxyDownstream():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -822,12 +918,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">proxyDownstream</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">proxyDownstream</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Proxy further downstream events.</p><div class="fullcomment"><div class="comment cmt"><p>Proxy further downstream events.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
-    </li><li visbl="prt" name="com.twitter.finagle.channel.BrokerChannelHandler#proxyUpstream" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#proxyUpstream" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="proxyUpstream():Unit"></a>
       <a id="proxyUpstream():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -835,12 +932,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">proxyUpstream</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">proxyUpstream</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Proxy further upstream events.</p><div class="fullcomment"><div class="comment cmt"><p>Proxy further upstream events.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#setInterestOpsRequested" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#setInterestOpsRequested" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setInterestOpsRequested(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
       <a id="setInterestOpsRequested(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -848,23 +946,25 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setInterestOpsRequested</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ChannelStateEvent" class="extype">ChannelStateEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">setInterestOpsRequested</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
-      <a id="synchronized[T0](⇒ T0):T0"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ T0</span>)</span><span class="result">: T0</span>
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
+    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -872,11 +972,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#unbindRequested" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#unbindRequested" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="unbindRequested(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
       <a id="unbindRequested(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -884,11 +985,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unbindRequested</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ChannelStateEvent" class="extype">ChannelStateEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">unbindRequested</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#upstreamBroker" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#upstreamBroker" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="upstreamBroker:com.twitter.concurrent.Broker[BrokerChannelHandler.this.UpstreamEvent]"></a>
       <a id="upstreamBroker:Broker[UpstreamEvent]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -896,11 +998,12 @@
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">upstreamBroker</span><span class="result">: <span name="com.twitter.concurrent.Broker" class="extype">Broker</span>[<a name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent" class="extype" href="BrokerChannelHandler$UpstreamEvent.html">UpstreamEvent</a>]</span>
+        <span class="name">upstreamBroker</span><span class="result">: <span class="extype" name="com.twitter.concurrent.Broker">Broker</span>[<a href="BrokerChannelHandler$UpstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent">UpstreamEvent</a>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#upstreamEvent" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#upstreamEvent" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="upstreamEvent:com.twitter.concurrent.Offer[BrokerChannelHandler.this.UpstreamEvent]"></a>
       <a id="upstreamEvent:Offer[UpstreamEvent]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -908,11 +1011,12 @@
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">upstreamEvent</span><span class="result">: <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<a name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent" class="extype" href="BrokerChannelHandler$UpstreamEvent.html">UpstreamEvent</a>]</span>
+        <span class="name">upstreamEvent</span><span class="result">: <span class="extype" name="com.twitter.concurrent.Offer">Offer</span>[<a href="BrokerChannelHandler$UpstreamEvent.html" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler.UpstreamEvent">UpstreamEvent</a>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -920,14 +1024,18 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
       <a id="wait(Long,Int):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -935,14 +1043,18 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>, <span name="arg1">arg1: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
       <a id="wait(Long):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -950,14 +1062,18 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#writeComplete" data-isabs="false">
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#writeComplete" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeComplete(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.WriteCompletionEvent):Unit"></a>
       <a id="writeComplete(ChannelHandlerContext,WriteCompletionEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -965,11 +1081,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeComplete</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.WriteCompletionEvent" class="extype">WriteCompletionEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">writeComplete</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.WriteCompletionEvent">WriteCompletionEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.channel.BrokerChannelHandler#writeRequested" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+    </li><li name="com.twitter.finagle.channel.BrokerChannelHandler#writeRequested" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeRequested(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.MessageEvent):Unit"></a>
       <a id="writeRequested(ChannelHandlerContext,MessageEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -977,29 +1094,39 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeRequested</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.MessageEvent" class="extype">MessageEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">writeRequested</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.MessageEvent">MessageEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.BrokerChannelHandler" class="extype" href="">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.channel.BrokerChannelHandler">BrokerChannelHandler</a> → SimpleChannelHandler</dd></dl></div>
     </li></ol>
             </div>
+
+        
 
         
         </div>
 
         <div id="inheritedMembers">
-        <div name="org.jboss.netty.channel.SimpleChannelHandler" class="parent">
-              <h3>Inherited from <span name="org.jboss.netty.channel.SimpleChannelHandler" class="extype">SimpleChannelHandler</span></h3>
-            </div><div name="org.jboss.netty.channel.ChannelDownstreamHandler" class="parent">
-              <h3>Inherited from <span name="org.jboss.netty.channel.ChannelDownstreamHandler" class="extype">ChannelDownstreamHandler</span></h3>
-            </div><div name="org.jboss.netty.channel.ChannelUpstreamHandler" class="parent">
-              <h3>Inherited from <span name="org.jboss.netty.channel.ChannelUpstreamHandler" class="extype">ChannelUpstreamHandler</span></h3>
-            </div><div name="org.jboss.netty.channel.ChannelHandler" class="parent">
-              <h3>Inherited from <span name="org.jboss.netty.channel.ChannelHandler" class="extype">ChannelHandler</span></h3>
-            </div><div name="scala.AnyRef" class="parent">
-              <h3>Inherited from AnyRef</h3>
-            </div><div name="scala.Any" class="parent">
-              <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>
+        <div class="parent" name="org.jboss.netty.channel.SimpleChannelHandler">
+              <h3>Inherited from <span class="extype" name="org.jboss.netty.channel.SimpleChannelHandler">SimpleChannelHandler</span></h3>
+            </div><div class="parent" name="org.jboss.netty.channel.ChannelDownstreamHandler">
+              <h3>Inherited from <span class="extype" name="org.jboss.netty.channel.ChannelDownstreamHandler">ChannelDownstreamHandler</span></h3>
+            </div><div class="parent" name="org.jboss.netty.channel.ChannelUpstreamHandler">
+              <h3>Inherited from <span class="extype" name="org.jboss.netty.channel.ChannelUpstreamHandler">ChannelUpstreamHandler</span></h3>
+            </div><div class="parent" name="org.jboss.netty.channel.ChannelHandler">
+              <h3>Inherited from <span class="extype" name="org.jboss.netty.channel.ChannelHandler">ChannelHandler</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
             </div>
         </div>
 
@@ -1008,7 +1135,6 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

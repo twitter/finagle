@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.exp.mysql</title>
+          <title>mysql - com.twitter.finagle.exp.mysql</title>
+          <meta name="description" content="mysql - com.twitter.finagle.exp.mysql" />
+          <meta name="keywords" content="mysql com.twitter.finagle.exp.mysql" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../index.html';
+            var hash = 'com.twitter.finagle.exp.mysql.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.exp" class="extype" href="../package.html">exp</a></p>
+        <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.exp">exp</a></p>
         <h1>mysql</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,9 +56,10 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.exp.mysql.BinaryEncodedRow" data-isabs="false">
+              <ol><li name="com.twitter.finagle.exp.mysql.BinaryEncodedRow" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BinaryEncodedRowextendsRow"></a>
       <a id="BinaryEncodedRow:BinaryEncodedRow"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,12 +67,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="BinaryEncodedRow.html"><span class="name">BinaryEncodedRow</span></a><span class="result"> extends Row</span>
+        <a href="BinaryEncodedRow.html"><span class="name">BinaryEncodedRow</span></a><span class="result"> extends <a href="Row.html" class="extype" name="com.twitter.finagle.exp.mysql.Row">Row</a></span>
       </span>
       </h4>
       <p class="comment cmt">Defines a Row where the data is presumed to be encoded with the
 mysql binary protocol.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ByteValue" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.ByteValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ByteValueextendsValuewithProductwithSerializable"></a>
       <a id="ByteValue:ByteValue"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -69,11 +81,12 @@ mysql binary protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ByteValue.html"><span class="name">ByteValue</span></a><span class="params">(<span name="b">b: Byte</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+        <a href="ByteValue.html"><span class="name">ByteValue</span></a><span class="params">(<span name="b">b: <span class="extype" name="scala.Byte">Byte</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Capability" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.Capability" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CapabilityextendsProductwithSerializable"></a>
       <a id="Capability:Capability"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -81,11 +94,12 @@ mysql binary protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Capability.html"><span class="name">Capability</span></a><span class="params">(<span name="mask">mask: Int</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="Capability.html"><span class="name">Capability</span></a><span class="params">(<span name="mask">mask: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Client" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.Client" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ClientextendsClosable"></a>
       <a id="Client:Client"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -93,11 +107,12 @@ mysql binary protocol.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Client.html"><span class="name">Client</span></a><span class="result"> extends Closable</span>
+        <a href="Client.html"><span class="name">Client</span></a><span class="result"> extends <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ClientDispatcher" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.ClientDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientDispatcherextendsGenSerialClientDispatcher[com.twitter.finagle.exp.mysql.Request,com.twitter.finagle.exp.mysql.Result,com.twitter.finagle.exp.mysql.transport.Packet,com.twitter.finagle.exp.mysql.transport.Packet]"></a>
       <a id="ClientDispatcher:ClientDispatcher"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -105,11 +120,12 @@ mysql binary protocol.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ClientDispatcher.html"><span class="name">ClientDispatcher</span></a><span class="result"> extends GenSerialClientDispatcher[Request, Result, Packet, Packet]</span>
+        <a href="ClientDispatcher.html"><span class="name">ClientDispatcher</span></a><span class="result"> extends <a href="../../dispatch/GenSerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher">GenSerialClientDispatcher</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>, <a href="transport/Packet.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Packet">Packet</a>, <a href="transport/Packet.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Packet">Packet</a>]</span>
       </span>
       </h4>
       <p class="comment cmt">A ClientDispatcher that implements the mysql client/server protocol.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.CloseRequest" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.CloseRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CloseRequestextendsCommandRequestwithProductwithSerializable"></a>
       <a id="CloseRequest:CloseRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -117,11 +133,12 @@ mysql binary protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="CloseRequest.html"><span class="name">CloseRequest</span></a><span class="params">(<span name="stmtId">stmtId: Int</span>)</span><span class="result"> extends CommandRequest with Product with Serializable</span>
+        <a href="CloseRequest.html"><span class="name">CloseRequest</span></a><span class="params">(<span name="stmtId">stmtId: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">A CloseRequest deallocates a prepared statement on the server.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.CommandRequest" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.CommandRequest" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="CommandRequestextendsRequest"></a>
       <a id="CommandRequest:CommandRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -129,24 +146,26 @@ mysql binary protocol.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="CommandRequest.html"><span class="name">CommandRequest</span></a><span class="result"> extends Request</span>
+        <a href="CommandRequest.html"><span class="name">CommandRequest</span></a><span class="result"> extends <a href="Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a></span>
       </span>
       </h4>
       <p class="comment cmt">A command request is a request initiated by the client
 and has a cmd byte associated with it.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Decoder" data-isabs="true">
-      <a id="Decoder:Decoder[T]"></a>
+    </li><li name="com.twitter.finagle.exp.mysql.Decoder" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="Decoder[T&lt;:com.twitter.finagle.exp.mysql.Result]extendscom.twitter.finagle.exp.mysql.transport.Packet=&gt;com.twitter.util.Try[T]"></a>
+      <a id="Decoder[T&lt;:Result]:Decoder[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Decoder.html"><span class="name">Decoder</span></a><span class="tparams">[<span name="T">T &lt;: Result</span>]</span><span class="result"> extends (Packet) ⇒ Try[T]</span>
+        <a href="Decoder.html"><span class="name">Decoder</span></a><span class="tparams">[<span name="T">T &lt;: <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a></span>]</span><span class="result"> extends (<a href="transport/Packet.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Packet">Packet</a>) ⇒ <span class="extype" name="com.twitter.util.Try">Try</span>[<span class="extype" name="com.twitter.finagle.exp.mysql.Decoder.T">T</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">A decoder for Results contained in a single packet.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.DoubleValue" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.DoubleValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DoubleValueextendsValuewithProductwithSerializable"></a>
       <a id="DoubleValue:DoubleValue"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -154,11 +173,12 @@ and has a cmd byte associated with it.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="DoubleValue.html"><span class="name">DoubleValue</span></a><span class="params">(<span name="d">d: Double</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+        <a href="DoubleValue.html"><span class="name">DoubleValue</span></a><span class="params">(<span name="d">d: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.EOF" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.EOF" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EOFextendsResultwithProductwithSerializable"></a>
       <a id="EOF:EOF"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -166,11 +186,12 @@ and has a cmd byte associated with it.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="EOF.html"><span class="name">EOF</span></a><span class="params">(<span name="warnings">warnings: Short</span>, <span name="serverStatus">serverStatus: Short</span>)</span><span class="result"> extends Result with Product with Serializable</span>
+        <a href="EOF.html"><span class="name">EOF</span></a><span class="params">(<span name="warnings">warnings: <span class="extype" name="scala.Short">Short</span></span>, <span name="serverStatus">serverStatus: <span class="extype" name="scala.Short">Short</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Error" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.Error" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ErrorextendsResultwithProductwithSerializable"></a>
       <a id="Error:Error"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -178,11 +199,12 @@ and has a cmd byte associated with it.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Error.html"><span class="name">Error</span></a><span class="params">(<span name="code">code: Short</span>, <span name="sqlState">sqlState: String</span>, <span name="message">message: String</span>)</span><span class="result"> extends Result with Product with Serializable</span>
+        <a href="Error.html"><span class="name">Error</span></a><span class="params">(<span name="code">code: <span class="extype" name="scala.Short">Short</span></span>, <span name="sqlState">sqlState: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ExecuteRequest" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.ExecuteRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExecuteRequestextendsCommandRequestwithProductwithSerializable"></a>
       <a id="ExecuteRequest:ExecuteRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -190,12 +212,13 @@ and has a cmd byte associated with it.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ExecuteRequest.html"><span class="name">ExecuteRequest</span></a><span class="params">(<span name="stmtId">stmtId: Int</span>, <span name="params">params: IndexedSeq[Any]</span>, <span name="hasNewParams">hasNewParams: Boolean</span>, <span name="flags">flags: Byte</span>)</span><span class="result"> extends CommandRequest with Product with Serializable</span>
+        <a href="ExecuteRequest.html"><span class="name">ExecuteRequest</span></a><span class="params">(<span name="stmtId">stmtId: <span class="extype" name="scala.Int">Int</span></span>, <span name="params">params: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<span class="extype" name="scala.Any">Any</span>] = <span class="defval" name="scala.`package`.IndexedSeq.empty[Nothing]">...</span></span>, <span name="hasNewParams">hasNewParams: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="flags">flags: <span class="extype" name="scala.Byte">Byte</span> = <span class="symbol">0</span></span>)</span><span class="result"> extends <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Uses the binary protocol to build an execute request for
 a prepared statement.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Field" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.Field" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FieldextendsResultwithProductwithSerializable"></a>
       <a id="Field:Field"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -203,11 +226,12 @@ a prepared statement.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Field.html"><span class="name">Field</span></a><span class="params">(<span name="catalog">catalog: String</span>, <span name="db">db: String</span>, <span name="table">table: String</span>, <span name="origTable">origTable: String</span>, <span name="name">name: String</span>, <span name="origName">origName: String</span>, <span name="charset">charset: Short</span>, <span name="displayLength">displayLength: Int</span>, <span name="fieldType">fieldType: Short</span>, <span name="flags">flags: Short</span>, <span name="decimals">decimals: Byte</span>)</span><span class="result"> extends Result with Product with Serializable</span>
+        <a href="Field.html"><span class="name">Field</span></a><span class="params">(<span name="catalog">catalog: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="db">db: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="table">table: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="origTable">origTable: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="origName">origName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="charset">charset: <span class="extype" name="scala.Short">Short</span></span>, <span name="displayLength">displayLength: <span class="extype" name="scala.Int">Int</span></span>, <span name="fieldType">fieldType: <span class="extype" name="scala.Short">Short</span></span>, <span name="flags">flags: <span class="extype" name="scala.Short">Short</span></span>, <span name="decimals">decimals: <span class="extype" name="scala.Byte">Byte</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.FloatValue" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.FloatValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FloatValueextendsValuewithProductwithSerializable"></a>
       <a id="FloatValue:FloatValue"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -215,11 +239,12 @@ a prepared statement.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="FloatValue.html"><span class="name">FloatValue</span></a><span class="params">(<span name="f">f: Float</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+        <a href="FloatValue.html"><span class="name">FloatValue</span></a><span class="params">(<span name="f">f: <span class="extype" name="scala.Float">Float</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Handshake" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.Handshake" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Handshakeextendscom.twitter.finagle.exp.mysql.HandshakeInit=&gt;com.twitter.util.Try[com.twitter.finagle.exp.mysql.HandshakeResponse]withProductwithSerializable"></a>
       <a id="Handshake:Handshake"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -227,13 +252,14 @@ a prepared statement.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Handshake.html"><span class="name">Handshake</span></a><span class="params">(<span name="username">username: Option[String]</span>, <span name="password">password: Option[String]</span>, <span name="database">database: Option[String]</span>, <span name="clientCap">clientCap: Capability</span>, <span name="charset">charset: Short</span>, <span name="maxPacketSize">maxPacketSize: StorageUnit</span>)</span><span class="result"> extends (HandshakeInit) ⇒ Try[HandshakeResponse] with Product with Serializable</span>
+        <a href="Handshake.html"><span class="name">Handshake</span></a><span class="params">(<span name="username">username: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>, <span name="password">password: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>, <span name="database">database: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a> = <span class="symbol">Capability.baseCap</span></span>, <span name="charset">charset: <span class="extype" name="scala.Short">Short</span> = <span class="defval" name="com.twitter.finagle.exp.mysql.Charset.Utf8_general_ci">...</span></span>, <span name="maxPacketSize">maxPacketSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(1).gigabyte">...</span></span>)</span><span class="result"> extends (<a href="HandshakeInit.html" class="extype" name="com.twitter.finagle.exp.mysql.HandshakeInit">HandshakeInit</a>) ⇒ <span class="extype" name="com.twitter.util.Try">Try</span>[<a href="HandshakeResponse.html" class="extype" name="com.twitter.finagle.exp.mysql.HandshakeResponse">HandshakeResponse</a>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Bridges a server handshake (HandshakeInit) with a
 client handshake (HandshakeResponse) using the given
 parameters.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.HandshakeInit" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.HandshakeInit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HandshakeInitextendsResultwithProductwithSerializable"></a>
       <a id="HandshakeInit:HandshakeInit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -241,11 +267,12 @@ parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="HandshakeInit.html"><span class="name">HandshakeInit</span></a><span class="params">(<span name="protocol">protocol: Byte</span>, <span name="version">version: String</span>, <span name="threadId">threadId: Int</span>, <span name="salt">salt: Array[Byte]</span>, <span name="serverCap">serverCap: Capability</span>, <span name="charset">charset: Short</span>, <span name="status">status: Short</span>)</span><span class="result"> extends Result with Product with Serializable</span>
+        <a href="HandshakeInit.html"><span class="name">HandshakeInit</span></a><span class="params">(<span name="protocol">protocol: <span class="extype" name="scala.Byte">Byte</span></span>, <span name="version">version: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="threadId">threadId: <span class="extype" name="scala.Int">Int</span></span>, <span name="salt">salt: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>, <span name="serverCap">serverCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a></span>, <span name="charset">charset: <span class="extype" name="scala.Short">Short</span></span>, <span name="status">status: <span class="extype" name="scala.Short">Short</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.HandshakeResponse" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.HandshakeResponse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HandshakeResponseextendsRequestwithProductwithSerializable"></a>
       <a id="HandshakeResponse:HandshakeResponse"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -253,11 +280,12 @@ parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="HandshakeResponse.html"><span class="name">HandshakeResponse</span></a><span class="params">(<span name="username">username: Option[String]</span>, <span name="password">password: Option[String]</span>, <span name="database">database: Option[String]</span>, <span name="clientCap">clientCap: Capability</span>, <span name="salt">salt: Array[Byte]</span>, <span name="serverCap">serverCap: Capability</span>, <span name="charset">charset: Short</span>, <span name="maxPacketSize">maxPacketSize: Int</span>)</span><span class="result"> extends Request with Product with Serializable</span>
+        <a href="HandshakeResponse.html"><span class="name">HandshakeResponse</span></a><span class="params">(<span name="username">username: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="password">password: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="database">database: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a></span>, <span name="salt">salt: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>, <span name="serverCap">serverCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a></span>, <span name="charset">charset: <span class="extype" name="scala.Short">Short</span></span>, <span name="maxPacketSize">maxPacketSize: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <a href="Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Client response sent during connection phase.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.IncompatibleServerError" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.IncompatibleServerError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="IncompatibleServerErrorextendsException"></a>
       <a id="IncompatibleServerError:IncompatibleServerError"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -265,11 +293,13 @@ parameters.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="IncompatibleServerError.html"><span class="name">IncompatibleServerError</span></a><span class="result"> extends Exception</span>
+        <a href="IncompatibleServerError.html"><span class="name">IncompatibleServerError</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.IntValue" data-isabs="false">
+      <p class="comment cmt">A base class for exceptions related to client incompatibility with an
+upstream MySQL server.</p>
+    </li><li name="com.twitter.finagle.exp.mysql.IntValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="IntValueextendsValuewithProductwithSerializable"></a>
       <a id="IntValue:IntValue"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -277,11 +307,12 @@ parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="IntValue.html"><span class="name">IntValue</span></a><span class="params">(<span name="i">i: Int</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+        <a href="IntValue.html"><span class="name">IntValue</span></a><span class="params">(<span name="i">i: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.LongValue" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.LongValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LongValueextendsValuewithProductwithSerializable"></a>
       <a id="LongValue:LongValue"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -289,11 +320,12 @@ parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="LongValue.html"><span class="name">LongValue</span></a><span class="params">(<span name="l">l: Long</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+        <a href="LongValue.html"><span class="name">LongValue</span></a><span class="params">(<span name="l">l: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.LostSyncException" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.LostSyncException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LostSyncExceptionextendsRuntimeExceptionwithProductwithSerializable"></a>
       <a id="LostSyncException:LostSyncException"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -301,11 +333,12 @@ parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="LostSyncException.html"><span class="name">LostSyncException</span></a><span class="params">(<span name="underlying">underlying: Throwable</span>)</span><span class="result"> extends RuntimeException with Product with Serializable</span>
+        <a href="LostSyncException.html"><span class="name">LostSyncException</span></a><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result"> extends <span class="extype" name="scala.RuntimeException">RuntimeException</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.OK" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.OK" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OKextendsResultwithProductwithSerializable"></a>
       <a id="OK:OK"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -313,11 +346,12 @@ parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="OK.html"><span class="name">OK</span></a><span class="params">(<span name="affectedRows">affectedRows: Long</span>, <span name="insertId">insertId: Long</span>, <span name="serverStatus">serverStatus: Int</span>, <span name="warningCount">warningCount: Int</span>, <span name="message">message: String</span>)</span><span class="result"> extends Result with Product with Serializable</span>
+        <a href="OK.html"><span class="name">OK</span></a><span class="params">(<span name="affectedRows">affectedRows: <span class="extype" name="scala.Long">Long</span></span>, <span name="insertId">insertId: <span class="extype" name="scala.Long">Long</span></span>, <span name="serverStatus">serverStatus: <span class="extype" name="scala.Int">Int</span></span>, <span name="warningCount">warningCount: <span class="extype" name="scala.Int">Int</span></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PrepareOK" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.PrepareOK" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PrepareOKextendsResultwithProductwithSerializable"></a>
       <a id="PrepareOK:PrepareOK"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -325,11 +359,12 @@ parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="PrepareOK.html"><span class="name">PrepareOK</span></a><span class="params">(<span name="id">id: Int</span>, <span name="numOfCols">numOfCols: Int</span>, <span name="numOfParams">numOfParams: Int</span>, <span name="warningCount">warningCount: Int</span>, <span name="columns">columns: Seq[Field]</span>, <span name="params">params: Seq[Field]</span>)</span><span class="result"> extends Result with Product with Serializable</span>
+        <a href="PrepareOK.html"><span class="name">PrepareOK</span></a><span class="params">(<span name="id">id: <span class="extype" name="scala.Int">Int</span></span>, <span name="numOfCols">numOfCols: <span class="extype" name="scala.Int">Int</span></span>, <span name="numOfParams">numOfParams: <span class="extype" name="scala.Int">Int</span></span>, <span name="warningCount">warningCount: <span class="extype" name="scala.Int">Int</span></span>, <span name="columns">columns: <span class="extype" name="scala.Seq">Seq</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>] = <span class="symbol">immutable.this.Nil</span></span>, <span name="params">params: <span class="extype" name="scala.Seq">Seq</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>] = <span class="symbol">immutable.this.Nil</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PrepareRequest" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.PrepareRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PrepareRequestextendsSimpleCommandRequestwithProductwithSerializable"></a>
       <a id="PrepareRequest:PrepareRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -337,12 +372,13 @@ parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="PrepareRequest.html"><span class="name">PrepareRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: String</span>)</span><span class="result"> extends SimpleCommandRequest with Product with Serializable</span>
+        <a href="PrepareRequest.html"><span class="name">PrepareRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Allocates a prepared statement on the server from the
 passed in query string.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PreparedStatement" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.PreparedStatement" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="PreparedStatementextendsAnyRef"></a>
       <a id="PreparedStatement:PreparedStatement"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -350,13 +386,14 @@ passed in query string.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="PreparedStatement.html"><span class="name">PreparedStatement</span></a><span class="result"> extends AnyRef</span>
+        <a href="PreparedStatement.html"><span class="name">PreparedStatement</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">A PreparedStatement represents a parameterized
 sql statement which may be applied concurrently
 with varying parameters.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.QueryRequest" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.QueryRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="QueryRequestextendsSimpleCommandRequestwithProductwithSerializable"></a>
       <a id="QueryRequest:QueryRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -364,12 +401,13 @@ with varying parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="QueryRequest.html"><span class="name">QueryRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: String</span>)</span><span class="result"> extends SimpleCommandRequest with Product with Serializable</span>
+        <a href="QueryRequest.html"><span class="name">QueryRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">A QueryRequest is used to send the server a text-based query that
 is executed immediately.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.RawValue" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.RawValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RawValueextendsValuewithProductwithSerializable"></a>
       <a id="RawValue:RawValue"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -377,13 +415,14 @@ is executed immediately.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="RawValue.html"><span class="name">RawValue</span></a><span class="params">(<span name="typ">typ: Short</span>, <span name="charset">charset: Short</span>, <span name="isBinary">isBinary: Boolean</span>, <span name="bytes">bytes: Array[Byte]</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+        <a href="RawValue.html"><span class="name">RawValue</span></a><span class="params">(<span name="typ">typ: <span class="extype" name="scala.Short">Short</span></span>, <span name="charset">charset: <span class="extype" name="scala.Short">Short</span></span>, <span name="isBinary">isBinary: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="bytes">bytes: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">A RawValue contains the raw bytes that represent
 a value and enough meta data to decode the
 bytes.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Request" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.Request" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RequestextendsAnyRef"></a>
       <a id="Request:Request"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -391,11 +430,12 @@ bytes.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Request.html"><span class="name">Request</span></a><span class="result"> extends AnyRef</span>
+        <a href="Request.html"><span class="name">Request</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Result" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.Result" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ResultextendsAnyRef"></a>
       <a id="Result:Result"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -403,11 +443,12 @@ bytes.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Result.html"><span class="name">Result</span></a><span class="result"> extends AnyRef</span>
+        <a href="Result.html"><span class="name">Result</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ResultSet" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.ResultSet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ResultSetextendsResultwithProductwithSerializable"></a>
       <a id="ResultSet:ResultSet"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -415,11 +456,12 @@ bytes.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ResultSet.html"><span class="name">ResultSet</span></a><span class="params">(<span name="fields">fields: Seq[Field]</span>, <span name="rows">rows: Seq[Row]</span>)</span><span class="result"> extends Result with Product with Serializable</span>
+        <a href="ResultSet.html"><span class="name">ResultSet</span></a><span class="params">(<span name="fields">fields: <span class="extype" name="scala.Seq">Seq</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>]</span>, <span name="rows">rows: <span class="extype" name="scala.Seq">Seq</span>[<a href="Row.html" class="extype" name="com.twitter.finagle.exp.mysql.Row">Row</a>]</span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Row" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.Row" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RowextendsAnyRef"></a>
       <a id="Row:Row"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -427,12 +469,13 @@ bytes.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Row.html"><span class="name">Row</span></a><span class="result"> extends AnyRef</span>
+        <a href="Row.html"><span class="name">Row</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">Defines an interface that allows for easily
 reading the values in a mysql row.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ServerError" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.ServerError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerErrorextendsExceptionwithProductwithSerializable"></a>
       <a id="ServerError:ServerError"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -440,11 +483,13 @@ reading the values in a mysql row.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ServerError.html"><span class="name">ServerError</span></a><span class="params">(<span name="code">code: Short</span>, <span name="sqlState">sqlState: String</span>, <span name="message">message: String</span>)</span><span class="result"> extends Exception with Product with Serializable</span>
+        <a href="ServerError.html"><span class="name">ServerError</span></a><span class="params">(<span name="code">code: <span class="extype" name="scala.Short">Short</span></span>, <span name="sqlState">sqlState: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ShortValue" data-isabs="false">
+      <p class="comment cmt">A catch-all exception class for errors returned from the upstream
+MySQL server.</p>
+    </li><li name="com.twitter.finagle.exp.mysql.ShortValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ShortValueextendsValuewithProductwithSerializable"></a>
       <a id="ShortValue:ShortValue"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -452,11 +497,12 @@ reading the values in a mysql row.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ShortValue.html"><span class="name">ShortValue</span></a><span class="params">(<span name="s">s: Short</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+        <a href="ShortValue.html"><span class="name">ShortValue</span></a><span class="params">(<span name="s">s: <span class="extype" name="scala.Short">Short</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.SimpleCommandRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SimpleCommandRequestextendsCommandRequest"></a>
       <a id="SimpleCommandRequest:SimpleCommandRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -464,12 +510,13 @@ reading the values in a mysql row.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SimpleCommandRequest.html"><span class="name">SimpleCommandRequest</span></a><span class="result"> extends CommandRequest</span>
+        <a href="SimpleCommandRequest.html"><span class="name">SimpleCommandRequest</span></a><span class="result"> extends <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a></span>
       </span>
       </h4>
       <p class="comment cmt">Defines a request that encodes the command byte and
 associated data into a packet.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.StringEncodedRow" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.StringEncodedRow" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StringEncodedRowextendsRow"></a>
       <a id="StringEncodedRow:StringEncodedRow"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -477,12 +524,13 @@ associated data into a packet.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="StringEncodedRow.html"><span class="name">StringEncodedRow</span></a><span class="result"> extends Row</span>
+        <a href="StringEncodedRow.html"><span class="name">StringEncodedRow</span></a><span class="result"> extends <a href="Row.html" class="extype" name="com.twitter.finagle.exp.mysql.Row">Row</a></span>
       </span>
       </h4>
       <p class="comment cmt">Defines a row where the data is presumed to be encoded with the mysql
 text-based protocol.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.StringValue" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.StringValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StringValueextendsValuewithProductwithSerializable"></a>
       <a id="StringValue:StringValue"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -490,11 +538,25 @@ text-based protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="StringValue.html"><span class="name">StringValue</span></a><span class="params">(<span name="s">s: String</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+        <a href="StringValue.html"><span class="name">StringValue</span></a><span class="params">(<span name="s">s: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.UseRequest" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.TimestampValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TimestampValueextendsInjectable[java.sql.Timestamp]withExtractable[java.sql.Timestamp]"></a>
+      <a id="TimestampValue:TimestampValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="TimestampValue.html"><span class="name">TimestampValue</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.exp.mysql.Injectable">Injectable</span>[<span class="extype" name="java.sql.Timestamp">Timestamp</span>] with <span class="extype" name="com.twitter.finagle.exp.mysql.Extractable">Extractable</span>[<span class="extype" name="java.sql.Timestamp">Timestamp</span>]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">An injector/extractor of <span class="extype" name="java.sql.Timestamp">java.sql.Timestamp</span> values.</p>
+    </li><li name="com.twitter.finagle.exp.mysql.UseRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="UseRequestextendsSimpleCommandRequestwithProductwithSerializable"></a>
       <a id="UseRequest:UseRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -502,11 +564,12 @@ text-based protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="UseRequest.html"><span class="name">UseRequest</span></a><span class="params">(<span name="dbName">dbName: String</span>)</span><span class="result"> extends SimpleCommandRequest with Product with Serializable</span>
+        <a href="UseRequest.html"><span class="name">UseRequest</span></a><span class="params">(<span name="dbName">dbName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">A UseRequest is used to change the default schema of the connection.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Value" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.Value" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ValueextendsAnyRef"></a>
       <a id="Value:Value"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -514,7 +577,7 @@ text-based protocol.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Value.html"><span class="name">Value</span></a><span class="result"> extends AnyRef</span>
+        <a href="Value.html"><span class="name">Value</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">Defines a Value ADT that represents the domain of values
@@ -524,9 +587,10 @@ received from a mysql server.</p>
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.exp.mysql.BigDecimalValue" data-isabs="false">
+              <ol><li name="com.twitter.finagle.exp.mysql.BigDecimalValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BigDecimalValue"></a>
       <a id="BigDecimalValue:BigDecimalValue"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -534,11 +598,12 @@ received from a mysql server.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="BigDecimalValue$.html"><span class="name">BigDecimalValue</span></a><span class="result"> extends AnyRef</span>
+        <a href="BigDecimalValue$.html"><span class="name">BigDecimalValue</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.exp.mysql.Injectable">Injectable</span>[<span class="extype" name="scala.BigDecimal">BigDecimal</span>] with <span class="extype" name="com.twitter.finagle.exp.mysql.Extractable">Extractable</span>[<span class="extype" name="scala.BigDecimal">BigDecimal</span>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Capability" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.Capability" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Capability"></a>
       <a id="Capability:Capability"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -546,11 +611,12 @@ received from a mysql server.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Capability$.html"><span class="name">Capability</span></a><span class="result"> extends Serializable</span>
+        <a href="Capability$.html"><span class="name">Capability</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Charset" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.Charset" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Charset"></a>
       <a id="Charset:Charset"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -558,11 +624,12 @@ received from a mysql server.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Charset$.html"><span class="name">Charset</span></a><span class="result"> extends AnyRef</span>
+        <a href="Charset$.html"><span class="name">Charset</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Client" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.Client" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Client"></a>
       <a id="Client:Client"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -570,11 +637,12 @@ received from a mysql server.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Client$.html"><span class="name">Client</span></a><span class="result"> extends AnyRef</span>
+        <a href="Client$.html"><span class="name">Client</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ClientDispatcher" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.ClientDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientDispatcher"></a>
       <a id="ClientDispatcher:ClientDispatcher"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -582,11 +650,12 @@ received from a mysql server.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ClientDispatcher$.html"><span class="name">ClientDispatcher</span></a><span class="result"> extends AnyRef</span>
+        <a href="ClientDispatcher$.html"><span class="name">ClientDispatcher</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.CloseStatementOK" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.CloseStatementOK" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CloseStatementOK"></a>
       <a id="CloseStatementOK:CloseStatementOK"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -594,14 +663,15 @@ received from a mysql server.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="CloseStatementOK$.html"><span class="name">CloseStatementOK</span></a><span class="result"> extends OK</span>
+        <a href="CloseStatementOK$.html"><span class="name">CloseStatementOK</span></a><span class="result"> extends <a href="OK.html" class="extype" name="com.twitter.finagle.exp.mysql.OK">OK</a></span>
       </span>
       </h4>
       <p class="comment cmt">Used internally to synthesize a response from
 the server when sending a prepared statement
 CloseRequest
 </p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Command" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.Command" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Command"></a>
       <a id="Command:Command"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -609,11 +679,12 @@ CloseRequest
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Command$.html"><span class="name">Command</span></a><span class="result"> extends AnyRef</span>
+        <a href="Command$.html"><span class="name">Command</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.DateValue" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.DateValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DateValue"></a>
       <a id="DateValue:DateValue"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -621,11 +692,12 @@ CloseRequest
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="DateValue$.html"><span class="name">DateValue</span></a><span class="result"> extends AnyRef</span>
+        <a href="DateValue$.html"><span class="name">DateValue</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.exp.mysql.Injectable">Injectable</span>[<span class="extype" name="java.sql.Date">Date</span>] with <span class="extype" name="com.twitter.finagle.exp.mysql.Extractable">Extractable</span>[<span class="extype" name="java.sql.Date">Date</span>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.EOF" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.EOF" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EOF"></a>
       <a id="EOF:EOF"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -633,12 +705,13 @@ CloseRequest
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="EOF$.html"><span class="name">EOF</span></a><span class="result"> extends Decoder[EOF] with Serializable</span>
+        <a href="EOF$.html"><span class="name">EOF</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="EOF.html" class="extype" name="com.twitter.finagle.exp.mysql.EOF">EOF</a>] with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Represents and EOF result received from the server which
 contains any warnings and the server status.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.EmptyValue" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.EmptyValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EmptyValue"></a>
       <a id="EmptyValue:EmptyValue"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -646,11 +719,12 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="EmptyValue$.html"><span class="name">EmptyValue</span></a><span class="result"> extends Value with Product with Serializable</span>
+        <a href="EmptyValue$.html"><span class="name">EmptyValue</span></a><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Error" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.Error" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Error"></a>
       <a id="Error:Error"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -658,11 +732,12 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Error$.html"><span class="name">Error</span></a><span class="result"> extends Decoder[Error] with Serializable</span>
+        <a href="Error$.html"><span class="name">Error</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="Error.html" class="extype" name="com.twitter.finagle.exp.mysql.Error">Error</a>] with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Represents the Error Packet received from the server and the data sent along with it.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Field" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.Field" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Field"></a>
       <a id="Field:Field"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -670,11 +745,12 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Field$.html"><span class="name">Field</span></a><span class="result"> extends Decoder[Field] with Serializable</span>
+        <a href="Field$.html"><span class="name">Field</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>] with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Represents the column meta-data associated with a query.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Handshake" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.Handshake" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Handshake"></a>
       <a id="Handshake:Handshake"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -682,11 +758,12 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Handshake$.html"><span class="name">Handshake</span></a><span class="result"> extends Serializable</span>
+        <a href="Handshake$.html"><span class="name">Handshake</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.HandshakeInit" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.HandshakeInit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HandshakeInit"></a>
       <a id="HandshakeInit:HandshakeInit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -694,11 +771,12 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="HandshakeInit$.html"><span class="name">HandshakeInit</span></a><span class="result"> extends Decoder[HandshakeInit] with Serializable</span>
+        <a href="HandshakeInit$.html"><span class="name">HandshakeInit</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="HandshakeInit.html" class="extype" name="com.twitter.finagle.exp.mysql.HandshakeInit">HandshakeInit</a>] with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">First result received from the server as part of the connection phase.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.IncompatibleCharset" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.IncompatibleCharset" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="IncompatibleCharset"></a>
       <a id="IncompatibleCharset:IncompatibleCharset"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -706,11 +784,13 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="IncompatibleCharset$.html"><span class="name">IncompatibleCharset</span></a><span class="result"> extends IncompatibleServerError with Product with Serializable</span>
+        <a href="IncompatibleCharset$.html"><span class="name">IncompatibleCharset</span></a><span class="result"> extends <a href="IncompatibleServerError.html" class="extype" name="com.twitter.finagle.exp.mysql.IncompatibleServerError">IncompatibleServerError</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.IncompatibleVersion" data-isabs="false">
+      <p class="comment cmt">Indicates that the server to which the client is connected is configured to use
+a charset that the client is incompatible with.</p>
+    </li><li name="com.twitter.finagle.exp.mysql.IncompatibleVersion" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="IncompatibleVersion"></a>
       <a id="IncompatibleVersion:IncompatibleVersion"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -718,11 +798,13 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="IncompatibleVersion$.html"><span class="name">IncompatibleVersion</span></a><span class="result"> extends IncompatibleServerError with Product with Serializable</span>
+        <a href="IncompatibleVersion$.html"><span class="name">IncompatibleVersion</span></a><span class="result"> extends <a href="IncompatibleServerError.html" class="extype" name="com.twitter.finagle.exp.mysql.IncompatibleServerError">IncompatibleServerError</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.NullValue" data-isabs="false">
+      <p class="comment cmt">Indicates that the server to which the client is connected is running
+a version of MySQL that the client is incompatible with.</p>
+    </li><li name="com.twitter.finagle.exp.mysql.NullValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NullValue"></a>
       <a id="NullValue:NullValue"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -730,11 +812,12 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NullValue$.html"><span class="name">NullValue</span></a><span class="result"> extends Value with Product with Serializable</span>
+        <a href="NullValue$.html"><span class="name">NullValue</span></a><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.OK" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.OK" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OK"></a>
       <a id="OK:OK"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -742,11 +825,12 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="OK$.html"><span class="name">OK</span></a><span class="result"> extends Decoder[OK] with Serializable</span>
+        <a href="OK$.html"><span class="name">OK</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="OK.html" class="extype" name="com.twitter.finagle.exp.mysql.OK">OK</a>] with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Represents the OK Packet received from the server.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PingRequest" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.PingRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PingRequest"></a>
       <a id="PingRequest:PingRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -754,11 +838,12 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="PingRequest$.html"><span class="name">PingRequest</span></a><span class="result"> extends SimpleCommandRequest with Product with Serializable</span>
+        <a href="PingRequest$.html"><span class="name">PingRequest</span></a><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">A request to check if the server is alive.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PrepareOK" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.PrepareOK" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PrepareOK"></a>
       <a id="PrepareOK:PrepareOK"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -766,13 +851,14 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="PrepareOK$.html"><span class="name">PrepareOK</span></a><span class="result"> extends Decoder[PrepareOK] with Serializable</span>
+        <a href="PrepareOK$.html"><span class="name">PrepareOK</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="PrepareOK.html" class="extype" name="com.twitter.finagle.exp.mysql.PrepareOK">PrepareOK</a>] with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Meta data returned from the server in response to
 a prepared statement initialization request
 COM_STMT_PREPARE.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ResultSet" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.ResultSet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ResultSet"></a>
       <a id="ResultSet:ResultSet"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -780,24 +866,13 @@ COM_STMT_PREPARE.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ResultSet$.html"><span class="name">ResultSet</span></a><span class="result"> extends Serializable</span>
+        <a href="ResultSet$.html"><span class="name">ResultSet</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Resultset returned from the server containing field definitions and
 rows.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.TimestampValue" data-isabs="false">
-      <a id="TimestampValue:TimestampValue"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="TimestampValue$.html"><span class="name">TimestampValue</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Type" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.Type" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Type"></a>
       <a id="Type:Type"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -805,11 +880,12 @@ rows.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Type$.html"><span class="name">Type</span></a><span class="result"> extends AnyRef</span>
+        <a href="Type$.html"><span class="name">Type</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.transport" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="transport"></a>
       <a id="transport:transport"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -825,10 +901,36 @@ rows.</p>
             </div>
 
         
+
+        <div id="values" class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.exp.mysql.TimestampValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TimestampValue"></a>
+      <a id="TimestampValue:TimestampValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="TimestampValue$.html"><span class="name deprecated" title="Deprecated: (Since version 6.20.2)">TimestampValue</span></a><span class="result"> extends <a href="TimestampValue.html" class="extype" name="com.twitter.finagle.exp.mysql.TimestampValue">TimestampValue</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Extracts a value in UTC.</p>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -836,7 +938,6 @@ rows.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../lib/template.js"></script>
     </body>
       </html>

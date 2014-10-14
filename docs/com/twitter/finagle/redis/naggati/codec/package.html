@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.redis.naggati.codec</title>
+          <title>codec - com.twitter.finagle.redis.naggati.codec</title>
+          <meta name="description" content="codec - com.twitter.finagle.redis.naggati.codec" />
+          <meta name="keywords" content="codec com.twitter.finagle.redis.naggati.codec" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../../index.html';
+            var hash = 'com.twitter.finagle.redis.naggati.codec.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../../package.html">finagle</a>.<a name="com.twitter.finagle.redis" class="extype" href="../../package.html">redis</a>.<a name="com.twitter.finagle.redis.naggati" class="extype" href="../package.html">naggati</a></p>
+        <p id="owner"><a href="../../../../../package.html" class="extype" name="com">com</a>.<a href="../../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle.redis">redis</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.redis.naggati">naggati</a></p>
         <h1>codec</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,9 +56,10 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.redis.naggati.codec.HeaderLine" data-isabs="false">
+              <ol><li name="com.twitter.finagle.redis.naggati.codec.HeaderLine" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HeaderLineextendsProductwithSerializable"></a>
       <a id="HeaderLine:HeaderLine"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,11 +67,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="HeaderLine.html"><span class="name">HeaderLine</span></a><span class="params">(<span name="name">name: String</span>, <span name="value">value: String</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="HeaderLine.html"><span class="name">HeaderLine</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.redis.naggati.codec.HttpRequest" data-isabs="false">
+    </li><li name="com.twitter.finagle.redis.naggati.codec.HttpRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpRequestextendsProductwithSerializable"></a>
       <a id="HttpRequest:HttpRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -68,11 +80,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="HttpRequest.html"><span class="name">HttpRequest</span></a><span class="params">(<span name="request">request: RequestLine</span>, <span name="headers">headers: List[HeaderLine]</span>, <span name="body">body: Array[Byte]</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="HttpRequest.html"><span class="name">HttpRequest</span></a><span class="params">(<span name="request">request: <a href="RequestLine.html" class="extype" name="com.twitter.finagle.redis.naggati.codec.RequestLine">RequestLine</a></span>, <span name="headers">headers: <span class="extype" name="scala.List">List</span>[<a href="HeaderLine.html" class="extype" name="com.twitter.finagle.redis.naggati.codec.HeaderLine">HeaderLine</a>]</span>, <span name="body">body: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.redis.naggati.codec.MemcacheRequest" data-isabs="false">
+    </li><li name="com.twitter.finagle.redis.naggati.codec.MemcacheRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MemcacheRequestextendsProductwithSerializable"></a>
       <a id="MemcacheRequest:MemcacheRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -80,11 +93,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="MemcacheRequest.html"><span class="name">MemcacheRequest</span></a><span class="params">(<span name="line">line: List[String]</span>, <span name="data">data: Option[ByteBuffer]</span>, <span name="bytesRead">bytesRead: Int</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="MemcacheRequest.html"><span class="name">MemcacheRequest</span></a><span class="params">(<span name="line">line: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="data">data: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span>]</span>, <span name="bytesRead">bytesRead: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.redis.naggati.codec.MemcacheResponse" data-isabs="false">
+    </li><li name="com.twitter.finagle.redis.naggati.codec.MemcacheResponse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MemcacheResponseextendsCodec.SignallingwithProductwithSerializable"></a>
       <a id="MemcacheResponse:MemcacheResponse"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -92,11 +106,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="MemcacheResponse.html"><span class="name">MemcacheResponse</span></a><span class="params">(<span name="line">line: String</span>, <span name="data">data: Option[ByteBuffer]</span>)</span><span class="result"> extends Signalling with Product with Serializable</span>
+        <a href="MemcacheResponse.html"><span class="name">MemcacheResponse</span></a><span class="params">(<span name="line">line: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="data">data: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="../Codec$$Signalling.html" class="extype" name="com.twitter.finagle.redis.naggati.Codec.Signalling">Signalling</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.redis.naggati.codec.RequestLine" data-isabs="false">
+    </li><li name="com.twitter.finagle.redis.naggati.codec.RequestLine" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RequestLineextendsProductwithSerializable"></a>
       <a id="RequestLine:RequestLine"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -104,7 +119,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="RequestLine.html"><span class="name">RequestLine</span></a><span class="params">(<span name="method">method: String</span>, <span name="resource">resource: String</span>, <span name="version">version: String</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="RequestLine.html"><span class="name">RequestLine</span></a><span class="params">(<span name="method">method: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="resource">resource: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="version">version: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -113,9 +128,10 @@
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.redis.naggati.codec.HttpRequest" data-isabs="false">
+              <ol><li name="com.twitter.finagle.redis.naggati.codec.HttpRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpRequest"></a>
       <a id="HttpRequest:HttpRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -123,11 +139,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="HttpRequest$.html"><span class="name">HttpRequest</span></a><span class="result"> extends Serializable</span>
+        <a href="HttpRequest$.html"><span class="name">HttpRequest</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.redis.naggati.codec.MemcacheCodec" data-isabs="false">
+    </li><li name="com.twitter.finagle.redis.naggati.codec.MemcacheCodec" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MemcacheCodec"></a>
       <a id="MemcacheCodec:MemcacheCodec"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -135,7 +152,7 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="MemcacheCodec$.html"><span class="name">MemcacheCodec</span></a><span class="result"> extends AnyRef</span>
+        <a href="MemcacheCodec$.html"><span class="name">MemcacheCodec</span></a>
       </span>
       </h4>
       
@@ -143,10 +160,20 @@
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -154,7 +181,6 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../../lib/template.js"></script>
     </body>
       </html>

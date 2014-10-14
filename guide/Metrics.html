@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.20.0 documentation</title>
+    <title>Metrics &mdash; Finagle 6.22.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.20.0',
+        VERSION:     '6.22.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.20.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.22.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -270,8 +270,8 @@ in between requests</dd>
 <dd>a counter of the number of times there were no connections immediately available and there were already too many waiters</dd>
 </dl>
 </div>
-<div class="section" id="reusingpool">
-<h3>ReusingPool<a class="headerlink" href="#reusingpool" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="singletonpool">
+<h3>SingletonPool<a class="headerlink" href="#singletonpool" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>conn/fail</strong></dt>
 <dd>a counter of the number of times the connection could not be established and must be retried</dd>
@@ -359,6 +359,26 @@ watermark of connections full and no connections are idle.</dd>
 </dl>
 </div>
 </div>
+<div class="section" id="serversets">
+<h2>ServerSets<a class="headerlink" href="#serversets" title="Permalink to this headline">¶</a></h2>
+<p id="serverset-stats">These metrics track the current state of ServerSets if you are using them for name resolution. They are scoped under &#8220;zk2&#8221;.</p>
+<div class="section" id="stabilizing-serversets">
+<h3>Stabilizing ServerSets<a class="headerlink" href="#stabilizing-serversets" title="Permalink to this headline">¶</a></h3>
+<p>Addresses that are resolved through ServerSets are stabilized in two ways:</p>
+<ol class="arabic simple">
+<li>ZooKeeper failures will not cause a previously bound address to fail.</li>
+<li>When a member leaves a ServerSet, its removal is delayed.</li>
+</ol>
+<p>Note that additions to a ServerSet are reflected immediately.</p>
+<p>These metrics are scoped under the ServerSet&#8217;s ZooKeeper path.</p>
+<p><strong>limbo</strong></p>
+<p>When a member leaves a ServerSet, it is placed in limbo. Hosts in limbo are still presented
+as belonging to the ServerSet, but are being staged for removal, within an interval bound by
+the ZooKeeper session timeout.</p>
+<p><strong>size</strong></p>
+<p>The current size of the live ServerSet, not including members in limbo.</p>
+</div>
+</div>
 </div>
 
 
@@ -414,7 +434,7 @@ watermark of connections full and no connections are idle.</dd>
 <li><a class="reference internal" href="#pooling">Pooling</a><ul>
 <li><a class="reference internal" href="#cachingpool">CachingPool</a></li>
 <li><a class="reference internal" href="#watermarkpool">WatermarkPool</a></li>
-<li><a class="reference internal" href="#reusingpool">ReusingPool</a></li>
+<li><a class="reference internal" href="#singletonpool">SingletonPool</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#transport">Transport</a><ul>
@@ -424,6 +444,10 @@ watermark of connections full and no connections are idle.</dd>
 <li><a class="reference internal" href="#channelstatshandler">ChannelStatsHandler</a></li>
 <li><a class="reference internal" href="#idlechannelhandler">IdleChannelHandler</a></li>
 <li><a class="reference internal" href="#idleconnectionfilter">IdleConnectionFilter</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#serversets">ServerSets</a><ul>
+<li><a class="reference internal" href="#stabilizing-serversets">Stabilizing ServerSets</a></li>
 </ul>
 </li>
 </ul>

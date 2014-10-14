@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.util</title>
+          <title>util - com.twitter.finagle.util</title>
+          <meta name="description" content="util - com.twitter.finagle.util" />
+          <meta name="keywords" content="util com.twitter.finagle.util" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.util.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>util</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,13 +39,36 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
-        
-        
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="com.twitter.finagle.util"><span>util</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
             <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
@@ -46,9 +79,10 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.util.AsyncLatch" data-isabs="false">
+              <ol><li name="com.twitter.finagle.util.AsyncLatch" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AsyncLatchextendsAnyRef"></a>
       <a id="AsyncLatch:AsyncLatch"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,24 +90,26 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="AsyncLatch.html"><span class="name">AsyncLatch</span></a><span class="result"> extends AnyRef</span>
+        <a href="AsyncLatch.html"><span class="name">AsyncLatch</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">A construct providing latched, asynchronous execution of side-effecting
 functions.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.util.Chan" data-isabs="true">
-      <a id="Chan:Chan[T]"></a>
+    </li><li name="com.twitter.finagle.util.Chan" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="Chan[-T]extendsAnyRef"></a>
+      <a id="Chan[-T]:Chan[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Chan.html"><span class="name">Chan</span></a><span class="tparams">[<span name="T">-T</span>]</span><span class="result"> extends AnyRef</span>
+        <a href="Chan.html"><span class="name">Chan</span></a><span class="tparams">[<span name="T">-T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.util.CloseNotifier" data-isabs="true">
+    </li><li name="com.twitter.finagle.util.CloseNotifier" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="CloseNotifierextendsAnyRef"></a>
       <a id="CloseNotifier:CloseNotifier"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -81,23 +117,25 @@ functions.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="CloseNotifier.html"><span class="name">CloseNotifier</span></a><span class="result"> extends AnyRef</span>
+        <a href="CloseNotifier.html"><span class="name">CloseNotifier</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">Allows resources to register their handlers to be invoked when service is closing.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.util.ConcurrentRingBuffer" data-isabs="false">
-      <a id="ConcurrentRingBuffer:ConcurrentRingBuffer[T]"></a>
+    </li><li name="com.twitter.finagle.util.ConcurrentRingBuffer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ConcurrentRingBuffer[T]extendsAnyRef"></a>
+      <a id="ConcurrentRingBuffer[T]:ConcurrentRingBuffer[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ConcurrentRingBuffer.html"><span class="name">ConcurrentRingBuffer</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends AnyRef</span>
+        <a href="ConcurrentRingBuffer.html"><span class="name">ConcurrentRingBuffer</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">A simple, lock-free, non-blocking ring buffer.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.util.Drv" data-isabs="true">
+    </li><li name="com.twitter.finagle.util.Drv" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="Drvextendscom.twitter.finagle.util.Rng=&gt;Int"></a>
       <a id="Drv:Drv"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -105,23 +143,38 @@ functions.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Drv.html"><span class="name">Drv</span></a><span class="result"> extends (Rng) ⇒ Int</span>
+        <a href="Drv.html"><span class="name">Drv</span></a><span class="result"> extends (<a href="Rng.html" class="extype" name="com.twitter.finagle.util.Rng">Rng</a>) ⇒ <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.util.Proc" data-isabs="true">
-      <a id="Proc:Proc[T]"></a>
+    </li><li name="com.twitter.finagle.util.OnReady" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="OnReadyextendsAnyRef"></a>
+      <a id="OnReady:OnReady"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Proc.html"><span class="name">Proc</span></a><span class="tparams">[<span name="T">-T</span>]</span><span class="result"> extends Chan[T]</span>
+        <a href="OnReady.html"><span class="name">OnReady</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">A base type for something that signals its readiness asynchronously.</p>
+    </li><li name="com.twitter.finagle.util.Proc" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="Proc[-T]extendsChan[T]"></a>
+      <a id="Proc[-T]:Proc[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Proc.html"><span class="name">Proc</span></a><span class="tparams">[<span name="T">-T</span>]</span><span class="result"> extends <a href="Chan.html" class="extype" name="com.twitter.finagle.util.Chan">Chan</a>[<span class="extype" name="com.twitter.finagle.util.Proc.T">T</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">A Proc is a process that can receive messages.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.util.ReporterFactory" data-isabs="true">
+    </li><li name="com.twitter.finagle.util.ReporterFactory" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ReporterFactoryextends(String,Option[java.net.SocketAddress])=&gt;com.twitter.util.Monitor"></a>
       <a id="ReporterFactory:ReporterFactory"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -129,11 +182,12 @@ functions.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ReporterFactory.html"><span class="name">ReporterFactory</span></a><span class="result"> extends (String, Option[SocketAddress]) ⇒ Monitor</span>
+        <a href="ReporterFactory.html"><span class="name">ReporterFactory</span></a><span class="result"> extends (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]) ⇒ <span class="extype" name="com.twitter.util.Monitor">Monitor</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.util.Rng" data-isabs="true">
+    </li><li name="com.twitter.finagle.util.Rng" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RngextendsAnyRef"></a>
       <a id="Rng:Rng"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -141,24 +195,26 @@ functions.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Rng.html"><span class="name">Rng</span></a><span class="result"> extends AnyRef</span>
+        <a href="Rng.html"><span class="name">Rng</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">A random number generator.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.util.Showable" data-isabs="true">
-      <a id="Showable:Showable[T]"></a>
+    </li><li name="com.twitter.finagle.util.Showable" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="Showable[-T]extendsAnyRef"></a>
+      <a id="Showable[-T]:Showable[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Showable.html"><span class="name">Showable</span></a><span class="tparams">[<span name="T">-T</span>]</span><span class="result"> extends AnyRef</span>
+        <a href="Showable.html"><span class="name">Showable</span></a><span class="tparams">[<span name="T">-T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">Trait showable is a type-class for showing parsable
 representations of objects.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.util.TimerFromNettyTimer" data-isabs="false">
+    </li><li name="com.twitter.finagle.util.TimerFromNettyTimer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TimerFromNettyTimerextendsTimer"></a>
       <a id="TimerFromNettyTimer:TimerFromNettyTimer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -166,19 +222,20 @@ representations of objects.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="TimerFromNettyTimer.html"><span class="name">TimerFromNettyTimer</span></a><span class="result"> extends Timer</span>
+        <a href="TimerFromNettyTimer.html"><span class="name">TimerFromNettyTimer</span></a><span class="result"> extends <span class="extype" name="com.twitter.util.Timer">Timer</span></span>
       </span>
       </h4>
-      <p class="comment cmt">Implements a com.twitter.util.Timer in terms of a
-org.jboss.netty.util.Timer.</p>
+      <p class="comment cmt">Implements a <span class="extype" name="com.twitter.util.Timer">com.twitter.util.Timer</span> in terms of a
+<span class="extype" name="org.jboss.netty.util.Timer">org.jboss.netty.util.Timer</span>.</p>
     </li></ol>
             </div>
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.util.ByteArrays" data-isabs="false">
+              <ol><li name="com.twitter.finagle.util.ByteArrays" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ByteArrays"></a>
       <a id="ByteArrays:ByteArrays"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -186,11 +243,12 @@ org.jboss.netty.util.Timer.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ByteArrays$.html"><span class="name">ByteArrays</span></a><span class="result"> extends AnyRef</span>
+        <a href="ByteArrays$.html"><span class="name">ByteArrays</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.util.CloseNotifier" data-isabs="false">
+    </li><li name="com.twitter.finagle.util.CloseNotifier" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CloseNotifier"></a>
       <a id="CloseNotifier:CloseNotifier"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -198,11 +256,12 @@ org.jboss.netty.util.Timer.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="CloseNotifier$.html"><span class="name">CloseNotifier</span></a><span class="result"> extends AnyRef</span>
+        <a href="CloseNotifier$.html"><span class="name">CloseNotifier</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.util.package#DefaultLogger" data-isabs="false">
+    </li><li name="com.twitter.finagle.util.package#DefaultLogger" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultLogger:java.util.logging.Logger"></a>
       <a id="DefaultLogger:Logger"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -210,11 +269,12 @@ org.jboss.netty.util.Timer.</p>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">DefaultLogger</span><span class="result">: <span name="java.util.logging.Logger" class="extype">Logger</span></span>
+        <span class="name">DefaultLogger</span><span class="result">: <span class="extype" name="java.util.logging.Logger">Logger</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.util.package" class="extype" href="package$.html">package</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.util.DefaultMonitor" data-isabs="false">
+      
+    </li><li name="com.twitter.finagle.util.DefaultMonitor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultMonitor"></a>
       <a id="DefaultMonitor:DefaultMonitor"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -222,11 +282,12 @@ org.jboss.netty.util.Timer.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="DefaultMonitor$.html"><span class="name">DefaultMonitor</span></a><span class="result"> extends Monitor</span>
+        <a href="DefaultMonitor$.html"><span class="name">DefaultMonitor</span></a><span class="result"> extends <span class="extype" name="com.twitter.util.Monitor">Monitor</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.util.DefaultTimer" data-isabs="false">
+    </li><li name="com.twitter.finagle.util.DefaultTimer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultTimer"></a>
       <a id="DefaultTimer:DefaultTimer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -234,11 +295,12 @@ org.jboss.netty.util.Timer.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="DefaultTimer$.html"><span class="name">DefaultTimer</span></a><span class="result"> extends HashedWheelTimer</span>
+        <a href="DefaultTimer$.html"><span class="name">DefaultTimer</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.util.HashedWheelTimer">HashedWheelTimer</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.util.Drv" data-isabs="false">
+    </li><li name="com.twitter.finagle.util.Drv" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Drv"></a>
       <a id="Drv:Drv"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -246,11 +308,12 @@ org.jboss.netty.util.Timer.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Drv$.html"><span class="name">Drv</span></a><span class="result"> extends AnyRef</span>
+        <a href="Drv$.html"><span class="name">Drv</span></a>
       </span>
       </h4>
       <p class="comment cmt">Create discrete random variables representing arbitrary distributions.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.util.ExitGuard" data-isabs="false">
+    </li><li name="com.twitter.finagle.util.ExitGuard" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExitGuard"></a>
       <a id="ExitGuard:ExitGuard"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -258,12 +321,13 @@ org.jboss.netty.util.Timer.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ExitGuard$.html"><span class="name">ExitGuard</span></a><span class="result"> extends AnyRef</span>
+        <a href="ExitGuard$.html"><span class="name">ExitGuard</span></a>
       </span>
       </h4>
       <p class="comment cmt">ExitGuard prevents the process from exiting normally by use of a
 nondaemon thread whenever there is at least one guarder.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.util.InetSocketAddressUtil" data-isabs="false">
+    </li><li name="com.twitter.finagle.util.InetSocketAddressUtil" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InetSocketAddressUtil"></a>
       <a id="InetSocketAddressUtil:InetSocketAddressUtil"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -271,11 +335,12 @@ nondaemon thread whenever there is at least one guarder.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="InetSocketAddressUtil$.html"><span class="name">InetSocketAddressUtil</span></a><span class="result"> extends AnyRef</span>
+        <a href="InetSocketAddressUtil$.html"><span class="name">InetSocketAddressUtil</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.util.LoadService" data-isabs="false">
+    </li><li name="com.twitter.finagle.util.LoadService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LoadService"></a>
       <a id="LoadService:LoadService"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -283,12 +348,12 @@ nondaemon thread whenever there is at least one guarder.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="LoadService$.html"><span class="name">LoadService</span></a><span class="result"> extends AnyRef</span>
+        <a href="LoadService$.html"><span class="name">LoadService</span></a>
       </span>
       </h4>
-      <p class="comment cmt">Load a singleton class in the manner of
-java.util.ServiceLoader.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.util.LoadedReporterFactory" data-isabs="false">
+      <p class="comment cmt">Load a singleton class in the manner of <span class="extype" name="java.util.ServiceLoader">java.util.ServiceLoader</span>.</p>
+    </li><li name="com.twitter.finagle.util.LoadedReporterFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LoadedReporterFactory"></a>
       <a id="LoadedReporterFactory:LoadedReporterFactory"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -296,11 +361,12 @@ java.util.ServiceLoader.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="LoadedReporterFactory$.html"><span class="name">LoadedReporterFactory</span></a><span class="result"> extends ReporterFactory</span>
+        <a href="LoadedReporterFactory$.html"><span class="name">LoadedReporterFactory</span></a><span class="result"> extends <a href="ReporterFactory.html" class="extype" name="com.twitter.finagle.util.ReporterFactory">ReporterFactory</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.util.NullReporterFactory" data-isabs="false">
+    </li><li name="com.twitter.finagle.util.NullReporterFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NullReporterFactory"></a>
       <a id="NullReporterFactory:NullReporterFactory"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -308,11 +374,12 @@ java.util.ServiceLoader.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NullReporterFactory$.html"><span class="name">NullReporterFactory</span></a><span class="result"> extends ReporterFactory</span>
+        <a href="NullReporterFactory$.html"><span class="name">NullReporterFactory</span></a><span class="result"> extends <a href="ReporterFactory.html" class="extype" name="com.twitter.finagle.util.ReporterFactory">ReporterFactory</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.util.Proc" data-isabs="false">
+    </li><li name="com.twitter.finagle.util.Proc" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Proc"></a>
       <a id="Proc:Proc"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -320,11 +387,12 @@ java.util.ServiceLoader.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Proc$.html"><span class="name">Proc</span></a><span class="result"> extends AnyRef</span>
+        <a href="Proc$.html"><span class="name">Proc</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.util.Rng" data-isabs="false">
+    </li><li name="com.twitter.finagle.util.Rng" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Rng"></a>
       <a id="Rng:Rng"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -332,11 +400,12 @@ java.util.ServiceLoader.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Rng$.html"><span class="name">Rng</span></a><span class="result"> extends AnyRef</span>
+        <a href="Rng$.html"><span class="name">Rng</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.util.Showable" data-isabs="false">
+    </li><li name="com.twitter.finagle.util.Showable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Showable"></a>
       <a id="Showable:Showable"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -344,11 +413,12 @@ java.util.ServiceLoader.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Showable$.html"><span class="name">Showable</span></a><span class="result"> extends AnyRef</span>
+        <a href="Showable$.html"><span class="name">Showable</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.util.Throwables" data-isabs="false">
+    </li><li name="com.twitter.finagle.util.Throwables" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Throwables"></a>
       <a id="Throwables:Throwables"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -356,7 +426,7 @@ java.util.ServiceLoader.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Throwables$.html"><span class="name">Throwables</span></a><span class="result"> extends AnyRef</span>
+        <a href="Throwables$.html"><span class="name">Throwables</span></a>
       </span>
       </h4>
       
@@ -364,10 +434,24 @@ java.util.ServiceLoader.</p>
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
         
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -375,7 +459,6 @@ java.util.ServiceLoader.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

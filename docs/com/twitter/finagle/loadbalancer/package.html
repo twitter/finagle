@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.loadbalancer</title>
+          <title>loadbalancer - com.twitter.finagle.loadbalancer</title>
+          <meta name="description" content="loadbalancer - com.twitter.finagle.loadbalancer" />
+          <meta name="keywords" content="loadbalancer com.twitter.finagle.loadbalancer" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.loadbalancer.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>loadbalancer</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,21 +56,23 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.loadbalancer.HeapBalancer" data-isabs="false">
-      <a id="HeapBalancer:HeapBalancer[Req, Rep]"></a>
+              <ol><li name="com.twitter.finagle.loadbalancer.HeapBalancer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HeapBalancer[Req,Rep]extendsServiceFactory[Req,Rep]withOnReady"></a>
+      <a id="HeapBalancer[Req,Rep]:HeapBalancer[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="HeapBalancer.html"><span class="name">HeapBalancer</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends ServiceFactory[Req, Rep]</span>
+        <a href="HeapBalancer.html"><span class="name">HeapBalancer</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancer.Rep">Rep</span>] with <a href="../util/OnReady.html" class="extype" name="com.twitter.finagle.util.OnReady">OnReady</a></span>
       </span>
       </h4>
-      <p class="comment cmt">An efficient load balancer that operates on Groups.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" data-isabs="true">
+      <p class="comment cmt">An efficient load balancer that operates on Activity[Set[ServiceFactory[Req, Rep]]].</p>
+    </li><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="LoadBalancerFactoryextendsAnyRef"></a>
       <a id="LoadBalancerFactory:LoadBalancerFactory"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -68,23 +80,25 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="LoadBalancerFactory.html"><span class="name">LoadBalancerFactory</span></a><span class="result"> extends AnyRef</span>
+        <a href="LoadBalancerFactory.html"><span class="name">LoadBalancerFactory</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.P2CBalancer" data-isabs="false">
-      <a id="P2CBalancer:P2CBalancer[Req, Rep]"></a>
+    </li><li name="com.twitter.finagle.loadbalancer.P2CBalancer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="P2CBalancer[Req,Rep]extendsServiceFactory[Req,Rep]withOnReady"></a>
+      <a id="P2CBalancer[Req,Rep]:P2CBalancer[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="P2CBalancer.html"><span class="name">P2CBalancer</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends ServiceFactory[Req, Rep]</span>
+        <a href="P2CBalancer.html"><span class="name">P2CBalancer</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.P2CBalancer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.P2CBalancer.Rep">Rep</span>] with <a href="../util/OnReady.html" class="extype" name="com.twitter.finagle.util.OnReady">OnReady</a></span>
       </span>
       </h4>
       <p class="comment cmt">An O(1), concurrent, weighted fair load balancer.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" data-isabs="true">
+    </li><li name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="WeightedLoadBalancerFactoryextendsAnyRef"></a>
       <a id="WeightedLoadBalancerFactory:WeightedLoadBalancerFactory"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -92,7 +106,7 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="WeightedLoadBalancerFactory.html"><span class="name">WeightedLoadBalancerFactory</span></a><span class="result"> extends AnyRef</span>
+        <a href="WeightedLoadBalancerFactory.html"><span class="name">WeightedLoadBalancerFactory</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
@@ -101,9 +115,10 @@
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.loadbalancer.Benchmark" data-isabs="false">
+              <ol><li name="com.twitter.finagle.loadbalancer.Benchmark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Benchmark"></a>
       <a id="Benchmark:Benchmark"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -111,11 +126,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Benchmark$.html"><span class="name">Benchmark</span></a><span class="result"> extends AnyRef</span>
+        <a href="Benchmark$.html"><span class="name">Benchmark</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.DefaultBalancerFactory" data-isabs="false">
+    </li><li name="com.twitter.finagle.loadbalancer.DefaultBalancerFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultBalancerFactory"></a>
       <a id="DefaultBalancerFactory:DefaultBalancerFactory"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -123,11 +139,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="DefaultBalancerFactory$.html"><span class="name">DefaultBalancerFactory</span></a><span class="result"> extends WeightedLoadBalancerFactory</span>
+        <a href="DefaultBalancerFactory$.html"><span class="name">DefaultBalancerFactory</span></a><span class="result"> extends <a href="WeightedLoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory">WeightedLoadBalancerFactory</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.HeapBalancer" data-isabs="false">
+    </li><li name="com.twitter.finagle.loadbalancer.HeapBalancer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HeapBalancer"></a>
       <a id="HeapBalancer:HeapBalancer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -135,11 +152,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="HeapBalancer$.html"><span class="name">HeapBalancer</span></a><span class="result"> extends AnyRef</span>
+        <a href="HeapBalancer$.html"><span class="name">HeapBalancer</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.HeapBalancerFactory" data-isabs="false">
+    </li><li name="com.twitter.finagle.loadbalancer.HeapBalancerFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HeapBalancerFactory"></a>
       <a id="HeapBalancerFactory:HeapBalancerFactory"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -147,11 +165,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="HeapBalancerFactory$.html"><span class="name">HeapBalancerFactory</span></a><span class="result"> extends LoadBalancerFactory with WeightedLoadBalancerFactory</span>
+        <a href="HeapBalancerFactory$.html"><span class="name">HeapBalancerFactory</span></a><span class="result"> extends <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a> with <a href="WeightedLoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory">WeightedLoadBalancerFactory</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.P2CBalancerFactory" data-isabs="false">
+    </li><li name="com.twitter.finagle.loadbalancer.P2CBalancerFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="P2CBalancerFactory"></a>
       <a id="P2CBalancerFactory:P2CBalancerFactory"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -159,11 +178,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="P2CBalancerFactory$.html"><span class="name">P2CBalancerFactory</span></a><span class="result"> extends WeightedLoadBalancerFactory</span>
+        <a href="P2CBalancerFactory$.html"><span class="name">P2CBalancerFactory</span></a><span class="result"> extends <a href="WeightedLoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory">WeightedLoadBalancerFactory</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.defaultBalancer" data-isabs="false">
+    </li><li name="com.twitter.finagle.loadbalancer.defaultBalancer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="defaultBalancer"></a>
       <a id="defaultBalancer:defaultBalancer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -171,11 +191,25 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="defaultBalancer$.html"><span class="name">defaultBalancer</span></a><span class="result"> extends GlobalFlag[String]</span>
+        <a href="defaultBalancer$.html"><span class="name">defaultBalancer</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="java.lang.String">String</span>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.perHostStats" data-isabs="false">
+    </li><li name="com.twitter.finagle.loadbalancer.exp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="exp"></a>
+      <a id="exp:exp"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="exp/package.html"><span class="name">exp</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.loadbalancer.perHostStats" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="perHostStats"></a>
       <a id="perHostStats:perHostStats"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -183,7 +217,7 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="perHostStats$.html"><span class="name">perHostStats</span></a><span class="result"> extends GlobalFlag[Boolean]</span>
+        <a href="perHostStats$.html"><span class="name">perHostStats</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>
       </span>
       </h4>
       
@@ -191,10 +225,20 @@
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -202,7 +246,6 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

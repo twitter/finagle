@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>FAQ &mdash; Finagle 6.20.0 documentation</title>
+    <title>FAQ &mdash; Finagle 6.22.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.20.0',
+        VERSION:     '6.22.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.20.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.22.0 documentation" href="index.html" />
     <link rel="next" title="Finagle changelog" href="changelog.html" />
     <link rel="prev" title="Metrics" href="Metrics.html" />
    
@@ -70,8 +70,8 @@
 <h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="general-finagle-faq">
 <h2>General Finagle FAQ<a class="headerlink" href="#general-finagle-faq" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="what-s-a-cancelled-request-connection-exception">
-<span id="propagate-failure"></span><h3>What&#8217;s a Cancelled{Request, Connection}Exception?<a class="headerlink" href="#what-s-a-cancelled-request-connection-exception" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="what-are-cancelledrequestexception-and-cancelledconnectionexception">
+<span id="propagate-failure"></span><h3>What are CancelledRequestException and CancelledConnectionException?<a class="headerlink" href="#what-are-cancelledrequestexception-and-cancelledconnectionexception" title="Permalink to this headline">¶</a></h3>
 <p>When a client connected to a Finagle server disconnects, the server raises
 a <em>cancellation</em> interrupt on the pending Future. This is done to
 conserve resources and avoid unnecessary work: the upstream
@@ -193,6 +193,24 @@ synchronization mechanisms.</td></tr>
 </tbody>
 </table>
 </div>
+<div class="section" id="why-do-clients-see-com-twitter-finagle-failedfastexception-s">
+<span id="faq-failedfastexception"></span><h3>Why do clients see com.twitter.finagle.FailedFastException&#8217;s?<a class="headerlink" href="#why-do-clients-see-com-twitter-finagle-failedfastexception-s" title="Permalink to this headline">¶</a></h3>
+<p>While the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/FailFastFactory.scala">FailFast</a> service
+factory generally shields clients from downed hosts, sometimes clients will see
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">FailedFastExceptions</a>.
+A common cause is when all endpoints in the load balancer&#8217;s pool are
+marked down as fail fast, then the load balancer will pass requests through, resulting in a
+<tt class="docutils literal"><span class="pre">com.twitter.finagle.FailedFastException</span></tt>.</p>
+<p>A related issue is when the load balancer&#8217;s pool is a single endpoint that is itself a
+load balancer (for example an nginx server or a hardware load balancer).
+It is important to disable fail fast as the remote load balancer has
+the visibility into which endpoints are up.
+Disabling fail fast can be done with <tt class="docutils literal"><span class="pre">ClientBuilder</span></tt>:</p>
+<div class="highlight-text"><div class="highlight"><pre>clientBuilder.failFast(false)
+</pre></div>
+</div>
+<p>Refer to the <a class="reference internal" href="Clients.html#client-fail-fast"><em>fail fast</em></a> section for further context.</p>
+</div>
 </div>
 <div class="section" id="mux-specific-faq">
 <h2>Mux-specific FAQ<a class="headerlink" href="#mux-specific-faq" title="Permalink to this headline">¶</a></h2>
@@ -201,7 +219,7 @@ synchronization mechanisms.</td></tr>
 <p><em>Connecting Pooling Metrics</em></p>
 <p>With Mux, Finagle multiplexes several requests onto a single connection. As a
 consequence, traditional forms of connection-pooling are no longer required. Thus
-Mux employs <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.pool.ReusingPool">com.twitter.finagle.pool.ReusingPool</a>,
+Mux employs <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.pool.SingletonPool">com.twitter.finagle.pool.SingletonPool</a>,
 which exposes new stats:</p>
 <ul class="simple">
 <li><tt class="docutils literal"><span class="pre">connects</span></tt>, <tt class="docutils literal"><span class="pre">connections</span></tt>, and <tt class="docutils literal"><span class="pre">closechans</span></tt> stats should drop, since
@@ -264,9 +282,10 @@ is an implementation of the Thrift protocol built on top of Mux.</p>
   <ul>
 <li><a class="reference internal" href="#">FAQ</a><ul>
 <li><a class="reference internal" href="#general-finagle-faq">General Finagle FAQ</a><ul>
-<li><a class="reference internal" href="#what-s-a-cancelled-request-connection-exception">What&#8217;s a Cancelled{Request, Connection}Exception?</a></li>
+<li><a class="reference internal" href="#what-are-cancelledrequestexception-and-cancelledconnectionexception">What are CancelledRequestException and CancelledConnectionException?</a></li>
 <li><a class="reference internal" href="#why-is-com-twitter-common-zookeeper-server-set-not-found">Why is com.twitter.common.zookeeper#server-set not found?</a></li>
 <li><a class="reference internal" href="#how-do-i-configure-clients-and-servers-with-finagle-6-apis">How do I configure clients and servers with Finagle 6 APIs?</a></li>
+<li><a class="reference internal" href="#why-do-clients-see-com-twitter-finagle-failedfastexception-s">Why do clients see com.twitter.finagle.FailedFastException&#8217;s?</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#mux-specific-faq">Mux-specific FAQ</a><ul>

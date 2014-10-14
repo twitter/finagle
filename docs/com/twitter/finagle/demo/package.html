@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.demo</title>
+          <title>demo - com.twitter.finagle.demo</title>
+          <meta name="description" content="demo - com.twitter.finagle.demo" />
+          <meta name="keywords" content="demo com.twitter.finagle.demo" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.demo.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>demo</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,151 +56,14 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
-              <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.demo.Tracing1" data-isabs="true">
-      <a id="Tracing1:Tracing1[MM]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="Tracing1.html"><span class="name">Tracing1</span></a><span class="tparams">[<span name="MM">+MM<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="result"> extends ThriftService</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@Generated</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1$FinagleClient" data-isabs="false">
-      <a id="Tracing1$FinagleClient:Tracing1$FinagleClient"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="Tracing1$FinagleClient.html"><span class="name">Tracing1$FinagleClient</span></a><span class="result"> extends Tracing1[Future]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@Generated</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1$FinagleService" data-isabs="false">
-      <a id="Tracing1$FinagleService:Tracing1$FinagleService"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="Tracing1$FinagleService.html"><span class="name">Tracing1$FinagleService</span></a><span class="result"> extends Service[Array[Byte], Array[Byte]]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@Generated</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing2" data-isabs="true">
-      <a id="Tracing2:Tracing2[MM]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="Tracing2.html"><span class="name">Tracing2</span></a><span class="tparams">[<span name="MM">+MM<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="result"> extends ThriftService</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@Generated</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing2$FinagleClient" data-isabs="false">
-      <a id="Tracing2$FinagleClient:Tracing2$FinagleClient"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="Tracing2$FinagleClient.html"><span class="name">Tracing2$FinagleClient</span></a><span class="result"> extends Tracing2[Future]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@Generated</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing2$FinagleService" data-isabs="false">
-      <a id="Tracing2$FinagleService:Tracing2$FinagleService"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="Tracing2$FinagleService.html"><span class="name">Tracing2$FinagleService</span></a><span class="result"> extends Service[Array[Byte], Array[Byte]]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@Generated</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3" data-isabs="true">
-      <a id="Tracing3:Tracing3[MM]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="Tracing3.html"><span class="name">Tracing3</span></a><span class="tparams">[<span name="MM">+MM<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="result"> extends ThriftService</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@Generated</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3$FinagleClient" data-isabs="false">
-      <a id="Tracing3$FinagleClient:Tracing3$FinagleClient"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="Tracing3$FinagleClient.html"><span class="name">Tracing3$FinagleClient</span></a><span class="result"> extends Tracing3[Future]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@Generated</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3$FinagleService" data-isabs="false">
-      <a id="Tracing3$FinagleService:Tracing3$FinagleService"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="Tracing3$FinagleService.html"><span class="name">Tracing3$FinagleService</span></a><span class="result"> extends Service[Array[Byte], Array[Byte]]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@Generated</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li></ol>
-            </div>
+        
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.demo.Client" data-isabs="false">
+              <ol><li name="com.twitter.finagle.demo.Client" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Client"></a>
       <a id="Client:Client"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -198,23 +71,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Client$.html"><span class="name">Client</span></a><span class="result"> extends AnyRef</span>
+        <a href="Client$.html"><span class="name">Client</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1" data-isabs="false">
-      <a id="Tracing1:Tracing1"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Tracing1$.html"><span class="name">Tracing1</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1Service" data-isabs="false">
+    </li><li name="com.twitter.finagle.demo.Tracing1Service" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Tracing1Service"></a>
       <a id="Tracing1Service:Tracing1Service"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -222,23 +84,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Tracing1Service$.html"><span class="name">Tracing1Service</span></a><span class="result"> extends FutureIface</span>
+        <a href="Tracing1Service$.html"><span class="name">Tracing1Service</span></a><span class="result"> extends <a href="thriftscala/Tracing1$$FutureIface.html" class="extype" name="com.twitter.finagle.demo.thriftscala.Tracing1.FutureIface">FutureIface</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing2" data-isabs="false">
-      <a id="Tracing2:Tracing2"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Tracing2$.html"><span class="name">Tracing2</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing2Service" data-isabs="false">
+    </li><li name="com.twitter.finagle.demo.Tracing2Service" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Tracing2Service"></a>
       <a id="Tracing2Service:Tracing2Service"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -246,23 +97,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Tracing2Service$.html"><span class="name">Tracing2Service</span></a><span class="result"> extends FutureIface</span>
+        <a href="Tracing2Service$.html"><span class="name">Tracing2Service</span></a><span class="result"> extends <a href="thriftscala/Tracing2$$FutureIface.html" class="extype" name="com.twitter.finagle.demo.thriftscala.Tracing2.FutureIface">FutureIface</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3" data-isabs="false">
-      <a id="Tracing3:Tracing3"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Tracing3$.html"><span class="name">Tracing3</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3Service" data-isabs="false">
+    </li><li name="com.twitter.finagle.demo.Tracing3Service" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Tracing3Service"></a>
       <a id="Tracing3Service:Tracing3Service"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -270,7 +110,20 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Tracing3Service$.html"><span class="name">Tracing3Service</span></a><span class="result"> extends FutureIface</span>
+        <a href="Tracing3Service$.html"><span class="name">Tracing3Service</span></a><span class="result"> extends <a href="thriftscala/Tracing3$$FutureIface.html" class="extype" name="com.twitter.finagle.demo.thriftscala.Tracing3.FutureIface">FutureIface</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.demo.thriftscala" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="thriftscala"></a>
+      <a id="thriftscala:thriftscala"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="thriftscala/package.html"><span class="name">thriftscala</span></a>
       </span>
       </h4>
       
@@ -278,10 +131,20 @@
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -289,7 +152,6 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

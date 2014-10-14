@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.http.service</title>
+          <title>service - com.twitter.finagle.http.service</title>
+          <meta name="description" content="service - com.twitter.finagle.http.service" />
+          <meta name="keywords" content="service com.twitter.finagle.http.service" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../index.html';
+            var hash = 'com.twitter.finagle.http.service.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.http" class="extype" href="../package.html">http</a></p>
+        <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.http">http</a></p>
         <h1>service</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,41 +56,44 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.http.service.NotFoundService" data-isabs="false">
-      <a id="NotFoundService:NotFoundService[REQUEST]"></a>
+              <ol><li name="com.twitter.finagle.http.service.NotFoundService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NotFoundService[REQUEST&lt;:com.twitter.finagle.http.Request]extendsService[REQUEST,com.twitter.finagle.http.Response]"></a>
+      <a id="NotFoundService[REQUEST&lt;:Request]:NotFoundService[REQUEST]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="NotFoundService.html"><span class="name">NotFoundService</span></a><span class="tparams">[<span name="REQUEST">REQUEST &lt;: Request</span>]</span><span class="result"> extends Service[REQUEST, Response]</span>
+        <a href="NotFoundService.html"><span class="name">NotFoundService</span></a><span class="tparams">[<span name="REQUEST">REQUEST &lt;: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>]</span><span class="result"> extends <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.http.service.NotFoundService.REQUEST">REQUEST</span>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
       </span>
       </h4>
       <p class="comment cmt">NotFoundService just returns 404 Not Found.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.service.NullService" data-isabs="false">
-      <a id="NullService:NullService[REQUEST]"></a>
+    </li><li name="com.twitter.finagle.http.service.NullService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NullService[REQUEST&lt;:com.twitter.finagle.http.Request]extendsService[REQUEST,com.twitter.finagle.http.Response]"></a>
+      <a id="NullService[REQUEST&lt;:Request]:NullService[REQUEST]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="NullService.html"><span class="name">NullService</span></a><span class="tparams">[<span name="REQUEST">REQUEST &lt;: Request</span>]</span><span class="result"> extends Service[REQUEST, Response]</span>
+        <a href="NullService.html"><span class="name">NullService</span></a><span class="tparams">[<span name="REQUEST">REQUEST &lt;: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>]</span><span class="result"> extends <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.http.service.NullService.REQUEST">REQUEST</span>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
       </span>
       </h4>
       <p class="comment cmt">* A null Service.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.service.RoutingService" data-isabs="false">
-      <a id="RoutingService:RoutingService[REQUEST]"></a>
+    </li><li name="com.twitter.finagle.http.service.RoutingService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RoutingService[REQUEST&lt;:com.twitter.finagle.http.Request]extendsService[REQUEST,com.twitter.finagle.http.Response]"></a>
+      <a id="RoutingService[REQUEST&lt;:Request]:RoutingService[REQUEST]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="RoutingService.html"><span class="name">RoutingService</span></a><span class="tparams">[<span name="REQUEST">REQUEST &lt;: Request</span>]</span><span class="result"> extends Service[REQUEST, Response]</span>
+        <a href="RoutingService.html"><span class="name">RoutingService</span></a><span class="tparams">[<span name="REQUEST">REQUEST &lt;: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>]</span><span class="result"> extends <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.http.service.RoutingService.REQUEST">REQUEST</span>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
       </span>
       </h4>
       <p class="comment cmt">RoutingService for composing Services.</p>
@@ -89,9 +102,10 @@
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.http.service.NotFoundService" data-isabs="false">
+              <ol><li name="com.twitter.finagle.http.service.NotFoundService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NotFoundService"></a>
       <a id="NotFoundService:NotFoundService"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -99,11 +113,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NotFoundService$.html"><span class="name">NotFoundService</span></a><span class="result"> extends NotFoundService[Request]</span>
+        <a href="NotFoundService$.html"><span class="name">NotFoundService</span></a><span class="result"> extends <a href="NotFoundService.html" class="extype" name="com.twitter.finagle.http.service.NotFoundService">NotFoundService</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.service.NullService" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.service.NullService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NullService"></a>
       <a id="NullService:NullService"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -111,11 +126,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NullService$.html"><span class="name">NullService</span></a><span class="result"> extends NullService[Request]</span>
+        <a href="NullService$.html"><span class="name">NullService</span></a><span class="result"> extends <a href="NullService.html" class="extype" name="com.twitter.finagle.http.service.NullService">NullService</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.service.RoutingService" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.service.RoutingService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RoutingService"></a>
       <a id="RoutingService:RoutingService"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -123,7 +139,7 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="RoutingService$.html"><span class="name">RoutingService</span></a><span class="result"> extends AnyRef</span>
+        <a href="RoutingService$.html"><span class="name">RoutingService</span></a>
       </span>
       </h4>
       
@@ -131,10 +147,20 @@
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -142,7 +168,6 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../lib/template.js"></script>
     </body>
       </html>

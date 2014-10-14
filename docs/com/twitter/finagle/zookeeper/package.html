@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.zookeeper</title>
+          <title>zookeeper - com.twitter.finagle.zookeeper</title>
+          <meta name="description" content="zookeeper - com.twitter.finagle.zookeeper" />
+          <meta name="keywords" content="zookeeper com.twitter.finagle.zookeeper" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.zookeeper.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>zookeeper</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,9 +56,10 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.zookeeper.ZkAnnouncer" data-isabs="false">
+              <ol><li name="com.twitter.finagle.zookeeper.ZkAnnouncer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ZkAnnouncerextendsAnnouncer"></a>
       <a id="ZkAnnouncer:ZkAnnouncer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,12 +67,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ZkAnnouncer.html"><span class="name">ZkAnnouncer</span></a><span class="result"> extends Announcer</span>
+        <a href="ZkAnnouncer.html"><span class="name">ZkAnnouncer</span></a><span class="result"> extends <a href="../Announcer.html" class="extype" name="com.twitter.finagle.Announcer">Announcer</a></span>
       </span>
       </h4>
       <p class="comment cmt">When announcing an endpoint with additional endpoints they all need to join
 the path together.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.zookeeper.ZkAnnouncerException" data-isabs="false">
+    </li><li name="com.twitter.finagle.zookeeper.ZkAnnouncerException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ZkAnnouncerExceptionextendsException"></a>
       <a id="ZkAnnouncerException:ZkAnnouncerException"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -69,11 +81,13 @@ the path together.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ZkAnnouncerException.html"><span class="name">ZkAnnouncerException</span></a><span class="result"> extends Exception</span>
+        <a href="ZkAnnouncerException.html"><span class="name">ZkAnnouncerException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.zookeeper.ZkResolver" data-isabs="false">
+      <p class="comment cmt">Indicates that a failure occurred while attempting to announce the server
+using a <a href="ZkAnnouncer.html" class="extype" name="com.twitter.finagle.zookeeper.ZkAnnouncer">com.twitter.finagle.zookeeper.ZkAnnouncer</a>.</p>
+    </li><li name="com.twitter.finagle.zookeeper.ZkResolver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ZkResolverextendsResolver"></a>
       <a id="ZkResolver:ZkResolver"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -81,11 +95,12 @@ the path together.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ZkResolver.html"><span class="name">ZkResolver</span></a><span class="result"> extends Resolver</span>
+        <a href="ZkResolver.html"><span class="name">ZkResolver</span></a><span class="result"> extends <a href="../Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.zookeeper.ZkResolverException" data-isabs="false">
+    </li><li name="com.twitter.finagle.zookeeper.ZkResolverException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ZkResolverExceptionextendsException"></a>
       <a id="ZkResolverException:ZkResolverException"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -93,11 +108,13 @@ the path together.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ZkResolverException.html"><span class="name">ZkResolverException</span></a><span class="result"> extends Exception</span>
+        <a href="ZkResolverException.html"><span class="name">ZkResolverException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.zookeeper.ZookeeperServerSetCluster" data-isabs="false">
+      <p class="comment cmt">Indicates that a failure occurred while attempting to resolve a cluster
+using a <a href="ZkAnnouncer.html" class="extype" name="com.twitter.finagle.zookeeper.ZkAnnouncer">com.twitter.finagle.zookeeper.ZkAnnouncer</a>.</p>
+    </li><li name="com.twitter.finagle.zookeeper.ZookeeperServerSetCluster" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ZookeeperServerSetClusterextendsCluster[java.net.SocketAddress]"></a>
       <a id="ZookeeperServerSetCluster:ZookeeperServerSetCluster"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -105,7 +122,7 @@ the path together.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ZookeeperServerSetCluster.html"><span class="name deprecated" title="Deprecated: (Since version 6.7.1) Get a Group[SocketAddress] from ZkResolver instead">ZookeeperServerSetCluster</span></a><span class="result"> extends Cluster[SocketAddress]</span>
+        <a href="ZookeeperServerSetCluster.html"><span class="name deprecated" title="Deprecated: (Since version 6.7.1) Get a Group[SocketAddress] from ZkResolver instead">ZookeeperServerSetCluster</span></a><span class="result"> extends <a href="../builder/Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">A Cluster of SocketAddresses that provide a certain service.</p>
@@ -117,10 +134,20 @@ the path together.</p>
         
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -128,7 +155,6 @@ the path together.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

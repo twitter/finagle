@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.kestrel.protocol</title>
+          <title>protocol - com.twitter.finagle.kestrel.protocol</title>
+          <meta name="description" content="protocol - com.twitter.finagle.kestrel.protocol" />
+          <meta name="keywords" content="protocol com.twitter.finagle.kestrel.protocol" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../index.html';
+            var hash = 'com.twitter.finagle.kestrel.protocol.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.kestrel" class="extype" href="../package.html">kestrel</a></p>
+        <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.kestrel">kestrel</a></p>
         <h1>protocol</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,9 +56,10 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Abort" data-isabs="false">
+              <ol><li name="com.twitter.finagle.kestrel.protocol.Abort" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AbortextendsGetCommandwithProductwithSerializable"></a>
       <a id="Abort:Abort"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,11 +67,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Abort.html"><span class="name">Abort</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span><span class="result"> extends GetCommand with Product with Serializable</span>
+        <a href="Abort.html"><span class="name">Abort</span></a><span class="params">(<span name="queueName">queueName: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="timeout">timeout: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Close" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Close" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CloseextendsGetCommandwithProductwithSerializable"></a>
       <a id="Close:Close"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -68,11 +80,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Close.html"><span class="name">Close</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span><span class="result"> extends GetCommand with Product with Serializable</span>
+        <a href="Close.html"><span class="name">Close</span></a><span class="params">(<span name="queueName">queueName: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="timeout">timeout: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.CloseAndOpen" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.CloseAndOpen" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CloseAndOpenextendsGetCommandwithProductwithSerializable"></a>
       <a id="CloseAndOpen:CloseAndOpen"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -80,11 +93,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="CloseAndOpen.html"><span class="name">CloseAndOpen</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span><span class="result"> extends GetCommand with Product with Serializable</span>
+        <a href="CloseAndOpen.html"><span class="name">CloseAndOpen</span></a><span class="params">(<span name="queueName">queueName: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="timeout">timeout: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Command" data-isabs="true">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Command" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="CommandextendsAnyRef"></a>
       <a id="Command:Command"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -92,11 +106,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Command.html"><span class="name">Command</span></a><span class="result"> extends AnyRef</span>
+        <a href="Command.html"><span class="name">Command</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Delete" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Delete" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DeleteextendsCommandwithProductwithSerializable"></a>
       <a id="Delete:Delete"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -104,11 +119,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Delete.html"><span class="name">Delete</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>)</span><span class="result"> extends Command with Product with Serializable</span>
+        <a href="Delete.html"><span class="name">Delete</span></a><span class="params">(<span name="queueName">queueName: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Deleted" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Deleted" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DeletedextendsResponsewithProductwithSerializable"></a>
       <a id="Deleted:Deleted"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -116,11 +132,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Deleted.html"><span class="name">Deleted</span></a><span class="params">()</span><span class="result"> extends Response with Product with Serializable</span>
+        <a href="Deleted.html"><span class="name">Deleted</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.DumpConfig" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.DumpConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DumpConfigextendsCommandwithProductwithSerializable"></a>
       <a id="DumpConfig:DumpConfig"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -128,11 +145,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="DumpConfig.html"><span class="name">DumpConfig</span></a><span class="params">()</span><span class="result"> extends Command with Product with Serializable</span>
+        <a href="DumpConfig.html"><span class="name">DumpConfig</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.DumpStats" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.DumpStats" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DumpStatsextendsCommandwithProductwithSerializable"></a>
       <a id="DumpStats:DumpStats"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -140,11 +158,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="DumpStats.html"><span class="name">DumpStats</span></a><span class="params">()</span><span class="result"> extends Command with Product with Serializable</span>
+        <a href="DumpStats.html"><span class="name">DumpStats</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Error" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Error" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ErrorextendsResponsewithProductwithSerializable"></a>
       <a id="Error:Error"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -152,11 +171,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Error.html"><span class="name">Error</span></a><span class="params">()</span><span class="result"> extends Response with Product with Serializable</span>
+        <a href="Error.html"><span class="name">Error</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Flush" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Flush" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FlushextendsCommandwithProductwithSerializable"></a>
       <a id="Flush:Flush"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -164,11 +184,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Flush.html"><span class="name">Flush</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>)</span><span class="result"> extends Command with Product with Serializable</span>
+        <a href="Flush.html"><span class="name">Flush</span></a><span class="params">(<span name="queueName">queueName: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.FlushAll" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.FlushAll" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FlushAllextendsCommandwithProductwithSerializable"></a>
       <a id="FlushAll:FlushAll"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -176,11 +197,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="FlushAll.html"><span class="name">FlushAll</span></a><span class="params">()</span><span class="result"> extends Command with Product with Serializable</span>
+        <a href="FlushAll.html"><span class="name">FlushAll</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Get" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Get" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GetextendsGetCommandwithProductwithSerializable"></a>
       <a id="Get:Get"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -188,11 +210,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Get.html"><span class="name">Get</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span><span class="result"> extends GetCommand with Product with Serializable</span>
+        <a href="Get.html"><span class="name">Get</span></a><span class="params">(<span name="queueName">queueName: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="timeout">timeout: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.GetCommand" data-isabs="true">
+    </li><li name="com.twitter.finagle.kestrel.protocol.GetCommand" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="GetCommandextendsCommand"></a>
       <a id="GetCommand:GetCommand"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -200,11 +223,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="GetCommand.html"><span class="name">GetCommand</span></a><span class="result"> extends Command</span>
+        <a href="GetCommand.html"><span class="name">GetCommand</span></a><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Kestrel" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Kestrel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="KestrelextendsCodecFactory[com.twitter.finagle.kestrel.protocol.Command,com.twitter.finagle.kestrel.protocol.Response]"></a>
       <a id="Kestrel:Kestrel"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -212,11 +236,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Kestrel.html"><span class="name">Kestrel</span></a><span class="result"> extends CodecFactory[Command, Response]</span>
+        <a href="Kestrel.html"><span class="name">Kestrel</span></a><span class="result"> extends <a href="../../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a>, <a href="Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.NotFound" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.NotFound" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NotFoundextendsResponsewithProductwithSerializable"></a>
       <a id="NotFound:NotFound"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -224,11 +249,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="NotFound.html"><span class="name">NotFound</span></a><span class="params">()</span><span class="result"> extends Response with Product with Serializable</span>
+        <a href="NotFound.html"><span class="name">NotFound</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Open" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Open" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OpenextendsGetCommandwithProductwithSerializable"></a>
       <a id="Open:Open"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -236,11 +262,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Open.html"><span class="name">Open</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span><span class="result"> extends GetCommand with Product with Serializable</span>
+        <a href="Open.html"><span class="name">Open</span></a><span class="params">(<span name="queueName">queueName: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="timeout">timeout: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Peek" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Peek" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PeekextendsGetCommandwithProductwithSerializable"></a>
       <a id="Peek:Peek"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -248,11 +275,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Peek.html"><span class="name">Peek</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span><span class="result"> extends GetCommand with Product with Serializable</span>
+        <a href="Peek.html"><span class="name">Peek</span></a><span class="params">(<span name="queueName">queueName: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="timeout">timeout: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Reload" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Reload" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ReloadextendsCommandwithProductwithSerializable"></a>
       <a id="Reload:Reload"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -260,11 +288,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Reload.html"><span class="name">Reload</span></a><span class="params">()</span><span class="result"> extends Command with Product with Serializable</span>
+        <a href="Reload.html"><span class="name">Reload</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Response" data-isabs="true">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Response" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ResponseextendsAnyRef"></a>
       <a id="Response:Response"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -272,11 +301,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Response.html"><span class="name">Response</span></a><span class="result"> extends AnyRef</span>
+        <a href="Response.html"><span class="name">Response</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Set" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Set" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SetextendsCommandwithProductwithSerializable"></a>
       <a id="Set:Set"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -284,11 +314,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Set.html"><span class="name">Set</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="expiry">expiry: Time</span>, <span name="value">value: ChannelBuffer</span>)</span><span class="result"> extends Command with Product with Serializable</span>
+        <a href="Set.html"><span class="name">Set</span></a><span class="params">(<span name="queueName">queueName: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="expiry">expiry: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.ShutDown" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.ShutDown" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ShutDownextendsCommandwithProductwithSerializable"></a>
       <a id="ShutDown:ShutDown"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -296,11 +327,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ShutDown.html"><span class="name">ShutDown</span></a><span class="params">()</span><span class="result"> extends Command with Product with Serializable</span>
+        <a href="ShutDown.html"><span class="name">ShutDown</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Stats" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Stats" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StatsextendsCommandwithProductwithSerializable"></a>
       <a id="Stats:Stats"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -308,11 +340,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Stats.html"><span class="name">Stats</span></a><span class="params">()</span><span class="result"> extends Command with Product with Serializable</span>
+        <a href="Stats.html"><span class="name">Stats</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Stored" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Stored" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StoredextendsResponsewithProductwithSerializable"></a>
       <a id="Stored:Stored"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -320,11 +353,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Stored.html"><span class="name">Stored</span></a><span class="params">()</span><span class="result"> extends Response with Product with Serializable</span>
+        <a href="Stored.html"><span class="name">Stored</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Value" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Value" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ValueextendsProductwithSerializable"></a>
       <a id="Value:Value"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -332,11 +366,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Value.html"><span class="name">Value</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="value">value: ChannelBuffer</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="Value.html"><span class="name">Value</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Values" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Values" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ValuesextendsResponsewithProductwithSerializable"></a>
       <a id="Values:Values"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -344,11 +379,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Values.html"><span class="name">Values</span></a><span class="params">(<span name="values">values: Seq[Value]</span>)</span><span class="result"> extends Response with Product with Serializable</span>
+        <a href="Values.html"><span class="name">Values</span></a><span class="params">(<span name="values">values: <span class="extype" name="scala.Seq">Seq</span>[<a href="Value.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Value">Value</a>]</span>)</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Version" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Version" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="VersionextendsCommandwithProductwithSerializable"></a>
       <a id="Version:Version"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -356,7 +392,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Version.html"><span class="name">Version</span></a><span class="params">()</span><span class="result"> extends Command with Product with Serializable</span>
+        <a href="Version.html"><span class="name">Version</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -365,9 +401,10 @@
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.CommandToEncoding" data-isabs="false">
+              <ol><li name="com.twitter.finagle.kestrel.protocol.CommandToEncoding" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CommandToEncoding"></a>
       <a id="CommandToEncoding:CommandToEncoding"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -375,11 +412,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="CommandToEncoding$.html"><span class="name">CommandToEncoding</span></a><span class="result"> extends AnyRef</span>
+        <a href="CommandToEncoding$.html"><span class="name">CommandToEncoding</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Kestrel" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.Kestrel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Kestrel"></a>
       <a id="Kestrel:Kestrel"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -387,11 +425,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Kestrel$.html"><span class="name">Kestrel</span></a><span class="result"> extends AnyRef</span>
+        <a href="Kestrel$.html"><span class="name">Kestrel</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.ResponseToEncoding" data-isabs="false">
+    </li><li name="com.twitter.finagle.kestrel.protocol.ResponseToEncoding" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ResponseToEncoding"></a>
       <a id="ResponseToEncoding:ResponseToEncoding"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -399,7 +438,7 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ResponseToEncoding$.html"><span class="name">ResponseToEncoding</span></a><span class="result"> extends AnyRef</span>
+        <a href="ResponseToEncoding$.html"><span class="name">ResponseToEncoding</span></a>
       </span>
       </h4>
       
@@ -407,10 +446,20 @@
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -418,7 +467,6 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../lib/template.js"></script>
     </body>
       </html>

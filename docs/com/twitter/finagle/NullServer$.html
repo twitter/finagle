@@ -2,56 +2,76 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.NullServer</title>
+          <title>NullServer - com.twitter.finagle.NullServer</title>
+          <meta name="description" content="NullServer - com.twitter.finagle.NullServer" />
+          <meta name="keywords" content="NullServer com.twitter.finagle.NullServer" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../lib/template.css" />
-      <script type="text/javascript" src="../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../index.html';
+            var hash = 'com.twitter.finagle.NullServer$';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../lib/object_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../package.html">com</a>.<a name="com.twitter" class="extype" href="../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="package.html">finagle</a></p>
+        <p id="owner"><a href="../../package.html" class="extype" name="com">com</a>.<a href="../package.html" class="extype" name="com.twitter">twitter</a>.<a href="package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>NullServer</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">NullServer</span><span class="result"> extends <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a> with <span name="com.twitter.util.CloseAwaitably" class="extype">CloseAwaitably</span></span>
+        <span class="name">NullServer</span><span class="result"> extends <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a> with <span class="extype" name="com.twitter.util.CloseAwaitably">CloseAwaitably</span></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>An empty ListeningServer that can be used as a placeholder. For
-example:</p><pre>
-<span class="ano">@volatile</span> <span class="kw">var</span> server = NullServer
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>An empty ListeningServer that can be used as a placeholder. For
+example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> server = NullServer
 <span class="kw">def</span> main() { server = Http.serve(...) }
-<span class="kw">def</span> exit() { server.close() }
-</pre></div><div class="toggleContainer block">
+<span class="kw">def</span> exit() { server.close() }</pre></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="com.twitter.util.CloseAwaitably" class="extype">CloseAwaitably</span>, <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a>, <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>], <span name="com.twitter.util.Awaitable" class="extype">Awaitable</span>[<span name="scala.Unit" class="extype">Unit</span>], <span name="com.twitter.util.Closable" class="extype">Closable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.util.CloseAwaitably">CloseAwaitably</span>, <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a>, <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>], <span class="extype" name="com.twitter.util.Awaitable">Awaitable</span>[<span class="extype" name="scala.Unit">Unit</span>], <span class="extype" name="com.twitter.util.Closable">Closable</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
-    
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         <div id="order">
               <span class="filtertype">Ordering</span>
-              <ol><li class="alpha in"><span>Alphabetic</span></li><li class="inherit out"><span>By inheritance</span></li></ol>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
             </div>
         <div id="ancestors">
-              <span class="filtertype">Inherited</span>
-              <ol><li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.NullServer" class="in"><span>NullServer</span></li><li name="com.twitter.util.CloseAwaitably" class="in"><span>CloseAwaitably</span></li><li name="com.twitter.finagle.ListeningServer" class="in"><span>ListeningServer</span></li><li name="com.twitter.finagle.Group" class="in"><span>Group</span></li><li name="com.twitter.util.Awaitable" class="in"><span>Awaitable</span></li><li name="com.twitter.util.Closable" class="in"><span>Closable</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
-            </div>
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="com.twitter.finagle.NullServer"><span>NullServer</span></li><li class="in" name="com.twitter.util.CloseAwaitably"><span>CloseAwaitably</span></li><li class="in" name="com.twitter.finagle.ListeningServer"><span>ListeningServer</span></li><li class="in" name="com.twitter.finagle.Group"><span>Group</span></li><li class="in" name="com.twitter.util.Awaitable"><span>Awaitable</span></li><li class="in" name="com.twitter.util.Closable"><span>Closable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
             <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
@@ -66,9 +86,10 @@ example:</p><pre>
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:AnyRef):Boolean"></a>
       <a id="!=(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -76,11 +97,12 @@ example:</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#!=" data-isabs="false">
+    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -88,11 +110,12 @@ example:</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef###" data-isabs="false">
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
       <a id="##():Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -100,11 +123,12 @@ example:</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $hash$hash">##</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Group#+" data-isabs="false">
+    </li><li name="com.twitter.finagle.Group#+" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="+(other:com.twitter.finagle.Group[T]):com.twitter.finagle.Group[T]"></a>
       <a id="+(Group[SocketAddress]):Group[SocketAddress]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -112,11 +136,12 @@ example:</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $plus">+</span><span class="params">(<span name="other">other: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>
+        <span title="gt4s: $plus" class="name">+</span><span class="params">(<span name="other">other: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a></dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a></dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:AnyRef):Boolean"></a>
       <a id="==(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -124,11 +149,12 @@ example:</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#==" data-isabs="false">
+    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -136,11 +162,12 @@ example:</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.ListeningServer#announce" data-isabs="false">
+    </li><li name="com.twitter.finagle.ListeningServer#announce" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="announce(addr:String):com.twitter.util.Future[com.twitter.finagle.Announcement]"></a>
       <a id="announce(String):Future[Announcement]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -148,13 +175,14 @@ example:</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">announce</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.Announcement" class="extype" href="Announcement.html">Announcement</a>]</span>
+        <span class="name">announce</span><span class="params">(<span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="Announcement.html" class="extype" name="com.twitter.finagle.Announcement">Announcement</a>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Announce the given address and return a future to the announcement
 </p><div class="fullcomment"><div class="comment cmt"><p>Announce the given address and return a future to the announcement
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Group#apply" data-isabs="false">
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Group#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apply():Set[T]"></a>
       <a id="apply():Set[SocketAddress]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -162,11 +190,12 @@ example:</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">()</span><span class="result">: Set[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>
+        <span class="name">apply</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a></dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a></dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -174,11 +203,12 @@ example:</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: T0</span>
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.NullServer#boundAddress" data-isabs="false">
+    </li><li name="com.twitter.finagle.NullServer#boundAddress" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="boundAddress:java.net.InetSocketAddress"></a>
       <a id="boundAddress:InetSocketAddress"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -186,12 +216,13 @@ example:</p><pre>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">boundAddress</span><span class="result">: <span name="java.net.InetSocketAddress" class="extype">InetSocketAddress</span></span>
+        <span class="name">boundAddress</span><span class="result">: <span class="extype" name="java.net.InetSocketAddress">InetSocketAddress</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">The address to which this server is bound.</p><div class="fullcomment"><div class="comment cmt"><p>The address to which this server is bound.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.NullServer" class="extype" href="">NullServer</a> → <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></dd></dl></div>
-    </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.NullServer">NullServer</a> → <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -199,14 +230,18 @@ example:</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: AnyRef</span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.ListeningServer#close" data-isabs="false">
+    </li><li name="com.twitter.finagle.ListeningServer#close" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="close(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]"></a>
       <a id="close(Time):Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -214,11 +249,12 @@ example:</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span name="com.twitter.util.Time" class="extype">Time</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a> → Closable</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a> → Closable</dd></dl></div>
+    </li><li name="com.twitter.util.Closable#close" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="close(after:com.twitter.util.Duration):com.twitter.util.Future[Unit]"></a>
       <a id="close(Duration):Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -226,11 +262,12 @@ example:</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="after">after: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+        <span class="name">close</span><span class="params">(<span name="after">after: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
+    </li><li name="com.twitter.util.Closable#close" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="close():com.twitter.util.Future[Unit]"></a>
       <a id="close():Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -238,23 +275,25 @@ example:</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+        <span class="name">close</span><span class="params">()</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
-    </li><li visbl="prt" name="com.twitter.util.CloseAwaitably#closeAwaitably" data-isabs="false">
-      <a id="closeAwaitably(⇒ Future[Unit]):Future[Unit]"></a>
+    </li><li name="com.twitter.util.CloseAwaitably#closeAwaitably" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="closeAwaitably(f:=&gt;com.twitter.util.Future[Unit]):com.twitter.util.Future[Unit]"></a>
+      <a id="closeAwaitably(⇒Future[Unit]):Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">closeAwaitably</span><span class="params">(<span name="f">f: ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+        <span class="name">closeAwaitably</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>CloseAwaitably</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.NullServer#closeServer" data-isabs="false">
+    </li><li name="com.twitter.finagle.NullServer#closeServer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="closeServer(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]"></a>
       <a id="closeServer(Time):Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -262,27 +301,29 @@ example:</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">closeServer</span><span class="params">(<span name="deadline">deadline: <span name="com.twitter.util.Time" class="extype">Time</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+        <span class="name">closeServer</span><span class="params">(<span name="deadline">deadline: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.NullServer" class="extype" href="">NullServer</a> → <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Group#collect" data-isabs="false">
-      <a id="collect[U](PartialFunction[SocketAddress, U]):Group[U]"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.NullServer">NullServer</a> → <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Group#collect" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="collect[U](f:PartialFunction[T,U]):com.twitter.finagle.Group[U]"></a>
+      <a id="collect[U](PartialFunction[SocketAddress,U]):Group[U]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">collect</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="f">f: <span name="scala.PartialFunction" class="extype">PartialFunction</span>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>, U]</span>)</span><span class="result">: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[U]</span>
+        <span class="name">collect</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="scala.PartialFunction">PartialFunction</span>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>, <span class="extype" name="com.twitter.finagle.Group.collect.U">U</span>]</span>)</span><span class="result">: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="com.twitter.finagle.Group.collect.U">U</span>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Create a new group by collecting each element of this group
 with <code>f</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new group by collecting each element of this group
 with <code>f</code>. <code>f</code> is guaranteed to be invoked exactly once for each
 element of the group, even for dynamic groups.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a></dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a></dd></dl></div>
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -290,11 +331,12 @@ element of the group, even for dynamic groups.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#equals" data-isabs="false">
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
       <a id="equals(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -302,11 +344,12 @@ element of the group, even for dynamic groups.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -314,26 +357,31 @@ element of the group, even for dynamic groups.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
-      <a id="getClass():java.lang.Class[_]"></a>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getClass</span><span class="params">()</span><span class="result">: java.lang.Class[_]</span>
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -341,11 +389,12 @@ element of the group, even for dynamic groups.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -353,11 +402,12 @@ element of the group, even for dynamic groups.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.util.CloseAwaitably#isReady" data-isabs="false">
+    </li><li name="com.twitter.util.CloseAwaitably#isReady" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isReady(implicitpermit:com.twitter.util.Awaitable.CanAwait):Boolean"></a>
       <a id="isReady(CanAwait):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -365,27 +415,29 @@ element of the group, even for dynamic groups.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isReady</span><span class="params">(<span class="implicit">implicit </span><span name="permit">permit: <span name="com.twitter.util.Awaitable.CanAwait" class="extype">CanAwait</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">isReady</span><span class="params">(<span class="implicit">implicit </span><span name="permit">permit: <span class="extype" name="com.twitter.util.Awaitable.CanAwait">CanAwait</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CloseAwaitably → Awaitable</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Group#map" data-isabs="false">
-      <a id="map[U]((SocketAddress) ⇒ U):Group[U]"></a>
+    </li><li name="com.twitter.finagle.Group#map" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="map[U](f:T=&gt;U):com.twitter.finagle.Group[U]"></a>
+      <a id="map[U]((SocketAddress)⇒U):Group[U]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">map</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="f">f: (<span name="java.net.SocketAddress" class="extype">SocketAddress</span>) ⇒ U</span>)</span><span class="result">: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[U]</span>
+        <span class="name">map</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <span class="extype" name="com.twitter.finagle.Group.map.U">U</span></span>)</span><span class="result">: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="com.twitter.finagle.Group.map.U">U</span>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Create a new group by mapping each element of this group
 with <code>f</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new group by mapping each element of this group
 with <code>f</code>. <code>f</code> is guaranteed to be invoked exactly once for each
 element of the groups, even for dynamic groups.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Group#members" data-isabs="false">
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Group#members" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="members:Set[T]"></a>
       <a id="members:Set[SocketAddress]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -393,15 +445,16 @@ element of the groups, even for dynamic groups.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">members</span><span class="result">: Set[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>
+        <span class="name">members</span><span class="result">: <span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">The current members of this group.</p><div class="fullcomment"><div class="comment cmt"><p>The current members of this group. If the group has not
 changed, the same object is returned. This allows a simple
 object identity check to be performed to see if the Group has
 been updated.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Group#named" data-isabs="false">
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Group#named" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="named(n:String):com.twitter.finagle.Group[T]"></a>
       <a id="named(String):Group[SocketAddress]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -409,13 +462,14 @@ been updated.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">named</span><span class="params">(<span name="n">n: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>
+        <span class="name">named</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Name the group <code>n</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Name the group <code>n</code>.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><code>this</code> mixed in with <code>LabelledGroup</code>, named <code>n</code>
-</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a></dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a></dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -423,11 +477,12 @@ been updated.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
       <a id="notify():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -435,11 +490,12 @@ been updated.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#notifyAll" data-isabs="false">
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
       <a id="notifyAll():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -447,23 +503,25 @@ been updated.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.util.CloseAwaitably#ready" data-isabs="false">
-      <a id="ready(Duration)(CanAwait):com.twitter.finagle.NullServer.type"></a>
+    </li><li name="com.twitter.util.CloseAwaitably#ready" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ready(timeout:com.twitter.util.Duration)(implicitpermit:com.twitter.util.Awaitable.CanAwait):CloseAwaitably.this.type"></a>
+      <a id="ready(Duration)(CanAwait):NullServer.this.type"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ready</span><span class="params">(<span name="timeout">timeout: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="permit">permit: <span name="com.twitter.util.Awaitable.CanAwait" class="extype">CanAwait</span></span>)</span><span class="result">: com.twitter.finagle.NullServer.type</span>
+        <span class="name">ready</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="permit">permit: <span class="extype" name="com.twitter.util.Awaitable.CanAwait">CanAwait</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.NullServer">NullServer</a>.this.type</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CloseAwaitably → Awaitable</dd></dl></div>
-    </li><li visbl="prt" name="com.twitter.finagle.Group#ref" data-isabs="false">
+    </li><li name="com.twitter.finagle.Group#ref" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ref:java.util.concurrent.atomic.AtomicReference[Set[T]]"></a>
       <a id="ref:AtomicReference[Set[SocketAddress]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -471,11 +529,12 @@ been updated.
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">ref</span><span class="result">: <span name="java.util.concurrent.atomic.AtomicReference" class="extype">AtomicReference</span>[Set[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]]</span>
+        <span class="name">ref</span><span class="result">: <span class="extype" name="java.util.concurrent.atomic.AtomicReference">AtomicReference</span>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="com.twitter.finagle" class="extype" href="package.html">finagle</a>] </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.util.CloseAwaitably#result" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd><a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a></dd></dl></div>
+    </li><li name="com.twitter.util.CloseAwaitably#result" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="result(timeout:com.twitter.util.Duration)(implicitpermit:com.twitter.util.Awaitable.CanAwait):Unit"></a>
       <a id="result(Duration)(CanAwait):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -483,11 +542,12 @@ been updated.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">result</span><span class="params">(<span name="timeout">timeout: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="permit">permit: <span name="com.twitter.util.Awaitable.CanAwait" class="extype">CanAwait</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">result</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="permit">permit: <span class="extype" name="com.twitter.util.Awaitable.CanAwait">CanAwait</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CloseAwaitably → Awaitable</dd></dl></div>
-    </li><li visbl="prt" name="com.twitter.finagle.ListeningServer#set" data-isabs="false">
+    </li><li name="com.twitter.finagle.ListeningServer#set" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="set:com.twitter.util.Var[scala.collection.immutable.Set[java.net.SocketAddress]]"></a>
       <a id="set:Var[Set[SocketAddress]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -495,23 +555,25 @@ been updated.
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">set</span><span class="result">: <span name="com.twitter.util.Var" class="extype">Var</span>[<span name="scala.collection.immutable.Set" class="extype">Set</span>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]]</span>
+        <span class="name">set</span><span class="result">: <span class="extype" name="com.twitter.util.Var">Var</span>[<span class="extype" name="scala.collection.immutable.Set">Set</span>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="com.twitter.finagle" class="extype" href="package.html">finagle</a>] </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a> → <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a></dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
-      <a id="synchronized[T0](⇒ T0):T0"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd><a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a> → <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a></dd></dl></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ T0</span>)</span><span class="result">: T0</span>
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Group#toString" data-isabs="false">
+    </li><li name="com.twitter.finagle.Group#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -519,11 +581,12 @@ been updated.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toString</span><span class="params">()</span><span class="result">: String</span>
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a> → AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a> → AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -531,14 +594,18 @@ been updated.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
       <a id="wait(Long,Int):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -546,14 +613,18 @@ been updated.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>, <span name="arg1">arg1: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
       <a id="wait(Long):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -561,34 +632,47 @@ been updated.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
     </li></ol>
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
-        <div name="com.twitter.util.CloseAwaitably" class="parent">
-              <h3>Inherited from <span name="com.twitter.util.CloseAwaitably" class="extype">CloseAwaitably</span></h3>
-            </div><div name="com.twitter.finagle.ListeningServer" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></h3>
-            </div><div name="com.twitter.finagle.Group" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</h3>
-            </div><div name="com.twitter.util.Awaitable" class="parent">
-              <h3>Inherited from <span name="com.twitter.util.Awaitable" class="extype">Awaitable</span>[<span name="scala.Unit" class="extype">Unit</span>]</h3>
-            </div><div name="com.twitter.util.Closable" class="parent">
-              <h3>Inherited from <span name="com.twitter.util.Closable" class="extype">Closable</span></h3>
-            </div><div name="scala.AnyRef" class="parent">
-              <h3>Inherited from AnyRef</h3>
-            </div><div name="scala.Any" class="parent">
-              <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>
+        <div class="parent" name="com.twitter.util.CloseAwaitably">
+              <h3>Inherited from <span class="extype" name="com.twitter.util.CloseAwaitably">CloseAwaitably</span></h3>
+            </div><div class="parent" name="com.twitter.finagle.ListeningServer">
+              <h3>Inherited from <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.Group">
+              <h3>Inherited from <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</h3>
+            </div><div class="parent" name="com.twitter.util.Awaitable">
+              <h3>Inherited from <span class="extype" name="com.twitter.util.Awaitable">Awaitable</span>[<span class="extype" name="scala.Unit">Unit</span>]</h3>
+            </div><div class="parent" name="com.twitter.util.Closable">
+              <h3>Inherited from <span class="extype" name="com.twitter.util.Closable">Closable</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
             </div>
         </div>
 
@@ -597,7 +681,6 @@ been updated.
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../lib/template.js"></script>
     </body>
       </html>

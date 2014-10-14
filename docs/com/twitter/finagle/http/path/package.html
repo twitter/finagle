@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.http.path</title>
+          <title>path - com.twitter.finagle.http.path</title>
+          <meta name="description" content="path - com.twitter.finagle.http.path" />
+          <meta name="keywords" content="path com.twitter.finagle.http.path" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../index.html';
+            var hash = 'com.twitter.finagle.http.path.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.http" class="extype" href="../package.html">http</a></p>
+        <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.http">http</a></p>
         <h1>path</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,9 +56,10 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.http.path./" data-isabs="false">
+              <ol><li name="com.twitter.finagle.http.path./" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="/extendsPathwithProductwithSerializable"></a>
       <a id="/:/"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,12 +67,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="$div.html"><span class="name" title="gt4s: $div">/</span></a><span class="params">(<span name="parent">parent: Path</span>, <span name="child">child: String</span>)</span><span class="result"> extends Path with Product with Serializable</span>
+        <a href="$div.html"><span title="gt4s: $div" class="name">/</span></a><span class="params">(<span name="parent">parent: <a href="Path.html" class="extype" name="com.twitter.finagle.http.path.Path">Path</a></span>, <span name="child">child: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Path.html" class="extype" name="com.twitter.finagle.http.path.Path">Path</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Path separator extractor:
   Path(&quot;/1/2/3/test.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.path.:?" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.path.:?" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id=":?extendsProductwithSerializable"></a>
       <a id=":?::?"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -69,11 +81,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="$colon$qmark.html"><span class="name" title="gt4s: $colon$qmark">:?</span></a><span class="params">(<span name="path">path: Path</span>, <span name="params">params: ParamMap</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="$colon$qmark.html"><span title="gt4s: $colon$qmark" class="name">:?</span></a><span class="params">(<span name="path">path: <a href="Path.html" class="extype" name="com.twitter.finagle.http.path.Path">Path</a></span>, <span name="params">params: <a href="../ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.path.DoubleParamMatcher" data-isabs="true">
+    </li><li name="com.twitter.finagle.http.path.DoubleParamMatcher" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="DoubleParamMatcherextendsAnyRef"></a>
       <a id="DoubleParamMatcher:DoubleParamMatcher"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -81,13 +94,14 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="DoubleParamMatcher.html"><span class="name">DoubleParamMatcher</span></a><span class="result"> extends AnyRef</span>
+        <a href="DoubleParamMatcher.html"><span class="name">DoubleParamMatcher</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">Double param extractor:
   object Latitude extends DoubleParamMatcher(&quot;lat&quot;)
   (Path(request.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.path.IntParamMatcher" data-isabs="true">
+    </li><li name="com.twitter.finagle.http.path.IntParamMatcher" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="IntParamMatcherextendsAnyRef"></a>
       <a id="IntParamMatcher:IntParamMatcher"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -95,13 +109,14 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="IntParamMatcher.html"><span class="name">IntParamMatcher</span></a><span class="result"> extends AnyRef</span>
+        <a href="IntParamMatcher.html"><span class="name">IntParamMatcher</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">Int param extractor:
   object Page extends IntParamMatcher(&quot;page&quot;)
   (Path(request.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.path.LongParamMatcher" data-isabs="true">
+    </li><li name="com.twitter.finagle.http.path.LongParamMatcher" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="LongParamMatcherextendsAnyRef"></a>
       <a id="LongParamMatcher:LongParamMatcher"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -109,25 +124,27 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="LongParamMatcher.html"><span class="name">LongParamMatcher</span></a><span class="result"> extends AnyRef</span>
+        <a href="LongParamMatcher.html"><span class="name">LongParamMatcher</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">Long param extractor:
   object UserId extends LongParamMatcher(&quot;user_id&quot;)
   (Path(request.</p>
-    </li><li visbl="prt" name="com.twitter.finagle.http.path.Numeric" data-isabs="false">
-      <a id="Numeric:Numeric[A]"></a>
+    </li><li name="com.twitter.finagle.http.path.Numeric" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Numeric[A&lt;:AnyVal]extendsAnyRef"></a>
+      <a id="Numeric[A&lt;:AnyVal]:Numeric[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Numeric.html"><span class="name">Numeric</span></a><span class="tparams">[<span name="A">A &lt;: AnyVal</span>]</span><span class="result"> extends AnyRef</span>
+        <a href="Numeric.html"><span class="name">Numeric</span></a><span class="tparams">[<span name="A">A &lt;: <span class="extype" name="scala.AnyVal">AnyVal</span></span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.path.ParamMatcher" data-isabs="true">
+    </li><li name="com.twitter.finagle.http.path.ParamMatcher" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ParamMatcherextendsAnyRef"></a>
       <a id="ParamMatcher:ParamMatcher"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -135,13 +152,14 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ParamMatcher.html"><span class="name">ParamMatcher</span></a><span class="result"> extends AnyRef</span>
+        <a href="ParamMatcher.html"><span class="name">ParamMatcher</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">Param extractor:
   object ScreenName extends ParamMatcher(&quot;screen_name&quot;)
   (Path(request.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.path.Path" data-isabs="true">
+    </li><li name="com.twitter.finagle.http.path.Path" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="PathextendsAnyRef"></a>
       <a id="Path:Path"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -149,7 +167,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Path.html"><span class="name">Path</span></a><span class="result"> extends AnyRef</span>
+        <a href="Path.html"><span class="name">Path</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">Base class for path extractors.</p>
@@ -158,9 +176,10 @@
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.http.path.-&gt;" data-isabs="false">
+              <ol><li name="com.twitter.finagle.http.path.-&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="-&gt;"></a>
       <a id="-&gt;:-&gt;"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -168,11 +187,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="$minus$greater$.html"><span class="name" title="gt4s: $minus$greater">-&gt;</span></a><span class="result"> extends AnyRef</span>
+        <a href="$minus$greater$.html"><span title="gt4s: $minus$greater" class="name">-&gt;</span></a>
       </span>
       </h4>
       <p class="comment cmt">HttpMethod extractor</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.path./:" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.path./:" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="/:"></a>
       <a id="/::/:"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -180,12 +200,13 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="$div$colon$.html"><span class="name" title="gt4s: $div$colon">/:</span></a><span class="result"> extends AnyRef</span>
+        <a href="$div$colon$.html"><span title="gt4s: $div$colon" class="name">/:</span></a>
       </span>
       </h4>
       <p class="comment cmt">Path separator extractor:
   Path(&quot;/1/2/3/test.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.path.:&amp;" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.path.:&amp;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id=":&amp;"></a>
       <a id=":&amp;::&amp;"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -193,14 +214,15 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="$colon$amp$.html"><span class="name" title="gt4s: $colon$amp">:&amp;</span></a><span class="result"> extends AnyRef</span>
+        <a href="$colon$amp$.html"><span title="gt4s: $colon$amp" class="name">:&amp;</span></a>
       </span>
       </h4>
       <p class="comment cmt">Multiple param extractor:
   object A extends ParamMatcher(&quot;a&quot;)
   object B extends ParamMatcher(&quot;b&quot;)
   (Path(request.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.path.Integer" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.path.Integer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Integer"></a>
       <a id="Integer:Integer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -208,13 +230,14 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Integer$.html"><span class="name">Integer</span></a><span class="result"> extends Numeric[Int]</span>
+        <a href="Integer$.html"><span class="name">Integer</span></a><span class="result"> extends <a href="Numeric.html" class="extype" name="com.twitter.finagle.http.path.Numeric">Numeric</a>[<span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">Integer extractor:
   Path(&quot;/user/123&quot;) match {
      case Root / &quot;user&quot; / Int(userId) =&gt; .</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.path.Long" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.path.Long" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Long"></a>
       <a id="Long:Long"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -222,13 +245,14 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Long$.html"><span class="name">Long</span></a><span class="result"> extends Numeric[Long]</span>
+        <a href="Long$.html"><span class="name">Long</span></a><span class="result"> extends <a href="Numeric.html" class="extype" name="com.twitter.finagle.http.path.Numeric">Numeric</a>[<span class="extype" name="scala.Long">scala.Long</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">Long extractor:
   Path(&quot;/user/123&quot;) match {
      case Root / &quot;user&quot; / Long(userId) =&gt; .</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.path.Path" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.path.Path" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Path"></a>
       <a id="Path:Path"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -236,11 +260,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Path$.html"><span class="name">Path</span></a><span class="result"> extends AnyRef</span>
+        <a href="Path$.html"><span class="name">Path</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.path.Root" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.path.Root" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Root"></a>
       <a id="Root:Root"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -248,13 +273,14 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Root$.html"><span class="name">Root</span></a><span class="result"> extends Path with Product with Serializable</span>
+        <a href="Root$.html"><span class="name">Root</span></a><span class="result"> extends <a href="Path.html" class="extype" name="com.twitter.finagle.http.path.Path">Path</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Root extractor:
   Path(&quot;/&quot;) match {
     case Root =&gt; .</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.path.~" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.path.~" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="~"></a>
       <a id="~:~"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -262,7 +288,7 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="$tilde$.html"><span class="name" title="gt4s: $tilde">~</span></a><span class="result"> extends AnyRef</span>
+        <a href="$tilde$.html"><span title="gt4s: $tilde" class="name">~</span></a>
       </span>
       </h4>
       <p class="comment cmt">File extension extractor</p>
@@ -270,10 +296,20 @@
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -281,7 +317,6 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../lib/template.js"></script>
     </body>
       </html>

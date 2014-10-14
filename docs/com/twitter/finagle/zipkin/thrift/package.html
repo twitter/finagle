@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.zipkin.thrift</title>
+          <title>thrift - com.twitter.finagle.zipkin.thrift</title>
+          <meta name="description" content="thrift - com.twitter.finagle.zipkin.thrift" />
+          <meta name="keywords" content="thrift com.twitter.finagle.zipkin.thrift" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../index.html';
+            var hash = 'com.twitter.finagle.zipkin.thrift.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.zipkin" class="extype" href="../package.html">zipkin</a></p>
+        <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.zipkin">zipkin</a></p>
         <h1>thrift</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,9 +56,10 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.BinaryAnnotation" data-isabs="false">
+              <ol><li name="com.twitter.finagle.zipkin.thrift.BinaryAnnotation" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BinaryAnnotationextendsProductwithSerializable"></a>
       <a id="BinaryAnnotation:BinaryAnnotation"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,23 +67,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BinaryAnnotation.html"><span class="name">BinaryAnnotation</span></a><span class="params">(<span name="key">key: String</span>, <span name="value">value: ByteBuffer</span>, <span name="annotationType">annotationType: AnnotationType</span>, <span name="endpoint">endpoint: Endpoint</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="BinaryAnnotation.html"><span class="name">BinaryAnnotation</span></a><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span></span>, <span name="annotationType">annotationType: <a href="../../thrift/thrift/AnnotationType.html" class="extype" name="com.twitter.finagle.thrift.thrift.AnnotationType">AnnotationType</a></span>, <span name="endpoint">endpoint: <a href="Endpoint.html" class="extype" name="com.twitter.finagle.zipkin.thrift.Endpoint">Endpoint</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.DeadlineSpanMap" data-isabs="false">
-      <a id="DeadlineSpanMap:DeadlineSpanMap"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="DeadlineSpanMap.html"><span class="name">DeadlineSpanMap</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      <p class="comment cmt">Takes care of storing the spans in a thread safe fashion.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Endpoint" data-isabs="false">
+    </li><li name="com.twitter.finagle.zipkin.thrift.Endpoint" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EndpointextendsProductwithSerializable"></a>
       <a id="Endpoint:Endpoint"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -80,39 +80,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Endpoint.html"><span class="name">Endpoint</span></a><span class="params">(<span name="ipv4">ipv4: Int</span>, <span name="port">port: Short</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="Endpoint.html"><span class="name">Endpoint</span></a><span class="params">(<span name="ipv4">ipv4: <span class="extype" name="scala.Int">Int</span></span>, <span name="port">port: <span class="extype" name="scala.Short">Short</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Endpoints describe a TCP endpoint that terminates RPC
 communication.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.LogEntry" data-isabs="true">
-      <a id="LogEntry:LogEntry"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="LogEntry.html"><span class="name">LogEntry</span></a><span class="result"> extends ThriftStruct with Product2[String, String] with Serializable</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.ResultCode" data-isabs="true">
-      <a id="ResultCode:ResultCode"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">sealed </span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="ResultCode.html"><span class="name">ResultCode</span></a><span class="result"> extends ThriftEnum with Serializable</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@Generated</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Sampler" data-isabs="false">
+    </li><li name="com.twitter.finagle.zipkin.thrift.Sampler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SamplerextendsAnyRef"></a>
       <a id="Sampler:Sampler"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -120,11 +94,12 @@ communication.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Sampler.html"><span class="name">Sampler</span></a><span class="result"> extends AnyRef</span>
+        <a href="Sampler.html"><span class="name">Sampler</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">Decide if we should sample a particular trace or not.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.SamplingTracer" data-isabs="false">
+    </li><li name="com.twitter.finagle.zipkin.thrift.SamplingTracer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SamplingTracerextendsTracer"></a>
       <a id="SamplingTracer:SamplingTracer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -132,56 +107,12 @@ communication.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SamplingTracer.html"><span class="name">SamplingTracer</span></a><span class="result"> extends Tracer</span>
+        <a href="SamplingTracer.html"><span class="name">SamplingTracer</span></a><span class="result"> extends <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>
       </span>
       </h4>
       <p class="comment cmt">Tracer that supports sampling.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Scribe" data-isabs="true">
-      <a id="Scribe:Scribe[MM]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="Scribe.html"><span class="name">Scribe</span></a><span class="tparams">[<span name="MM">+MM<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="result"> extends ThriftService</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@Generated</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Scribe$FinagleClient" data-isabs="false">
-      <a id="Scribe$FinagleClient:Scribe$FinagleClient"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="Scribe$FinagleClient.html"><span class="name">Scribe$FinagleClient</span></a><span class="result"> extends Scribe[Future]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@Generated</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Scribe$FinagleService" data-isabs="false">
-      <a id="Scribe$FinagleService:Scribe$FinagleService"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="Scribe$FinagleService.html"><span class="name">Scribe$FinagleService</span></a><span class="result"> extends Service[Array[Byte], Array[Byte]]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@Generated</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Span" data-isabs="false">
+    </li><li name="com.twitter.finagle.zipkin.thrift.Span" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SpanextendsProductwithSerializable"></a>
       <a id="Span:Span"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -189,11 +120,12 @@ communication.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Span.html"><span class="name">Span</span></a><span class="params">(<span name="traceId">traceId: TraceId</span>, <span name="_serviceName">_serviceName: Option[String]</span>, <span name="_name">_name: Option[String]</span>, <span name="annotations">annotations: Seq[ZipkinAnnotation]</span>, <span name="bAnnotations">bAnnotations: Seq[BinaryAnnotation]</span>, <span name="endpoint">endpoint: Endpoint</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="Span.html"><span class="name">Span</span></a><span class="params">(<span name="traceId">traceId: <a href="../../tracing/TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>, <span name="_serviceName">_serviceName: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="_name">_name: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="annotations">annotations: <span class="extype" name="scala.Seq">Seq</span>[<a href="ZipkinAnnotation.html" class="extype" name="com.twitter.finagle.zipkin.thrift.ZipkinAnnotation">ZipkinAnnotation</a>]</span>, <span name="bAnnotations">bAnnotations: <span class="extype" name="scala.Seq">Seq</span>[<a href="BinaryAnnotation.html" class="extype" name="com.twitter.finagle.zipkin.thrift.BinaryAnnotation">BinaryAnnotation</a>]</span>, <span name="endpoint">endpoint: <a href="Endpoint.html" class="extype" name="com.twitter.finagle.zipkin.thrift.Endpoint">Endpoint</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">The span itself is an immutable datastructure.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.ZipkinAnnotation" data-isabs="false">
+    </li><li name="com.twitter.finagle.zipkin.thrift.ZipkinAnnotation" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ZipkinAnnotationextendsProductwithSerializable"></a>
       <a id="ZipkinAnnotation:ZipkinAnnotation"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -201,11 +133,12 @@ communication.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ZipkinAnnotation.html"><span class="name">ZipkinAnnotation</span></a><span class="params">(<span name="timestamp">timestamp: Time</span>, <span name="value">value: String</span>, <span name="endpoint">endpoint: Endpoint</span>, <span name="duration">duration: Option[Duration]</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="ZipkinAnnotation.html"><span class="name">ZipkinAnnotation</span></a><span class="params">(<span name="timestamp">timestamp: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="endpoint">endpoint: <a href="Endpoint.html" class="extype" name="com.twitter.finagle.zipkin.thrift.Endpoint">Endpoint</a></span>, <span name="duration">duration: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Annotation for a span.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.ZipkinTracer" data-isabs="false">
+    </li><li name="com.twitter.finagle.zipkin.thrift.ZipkinTracer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ZipkinTracerextendsSamplingTracer"></a>
       <a id="ZipkinTracer:ZipkinTracer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -213,7 +146,7 @@ communication.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ZipkinTracer.html"><span class="name">ZipkinTracer</span></a><span class="result"> extends SamplingTracer</span>
+        <a href="ZipkinTracer.html"><span class="name">ZipkinTracer</span></a><span class="result"> extends <a href="SamplingTracer.html" class="extype" name="com.twitter.finagle.zipkin.thrift.SamplingTracer">SamplingTracer</a></span>
       </span>
       </h4>
       
@@ -222,9 +155,10 @@ communication.</p>
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Endpoint" data-isabs="false">
+              <ol><li name="com.twitter.finagle.zipkin.thrift.Endpoint" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Endpoint"></a>
       <a id="Endpoint:Endpoint"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -232,23 +166,12 @@ communication.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Endpoint$.html"><span class="name">Endpoint</span></a><span class="result"> extends Serializable</span>
+        <a href="Endpoint$.html"><span class="name">Endpoint</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.LogEntry" data-isabs="false">
-      <a id="LogEntry:LogEntry"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="LogEntry$.html"><span class="name">LogEntry</span></a><span class="result"> extends ThriftStructCodec3[LogEntry] with Serializable</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.RawZipkinTracer" data-isabs="false">
+    </li><li name="com.twitter.finagle.zipkin.thrift.RawZipkinTracer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RawZipkinTracer"></a>
       <a id="RawZipkinTracer:RawZipkinTracer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -256,26 +179,12 @@ communication.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="RawZipkinTracer$.html"><span class="name">RawZipkinTracer</span></a><span class="result"> extends AnyRef</span>
+        <a href="RawZipkinTracer$.html"><span class="name">RawZipkinTracer</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.ResultCode" data-isabs="false">
-      <a id="ResultCode:ResultCode"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="ResultCode$.html"><span class="name">ResultCode</span></a><span class="result"> extends Product with Serializable</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@Generated</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Sampler" data-isabs="false">
+    </li><li name="com.twitter.finagle.zipkin.thrift.Sampler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Sampler"></a>
       <a id="Sampler:Sampler"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -283,23 +192,12 @@ communication.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Sampler$.html"><span class="name">Sampler</span></a><span class="result"> extends AnyRef</span>
+        <a href="Sampler$.html"><span class="name">Sampler</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Scribe" data-isabs="false">
-      <a id="Scribe:Scribe"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Scribe$.html"><span class="name">Scribe</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Span" data-isabs="false">
+    </li><li name="com.twitter.finagle.zipkin.thrift.Span" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Span"></a>
       <a id="Span:Span"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -307,11 +205,12 @@ communication.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Span$.html"><span class="name">Span</span></a><span class="result"> extends Serializable</span>
+        <a href="Span$.html"><span class="name">Span</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.ZipkinTracer" data-isabs="false">
+    </li><li name="com.twitter.finagle.zipkin.thrift.ZipkinTracer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ZipkinTracer"></a>
       <a id="ZipkinTracer:ZipkinTracer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -319,7 +218,7 @@ communication.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ZipkinTracer$.html"><span class="name">ZipkinTracer</span></a><span class="result"> extends AnyRef</span>
+        <a href="ZipkinTracer$.html"><span class="name">ZipkinTracer</span></a>
       </span>
       </h4>
       
@@ -327,10 +226,20 @@ communication.</p>
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -338,7 +247,6 @@ communication.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../lib/template.js"></script>
     </body>
       </html>

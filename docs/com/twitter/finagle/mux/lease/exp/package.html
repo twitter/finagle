@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.mux.lease.exp</title>
+          <title>exp - com.twitter.finagle.mux.lease.exp</title>
+          <meta name="description" content="exp - com.twitter.finagle.mux.lease.exp" />
+          <meta name="keywords" content="exp com.twitter.finagle.mux.lease.exp" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../../index.html';
+            var hash = 'com.twitter.finagle.mux.lease.exp.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../../package.html">finagle</a>.<a name="com.twitter.finagle.mux" class="extype" href="../../package.html">mux</a>.<a name="com.twitter.finagle.mux.lease" class="extype" href="../package.html">lease</a></p>
+        <p id="owner"><a href="../../../../../package.html" class="extype" name="com">com</a>.<a href="../../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle.mux">mux</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.mux.lease">lease</a></p>
         <h1>exp</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,17 +39,83 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>This is the experimental package of mux.lease.  Right now, this is all
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>This is the experimental package of mux.lease.  Right now, this is all
 experimental code around leasing, especially leasing around garbage
 collections.  We haven't hammered out exactly what the api will be, so it's
-in large part private and is subject to change.</p><p>NB: large parts of this package might suddenly end up in util-jvm
-</p></div></div>
-    
+in large part private and is subject to change.</p><p>If you want to experiment with GC avoidance, you need to turn on the flag
+<code>com.twitter.finagle.mux.lease.exp.drainerEnabled</code> to enable GC avoidance,
+and right now it only works with parallel old and CMS.  So far, we've seen
+promising results with GC avoidance locally, but haven't had the opportunity
+to run scientific load tests when simulating production load.</p><p>It can be useful to turn on the
+<code>com.twitter.finagle.mux.lease.exp.drainerDebug</code> flag to get much more
+granular data about what is going on.  Turning on this flag will log stats
+for each garbage collection avoidance attempt.  Especially interesting is to
+see how long it takes for a server to drain, how many outstanding requests
+there still are, and whether any GCs were natural instead of triggered.  If
+there are still outstanding requests when the GC is triggered, it might make
+sense to turn on nacking, or allow more time for draining.</p><p>You can turn on nacking for a server after the lease has expired by turning
+on the flag <code>com.twitter.finagle.mux.lease.exp.nackOnExpiredLease</code>.  The way
+this behaves is that it nacks all requests which come in after a 0 lease has
+been issued. This has two effects--it corrects behavior for clients which are
+slow to respect leases and turns on failure accrual for clients which
+continue to send requests.  One possible area of future work would be
+allowing consumers to configure whether or not Finagle's failure accrual
+mechanism considers these nacks to be failures.  Another possible improvement
+would be to nack requests which are already partially completed, instead of
+just new incoming requets.</p><p>The <code>com.twitter.finagle.mux.lease.exp.drainerDiscountRange</code> flag modulates
+how the server chooses the discount, which is when it expires the lease.  The
+left is the absolute lower bound on the range from which it will select
+randomly.  The right is the absolute upper bound on the range from which it
+will select randomly.  It chooses a uniform random number of bytes from
+between the upper bound and the max of the percentile number of bytes
+generated in a single request and the lower bound.  The absolute lower bound
+does double duty--it is also used for choosing when to stop waiting for
+stragglers and run a GC regardless.</p><p>The <code>com.twitter.finagle.mux.lease.exp.drainerPercentile</code> flag specifies the
+percentile of the incoming request distribution that will be chosen for
+deciding how long it takes to handle a single request.</p><p>If you're not working with a JDK which supports System.minorGc, GCA will not
+work properly, since it will not just run a minor GC when you trigger
+System.gc.  Although the behavior will continue to be correct, it will be
+less efficient.  Assuming you're draining properly, your pause times won't
+affect your latency, but you will have lower throughput, since your server
+will spend more time not receiving traffice.  One possible direction for
+further work is to allocate big arrays until you trigger a minor GC, but this
+must be done slightly delicately to avoid triggering a major collection.</p><p>The drainerDiscountRange is of insufficient fidelity.  The biggest problem is
+that it doesn't make sense to conflate the hard cutoff for triggering a GC
+with the drainerDiscountRange minimum, so it should probably be separated
+out.</p><p>Observing leases on the client side can be made slightly smarter too.  It
+might make sense to have some kind of communication which encourages clients
+to stop sending requests that it guesses will soon fail (for leases that will
+soon expire).</p><p>NB: large parts of this package might suddenly end up in util-jvm
+</p></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
-        
-        
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="com.twitter.finagle.mux.lease.exp"><span>exp</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
             <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
@@ -50,9 +126,10 @@ in large part private and is subject to change.</p><p>NB: large parts of this pa
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.mux.lease.exp.DedupingLogsReceiver" data-isabs="false">
+              <ol><li name="com.twitter.finagle.mux.lease.exp.DedupingLogsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DedupingLogsReceiverextendsLogsReceiver"></a>
       <a id="DedupingLogsReceiver:DedupingLogsReceiver"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -60,11 +137,12 @@ in large part private and is subject to change.</p><p>NB: large parts of this pa
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="DedupingLogsReceiver.html"><span class="name">DedupingLogsReceiver</span></a><span class="result"> extends LogsReceiver</span>
+        <a href="DedupingLogsReceiver.html"><span class="name">DedupingLogsReceiver</span></a><span class="result"> extends <a href="LogsReceiver.html" class="extype" name="com.twitter.finagle.mux.lease.exp.LogsReceiver">LogsReceiver</a></span>
       </span>
       </h4>
       <p class="comment cmt">This is not threadsafe.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.mux.lease.exp.package.GarbageCollectorAddable" data-isabs="false">
+    </li><li name="com.twitter.finagle.mux.lease.exp.GarbageCollectorAddable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GarbageCollectorAddableextendsAnyRef"></a>
       <a id="GarbageCollectorAddable:GarbageCollectorAddable"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -72,11 +150,12 @@ in large part private and is subject to change.</p><p>NB: large parts of this pa
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="package$$GarbageCollectorAddable.html"><span class="name">GarbageCollectorAddable</span></a><span class="result"> extends AnyRef</span>
+        <a href="package$$GarbageCollectorAddable.html"><span class="name">GarbageCollectorAddable</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.mux.lease.exp.LogsReceiver" data-isabs="true">
+    </li><li name="com.twitter.finagle.mux.lease.exp.LogsReceiver" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="LogsReceiverextendsAnyRef"></a>
       <a id="LogsReceiver:LogsReceiver"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -84,7 +163,7 @@ in large part private and is subject to change.</p><p>NB: large parts of this pa
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="LogsReceiver.html"><span class="name">LogsReceiver</span></a><span class="result"> extends AnyRef</span>
+        <a href="LogsReceiver.html"><span class="name">LogsReceiver</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
@@ -93,9 +172,10 @@ in large part private and is subject to change.</p><p>NB: large parts of this pa
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.mux.lease.exp.NullLogsReceiver" data-isabs="false">
+              <ol><li name="com.twitter.finagle.mux.lease.exp.NullLogsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NullLogsReceiver"></a>
       <a id="NullLogsReceiver:NullLogsReceiver"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -103,11 +183,12 @@ in large part private and is subject to change.</p><p>NB: large parts of this pa
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NullLogsReceiver$.html"><span class="name">NullLogsReceiver</span></a><span class="result"> extends LogsReceiver</span>
+        <a href="NullLogsReceiver$.html"><span class="name">NullLogsReceiver</span></a><span class="result"> extends <a href="LogsReceiver.html" class="extype" name="com.twitter.finagle.mux.lease.exp.LogsReceiver">LogsReceiver</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.mux.lease.exp.drainerDebug" data-isabs="false">
+    </li><li name="com.twitter.finagle.mux.lease.exp.drainerDebug" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="drainerDebug"></a>
       <a id="drainerDebug:drainerDebug"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -115,11 +196,12 @@ in large part private and is subject to change.</p><p>NB: large parts of this pa
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="drainerDebug$.html"><span class="name">drainerDebug</span></a><span class="result"> extends GlobalFlag[Boolean]</span>
+        <a href="drainerDebug$.html"><span class="name">drainerDebug</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.mux.lease.exp.drainerDiscountRange" data-isabs="false">
+    </li><li name="com.twitter.finagle.mux.lease.exp.drainerDiscountRange" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="drainerDiscountRange"></a>
       <a id="drainerDiscountRange:drainerDiscountRange"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -127,11 +209,12 @@ in large part private and is subject to change.</p><p>NB: large parts of this pa
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="drainerDiscountRange$.html"><span class="name">drainerDiscountRange</span></a><span class="result"> extends GlobalFlag[StorageUnit]</span>
+        <a href="drainerDiscountRange$.html"><span class="name">drainerDiscountRange</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[(<span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span>, <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span>)]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.mux.lease.exp.drainerEnabled" data-isabs="false">
+    </li><li name="com.twitter.finagle.mux.lease.exp.drainerEnabled" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="drainerEnabled"></a>
       <a id="drainerEnabled:drainerEnabled"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -139,35 +222,12 @@ in large part private and is subject to change.</p><p>NB: large parts of this pa
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="drainerEnabled$.html"><span class="name">drainerEnabled</span></a><span class="result"> extends GlobalFlag[Boolean]</span>
+        <a href="drainerEnabled$.html"><span class="name">drainerEnabled</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.mux.lease.exp.drainerMaxDiscount" data-isabs="false">
-      <a id="drainerMaxDiscount:drainerMaxDiscount"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="drainerMaxDiscount$.html"><span class="name">drainerMaxDiscount</span></a><span class="result"> extends GlobalFlag[StorageUnit]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.mux.lease.exp.drainerMinDiscount" data-isabs="false">
-      <a id="drainerMinDiscount:drainerMinDiscount"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="drainerMinDiscount$.html"><span class="name">drainerMinDiscount</span></a><span class="result"> extends GlobalFlag[StorageUnit]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.mux.lease.exp.drainerPercentile" data-isabs="false">
+    </li><li name="com.twitter.finagle.mux.lease.exp.drainerPercentile" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="drainerPercentile"></a>
       <a id="drainerPercentile:drainerPercentile"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -175,11 +235,12 @@ in large part private and is subject to change.</p><p>NB: large parts of this pa
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="drainerPercentile$.html"><span class="name">drainerPercentile</span></a><span class="result"> extends GlobalFlag[Int]</span>
+        <a href="drainerPercentile$.html"><span class="name">drainerPercentile</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.mux.lease.exp.package#gcMxBeanToGc" data-isabs="false">
+    </li><li name="com.twitter.finagle.mux.lease.exp.package#gcMxBeanToGc" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="gcMxBeanToGc(coll:java.lang.management.GarbageCollectorMXBean):com.twitter.finagle.mux.lease.exp.package.GarbageCollectorAddable"></a>
       <a id="gcMxBeanToGc(GarbageCollectorMXBean):GarbageCollectorAddable"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -187,18 +248,45 @@ in large part private and is subject to change.</p><p>NB: large parts of this pa
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">gcMxBeanToGc</span><span class="params">(<span name="coll">coll: <span name="java.lang.management.GarbageCollectorMXBean" class="extype">GarbageCollectorMXBean</span></span>)</span><span class="result">: <a name="com.twitter.finagle.mux.lease.exp.package.GarbageCollectorAddable" class="extype" href="package$$GarbageCollectorAddable.html">GarbageCollectorAddable</a></span>
+        <span class="name">gcMxBeanToGc</span><span class="params">(<span name="coll">coll: <span class="extype" name="java.lang.management.GarbageCollectorMXBean">GarbageCollectorMXBean</span></span>)</span><span class="result">: <a href="package$$GarbageCollectorAddable.html" class="extype" name="com.twitter.finagle.mux.lease.exp.GarbageCollectorAddable">GarbageCollectorAddable</a></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.mux.lease.exp.package" class="extype" href="package$.html">package</a></dd></dl></div>
+      
+    </li><li name="com.twitter.finagle.mux.lease.exp.nackOnExpiredLease" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="nackOnExpiredLease"></a>
+      <a id="nackOnExpiredLease:nackOnExpiredLease"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="nackOnExpiredLease$.html"><span class="name">nackOnExpiredLease</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>
+      </span>
+      </h4>
+      
     </li></ol>
             </div>
+
+        
 
         
         </div>
 
         <div id="inheritedMembers">
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
         
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -206,7 +294,6 @@ in large part private and is subject to change.</p><p>NB: large parts of this pa
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../../lib/template.js"></script>
     </body>
       </html>

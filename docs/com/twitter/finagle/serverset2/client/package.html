@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.serverset2.client</title>
+          <title>client - com.twitter.finagle.serverset2.client</title>
+          <meta name="description" content="client - com.twitter.finagle.serverset2.client" />
+          <meta name="keywords" content="client com.twitter.finagle.serverset2.client" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../index.html';
+            var hash = 'com.twitter.finagle.serverset2.client.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.serverset2" class="extype" href="../package.html">serverset2</a></p>
+        <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.serverset2">serverset2</a></p>
         <h1>client</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,21 +56,85 @@
         <div id="allMembers">
         
 
-        
-
-        
-
-        <div class="values members" id="values">
-              <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.serverset2.client.ZooKeeperReader" data-isabs="false">
-      <a id="ZooKeeperReader:ZooKeeperReader"></a>
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="com.twitter.finagle.serverset2.client.NullZooKeeperClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="NullZooKeeperClientextendsZooKeeperClient"></a>
+      <a id="NullZooKeeperClient:NullZooKeeperClient"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">object</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ZooKeeperReader$.html"><span class="name">ZooKeeperReader</span></a><span class="result"> extends AnyRef</span>
+        <a href="NullZooKeeperClient.html"><span class="name">NullZooKeeperClient</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.serverset2.client.ZooKeeperClient">ZooKeeperClient</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Provide a Null client, useful as an initial value for a wrapper that
+re-establishes a ZooKeeper connection on SessionExpiration, as
+ZooKeeperClient is designed for single session operation.</p>
+    </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperMulti" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="NullZooKeeperMultiextendsZooKeeperMultiwithNullZooKeeperClient"></a>
+      <a id="NullZooKeeperMulti:NullZooKeeperMulti"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="NullZooKeeperMulti.html"><span class="name">NullZooKeeperMulti</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.serverset2.client.ZooKeeperMulti">ZooKeeperMulti</span> with <a href="NullZooKeeperClient.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperClient">NullZooKeeperClient</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperRW" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="NullZooKeeperRWextendsZooKeeperRWwithNullZooKeeperReaderwithNullZooKeeperWriter"></a>
+      <a id="NullZooKeeperRW:NullZooKeeperRW"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="NullZooKeeperRW.html"><span class="name">NullZooKeeperRW</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.serverset2.client.ZooKeeperRW">ZooKeeperRW</span> with <a href="NullZooKeeperReader.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperReader">NullZooKeeperReader</a> with <a href="NullZooKeeperWriter.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperWriter">NullZooKeeperWriter</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperRWMulti" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="NullZooKeeperRWMultiextendsZooKeeperRWMultiwithNullZooKeeperReaderwithNullZooKeeperWriterwithNullZooKeeperMulti"></a>
+      <a id="NullZooKeeperRWMulti:NullZooKeeperRWMulti"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="NullZooKeeperRWMulti.html"><span class="name">NullZooKeeperRWMulti</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.serverset2.client.ZooKeeperRWMulti">ZooKeeperRWMulti</span> with <a href="NullZooKeeperReader.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperReader">NullZooKeeperReader</a> with <a href="NullZooKeeperWriter.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperWriter">NullZooKeeperWriter</a> with <a href="NullZooKeeperMulti.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperMulti">NullZooKeeperMulti</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperReader" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="NullZooKeeperReaderextendsZooKeeperReaderwithNullZooKeeperClient"></a>
+      <a id="NullZooKeeperReader:NullZooKeeperReader"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="NullZooKeeperReader.html"><span class="name">NullZooKeeperReader</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.serverset2.client.ZooKeeperReader">ZooKeeperReader</span> with <a href="NullZooKeeperClient.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperClient">NullZooKeeperClient</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperWriter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="NullZooKeeperWriterextendsZooKeeperWriterwithNullZooKeeperClient"></a>
+      <a id="NullZooKeeperWriter:NullZooKeeperWriter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="NullZooKeeperWriter.html"><span class="name">NullZooKeeperWriter</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.serverset2.client.ZooKeeperWriter">ZooKeeperWriter</span> with <a href="NullZooKeeperClient.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperClient">NullZooKeeperClient</a></span>
       </span>
       </h4>
       
@@ -68,10 +142,118 @@
             </div>
 
         
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="com.twitter.finagle.serverset2.client.NullZooKeeperClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NullZooKeeperClient"></a>
+      <a id="NullZooKeeperClient:NullZooKeeperClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="NullZooKeeperClient$.html"><span class="name">NullZooKeeperClient</span></a><span class="result"> extends <a href="NullZooKeeperClient.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperClient">NullZooKeeperClient</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperMulti" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NullZooKeeperMulti"></a>
+      <a id="NullZooKeeperMulti:NullZooKeeperMulti"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="NullZooKeeperMulti$.html"><span class="name">NullZooKeeperMulti</span></a><span class="result"> extends <a href="NullZooKeeperMulti.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperMulti">NullZooKeeperMulti</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperRW" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NullZooKeeperRW"></a>
+      <a id="NullZooKeeperRW:NullZooKeeperRW"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="NullZooKeeperRW$.html"><span class="name">NullZooKeeperRW</span></a><span class="result"> extends <a href="NullZooKeeperRW.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperRW">NullZooKeeperRW</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperRWMulti" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NullZooKeeperRWMulti"></a>
+      <a id="NullZooKeeperRWMulti:NullZooKeeperRWMulti"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="NullZooKeeperRWMulti$.html"><span class="name">NullZooKeeperRWMulti</span></a><span class="result"> extends <a href="NullZooKeeperRWMulti.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperRWMulti">NullZooKeeperRWMulti</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperReader" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NullZooKeeperReader"></a>
+      <a id="NullZooKeeperReader:NullZooKeeperReader"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="NullZooKeeperReader$.html"><span class="name">NullZooKeeperReader</span></a><span class="result"> extends <a href="NullZooKeeperReader.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperReader">NullZooKeeperReader</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperWriter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NullZooKeeperWriter"></a>
+      <a id="NullZooKeeperWriter:NullZooKeeperWriter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="NullZooKeeperWriter$.html"><span class="name">NullZooKeeperWriter</span></a><span class="result"> extends <a href="NullZooKeeperWriter.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperWriter">NullZooKeeperWriter</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.serverset2.client.ZooKeeperReader" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ZooKeeperReader"></a>
+      <a id="ZooKeeperReader:ZooKeeperReader"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ZooKeeperReader$.html"><span class="name">ZooKeeperReader</span></a>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -79,7 +261,6 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../lib/template.js"></script>
     </body>
       </html>

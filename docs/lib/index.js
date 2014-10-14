@@ -14,16 +14,19 @@ var title = $(document).attr('title');
 var lastHash = "";
 
 $(document).ready(function() {
-    $('body').layout({ west__size: '20%' });
-    $('#browser').layout({	
-    	center__paneSelector: ".ui-west-center"
+    $('body').layout({
+        west__size: '20%',
+        center__maskContents: true
+    });
+    $('#browser').layout({
+        center__paneSelector: ".ui-west-center"
         //,center__initClosed:true
-    	,north__paneSelector: ".ui-west-north"
-    }); 
+        ,north__paneSelector: ".ui-west-north"
+    });
     $('iframe').bind("load", function(){
         var subtitle = $(this).contents().find('title').text();
         $(document).attr('title', (title ? title + " - " : "") + subtitle);
-        
+
         setUrlFragmentFromFrameSrc();
     });
 
@@ -81,16 +84,16 @@ function setUrlFragmentFromFrameSrc() {
     var commonLength = location.pathname.lastIndexOf("/");
     var frameLocation = frames["template"].location;
     var relativePath = frameLocation.pathname.slice(commonLength + 1);
-    
+
     if(!relativePath || frameLocation.pathname.indexOf("/") < 0)
       return;
-    
+
     // Add #, remove ".html" and replace "/" with "."
     fragment = "#" + relativePath.replace(/\.html$/, "").replace(/\//g, ".");
-    
+
     // Add the frame's hash after an @
     if(frameLocation.hash) fragment += ("@" + frameLocation.hash.slice(1));
-  
+
     // Use replace to not add history items
     lastFragment = fragment;
     location.replace(fragment);
@@ -109,7 +112,7 @@ var Index = {};
         if (type == 'object') {
             href = t['object'];
         } else {
-            href = t['class'] || t['trait'] || t['case class'];
+            href = t['class'] || t['trait'] || t['case class'] || t['type'];
         }
         return [
             '<a class="tplshow" target="template" href="',
@@ -142,10 +145,10 @@ var Index = {};
             inner += openLink(template, 'object');
         }
 
-        if (template['class'] || template['trait'] || template['case class']) {
+        if (template['class'] || template['trait'] || template['case class'] || template['type']) {
             inner += (inner == '') ?
                 '<div class="placeholder" />' : '</a>';
-            inner += openLink(template, template['trait'] ? 'trait' : 'class');
+            inner += openLink(template, template['trait'] ? 'trait' : template['type'] ? 'type' : 'class');
         } else {
             inner += '<div class="placeholder"/>';
         }
@@ -245,6 +248,7 @@ function configureEntityList() {
 function prepareEntityList() {
     var classIcon = $("#library > img.class");
     var traitIcon = $("#library > img.trait");
+    var typeIcon = $("#library > img.type");
     var objectIcon = $("#library > img.object");
     var packageIcon = $("#library > img.package");
 
@@ -252,6 +256,7 @@ function prepareEntityList() {
     $('#tpl li.pack').each(function () {
         $("span.class", this).each(function() { $(this).replaceWith(classIcon.clone()); });
         $("span.trait", this).each(function() { $(this).replaceWith(traitIcon.clone()); });
+        $("span.type", this).each(function() { $(this).replaceWith(typeIcon.clone()); });
         $("span.object", this).each(function() { $(this).replaceWith(objectIcon.clone()); });
         $("span.package", this).each(function() { $(this).replaceWith(packageIcon.clone()); });
     });
@@ -260,16 +265,95 @@ function prepareEntityList() {
         .prepend("<a class='packfocus'>focus</a>");
 }
 
+/* Handles all key presses while scrolling around with keyboard shortcuts in left panel */
+function keyboardScrolldownLeftPane() {
+    scheduler.add("init", function() {
+        $("#textfilter input").blur();
+        var $items = $("#tpl li");
+        $items.first().addClass('selected');
+
+        $(window).bind("keydown", function(e) {
+            var $old = $items.filter('.selected'),
+                $new;
+
+            switch ( e.keyCode ) {
+
+            case 9: // tab
+                $old.removeClass('selected');
+                break;
+
+            case 13: // enter
+                $old.removeClass('selected');
+                var $url = $old.children().filter('a:last').attr('href');
+                $("#template").attr("src",$url);
+                break;
+
+            case 27: // escape
+                $old.removeClass('selected');
+                $(window).unbind(e);
+                $("#textfilter input").focus();
+
+                break;
+
+            case 38: // up
+                $new = $old.prev();
+
+                if (!$new.length) {
+                    $new = $old.parent().prev();
+                }
+
+                if ($new.is('ol') && $new.children(':last').is('ol')) {
+                    $new = $new.children().children(':last');
+                } else if ($new.is('ol')) {
+                    $new = $new.children(':last');
+                }
+
+                break;
+
+            case 40: // down
+                $new = $old.next();
+                if (!$new.length) {
+                    $new = $old.parent().parent().next();
+                }
+                if ($new.is('ol')) {
+                    $new = $new.children(':first');
+                }
+                break;
+            }
+
+            if ($new.is('li')) {
+                $old.removeClass('selected');
+                $new.addClass('selected');
+            } else if (e.keyCode == 38) {
+                $(window).unbind(e);
+                $("#textfilter input").focus();
+            }
+        });
+    });
+}
+
 /* Configures the text filter  */
 function configureTextFilter() {
     scheduler.add("init", function() {
-        $("#filter").append("<div id='textfilter'><span class='pre'/><span class='input'><input type='text' accesskey='/'/></span><span class='post'/></div>");
-        printAlphabet();
+        $("#textfilter").append("<span class='pre'/><span class='input'><input id='index-input' type='text' accesskey='/'/></span><span class='post'/>");
         var input = $("#textfilter input");
         resizeFilterBlock();
-        input.bind("keyup", function(event) {
+        input.bind('keyup', function(event) {
             if (event.keyCode == 27) { // escape
                 input.attr("value", "");
+            }
+            if (event.keyCode == 40) { // down arrow
+                $(window).unbind("keydown");
+                keyboardScrolldownLeftPane();
+                return false;
+            }
+            textFilter();
+        });
+        input.bind('keydown', function(event) {
+            if (event.keyCode == 9) { // tab
+                $("#template").contents().find("#mbrsel-input").focus();
+                input.attr("value", "");
+                return false;
             }
             textFilter();
         });
@@ -342,7 +426,7 @@ function textFilter() {
         });
         configureHideFilter();
     };
-    
+
     scheduler.add('filter', searchLoop);
 }
 
@@ -450,19 +534,3 @@ function kindFilterSync() {
 function resizeFilterBlock() {
     $("#tpl").css("top", $("#filter").outerHeight(true));
 }
-
-function printAlphabet() {
-    var html = '<a target="template" href="index/index-_.html">#</a>';
-    var c;
-    for (c = 'a'; c < 'z'; c = String.fromCharCode(c.charCodeAt(0) + 1)) {
-        html += [
-            '<a target="template" href="index/index-',
-            c,
-            '.html">',
-            c.toUpperCase(),
-            '</a>'
-        ].join('');
-    }
-    $("#filter").append('<div id="letters">' + html + '</div>');
-}
-

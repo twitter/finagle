@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.serverset2</title>
+          <title>serverset2 - com.twitter.finagle.serverset2</title>
+          <meta name="description" content="serverset2 - com.twitter.finagle.serverset2" />
+          <meta name="keywords" content="serverset2 com.twitter.finagle.serverset2" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.serverset2.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>serverset2</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,9 +56,10 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.serverset2.Endpoint" data-isabs="false">
+              <ol><li name="com.twitter.finagle.serverset2.Endpoint" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EndpointextendsEntrywithProductwithSerializable"></a>
       <a id="Endpoint:Endpoint"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,11 +67,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Endpoint.html"><span class="name">Endpoint</span></a><span class="params">(<span name="name">name: Option[String]</span>, <span name="addr">addr: InetSocketAddress</span>, <span name="shard">shard: Option[Int]</span>, <span name="status">status: Value</span>, <span name="memberId">memberId: String</span>)</span><span class="result"> extends Entry with Product with Serializable</span>
+        <a href="Endpoint.html"><span class="name">Endpoint</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="addr">addr: <span class="extype" name="scala.Option">Option</span>[<a href="HostPort.html" class="extype" name="com.twitter.finagle.serverset2.HostPort">HostPort</a>]</span>, <span name="shard">shard: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="status">status: <a href="Endpoint$$Status$.html#ValueextendsOrdered[Enumeration.this.Value]withSerializable" class="extmbr" name="com.twitter.finagle.serverset2.Endpoint.Status.Value">Endpoint.Status.Value</a></span>, <span name="memberId">memberId: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Entry.html" class="extype" name="com.twitter.finagle.serverset2.Entry">Entry</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Endpoints encode a destination announced via serversets.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.serverset2.Entry" data-isabs="true">
+    </li><li name="com.twitter.finagle.serverset2.Entry" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="EntryextendsAnyRef"></a>
       <a id="Entry:Entry"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -68,11 +80,25 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Entry.html"><span class="name">Entry</span></a><span class="result"> extends AnyRef</span>
+        <a href="Entry.html"><span class="name">Entry</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">Represents one logical serverset2 entry.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.serverset2.Identity" data-isabs="true">
+    </li><li name="com.twitter.finagle.serverset2.HostPort" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HostPortextendsProductwithSerializable"></a>
+      <a id="HostPort:HostPort"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HostPort.html"><span class="name">HostPort</span></a><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Represents an Endpoint's host address and port.</p>
+    </li><li name="com.twitter.finagle.serverset2.Identity" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="IdentityextendsAnyRef"></a>
       <a id="Identity:Identity"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -80,11 +106,12 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Identity.html"><span class="name">Identity</span></a><span class="result"> extends AnyRef</span>
+        <a href="Identity.html"><span class="name">Identity</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">An Identity provides identifying metadata for a process.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.serverset2.UserIdentity" data-isabs="false">
+    </li><li name="com.twitter.finagle.serverset2.UserIdentity" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="UserIdentityextendsIdentity"></a>
       <a id="UserIdentity:UserIdentity"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -92,11 +119,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="UserIdentity.html"><span class="name">UserIdentity</span></a><span class="result"> extends Identity</span>
+        <a href="UserIdentity.html"><span class="name">UserIdentity</span></a><span class="result"> extends <a href="Identity.html" class="extype" name="com.twitter.finagle.serverset2.Identity">Identity</a></span>
       </span>
       </h4>
       <p class="comment cmt">Identity that represents the user a process is running as.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.serverset2.Zk2Resolver" data-isabs="false">
+    </li><li name="com.twitter.finagle.serverset2.Zk2Resolver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Zk2ResolverextendsResolver"></a>
       <a id="Zk2Resolver:Zk2Resolver"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -104,7 +132,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Zk2Resolver.html"><span class="name">Zk2Resolver</span></a><span class="result"> extends Resolver</span>
+        <a href="Zk2Resolver.html"><span class="name">Zk2Resolver</span></a><span class="result"> extends <a href="../Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></span>
       </span>
       </h4>
       <p class="comment cmt">The actual, public zk2 resolver.</p>
@@ -113,9 +141,10 @@
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.serverset2.Endpoint" data-isabs="false">
+              <ol><li name="com.twitter.finagle.serverset2.Endpoint" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Endpoint"></a>
       <a id="Endpoint:Endpoint"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -123,11 +152,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Endpoint$.html"><span class="name">Endpoint</span></a><span class="result"> extends Serializable</span>
+        <a href="Endpoint$.html"><span class="name">Endpoint</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.serverset2.Entry" data-isabs="false">
+    </li><li name="com.twitter.finagle.serverset2.Entry" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Entry"></a>
       <a id="Entry:Entry"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -135,11 +165,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Entry$.html"><span class="name">Entry</span></a><span class="result"> extends AnyRef</span>
+        <a href="Entry$.html"><span class="name">Entry</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.serverset2.chatty" data-isabs="false">
+    </li><li name="com.twitter.finagle.serverset2.chatty" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="chatty"></a>
       <a id="chatty:chatty"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -147,11 +178,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="chatty$.html"><span class="name">chatty</span></a><span class="result"> extends GlobalFlag[Boolean]</span>
+        <a href="chatty$.html"><span class="name">chatty</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.serverset2.client" data-isabs="false">
+    </li><li name="com.twitter.finagle.serverset2.client" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="client"></a>
       <a id="client:client"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -167,10 +199,20 @@
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -178,7 +220,6 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

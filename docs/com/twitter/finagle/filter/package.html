@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.filter</title>
+          <title>filter - com.twitter.finagle.filter</title>
+          <meta name="description" content="filter - com.twitter.finagle.filter" />
+          <meta name="keywords" content="filter com.twitter.finagle.filter" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.filter.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>filter</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,84 +56,91 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.filter.DtabStatsFilter" data-isabs="false">
-      <a id="DtabStatsFilter:DtabStatsFilter[Req, Rsp]"></a>
+              <ol><li name="com.twitter.finagle.filter.DtabStatsFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DtabStatsFilter[Req,Rsp]extendsSimpleFilter[Req,Rsp]"></a>
+      <a id="DtabStatsFilter[Req,Rsp]:DtabStatsFilter[Req,Rsp]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="DtabStatsFilter.html"><span class="name">DtabStatsFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rsp">Rsp</span>]</span><span class="result"> extends SimpleFilter[Req, Rsp]</span>
+        <a href="DtabStatsFilter.html"><span class="name">DtabStatsFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rsp">Rsp</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">Adds a Stat, dtab/local/size, that tracks the size of Dtab.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.filter.ExceptionSourceFilter" data-isabs="false">
-      <a id="ExceptionSourceFilter:ExceptionSourceFilter[Req, Rep]"></a>
+    </li><li name="com.twitter.finagle.filter.ExceptionSourceFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExceptionSourceFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
+      <a id="ExceptionSourceFilter[Req,Rep]:ExceptionSourceFilter[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ExceptionSourceFilter.html"><span class="name">ExceptionSourceFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
+        <a href="ExceptionSourceFilter.html"><span class="name">ExceptionSourceFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.filter.ExceptionSourceFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.ExceptionSourceFilter.Rep">Rep</span>]</span>
       </span>
       </h4>
-      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that sources exceptions.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.filter.HandletimeFilter" data-isabs="false">
-      <a id="HandletimeFilter:HandletimeFilter[Req, Rep]"></a>
+      <p class="comment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that sources exceptions.</p>
+    </li><li name="com.twitter.finagle.filter.HandletimeFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HandletimeFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
+      <a id="HandletimeFilter[Req,Rep]:HandletimeFilter[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="HandletimeFilter.html"><span class="name">HandletimeFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
+        <a href="HandletimeFilter.html"><span class="name">HandletimeFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.filter.HandletimeFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.HandletimeFilter.Rep">Rep</span>]</span>
       </span>
       </h4>
-      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that records the elapsed execution times of
-the underlying <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.filter.LogFormatter" data-isabs="true">
-      <a id="LogFormatter:LogFormatter[Req, Rep]"></a>
+      <p class="comment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that records the elapsed execution times of
+the underlying <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a>.</p>
+    </li><li name="com.twitter.finagle.filter.LogFormatter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="LogFormatter[-Req,Rep]extendsAnyRef"></a>
+      <a id="LogFormatter[-Req,Rep]:LogFormatter[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="LogFormatter.html"><span class="name">LogFormatter</span></a><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends AnyRef</span>
+        <a href="LogFormatter.html"><span class="name">LogFormatter</span></a><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.filter.LoggingFilter" data-isabs="true">
-      <a id="LoggingFilter:LoggingFilter[Req, Rep]"></a>
+    </li><li name="com.twitter.finagle.filter.LoggingFilter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="LoggingFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
+      <a id="LoggingFilter[Req,Rep]:LoggingFilter[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="LoggingFilter.html"><span class="name">LoggingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
+        <a href="LoggingFilter.html"><span class="name">LoggingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.filter.LoggingFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.LoggingFilter.Rep">Rep</span>]</span>
       </span>
       </h4>
-      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that logs all requests according to
+      <p class="comment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that logs all requests according to
 formatter.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.filter.MaskCancelFilter" data-isabs="false">
-      <a id="MaskCancelFilter:MaskCancelFilter[Req, Rep]"></a>
+    </li><li name="com.twitter.finagle.filter.MaskCancelFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MaskCancelFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
+      <a id="MaskCancelFilter[Req,Rep]:MaskCancelFilter[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="MaskCancelFilter.html"><span class="name">MaskCancelFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
+        <a href="MaskCancelFilter.html"><span class="name">MaskCancelFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.filter.MaskCancelFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.MaskCancelFilter.Rep">Rep</span>]</span>
       </span>
       </h4>
-      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that prevents cancellations from propagating
-to any subsequent <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.filter.MkJvmFilter" data-isabs="false">
+      <p class="comment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that prevents cancellations from propagating
+to any subsequent <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a>.</p>
+    </li><li name="com.twitter.finagle.filter.MkJvmFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MkJvmFilterextendsAnyRef"></a>
       <a id="MkJvmFilter:MkJvmFilter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -131,54 +148,75 @@ to any subsequent <a name="com.twitter.finagle.Service" class="extype" href="../
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="MkJvmFilter.html"><span class="name">MkJvmFilter</span></a><span class="result"> extends AnyRef</span>
+        <a href="MkJvmFilter.html"><span class="name">MkJvmFilter</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">Given a Jvm, create filters to record GCs (and other JVM events in
 the future).</p>
-    </li><li visbl="pub" name="com.twitter.finagle.filter.MonitorFilter" data-isabs="false">
-      <a id="MonitorFilter:MonitorFilter[Req, Rep]"></a>
+    </li><li name="com.twitter.finagle.filter.MonitorFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MonitorFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
+      <a id="MonitorFilter[Req,Rep]:MonitorFilter[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="MonitorFilter.html"><span class="name">MonitorFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
+        <a href="MonitorFilter.html"><span class="name">MonitorFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.filter.MonitorFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.MonitorFilter.Rep">Rep</span>]</span>
       </span>
       </h4>
-      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that handles exceptions (incl.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.filter.RequestSemaphoreFilter" data-isabs="false">
-      <a id="RequestSemaphoreFilter:RequestSemaphoreFilter[Req, Rep]"></a>
+      <p class="comment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that handles exceptions (incl.</p>
+    </li><li name="com.twitter.finagle.filter.RequestSemaphoreFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RequestSemaphoreFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
+      <a id="RequestSemaphoreFilter[Req,Rep]:RequestSemaphoreFilter[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="RequestSemaphoreFilter.html"><span class="name">RequestSemaphoreFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
+        <a href="RequestSemaphoreFilter.html"><span class="name">RequestSemaphoreFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.filter.RequestSemaphoreFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.RequestSemaphoreFilter.Rep">Rep</span>]</span>
       </span>
       </h4>
-      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that restricts request concurrency according
-to an argument com.twitter.concurrent.AsyncSemaphore.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.filter.RequestSerializingFilter" data-isabs="false">
-      <a id="RequestSerializingFilter:RequestSerializingFilter[Req, Rep]"></a>
+      <p class="comment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that restricts request concurrency according
+to an argument <span class="extype" name="com.twitter.concurrent.AsyncSemaphore">com.twitter.concurrent.AsyncSemaphore</span>.</p>
+    </li><li name="com.twitter.finagle.filter.RequestSerializingFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RequestSerializingFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
+      <a id="RequestSerializingFilter[Req,Rep]:RequestSerializingFilter[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="RequestSerializingFilter.html"><span class="name">RequestSerializingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
+        <a href="RequestSerializingFilter.html"><span class="name">RequestSerializingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.filter.RequestSerializingFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.RequestSerializingFilter.Rep">Rep</span>]</span>
       </span>
       </h4>
-      <p class="comment cmt">A <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> that enforces request serialization,
+      <p class="comment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that enforces request serialization,
 meaning that there is guaranteed to be only one outstanding request being
 serviced at any given time.</p>
     </li></ol>
             </div>
 
         
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="com.twitter.finagle.filter.DtabStatsFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DtabStatsFilter"></a>
+      <a id="DtabStatsFilter:DtabStatsFilter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DtabStatsFilter$.html"><span class="name">DtabStatsFilter</span></a>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
 
         
 
@@ -187,6 +225,14 @@ serviced at any given time.</p>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -194,7 +240,6 @@ serviced at any given time.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

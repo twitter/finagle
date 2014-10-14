@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.mux</title>
+          <title>mux - com.twitter.finagle.mux</title>
+          <meta name="description" content="mux - com.twitter.finagle.mux" />
+          <meta name="keywords" content="mux com.twitter.finagle.mux" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.mux.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>mux</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,13 +39,114 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Package mux implements a generic RPC multiplexer with a rich protocol.
+Mux is itself encoding independent, so it is meant to use as the
+transport for other RPC systems (eg. thrift). In OSI terminology, it
+is a pure session layer.</p><p>In the below description, all numeric values are unsigned and in
+big-endian byte order. The schema <i>size:4 body:10</i> defines the
+field size to be 4 bytes, followed by 10 bytes of the field body. The
+schema <i>key~4</i> defines the field key to be defined by 4 bytes
+intepreted as the size of the field, followed by that many bytes
+comprising the field itself--it is shorthand for <i>keysize:4 key:keysize</i>.
+Groups are denoted by parenthesis; <i>*</i> denotes reptition of the
+previous schema 0 or more times, while <code>{n}</code> indicates repetition
+exactly <i>n</i> times. Unspecified sizes consume the rest of the frame:
+they may be specified only as the last field in the message.</p><p>All strings  in Mux are Utf-8 encoded, and are never null-terminated.</p><h3>Message framing</h3><p>Messages in mux are framed with a 4-byte big-endian size header,
+followed by 1 byte describing the message type and a 3-byte tag; or,
+diagrammatically: <i>size:4 type:1 tag:3</i>. The remainder of the frame
+(size-4 bytes) contains the body. Its format depends on the
+message type, documented below.</p><p>Tag 0 designates a &quot;marker&quot; T message that expects no reply. Some
+messages may be split into an ordered sequence of fragments. Tag MSB=0
+denotes the last message in such a sequence, making the tag namespace
+23 bits. The tag is otherwise arbitrary, and is chosen by the sender
+of the T message.</p><p>Currently, only Tdispatch and Rdispatch messages may be split into an
+ordered sequence of fragments. TdispatchError message ends a Tdispatch
+sequence and an Rerr ends an Rdispatch sequence.</p><p>Message types, interpreted as a two's complement, 1-byte integer are
+numbered as follows: positive numbers are T-messages; their negative
+complement is the corresponding R message. T-messages greater than 63
+(correspondingly R-messages smaller than -63) are session messages.
+The message number -128 is reserved for Rerr. All other messsages are
+application messages. Middle boxes may forward application messages
+indiscriminately. Because of an early implementation bug, two aliases
+exist: 127 is Rerr, and -62 is Tdiscarded.</p><p>The protocol is full duplex: both the server and client may send T
+messages initiating an exchange.</p><h3>Exchanges</h3><p>Messages are designated as &quot;T messages&quot; or &quot;R messages&quot;, T and R being
+stand-ins for transmit and receive. A T message initiates an exchange
+and is assigned a free tag by the sender. A reply is either an R
+message of the same type (Rx replies to Tx for some x), or an Rerr,
+indicating a session layer error. R messages are matched to their T
+messages by tag, and the reply concludes the exchange and frees the
+tag for future use. Implementations should reuse small tag numbers.</p><h3>Messages</h3><p><i>size:4 Tinit:1 tag:3 version:2 (key~4 value~4)*</i> reinitializes a
+session. Clients typically send this at the beginning of the session.
+When doing so, the sender may issue no more T messages until the
+corresponding <i>size:4 Rinit:1 version:2 (key~4 value~4)*</i> has been
+received. After the Rinit was received, all connection state has been
+reset (outstanding tags are invalidated) and the stream is resumed
+according to the newly negotiated parameters. Prior to the first
+Tinit, the session operates at version 1. Rinit's version field is the
+accepted version of the session (which may be lower than the one
+requested by Tinit).</p><p><i>size:4 Treq:1 tag:3 n:1 (key:1 value~1){n} body:</i> initiates the
+request described by its body. The request body is delivered to the
+application. The request header contains a number of key-value pairs
+that describe request metadata.</p><p>Keys for <i>Treq</i> messages are as follows:</p><ol class="decimal"><li><i>traceid</i>: a 24-byte value describing the full
+<a href="http://research.google.com/archive/papers/dapper-2010-1.pdf" target="_blank">Dapper</a> trace id
+assigned by the client. The value's format is <i>spanid:8 parentid:8 traceid:8</i>.</li></ol><p> 2. <i>traceflag</i>: a bitmask describing trace flags. Currently, the
+only defined flag is bit 0 which enables &quot;debug mode&quot;, asking the
+server to force trace sampling.</p><p><i>size:4 Tdispatch:1 tag:3 nc:2 (ckey~2 cval~2){nc} dst~2 nd:2
+(from~2 to~2){nd} body:</i> implements <i>destination dispatch</i>.
+Tdispatch messages carry a set of keyed request contexts, followed by
+a logical destination encoded as a UTF-8 string. A delegation table
+follows describing rewrite rules that apply to this request.</p><p><i>size:4 Rreq:1 tag:3 status:1 body:</i> replies to a request. Status
+codes are as follows: 0=OK; the body contains the reply. 1=ERROR; the
+body contains a string describing the error. 2=NACK; a negative
+acknowledgment, the body contains a string describing the reason.</p><p><i>size:4 Rdispatch:1 tag:3 status:1 nctx:2 (key~2 value~2){nctx} body:</i> replies
+to a Tdispatch request. Status codes are as in Rreq. Replies can include
+request contexts.</p><p><i>size:4 Rerr:1 tag:3 why:</i> indicates that the corresponding T message
+produced an error. Rerr is specifically for server errors: the server
+failed to interpret or act on the message. The body carries a string
+describing the error.</p><p><i>size:4 Tdrain:1 tag:3</i> is a request sent by the server telling the
+client to stop sending new requests. A client acknowledges this with
+an Rdrain message.</p><p><i>size:4 Tping:1 tag:3</i> is sent by either party to check the liveness of
+its peer; these should be responded to immediately with a Rping
+message.</p><p><i>size:4 Tdiscarded:1 tag:3 why:</i> is a marker message
+indicating that the Treq with the given tag has been discarded by the
+client. This can be used as a hint for early termination. Why is a
+string describing why the request was discarded. Note that it does
+*not* free the server from the obligation of replying to the original
+Treq.</p><p><i>size:4 Tlease:1 tag:3 unit:1 howmuch:8</i> is a marker message indicating that a
+lease has been issued for <i>howmuch</i> unit. Unit '1' is reserved for duration in
+milliseconds. Whenever a lease has not been issued, a client can assume it holds
+an indefinite lease. Adhering to the lease is optional, but the server may
+reject requests or provide degraded service should the lease expire. This is
+used by servers to implement features like garbage collection avoidance.</p></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
-        
-        
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="com.twitter.finagle.mux"><span>mux</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
             <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
@@ -46,9 +157,10 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.mux.BadMessageException" data-isabs="false">
+              <ol><li name="com.twitter.finagle.mux.BadMessageException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BadMessageExceptionextendsExceptionwithProductwithSerializable"></a>
       <a id="BadMessageException:BadMessageException"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,11 +168,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BadMessageException.html"><span class="name">BadMessageException</span></a><span class="params">(<span name="why">why: String</span>)</span><span class="result"> extends Exception with Product with Serializable</span>
+        <a href="BadMessageException.html"><span class="name">BadMessageException</span></a><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.mux.ClientDiscardedRequestException" data-isabs="false">
+      <p class="comment cmt">Indicates that encoding or decoding of a Mux message failed.</p>
+    </li><li name="com.twitter.finagle.mux.ClientDiscardedRequestException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientDiscardedRequestExceptionextendsExceptionwithProductwithSerializable"></a>
       <a id="ClientDiscardedRequestException:ClientDiscardedRequestException"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -68,11 +181,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ClientDiscardedRequestException.html"><span class="name">ClientDiscardedRequestException</span></a><span class="params">(<span name="why">why: String</span>)</span><span class="result"> extends Exception with Product with Serializable</span>
+        <a href="ClientDiscardedRequestException.html"><span class="name">ClientDiscardedRequestException</span></a><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Indicates that a client requested that a given request be discarded.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.mux.ServerApplicationError" data-isabs="false">
+    </li><li name="com.twitter.finagle.mux.ServerApplicationError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerApplicationErrorextendsExceptionwithNoStacktracewithProductwithSerializable"></a>
       <a id="ServerApplicationError:ServerApplicationError"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -80,11 +194,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ServerApplicationError.html"><span class="name">ServerApplicationError</span></a><span class="params">(<span name="what">what: String</span>)</span><span class="result"> extends Exception with NoStacktrace with Product with Serializable</span>
+        <a href="ServerApplicationError.html"><span class="name">ServerApplicationError</span></a><span class="params">(<span name="what">what: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="../NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.mux.ServerError" data-isabs="false">
+      <p class="comment cmt">Indicates that the server encountered an error whilst processing the client's
+request.</p>
+    </li><li name="com.twitter.finagle.mux.ServerError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerErrorextendsExceptionwithNoStacktracewithProductwithSerializable"></a>
       <a id="ServerError:ServerError"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -92,18 +208,19 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ServerError.html"><span class="name">ServerError</span></a><span class="params">(<span name="what">what: String</span>)</span><span class="result"> extends Exception with NoStacktrace with Product with Serializable</span>
+        <a href="ServerError.html"><span class="name">ServerError</span></a><span class="params">(<span name="what">what: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="../NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
-      
+      <p class="comment cmt">Indicates that the server failed to interpret or act on the request.</p>
     </li></ol>
             </div>
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.mux.ClientDispatcher" data-isabs="false">
+              <ol><li name="com.twitter.finagle.mux.ClientDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientDispatcher"></a>
       <a id="ClientDispatcher:ClientDispatcher"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -111,11 +228,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ClientDispatcher$.html"><span class="name">ClientDispatcher</span></a><span class="result"> extends AnyRef</span>
+        <a href="ClientDispatcher$.html"><span class="name">ClientDispatcher</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.mux.RequestNackedException" data-isabs="false">
+    </li><li name="com.twitter.finagle.mux.RequestNackedException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RequestNackedException"></a>
       <a id="RequestNackedException:RequestNackedException"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -123,11 +241,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="RequestNackedException$.html"><span class="name">RequestNackedException</span></a><span class="result"> extends Exception with WriteException with NoStacktrace</span>
+        <a href="RequestNackedException$.html"><span class="name">RequestNackedException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="../WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteException</a> with <a href="../NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.mux.ServerDispatcher" data-isabs="false">
+      <p class="comment cmt">Indicates that a client request was denied by the server.</p>
+    </li><li name="com.twitter.finagle.mux.ServerDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerDispatcher"></a>
       <a id="ServerDispatcher:ServerDispatcher"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -135,11 +254,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ServerDispatcher$.html"><span class="name">ServerDispatcher</span></a><span class="result"> extends AnyRef</span>
+        <a href="ServerDispatcher$.html"><span class="name">ServerDispatcher</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.mux.exp" data-isabs="false">
+    </li><li name="com.twitter.finagle.mux.exp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="exp"></a>
       <a id="exp:exp"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -151,7 +271,8 @@
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.mux.lease" data-isabs="false">
+    </li><li name="com.twitter.finagle.mux.lease" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="lease"></a>
       <a id="lease:lease"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -167,10 +288,24 @@
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
         
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -178,7 +313,6 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

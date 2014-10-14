@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.client</title>
+          <title>client - com.twitter.finagle.client</title>
+          <meta name="description" content="client - com.twitter.finagle.client" />
+          <meta name="keywords" content="client com.twitter.finagle.client" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.client.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>client</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,13 +39,36 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
-        
-        
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="com.twitter.finagle.client"><span>client</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
             <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
@@ -46,54 +79,86 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.client.DefaultClient" data-isabs="false">
-      <a id="DefaultClient:DefaultClient[Req, Rep]"></a>
+              <ol><li name="com.twitter.finagle.client.DefaultClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultClient[Req,Rep]extendsClient[Req,Rep]withProductwithSerializable"></a>
+      <a id="DefaultClient[Req,Rep]:DefaultClient[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="DefaultClient.html"><span class="name">DefaultClient</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="name">name: String</span>, <span name="endpointer">endpointer: (SocketAddress, StatsReceiver) ⇒ ServiceFactory[Req, Rep]</span>, <span name="pool">pool: (StatsReceiver) ⇒ (ServiceFactory[Req, Rep]) ⇒ ServiceFactory[Req, Rep]</span>, <span name="maxIdletime">maxIdletime: Duration</span>, <span name="maxLifetime">maxLifetime: Duration</span>, <span name="requestTimeout">requestTimeout: Duration</span>, <span name="failFast">failFast: Boolean</span>, <span name="failureAccrual">failureAccrual: (ServiceFactory[Req, Rep]) ⇒ ServiceFactory[Req, Rep]</span>, <span name="serviceTimeout">serviceTimeout: Duration</span>, <span name="timer">timer: Timer</span>, <span name="statsReceiver">statsReceiver: StatsReceiver</span>, <span name="hostStatsReceiver">hostStatsReceiver: StatsReceiver</span>, <span name="tracer">tracer: Tracer</span>, <span name="monitor">monitor: Monitor</span>, <span name="reporter">reporter: ReporterFactory</span>, <span name="loadBalancer">loadBalancer: WeightedLoadBalancerFactory</span>)</span><span class="result"> extends Client[Req, Rep] with Product with Serializable</span>
+        <a href="DefaultClient.html"><span class="name">DefaultClient</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="endpointer">endpointer: (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>, <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a>) ⇒ <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>]</span>, <span name="pool">pool: (<a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a>) ⇒ (<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>]) ⇒ <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>] = <span class="defval" name="DefaultPool.apply[Req, Rep](DefaultPool.apply$default$1[Req, Rep], DefaultPool.apply$default$2[Req, Rep], DefaultPool.apply$default$3[Req, Rep], DefaultPool.apply$default$4[Req, Rep], DefaultPool.apply$default$5[Req, Rep], DefaultPool.apply$default$6[Req, Rep])">...</span></span>, <span name="maxIdletime">maxIdletime: <span class="extype" name="com.twitter.util.Duration">Duration</span> = <span class="symbol">com.twitter.util.Duration.Top</span></span>, <span name="maxLifetime">maxLifetime: <span class="extype" name="com.twitter.util.Duration">Duration</span> = <span class="symbol">com.twitter.util.Duration.Top</span></span>, <span name="requestTimeout">requestTimeout: <span class="extype" name="com.twitter.util.Duration">Duration</span> = <span class="symbol">com.twitter.util.Duration.Top</span></span>, <span name="failFast">failFast: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="failureAccrual">failureAccrual: (<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>]) ⇒ <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>] = <span class="defval" name="((factory: com.twitter.finagle.ServiceFactory[Req,Rep]) =&gt; DefaultClient.defaultFailureAccrual.andThen[Req, Rep](factory))">...</span></span>, <span name="serviceTimeout">serviceTimeout: <span class="extype" name="com.twitter.util.Duration">Duration</span> = <span class="symbol">com.twitter.util.Duration.Top</span></span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span> = <span class="defval" name="com.twitter.finagle.util.DefaultTimer.twitter">...</span></span>, <span name="statsReceiver">statsReceiver: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="defval" name="com.twitter.finagle.stats.ClientStatsReceiver">...</span></span>, <span name="hostStatsReceiver">hostStatsReceiver: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>, <span name="tracer">tracer: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a> = <span class="defval" name="com.twitter.finagle.tracing.DefaultTracer">...</span></span>, <span name="monitor">monitor: <span class="extype" name="com.twitter.util.Monitor">Monitor</span> = <span class="defval" name="com.twitter.finagle.util.DefaultMonitor">...</span></span>, <span name="reporter">reporter: <a href="../util/ReporterFactory.html" class="extype" name="com.twitter.finagle.util.ReporterFactory">ReporterFactory</a> = <span class="defval" name="com.twitter.finagle.util.LoadedReporterFactory">...</span></span>, <span name="loadBalancer">loadBalancer: <a href="../loadbalancer/WeightedLoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory">WeightedLoadBalancerFactory</a> = <span class="defval" name="com.twitter.finagle.loadbalancer.DefaultBalancerFactory">...</span></span>, <span name="newTraceInitializer">newTraceInitializer: <a href="../Stack$$Simple.html" class="extype" name="com.twitter.finagle.Stack.Simple">Simple</a>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>]] = <span class="defval" name="com.twitter.finagle.tracing.TraceInitializerFilter.clientModule[Req, Rep]">...</span></span>)</span><span class="result"> extends <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">A default client implementation that does load balancing and
 connection pooling.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.client.DefaultPool" data-isabs="false">
-      <a id="DefaultPool:DefaultPool[Req, Rep]"></a>
+    </li><li name="com.twitter.finagle.client.DefaultPool" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultPool[Req,Rep]extendscom.twitter.finagle.stats.StatsReceiver=&gt;(com.twitter.finagle.ServiceFactory[Req,Rep]=&gt;com.twitter.finagle.ServiceFactory[Req,Rep])withProductwithSerializable"></a>
+      <a id="DefaultPool[Req,Rep]:DefaultPool[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="DefaultPool.html"><span class="name">DefaultPool</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="low">low: Int</span>, <span name="high">high: Int</span>, <span name="bufferSize">bufferSize: Int</span>, <span name="idleTime">idleTime: Duration</span>, <span name="maxWaiters">maxWaiters: Int</span>, <span name="timer">timer: Timer</span>)</span><span class="result"> extends (StatsReceiver) ⇒ (ServiceFactory[Req, Rep]) ⇒ ServiceFactory[Req, Rep] with Product with Serializable</span>
+        <a href="DefaultPool.html"><span class="name">DefaultPool</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="low">low: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">0</span></span>, <span name="high">high: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">scala.Int.MaxValue</span></span>, <span name="bufferSize">bufferSize: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">0</span></span>, <span name="idleTime">idleTime: <span class="extype" name="com.twitter.util.Duration">Duration</span> = <span class="symbol">com.twitter.util.Duration.Top</span></span>, <span name="maxWaiters">maxWaiters: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">scala.Int.MaxValue</span></span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span> = <span class="defval" name="com.twitter.finagle.util.DefaultTimer.twitter">...</span></span>)</span><span class="result"> extends (<a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a>) ⇒ (<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultPool.Rep">Rep</span>]) ⇒ <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultPool.Rep">Rep</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Create a watermark pool backed by a caching pool.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.client.package#Transformer" data-isabs="false">
-      <a id="Transformer:(ServiceFactory[Req, Rep]) ⇒ ServiceFactory[Req, Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">type</span>
-      </span>
-      <span class="symbol">
-        <span class="name">Transformer</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> = (<a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep]) ⇒ <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Transform a service factory stack.</p><div class="fullcomment"><div class="comment cmt"><p>Transform a service factory stack.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.client.package" class="extype" href="package$.html">package</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.client.Transporter" data-isabs="true">
-      <a id="Transporter:Transporter[In, Out]"></a>
+    </li><li name="com.twitter.finagle.client.StackClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="StackClient[Req,Rep]extendsClient[Req,Rep]withStack.Parameterized[com.twitter.finagle.client.StackClient[Req,Rep]]"></a>
+      <a id="StackClient[Req,Rep]:StackClient[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Transporter.html"><span class="name">Transporter</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends AnyRef</span>
+        <a href="StackClient.html"><span class="name">StackClient</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<span class="extype" name="com.twitter.finagle.client.StackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackClient.Rep">Rep</span>] with <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<span class="extype" name="com.twitter.finagle.client.StackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackClient.Rep">Rep</span>]]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a> that composes a
+<a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>.</p>
+    </li><li name="com.twitter.finagle.client.StdStackClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="StdStackClient[Req,Rep,This&lt;:com.twitter.finagle.client.StdStackClient[Req,Rep,This]]extendsStackClient[Req,Rep]"></a>
+      <a id="StdStackClient[Req,Rep,This&lt;:StdStackClient[Req,Rep,This]]:StdStackClient[Req,Rep,This]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="StdStackClient.html"><span class="name">StdStackClient</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="This">This &lt;: <a href="StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.This">This</span>]</span>]</span><span class="result"> extends <a href="StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.Rep">Rep</span>]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">The standard template implementation for
+<a href="StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">com.twitter.finagle.client.StackClient</a>.</p>
+    </li><li name="com.twitter.finagle.client.Transformer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Transformer[Req,Rep]=com.twitter.finagle.ServiceFactory[Req,Rep]=&gt;com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
+      <a id="Transformer[Req,Rep]:(ServiceFactory[Req,Rep])⇒ServiceFactory[Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Transformer</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> = (<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.Transformer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.Transformer.Rep">Rep</span>]) ⇒ <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.Transformer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.Transformer.Rep">Rep</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Transform a service factory stack.</p>
+    </li><li name="com.twitter.finagle.client.Transporter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="Transporter[In,Out]extendsAnyRef"></a>
+      <a id="Transporter[In,Out]:Transporter[In,Out]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Transporter.html"><span class="name">Transporter</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">Transporters are simple functions from a <code>SocketAddress</code> to a
@@ -103,9 +168,10 @@ connection pooling.</p>
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.client.Bridge" data-isabs="false">
+              <ol><li name="com.twitter.finagle.client.Bridge" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Bridge"></a>
       <a id="Bridge:Bridge"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -113,11 +179,12 @@ connection pooling.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Bridge$.html"><span class="name">Bridge</span></a><span class="result"> extends AnyRef</span>
+        <a href="Bridge$.html"><span class="name">Bridge</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.client.DefaultClient" data-isabs="false">
+    </li><li name="com.twitter.finagle.client.DefaultClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultClient"></a>
       <a id="DefaultClient:DefaultClient"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -125,11 +192,12 @@ connection pooling.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="DefaultClient$.html"><span class="name">DefaultClient</span></a><span class="result"> extends Serializable</span>
+        <a href="DefaultClient$.html"><span class="name">DefaultClient</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.client.DefaultPool" data-isabs="false">
+    </li><li name="com.twitter.finagle.client.DefaultPool" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultPool"></a>
       <a id="DefaultPool:DefaultPool"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -137,7 +205,20 @@ connection pooling.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="DefaultPool$.html"><span class="name">DefaultPool</span></a><span class="result"> extends Serializable</span>
+        <a href="DefaultPool$.html"><span class="name">DefaultPool</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.client.StackClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StackClient"></a>
+      <a id="StackClient:StackClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="StackClient$.html"><span class="name">StackClient</span></a>
       </span>
       </h4>
       
@@ -145,10 +226,24 @@ connection pooling.</p>
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
         
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -156,7 +251,6 @@ connection pooling.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

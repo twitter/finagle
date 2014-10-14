@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.exp</title>
+          <title>exp - com.twitter.finagle.exp</title>
+          <meta name="description" content="exp - com.twitter.finagle.exp" />
+          <meta name="keywords" content="exp com.twitter.finagle.exp" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.exp.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>exp</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,15 +39,38 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Package exp contains experimental code. This can be removed or
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Package exp contains experimental code. This can be removed or
 stabilized (moved elsewhere) at any time.
-</p></div></div>
-    
+</p></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
-        
-        
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="com.twitter.finagle.exp"><span>exp</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
             <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
@@ -48,46 +81,50 @@ stabilized (moved elsewhere) at any time.
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.exp.BackupRequestFilter" data-isabs="false">
-      <a id="BackupRequestFilter:BackupRequestFilter[Req, Rep]"></a>
+              <ol><li name="com.twitter.finagle.exp.BackupRequestFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BackupRequestFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
+      <a id="BackupRequestFilter[Req,Rep]:BackupRequestFilter[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="BackupRequestFilter.html"><span class="name">BackupRequestFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
+        <a href="BackupRequestFilter.html"><span class="name">BackupRequestFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">Issue a backup request after a threshold time has elapsed, useful
 for curtailing tail latencies in distributed systems.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.ForwardingWarmUpFilter" data-isabs="true">
-      <a id="ForwardingWarmUpFilter:ForwardingWarmUpFilter[Req, Rep]"></a>
+    </li><li name="com.twitter.finagle.exp.DarkTrafficFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DarkTrafficFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
+      <a id="DarkTrafficFilter[Req,Rep]:DarkTrafficFilter[Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="DarkTrafficFilter.html"><span class="name">DarkTrafficFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Forwards dark traffic to the given service when the given function returns true for a request.</p>
+    </li><li name="com.twitter.finagle.exp.ForwardingWarmUpFilter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ForwardingWarmUpFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
+      <a id="ForwardingWarmUpFilter[Req,Rep]:ForwardingWarmUpFilter[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ForwardingWarmUpFilter.html"><span class="name">ForwardingWarmUpFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
+        <a href="ForwardingWarmUpFilter.html"><span class="name">ForwardingWarmUpFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.ForwardingWarmUpFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.ForwardingWarmUpFilter.Rep">Rep</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">A filter that forwards thrift requests to a specified service.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.MysqlClient" data-isabs="false">
-      <a id="MysqlClient:MysqlClient"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="MysqlClient.html"><span class="name">MysqlClient</span></a><span class="result"> extends StackClientLike[Request, Result, MysqlClient] with MysqlRichClient</span>
-      </span>
-      </h4>
-      <p class="comment cmt">Wraps a mysql client with builder semantics.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.MysqlRichClient" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.MysqlRichClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="MysqlRichClientextendsAnyRef"></a>
       <a id="MysqlRichClient:MysqlRichClient"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -95,12 +132,13 @@ for curtailing tail latencies in distributed systems.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="MysqlRichClient.html"><span class="name">MysqlRichClient</span></a><span class="result"> extends AnyRef</span>
+        <a href="MysqlRichClient.html"><span class="name">MysqlRichClient</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
-      <p class="comment cmt">Supplements a <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a> with convenient
+      <p class="comment cmt">Supplements a <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> with convenient
 builder methods for constructing a mysql client.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.ThriftForwardingWarmUpFilter" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.ThriftForwardingWarmUpFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ThriftForwardingWarmUpFilterextendsForwardingWarmUpFilter[Array[Byte],Array[Byte]]"></a>
       <a id="ThriftForwardingWarmUpFilter:ThriftForwardingWarmUpFilter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -108,7 +146,7 @@ builder methods for constructing a mysql client.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftForwardingWarmUpFilter.html"><span class="name">ThriftForwardingWarmUpFilter</span></a><span class="result"> extends ForwardingWarmUpFilter[Array[Byte], Array[Byte]]</span>
+        <a href="ThriftForwardingWarmUpFilter.html"><span class="name">ThriftForwardingWarmUpFilter</span></a><span class="result"> extends <a href="ForwardingWarmUpFilter.html" class="extype" name="com.twitter.finagle.exp.ForwardingWarmUpFilter">ForwardingWarmUpFilter</a>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>], <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]]</span>
       </span>
       </h4>
       
@@ -117,33 +155,23 @@ builder methods for constructing a mysql client.</p>
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.exp.HttpClient" data-isabs="false">
-      <a id="HttpClient:HttpClient"></a>
+              <ol><li name="com.twitter.finagle.exp.MySqlClientTracingFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MySqlClientTracingFilter"></a>
+      <a id="MySqlClientTracingFilter:MySqlClientTracingFilter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="HttpClient$.html"><span class="name">HttpClient</span></a><span class="result"> extends HttpClient</span>
+        <a href="MySqlClientTracingFilter$.html"><span class="name">MySqlClientTracingFilter</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.HttpServer" data-isabs="false">
-      <a id="HttpServer:HttpServer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="HttpServer$.html"><span class="name">HttpServer</span></a><span class="result"> extends HttpServer</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.exp.Mysql" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.Mysql" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Mysql"></a>
       <a id="Mysql:Mysql"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -151,23 +179,12 @@ builder methods for constructing a mysql client.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Mysql$.html"><span class="name">Mysql</span></a><span class="result"> extends MysqlClient</span>
+        <a href="Mysql$.html"><span class="name">Mysql</span></a><span class="result"> extends <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>] with <a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.exp.MysqlRichClient">MysqlRichClient</a></span>
       </span>
       </h4>
       <p class="comment cmt"></p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.MysqlStackClient" data-isabs="false">
-      <a id="MysqlStackClient:MysqlStackClient"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="MysqlStackClient$.html"><span class="name">MysqlStackClient</span></a><span class="result"> extends StackClient[Request, Result]</span>
-      </span>
-      </h4>
-      <p class="comment cmt">Implements a mysql client in terms of a com.twitter.finagle.StackClient.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.ThriftForwardingWarmUpFilter" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.ThriftForwardingWarmUpFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ThriftForwardingWarmUpFilter"></a>
       <a id="ThriftForwardingWarmUpFilter:ThriftForwardingWarmUpFilter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -175,11 +192,12 @@ builder methods for constructing a mysql client.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ThriftForwardingWarmUpFilter$.html"><span class="name">ThriftForwardingWarmUpFilter</span></a><span class="result"> extends AnyRef</span>
+        <a href="ThriftForwardingWarmUpFilter$.html"><span class="name">ThriftForwardingWarmUpFilter</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="mysql"></a>
       <a id="mysql:mysql"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -191,7 +209,8 @@ builder methods for constructing a mysql client.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.scheduler" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.scheduler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="scheduler"></a>
       <a id="scheduler:scheduler"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -199,7 +218,7 @@ builder methods for constructing a mysql client.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="scheduler$.html"><span class="name">scheduler</span></a><span class="result"> extends GlobalFlag[String]</span>
+        <a href="scheduler$.html"><span class="name">scheduler</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="java.lang.String">String</span>]</span>
       </span>
       </h4>
       
@@ -207,10 +226,24 @@ builder methods for constructing a mysql client.</p>
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
         
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -218,7 +251,6 @@ builder methods for constructing a mysql client.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

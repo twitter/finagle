@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.jsr166y</title>
+          <title>jsr166y - com.twitter.finagle.jsr166y</title>
+          <meta name="description" content="jsr166y - com.twitter.finagle.jsr166y" />
+          <meta name="keywords" content="jsr166y com.twitter.finagle.jsr166y" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.jsr166y.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>jsr166y</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,21 +56,23 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.jsr166y.CountedCompleter" data-isabs="true">
-      <a id="CountedCompleter:CountedCompleter[T]"></a>
+              <ol><li name="com.twitter.finagle.jsr166y.CountedCompleter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="CountedCompleter[T]extendsForkJoinTask[T]"></a>
+      <a id="CountedCompleter[T]:CountedCompleter[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="CountedCompleter.html"><span class="name">CountedCompleter</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends ForkJoinTask[T]</span>
+        <a href="CountedCompleter.html"><span class="name">CountedCompleter</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="ForkJoinTask.html" class="extype" name="com.twitter.finagle.jsr166y.ForkJoinTask">ForkJoinTask</a>[<span class="extype" name="com.twitter.finagle.jsr166y.CountedCompleter.T">T</span>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinPool" data-isabs="false">
+    </li><li name="com.twitter.finagle.jsr166y.ForkJoinPool" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ForkJoinPoolextendsAbstractExecutorService"></a>
       <a id="ForkJoinPool:ForkJoinPool"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -68,23 +80,25 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ForkJoinPool.html"><span class="name">ForkJoinPool</span></a><span class="result"> extends AbstractExecutorService</span>
+        <a href="ForkJoinPool.html"><span class="name">ForkJoinPool</span></a><span class="result"> extends <span class="extype" name="java.util.concurrent.AbstractExecutorService">AbstractExecutorService</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask" data-isabs="true">
-      <a id="ForkJoinTask:ForkJoinTask[V]"></a>
+    </li><li name="com.twitter.finagle.jsr166y.ForkJoinTask" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ForkJoinTask[V]extendsFuture[V]withSerializable"></a>
+      <a id="ForkJoinTask[V]:ForkJoinTask[V]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ForkJoinTask.html"><span class="name">ForkJoinTask</span></a><span class="tparams">[<span name="V">V</span>]</span><span class="result"> extends Future[V] with Serializable</span>
+        <a href="ForkJoinTask.html"><span class="name">ForkJoinTask</span></a><span class="tparams">[<span name="V">V</span>]</span><span class="result"> extends <span class="extype" name="java.util.concurrent.Future">Future</span>[<span class="extype" name="com.twitter.finagle.jsr166y.ForkJoinTask.V">V</span>] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinWorkerThread" data-isabs="false">
+    </li><li name="com.twitter.finagle.jsr166y.ForkJoinWorkerThread" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ForkJoinWorkerThreadextendsThread"></a>
       <a id="ForkJoinWorkerThread:ForkJoinWorkerThread"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -92,7 +106,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ForkJoinWorkerThread.html"><span class="name">ForkJoinWorkerThread</span></a><span class="result"> extends Thread</span>
+        <a href="ForkJoinWorkerThread.html"><span class="name">ForkJoinWorkerThread</span></a><span class="result"> extends <span class="extype" name="java.lang.Thread">Thread</span></span>
       </span>
       </h4>
       
@@ -101,40 +115,23 @@
 
         
 
-        <div class="values members" id="values">
-              <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinPool" data-isabs="false">
-      <a id="ForkJoinPool:ForkJoinPool"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="ForkJoinPool$.html"><span class="name">ForkJoinPool</span></a><span class="result"> extends </span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.jsr166y.ForkJoinTask" data-isabs="false">
-      <a id="ForkJoinTask:ForkJoinTask"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="ForkJoinTask$.html"><span class="name">ForkJoinTask</span></a><span class="result"> extends </span>
-      </span>
-      </h4>
-      
-    </li></ol>
-            </div>
+        
+
+        
 
         
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -142,7 +139,6 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

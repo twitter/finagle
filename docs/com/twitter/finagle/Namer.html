@@ -2,61 +2,84 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.Namer</title>
+          <title>Namer - com.twitter.finagle.Namer</title>
+          <meta name="description" content="Namer - com.twitter.finagle.Namer" />
+          <meta name="keywords" content="Namer com.twitter.finagle.Namer" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../lib/template.css" />
-      <script type="text/javascript" src="../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../index.html';
+            var hash = 'com.twitter.finagle.Namer';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
+        <body class="type">
       <div id="definition">
-        <a title="Go to companion" href="Namer$.html"><img src="../../../lib/trait_to_object_big.png" /></a>
-        <p id="owner"><a name="com" class="extype" href="../../package.html">com</a>.<a name="com.twitter" class="extype" href="../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="package.html">finagle</a></p>
-        <h1><a title="Go to companion" href="Namer$.html">Namer</a></h1>
+        <a href="Namer$.html" title="Go to companion"><img src="../../../lib/trait_to_object_big.png" /></a>
+        <p id="owner"><a href="../../package.html" class="extype" name="com">com</a>.<a href="../package.html" class="extype" name="com.twitter">twitter</a>.<a href="package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
+        <h1><a href="Namer$.html" title="Go to companion">Namer</a></h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">Namer</span><span class="result"> extends AnyRef</span>
+        <span class="name">Namer</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A namer is a context in which a com.twitter.finagle.NameTree
-NameTree is bound. The context is provided by the
-com.twitter.finagle.Namer.lookup method, which
-translates <a name="com.twitter.finagle.Path" class="extype" href="Path.html">Path</a> into
-<a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a>. Namers may represent
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A namer is a context in which a <span class="extype" name="com.twitter.finagle.NameTree
+NameTree">com.twitter.finagle.NameTree
+NameTree</span> is bound. The context is provided by the
+<a href="#lookup(path:com.twitter.finagle.Path):com.twitter.util.Activity[com.twitter.finagle.NameTree[com.twitter.finagle.Name]]" class="extmbr" name="com.twitter.finagle.Namer#lookup">lookup</a> method, which
+translates <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Paths</a> into
+<a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTrees</a>. Namers may represent
 external processes, for example lookups through DNS or to ZooKeeper,
-and thus lookup results are represented by a com.twitter.util.Activity.
-</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a name="com.twitter.finagle.Namer" class="extype" href="">Namer</a></dd></dl><div class="toggleContainer block">
+and thus lookup results are represented by a <span class="extype" name="com.twitter.util.Activity">Activity</span>.
+</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.Namer">Namer</a></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.Dtab" class="extype" href="Dtab.html">Dtab</a>, <a name="com.twitter.serverset" class="extype" href="../serverset.html">serverset</a></div>
+          <div class="subClasses hiddenContent"><a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>, <a href="../serverset.html" class="extype" name="com.twitter.serverset">serverset</a></div>
         </div></div>
-    
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         <div id="order">
               <span class="filtertype">Ordering</span>
-              <ol><li class="alpha in"><span>Alphabetic</span></li><li class="inherit out"><span>By inheritance</span></li></ol>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
             </div>
         <div id="ancestors">
-              <span class="filtertype">Inherited</span>
-              <ol><li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.Namer" class="in"><span>Namer</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
-            </div>
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="com.twitter.finagle.Namer"><span>Namer</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
             <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
@@ -69,9 +92,10 @@ and thus lookup results are represented by a com.twitter.util.Activity.
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.Namer#enum" data-isabs="true">
+              <ol><li name="com.twitter.finagle.Namer#enum" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="enum(prefix:com.twitter.finagle.Path):com.twitter.util.Activity[com.twitter.finagle.Dtab]"></a>
       <a id="enum(Path):Activity[Dtab]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -79,11 +103,12 @@ and thus lookup results are represented by a com.twitter.util.Activity.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">enum</span><span class="params">(<span name="prefix">prefix: <a name="com.twitter.finagle.Path" class="extype" href="Path.html">Path</a></span>)</span><span class="result">: <span name="com.twitter.util.Activity" class="extype">Activity</span>[<a name="com.twitter.finagle.Dtab" class="extype" href="Dtab.html">Dtab</a>]</span>
+        <span class="name">enum</span><span class="params">(<span name="prefix">prefix: <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Activity">Activity</span>[<a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Enumerate entries in this namer by prefix.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.Namer#lookup" data-isabs="true">
+    </li><li name="com.twitter.finagle.Namer#lookup" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="lookup(path:com.twitter.finagle.Path):com.twitter.util.Activity[com.twitter.finagle.NameTree[com.twitter.finagle.Name]]"></a>
       <a id="lookup(Path):Activity[NameTree[Name]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -91,17 +116,18 @@ and thus lookup results are represented by a com.twitter.util.Activity.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">lookup</span><span class="params">(<span name="path">path: <a name="com.twitter.finagle.Path" class="extype" href="Path.html">Path</a></span>)</span><span class="result">: <span name="com.twitter.util.Activity" class="extype">Activity</span>[<a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a>[<a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a>]]</span>
+        <span class="name">lookup</span><span class="params">(<span name="path">path: <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Activity">Activity</span>[<a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a>]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Translate a <a name="com.twitter.finagle.Path" class="extype" href="Path.html">Path</a> into a
-<a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a>.</p>
+      <p class="shortcomment cmt">Translate a <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a> into a
+<a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>.</p>
     </li></ol>
             </div>
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Concrete Value Members</h3>
-              <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:AnyRef):Boolean"></a>
       <a id="!=(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -109,11 +135,12 @@ and thus lookup results are represented by a com.twitter.util.Activity.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#!=" data-isabs="false">
+    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -121,11 +148,12 @@ and thus lookup results are represented by a com.twitter.util.Activity.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef###" data-isabs="false">
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
       <a id="##():Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -133,11 +161,12 @@ and thus lookup results are represented by a com.twitter.util.Activity.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $hash$hash">##</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:AnyRef):Boolean"></a>
       <a id="==(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -145,11 +174,12 @@ and thus lookup results are represented by a com.twitter.util.Activity.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#==" data-isabs="false">
+    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -157,11 +187,12 @@ and thus lookup results are represented by a com.twitter.util.Activity.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -169,11 +200,12 @@ and thus lookup results are represented by a com.twitter.util.Activity.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: T0</span>
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Namer#bind" data-isabs="false">
+    </li><li name="com.twitter.finagle.Namer#bind" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bind(tree:com.twitter.finagle.NameTree[com.twitter.finagle.Path]):com.twitter.util.Activity[com.twitter.finagle.NameTree[com.twitter.finagle.Name.Bound]]"></a>
       <a id="bind(NameTree[Path]):Activity[NameTree[Bound]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -181,14 +213,15 @@ and thus lookup results are represented by a com.twitter.util.Activity.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">bind</span><span class="params">(<span name="tree">tree: <a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a>[<a name="com.twitter.finagle.Path" class="extype" href="Path.html">Path</a>]</span>)</span><span class="result">: <span name="com.twitter.util.Activity" class="extype">Activity</span>[<a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a>[<a name="com.twitter.finagle.Name.Bound" class="extype" href="Name$$Bound.html">Bound</a>]]</span>
+        <span class="name">bind</span><span class="params">(<span name="tree">tree: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Activity">Activity</span>[<a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="Name$$Bound.html" class="extype" name="com.twitter.finagle.Name.Bound">Bound</a>]]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Bind the given tree with this namer.</p><div class="fullcomment"><div class="comment cmt"><p>Bind the given tree with this namer. Bind recursively follows
 paths by looking them up in this namer. A recursion depth of up
 to 100 is allowed.
 </p></div></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Namer#bindAndEval" data-isabs="false">
+    </li><li name="com.twitter.finagle.Namer#bindAndEval" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bindAndEval(tree:com.twitter.finagle.NameTree[com.twitter.finagle.Path]):com.twitter.util.Var[com.twitter.finagle.Addr]"></a>
       <a id="bindAndEval(NameTree[Path]):Var[Addr]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -196,13 +229,14 @@ to 100 is allowed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">bindAndEval</span><span class="params">(<span name="tree">tree: <a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a>[<a name="com.twitter.finagle.Path" class="extype" href="Path.html">Path</a>]</span>)</span><span class="result">: <span name="com.twitter.util.Var" class="extype">Var</span>[<a name="com.twitter.finagle.Addr" class="extype" href="Addr.html">Addr</a>]</span>
+        <span class="name">bindAndEval</span><span class="params">(<span name="tree">tree: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Var">Var</span>[<a href="Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Bind, then evaluate the given NameTree with this Namer.</p><div class="fullcomment"><div class="comment cmt"><p>Bind, then evaluate the given NameTree with this Namer. The result
 is translated into a Var[Addr].
 </p></div></div>
-    </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -210,14 +244,18 @@ is translated into a Var[Addr].
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: AnyRef</span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -225,11 +263,12 @@ is translated into a Var[Addr].
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#equals" data-isabs="false">
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
       <a id="equals(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -237,11 +276,12 @@ is translated into a Var[Addr].
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Namer#expand" data-isabs="false">
+    </li><li name="com.twitter.finagle.Namer#expand" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="expand(prefix:com.twitter.finagle.Path):com.twitter.util.Activity[com.twitter.finagle.Dtab]"></a>
       <a id="expand(Path):Activity[Dtab]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -249,7 +289,7 @@ is translated into a Var[Addr].
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">expand</span><span class="params">(<span name="prefix">prefix: <a name="com.twitter.finagle.Path" class="extype" href="Path.html">Path</a></span>)</span><span class="result">: <span name="com.twitter.util.Activity" class="extype">Activity</span>[<a name="com.twitter.finagle.Dtab" class="extype" href="Dtab.html">Dtab</a>]</span>
+        <span class="name">expand</span><span class="params">(<span name="prefix">prefix: <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Activity">Activity</span>[<a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Expand a prefix of this Namer, producing a Dtab reflecting the
@@ -258,7 +298,8 @@ this prefixed namespace. The returned Dtab does not contain any
 root entries (/=&gt;...), and thus represents valid suffixes of the
 given prefix.
 </p></div></div>
-    </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -266,26 +307,31 @@ given prefix.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
-      <a id="getClass():java.lang.Class[_]"></a>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getClass</span><span class="params">()</span><span class="result">: java.lang.Class[_]</span>
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -293,11 +339,12 @@ given prefix.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -305,11 +352,12 @@ given prefix.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -317,11 +365,12 @@ given prefix.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
       <a id="notify():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -329,11 +378,12 @@ given prefix.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#notifyAll" data-isabs="false">
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
       <a id="notifyAll():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -341,11 +391,12 @@ given prefix.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Namer#orElse" data-isabs="false">
+    </li><li name="com.twitter.finagle.Namer#orElse" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="orElse(next:com.twitter.finagle.Namer):com.twitter.finagle.Namer"></a>
       <a id="orElse(Namer):Namer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -353,28 +404,30 @@ given prefix.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">orElse</span><span class="params">(<span name="next">next: <a name="com.twitter.finagle.Namer" class="extype" href="">Namer</a></span>)</span><span class="result">: <a name="com.twitter.finagle.Namer" class="extype" href="">Namer</a></span>
+        <span class="name">orElse</span><span class="params">(<span name="next">next: <a href="" class="extype" name="com.twitter.finagle.Namer">Namer</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Namer">Namer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Compose this <a name="com.twitter.finagle.Namer" class="extype" href="">Namer</a> with <code>next</code>;
-the returned <a name="com.twitter.finagle.Namer" class="extype" href="">Namer</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Compose this <a name="com.twitter.finagle.Namer" class="extype" href="">Namer</a> with <code>next</code>;
-the returned <a name="com.twitter.finagle.Namer" class="extype" href="">Namer</a>. The result is
-the <a name="com.twitter.finagle.NameTree" class="extype" href="NameTree.html">NameTree</a>-tree of both lookups,
+      <p class="shortcomment cmt">Compose this <a href="" class="extype" name="com.twitter.finagle.Namer">Namer</a> with <code>next</code>;
+the returned <a href="" class="extype" name="com.twitter.finagle.Namer">Namer</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Compose this <a href="" class="extype" name="com.twitter.finagle.Namer">Namer</a> with <code>next</code>;
+the returned <a href="" class="extype" name="com.twitter.finagle.Namer">Namer</a>. The result is
+the <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">Alt</a>-tree of both lookups,
 with this namer's result first.
 </p></div></div>
-    </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
-      <a id="synchronized[T0](⇒ T0):T0"></a>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ T0</span>)</span><span class="result">: T0</span>
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
+    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -382,11 +435,12 @@ with this namer's result first.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -394,14 +448,18 @@ with this namer's result first.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
       <a id="wait(Long,Int):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -409,14 +467,18 @@ with this namer's result first.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>, <span name="arg1">arg1: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
       <a id="wait(Long):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -424,24 +486,37 @@ with this namer's result first.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
     </li></ol>
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.AnyRef" class="parent">
-              <h3>Inherited from AnyRef</h3>
-            </div><div name="scala.Any" class="parent">
-              <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
             </div>
         </div>
 
@@ -450,7 +525,6 @@ with this namer's result first.
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../lib/template.js"></script>
     </body>
       </html>

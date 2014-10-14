@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.topo</title>
+          <title>topo - com.twitter.finagle.topo</title>
+          <meta name="description" content="topo - com.twitter.finagle.topo" />
+          <meta name="keywords" content="topo com.twitter.finagle.topo" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.topo.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>topo</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,9 +56,10 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.topo.AppService" data-isabs="false">
+              <ol><li name="com.twitter.finagle.topo.AppService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AppServiceextendsService[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]"></a>
       <a id="AppService:AppService"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,7 +67,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="AppService.html"><span class="name">AppService</span></a><span class="result"> extends Service[HttpRequest, HttpResponse]</span>
+        <a href="AppService.html"><span class="name">AppService</span></a><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
       </span>
       </h4>
       
@@ -65,9 +76,10 @@
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.topo.Appserver" data-isabs="false">
+              <ol><li name="com.twitter.finagle.topo.Appserver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Appserver"></a>
       <a id="Appserver:Appserver"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -75,11 +87,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Appserver$.html"><span class="name">Appserver</span></a><span class="result"> extends App with Logging</span>
+        <a href="Appserver$.html"><span class="name">Appserver</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.App">App</span> with <span class="extype" name="com.twitter.logging.Logging">Logging</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.topo.BackendService" data-isabs="false">
+    </li><li name="com.twitter.finagle.topo.BackendService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BackendService"></a>
       <a id="BackendService:BackendService"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -87,11 +100,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="BackendService$.html"><span class="name">BackendService</span></a><span class="result"> extends FutureIface</span>
+        <a href="BackendService$.html"><span class="name">BackendService</span></a><span class="result"> extends <a href="thriftscala/Backend$$FutureIface.html" class="extype" name="com.twitter.finagle.topo.thriftscala.Backend.FutureIface">FutureIface</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.topo.Backendserver" data-isabs="false">
+    </li><li name="com.twitter.finagle.topo.Backendserver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Backendserver"></a>
       <a id="Backendserver:Backendserver"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -99,11 +113,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Backendserver$.html"><span class="name">Backendserver</span></a><span class="result"> extends App with Logging</span>
+        <a href="Backendserver$.html"><span class="name">Backendserver</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.App">App</span> with <span class="extype" name="com.twitter.logging.Logging">Logging</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.topo.Client" data-isabs="false">
+    </li><li name="com.twitter.finagle.topo.Client" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Client"></a>
       <a id="Client:Client"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -111,19 +126,20 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Client$.html"><span class="name">Client</span></a><span class="result"> extends AnyRef</span>
+        <a href="Client$.html"><span class="name">Client</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.topo.thrift" data-isabs="false">
-      <a id="thrift:thrift"></a>
+    </li><li name="com.twitter.finagle.topo.thriftscala" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="thriftscala"></a>
+      <a id="thriftscala:thriftscala"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a href="thrift/package.html"><span class="name">thrift</span></a>
+        <a href="thriftscala/package.html"><span class="name">thriftscala</span></a>
       </span>
       </h4>
       
@@ -131,10 +147,20 @@
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -142,7 +168,6 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

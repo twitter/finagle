@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.http</title>
+          <title>http - com.twitter.finagle.http</title>
+          <meta name="description" content="http - com.twitter.finagle.http" />
+          <meta name="keywords" content="http com.twitter.finagle.http" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.http.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>http</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,9 +56,10 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.http.BadHttpRequest" data-isabs="false">
+              <ol><li name="com.twitter.finagle.http.BadHttpRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BadHttpRequestextendsDefaultHttpRequestwithProductwithSerializable"></a>
       <a id="BadHttpRequest:BadHttpRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,23 +67,25 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BadHttpRequest.html"><span class="name">BadHttpRequest</span></a><span class="params">(<span name="httpVersion">httpVersion: HttpVersion</span>, <span name="method">method: HttpMethod</span>, <span name="uri">uri: String</span>, <span name="codecError">codecError: String</span>)</span><span class="result"> extends DefaultHttpRequest with Product with Serializable</span>
+        <a href="BadHttpRequest.html"><span class="name">BadHttpRequest</span></a><span class="params">(<span name="httpVersion">httpVersion: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpVersion">HttpVersion</span></span>, <span name="method">method: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMethod">HttpMethod</span></span>, <span name="uri">uri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="codecError">codecError: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.codec.http.DefaultHttpRequest">DefaultHttpRequest</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.CheckRequestFilter" data-isabs="true">
-      <a id="CheckRequestFilter:CheckRequestFilter[Req]"></a>
+    </li><li name="com.twitter.finagle.http.CheckRequestFilter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="CheckRequestFilter[Req]extendsSimpleFilter[Req,org.jboss.netty.handler.codec.http.HttpResponse]"></a>
+      <a id="CheckRequestFilter[Req]:CheckRequestFilter[Req]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="CheckRequestFilter.html"><span class="name">CheckRequestFilter</span></a><span class="tparams">[<span name="Req">Req</span>]</span><span class="result"> extends SimpleFilter[Req, HttpResponse]</span>
+        <a href="CheckRequestFilter.html"><span class="name">CheckRequestFilter</span></a><span class="tparams">[<span name="Req">Req</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.http.CheckRequestFilter.Req">Req</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.Cookie" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.Cookie" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CookieextendsAnyRef"></a>
       <a id="Cookie:Cookie"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -80,11 +93,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Cookie.html"><span class="name">Cookie</span></a><span class="result"> extends AnyRef</span>
+        <a href="Cookie.html"><span class="name">Cookie</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">Scala wrapper around Netty cookies.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.CookieMap" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.CookieMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CookieMapextendsMap[String,com.twitter.finagle.http.Cookie]withMapLike[String,com.twitter.finagle.http.Cookie,com.twitter.finagle.http.CookieMap]"></a>
       <a id="CookieMap:CookieMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -92,12 +106,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="CookieMap.html"><span class="name">CookieMap</span></a><span class="result"> extends Map[String, Cookie] with MapLike[String, Cookie, CookieMap]</span>
+        <a href="CookieMap.html"><span class="name">CookieMap</span></a><span class="result"> extends <span class="extype" name="scala.collection.mutable.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="Cookie.html" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a>] with <span class="extype" name="scala.collection.mutable.MapLike">MapLike</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="Cookie.html" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a>, <a href="CookieMap.html" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a>]</span>
       </span>
       </h4>
       <p class="comment cmt">Adapt cookies of a Message to a mutable Map where cookies are indexed by
 their name.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.FileElement" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.FileElement" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FileElementextendsFormElementwithProductwithSerializable"></a>
       <a id="FileElement:FileElement"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -105,11 +120,12 @@ their name.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="FileElement.html"><span class="name">FileElement</span></a><span class="params">(<span name="name">name: String</span>, <span name="content">content: ChannelBuffer</span>, <span name="contentType">contentType: Option[String]</span>, <span name="filename">filename: Option[String]</span>)</span><span class="result"> extends FormElement with Product with Serializable</span>
+        <a href="FileElement.html"><span class="name">FileElement</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="content">content: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="contentType">contentType: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>, <span name="filename">filename: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="FormElement.html" class="extype" name="com.twitter.finagle.http.FormElement">FormElement</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.FormElement" data-isabs="true">
+    </li><li name="com.twitter.finagle.http.FormElement" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="FormElementextendsAnyRef"></a>
       <a id="FormElement:FormElement"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -117,11 +133,12 @@ their name.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="FormElement.html"><span class="name">FormElement</span></a><span class="result"> extends AnyRef</span>
+        <a href="FormElement.html"><span class="name">FormElement</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.HeaderMap" data-isabs="true">
+    </li><li name="com.twitter.finagle.http.HeaderMap" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="HeaderMapextendsMap[String,String]withMapLike[String,String,com.twitter.finagle.http.HeaderMap]"></a>
       <a id="HeaderMap:HeaderMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -129,11 +146,12 @@ their name.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="HeaderMap.html"><span class="name">HeaderMap</span></a><span class="result"> extends Map[String, String] with MapLike[String, String, HeaderMap]</span>
+        <a href="HeaderMap.html"><span class="name">HeaderMap</span></a><span class="result"> extends <span class="extype" name="scala.collection.mutable.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>] with <span class="extype" name="scala.collection.mutable.MapLike">MapLike</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</span>
       </span>
       </h4>
       <p class="comment cmt">Message headers map.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.Http" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.Http" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpextendsCodecFactory[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]withProductwithSerializable"></a>
       <a id="Http:Http"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -141,23 +159,12 @@ their name.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Http.html"><span class="name">Http</span></a><span class="params">(<span name="_compressionLevel">_compressionLevel: Int</span>, <span name="_maxRequestSize">_maxRequestSize: StorageUnit</span>, <span name="_maxResponseSize">_maxResponseSize: StorageUnit</span>, <span name="_decompressionEnabled">_decompressionEnabled: Boolean</span>, <span name="_channelBufferUsageTracker">_channelBufferUsageTracker: Option[ChannelBufferUsageTracker]</span>, <span name="_annotateCipherHeader">_annotateCipherHeader: Option[String]</span>, <span name="_enableTracing">_enableTracing: Boolean</span>, <span name="_maxInitialLineLength">_maxInitialLineLength: StorageUnit</span>, <span name="_maxHeaderSize">_maxHeaderSize: StorageUnit</span>)</span><span class="result"> extends CodecFactory[HttpRequest, HttpResponse] with Product with Serializable</span>
+        <a href="Http.html"><span class="name">Http</span></a><span class="params">(<span name="_compressionLevel">_compressionLevel: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">-1</span></span>, <span name="_maxRequestSize">_maxRequestSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes">...</span></span>, <span name="_maxResponseSize">_maxResponseSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes">...</span></span>, <span name="_decompressionEnabled">_decompressionEnabled: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="_channelBufferUsageTracker">_channelBufferUsageTracker: <span class="extype" name="scala.Option">Option</span>[<a href="codec/ChannelBufferUsageTracker.html" class="extype" name="com.twitter.finagle.http.codec.ChannelBufferUsageTracker">ChannelBufferUsageTracker</a>] = <span class="symbol">scala.None</span></span>, <span name="_annotateCipherHeader">_annotateCipherHeader: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>, <span name="_enableTracing">_enableTracing: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="_maxInitialLineLength">_maxInitialLineLength: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(4096).bytes">...</span></span>, <span name="_maxHeaderSize">_maxHeaderSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(8192).bytes">...</span></span>)</span><span class="result"> extends <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt"></p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.HttpClientTracingFilter" data-isabs="false">
-      <a id="HttpClientTracingFilter:HttpClientTracingFilter[Req, Res]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="HttpClientTracingFilter.html"><span class="name">HttpClientTracingFilter</span></a><span class="tparams">[<span name="Req">Req &lt;: HttpRequest</span>, <span name="Res">Res</span>]</span><span class="result"> extends SimpleFilter[Req, Res]</span>
-      </span>
-      </h4>
-      <p class="comment cmt">Pass along headers with the required tracing information.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.HttpMuxHandler" data-isabs="true">
+    </li><li name="com.twitter.finagle.http.HttpMuxHandler" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="HttpMuxHandlerextendsService[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]"></a>
       <a id="HttpMuxHandler:HttpMuxHandler"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -165,11 +172,12 @@ their name.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="HttpMuxHandler.html"><span class="name">HttpMuxHandler</span></a><span class="result"> extends Service[HttpRequest, HttpResponse]</span>
+        <a href="HttpMuxHandler.html"><span class="name">HttpMuxHandler</span></a><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">Trait HttpMuxHandler is used for service-loading HTTP handlers.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.HttpMuxer" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.HttpMuxer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpMuxerextendsService[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]"></a>
       <a id="HttpMuxer:HttpMuxer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -177,23 +185,12 @@ their name.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="HttpMuxer.html"><span class="name">HttpMuxer</span></a><span class="result"> extends Service[HttpRequest, HttpResponse]</span>
+        <a href="HttpMuxer.html"><span class="name">HttpMuxer</span></a><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">A service that dispatches incoming requests to registered handlers.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.HttpServerTracingFilter" data-isabs="false">
-      <a id="HttpServerTracingFilter:HttpServerTracingFilter[Req, Res]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="HttpServerTracingFilter.html"><span class="name">HttpServerTracingFilter</span></a><span class="tparams">[<span name="Req">Req &lt;: HttpRequest</span>, <span name="Res">Res</span>]</span><span class="result"> extends SimpleFilter[Req, Res]</span>
-      </span>
-      </h4>
-      <p class="comment cmt">Adds tracing annotations for each http request we receive.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.HttpTransport" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.HttpTransport" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpTransportextendsTransport[Any,Any]"></a>
       <a id="HttpTransport:HttpTransport"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -201,11 +198,12 @@ their name.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="HttpTransport.html"><span class="name">HttpTransport</span></a><span class="result"> extends Transport[Any, Any]</span>
+        <a href="HttpTransport.html"><span class="name">HttpTransport</span></a><span class="result"> extends <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="scala.Any">Any</span>, <span class="extype" name="scala.Any">Any</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">A Transport with close behavior managed by ConnectionManager.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.MapHeaderMap" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.MapHeaderMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MapHeaderMapextendsHeaderMap"></a>
       <a id="MapHeaderMap:MapHeaderMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -213,11 +211,12 @@ their name.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="MapHeaderMap.html"><span class="name">MapHeaderMap</span></a><span class="result"> extends HeaderMap</span>
+        <a href="MapHeaderMap.html"><span class="name">MapHeaderMap</span></a><span class="result"> extends <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
       </span>
       </h4>
       <p class="comment cmt">Mutable-Map-backed HeaderMap</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.MapParamMap" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.MapParamMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MapParamMapextendsParamMap"></a>
       <a id="MapParamMap:MapParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -225,11 +224,12 @@ their name.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="MapParamMap.html"><span class="name">MapParamMap</span></a><span class="result"> extends ParamMap</span>
+        <a href="MapParamMap.html"><span class="name">MapParamMap</span></a><span class="result"> extends <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a></span>
       </span>
       </h4>
       <p class="comment cmt">Map-backed ParamMap.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.Message" data-isabs="true">
+    </li><li name="com.twitter.finagle.http.Message" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="MessageextendsHttpMessage"></a>
       <a id="Message:Message"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -237,11 +237,12 @@ their name.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Message.html"><span class="name">Message</span></a><span class="result"> extends HttpMessage</span>
+        <a href="Message.html"><span class="name">Message</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMessage">HttpMessage</span></span>
       </span>
       </h4>
       <p class="comment cmt">Rich HttpMessage</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.MessageHeaderMap" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.MessageHeaderMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MessageHeaderMapextendsHeaderMap"></a>
       <a id="MessageHeaderMap:MessageHeaderMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -249,11 +250,12 @@ their name.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="MessageHeaderMap.html"><span class="name">MessageHeaderMap</span></a><span class="result"> extends HeaderMap</span>
+        <a href="MessageHeaderMap.html"><span class="name">MessageHeaderMap</span></a><span class="result"> extends <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
       </span>
       </h4>
       <p class="comment cmt">HttpMessage-backed HeaderMap.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.MockResponse" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.MockResponse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MockResponseextendsResponse"></a>
       <a id="MockResponse:MockResponse"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -261,11 +263,12 @@ their name.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="MockResponse.html"><span class="name">MockResponse</span></a><span class="result"> extends Response</span>
+        <a href="MockResponse.html"><span class="name">MockResponse</span></a><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap" data-isabs="true">
+    </li><li name="com.twitter.finagle.http.ParamMap" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ParamMapextendsMap[String,String]withMapLike[String,String,com.twitter.finagle.http.ParamMap]"></a>
       <a id="ParamMap:ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -273,11 +276,12 @@ their name.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ParamMap.html"><span class="name">ParamMap</span></a><span class="result"> extends Map[String, String] with MapLike[String, String, ParamMap]</span>
+        <a href="ParamMap.html"><span class="name">ParamMap</span></a><span class="result"> extends <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>] with <span class="extype" name="scala.collection.immutable.MapLike">MapLike</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a>]</span>
       </span>
       </h4>
       <p class="comment cmt">Request parameter map.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.ProxyCredentials" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.ProxyCredentials" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ProxyCredentialsextendsProductwithSerializable"></a>
       <a id="ProxyCredentials:ProxyCredentials"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -285,11 +289,12 @@ their name.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ProxyCredentials.html"><span class="name">ProxyCredentials</span></a><span class="params">(<span name="username">username: String</span>, <span name="password">password: String</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="ProxyCredentials.html"><span class="name">ProxyCredentials</span></a><span class="params">(<span name="username">username: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="password">password: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.Request" data-isabs="true">
+    </li><li name="com.twitter.finagle.http.Request" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RequestextendsMessagewithHttpRequestProxy"></a>
       <a id="Request:Request"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -297,23 +302,25 @@ their name.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Request.html"><span class="name">Request</span></a><span class="result"> extends Message with HttpRequestProxy</span>
+        <a href="Request.html"><span class="name">Request</span></a><span class="result"> extends <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a> with <a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a></span>
       </span>
       </h4>
       <p class="comment cmt">Rich HttpRequest.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.RequestBuilder" data-isabs="false">
-      <a id="RequestBuilder:RequestBuilder[HasUrl, HasForm]"></a>
+    </li><li name="com.twitter.finagle.http.RequestBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RequestBuilder[HasUrl,HasForm]extendsAnyRef"></a>
+      <a id="RequestBuilder[HasUrl,HasForm]:RequestBuilder[HasUrl,HasForm]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="RequestBuilder.html"><span class="name">RequestBuilder</span></a><span class="tparams">[<span name="HasUrl">HasUrl</span>, <span name="HasForm">HasForm</span>]</span><span class="result"> extends AnyRef</span>
+        <a href="RequestBuilder.html"><span class="name">RequestBuilder</span></a><span class="tparams">[<span name="HasUrl">HasUrl</span>, <span name="HasForm">HasForm</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.RequestParamMap" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.RequestParamMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RequestParamMapextendsParamMap"></a>
       <a id="RequestParamMap:RequestParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -321,11 +328,12 @@ their name.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="RequestParamMap.html"><span class="name">RequestParamMap</span></a><span class="result"> extends ParamMap</span>
+        <a href="RequestParamMap.html"><span class="name">RequestParamMap</span></a><span class="result"> extends <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a></span>
       </span>
       </h4>
       <p class="comment cmt">HttpRequest-backed param map.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.RequestProxy" data-isabs="true">
+    </li><li name="com.twitter.finagle.http.RequestProxy" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RequestProxyextendsRequest"></a>
       <a id="RequestProxy:RequestProxy"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -333,11 +341,12 @@ their name.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="RequestProxy.html"><span class="name">RequestProxy</span></a><span class="result"> extends Request</span>
+        <a href="RequestProxy.html"><span class="name">RequestProxy</span></a><span class="result"> extends <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>
       </span>
       </h4>
       <p class="comment cmt">Proxy for Request.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.Response" data-isabs="true">
+    </li><li name="com.twitter.finagle.http.Response" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ResponseextendsMessagewithHttpResponseProxy"></a>
       <a id="Response:Response"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -345,24 +354,26 @@ their name.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Response.html"><span class="name">Response</span></a><span class="result"> extends Message with HttpResponseProxy</span>
+        <a href="Response.html"><span class="name">Response</span></a><span class="result"> extends <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a> with <a href="netty/HttpResponseProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpResponseProxy">HttpResponseProxy</a></span>
       </span>
       </h4>
       <p class="comment cmt">Rich HttpResponse
 </p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.RichHttp" data-isabs="false">
-      <a id="RichHttp:RichHttp[REQUEST]"></a>
+    </li><li name="com.twitter.finagle.http.RichHttp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RichHttp[REQUEST&lt;:com.twitter.finagle.http.Request]extendsCodecFactory[REQUEST,com.twitter.finagle.http.Response]withProductwithSerializable"></a>
+      <a id="RichHttp[REQUEST&lt;:Request]:RichHttp[REQUEST]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="RichHttp.html"><span class="name">RichHttp</span></a><span class="tparams">[<span name="REQUEST">REQUEST &lt;: Request</span>]</span><span class="params">(<span name="httpFactory">httpFactory: Http</span>, <span name="aggregateChunks">aggregateChunks: Boolean</span>)</span><span class="result"> extends CodecFactory[REQUEST, Response] with Product with Serializable</span>
+        <a href="RichHttp.html"><span class="name">RichHttp</span></a><span class="tparams">[<span name="REQUEST">REQUEST &lt;: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>]</span><span class="params">(<span name="httpFactory">httpFactory: <a href="Http.html" class="extype" name="com.twitter.finagle.http.Http">Http</a></span>, <span name="aggregateChunks">aggregateChunks: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>)</span><span class="result"> extends <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="com.twitter.finagle.http.RichHttp.REQUEST">REQUEST</span>, <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Http codec for rich Request/Response objects.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.SafeHttpServerCodec" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.SafeHttpServerCodec" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SafeHttpServerCodecextendsHttpServerCodec"></a>
       <a id="SafeHttpServerCodec:SafeHttpServerCodec"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -370,11 +381,12 @@ their name.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SafeHttpServerCodec.html"><span class="name">SafeHttpServerCodec</span></a><span class="result"> extends HttpServerCodec</span>
+        <a href="SafeHttpServerCodec.html"><span class="name">SafeHttpServerCodec</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.codec.http.HttpServerCodec">HttpServerCodec</span></span>
       </span>
       </h4>
       <p class="comment cmt">Convert exceptions to BadHttpRequests</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.SimpleElement" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.SimpleElement" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SimpleElementextendsFormElementwithProductwithSerializable"></a>
       <a id="SimpleElement:SimpleElement"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -382,23 +394,25 @@ their name.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="SimpleElement.html"><span class="name">SimpleElement</span></a><span class="params">(<span name="name">name: String</span>, <span name="content">content: String</span>)</span><span class="result"> extends FormElement with Product with Serializable</span>
+        <a href="SimpleElement.html"><span class="name">SimpleElement</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="content">content: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="FormElement.html" class="extype" name="com.twitter.finagle.http.FormElement">FormElement</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.SpnegoAuthenticator" data-isabs="true">
-      <a id="SpnegoAuthenticator:SpnegoAuthenticator[Req, Rsp]"></a>
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="SpnegoAuthenticator[Req,Rsp]extendsFilter[Req,Rsp,com.twitter.finagle.http.SpnegoAuthenticator.Authenticated[Req],Rsp]"></a>
+      <a id="SpnegoAuthenticator[Req,Rsp]:SpnegoAuthenticator[Req,Rsp]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SpnegoAuthenticator.html"><span class="name">SpnegoAuthenticator</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rsp">Rsp</span>]</span><span class="result"> extends Filter[Req, Rsp, Authenticated[Req], Rsp]</span>
+        <a href="SpnegoAuthenticator.html"><span class="name">SpnegoAuthenticator</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rsp">Rsp</span>]</span><span class="result"> extends <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Req">Req</span>, <span class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Rsp">Rsp</span>, <a href="SpnegoAuthenticator$$Authenticated.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated">Authenticated</a>[<span class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Req">Req</span>], <span class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Rsp">Rsp</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">A SPNEGO HTTP authenticator as defined in https://tools.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.TlsFilter" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.TlsFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TlsFilterextendsSimpleFilter[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]"></a>
       <a id="TlsFilter:TlsFilter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -406,19 +420,20 @@ their name.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="TlsFilter.html"><span class="name">TlsFilter</span></a><span class="result"> extends SimpleFilter[HttpRequest, HttpResponse]</span>
+        <a href="TlsFilter.html"><span class="name">TlsFilter</span></a><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">Adds the host headers to the
-org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
+<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">org.jboss.netty.handler.codec.http.HttpRequest</span> for TLS-enabled requests.</p>
     </li></ol>
             </div>
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.http.BadHttpRequest" data-isabs="false">
+              <ol><li name="com.twitter.finagle.http.BadHttpRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BadHttpRequest"></a>
       <a id="BadHttpRequest:BadHttpRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -426,11 +441,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="BadHttpRequest$.html"><span class="name">BadHttpRequest</span></a><span class="result"> extends Serializable</span>
+        <a href="BadHttpRequest$.html"><span class="name">BadHttpRequest</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.EmptyParamMap" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.EmptyParamMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EmptyParamMap"></a>
       <a id="EmptyParamMap:EmptyParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -438,11 +454,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="EmptyParamMap$.html"><span class="name">EmptyParamMap</span></a><span class="result"> extends ParamMap</span>
+        <a href="EmptyParamMap$.html"><span class="name">EmptyParamMap</span></a><span class="result"> extends <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a></span>
       </span>
       </h4>
       <p class="comment cmt">Empty ParamMap</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.HeaderMap" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.HeaderMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HeaderMap"></a>
       <a id="HeaderMap:HeaderMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -450,11 +467,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="HeaderMap$.html"><span class="name">HeaderMap</span></a><span class="result"> extends AnyRef</span>
+        <a href="HeaderMap$.html"><span class="name">HeaderMap</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.Http" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.Http" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Http"></a>
       <a id="Http:Http"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -462,11 +480,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Http$.html"><span class="name">Http</span></a><span class="result"> extends Serializable</span>
+        <a href="Http$.html"><span class="name">Http</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.HttpMuxer" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.HttpMuxer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpMuxer"></a>
       <a id="HttpMuxer:HttpMuxer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -474,12 +493,13 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="HttpMuxer$.html"><span class="name">HttpMuxer</span></a><span class="result"> extends Service[HttpRequest, HttpResponse]</span>
+        <a href="HttpMuxer$.html"><span class="name">HttpMuxer</span></a><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">Singleton default multiplex service
 </p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.HttpTracing" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.HttpTracing" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpTracing"></a>
       <a id="HttpTracing:HttpTracing"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -487,11 +507,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="HttpTracing$.html"><span class="name">HttpTracing</span></a><span class="result"> extends AnyRef</span>
+        <a href="HttpTracing$.html"><span class="name">HttpTracing</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.MapHeaderMap" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.MapHeaderMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MapHeaderMap"></a>
       <a id="MapHeaderMap:MapHeaderMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -499,11 +520,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="MapHeaderMap$.html"><span class="name">MapHeaderMap</span></a><span class="result"> extends AnyRef</span>
+        <a href="MapHeaderMap$.html"><span class="name">MapHeaderMap</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.MapParamMap" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.MapParamMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MapParamMap"></a>
       <a id="MapParamMap:MapParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -511,11 +533,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="MapParamMap$.html"><span class="name">MapParamMap</span></a><span class="result"> extends AnyRef</span>
+        <a href="MapParamMap$.html"><span class="name">MapParamMap</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.MediaType" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.MediaType" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MediaType"></a>
       <a id="MediaType:MediaType"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -523,11 +546,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="MediaType$.html"><span class="name">MediaType</span></a><span class="result"> extends AnyRef</span>
+        <a href="MediaType$.html"><span class="name">MediaType</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.Message" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.Message" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Message"></a>
       <a id="Message:Message"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -535,11 +559,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Message$.html"><span class="name">Message</span></a><span class="result"> extends AnyRef</span>
+        <a href="Message$.html"><span class="name">Message</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.Method" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.Method" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Method"></a>
       <a id="Method:Method"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -547,11 +572,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Method$.html"><span class="name">Method</span></a><span class="result"> extends AnyRef</span>
+        <a href="Method$.html"><span class="name">Method</span></a>
       </span>
       </h4>
       <p class="comment cmt">Scala aliases for HttpMethod.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.ParamMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParamMap"></a>
       <a id="ParamMap:ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -559,11 +585,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ParamMap$.html"><span class="name">ParamMap</span></a><span class="result"> extends AnyRef</span>
+        <a href="ParamMap$.html"><span class="name">ParamMap</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.ProxyCredentials" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.ProxyCredentials" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ProxyCredentials"></a>
       <a id="ProxyCredentials:ProxyCredentials"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -571,11 +598,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ProxyCredentials$.html"><span class="name">ProxyCredentials</span></a><span class="result"> extends Serializable</span>
+        <a href="ProxyCredentials$.html"><span class="name">ProxyCredentials</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.Request" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.Request" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Request"></a>
       <a id="Request:Request"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -583,11 +611,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Request$.html"><span class="name">Request</span></a><span class="result"> extends AnyRef</span>
+        <a href="Request$.html"><span class="name">Request</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.RequestBuilder" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.RequestBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RequestBuilder"></a>
       <a id="RequestBuilder:RequestBuilder"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -595,12 +624,13 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="RequestBuilder$.html"><span class="name">RequestBuilder</span></a><span class="result"> extends AnyRef</span>
+        <a href="RequestBuilder$.html"><span class="name">RequestBuilder</span></a>
       </span>
       </h4>
-      <p class="comment cmt">Factory for <a name="com.twitter.finagle.http.RequestBuilder" class="extype" href="RequestBuilder.html">RequestBuilder</a> instances
+      <p class="comment cmt">Factory for <a href="RequestBuilder.html" class="extype" name="com.twitter.finagle.http.RequestBuilder">com.twitter.finagle.http.RequestBuilder</a> instances
 </p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.RequestConfig" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.RequestConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RequestConfig"></a>
       <a id="RequestConfig:RequestConfig"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -608,11 +638,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="RequestConfig$.html"><span class="name">RequestConfig</span></a><span class="result"> extends Serializable</span>
+        <a href="RequestConfig$.html"><span class="name">RequestConfig</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.Response" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.Response" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Response"></a>
       <a id="Response:Response"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -620,11 +651,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Response$.html"><span class="name">Response</span></a><span class="result"> extends AnyRef</span>
+        <a href="Response$.html"><span class="name">Response</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.SpnegoAuthenticator" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SpnegoAuthenticator"></a>
       <a id="SpnegoAuthenticator:SpnegoAuthenticator"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -632,11 +664,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="SpnegoAuthenticator$.html"><span class="name">SpnegoAuthenticator</span></a><span class="result"> extends AnyRef</span>
+        <a href="SpnegoAuthenticator$.html"><span class="name">SpnegoAuthenticator</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.Status" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.Status" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Status"></a>
       <a id="Status:Status"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -644,11 +677,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Status$.html"><span class="name">Status</span></a><span class="result"> extends AnyRef</span>
+        <a href="Status$.html"><span class="name">Status</span></a>
       </span>
       </h4>
       <p class="comment cmt">Scala aliases for HttpResponseStatus.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.TlsFilter" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.TlsFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TlsFilter"></a>
       <a id="TlsFilter:TlsFilter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -656,11 +690,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="TlsFilter$.html"><span class="name">TlsFilter</span></a><span class="result"> extends AnyRef</span>
+        <a href="TlsFilter$.html"><span class="name">TlsFilter</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.Version" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.Version" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Version"></a>
       <a id="Version:Version"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -668,11 +703,12 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Version$.html"><span class="name">Version</span></a><span class="result"> extends AnyRef</span>
+        <a href="Version$.html"><span class="name">Version</span></a>
       </span>
       </h4>
       <p class="comment cmt">Scala aliases for HttpVersion.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.codec" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.codec" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="codec"></a>
       <a id="codec:codec"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -684,7 +720,8 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.filter" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.filter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="filter"></a>
       <a id="filter:filter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -696,7 +733,8 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.netty" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="netty"></a>
       <a id="netty:netty"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -708,7 +746,8 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.path" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.path" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="path"></a>
       <a id="path:path"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -720,7 +759,8 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.service" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.service" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="service"></a>
       <a id="service:service"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -732,7 +772,8 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.util" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.util" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="util"></a>
       <a id="util:util"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -748,10 +789,20 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -759,7 +810,6 @@ org.jboss.netty.handler.codec.http.HttpRequest for TLS-enabled requests.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

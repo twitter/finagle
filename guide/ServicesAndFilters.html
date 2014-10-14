@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Services &amp; Filters &mdash; Finagle 6.20.0 documentation</title>
+    <title>Services &amp; Filters &mdash; Finagle 6.22.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.20.0',
+        VERSION:     '6.22.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.20.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.22.0 documentation" href="index.html" />
     <link rel="next" title="Servers" href="Servers.html" />
     <link rel="prev" title="Concurrent Programming with Futures" href="Futures.html" />
    
@@ -170,7 +170,7 @@ then <cite>timeoutFilter</cite>.</p>
 <p>In certain modules, it&#8217;s important to take into account the process of acquiring
 a <cite>Service</cite>. For example, a connection pool would need to play a significant role
 in the <cite>Service</cite> acquisition phase. The <cite>ServiceFactory</cite> exists for this exact reason.
-It produces <a href="#id2"><span class="problematic" id="id3">`</span></a>Service`s over which requests can be dispatched. Its definition:</p>
+It produces <cite>Service</cite>&#8216;s over which requests can be dispatched. Its definition:</p>
 <div class="highlight-text"><div class="highlight"><pre>abstract class ServiceFactory[-Req, +Rep]
         extends (ClientConnection =&gt; Future[Service[Req, Rep]])
 </pre></div>

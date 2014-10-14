@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.ssl</title>
+          <title>ssl - com.twitter.finagle.ssl</title>
+          <meta name="description" content="ssl - com.twitter.finagle.ssl" />
+          <meta name="keywords" content="ssl com.twitter.finagle.ssl" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.ssl.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>ssl</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,9 +56,10 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.ssl.Engine" data-isabs="false">
+              <ol><li name="com.twitter.finagle.ssl.Engine" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EngineextendsProductwithSerializable"></a>
       <a id="Engine:Engine"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,11 +67,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Engine.html"><span class="name">Engine</span></a><span class="params">(<span name="self">self: SSLEngine</span>, <span name="handlesRenegotiation">handlesRenegotiation: Boolean</span>, <span name="certId">certId: String</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="Engine.html"><span class="name">Engine</span></a><span class="params">(<span name="self">self: <span class="extype" name="javax.net.ssl.SSLEngine">SSLEngine</span></span>, <span name="handlesRenegotiation">handlesRenegotiation: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="certId">certId: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&lt;unknown&gt;&quot;</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.ssl.SslConnectHandler" data-isabs="false">
+    </li><li name="com.twitter.finagle.ssl.SslConnectHandler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SslConnectHandlerextendsSimpleChannelHandler"></a>
       <a id="SslConnectHandler:SslConnectHandler"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -68,11 +80,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SslConnectHandler.html"><span class="name">SslConnectHandler</span></a><span class="result"> extends SimpleChannelHandler</span>
+        <a href="SslConnectHandler.html"><span class="name">SslConnectHandler</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.SimpleChannelHandler">SimpleChannelHandler</span></span>
       </span>
       </h4>
       <p class="comment cmt">Handle client-side SSL connections:</p>
-    </li><li visbl="pub" name="com.twitter.finagle.ssl.SslShutdownHandler" data-isabs="false">
+    </li><li name="com.twitter.finagle.ssl.SslShutdownHandler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SslShutdownHandlerextendsSimpleChannelUpstreamHandler"></a>
       <a id="SslShutdownHandler:SslShutdownHandler"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -80,7 +93,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SslShutdownHandler.html"><span class="name">SslShutdownHandler</span></a><span class="result"> extends SimpleChannelUpstreamHandler</span>
+        <a href="SslShutdownHandler.html"><span class="name">SslShutdownHandler</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.SimpleChannelUpstreamHandler">SimpleChannelUpstreamHandler</span></span>
       </span>
       </h4>
       
@@ -89,9 +102,10 @@
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.ssl.JSSE" data-isabs="false">
+              <ol><li name="com.twitter.finagle.ssl.JSSE" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="JSSE"></a>
       <a id="JSSE:JSSE"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -99,11 +113,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="JSSE$.html"><span class="name">JSSE</span></a><span class="result"> extends AnyRef</span>
+        <a href="JSSE$.html"><span class="name">JSSE</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.ssl.OpenSSL" data-isabs="false">
+    </li><li name="com.twitter.finagle.ssl.OpenSSL" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OpenSSL"></a>
       <a id="OpenSSL:OpenSSL"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -111,11 +126,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="OpenSSL$.html"><span class="name">OpenSSL</span></a><span class="result"> extends AnyRef</span>
+        <a href="OpenSSL$.html"><span class="name">OpenSSL</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.ssl.PEMEncodedKeyManager" data-isabs="false">
+    </li><li name="com.twitter.finagle.ssl.PEMEncodedKeyManager" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PEMEncodedKeyManager"></a>
       <a id="PEMEncodedKeyManager:PEMEncodedKeyManager"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -123,11 +139,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="PEMEncodedKeyManager$.html"><span class="name">PEMEncodedKeyManager</span></a><span class="result"> extends AnyRef</span>
+        <a href="PEMEncodedKeyManager$.html"><span class="name">PEMEncodedKeyManager</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.ssl.Shell" data-isabs="false">
+    </li><li name="com.twitter.finagle.ssl.Shell" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Shell"></a>
       <a id="Shell:Shell"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -135,11 +152,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Shell$.html"><span class="name">Shell</span></a><span class="result"> extends AnyRef</span>
+        <a href="Shell$.html"><span class="name">Shell</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.ssl.Ssl" data-isabs="false">
+    </li><li name="com.twitter.finagle.ssl.Ssl" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Ssl"></a>
       <a id="Ssl:Ssl"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -147,11 +165,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Ssl$.html"><span class="name">Ssl</span></a><span class="result"> extends AnyRef</span>
+        <a href="Ssl$.html"><span class="name">Ssl</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.ssl.SslConnectHandler" data-isabs="false">
+    </li><li name="com.twitter.finagle.ssl.SslConnectHandler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SslConnectHandler"></a>
       <a id="SslConnectHandler:SslConnectHandler"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -159,7 +178,7 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="SslConnectHandler$.html"><span class="name">SslConnectHandler</span></a><span class="result"> extends AnyRef</span>
+        <a href="SslConnectHandler$.html"><span class="name">SslConnectHandler</span></a>
       </span>
       </h4>
       
@@ -167,10 +186,20 @@
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -178,7 +207,6 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

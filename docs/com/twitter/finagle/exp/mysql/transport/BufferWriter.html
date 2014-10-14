@@ -2,34 +2,44 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.exp.mysql.transport.BufferWriter</title>
+          <title>BufferWriter - com.twitter.finagle.exp.mysql.transport.BufferWriter</title>
+          <meta name="description" content="BufferWriter - com.twitter.finagle.exp.mysql.transport.BufferWriter" />
+          <meta name="keywords" content="BufferWriter com.twitter.finagle.exp.mysql.transport.BufferWriter" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../../index.html';
+            var hash = 'com.twitter.finagle.exp.mysql.transport.BufferWriter';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
+        <body class="type">
       <div id="definition">
-        <a title="Go to companion" href="BufferWriter$.html"><img src="../../../../../../lib/trait_to_object_big.png" /></a>
-        <p id="owner"><a name="com" class="extype" href="../../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../../package.html">finagle</a>.<a name="com.twitter.finagle.exp" class="extype" href="../../package.html">exp</a>.<a name="com.twitter.finagle.exp.mysql" class="extype" href="../package.html">mysql</a>.<a name="com.twitter.finagle.exp.mysql.transport" class="extype" href="package.html">transport</a></p>
-        <h1><a title="Go to companion" href="BufferWriter$.html">BufferWriter</a></h1>
+        <a href="BufferWriter$.html" title="Go to companion"><img src="../../../../../../lib/trait_to_object_big.png" /></a>
+        <p id="owner"><a href="../../../../../package.html" class="extype" name="com">com</a>.<a href="../../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle.exp">exp</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.exp.mysql">mysql</a>.<a href="package.html" class="extype" name="com.twitter.finagle.exp.mysql.transport">transport</a></p>
+        <h1><a href="BufferWriter$.html" title="Go to companion">BufferWriter</a></h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">BufferWriter</span><span class="result"> extends <a name="com.twitter.finagle.exp.mysql.transport.Buffer" class="extype" href="Buffer.html">Buffer</a></span>
+        <span class="name">BufferWriter</span><span class="result"> extends <a href="Buffer.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Buffer">Buffer</a></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Provides convenient methods for writing the
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Provides convenient methods for writing the
 data in a mysql packet body. All data is encoded
 in little endian byte order in accordance with
 the mysql protocol. Operations are side-effecting,
@@ -37,22 +47,34 @@ that is, all operations increase the offset
 into the underlying buffer.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.exp.mysql.transport.Buffer" class="extype" href="Buffer.html">Buffer</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="Buffer.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Buffer">Buffer</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
-    
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         <div id="order">
               <span class="filtertype">Ordering</span>
-              <ol><li class="alpha in"><span>Alphabetic</span></li><li class="inherit out"><span>By inheritance</span></li></ol>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
             </div>
         <div id="ancestors">
-              <span class="filtertype">Inherited</span>
-              <ol><li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter" class="in"><span>BufferWriter</span></li><li name="com.twitter.finagle.exp.mysql.transport.Buffer" class="in"><span>Buffer</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
-            </div>
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="com.twitter.finagle.exp.mysql.transport.BufferWriter"><span>BufferWriter</span></li><li class="in" name="com.twitter.finagle.exp.mysql.transport.Buffer"><span>Buffer</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
             <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
@@ -65,9 +87,10 @@ into the underlying buffer.
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#offset" data-isabs="true">
+              <ol><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#offset" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="offset:Int"></a>
       <a id="offset:Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -75,11 +98,12 @@ into the underlying buffer.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">offset</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+        <span class="name">offset</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Current writer offset.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#skip" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#skip" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="skip(n:Int):com.twitter.finagle.exp.mysql.transport.BufferWriter"></a>
       <a id="skip(Int):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -87,11 +111,12 @@ into the underlying buffer.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">skip</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">skip</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.mysql.transport.BufferWriter">BufferWriter</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.Buffer#underlying" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.Buffer#underlying" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="underlying:org.jboss.netty.buffer.ChannelBuffer"></a>
       <a id="underlying:ChannelBuffer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -99,11 +124,12 @@ into the underlying buffer.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">underlying</span><span class="result">: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>
+        <span class="name">underlying</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.transport.Buffer" class="extype" href="Buffer.html">Buffer</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writable" data-isabs="true">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Buffer.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Buffer">Buffer</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writable" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="writable(width:Int):Boolean"></a>
       <a id="writable(Int):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -111,12 +137,13 @@ into the underlying buffer.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writable</span><span class="params">(<span name="width">width: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">writable</span><span class="params">(<span name="width">width: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Denotes if the buffer is writable upto the given width
 based on the current offset.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeBoolean" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeBoolean" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="writeBoolean(b:Boolean):com.twitter.finagle.exp.mysql.transport.BufferWriter"></a>
       <a id="writeBoolean(Boolean):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -124,11 +151,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeBoolean</span><span class="params">(<span name="b">b: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">writeBoolean</span><span class="params">(<span name="b">b: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.mysql.transport.BufferWriter">BufferWriter</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeByte" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeByte" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="writeByte(n:Int):com.twitter.finagle.exp.mysql.transport.BufferWriter"></a>
       <a id="writeByte(Int):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -136,11 +164,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeByte</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">writeByte</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.mysql.transport.BufferWriter">BufferWriter</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeBytes" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeBytes" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="writeBytes(bytes:Array[Byte]):com.twitter.finagle.exp.mysql.transport.BufferWriter"></a>
       <a id="writeBytes(Array[Byte]):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -148,12 +177,13 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeBytes</span><span class="params">(<span name="bytes">bytes: <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">writeBytes</span><span class="params">(<span name="bytes">bytes: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.mysql.transport.BufferWriter">BufferWriter</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Writes bytes onto the buffer.</p><div class="fullcomment"><div class="comment cmt"><p>Writes bytes onto the buffer.</p></div><dl class="paramcmts block"><dt class="param">bytes</dt><dd class="cmt"><p>Array[Byte] to copy onto the buffer.
 </p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeDouble" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeDouble" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="writeDouble(d:Double):com.twitter.finagle.exp.mysql.transport.BufferWriter"></a>
       <a id="writeDouble(Double):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -161,11 +191,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeDouble</span><span class="params">(<span name="d">d: <span name="scala.Double" class="extype">Double</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">writeDouble</span><span class="params">(<span name="d">d: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.mysql.transport.BufferWriter">BufferWriter</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeFloat" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeFloat" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="writeFloat(f:Float):com.twitter.finagle.exp.mysql.transport.BufferWriter"></a>
       <a id="writeFloat(Float):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -173,11 +204,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeFloat</span><span class="params">(<span name="f">f: <span name="scala.Float" class="extype">Float</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">writeFloat</span><span class="params">(<span name="f">f: <span class="extype" name="scala.Float">Float</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.mysql.transport.BufferWriter">BufferWriter</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeInt" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeInt" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="writeInt(n:Int):com.twitter.finagle.exp.mysql.transport.BufferWriter"></a>
       <a id="writeInt(Int):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -185,11 +217,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeInt</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">writeInt</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.mysql.transport.BufferWriter">BufferWriter</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeInt24" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeInt24" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="writeInt24(n:Int):com.twitter.finagle.exp.mysql.transport.BufferWriter"></a>
       <a id="writeInt24(Int):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -197,11 +230,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeInt24</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">writeInt24</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.mysql.transport.BufferWriter">BufferWriter</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeLong" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeLong" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="writeLong(n:Long):com.twitter.finagle.exp.mysql.transport.BufferWriter"></a>
       <a id="writeLong(Long):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -209,11 +243,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeLong</span><span class="params">(<span name="n">n: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">writeLong</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.mysql.transport.BufferWriter">BufferWriter</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeShort" data-isabs="true">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeShort" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="writeShort(n:Int):com.twitter.finagle.exp.mysql.transport.BufferWriter"></a>
       <a id="writeShort(Int):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -221,16 +256,17 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeShort</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">writeShort</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.mysql.transport.BufferWriter">BufferWriter</a></span>
       </span>
       </h4>
       
     </li></ol>
             </div>
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Concrete Value Members</h3>
-              <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:AnyRef):Boolean"></a>
       <a id="!=(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -238,11 +274,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#!=" data-isabs="false">
+    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -250,11 +287,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef###" data-isabs="false">
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
       <a id="##():Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -262,11 +300,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $hash$hash">##</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:AnyRef):Boolean"></a>
       <a id="==(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -274,11 +313,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#==" data-isabs="false">
+    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -286,11 +326,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -298,11 +339,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: T0</span>
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.Buffer#capacity" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.Buffer#capacity" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="capacity:Int"></a>
       <a id="capacity:Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -310,11 +352,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">capacity</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+        <span class="name">capacity</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.transport.Buffer" class="extype" href="Buffer.html">Buffer</a></dd></dl></div>
-    </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Buffer.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Buffer">Buffer</a></dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -322,14 +365,18 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: AnyRef</span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -337,11 +384,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#equals" data-isabs="false">
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
       <a id="equals(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -349,11 +397,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#fill" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#fill" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fill(n:Int,b:Byte):com.twitter.finagle.exp.mysql.transport.BufferWriter"></a>
       <a id="fill(Int,Byte):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -361,12 +410,13 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">fill</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>, <span name="b">b: <span name="scala.Byte" class="extype">Byte</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">fill</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>, <span name="b">b: <span class="extype" name="scala.Byte">Byte</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.mysql.transport.BufferWriter">BufferWriter</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Fills the buffer from current offset to offset+n with b.</p><div class="fullcomment"><div class="comment cmt"><p>Fills the buffer from current offset to offset+n with b.</p></div><dl class="paramcmts block"><dt class="param">n</dt><dd class="cmt"><p>width to fill</p></dd><dt class="param">b</dt><dd class="cmt"><p>Byte used to fill.
 </p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#fillRest" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#fillRest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fillRest(b:Byte):com.twitter.finagle.exp.mysql.transport.BufferWriter"></a>
       <a id="fillRest(Byte):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -374,12 +424,13 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">fillRest</span><span class="params">(<span name="b">b: <span name="scala.Byte" class="extype">Byte</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">fillRest</span><span class="params">(<span name="b">b: <span class="extype" name="scala.Byte">Byte</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.mysql.transport.BufferWriter">BufferWriter</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Fills the rest of the buffer with the given byte.</p><div class="fullcomment"><div class="comment cmt"><p>Fills the rest of the buffer with the given byte.</p></div><dl class="paramcmts block"><dt class="param">b</dt><dd class="cmt"><p>Byte used to fill.
 </p></dd></dl></div>
-    </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -387,26 +438,31 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
-      <a id="getClass():java.lang.Class[_]"></a>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getClass</span><span class="params">()</span><span class="result">: java.lang.Class[_]</span>
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -414,11 +470,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.Buffer#headOption" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.Buffer#headOption" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="headOption:Option[Byte]"></a>
       <a id="headOption:Option[Byte]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -426,11 +483,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">headOption</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[<span name="scala.Byte" class="extype">Byte</span>]</span>
+        <span class="name">headOption</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.transport.Buffer" class="extype" href="Buffer.html">Buffer</a></dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Buffer.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Buffer">Buffer</a></dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -438,11 +496,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -450,11 +509,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
       <a id="notify():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -462,11 +522,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#notifyAll" data-isabs="false">
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
       <a id="notifyAll():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -474,23 +535,25 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
-      <a id="synchronized[T0](⇒ T0):T0"></a>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ T0</span>)</span><span class="result">: T0</span>
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
+    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -498,11 +561,12 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -510,14 +574,18 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
       <a id="wait(Long,Int):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -525,14 +593,18 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>, <span name="arg1">arg1: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
       <a id="wait(Long):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -540,14 +612,18 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeLengthCodedBinary" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeLengthCodedBinary" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeLengthCodedBinary(length:Long):com.twitter.finagle.exp.mysql.transport.BufferWriter"></a>
       <a id="writeLengthCodedBinary(Long):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -555,7 +631,7 @@ based on the current offset.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeLengthCodedBinary</span><span class="params">(<span name="length">length: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">writeLengthCodedBinary</span><span class="params">(<span name="length">length: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.mysql.transport.BufferWriter">BufferWriter</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Writes a length coded binary according the the MySQL
@@ -563,7 +639,8 @@ Client/Server protocol.</p><div class="fullcomment"><div class="comment cmt"><p>
 Client/Server protocol. Refer to MySQL documentation for
 more information.
 </p></div></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeLengthCodedBytes" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeLengthCodedBytes" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="writeLengthCodedBytes(bytes:Array[Byte]):com.twitter.finagle.exp.mysql.transport.BufferWriter"></a>
       <a id="writeLengthCodedBytes(Array[Byte]):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -571,12 +648,13 @@ more information.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeLengthCodedBytes</span><span class="params">(<span name="bytes">bytes: <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">writeLengthCodedBytes</span><span class="params">(<span name="bytes">bytes: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.mysql.transport.BufferWriter">BufferWriter</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Writes a length coded set of bytes according to the MySQL
 client/server protocol.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeLengthCodedString" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeLengthCodedString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeLengthCodedString(s:String,charset:java.nio.charset.Charset):com.twitter.finagle.exp.mysql.transport.BufferWriter"></a>
       <a id="writeLengthCodedString(String,Charset):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -584,7 +662,7 @@ client/server protocol.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeLengthCodedString</span><span class="params">(<span name="s">s: String</span>, <span name="charset">charset: <span name="java.nio.charset.Charset" class="extype">Charset</span> = <span class="symbol"><span class="name"><a href="../../../../../package.html">Charset.defaultCharset</a></span></span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">writeLengthCodedString</span><span class="params">(<span name="s">s: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="charset">charset: <span class="extype" name="java.nio.charset.Charset">Charset</span> = <span class="symbol"><span class="name"><a href="../../../../../package.html">Charset.defaultCharset</a></span></span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.mysql.transport.BufferWriter">BufferWriter</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Writes a length coded string using the MySQL Client/Server
@@ -592,7 +670,8 @@ protocol.</p><div class="fullcomment"><div class="comment cmt"><p>Writes a lengt
 protocol. Uses Charset.defaultCharset by default to decode
 the given String.</p></div><dl class="paramcmts block"><dt class="param">s</dt><dd class="cmt"><p>String to write to buffer.
 </p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeNullTerminatedString" data-isabs="false">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter#writeNullTerminatedString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeNullTerminatedString(s:String,charset:java.nio.charset.Charset):com.twitter.finagle.exp.mysql.transport.BufferWriter"></a>
       <a id="writeNullTerminatedString(String,Charset):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -600,7 +679,7 @@ the given String.</p></div><dl class="paramcmts block"><dt class="param">s</dt><
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeNullTerminatedString</span><span class="params">(<span name="s">s: String</span>, <span name="charset">charset: <span name="java.nio.charset.Charset" class="extype">Charset</span> = <span class="symbol"><span class="name"><a href="../../../../../package.html">Charset.defaultCharset</a></span></span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">writeNullTerminatedString</span><span class="params">(<span name="s">s: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="charset">charset: <span class="extype" name="java.nio.charset.Charset">Charset</span> = <span class="symbol"><span class="name"><a href="../../../../../package.html">Charset.defaultCharset</a></span></span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.mysql.transport.BufferWriter">BufferWriter</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Writes a null terminated string onto the buffer where
@@ -612,15 +691,25 @@ to decode the given String.</p></div><dl class="paramcmts block"><dt class="para
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
-        <div name="com.twitter.finagle.exp.mysql.transport.Buffer" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.exp.mysql.transport.Buffer" class="extype" href="Buffer.html">Buffer</a></h3>
-            </div><div name="scala.AnyRef" class="parent">
-              <h3>Inherited from AnyRef</h3>
-            </div><div name="scala.Any" class="parent">
-              <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>
+        <div class="parent" name="com.twitter.finagle.exp.mysql.transport.Buffer">
+              <h3>Inherited from <a href="Buffer.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Buffer">Buffer</a></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
             </div>
         </div>
 
@@ -629,7 +718,6 @@ to decode the given String.</p></div><dl class="paramcmts block"><dt class="para
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../../lib/template.js"></script>
     </body>
       </html>

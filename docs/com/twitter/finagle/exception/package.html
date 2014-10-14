@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.exception</title>
+          <title>exception - com.twitter.finagle.exception</title>
+          <meta name="description" content="exception - com.twitter.finagle.exception" />
+          <meta name="keywords" content="exception com.twitter.finagle.exception" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.exception.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>exception</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,9 +56,10 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.exception.ClientMonitorFactory" data-isabs="true">
+              <ol><li name="com.twitter.finagle.exception.ClientMonitorFactory" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ClientMonitorFactoryextendsString=&gt;com.twitter.util.Monitor"></a>
       <a id="ClientMonitorFactory:ClientMonitorFactory"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,11 +67,12 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ClientMonitorFactory.html"><span class="name">ClientMonitorFactory</span></a><span class="result"> extends (String) ⇒ Monitor</span>
+        <a href="ClientMonitorFactory.html"><span class="name">ClientMonitorFactory</span></a><span class="result"> extends (<span class="extype" name="scala.Predef.String">String</span>) ⇒ <span class="extype" name="com.twitter.util.Monitor">Monitor</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exception.ExceptionReporter" data-isabs="false">
+    </li><li name="com.twitter.finagle.exception.ExceptionReporter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExceptionReporterextendsReporterFactory"></a>
       <a id="ExceptionReporter:ExceptionReporter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -68,11 +80,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ExceptionReporter.html"><span class="name">ExceptionReporter</span></a><span class="result"> extends ReporterFactory</span>
+        <a href="ExceptionReporter.html"><span class="name">ExceptionReporter</span></a><span class="result"> extends <a href="../util/ReporterFactory.html" class="extype" name="com.twitter.finagle.util.ReporterFactory">ReporterFactory</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exception.MonitorFactory" data-isabs="true">
+    </li><li name="com.twitter.finagle.exception.MonitorFactory" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="MonitorFactoryextendsServerMonitorFactorywithClientMonitorFactory"></a>
       <a id="MonitorFactory:MonitorFactory"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -80,11 +93,12 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="MonitorFactory.html"><span class="name">MonitorFactory</span></a><span class="result"> extends ServerMonitorFactory with ClientMonitorFactory</span>
+        <a href="MonitorFactory.html"><span class="name">MonitorFactory</span></a><span class="result"> extends <a href="ServerMonitorFactory.html" class="extype" name="com.twitter.finagle.exception.ServerMonitorFactory">ServerMonitorFactory</a> with <a href="ClientMonitorFactory.html" class="extype" name="com.twitter.finagle.exception.ClientMonitorFactory">ClientMonitorFactory</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exception.Reporter" data-isabs="false">
+    </li><li name="com.twitter.finagle.exception.Reporter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ReporterextendsMonitorwithProductwithSerializable"></a>
       <a id="Reporter:Reporter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -92,11 +106,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Reporter.html"><span class="name">Reporter</span></a><span class="params">(<span name="client">client: Scribe[Future]</span>, <span name="serviceName">serviceName: String</span>, <span name="statsReceiver">statsReceiver: StatsReceiver</span>, <span name="sourceAddress">sourceAddress: Option[String]</span>, <span name="clientAddress">clientAddress: Option[String]</span>)</span><span class="result"> extends Monitor with Product with Serializable</span>
+        <a href="Reporter.html"><span class="name">Reporter</span></a><span class="params">(<span name="client">client: <a href="thriftscala/Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a>[<span class="extype" name="com.twitter.util.Future">Future</span>]</span>, <span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="statsReceiver">statsReceiver: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>, <span name="sourceAddress">sourceAddress: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="defval" name="scala.Some.apply[String](com.twitter.finagle.core.util.InetAddressUtil.Loopback.getHostName())">...</span></span>, <span name="clientAddress">clientAddress: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <span class="extype" name="com.twitter.util.Monitor">Monitor</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">An implementation of ExceptionReceiver custom to the chickadee reporting service.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exception.ServerMonitorFactory" data-isabs="true">
+    </li><li name="com.twitter.finagle.exception.ServerMonitorFactory" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ServerMonitorFactoryextends(String,java.net.SocketAddress)=&gt;com.twitter.util.Monitor"></a>
       <a id="ServerMonitorFactory:ServerMonitorFactory"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -104,7 +119,7 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ServerMonitorFactory.html"><span class="name">ServerMonitorFactory</span></a><span class="result"> extends (String, SocketAddress) ⇒ Monitor</span>
+        <a href="ServerMonitorFactory.html"><span class="name">ServerMonitorFactory</span></a><span class="result"> extends (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <span class="extype" name="com.twitter.util.Monitor">Monitor</span></span>
       </span>
       </h4>
       
@@ -113,9 +128,10 @@
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.exception.NullMonitorFactory" data-isabs="false">
+              <ol><li name="com.twitter.finagle.exception.NullMonitorFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NullMonitorFactory"></a>
       <a id="NullMonitorFactory:NullMonitorFactory"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -123,11 +139,12 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NullMonitorFactory$.html"><span class="name">NullMonitorFactory</span></a><span class="result"> extends MonitorFactory</span>
+        <a href="NullMonitorFactory$.html"><span class="name">NullMonitorFactory</span></a><span class="result"> extends <a href="MonitorFactory.html" class="extype" name="com.twitter.finagle.exception.MonitorFactory">MonitorFactory</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exception.Reporter" data-isabs="false">
+    </li><li name="com.twitter.finagle.exception.Reporter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Reporter"></a>
       <a id="Reporter:Reporter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -135,12 +152,13 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Reporter$.html"><span class="name">Reporter</span></a><span class="result"> extends Serializable</span>
+        <a href="Reporter$.html"><span class="name">Reporter</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">A collection of methods to construct a Monitor that logs to a ScribeHandler
 specifically for the chickadee exception reporting service.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.exception.host" data-isabs="false">
+    </li><li name="com.twitter.finagle.exception.host" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="host"></a>
       <a id="host:host"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -148,19 +166,20 @@ specifically for the chickadee exception reporting service.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="host$.html"><span class="name">host</span></a><span class="result"> extends GlobalFlag[InetSocketAddress]</span>
+        <a href="host$.html"><span class="name">host</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="java.net.InetSocketAddress">InetSocketAddress</span>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift" data-isabs="false">
-      <a id="thrift:thrift"></a>
+    </li><li name="com.twitter.finagle.exception.thriftscala" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="thriftscala"></a>
+      <a id="thriftscala:thriftscala"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a href="thrift/package.html"><span class="name">thrift</span></a>
+        <a href="thriftscala/package.html"><span class="name">thriftscala</span></a>
       </span>
       </h4>
       
@@ -168,10 +187,20 @@ specifically for the chickadee exception reporting service.</p>
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -179,7 +208,6 @@ specifically for the chickadee exception reporting service.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

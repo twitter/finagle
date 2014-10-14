@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Quickstart &mdash; Finagle 6.20.0 documentation</title>
+    <title>Quickstart &mdash; Finagle 6.22.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.20.0',
+        VERSION:     '6.22.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.20.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.22.0 documentation" href="index.html" />
     <link rel="next" title="Concurrent Programming with Futures" href="Futures.html" />
     <link rel="prev" title="User’s guide" href="index.html" />
    
@@ -84,13 +84,13 @@ $ ./sbt compile
 <p>We&#8217;ll use <a class="reference external" href="http://www.scala-sbt.org">sbt</a> to build our project. Finagle is published to Maven Central,
 so little setup is needed: put the following into a file called <cite>build.sbt</cite> in
 a fresh directory:</p>
-<div class="highlight-text"><div class="highlight"><pre>name := &quot;quickstart&quot;
+<pre class="literal-block">
+name = &quot;quickstart&quot;
 
-version := &quot;1.0&quot;
+version = &quot;1.0&quot;
 
-libraryDependencies += &quot;com.twitter&quot; %% &quot;finagle-http&quot; % &quot;6.2.0&quot;
-</pre></div>
-</div>
+libraryDependencies += &quot;com.twitter&quot; %% &quot;finagle-http&quot; % &quot;6.22.0&quot;
+</pre>
 <p>Any file in this directory will now be compiled by <cite>sbt</cite>. In order to simplify
 installation, we recommend that you use the bootstrap <cite>sbt</cite> script available
 <a class="reference external" href="https://raw.github.com/twitter/finagle/master/doc/src/sphinx/code/quickstart/sbt">here</a>, or:</p>
@@ -241,7 +241,7 @@ import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 object Proxy extends App {
   val client: Service[HttpRequest, HttpResponse] =
     Http.newService(&quot;www.google.com:80&quot;)
-    
+
   val server = Http.serve(&quot;:8080&quot;, client)
   Await.ready(server)
 }

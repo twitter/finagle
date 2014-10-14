@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.tracing</title>
+          <title>tracing - com.twitter.finagle.tracing</title>
+          <meta name="description" content="tracing - com.twitter.finagle.tracing" />
+          <meta name="keywords" content="tracing com.twitter.finagle.tracing" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.tracing.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>tracing</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,9 +56,24 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.tracing.Annotation" data-isabs="true">
+              <ol><li name="com.twitter.finagle.tracing.AnnotatingTracingFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AnnotatingTracingFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
+      <a id="AnnotatingTracingFilter[Req,Rep]:AnnotatingTracingFilter[Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="AnnotatingTracingFilter.html"><span class="name">AnnotatingTracingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.tracing.AnnotatingTracingFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.tracing.AnnotatingTracingFilter.Rep">Rep</span>]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A generic filter that can be used for annotating the Server and Client side
+of a trace.</p>
+    </li><li name="com.twitter.finagle.tracing.Annotation" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="AnnotationextendsAnyRef"></a>
       <a id="Annotation:Annotation"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,11 +81,12 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Annotation.html"><span class="name">Annotation</span></a><span class="result"> extends AnyRef</span>
+        <a href="Annotation.html"><span class="name">Annotation</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.BufferingTracer" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.BufferingTracer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BufferingTracerextendsTracerwithIterable[com.twitter.finagle.tracing.Record]"></a>
       <a id="BufferingTracer:BufferingTracer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -68,35 +94,38 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="BufferingTracer.html"><span class="name">BufferingTracer</span></a><span class="result"> extends Tracer with Iterable[Record]</span>
+        <a href="BufferingTracer.html"><span class="name">BufferingTracer</span></a><span class="result"> extends <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a> with <span class="extype" name="scala.Iterable">Iterable</span>[<a href="Record.html" class="extype" name="com.twitter.finagle.tracing.Record">Record</a>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.ClientDestTracingFilter" data-isabs="false">
-      <a id="ClientDestTracingFilter:ClientDestTracingFilter[Req, Rep]"></a>
+    </li><li name="com.twitter.finagle.tracing.ClientDestTracingFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientDestTracingFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
+      <a id="ClientDestTracingFilter[Req,Rep]:ClientDestTracingFilter[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ClientDestTracingFilter.html"><span class="name">ClientDestTracingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
+        <a href="ClientDestTracingFilter.html"><span class="name">ClientDestTracingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.tracing.ClientDestTracingFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.tracing.ClientDestTracingFilter.Rep">Rep</span>]</span>
       </span>
       </h4>
-      <p class="comment cmt"><a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a> for clients to record the remote address of the server.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.ClientRequestTracingFilter" data-isabs="true">
-      <a id="ClientRequestTracingFilter:ClientRequestTracingFilter[Req, Res]"></a>
+      <p class="comment cmt"><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> for clients to record the remote address of the server.</p>
+    </li><li name="com.twitter.finagle.tracing.ClientRequestTracingFilter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ClientRequestTracingFilter[Req,Res]extendsSimpleFilter[Req,Res]"></a>
+      <a id="ClientRequestTracingFilter[Req,Res]:ClientRequestTracingFilter[Req,Res]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ClientRequestTracingFilter.html"><span class="name">ClientRequestTracingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Res">Res</span>]</span><span class="result"> extends SimpleFilter[Req, Res]</span>
+        <a href="ClientRequestTracingFilter.html"><span class="name">ClientRequestTracingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Res">Res</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.tracing.ClientRequestTracingFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.tracing.ClientRequestTracingFilter.Res">Res</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">Adds the basic tracing information to a request.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.Flags" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.Flags" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FlagsextendsProductwithSerializable"></a>
       <a id="Flags:Flags"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -104,11 +133,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Flags.html"><span class="name">Flags</span></a><span class="params">(<span name="flags">flags: Long</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="Flags.html"><span class="name">Flags</span></a><span class="params">(<span name="flags">flags: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Represents flags that can be passed along in request headers.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.NullTracer" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.NullTracer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NullTracerextendsTracer"></a>
       <a id="NullTracer:NullTracer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -116,11 +146,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="NullTracer.html"><span class="name">NullTracer</span></a><span class="result"> extends Tracer</span>
+        <a href="NullTracer.html"><span class="name">NullTracer</span></a><span class="result"> extends <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.Record" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.Record" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RecordextendsProductwithSerializable"></a>
       <a id="Record:Record"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -128,24 +159,26 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Record.html"><span class="name">Record</span></a><span class="params">(<span name="traceId">traceId: TraceId</span>, <span name="timestamp">timestamp: Time</span>, <span name="annotation">annotation: Annotation</span>, <span name="duration">duration: Option[Duration]</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="Record.html"><span class="name">Record</span></a><span class="params">(<span name="traceId">traceId: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>, <span name="timestamp">timestamp: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="annotation">annotation: <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a></span>, <span name="duration">duration: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">Records information of interest to the tracing system.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.ServerDestTracingProxy" data-isabs="false">
-      <a id="ServerDestTracingProxy:ServerDestTracingProxy[Req, Rep]"></a>
+    </li><li name="com.twitter.finagle.tracing.ServerDestTracingProxy" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerDestTracingProxy[Req,Rep]extendsServiceFactoryProxy[Req,Rep]"></a>
+      <a id="ServerDestTracingProxy[Req,Rep]:ServerDestTracingProxy[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ServerDestTracingProxy.html"><span class="name">ServerDestTracingProxy</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends ServiceFactoryProxy[Req, Rep]</span>
+        <a href="ServerDestTracingProxy.html"><span class="name">ServerDestTracingProxy</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a>[<span class="extype" name="com.twitter.finagle.tracing.ServerDestTracingProxy.Req">Req</span>, <span class="extype" name="com.twitter.finagle.tracing.ServerDestTracingProxy.Rep">Rep</span>]</span>
       </span>
       </h4>
-      <p class="comment cmt"><a name="com.twitter.finagle.ServiceFactoryProxy" class="extype" href="../ServiceFactoryProxy.html">ServiceFactoryProxy</a> used to trace the local addr and
+      <p class="comment cmt"><a href="../ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">com.twitter.finagle.ServiceFactoryProxy</a> used to trace the local addr and
 server addr.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.SpanId" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.SpanId" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SpanIdextendsProxy"></a>
       <a id="SpanId:SpanId"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -153,11 +186,12 @@ server addr.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SpanId.html"><span class="name">SpanId</span></a><span class="result"> extends Proxy</span>
+        <a href="SpanId.html"><span class="name">SpanId</span></a><span class="result"> extends <span class="extype" name="scala.Proxy">Proxy</span></span>
       </span>
       </h4>
       <p class="comment cmt">Defines trace identifiers.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.TraceId" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.TraceId" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TraceIdextendsProductwithSerializable"></a>
       <a id="TraceId:TraceId"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -165,11 +199,25 @@ server addr.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="TraceId.html"><span class="name">TraceId</span></a><span class="params">(<span name="_traceId">_traceId: Option[SpanId]</span>, <span name="_parentId">_parentId: Option[SpanId]</span>, <span name="spanId">spanId: SpanId</span>, <span name="_sampled">_sampled: Option[Boolean]</span>, <span name="flags">flags: Flags</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="TraceId.html"><span class="name">TraceId</span></a><span class="params">(<span name="_traceId">_traceId: <span class="extype" name="scala.Option">Option</span>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="_parentId">_parentId: <span class="extype" name="scala.Option">Option</span>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="spanId">spanId: <a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a></span>, <span name="_sampled">_sampled: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>, <span name="flags">flags: <a href="Flags.html" class="extype" name="com.twitter.finagle.tracing.Flags">Flags</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">A trace id represents one particular trace for one request.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.Tracer" data-isabs="true">
+    </li><li name="com.twitter.finagle.tracing.TraceInitializerFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TraceInitializerFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
+      <a id="TraceInitializerFilter[Req,Rep]:TraceInitializerFilter[Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="TraceInitializerFilter.html"><span class="name">TraceInitializerFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.tracing.TraceInitializerFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.tracing.TraceInitializerFilter.Rep">Rep</span>]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">The TraceInitializerFilter takes care of span lifecycle events.</p>
+    </li><li name="com.twitter.finagle.tracing.Tracer" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TracerextendsAnyRef"></a>
       <a id="Tracer:Tracer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -177,23 +225,12 @@ server addr.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Tracer.html"><span class="name">Tracer</span></a><span class="result"> extends AnyRef</span>
+        <a href="Tracer.html"><span class="name">Tracer</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.TracingFilter" data-isabs="false">
-      <a id="TracingFilter:TracingFilter[Req, Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="TracingFilter.html"><span class="name">TracingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
-      </span>
-      </h4>
-      <p class="comment cmt">The TracingFilter takes care of span lifecycle events.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.TracingLogHandler" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.TracingLogHandler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TracingLogHandlerextendsHandler"></a>
       <a id="TracingLogHandler:TracingLogHandler"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -201,19 +238,33 @@ server addr.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="TracingLogHandler.html"><span class="name">TracingLogHandler</span></a><span class="result"> extends Handler</span>
+        <a href="TracingLogHandler.html"><span class="name">TracingLogHandler</span></a><span class="result"> extends <span class="extype" name="com.twitter.logging.Handler">Handler</span></span>
       </span>
       </h4>
       <p class="comment cmt">A logging Handler that sends log information via tracing
 </p>
+    </li><li name="com.twitter.finagle.tracing.TracingFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TracingFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
+      <a id="TracingFilter[Req,Rep]:TracingFilter[Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="TracingFilter.html"><span class="name deprecated" title="Deprecated: (Since version 6.20.0) Use TraceInitializerFilter and (Client|Server)TracingFilter">TracingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.tracing.TracingFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.tracing.TracingFilter.Rep">Rep</span>]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">The TracingFilter takes care of span lifecycle events.</p>
     </li></ol>
             </div>
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.tracing.Annotation" data-isabs="false">
+              <ol><li name="com.twitter.finagle.tracing.Annotation" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Annotation"></a>
       <a id="Annotation:Annotation"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -221,11 +272,12 @@ server addr.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Annotation$.html"><span class="name">Annotation</span></a><span class="result"> extends AnyRef</span>
+        <a href="Annotation$.html"><span class="name">Annotation</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.BroadcastTracer" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.BroadcastTracer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BroadcastTracer"></a>
       <a id="BroadcastTracer:BroadcastTracer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -233,11 +285,12 @@ server addr.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="BroadcastTracer$.html"><span class="name">BroadcastTracer</span></a><span class="result"> extends AnyRef</span>
+        <a href="BroadcastTracer$.html"><span class="name">BroadcastTracer</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.ConsoleTracer" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.ConsoleTracer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ConsoleTracer"></a>
       <a id="ConsoleTracer:ConsoleTracer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -245,11 +298,12 @@ server addr.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ConsoleTracer$.html"><span class="name">ConsoleTracer</span></a><span class="result"> extends Tracer</span>
+        <a href="ConsoleTracer$.html"><span class="name">ConsoleTracer</span></a><span class="result"> extends <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.DefaultTracer" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.DefaultTracer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultTracer"></a>
       <a id="DefaultTracer:DefaultTracer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -257,11 +311,12 @@ server addr.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="DefaultTracer$.html"><span class="name">DefaultTracer</span></a><span class="result"> extends Tracer with Proxy</span>
+        <a href="DefaultTracer$.html"><span class="name">DefaultTracer</span></a><span class="result"> extends <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a> with <span class="extype" name="scala.Proxy">Proxy</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.Flags" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.Flags" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Flags"></a>
       <a id="Flags:Flags"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -269,11 +324,12 @@ server addr.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Flags$.html"><span class="name">Flags</span></a><span class="result"> extends Serializable</span>
+        <a href="Flags$.html"><span class="name">Flags</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.NullTracer" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.NullTracer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NullTracer"></a>
       <a id="NullTracer:NullTracer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -281,11 +337,12 @@ server addr.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NullTracer$.html"><span class="name">NullTracer</span></a><span class="result"> extends NullTracer</span>
+        <a href="NullTracer$.html"><span class="name">NullTracer</span></a><span class="result"> extends <a href="NullTracer.html" class="extype" name="com.twitter.finagle.tracing.NullTracer">NullTracer</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.Record" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.Record" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Record"></a>
       <a id="Record:Record"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -293,11 +350,12 @@ server addr.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Record$.html"><span class="name">Record</span></a><span class="result"> extends Serializable</span>
+        <a href="Record$.html"><span class="name">Record</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.SpanId" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.SpanId" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SpanId"></a>
       <a id="SpanId:SpanId"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -305,11 +363,12 @@ server addr.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="SpanId$.html"><span class="name">SpanId</span></a><span class="result"> extends AnyRef</span>
+        <a href="SpanId$.html"><span class="name">SpanId</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.Trace" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.Trace" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Trace"></a>
       <a id="Trace:Trace"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -317,13 +376,14 @@ server addr.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Trace$.html"><span class="name">Trace</span></a><span class="result"> extends AnyRef</span>
+        <a href="Trace$.html"><span class="name">Trace</span></a>
       </span>
       </h4>
       <p class="comment cmt"><code>Trace</code> maintains the state of the tracing stack
 The current <code>TraceId</code> has a terminal flag, indicating whether it
 can be overridden with a different <code>TraceId</code>.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.TraceId" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.TraceId" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TraceId"></a>
       <a id="TraceId:TraceId"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -331,11 +391,12 @@ can be overridden with a different <code>TraceId</code>.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="TraceId$.html"><span class="name">TraceId</span></a><span class="result"> extends Serializable</span>
+        <a href="TraceId$.html"><span class="name">TraceId</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.Tracer" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.Tracer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Tracer"></a>
       <a id="Tracer:Tracer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -343,11 +404,12 @@ can be overridden with a different <code>TraceId</code>.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Tracer$.html"><span class="name">Tracer</span></a><span class="result"> extends AnyRef</span>
+        <a href="Tracer$.html"><span class="name">Tracer</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.tracing.debugTrace" data-isabs="false">
+    </li><li name="com.twitter.finagle.tracing.debugTrace" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="debugTrace"></a>
       <a id="debugTrace:debugTrace"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -355,7 +417,7 @@ can be overridden with a different <code>TraceId</code>.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="debugTrace$.html"><span class="name">debugTrace</span></a><span class="result"> extends GlobalFlag[Boolean]</span>
+        <a href="debugTrace$.html"><span class="name">debugTrace</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>
       </span>
       </h4>
       
@@ -363,10 +425,20 @@ can be overridden with a different <code>TraceId</code>.</p>
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -374,7 +446,6 @@ can be overridden with a different <code>TraceId</code>.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

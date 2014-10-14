@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.stream</title>
+          <title>stream - com.twitter.finagle.stream</title>
+          <meta name="description" content="stream - com.twitter.finagle.stream" />
+          <meta name="keywords" content="stream com.twitter.finagle.stream" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.stream.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>stream</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,18 +39,41 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Finagle-stream implements a rather peculiar protocol: it streams
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Finagle-stream implements a rather peculiar protocol: it streams
 discrete messages delineated by HTTP chunks. It isn't how we'd design
 a protocol to stream messages, but we are stuck with it for legacy
 reasons.</p><p>Finagle-stream sessions are also <code><code>one-shot</code></code>: each session handles
 exactly one stream. The session terminates together with the stream.
-</p></div></div>
-    
+</p></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
-        
-        
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="com.twitter.finagle.stream"><span>stream</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
             <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
@@ -51,9 +84,10 @@ exactly one stream. The session terminates together with the stream.
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.stream.Stream" data-isabs="false">
+              <ol><li name="com.twitter.finagle.stream.Stream" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StreamextendsCodecFactory[org.jboss.netty.handler.codec.http.HttpRequest,com.twitter.finagle.stream.StreamResponse]"></a>
       <a id="Stream:Stream"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -61,11 +95,12 @@ exactly one stream. The session terminates together with the stream.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Stream.html"><span class="name">Stream</span></a><span class="result"> extends CodecFactory[HttpRequest, StreamResponse]</span>
+        <a href="Stream.html"><span class="name">Stream</span></a><span class="result"> extends <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.stream.StreamResponse" data-isabs="true">
+    </li><li name="com.twitter.finagle.stream.StreamResponse" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="StreamResponseextendsAnyRef"></a>
       <a id="StreamResponse:StreamResponse"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -73,7 +108,7 @@ exactly one stream. The session terminates together with the stream.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="StreamResponse.html"><span class="name">StreamResponse</span></a><span class="result"> extends AnyRef</span>
+        <a href="StreamResponse.html"><span class="name">StreamResponse</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
@@ -82,9 +117,10 @@ exactly one stream. The session terminates together with the stream.
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.stream.package.EOF" data-isabs="false">
+              <ol><li name="com.twitter.finagle.stream.EOF" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EOF"></a>
       <a id="EOF:EOF"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -92,11 +128,12 @@ exactly one stream. The session terminates together with the stream.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="package$$EOF$.html"><span class="name">EOF</span></a><span class="result"> extends Exception</span>
+        <a href="package$$EOF$.html"><span class="name">EOF</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
       </span>
       </h4>
       <p class="comment cmt">Indicates that a stream has ended.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.stream.Stream" data-isabs="false">
+    </li><li name="com.twitter.finagle.stream.Stream" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Stream"></a>
       <a id="Stream:Stream"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -104,7 +141,7 @@ exactly one stream. The session terminates together with the stream.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Stream$.html"><span class="name">Stream</span></a><span class="result"> extends AnyRef</span>
+        <a href="Stream$.html"><span class="name">Stream</span></a>
       </span>
       </h4>
       
@@ -112,10 +149,24 @@ exactly one stream. The session terminates together with the stream.
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
         
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -123,7 +174,6 @@ exactly one stream. The session terminates together with the stream.
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

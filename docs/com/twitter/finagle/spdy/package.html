@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.spdy</title>
+          <title>spdy - com.twitter.finagle.spdy</title>
+          <meta name="description" content="spdy - com.twitter.finagle.spdy" />
+          <meta name="keywords" content="spdy com.twitter.finagle.spdy" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.spdy.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>spdy</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,9 +56,10 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.spdy.AnnotateSpdyStreamId" data-isabs="false">
+              <ol><li name="com.twitter.finagle.spdy.AnnotateSpdyStreamId" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AnnotateSpdyStreamIdextendsSimpleFilter[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]"></a>
       <a id="AnnotateSpdyStreamId:AnnotateSpdyStreamId"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,11 +67,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="AnnotateSpdyStreamId.html"><span class="name">AnnotateSpdyStreamId</span></a><span class="result"> extends SimpleFilter[HttpRequest, HttpResponse]</span>
+        <a href="AnnotateSpdyStreamId.html"><span class="name">AnnotateSpdyStreamId</span></a><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.spdy.GenerateSpdyStreamId" data-isabs="false">
+    </li><li name="com.twitter.finagle.spdy.GenerateSpdyStreamId" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GenerateSpdyStreamIdextendsSimpleFilter[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]"></a>
       <a id="GenerateSpdyStreamId:GenerateSpdyStreamId"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -68,11 +80,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="GenerateSpdyStreamId.html"><span class="name">GenerateSpdyStreamId</span></a><span class="result"> extends SimpleFilter[HttpRequest, HttpResponse]</span>
+        <a href="GenerateSpdyStreamId.html"><span class="name">GenerateSpdyStreamId</span></a><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.spdy.Spdy" data-isabs="false">
+    </li><li name="com.twitter.finagle.spdy.Spdy" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SpdyextendsCodecFactory[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]withProductwithSerializable"></a>
       <a id="Spdy:Spdy"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -80,11 +93,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Spdy.html"><span class="name">Spdy</span></a><span class="params">(<span name="_version">_version: SpdyVersion</span>, <span name="_compressionLevel">_compressionLevel: Int</span>, <span name="_maxHeaderSize">_maxHeaderSize: StorageUnit</span>, <span name="_maxRequestSize">_maxRequestSize: StorageUnit</span>, <span name="_maxResponseSize">_maxResponseSize: StorageUnit</span>)</span><span class="result"> extends CodecFactory[HttpRequest, HttpResponse] with Product with Serializable</span>
+        <a href="Spdy.html"><span class="name">Spdy</span></a><span class="params">(<span name="_version">_version: <span class="extype" name="org.jboss.netty.handler.codec.spdy.SpdyVersion">SpdyVersion</span> = <span class="defval" name="org.jboss.netty.handler.codec.spdy.SpdyVersion.SPDY_3_1">...</span></span>, <span name="_compressionLevel">_compressionLevel: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">6</span></span>, <span name="_maxHeaderSize">_maxHeaderSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(16384).bytes">...</span></span>, <span name="_maxRequestSize">_maxRequestSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes">...</span></span>, <span name="_maxResponseSize">_maxResponseSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes">...</span></span>)</span><span class="result"> extends <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.spdy.SpdyClientDispatcher" data-isabs="false">
+    </li><li name="com.twitter.finagle.spdy.SpdyClientDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SpdyClientDispatcherextendsService[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]"></a>
       <a id="SpdyClientDispatcher:SpdyClientDispatcher"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -92,11 +106,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SpdyClientDispatcher.html"><span class="name">SpdyClientDispatcher</span></a><span class="result"> extends Service[HttpRequest, HttpResponse]</span>
+        <a href="SpdyClientDispatcher.html"><span class="name">SpdyClientDispatcher</span></a><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.spdy.SpdyServerDispatcher" data-isabs="false">
+    </li><li name="com.twitter.finagle.spdy.SpdyServerDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SpdyServerDispatcherextendsClosable"></a>
       <a id="SpdyServerDispatcher:SpdyServerDispatcher"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -104,7 +119,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SpdyServerDispatcher.html"><span class="name">SpdyServerDispatcher</span></a><span class="result"> extends Closable</span>
+        <a href="SpdyServerDispatcher.html"><span class="name">SpdyServerDispatcher</span></a><span class="result"> extends <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
       </span>
       </h4>
       
@@ -113,9 +128,10 @@
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.spdy.Spdy" data-isabs="false">
+              <ol><li name="com.twitter.finagle.spdy.Spdy" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Spdy"></a>
       <a id="Spdy:Spdy"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -123,7 +139,7 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Spdy$.html"><span class="name">Spdy</span></a><span class="result"> extends Serializable</span>
+        <a href="Spdy$.html"><span class="name">Spdy</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -131,10 +147,20 @@
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -142,7 +168,6 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.http.codec</title>
+          <title>codec - com.twitter.finagle.http.codec</title>
+          <meta name="description" content="codec - com.twitter.finagle.http.codec" />
+          <meta name="keywords" content="codec com.twitter.finagle.http.codec" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../index.html';
+            var hash = 'com.twitter.finagle.http.codec.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.http" class="extype" href="../package.html">http</a></p>
+        <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.http">http</a></p>
         <h1>codec</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,9 +56,10 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.http.codec.AggregateHttpChunks" data-isabs="false">
+              <ol><li name="com.twitter.finagle.http.codec.AggregateHttpChunks" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AggregateHttpChunksextendsLeftFoldUpstreamHandlerwithProductwithSerializable"></a>
       <a id="AggregateHttpChunks:AggregateHttpChunks"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,11 +67,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="AggregateHttpChunks.html"><span class="name">AggregateHttpChunks</span></a><span class="params">(<span name="whenDone">whenDone: LeftFoldUpstreamHandler</span>, <span name="request">request: HttpRequest</span>, <span name="bufferBudget">bufferBudget: Int</span>, <span name="buffer">buffer: ChannelBuffer</span>)</span><span class="result"> extends LeftFoldUpstreamHandler with Product with Serializable</span>
+        <a href="AggregateHttpChunks.html"><span class="name">AggregateHttpChunks</span></a><span class="params">(<span name="whenDone">whenDone: <a href="../../channel/LeftFoldUpstreamHandler.html" class="extype" name="com.twitter.finagle.channel.LeftFoldUpstreamHandler">LeftFoldUpstreamHandler</a></span>, <span name="request">request: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>, <span name="bufferBudget">bufferBudget: <span class="extype" name="scala.Int">Int</span></span>, <span name="buffer">buffer: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span> = <span class="defval" name="org.jboss.netty.buffer.ChannelBuffers.EMPTY_BUFFER">...</span></span>)</span><span class="result"> extends <a href="../../channel/LeftFoldUpstreamHandler.html" class="extype" name="com.twitter.finagle.channel.LeftFoldUpstreamHandler">LeftFoldUpstreamHandler</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.codec.AggregateHttpRequest" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.codec.AggregateHttpRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AggregateHttpRequestextendsLeftFoldUpstreamHandler"></a>
       <a id="AggregateHttpRequest:AggregateHttpRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -68,11 +80,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="AggregateHttpRequest.html"><span class="name">AggregateHttpRequest</span></a><span class="result"> extends LeftFoldUpstreamHandler</span>
+        <a href="AggregateHttpRequest.html"><span class="name">AggregateHttpRequest</span></a><span class="result"> extends <a href="../../channel/LeftFoldUpstreamHandler.html" class="extype" name="com.twitter.finagle.channel.LeftFoldUpstreamHandler">LeftFoldUpstreamHandler</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.codec.AnnotateCipher" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.codec.AnnotateCipher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AnnotateCipherextendsSimpleChannelHandler"></a>
       <a id="AnnotateCipher:AnnotateCipher"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -80,12 +93,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="AnnotateCipher.html"><span class="name">AnnotateCipher</span></a><span class="result"> extends SimpleChannelHandler</span>
+        <a href="AnnotateCipher.html"><span class="name">AnnotateCipher</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.SimpleChannelHandler">SimpleChannelHandler</span></span>
       </span>
       </h4>
       <p class="comment cmt">Extract the cipher from the SslHandler and set it as a header on the HTTP
 request befor sending it upstream.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.codec.ChannelBufferManager" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.codec.ChannelBufferManager" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ChannelBufferManagerextendsSimpleChannelHandler"></a>
       <a id="ChannelBufferManager:ChannelBufferManager"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -93,11 +107,12 @@ request befor sending it upstream.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ChannelBufferManager.html"><span class="name">ChannelBufferManager</span></a><span class="result"> extends SimpleChannelHandler</span>
+        <a href="ChannelBufferManager.html"><span class="name">ChannelBufferManager</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.SimpleChannelHandler">SimpleChannelHandler</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.codec.ChannelBufferUsageTracker" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.codec.ChannelBufferUsageTracker" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ChannelBufferUsageTrackerextendsAnyRef"></a>
       <a id="ChannelBufferUsageTracker:ChannelBufferUsageTracker"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -105,11 +120,12 @@ request befor sending it upstream.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ChannelBufferUsageTracker.html"><span class="name">ChannelBufferUsageTracker</span></a><span class="result"> extends AnyRef</span>
+        <a href="ChannelBufferUsageTracker.html"><span class="name">ChannelBufferUsageTracker</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.codec.ConnectionManager" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.codec.ConnectionManager" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ConnectionManagerextendsAnyRef"></a>
       <a id="ConnectionManager:ConnectionManager"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -117,35 +133,39 @@ request befor sending it upstream.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ConnectionManager.html"><span class="name">ConnectionManager</span></a><span class="result"> extends AnyRef</span>
+        <a href="ConnectionManager.html"><span class="name">ConnectionManager</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.http.codec.HttpClientDispatcher" data-isabs="false">
-      <a id="HttpClientDispatcher:HttpClientDispatcher[Req]"></a>
+      <p class="comment cmt">The HTTP connection manager implements connection management in
+accordance with RFC 2616 § 8.</p>
+    </li><li name="com.twitter.finagle.http.codec.HttpClientDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpClientDispatcher[Req&lt;:org.jboss.netty.handler.codec.http.HttpRequest]extendsGenSerialClientDispatcher[Req,com.twitter.finagle.http.Response,Any,Any]"></a>
+      <a id="HttpClientDispatcher[Req&lt;:HttpRequest]:HttpClientDispatcher[Req]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="HttpClientDispatcher.html"><span class="name">HttpClientDispatcher</span></a><span class="tparams">[<span name="Req">Req &lt;: HttpRequest</span>]</span><span class="result"> extends GenSerialClientDispatcher[Req, Response, Any, Any]</span>
+        <a href="HttpClientDispatcher.html"><span class="name">HttpClientDispatcher</span></a><span class="tparams">[<span name="Req">Req &lt;: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>]</span><span class="result"> extends <a href="../../dispatch/GenSerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher">GenSerialClientDispatcher</a>[<span class="extype" name="com.twitter.finagle.http.codec.HttpClientDispatcher.Req">Req</span>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>, <span class="extype" name="scala.Any">Any</span>, <span class="extype" name="scala.Any">Any</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">Client dispatcher for HTTP.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.codec.HttpServerDispatcher" data-isabs="false">
-      <a id="HttpServerDispatcher:HttpServerDispatcher[REQUEST]"></a>
+    </li><li name="com.twitter.finagle.http.codec.HttpServerDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpServerDispatcher[REQUEST&lt;:com.twitter.finagle.http.Request]extendsGenSerialServerDispatcher[REQUEST,org.jboss.netty.handler.codec.http.HttpResponse,Any,Any]"></a>
+      <a id="HttpServerDispatcher[REQUEST&lt;:Request]:HttpServerDispatcher[REQUEST]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="HttpServerDispatcher.html"><span class="name">HttpServerDispatcher</span></a><span class="tparams">[<span name="REQUEST">REQUEST &lt;: Request</span>]</span><span class="result"> extends GenSerialServerDispatcher[REQUEST, HttpResponse, Any, Any]</span>
+        <a href="HttpServerDispatcher.html"><span class="name">HttpServerDispatcher</span></a><span class="tparams">[<span name="REQUEST">REQUEST &lt;: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>]</span><span class="result"> extends <a href="../../dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">GenSerialServerDispatcher</a>[<span class="extype" name="com.twitter.finagle.http.codec.HttpServerDispatcher.REQUEST">REQUEST</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>, <span class="extype" name="scala.Any">Any</span>, <span class="extype" name="scala.Any">Any</span>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.codec.RequestEncoder" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.codec.RequestEncoder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RequestEncoderextendsSimpleChannelDownstreamHandler"></a>
       <a id="RequestEncoder:RequestEncoder"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -153,12 +173,13 @@ request befor sending it upstream.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="RequestEncoder.html"><span class="name">RequestEncoder</span></a><span class="result"> extends SimpleChannelDownstreamHandler</span>
+        <a href="RequestEncoder.html"><span class="name">RequestEncoder</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.SimpleChannelDownstreamHandler">SimpleChannelDownstreamHandler</span></span>
       </span>
       </h4>
       <p class="comment cmt">Convert Finagle-HTTP requests to Netty Requests
 </p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.codec.RespondToExpectContinue" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.codec.RespondToExpectContinue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RespondToExpectContinueextendsSimpleChannelUpstreamHandler"></a>
       <a id="RespondToExpectContinue:RespondToExpectContinue"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -166,11 +187,12 @@ request befor sending it upstream.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="RespondToExpectContinue.html"><span class="name">RespondToExpectContinue</span></a><span class="result"> extends SimpleChannelUpstreamHandler</span>
+        <a href="RespondToExpectContinue.html"><span class="name">RespondToExpectContinue</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.SimpleChannelUpstreamHandler">SimpleChannelUpstreamHandler</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.codec.ResponseDecoder" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.codec.ResponseDecoder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ResponseDecoderextendsSimpleChannelHandler"></a>
       <a id="ResponseDecoder:ResponseDecoder"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -178,12 +200,13 @@ request befor sending it upstream.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ResponseDecoder.html"><span class="name">ResponseDecoder</span></a><span class="result"> extends SimpleChannelHandler</span>
+        <a href="ResponseDecoder.html"><span class="name">ResponseDecoder</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.SimpleChannelHandler">SimpleChannelHandler</span></span>
       </span>
       </h4>
       <p class="comment cmt">Convert Netty responses to a Finagle-HTTP responses
 </p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.codec.TextualContentCompressor" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.codec.TextualContentCompressor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TextualContentCompressorextendsHttpContentCompressor"></a>
       <a id="TextualContentCompressor:TextualContentCompressor"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -191,7 +214,7 @@ request befor sending it upstream.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="TextualContentCompressor.html"><span class="name">TextualContentCompressor</span></a><span class="result"> extends HttpContentCompressor</span>
+        <a href="TextualContentCompressor.html"><span class="name">TextualContentCompressor</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.codec.http.HttpContentCompressor">HttpContentCompressor</span></span>
       </span>
       </h4>
       <p class="comment cmt">Custom compressor that only handles text-like content-types with the default
@@ -201,9 +224,10 @@ compression level.</p>
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.http.codec.HttpDtab" data-isabs="false">
+              <ol><li name="com.twitter.finagle.http.codec.HttpDtab" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpDtab"></a>
       <a id="HttpDtab:HttpDtab"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -211,11 +235,12 @@ compression level.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="HttpDtab$.html"><span class="name">HttpDtab</span></a><span class="result"> extends AnyRef</span>
+        <a href="HttpDtab$.html"><span class="name">HttpDtab</span></a>
       </span>
       </h4>
       <p class="comment cmt">Dtab serialization for Http.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.http.codec.TextualContentCompressor" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.codec.TextualContentCompressor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TextualContentCompressor"></a>
       <a id="TextualContentCompressor:TextualContentCompressor"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -223,7 +248,7 @@ compression level.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="TextualContentCompressor$.html"><span class="name">TextualContentCompressor</span></a><span class="result"> extends AnyRef</span>
+        <a href="TextualContentCompressor$.html"><span class="name">TextualContentCompressor</span></a>
       </span>
       </h4>
       
@@ -231,10 +256,20 @@ compression level.</p>
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -242,7 +277,6 @@ compression level.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../lib/template.js"></script>
     </body>
       </html>

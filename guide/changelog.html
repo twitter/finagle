@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Finagle changelog &mdash; Finagle 6.20.0 documentation</title>
+    <title>Finagle changelog &mdash; Finagle 6.22.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.20.0',
+        VERSION:     '6.22.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.20.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.22.0 documentation" href="index.html" />
     <link rel="next" title="License" href="license.html" />
     <link rel="prev" title="FAQ" href="FAQ.html" />
    
@@ -72,18 +72,160 @@
 <div class="section" id="x">
 <h2>6.x<a class="headerlink" href="#x" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="id1">
-<h3>6.20.0<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<h3>6.22.0<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="breaking-api-changes">
+<h2>Breaking API Changes<a class="headerlink" href="#breaking-api-changes" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>finagle-core: Removed unused <cite>com.twitter.finagle.service.ProxyService</cite>. It wasn&#8217;t
+sufficiently general to be used outside of finagle, and was no longer used
+in finagle.</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="new-features">
+<h2>New Features<a class="headerlink" href="#new-features" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>finagle-core: BroadcastStatsReceiver, introduce specialized implementation</li>
+<li>finagle-core: Introduce gauges in SummarizingStatsReceiver</li>
+<li>finagle-core: Introduce Transport#copyToWriter</li>
+<li>finagle-core: Make base Dtab used in BindingFactory a Stack.Param</li>
+<li>finagle-core: Proper decay in experimental ewma load metric</li>
+<li>finagle-core: Simplify Stack{Client, Server} and unify around them</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="runtime-behavior-changes">
+<h2>Runtime Behavior Changes<a class="headerlink" href="#runtime-behavior-changes" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>finagle-core: Add support for non-URLClassloaders to LoadService</li>
+<li>finagle-core: clear locals before entering server dispatch loop</li>
+<li>finagle-core: Defer DNS Resolution in InetResolver to FuturePool</li>
+<li>finagle-core: for paths starting with /#/, skip rewrites where prefix is /</li>
+<li>finagle-core: include name resolution in tracing request span</li>
+<li>finagle-core: Properly wrap some IOException into ConnectionFailedException</li>
+<li>finagle-core: Scope InetResolver&#8217;s stats properly</li>
+<li>finagle-http: Send &#8220;Connection: close&#8221; header while dispatcher is closing</li>
+<li>finagle-http: Set content length header when appropriate</li>
+<li>finagle-memcached: Use interruptible future for the client request readiness</li>
+<li>finagle-stats: Add content-type response header to JsonExporter</li>
+<li>finagle-thrift: Add back connection_preparation_latency stat in Thrift</li>
+<li>finagle-thriftmux: Record protocol as a gauge rather than a counter</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>finagle-core: Add Scaladocs for ChannelBufferBuf and BufChannelBuffer</li>
+<li>finagle-core: link to the FAQ in FailedFastException</li>
+<li>finagle-serversets: Defer DNS resolution for endpoints to InetResolver</li>
+<li>finagle-thrift{,mux}: Clarified with* deprecation warning</li>
+<li>Fix minor issues and missing code blocks in Finagle documentation</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="optimization">
+<h2>Optimization<a class="headerlink" href="#optimization" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>finagle-core: GlobalFlag isn&#8217;t caching the property value</li>
+<li>finagle-core: recursive-descent Path / NameTree / Dentry / Dtab parsers to reduce heap allocation</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="bug-fixes">
+<h2>Bug Fixes<a class="headerlink" href="#bug-fixes" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>finagle-core: Fix a deadlock in Contexts</li>
+<li>finagle-core: Fix breaking ABI change in SummarizingStatsReceiver</li>
+<li>finagle-core: Fix bug in computing array index in SummarizingStatsReceiver</li>
+<li>finagle-core: Fix build.properties location for maven builds</li>
+<li>finagle-core: Fix synchronization in LeasedFactory</li>
+<li>finagle-core: Fix tracing with Stack{Client, Server}</li>
+<li>finagle-core: Make FailedFastException an instance variable.</li>
+<li>finagle-core: Synchronized access to the Stackable mutable.params map</li>
+<li>finagle-http: Fix CookieMap.rewriteCookieHeaders()</li>
+<li>finagle-http: Fix the memory leak in HttpClientDispatcher</li>
+<li>finagle-mysql: Fix timestamp fractional seconds encoding</li>
+<li>finagle-mysql: Properly heed timezone when extracting TimestampValue</li>
+<li>mux: clear contexts after receive, not in &#8216;finally&#8217; clause</li>
+</ul>
+</div></blockquote>
+<div class="section" id="id2">
+<h3>6.21.0<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
+<li><cite>finagle</cite>: Upgrade to scala_2.10</li>
+<li><cite>finagle-core</cite>: Add weighted address support to InetResolver.</li>
+<li><cite>finagle-core</cite>: Adds ClientRegistry.expAllRegisteredClientsResolved</li>
+<li><cite>finagle-core</cite>: Attach Dtab.local to NoBrokersAvailableException in filter</li>
+<li><cite>finagle-core</cite>: Attempt to add dtab stats to all clients and servers</li>
+<li><cite>finagle-core</cite>: Avoid SOCKS proxy for both loopback and link-local addresses</li>
+<li><cite>finagle-core</cite>: Bind names lazily under Alt so we don&#8217;t do needless lookups</li>
+<li><cite>finagle-core</cite>: DelayedFactory to detachable implementation</li>
+<li><cite>finagle-core</cite>: Fix a race in load balancer initialization</li>
+<li><cite>finagle-core</cite>: Improve loadbalancer logging</li>
+<li><cite>finagle-core</cite>: Introduce ewma load metric</li>
+<li><cite>finagle-core</cite>: Log state for ewma load metric</li>
+<li><cite>finagle-core</cite>: Redesign of twitter-server admin page</li>
+<li><cite>finagle-core</cite>: Register StackClient with Path dest in ClientRegistry as evaluated against Dtab.base Problem</li>
+<li><cite>finagle-core</cite>: Rewrote ServiceLoader to avoid creating</li>
+<li><cite>finagle-core</cite>: SingletonPool: a single-service pool with good semantics</li>
+<li><cite>finagle-core</cite>: Zipkin tracing for name resolution</li>
+<li><cite>finagle-core</cite>: fix synchronization in SummarizingStatsReceiver</li>
+<li><cite>finagle-core</cite>: reusing pool: isAvailable === underlying.isAvailable</li>
+<li><cite>finagle-docs</cite>: A better picture for filters. (Replaces hand-drawn monstrosity.)</li>
+<li><cite>finagle-docs</cite>: Add Scaladocs for all public exception classes in Finagle.</li>
+<li><cite>finagle-docs</cite>: Add a section to the FAQ regarding FailedFastExceptions</li>
+<li><cite>finagle-exp</cite>: Generify the DarkTrafficFilter problem</li>
+<li><cite>finagle-guide</cite>: Document stabilizing serverset metrics.</li>
+<li><cite>finagle-http</cite>: Add support for a Dtab-Local header</li>
+<li><cite>finagle-http</cite>: Fail requests with invalid X-Dtab headers</li>
+<li><cite>finagle-http</cite>: Fail requests with invalid X-Dtab headers</li>
+<li><cite>finagle-http</cite>: TextualContentCompressor should compress textual Content-Type&#8217;s even when containing a charset</li>
+<li><cite>finagle-mux</cite>,thriftmux: explain why the files are named Netty3</li>
+<li><cite>finagle-mux</cite>: Better gc avoidance flags for experimentation</li>
+<li><cite>finagle-mux</cite>: Enable gc avoidance for parallel gc</li>
+<li><cite>finagle-mux</cite>: Improve mux&#8217;s handling of client disconnects</li>
+<li><cite>finagle-mux</cite>: Improved Garbage Collection Avoidance Docs</li>
+<li><cite>finagle-mux</cite>: docs and minor cleansing in Message subclasses</li>
+<li><cite>finagle-mysql</cite>: Switches PreparedCache over to util-cache FutureCache</li>
+<li><cite>finagle-serversets</cite>: Add support for getEphemerals ZooKeeper call</li>
+<li><cite>finagle-serversets</cite>: Memoize getChildrenWatchOp instead of globPrefixWatchOp</li>
+<li><cite>finagle-serversets</cite>: Reuse ObjectMapper in JSON parser.</li>
+<li><cite>finagle-serversets</cite>: add latency metrics for ServerSet2.</li>
+<li><cite>finagle-zipkin</cite>: Reduce allocations when tracing</li>
+</ul>
+</div>
+<div class="section" id="id3">
+<h3>6.20.0<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><cite>finagle</cite>: Smattering of minor cleanups in util and finagle</li>
 <li><cite>finagle</cite>: Upgrade sbt to 0.13</li>
+<li><cite>finagle</cite>: Upgrade to Netty 3.9.1.1.Final</li>
+<li><cite>finagle-core</cite>: Add NameTree.Fail to permit failing a name without fallback</li>
 <li><cite>finagle-core</cite>: Add a generic DtabStatsFilter</li>
 <li><cite>finagle-core</cite>: Add a singleton exception and a counter in WatermarkPool</li>
 <li><cite>finagle-core</cite>: DefaultClient in terms of StackClient</li>
 <li><cite>finagle-core</cite>: Disable Netty&#8217;s thread renaming</li>
+<li><cite>finagle-core</cite>: Fix CumulativeGauge memory leak</li>
 <li><cite>finagle-core</cite>: Fix negative resolution in Namer.global</li>
+<li><cite>finagle-core</cite>: Fixed ChannelStatsHandler to properly filter exceptions</li>
+<li><cite>finagle-core</cite>: Forces finagle-core to use ipv4 network stack</li>
 <li><cite>finagle-core</cite>: Improve <cite>Failure.toString</cite></li>
+<li><cite>finagle-core</cite>: Include path and Dtab.local in NoBrokersAvailableException</li>
 <li><cite>finagle-core</cite>: Log exceptions caught by ChannelStatsHandler</li>
 <li><cite>finagle-core</cite>: Make timer-based DNS resolution as default of InetResolver</li>
+<li><cite>finagle-core</cite>: Reader and getContent symmetry</li>
 <li><cite>finagle-core</cite>: Reduces log level for common exceptions</li>
+<li><cite>finagle-core</cite>: Register clients centrally</li>
+<li><cite>finagle-doc</cite>: Add fintop to companion projects list on Finagle website</li>
 <li><cite>finagle-http</cite>: Don&#8217;t emit (illegal) newlines in lengthy dtab header values</li>
 <li><cite>finagle-http</cite>: Fix code style from an open-source contribution</li>
 <li><cite>finagle-http</cite>: Migrate from specs to scalatest</li>
@@ -92,6 +234,7 @@
 <li><cite>finagle-mux</cite>: Fix broken draining behavior</li>
 <li><cite>finagle-mux</cite>: Improve granularity of rate to bytes/millisecond</li>
 <li><cite>finagle-serversets</cite>: Handle errors that occur when fetching endpoints</li>
+<li><cite>finagle-serversets</cite>: Increase ZK session timeout to 10 seconds</li>
 <li><cite>finagle-serversets</cite>: Merge WeightedSocketAddresses with same host:port but different weight in Stabilizer</li>
 <li><cite>finagle-serversets</cite>: Synchronize bug fixes &amp; test coverage across ZK facades</li>
 <li><cite>finagle-swift</cite>: Fixes pants build warning</li>
@@ -99,8 +242,8 @@
 <li><cite>finagle-thrift</cite>: Remove usage of java_sources, should be able to depend on it normally</li>
 </ul>
 </div>
-<div class="section" id="id2">
-<h3>6.19.0<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id4">
+<h3>6.19.0<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Allow trailing semicolons in dtabs</li>
 <li><cite>finagle-core</cite>: Rescue exceptions thrown by filter in <cite>Filter.andthen(Filter)</cite></li>
@@ -119,8 +262,8 @@
 <li><cite>finagle-thriftmux</cite>: Don&#8217;t reuse InMemoryStatsReceiver in the same test</li>
 </ul>
 </div>
-<div class="section" id="id3">
-<h3>6.18.0<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id5">
+<h3>6.18.0<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><cite>finagle-*</cite>: release scrooge v3.16.0</li>
 <li><cite>finagle-*</cite>: release util v6.18.0</li>
@@ -144,7 +287,7 @@
 <li><cite>finagle-serversets</cite>: Randomizes backoff interval in ZK2</li>
 <li><cite>finagle-serversets</cite>: Start resolution eagerly in ZK2</li>
 <li><cite>finagle-stats</cite>: Add a stat-filtration GlobalFlag</li>
-<li><a href="#id4"><span class="problematic" id="id5">`</span></a>release ostrich v9.5.2</li>
+<li><cite>ostrich</cite>: release ostrich v9.5.2</li>
 <li><cite>user guide</cite>: Add Google Analytics tracking code</li>
 <li><cite>user guide</cite>: Add sections about review process and starter issues</li>
 <li><cite>user guide</cite>: Update Finagle adopter list on user guide website</li>
@@ -1435,9 +1578,19 @@
   <ul>
 <li><a class="reference internal" href="#">Finagle changelog</a><ul>
 <li><a class="reference internal" href="#x">6.x</a><ul>
-<li><a class="reference internal" href="#id1">6.20.0</a></li>
-<li><a class="reference internal" href="#id2">6.19.0</a></li>
-<li><a class="reference internal" href="#id3">6.18.0</a></li>
+<li><a class="reference internal" href="#id1">6.22.0</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#breaking-api-changes">Breaking API Changes</a></li>
+<li><a class="reference internal" href="#new-features">New Features</a></li>
+<li><a class="reference internal" href="#runtime-behavior-changes">Runtime Behavior Changes</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
+<li><a class="reference internal" href="#optimization">Optimization</a></li>
+<li><a class="reference internal" href="#bug-fixes">Bug Fixes</a><ul>
+<li><a class="reference internal" href="#id2">6.21.0</a></li>
+<li><a class="reference internal" href="#id3">6.20.0</a></li>
+<li><a class="reference internal" href="#id4">6.19.0</a></li>
+<li><a class="reference internal" href="#id5">6.18.0</a></li>
 <li><a class="reference internal" href="#id6">6.17.0</a></li>
 <li><a class="reference internal" href="#id7">6.16.0</a></li>
 <li><a class="reference internal" href="#id8">6.15.0</a></li>

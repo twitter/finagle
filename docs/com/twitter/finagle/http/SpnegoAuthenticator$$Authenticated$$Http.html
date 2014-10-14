@@ -2,51 +2,73 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http</title>
+          <title>Http - com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http</title>
+          <meta name="description" content="Http - com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http" />
+          <meta name="keywords" content="Http com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.http.SpnegoAuthenticator$$Authenticated$$Http';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
+        <body class="type">
       <div id="definition">
         <img src="../../../../lib/class_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.http" class="extype" href="package.html">http</a>.<a name="com.twitter.finagle.http.SpnegoAuthenticator" class="extype" href="SpnegoAuthenticator$.html">SpnegoAuthenticator</a>.<a name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated" class="extype" href="SpnegoAuthenticator$$Authenticated$.html">Authenticated</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.http">http</a>.<a href="SpnegoAuthenticator$.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator">SpnegoAuthenticator</a>.<a href="SpnegoAuthenticator$$Authenticated$.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated">Authenticated</a></p>
         <h1>Http</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Http</span><span class="params">(<span name="httpRequest">httpRequest: <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span></span>, <span name="context">context: <span name="org.ietf.jgss.GSSContext" class="extype">GSSContext</span></span>)</span><span class="result"> extends <a name="com.twitter.finagle.http.netty.HttpRequestProxy" class="extype" href="netty/HttpRequestProxy.html">HttpRequestProxy</a> with <a name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated" class="extype" href="SpnegoAuthenticator$$Authenticated.html">Authenticated</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>] with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">Http</span><span class="params">(<span name="httpRequest">httpRequest: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>, <span name="context">context: <span class="extype" name="org.ietf.jgss.GSSContext">GSSContext</span></span>)</span><span class="result"> extends <a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a> with <a href="SpnegoAuthenticator$$Authenticated.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated">Authenticated</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <a name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated" class="extype" href="SpnegoAuthenticator$$Authenticated.html">Authenticated</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>], <a name="com.twitter.finagle.http.netty.HttpRequestProxy" class="extype" href="netty/HttpRequestProxy.html">HttpRequestProxy</a>, <a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a>, <span name="scala.Proxy" class="extype">Proxy</span>, <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpMessage" class="extype">HttpMessage</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <a href="SpnegoAuthenticator$$Authenticated.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated">Authenticated</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>], <a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a>, <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a>, <span class="extype" name="scala.Proxy">Proxy</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMessage">HttpMessage</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
-    
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         <div id="order">
               <span class="filtertype">Ordering</span>
-              <ol><li class="alpha in"><span>Alphabetic</span></li><li class="inherit out"><span>By inheritance</span></li></ol>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
             </div>
         <div id="ancestors">
-              <span class="filtertype">Inherited</span>
-              <ol><li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http" class="in"><span>Http</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated" class="in"><span>Authenticated</span></li><li name="com.twitter.finagle.http.netty.HttpRequestProxy" class="in"><span>HttpRequestProxy</span></li><li name="com.twitter.finagle.http.netty.HttpMessageProxy" class="in"><span>HttpMessageProxy</span></li><li name="scala.Proxy" class="in"><span>Proxy</span></li><li name="org.jboss.netty.handler.codec.http.HttpRequest" class="in"><span>HttpRequest</span></li><li name="org.jboss.netty.handler.codec.http.HttpMessage" class="in"><span>HttpMessage</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
-            </div>
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http"><span>Http</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated"><span>Authenticated</span></li><li class="in" name="com.twitter.finagle.http.netty.HttpRequestProxy"><span>HttpRequestProxy</span></li><li class="in" name="com.twitter.finagle.http.netty.HttpMessageProxy"><span>HttpMessageProxy</span></li><li class="in" name="scala.Proxy"><span>Proxy</span></li><li class="in" name="org.jboss.netty.handler.codec.http.HttpRequest"><span>HttpRequest</span></li><li class="in" name="org.jboss.netty.handler.codec.http.HttpMessage"><span>HttpMessage</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
             <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
@@ -55,17 +77,18 @@
 
       <div id="template">
         <div id="allMembers">
-        <div class="members" id="constructors">
+        <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http#this" data-isabs="false">
-      <a id="this:Http"></a>
+              <ol><li name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(httpRequest:org.jboss.netty.handler.codec.http.HttpRequest,context:org.ietf.jgss.GSSContext):com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http"></a>
+      <a id="&lt;init&gt;:Http"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Http</span><span class="params">(<span name="httpRequest">httpRequest: <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span></span>, <span name="context">context: <span name="org.ietf.jgss.GSSContext" class="extype">GSSContext</span></span>)</span>
+        <span class="name">Http</span><span class="params">(<span name="httpRequest">httpRequest: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>, <span name="context">context: <span class="extype" name="org.ietf.jgss.GSSContext">GSSContext</span></span>)</span>
       </span>
       </h4>
       
@@ -76,9 +99,10 @@
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:AnyRef):Boolean"></a>
       <a id="!=(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -86,11 +110,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#!=" data-isabs="false">
+    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -98,11 +123,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef###" data-isabs="false">
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
       <a id="##():Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -110,11 +136,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $hash$hash">##</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:AnyRef):Boolean"></a>
       <a id="==(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -122,11 +149,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#==" data-isabs="false">
+    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -134,11 +162,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -146,23 +175,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: T0</span>
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http#canEqual" data-isabs="false">
-      <a id="canEqual(Any):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">canEqual</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http" class="extype" href="">Http</a> → Equals</dd></dl></div>
-    </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -170,14 +188,18 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: AnyRef</span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http#context" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http#context" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="context:org.ietf.jgss.GSSContext"></a>
       <a id="context:GSSContext"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -185,11 +207,12 @@
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">context</span><span class="result">: <span name="org.ietf.jgss.GSSContext" class="extype">GSSContext</span></span>
+        <span class="name">context</span><span class="result">: <span class="extype" name="org.ietf.jgss.GSSContext">GSSContext</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http" class="extype" href="">Http</a> → <a name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated" class="extype" href="SpnegoAuthenticator$$Authenticated.html">Authenticated</a></dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http">Http</a> → <a href="SpnegoAuthenticator$$Authenticated.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated">Authenticated</a></dd></dl></div>
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -197,11 +220,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.Proxy#equals" data-isabs="false">
+    </li><li name="scala.Proxy#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(that:Any):Boolean"></a>
       <a id="equals(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -209,11 +233,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="that">that: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">equals</span><span class="params">(<span name="that">that: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Proxy → AnyRef → Any</dd></dl></div>
-    </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Proxy → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -221,26 +246,31 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
-      <a id="getClass():java.lang.Class[_]"></a>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getClass</span><span class="params">()</span><span class="result">: java.lang.Class[_]</span>
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getContent" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#getContent" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getContent():org.jboss.netty.buffer.ChannelBuffer"></a>
       <a id="getContent():ChannelBuffer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -248,11 +278,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getContent</span><span class="params">()</span><span class="result">: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>
+        <span class="name">getContent</span><span class="params">()</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHttpMessage" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#getHttpMessage" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getHttpMessage():org.jboss.netty.handler.codec.http.HttpMessage"></a>
       <a id="getHttpMessage():HttpMessage"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -260,11 +291,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getHttpMessage</span><span class="params">()</span><span class="result">: <span name="org.jboss.netty.handler.codec.http.HttpMessage" class="extype">HttpMessage</span></span>
+        <span class="name">getHttpMessage</span><span class="params">()</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMessage">HttpMessage</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpRequestProxy#getHttpRequest" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.netty.HttpRequestProxy#getHttpRequest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getHttpRequest():org.jboss.netty.handler.codec.http.HttpRequest"></a>
       <a id="getHttpRequest():HttpRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -272,11 +304,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getHttpRequest</span><span class="params">()</span><span class="result">: <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span></span>
+        <span class="name">getHttpRequest</span><span class="params">()</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpRequestProxy" class="extype" href="netty/HttpRequestProxy.html">HttpRequestProxy</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpRequestProxy#getMethod" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.netty.HttpRequestProxy#getMethod" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getMethod():org.jboss.netty.handler.codec.http.HttpMethod"></a>
       <a id="getMethod():HttpMethod"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -284,11 +317,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getMethod</span><span class="params">()</span><span class="result">: <span name="org.jboss.netty.handler.codec.http.HttpMethod" class="extype">HttpMethod</span></span>
+        <span class="name">getMethod</span><span class="params">()</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMethod">HttpMethod</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpRequestProxy" class="extype" href="netty/HttpRequestProxy.html">HttpRequestProxy</a> → HttpRequest</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getProtocolVersion" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a> → HttpRequest</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#getProtocolVersion" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getProtocolVersion():org.jboss.netty.handler.codec.http.HttpVersion"></a>
       <a id="getProtocolVersion():HttpVersion"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -296,11 +330,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getProtocolVersion</span><span class="params">()</span><span class="result">: <span name="org.jboss.netty.handler.codec.http.HttpVersion" class="extype">HttpVersion</span></span>
+        <span class="name">getProtocolVersion</span><span class="params">()</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpVersion">HttpVersion</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpRequestProxy#getUri" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.netty.HttpRequestProxy#getUri" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getUri():String"></a>
       <a id="getUri():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -308,11 +343,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getUri</span><span class="params">()</span><span class="result">: String</span>
+        <span class="name">getUri</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpRequestProxy" class="extype" href="netty/HttpRequestProxy.html">HttpRequestProxy</a> → HttpRequest</dd></dl></div>
-    </li><li visbl="pub" name="scala.Proxy#hashCode" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a> → HttpRequest</dd></dl></div>
+    </li><li name="scala.Proxy#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -320,11 +356,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Proxy → AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#headers" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Proxy → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#headers" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="headers():org.jboss.netty.handler.codec.http.HttpHeaders"></a>
       <a id="headers():HttpHeaders"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -332,11 +369,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">headers</span><span class="params">()</span><span class="result">: <span name="org.jboss.netty.handler.codec.http.HttpHeaders" class="extype">HttpHeaders</span></span>
+        <span class="name">headers</span><span class="params">()</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpHeaders">HttpHeaders</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpRequestProxy#httpMessage" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.netty.HttpRequestProxy#httpMessage" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="httpMessage:org.jboss.netty.handler.codec.http.HttpMessage"></a>
       <a id="httpMessage:HttpMessage"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -344,11 +382,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">httpMessage</span><span class="result">: <span name="org.jboss.netty.handler.codec.http.HttpMessage" class="extype">HttpMessage</span></span>
+        <span class="name">httpMessage</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMessage">HttpMessage</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpRequestProxy" class="extype" href="netty/HttpRequestProxy.html">HttpRequestProxy</a> → <a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http#httpRequest" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a> → <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http#httpRequest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="httpRequest:org.jboss.netty.handler.codec.http.HttpRequest"></a>
       <a id="httpRequest:HttpRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -356,11 +395,12 @@
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">httpRequest</span><span class="result">: <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span></span>
+        <span class="name">httpRequest</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http" class="extype" href="">Http</a> → <a name="com.twitter.finagle.http.netty.HttpRequestProxy" class="extype" href="netty/HttpRequestProxy.html">HttpRequestProxy</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#isChunked" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http">Http</a> → <a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#isChunked" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isChunked():Boolean"></a>
       <a id="isChunked():Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -368,11 +408,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isChunked</span><span class="params">()</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">isChunked</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
-    </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -380,11 +421,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -392,11 +434,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
       <a id="notify():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -404,11 +447,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#notifyAll" data-isabs="false">
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
       <a id="notifyAll():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -416,59 +460,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http#productArity" data-isabs="false">
-      <a id="productArity:Int"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">productArity</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http" class="extype" href="">Http</a> → Product</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http#productElement" data-isabs="false">
-      <a id="productElement(Int):Any"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">productElement</span><span class="params">(<span name="arg0">arg0: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Any" class="extype">Any</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http" class="extype" href="">Http</a> → Product</dd></dl></div>
-    </li><li visbl="pub" name="scala.Product#productIterator" data-isabs="false">
-      <a id="productIterator:Iterator[Any]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">productIterator</span><span class="result">: Iterator[<span name="scala.Any" class="extype">Any</span>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Product</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http#productPrefix" data-isabs="false">
-      <a id="productPrefix:String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">productPrefix</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http" class="extype" href="">Http</a> → Product</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http#request" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http#request" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="request:org.jboss.netty.handler.codec.http.HttpRequest"></a>
       <a id="request:HttpRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -476,11 +473,12 @@
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">request</span><span class="result">: <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span></span>
+        <span class="name">request</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http" class="extype" href="">Http</a> → <a name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated" class="extype" href="SpnegoAuthenticator$$Authenticated.html">Authenticated</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#self" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http">Http</a> → <a href="SpnegoAuthenticator$$Authenticated.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated">Authenticated</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#self" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="self:org.jboss.netty.handler.codec.http.HttpMessage"></a>
       <a id="self:HttpMessage"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -488,11 +486,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">self</span><span class="result">: <span name="org.jboss.netty.handler.codec.http.HttpMessage" class="extype">HttpMessage</span></span>
+        <span class="name">self</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMessage">HttpMessage</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → Proxy</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#setChunked" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → Proxy</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#setChunked" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setChunked(chunked:Boolean):Unit"></a>
       <a id="setChunked(Boolean):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -500,11 +499,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setChunked</span><span class="params">(<span name="chunked">chunked: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">setChunked</span><span class="params">(<span name="chunked">chunked: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#setContent" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#setContent" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setContent(content:org.jboss.netty.buffer.ChannelBuffer):Unit"></a>
       <a id="setContent(ChannelBuffer):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -512,11 +512,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setContent</span><span class="params">(<span name="content">content: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">setContent</span><span class="params">(<span name="content">content: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpRequestProxy#setMethod" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.netty.HttpRequestProxy#setMethod" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setMethod(method:org.jboss.netty.handler.codec.http.HttpMethod):Unit"></a>
       <a id="setMethod(HttpMethod):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -524,11 +525,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setMethod</span><span class="params">(<span name="method">method: <span name="org.jboss.netty.handler.codec.http.HttpMethod" class="extype">HttpMethod</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">setMethod</span><span class="params">(<span name="method">method: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMethod">HttpMethod</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpRequestProxy" class="extype" href="netty/HttpRequestProxy.html">HttpRequestProxy</a> → HttpRequest</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#setProtocolVersion" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a> → HttpRequest</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#setProtocolVersion" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setProtocolVersion(version:org.jboss.netty.handler.codec.http.HttpVersion):Unit"></a>
       <a id="setProtocolVersion(HttpVersion):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -536,11 +538,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setProtocolVersion</span><span class="params">(<span name="version">version: <span name="org.jboss.netty.handler.codec.http.HttpVersion" class="extype">HttpVersion</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">setProtocolVersion</span><span class="params">(<span name="version">version: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpVersion">HttpVersion</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpRequestProxy#setUri" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.netty.HttpRequestProxy#setUri" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setUri(uri:String):Unit"></a>
       <a id="setUri(String):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -548,23 +551,25 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setUri</span><span class="params">(<span name="uri">uri: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">setUri</span><span class="params">(<span name="uri">uri: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpRequestProxy" class="extype" href="netty/HttpRequestProxy.html">HttpRequestProxy</a> → HttpRequest</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
-      <a id="synchronized[T0](⇒ T0):T0"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a> → HttpRequest</dd></dl></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ T0</span>)</span><span class="result">: T0</span>
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.Proxy#toString" data-isabs="false">
+    </li><li name="scala.Proxy#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -572,11 +577,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toString</span><span class="params">()</span><span class="result">: String</span>
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Proxy → AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Proxy → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -584,14 +590,18 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
       <a id="wait(Long,Int):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -599,14 +609,18 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>, <span name="arg1">arg1: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
       <a id="wait(Long):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -614,19 +628,25 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
     </li></ol>
             </div>
 
-        <div class="values members" id="values">
+        
+
+        <div id="values" class="values members">
               <h3>Deprecated Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#addHeader" data-isabs="false">
+              <ol><li name="com.twitter.finagle.http.netty.HttpMessageProxy#addHeader" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addHeader(name:String,value:Object):Unit"></a>
       <a id="addHeader(String,AnyRef):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -634,14 +654,15 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">addHeader</span><span class="params">(<span name="name">name: String</span>, <span name="value">value: AnyRef</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">addHeader</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#clearHeaders" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#clearHeaders" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clearHeaders():Unit"></a>
       <a id="clearHeaders():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -649,14 +670,15 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">clearHeaders</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">clearHeaders</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#containsHeader" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#containsHeader" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="containsHeader(name:String):Boolean"></a>
       <a id="containsHeader(String):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -664,14 +686,15 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">containsHeader</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">containsHeader</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeader" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeader" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getHeader(name:String):String"></a>
       <a id="getHeader(String):String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -679,14 +702,15 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">getHeader</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: String</span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">getHeader</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeaderNames" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeaderNames" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getHeaderNames():java.util.Set[String]"></a>
       <a id="getHeaderNames():Set[String]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -694,29 +718,31 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">getHeaderNames</span><span class="params">()</span><span class="result">: <span name="java.util.Set" class="extype">Set</span>[String]</span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">getHeaderNames</span><span class="params">()</span><span class="result">: <span class="extype" name="java.util.Set">Set</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeaders" data-isabs="false">
-      <a id="getHeaders():List[Entry[String, String]]"></a>
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeaders" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getHeaders():java.util.List[java.util.Map.Entry[String,String]]"></a>
+      <a id="getHeaders():List[Entry[String,String]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">getHeaders</span><span class="params">()</span><span class="result">: <span name="java.util.List" class="extype">List</span>[<span name="java.util.Map.Entry" class="extype">Entry</span>[String, String]]</span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">getHeaders</span><span class="params">()</span><span class="result">: <span class="extype" name="java.util.List">List</span>[<span class="extype" name="java.util.Map.Entry">Entry</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeaders" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeaders" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getHeaders(name:String):java.util.List[String]"></a>
       <a id="getHeaders(String):List[String]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -724,29 +750,15 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">getHeaders</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: <span name="java.util.List" class="extype">List</span>[String]</span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">getHeaders</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="java.util.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
-    </li><li visbl="pub" name="scala.Product#productElements" data-isabs="false">
-      <a id="productElements:Iterator[Any]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2.8.0) use productIterator instead">productElements</span><span class="result">: Iterator[<span name="scala.Any" class="extype">Any</span>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Product</dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2.8.0)</i> use productIterator instead</p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#removeHeader" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#removeHeader" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="removeHeader(name:String):Unit"></a>
       <a id="removeHeader(String):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -754,29 +766,31 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">removeHeader</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">removeHeader</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#setHeader" data-isabs="false">
-      <a id="setHeader(String,java.lang.Iterable[_]):Unit"></a>
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#setHeader" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setHeader(name:String,values:Iterable[_]):Unit"></a>
+      <a id="setHeader(String,Iterable[_]):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">setHeader</span><span class="params">(<span name="name">name: String</span>, <span name="values">values: java.lang.Iterable[_]</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">setHeader</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="values">values: <span class="extype" name="java.lang.Iterable">Iterable</span>[_]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#setHeader" data-isabs="false">
+    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#setHeader" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setHeader(name:String,value:Object):Unit"></a>
       <a id="setHeader(String,AnyRef):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -784,10 +798,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">setHeader</span><span class="params">(<span name="name">name: String</span>, <span name="value">value: AnyRef</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.8.0) deprecated in netty">setHeader</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.8.0)</i> deprecated in netty</p></dd></dl></div>
@@ -796,30 +810,38 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.Serializable" class="parent">
-              <h3>Inherited from <span name="scala.Serializable" class="extype">Serializable</span></h3>
-            </div><div name="java.io.Serializable" class="parent">
-              <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
-            </div><div name="scala.Product" class="parent">
-              <h3>Inherited from <span name="scala.Product" class="extype">Product</span></h3>
-            </div><div name="scala.Equals" class="parent">
-              <h3>Inherited from <span name="scala.Equals" class="extype">Equals</span></h3>
-            </div><div name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated" class="extype" href="SpnegoAuthenticator$$Authenticated.html">Authenticated</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>]</h3>
-            </div><div name="com.twitter.finagle.http.netty.HttpRequestProxy" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.http.netty.HttpRequestProxy" class="extype" href="netty/HttpRequestProxy.html">HttpRequestProxy</a></h3>
-            </div><div name="com.twitter.finagle.http.netty.HttpMessageProxy" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a></h3>
-            </div><div name="scala.Proxy" class="parent">
-              <h3>Inherited from <span name="scala.Proxy" class="extype">Proxy</span></h3>
-            </div><div name="org.jboss.netty.handler.codec.http.HttpRequest" class="parent">
-              <h3>Inherited from <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span></h3>
-            </div><div name="org.jboss.netty.handler.codec.http.HttpMessage" class="parent">
-              <h3>Inherited from <span name="org.jboss.netty.handler.codec.http.HttpMessage" class="extype">HttpMessage</span></h3>
-            </div><div name="scala.AnyRef" class="parent">
-              <h3>Inherited from AnyRef</h3>
-            </div><div name="scala.Any" class="parent">
-              <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>
+        <div class="parent" name="scala.Serializable">
+              <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="java.io.Serializable">
+              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="scala.Product">
+              <h3>Inherited from <span class="extype" name="scala.Product">Product</span></h3>
+            </div><div class="parent" name="scala.Equals">
+              <h3>Inherited from <span class="extype" name="scala.Equals">Equals</span></h3>
+            </div><div class="parent" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated">
+              <h3>Inherited from <a href="SpnegoAuthenticator$$Authenticated.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated">Authenticated</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>]</h3>
+            </div><div class="parent" name="com.twitter.finagle.http.netty.HttpRequestProxy">
+              <h3>Inherited from <a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.http.netty.HttpMessageProxy">
+              <h3>Inherited from <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a></h3>
+            </div><div class="parent" name="scala.Proxy">
+              <h3>Inherited from <span class="extype" name="scala.Proxy">Proxy</span></h3>
+            </div><div class="parent" name="org.jboss.netty.handler.codec.http.HttpRequest">
+              <h3>Inherited from <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></h3>
+            </div><div class="parent" name="org.jboss.netty.handler.codec.http.HttpMessage">
+              <h3>Inherited from <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMessage">HttpMessage</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
             </div>
         </div>
 
@@ -828,7 +850,6 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

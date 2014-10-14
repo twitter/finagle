@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.dispatch</title>
+          <title>dispatch - com.twitter.finagle.dispatch</title>
+          <meta name="description" content="dispatch - com.twitter.finagle.dispatch" />
+          <meta name="keywords" content="dispatch com.twitter.finagle.dispatch" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'com.twitter.finagle.dispatch.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1>dispatch</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,69 +56,74 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher" data-isabs="true">
-      <a id="GenSerialClientDispatcher:GenSerialClientDispatcher[Req, Rep, In, Out]"></a>
+              <ol><li name="com.twitter.finagle.dispatch.GenSerialClientDispatcher" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="GenSerialClientDispatcher[Req,Rep,In,Out]extendsService[Req,Rep]"></a>
+      <a id="GenSerialClientDispatcher[Req,Rep,In,Out]:GenSerialClientDispatcher[Req,Rep,In,Out]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="GenSerialClientDispatcher.html"><span class="name">GenSerialClientDispatcher</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends Service[Req, Rep]</span>
+        <a href="GenSerialClientDispatcher.html"><span class="name">GenSerialClientDispatcher</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher.Req">Req</span>, <span class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher.Rep">Rep</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">Dispatch requests one at a time; concurrent requests are queued.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher" data-isabs="true">
-      <a id="GenSerialServerDispatcher:GenSerialServerDispatcher[Req, Rep, In, Out]"></a>
+    </li><li name="com.twitter.finagle.dispatch.GenSerialServerDispatcher" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="GenSerialServerDispatcher[Req,Rep,In,Out]extendsClosable"></a>
+      <a id="GenSerialServerDispatcher[Req,Rep,In,Out]:GenSerialServerDispatcher[Req,Rep,In,Out]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="GenSerialServerDispatcher.html"><span class="name">GenSerialServerDispatcher</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends Closable</span>
+        <a href="GenSerialServerDispatcher.html"><span class="name">GenSerialServerDispatcher</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
       </span>
       </h4>
       <p class="comment cmt">A generic version of
-<a name="com.twitter.finagle.dispatch.SerialServerDispatcher" class="extype" href="SerialServerDispatcher.html">SerialServerDispatcher</a>,
+<a href="SerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher">SerialServerDispatcher</a>,
 allowing the implementor to furnish custom dispatchers &amp; handlers.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.dispatch.PipeliningDispatcher" data-isabs="false">
-      <a id="PipeliningDispatcher:PipeliningDispatcher[Req, Rep]"></a>
+    </li><li name="com.twitter.finagle.dispatch.PipeliningDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PipeliningDispatcher[Req,Rep]extendsGenSerialClientDispatcher[Req,Rep,Req,Rep]"></a>
+      <a id="PipeliningDispatcher[Req,Rep]:PipeliningDispatcher[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="PipeliningDispatcher.html"><span class="name">PipeliningDispatcher</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends GenSerialClientDispatcher[Req, Rep, Req, Rep]</span>
+        <a href="PipeliningDispatcher.html"><span class="name">PipeliningDispatcher</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="GenSerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher">GenSerialClientDispatcher</a>[<span class="extype" name="com.twitter.finagle.dispatch.PipeliningDispatcher.Req">Req</span>, <span class="extype" name="com.twitter.finagle.dispatch.PipeliningDispatcher.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.dispatch.PipeliningDispatcher.Req">Req</span>, <span class="extype" name="com.twitter.finagle.dispatch.PipeliningDispatcher.Rep">Rep</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">A generic pipelining dispatcher, which assumes that servers will
 respect normal pipelining semantics, and that replies will be sent
 in the same order as requests were sent.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.dispatch.SerialClientDispatcher" data-isabs="false">
-      <a id="SerialClientDispatcher:SerialClientDispatcher[Req, Rep]"></a>
+    </li><li name="com.twitter.finagle.dispatch.SerialClientDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SerialClientDispatcher[Req,Rep]extendsGenSerialClientDispatcher[Req,Rep,Req,Rep]"></a>
+      <a id="SerialClientDispatcher[Req,Rep]:SerialClientDispatcher[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SerialClientDispatcher.html"><span class="name">SerialClientDispatcher</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends GenSerialClientDispatcher[Req, Rep, Req, Rep]</span>
+        <a href="SerialClientDispatcher.html"><span class="name">SerialClientDispatcher</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="GenSerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher">GenSerialClientDispatcher</a>[<span class="extype" name="com.twitter.finagle.dispatch.SerialClientDispatcher.Req">Req</span>, <span class="extype" name="com.twitter.finagle.dispatch.SerialClientDispatcher.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.dispatch.SerialClientDispatcher.Req">Req</span>, <span class="extype" name="com.twitter.finagle.dispatch.SerialClientDispatcher.Rep">Rep</span>]</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.dispatch.SerialServerDispatcher" data-isabs="false">
-      <a id="SerialServerDispatcher:SerialServerDispatcher[Req, Rep]"></a>
+    </li><li name="com.twitter.finagle.dispatch.SerialServerDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SerialServerDispatcher[Req,Rep]extendsGenSerialServerDispatcher[Req,Rep,Rep,Req]"></a>
+      <a id="SerialServerDispatcher[Req,Rep]:SerialServerDispatcher[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SerialServerDispatcher.html"><span class="name">SerialServerDispatcher</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends GenSerialServerDispatcher[Req, Rep, Rep, Req]</span>
+        <a href="SerialServerDispatcher.html"><span class="name">SerialServerDispatcher</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">GenSerialServerDispatcher</a>[<span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Req">Req</span>, <span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Req">Req</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">Dispatch requests from transport one at a time, queueing
@@ -118,9 +133,10 @@ concurrent requests.</p>
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.dispatch.ExpiringServerDispatcher" data-isabs="false">
+              <ol><li name="com.twitter.finagle.dispatch.ExpiringServerDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExpiringServerDispatcher"></a>
       <a id="ExpiringServerDispatcher:ExpiringServerDispatcher"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -128,11 +144,12 @@ concurrent requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ExpiringServerDispatcher$.html"><span class="name">ExpiringServerDispatcher</span></a><span class="result"> extends AnyRef</span>
+        <a href="ExpiringServerDispatcher$.html"><span class="name">ExpiringServerDispatcher</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher" data-isabs="false">
+    </li><li name="com.twitter.finagle.dispatch.GenSerialClientDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GenSerialClientDispatcher"></a>
       <a id="GenSerialClientDispatcher:GenSerialClientDispatcher"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -140,11 +157,12 @@ concurrent requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="GenSerialClientDispatcher$.html"><span class="name">GenSerialClientDispatcher</span></a><span class="result"> extends AnyRef</span>
+        <a href="GenSerialClientDispatcher$.html"><span class="name">GenSerialClientDispatcher</span></a>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher" data-isabs="false">
+    </li><li name="com.twitter.finagle.dispatch.GenSerialServerDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GenSerialServerDispatcher"></a>
       <a id="GenSerialServerDispatcher:GenSerialServerDispatcher"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -152,7 +170,7 @@ concurrent requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="GenSerialServerDispatcher$.html"><span class="name">GenSerialServerDispatcher</span></a><span class="result"> extends AnyRef</span>
+        <a href="GenSerialServerDispatcher$.html"><span class="name">GenSerialServerDispatcher</span></a>
       </span>
       </h4>
       
@@ -160,10 +178,20 @@ concurrent requests.</p>
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -171,7 +199,6 @@ concurrent requests.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
     </body>
       </html>

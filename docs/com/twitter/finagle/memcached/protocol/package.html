@@ -2,24 +2,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.finagle.memcached.protocol</title>
+          <title>protocol - com.twitter.finagle.memcached.protocol</title>
+          <meta name="description" content="protocol - com.twitter.finagle.memcached.protocol" />
+          <meta name="keywords" content="protocol com.twitter.finagle.memcached.protocol" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
-      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+      <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../index.html';
+            var hash = 'com.twitter.finagle.memcached.protocol.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+        <body class="value">
       <div id="definition">
         <img src="../../../../../lib/package_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.memcached" class="extype" href="../package.html">memcached</a></p>
+        <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.memcached">memcached</a></p>
         <h1>protocol</h1>
       </div>
 
-      <h4 class="signature" id="signature">
+      <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
@@ -29,11 +39,11 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"></div>
-    
+          <div id="comment" class="fullcommenttop"></div>
+        
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
         
         
         <div id="visbl">
@@ -46,9 +56,10 @@
         <div id="allMembers">
         
 
-        <div class="types members" id="types">
+        <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Add" data-isabs="false">
+              <ol><li name="com.twitter.finagle.memcached.protocol.Add" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AddextendsStorageCommandwithProductwithSerializable"></a>
       <a id="Add:Add"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -56,11 +67,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Add.html"><span class="name">Add</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="flags">flags: Int</span>, <span name="expiry">expiry: Time</span>, <span name="value">value: ChannelBuffer</span>)</span><span class="result"> extends StorageCommand with Product with Serializable</span>
+        <a href="Add.html"><span class="name">Add</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="flags">flags: <span class="extype" name="scala.Int">Int</span></span>, <span name="expiry">expiry: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="StorageCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.StorageCommand">StorageCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Append" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Append" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AppendextendsStorageCommandwithProductwithSerializable"></a>
       <a id="Append:Append"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -68,11 +80,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Append.html"><span class="name">Append</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="flags">flags: Int</span>, <span name="expiry">expiry: Time</span>, <span name="value">value: ChannelBuffer</span>)</span><span class="result"> extends StorageCommand with Product with Serializable</span>
+        <a href="Append.html"><span class="name">Append</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="flags">flags: <span class="extype" name="scala.Int">Int</span></span>, <span name="expiry">expiry: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="StorageCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.StorageCommand">StorageCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.ArithmeticCommand" data-isabs="true">
+    </li><li name="com.twitter.finagle.memcached.protocol.ArithmeticCommand" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ArithmeticCommandextendsNonStorageCommandwithKeyValidation"></a>
       <a id="ArithmeticCommand:ArithmeticCommand"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -80,11 +93,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ArithmeticCommand.html"><span class="name">ArithmeticCommand</span></a><span class="result"> extends NonStorageCommand with KeyValidation</span>
+        <a href="ArithmeticCommand.html"><span class="name">ArithmeticCommand</span></a><span class="result"> extends <a href="NonStorageCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.NonStorageCommand">NonStorageCommand</a> with <a href="KeyValidation.html" class="extype" name="com.twitter.finagle.memcached.protocol.KeyValidation">KeyValidation</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Cas" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Cas" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CasextendsStorageCommandwithProductwithSerializable"></a>
       <a id="Cas:Cas"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -92,11 +106,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Cas.html"><span class="name">Cas</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="flags">flags: Int</span>, <span name="expiry">expiry: Time</span>, <span name="value">value: ChannelBuffer</span>, <span name="casUnique">casUnique: ChannelBuffer</span>)</span><span class="result"> extends StorageCommand with Product with Serializable</span>
+        <a href="Cas.html"><span class="name">Cas</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="flags">flags: <span class="extype" name="scala.Int">Int</span></span>, <span name="expiry">expiry: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="casUnique">casUnique: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="StorageCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.StorageCommand">StorageCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.ClientError" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.ClientError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientErrorextendsException"></a>
       <a id="ClientError:ClientError"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -104,11 +119,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ClientError.html"><span class="name">ClientError</span></a><span class="result"> extends Exception</span>
+        <a href="ClientError.html"><span class="name">ClientError</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Command" data-isabs="true">
+      <p class="comment cmt">A catch-all exception class for memcached client-related failures.</p>
+    </li><li name="com.twitter.finagle.memcached.protocol.Command" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="CommandextendsAnyRef"></a>
       <a id="Command:Command"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -116,11 +132,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Command.html"><span class="name">Command</span></a><span class="result"> extends AnyRef</span>
+        <a href="Command.html"><span class="name">Command</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Decr" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Decr" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DecrextendsArithmeticCommandwithProductwithSerializable"></a>
       <a id="Decr:Decr"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -128,11 +145,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Decr.html"><span class="name">Decr</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="value">value: Long</span>)</span><span class="result"> extends ArithmeticCommand with Product with Serializable</span>
+        <a href="Decr.html"><span class="name">Decr</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result"> extends <a href="ArithmeticCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.ArithmeticCommand">ArithmeticCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Delete" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Delete" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DeleteextendsCommandwithKeyValidationwithProductwithSerializable"></a>
       <a id="Delete:Delete"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -140,11 +158,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Delete.html"><span class="name">Delete</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>)</span><span class="result"> extends Command with KeyValidation with Product with Serializable</span>
+        <a href="Delete.html"><span class="name">Delete</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a> with <a href="KeyValidation.html" class="extype" name="com.twitter.finagle.memcached.protocol.KeyValidation">KeyValidation</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Deleted" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Deleted" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DeletedextendsResponsewithProductwithSerializable"></a>
       <a id="Deleted:Deleted"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -152,11 +171,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Deleted.html"><span class="name">Deleted</span></a><span class="params">()</span><span class="result"> extends Response with Product with Serializable</span>
+        <a href="Deleted.html"><span class="name">Deleted</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Error" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Error" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ErrorextendsResponsewithProductwithSerializable"></a>
       <a id="Error:Error"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -164,11 +184,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Error.html"><span class="name">Error</span></a><span class="params">(<span name="cause">cause: Exception</span>)</span><span class="result"> extends Response with Product with Serializable</span>
+        <a href="Error.html"><span class="name">Error</span></a><span class="params">(<span name="cause">cause: <span class="extype" name="scala.Exception">Exception</span></span>)</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Exists" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Exists" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExistsextendsResponsewithProductwithSerializable"></a>
       <a id="Exists:Exists"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -176,11 +197,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Exists.html"><span class="name">Exists</span></a><span class="params">()</span><span class="result"> extends Response with Product with Serializable</span>
+        <a href="Exists.html"><span class="name">Exists</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Get" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Get" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GetextendsRetrievalCommandwithProductwithSerializable"></a>
       <a id="Get:Get"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -188,11 +210,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Get.html"><span class="name">Get</span></a><span class="params">(<span name="keys">keys: Seq[ChannelBuffer]</span>)</span><span class="result"> extends RetrievalCommand with Product with Serializable</span>
+        <a href="Get.html"><span class="name">Get</span></a><span class="params">(<span name="keys">keys: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result"> extends <a href="RetrievalCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.RetrievalCommand">RetrievalCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Gets" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Gets" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GetsextendsRetrievalCommandwithProductwithSerializable"></a>
       <a id="Gets:Gets"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -200,11 +223,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Gets.html"><span class="name">Gets</span></a><span class="params">(<span name="keys">keys: Seq[ChannelBuffer]</span>)</span><span class="result"> extends RetrievalCommand with Product with Serializable</span>
+        <a href="Gets.html"><span class="name">Gets</span></a><span class="params">(<span name="keys">keys: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result"> extends <a href="RetrievalCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.RetrievalCommand">RetrievalCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Getv" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Getv" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GetvextendsRetrievalCommandwithProductwithSerializable"></a>
       <a id="Getv:Getv"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -212,11 +236,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Getv.html"><span class="name">Getv</span></a><span class="params">(<span name="keys">keys: Seq[ChannelBuffer]</span>)</span><span class="result"> extends RetrievalCommand with Product with Serializable</span>
+        <a href="Getv.html"><span class="name">Getv</span></a><span class="params">(<span name="keys">keys: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result"> extends <a href="RetrievalCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.RetrievalCommand">RetrievalCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Incr" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Incr" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="IncrextendsArithmeticCommandwithProductwithSerializable"></a>
       <a id="Incr:Incr"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -224,11 +249,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Incr.html"><span class="name">Incr</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="value">value: Long</span>)</span><span class="result"> extends ArithmeticCommand with Product with Serializable</span>
+        <a href="Incr.html"><span class="name">Incr</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result"> extends <a href="ArithmeticCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.ArithmeticCommand">ArithmeticCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Info" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Info" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InfoextendsResponsewithProductwithSerializable"></a>
       <a id="Info:Info"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -236,11 +262,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Info.html"><span class="name">Info</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="values">values: Seq[ChannelBuffer]</span>)</span><span class="result"> extends Response with Product with Serializable</span>
+        <a href="Info.html"><span class="name">Info</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="values">values: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.InfoLines" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.InfoLines" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InfoLinesextendsResponsewithProductwithSerializable"></a>
       <a id="InfoLines:InfoLines"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -248,11 +275,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="InfoLines.html"><span class="name">InfoLines</span></a><span class="params">(<span name="lines">lines: Seq[Info]</span>)</span><span class="result"> extends Response with Product with Serializable</span>
+        <a href="InfoLines.html"><span class="name">InfoLines</span></a><span class="params">(<span name="lines">lines: <span class="extype" name="scala.Seq">Seq</span>[<a href="Info.html" class="extype" name="com.twitter.finagle.memcached.protocol.Info">Info</a>]</span>)</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.KeyValidation" data-isabs="true">
+    </li><li name="com.twitter.finagle.memcached.protocol.KeyValidation" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="KeyValidationextendsAnyRef"></a>
       <a id="KeyValidation:KeyValidation"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -260,11 +288,12 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="KeyValidation.html"><span class="name">KeyValidation</span></a><span class="result"> extends AnyRef</span>
+        <a href="KeyValidation.html"><span class="name">KeyValidation</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">This trait contains cache command key validation logic.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.NoOp" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.NoOp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NoOpextendsResponsewithProductwithSerializable"></a>
       <a id="NoOp:NoOp"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -272,11 +301,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="NoOp.html"><span class="name">NoOp</span></a><span class="params">()</span><span class="result"> extends Response with Product with Serializable</span>
+        <a href="NoOp.html"><span class="name">NoOp</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.NonStorageCommand" data-isabs="true">
+    </li><li name="com.twitter.finagle.memcached.protocol.NonStorageCommand" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="NonStorageCommandextendsCommand"></a>
       <a id="NonStorageCommand:NonStorageCommand"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -284,11 +314,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="NonStorageCommand.html"><span class="name">NonStorageCommand</span></a><span class="result"> extends Command</span>
+        <a href="NonStorageCommand.html"><span class="name">NonStorageCommand</span></a><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.NonexistentCommand" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.NonexistentCommand" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NonexistentCommandextendsException"></a>
       <a id="NonexistentCommand:NonexistentCommand"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -296,11 +327,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="NonexistentCommand.html"><span class="name">NonexistentCommand</span></a><span class="result"> extends Exception</span>
+        <a href="NonexistentCommand.html"><span class="name">NonexistentCommand</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.NotFound" data-isabs="false">
+      <p class="comment cmt">Indicates that a request failed because an attempt was made to decode a
+non-existent memcached command.</p>
+    </li><li name="com.twitter.finagle.memcached.protocol.NotFound" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NotFoundextendsResponsewithProductwithSerializable"></a>
       <a id="NotFound:NotFound"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -308,11 +341,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="NotFound.html"><span class="name">NotFound</span></a><span class="params">()</span><span class="result"> extends Response with Product with Serializable</span>
+        <a href="NotFound.html"><span class="name">NotFound</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.NotStored" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.NotStored" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NotStoredextendsResponsewithProductwithSerializable"></a>
       <a id="NotStored:NotStored"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -320,11 +354,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="NotStored.html"><span class="name">NotStored</span></a><span class="params">()</span><span class="result"> extends Response with Product with Serializable</span>
+        <a href="NotStored.html"><span class="name">NotStored</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Number" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Number" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NumberextendsResponsewithProductwithSerializable"></a>
       <a id="Number:Number"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -332,11 +367,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Number.html"><span class="name">Number</span></a><span class="params">(<span name="value">value: Long</span>)</span><span class="result"> extends Response with Product with Serializable</span>
+        <a href="Number.html"><span class="name">Number</span></a><span class="params">(<span name="value">value: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Prepend" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Prepend" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PrependextendsStorageCommandwithProductwithSerializable"></a>
       <a id="Prepend:Prepend"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -344,11 +380,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Prepend.html"><span class="name">Prepend</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="flags">flags: Int</span>, <span name="expiry">expiry: Time</span>, <span name="value">value: ChannelBuffer</span>)</span><span class="result"> extends StorageCommand with Product with Serializable</span>
+        <a href="Prepend.html"><span class="name">Prepend</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="flags">flags: <span class="extype" name="scala.Int">Int</span></span>, <span name="expiry">expiry: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="StorageCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.StorageCommand">StorageCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Quit" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Quit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="QuitextendsCommandwithProductwithSerializable"></a>
       <a id="Quit:Quit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -356,11 +393,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Quit.html"><span class="name">Quit</span></a><span class="params">()</span><span class="result"> extends Command with Product with Serializable</span>
+        <a href="Quit.html"><span class="name">Quit</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Replace" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Replace" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ReplaceextendsStorageCommandwithProductwithSerializable"></a>
       <a id="Replace:Replace"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -368,11 +406,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Replace.html"><span class="name">Replace</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="flags">flags: Int</span>, <span name="expiry">expiry: Time</span>, <span name="value">value: ChannelBuffer</span>)</span><span class="result"> extends StorageCommand with Product with Serializable</span>
+        <a href="Replace.html"><span class="name">Replace</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="flags">flags: <span class="extype" name="scala.Int">Int</span></span>, <span name="expiry">expiry: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="StorageCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.StorageCommand">StorageCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Response" data-isabs="true">
+    </li><li name="com.twitter.finagle.memcached.protocol.Response" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ResponseextendsAnyRef"></a>
       <a id="Response:Response"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -380,11 +419,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Response.html"><span class="name">Response</span></a><span class="result"> extends AnyRef</span>
+        <a href="Response.html"><span class="name">Response</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.RetrievalCommand" data-isabs="true">
+    </li><li name="com.twitter.finagle.memcached.protocol.RetrievalCommand" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RetrievalCommandextendsNonStorageCommandwithKeyValidation"></a>
       <a id="RetrievalCommand:RetrievalCommand"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -392,11 +432,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="RetrievalCommand.html"><span class="name">RetrievalCommand</span></a><span class="result"> extends NonStorageCommand with KeyValidation</span>
+        <a href="RetrievalCommand.html"><span class="name">RetrievalCommand</span></a><span class="result"> extends <a href="NonStorageCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.NonStorageCommand">NonStorageCommand</a> with <a href="KeyValidation.html" class="extype" name="com.twitter.finagle.memcached.protocol.KeyValidation">KeyValidation</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.ServerError" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.ServerError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerErrorextendsException"></a>
       <a id="ServerError:ServerError"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -404,11 +445,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ServerError.html"><span class="name">ServerError</span></a><span class="result"> extends Exception</span>
+        <a href="ServerError.html"><span class="name">ServerError</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Set" data-isabs="false">
+      <p class="comment cmt">A catch-all exception class for memcached server-related failures.</p>
+    </li><li name="com.twitter.finagle.memcached.protocol.Set" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SetextendsStorageCommandwithProductwithSerializable"></a>
       <a id="Set:Set"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -416,11 +458,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Set.html"><span class="name">Set</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="flags">flags: Int</span>, <span name="expiry">expiry: Time</span>, <span name="value">value: ChannelBuffer</span>)</span><span class="result"> extends StorageCommand with Product with Serializable</span>
+        <a href="Set.html"><span class="name">Set</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="flags">flags: <span class="extype" name="scala.Int">Int</span></span>, <span name="expiry">expiry: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="StorageCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.StorageCommand">StorageCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Stats" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Stats" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StatsextendsNonStorageCommandwithProductwithSerializable"></a>
       <a id="Stats:Stats"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -428,11 +471,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Stats.html"><span class="name">Stats</span></a><span class="params">(<span name="args">args: Seq[ChannelBuffer]</span>)</span><span class="result"> extends NonStorageCommand with Product with Serializable</span>
+        <a href="Stats.html"><span class="name">Stats</span></a><span class="params">(<span name="args">args: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result"> extends <a href="NonStorageCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.NonStorageCommand">NonStorageCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.StorageCommand" data-isabs="true">
+    </li><li name="com.twitter.finagle.memcached.protocol.StorageCommand" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="StorageCommandextendsCommandwithKeyValidation"></a>
       <a id="StorageCommand:StorageCommand"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -440,11 +484,12 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="StorageCommand.html"><span class="name">StorageCommand</span></a><span class="result"> extends Command with KeyValidation</span>
+        <a href="StorageCommand.html"><span class="name">StorageCommand</span></a><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a> with <a href="KeyValidation.html" class="extype" name="com.twitter.finagle.memcached.protocol.KeyValidation">KeyValidation</a></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Stored" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Stored" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StoredextendsResponsewithProductwithSerializable"></a>
       <a id="Stored:Stored"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -452,11 +497,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Stored.html"><span class="name">Stored</span></a><span class="params">()</span><span class="result"> extends Response with Product with Serializable</span>
+        <a href="Stored.html"><span class="name">Stored</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Upsert" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Upsert" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="UpsertextendsStorageCommandwithProductwithSerializable"></a>
       <a id="Upsert:Upsert"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -464,11 +510,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Upsert.html"><span class="name">Upsert</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="flags">flags: Int</span>, <span name="expiry">expiry: Time</span>, <span name="value">value: ChannelBuffer</span>, <span name="version">version: ChannelBuffer</span>)</span><span class="result"> extends StorageCommand with Product with Serializable</span>
+        <a href="Upsert.html"><span class="name">Upsert</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="flags">flags: <span class="extype" name="scala.Int">Int</span></span>, <span name="expiry">expiry: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="version">version: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="StorageCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.StorageCommand">StorageCommand</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Value" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Value" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ValueextendsProductwithSerializable"></a>
       <a id="Value:Value"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -476,11 +523,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Value.html"><span class="name">Value</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="value">value: ChannelBuffer</span>, <span name="casUnique">casUnique: Option[ChannelBuffer]</span>, <span name="flags">flags: Option[ChannelBuffer]</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="Value.html"><span class="name">Value</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="casUnique">casUnique: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>] = <span class="symbol">scala.None</span></span>, <span name="flags">flags: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Values" data-isabs="false">
+    </li><li name="com.twitter.finagle.memcached.protocol.Values" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ValuesextendsResponsewithProductwithSerializable"></a>
       <a id="Values:Values"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -488,7 +536,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Values.html"><span class="name">Values</span></a><span class="params">(<span name="values">values: Seq[Value]</span>)</span><span class="result"> extends Response with Product with Serializable</span>
+        <a href="Values.html"><span class="name">Values</span></a><span class="params">(<span name="values">values: <span class="extype" name="scala.Seq">Seq</span>[<a href="Value.html" class="extype" name="com.twitter.finagle.memcached.protocol.Value">Value</a>]</span>)</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -497,9 +545,10 @@
 
         
 
-        <div class="values members" id="values">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.memcached.protocol.text" data-isabs="false">
+              <ol><li name="com.twitter.finagle.memcached.protocol.text" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="text"></a>
       <a id="text:text"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -515,10 +564,20 @@
             </div>
 
         
+
+        
         </div>
 
         <div id="inheritedMembers">
         
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
         </div>
 
       </div>
@@ -526,7 +585,6 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../lib/template.js"></script>
     </body>
       </html>
