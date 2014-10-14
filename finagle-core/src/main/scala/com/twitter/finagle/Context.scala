@@ -5,7 +5,19 @@ import com.twitter.finagle.tracing.TraceContext
 import com.twitter.io.Buf
 import com.twitter.logging.Level
 import com.twitter.util.{Local, NonFatal}
-import java.nio.charset.Charset
+
+/**
+ * Method(s) used by the all of the predef contexts, extracted from the
+ * Context companion object to prevent an object initialization deadlock
+ * between TraceContext <---> Context
+ */
+private[finagle] object ContextHelpers {
+  def keyBytes(key: Buf): Array[Byte] = {
+    val bytes = new Array[Byte](key.length)
+    key.write(bytes, 0)
+    bytes
+  }
+}
 
 /**
  * A context is a piece of serializable metadata managed by a
@@ -32,12 +44,6 @@ object Context {
   for (h <- handlers) {
     val Buf.Utf8(key) = h.key
     log.log(Level.DEBUG, "Context: added handler "+key)
-  }
-
-  private[finagle] def keyBytes(key: Buf): Array[Byte] = {
-    val bytes = new Array[Byte](key.length)
-    key.write(bytes, 0)
-    bytes
   }
 
   private def getOrAddHandler(key: Buf): ContextHandler = synchronized {

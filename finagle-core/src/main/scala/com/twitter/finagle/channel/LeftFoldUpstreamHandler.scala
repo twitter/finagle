@@ -60,7 +60,7 @@ class LeftFoldUpstreamHandler {
     ctx.sendUpstream(e)
     this
   }
-  
+
   def channelUnbound(
     ctx: ChannelHandlerContext,
     e: ChannelStateEvent

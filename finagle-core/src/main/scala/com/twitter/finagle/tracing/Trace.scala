@@ -35,9 +35,9 @@ object Trace  {
   private case object NoState extends TraceState
 
   private[this] val rng = new Random
-
   private[this] val defaultId = TraceId(None, None, SpanId(rng.nextLong()), None, Flags())
   private[this] val local = new Local[State]
+
   @volatile private[this] var tracingEnabled = true
 
   /**
@@ -217,7 +217,7 @@ object Trace  {
   def isActivelyTracing: Boolean = {
     if (!tracingEnabled) false else { // short circuit
       local() match {
-        case Some(State(Some(TraceId(_, _, _, Some(false), Flags(0L))), _, _)) => false
+        case Some(State(Some(TraceId(_, _, _, Some(false), flags)), _, _)) if !flags.isDebug => false
         case None => false
         case Some(State(_, _, Nil)) => false
         case Some(State(_, _, List(NullTracer))) => false

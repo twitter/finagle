@@ -10,6 +10,7 @@ import org.mockito.Matchers.anyObject
 import org.scalatest.FunSpec
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
+import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class RetryingFilterTest extends FunSpec with MockitoSugar {

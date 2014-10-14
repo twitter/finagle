@@ -22,6 +22,7 @@
  */
 
 namespace java com.facebook.fb303
+#@namespace scala com.facebook.fb303.thriftscala
 namespace cpp facebook.fb303
 namespace perl Facebook.FB303
 

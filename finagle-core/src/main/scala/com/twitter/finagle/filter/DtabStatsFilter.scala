@@ -1,7 +1,25 @@
 package com.twitter.finagle.filter
 
-import com.twitter.finagle.{Dtab, Service, SimpleFilter}
+import com.twitter.finagle._
 import com.twitter.finagle.stats.StatsReceiver
+
+object DtabStatsFilter {
+  val role = Stack.Role("DtabStats")
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.filter.DtabStatsFilter]].
+   */
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Simple[ServiceFactory[Req, Rep]] {
+      val role = DtabStatsFilter.role
+      val description = "Report dtab statistics"
+      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+        val param.Stats(statsReceiver) = get[param.Stats]
+        if (statsReceiver.isNull) next
+        else new DtabStatsFilter[Req, Rep](statsReceiver) andThen next
+      }
+    }
+}
 
 /**
  * Adds a Stat, dtab/local/size, that tracks the size of Dtab.local for all

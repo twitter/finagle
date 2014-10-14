@@ -1,4 +1,9 @@
 scala_library(name='scala',
+  provides = scala_artifact(
+    org = 'com.twitter',
+    name = 'finagle-zipkin',
+    repo = artifactory,
+  ),
   dependencies=[
     '3rdparty:thrift-0.5.0',
     'finagle/finagle-core',
@@ -12,7 +17,4 @@ scala_library(name='scala',
   resources=[
     'finagle/finagle-zipkin/src/main/resources'
   ],
-  provides=artifact(org='com.twitter',
-                    name='finagle-zipkin',
-                    repo='pants-support/ivy:internal',),
 )

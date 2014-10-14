@@ -1,9 +1,9 @@
 package com.twitter.finagle;
 
-/** 
+/**
  * A Java compilation test for Dtab manipulation.
  */
- 
+
 public class MyTestDtab {
   static {
     Dtab d = Dtab.empty();

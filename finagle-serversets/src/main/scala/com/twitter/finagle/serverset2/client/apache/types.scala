@@ -11,7 +11,7 @@ private[serverset2] object ApacheCreateMode {
     CreateMode.Ephemeral -> org.apache.zookeeper.CreateMode.EPHEMERAL,
     CreateMode.EphemeralSequential -> org.apache.zookeeper.CreateMode.EPHEMERAL_SEQUENTIAL,
     CreateMode.Persistent -> org.apache.zookeeper.CreateMode.PERSISTENT,
-    CreateMode.PersistentSequential -> org.apache.zookeeper.CreateMode.PERSISTENT_SEQUENTIAL  
+    CreateMode.PersistentSequential -> org.apache.zookeeper.CreateMode.PERSISTENT_SEQUENTIAL
   )
 
   val zk: CreateMode => org.apache.zookeeper.CreateMode = zkMap
@@ -37,6 +37,6 @@ private[serverset2] object ApacheSessionState {
     KeeperState.NoSyncConnected -> SessionState.NoSyncConnected,
     KeeperState.SyncConnected -> SessionState.SyncConnected
   )
-  
+
   def apply(state: KeeperState): SessionState = map(state)
 }

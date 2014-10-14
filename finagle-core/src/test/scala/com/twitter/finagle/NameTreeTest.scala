@@ -92,7 +92,7 @@ class NameTreeTest extends FunSuite {
 
 
 
-  test("NameTree.eval") {
+  test("NameTree.eval/simplified") {
     val cases = Seq[(String, Option[Set[String]])](
       "~" -> None,
       "/ok" -> Some(Set("/ok")),
@@ -115,6 +115,7 @@ class NameTreeTest extends FunSuite {
       }
 
       assert(NameTree.read(tree).eval === expect)
+      assert(NameTree.read(tree).simplified.eval === expect)
     }
   }
 }

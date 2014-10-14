@@ -14,8 +14,8 @@ import java.util.concurrent.atomic.AtomicLong
  * blocking to ensure desired parallelism is retained.
  */
 private class ForkJoinScheduler(
-    nthreads: Int, 
-    statsReceiver: StatsReceiver = NullStatsReceiver) 
+    nthreads: Int,
+    statsReceiver: StatsReceiver = NullStatsReceiver)
     extends Scheduler {
   private trait IsManagedThread
 
@@ -24,7 +24,7 @@ private class ForkJoinScheduler(
   private[this] val threadsMade = statsReceiver.counter("threads_made")
   private[this] val threadCount = new AtomicLong(0L)
   private[this] val splitCount = new AtomicLong(0L)
-  
+
   private[this] val local = new LocalScheduler
 
   private[this] val threadFactory = new ForkJoinPool.ForkJoinWorkerThreadFactory {
@@ -54,41 +54,41 @@ private class ForkJoinScheduler(
     // The number of currently active managed blocking operations.
     statsReceiver.addGauge("active_blocks") { activeBlocks.get },
 
-    // Returns an estimate of the number of threads that are 
+    // Returns an estimate of the number of threads that are
     // currently stealing or executing tasks.
     statsReceiver.addGauge("active_threads") { pool.getActiveThreadCount() },
 
     // Returns the targeted parallelism level of this pool.
     statsReceiver.addGauge("parallelism") { pool.getParallelism() },
 
-    // Returns the number of worker threads that have started 
+    // Returns the number of worker threads that have started
     // but not yet terminated.
     statsReceiver.addGauge("pool_size") { pool.getPoolSize() },
 
-    // Returns an estimate of the number of tasks submitted to this 
+    // Returns an estimate of the number of tasks submitted to this
     // pool that have not yet begun executing.
     statsReceiver.addGauge("queued_submissions") { pool.getQueuedSubmissionCount() },
 
-    // Returns an estimate of the total number of tasks currently 
-    // held in queues by worker threads (but not including tasks 
+    // Returns an estimate of the total number of tasks currently
+    // held in queues by worker threads (but not including tasks
     // submitted to the pool that have not begun executing).
     statsReceiver.addGauge("queued_tasks") { pool.getQueuedTaskCount() },
 
-    // Returns an estimate of the number of worker threads that are not 
+    // Returns an estimate of the number of worker threads that are not
     // blocked waiting to join tasks or for other managed synchronization.
     statsReceiver.addGauge("running_threads") { pool.getRunningThreadCount() },
 
-    // Returns an estimate of the total number of tasks stolen from one thread's 
+    // Returns an estimate of the total number of tasks stolen from one thread's
     // work queue by another.
     statsReceiver.addGauge("steals") { pool.getStealCount() },
-    
+
     // The number of tasks that were split off a local schedule.
     statsReceiver.addGauge("splits") { splitCount.get }
   )
 
   def submit(r: Runnable) {
     Thread.currentThread() match {
-      case t: ForkJoinWorkerThread if t.getPool eq pool => 
+      case t: ForkJoinWorkerThread if t.getPool eq pool =>
         local.submit(r)
 
       case _ =>
@@ -130,7 +130,7 @@ private class ForkJoinScheduler(
         })
         res
 
-      case _ => 
+      case _ =>
         // There's nothing we can do.
         f
     }

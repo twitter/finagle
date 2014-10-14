@@ -180,7 +180,7 @@ public class ConnectionOptions implements TBase<ConnectionOptions, ConnectionOpt
     while (true)
     {
       field = iprot.readFieldBegin();
-      if (field.type == TType.STOP) { 
+      if (field.type == TType.STOP) {
         break;
       }
       switch (field.id) {

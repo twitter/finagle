@@ -16,6 +16,10 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 import java.util.logging.{Level, Logger}
 
+/**
+ * Indicates that a failure occurred while attempting to resolve a cluster
+ * using a [[com.twitter.finagle.zookeeper.ZkAnnouncer]].
+ */
 class ZkResolverException(msg: String) extends Exception(msg)
 
 // Note: this is still used by finagle-memcached.

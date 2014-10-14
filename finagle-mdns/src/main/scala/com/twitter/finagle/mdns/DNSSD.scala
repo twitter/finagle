@@ -121,7 +121,7 @@ private object DNSSD {
   lazy val instance = new DNSSD
 
   def check() {
-    // Throws ClassNotFoundException when 
+    // Throws ClassNotFoundException when
     // DNSSD is not present
     instance
   }
@@ -139,7 +139,7 @@ private object DNSSD {
         regType = args(4).asInstanceOf[String],
         domain = args(5).asInstanceOf[String])
     }
-  
+
     val proxy = instance.newProxy(instance.BrowseListenerClass) {
       case ("serviceFound", args)  =>
         val record = mkRecord(args)
@@ -149,13 +149,13 @@ private object DNSSD {
             record.regType,
             record.domain,
             new InetSocketAddress(resolved.hostName, resolved.port))
-  
+
           synchronized {
             services.put(record.serviceName, mdnsRecord)
             v() = Addr.Bound(services.values.toSet: Set[SocketAddress])
           }
         }
-  
+
       case ("serviceLost", args) =>
         val record = mkRecord(args)
         synchronized {
@@ -163,12 +163,12 @@ private object DNSSD {
             v() = Addr.Bound(services.values.toSet: Set[SocketAddress])
         }
     }
-  
+
     instance.browseMethod.invoke(instance.DNSSDClass,
-      instance.UNIQUE.asInstanceOf[Object], 
+      instance.UNIQUE.asInstanceOf[Object],
       instance.LOCALHOST_ONLY.asInstanceOf[Object],
       regType.asInstanceOf[String], domain.asInstanceOf[String], proxy)
-    
+
     v
   }
 }

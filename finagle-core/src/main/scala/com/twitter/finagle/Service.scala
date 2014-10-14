@@ -191,6 +191,44 @@ abstract class ServiceFactoryProxy[-Req, +Rep](_self: ServiceFactory[Req, Rep])
   def self: ServiceFactory[Req, Rep] = _self
 }
 
+object FactoryToService {
+  val role = Stack.Role("FactoryToService")
+
+  case class Enabled(enabled: Boolean)
+  implicit object Enabled extends Stack.Param[Enabled] {
+    val default = Enabled(false)
+  }
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]]
+   * [[FactoryToService]]. This makes per-request service acquisition
+   * part of the stack so it can be wrapped by filters such as tracing.
+   */
+  def module[Req, Rep] = new Stack.Simple[ServiceFactory[Req, Rep]] {
+    val role = FactoryToService.role
+    val description = "Apply service factory on each service request"
+    def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+      if (params[Enabled].enabled) {
+        // we want to pass through the ServiceFactory.close but not the Service.close
+        // which is called by the upstream FactoryToService
+        val service = Future.value(new ServiceProxy[Req, Rep](new FactoryToService(next)) {
+          override def close(deadline: Time) = Future.Done
+        })
+        new ServiceFactoryProxy(next) {
+          override def apply(conn: ClientConnection) = service
+        }
+      } else {
+        next
+      }
+    }
+  }
+}
+
+/**
+ * Turns a [[com.twitter.finagle.ServiceFactory]] into a
+ * [[com.twitter.finagle.Service]] which acquires a new service for
+ * each request.
+ */
 class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
   extends Service[Req, Rep]
 {

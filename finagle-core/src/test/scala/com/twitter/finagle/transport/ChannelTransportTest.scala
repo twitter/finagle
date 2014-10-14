@@ -12,10 +12,12 @@ import org.mockito.{Matchers, ArgumentCaptor}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{OneInstancePerTest, FunSuite}
+import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class ChannelTransportTest
-  extends FunSuite with MockitoSugar
+  extends FunSuite
+  with MockitoSugar
   with OneInstancePerTest {
 
   // For some reason, the scala compiler has a difficult time with

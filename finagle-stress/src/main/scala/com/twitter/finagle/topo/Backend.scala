@@ -6,6 +6,7 @@ import com.twitter.finagle.ThriftMux
 import com.twitter.finagle.builder.ServerBuilder
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.finagle.thrift.ThriftServerFramedCodec
+import com.twitter.finagle.topo.{thriftscala => thrift}
 import com.twitter.logging.Logging
 import com.twitter.logging.{Level, Logger, LoggerFactory, ConsoleHandler}
 import com.twitter.ostrich.admin.{RuntimeEnvironment, AdminHttpService}
@@ -33,7 +34,7 @@ object Backendserver extends App with Logging {
     val runtime = RuntimeEnvironment(this, Array()/*no args for you*/)
     val adminService = new AdminHttpService(basePort()+1, 100/*backlog*/, runtime)
     adminService.start()
-    
+
     if (useThriftmux())
       Await.ready(ThriftMux.serveIface(":"+basePort(), BackendService))
     else {

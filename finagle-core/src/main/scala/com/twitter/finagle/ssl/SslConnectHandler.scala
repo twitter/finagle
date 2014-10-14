@@ -105,8 +105,8 @@ class SslConnectHandler(
 object SslConnectHandler {
   /**
    * Run hostname verification on the session.  This will fail with a
-   * [[com.twitter.finagle.SslHostVerificationException]] if the certificate is invalid for the
-   * given session.
+   * [[com.twitter.finagle.SslHostVerificationException]] if the certificate is
+   * invalid for the given session.
    *
    * This uses [[sun.security.util.HostnameChecker]].  Any bugs are theirs.
    */

@@ -1,20 +1,19 @@
 package com.twitter.finagle.mux.exp
 
 import com.twitter.concurrent.{Spool, SpoolSource}
-import com.twitter.finagle.
-  {Dtab, CancelledRequestException, Context, ListeningServer, MuxListener, MuxTransporter}
 import com.twitter.finagle.mux._
-import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
+import com.twitter.finagle.netty3.{
+  BufChannelBuffer, ChannelBufferBuf, Netty3Listener, Netty3Transporter}
 import com.twitter.finagle.stats.ClientStatsReceiver
-import com.twitter.finagle.tracing.{Trace, Annotation, TraceId}
+import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.{Dtab, CancelledRequestException, Context, ListeningServer, Stack}
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Logger
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 import scala.collection.JavaConverters._
 
 object Session {
@@ -23,13 +22,15 @@ object Session {
    * MuxService which will handle incoming messages from the other
    * party.
    */
-  def connect(addr: SocketAddress): Future[SessionFactory] =
-    MuxTransporter(addr, ClientStatsReceiver) map { transport =>
+  def connect(addr: SocketAddress): Future[SessionFactory] = {
+    val transporter = new Netty3Transporter[ChannelBuffer, ChannelBuffer]("mux", PipelineFactory)
+    transporter(addr, ClientStatsReceiver) map { transport =>
       (serverImpl: MuxService) => {
         val clientDispatcher = new ClientDispatcher(transport)
         new Session(clientDispatcher, serverImpl, transport)
       }
     }
+  }
 
   /**
    * Listen for connections on addr. For each connection,
@@ -43,7 +44,8 @@ object Session {
   ): ListeningServer with CloseAwaitably =
     new ListeningServer with CloseAwaitably {
       private[this] val serverDeadlinep = new Promise[Time]
-      private[this] val listener = MuxListener.listen(addr) { transport =>
+      private[this] val listener = new Netty3Listener[ChannelBuffer, ChannelBuffer]("mux", PipelineFactory)
+      private[this] val server = listener.listen(addr) { transport =>
         sessionHandler { receiver =>
           val clientDispatcher = new ClientDispatcher(transport)
           val session = new Session(clientDispatcher, receiver, transport)
@@ -54,11 +56,11 @@ object Session {
         }
       }
 
-      def boundAddress = listener.boundAddress
+      def boundAddress = server.boundAddress
 
       def closeServer(deadline: Time) = closeAwaitably {
         serverDeadlinep.setValue(deadline)
-        listener.close(deadline)
+        server.close(deadline)
       }
     }
 }
@@ -224,18 +226,16 @@ class Session private[finagle](
   private[this] def loop(): Future[Nothing] =
     trans.read() flatMap { buf =>
       val save = Local.save()
-      try {
-        val m = decode(buf)
-        dispatch(m)
-        loop()
-      } catch {
+      val m = try decode(buf) catch {
         case exc: BadMessageException =>
           // We could just ignore this message, but in reality it
           // probably means something is really FUBARd.
-          Future.exception(exc)
-      } finally {
-        Local.restore(save)
+          return Future.exception(exc)
       }
+
+      dispatch(m)
+      Local.restore(save)
+      loop()
     }
 
   loop() onFailure { case cause =>

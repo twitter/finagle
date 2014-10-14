@@ -8,29 +8,39 @@ object BroadcastStatsReceiver {
   def apply(receivers: Seq[StatsReceiver]) = receivers.filterNot(_.isNull) match {
     case Seq() => NullStatsReceiver
     case Seq(fst) => fst
+    case Seq(first, second) => new Two(first, second)
     case more => new N(more)
+  }
+
+  private class Two(first: StatsReceiver, second: StatsReceiver) extends StatsReceiver {
+    val repr = this
+
+    def counter(names: String*): Counter =
+      new BroadcastCounter.Two(first.counter(names:_*), second.counter(names:_*))
+
+    def stat(names: String*): Stat =
+      new BroadcastStat.Two(first.stat(names:_*), second.stat(names:_*))
+
+    def addGauge(names: String*)(f: => Float): Gauge = new Gauge {
+      val firstGauge = first.addGauge(names:_*)(f)
+      val secondGauge = second.addGauge(names:_*)(f)
+      def remove() = {
+        firstGauge.remove()
+        secondGauge.remove()
+      }
+    }
   }
 
   private class N(statsReceivers: Seq[StatsReceiver]) extends StatsReceiver {
     val repr = this
 
-    def counter(names: String*) = new Counter {
-      val broadcastCounter = BroadcastCounter(
-        statsReceivers map { _.counter(names:_*) }
-      )
-      def incr(delta: Int) {
-        broadcastCounter.incr(delta)
-      }
-    }
-    def stat(names: String*) = new Stat {
-      val broadcastStats = BroadcastStat(
-        statsReceivers map { _.stat(names:_*) }
-      )
-      def add(value: Float) {
-        broadcastStats.add(value)
-      }
-    }
-    def addGauge(names: String*)(f: => Float) = new Gauge {
+    def counter(names: String*): Counter =
+      BroadcastCounter(statsReceivers map { _.counter(names:_*) })
+
+    def stat(names: String*): Stat =
+      BroadcastStat(statsReceivers map { _.stat(names:_*) })
+
+    def addGauge(names: String*)(f: => Float): Gauge = new Gauge {
       val gauges = statsReceivers map { _.addGauge(names:_*)(f) }
       def remove() = gauges foreach { _.remove() }
     }
@@ -56,7 +66,7 @@ object BroadcastCounter {
     def incr(delta: Int) {}
   }
 
-  private class Two(a: Counter, b: Counter) extends Counter {
+  private[stats] class Two(a: Counter, b: Counter) extends Counter {
     def incr(delta: Int) {
       a.incr(delta)
       b.incr(delta)
@@ -104,7 +114,7 @@ object BroadcastStat {
     def add(value: Float) {}
   }
 
-  private class Two(a: Stat, b: Stat) extends Stat {
+  private[stats] class Two(a: Stat, b: Stat) extends Stat {
     def add(value: Float) {
       a.add(value)
       b.add(value)

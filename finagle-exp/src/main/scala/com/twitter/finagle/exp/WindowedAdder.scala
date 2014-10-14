@@ -33,7 +33,7 @@ private class WindowedAdder(range: Duration, slices: Int) {
   private[this] def expired() {
     if (!expiredGen.compareAndSet(gen, gen+1))
       return
-      
+
     // At the time of add, we were likely up to date,
     // so we credit it to the current slice.
     buf(i) = writer.sumThenReset()
@@ -60,7 +60,7 @@ private class WindowedAdder(range: Duration, slices: Int) {
     writer.reset()
     elapsed = Stopwatch.start()
   }
- 
+
   /** Increment the adder by 1 */
   def incr() = add(1)
 

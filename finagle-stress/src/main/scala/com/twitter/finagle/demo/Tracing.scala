@@ -8,8 +8,10 @@ import com.twitter.util.Future
 import org.apache.thrift.protocol.TBinaryProtocol
 
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.demo.thriftscala._
 import com.twitter.finagle.thrift.{ThriftServerFramedCodec, ThriftClientFramedCodec}
 import com.twitter.finagle.tracing.{Trace, ConsoleTracer}
+
 
 object Tracing1Service extends Tracing1.FutureIface {
   private[this] val transport = ClientBuilder()

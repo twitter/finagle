@@ -39,7 +39,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   extends FunSuite with OneInstancePerTest with MockitoSugar
 {
   val tracer = new BufferingTracer
-  Trace.pushTracer(tracer)
+  Trace.pushTracer(tracer)  /* For the client */
   val clientToServer = new AsyncQueue[ChannelBuffer]
   val serverToClient = new AsyncQueue[ChannelBuffer]
   val serverTransport =
@@ -48,7 +48,15 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     new QueueTransport(writeq=clientToServer, readq=serverToClient)
   val service = mock[Service[ChannelBuffer, ChannelBuffer]]
   val client = new ClientDispatcher(clientTransport, NullStatsReceiver)
-  val server = new ServerDispatcher(serverTransport, service, canDispatch)
+  val server = new ServerDispatcher(serverTransport, service, canDispatch) {
+    private val saveReceive = receive
+    receive = { msg =>
+      Trace.unwind {
+        Trace.pushTracer(tracer)
+        saveReceive(msg)
+      }
+    }
+  }
 
   def buf(b: Byte*) = ChannelBuffers.wrappedBuffer(Array[Byte](b:_*))
 
@@ -120,37 +128,6 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       ClientDiscardedRequestException("java.lang.Exception: sad panda")))
 
     assert(f.poll === Some(Throw(exc)))
-  }
-
-  test("end-to-end with tracing: client-to-service") {
-    val p = new Promise[ChannelBuffer]
-    when(service(buf(1))).thenReturn(p)
-
-    verify(service, never())(any[ChannelBuffer])
-    val id = TraceId(Some(SpanId(1)), Some(SpanId(2)), SpanId(3), None)
-    val f = Trace.unwind {
-      Trace.setId(id)
-      client(buf(1))
-    }
-    verify(service)(buf(1))
-    assert(f.poll === None)
-    p.setValue(buf(2))
-    assert(f.poll === Some(Return(buf(2))))
-
-    val ia = new InetSocketAddress(0)
-    val recs = tracer.toSeq.sortBy(_.timestamp)
-    assert(recs match {
-      case Seq(
-        Record(`id`, _, Annotation.Message(ClientDispatcher.ClientEnabledTraceMessage), None),
-        Record(`id`, _, Annotation.ClientSend(), None),
-        Record(`id`, _, Annotation.ServerRecv(), None),
-        Record(`id`, _, Annotation.Message(ServerDispatcher.ServerEnabledTraceMessage), None),
-        Record(`id`, _, Annotation.ServerSend(), None),
-        Record(`id`, _, Annotation.ClientRecv(), None)
-      ) => true
-
-      case _ => false
-    })
   }
 
   test("propagate trace ids") {

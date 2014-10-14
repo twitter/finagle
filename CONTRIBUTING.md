@@ -35,6 +35,8 @@ in doubt, look around the codebase and see how it's done elsewhere.
 
 Comments should be formatted to a width no greater than 80 columns.
 
+Files should be exempt of trailing spaces.
+
 We adhere to a specific format for commit messages. Please write your commit
 messages along these guidelines:
 
@@ -122,13 +124,13 @@ requests that improve the existing ScalaDocs!
 
 [0]: http://www.scalatest.org/
 [1]: http://www.scalatest.org/getting_started_with_fun_suite
-[2]: http://twitter.github.io/effectivescala/
+[2]: https://twitter.github.io/effectivescala/
 [3]: http://docs.scala-lang.org/style/scaladoc.html
 [4]: https://github.com/twitter/finagle/pull/267
 [5]: https://github.com/twitter/finagle/pull/268
 [6]: https://github.com/twitter/finagle/issues?direction=desc&labels=Starter&sort=created&state=open
 [7]: https://groups.google.com/d/forum/finaglers
-[8]: http://twitter.github.io/finagle/
+[8]: https://twitter.github.io/finagle/
 [9]: http://sphinx-doc.org/
 [10]: https://github.com/sbt/sbt-site
 [11]: http://sphinx-doc.org/install.html

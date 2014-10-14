@@ -24,7 +24,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     saveBase = Dtab.base
     Dtab.base = Dtab.read("/foo=>/bar; /baz=>/biz")
   }
-  
+
   after {
     Dtab.base = saveBase
   }
@@ -98,7 +98,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
         def apply(request: HttpRequest) = {
           val stringer = new StringWriter
           val printer = new PrintWriter(stringer)
-          
+
           val response = Response(request)
           response.contentString = "%d".format(Dtab.local.length)
           Future.value(response)
@@ -288,8 +288,8 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       val Seq(innerTrace, innerSpan, innerParent) =
         response.contentString.split('.').toSeq
       assert(innerTrace === outerTrace, "traceId")
-      assert(outerSpan === innerParent, "outter span vs inner parent")
-      assert(innerSpan != outerSpan, "inner (%s) vs outter (%s) spanId".format(innerSpan, outerSpan))
+      assert(outerSpan === innerParent, "outer span vs inner parent")
+      assert(innerSpan != outerSpan, "inner (%s) vs outer (%s) spanId".format(innerSpan, outerSpan))
 
       outer.close()
       inner.close()

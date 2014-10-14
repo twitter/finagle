@@ -2,16 +2,19 @@ package com.twitter.finagle.serverset2
 
 import collection.JavaConverters._
 import collection.mutable.ArrayBuffer
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.twitter.util.NonFatal
 import java.net.InetSocketAddress
 
-/** 
+/**
  * Represents one logical serverset2 entry.
  */
 sealed trait Entry
 
-/** 
+/**
+ * Represents an Endpoint's host address and port.
+ */
+case class HostPort(host: String, port: Int)
+
+/**
  * Endpoints encode a destination announced via serversets.
  *
  * @param name The endpoint name. None describes a default service
@@ -23,12 +26,12 @@ sealed trait Entry
  *
  * @param status The endpoint's status.
  *
- * @param memberId The endpoint's member id, 
+ * @param memberId The endpoint's member id,
  * used as a foreign key for endpoints.
  */
 case class Endpoint(
   name: Option[String],
-  addr: InetSocketAddress, 
+  addr: Option[HostPort],
   shard: Option[Int],
   status: Endpoint.Status.Value,
   memberId: String
@@ -49,7 +52,7 @@ object Entry {
 
 object Endpoint {
   val Empty = Endpoint(
-    None, new InetSocketAddress(0), 
+    None, None,
     None, Endpoint.Status.Unknown, "")
 
   object Status extends Enumeration {
@@ -66,8 +69,8 @@ object Endpoint {
 
     def ofString(s: String): Option[Value] = map.get(s)
   }
-  
-  private def parseEndpoint(m: Any): Option[InetSocketAddress] =
+
+  private def parseEndpoint(m: Any): Option[HostPort] =
     m match {
       case ep: java.util.Map[_, _] =>
         val p = Option(ep.get("port")) collect {
@@ -79,20 +82,19 @@ object Endpoint {
         }
 
         for (h <- h; p <- p)
-          yield new InetSocketAddress(h, p.toInt)
+          yield HostPort(h, p.toInt)
 
       case _ => None
     }
 
   def parseJson(json: String): Seq[Endpoint] = {
     val d = JsonDict(json)
-    val m = new ObjectMapper
 
     val shard = for { IntObj(s) <- d("shard") } yield s
     val status = {
-      for { 
+      for {
         StringObj(s) <- d("status")
-        status <- Status.ofString(s) 
+        status <- Status.ofString(s)
       } yield status
     } getOrElse Endpoint.Status.Unknown
 
@@ -100,7 +102,7 @@ object Endpoint {
     val eps = new ArrayBuffer[Endpoint]
 
     for (map <- d("serviceEndpoint"); addr <- parseEndpoint(map))
-      eps += tmpl.copy(addr=addr)
+      eps += tmpl.copy(addr=Some(addr))
 
     for {
       map <- d("additionalEndpoints") collect {
@@ -109,8 +111,8 @@ object Endpoint {
       key <- map.keySet().asScala collect { case k: String => k }
       if key.isInstanceOf[String]
       addr <- parseEndpoint(map.get(key))
-    } eps += tmpl.copy(name=Some(key), addr=addr)
-    
+    } eps += tmpl.copy(name=Some(key), addr=Some(addr))
+
     eps.result
   }
 }

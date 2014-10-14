@@ -4,11 +4,12 @@ package com.twitter.finagle.tracing
  * Tracers record trace events.
  */
 
+import com.twitter.finagle.util.LoadService
 import com.twitter.util.{Duration, Time, TimeFormat}
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
+import java.util.logging.Logger
 import scala.collection.mutable.ArrayBuffer
-import com.twitter.finagle.util.LoadService
 
 private[tracing] object RecordTimeFormat
   extends TimeFormat("MMdd HH:mm:ss.SSS")
@@ -126,7 +127,12 @@ object BroadcastTracer {
 }
 
 object DefaultTracer extends Tracer with Proxy {
-  @volatile var self: Tracer = BroadcastTracer(LoadService[Tracer]())
+  private[this] val tracers = LoadService[Tracer]()
+  private[this] val log = Logger.getLogger(getClass.getName)
+  tracers foreach { tracer =>
+    log.info("Tracer: %s".format(tracer.getClass.getName))
+  }
+  @volatile var self: Tracer = BroadcastTracer(tracers)
 
   def record(record: Record) = self.record(record)
   def sampleTrace(traceId: TraceId) = self.sampleTrace(traceId)

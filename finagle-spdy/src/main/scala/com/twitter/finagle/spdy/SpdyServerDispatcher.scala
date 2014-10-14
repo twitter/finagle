@@ -4,7 +4,7 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Closable, Time}
+import com.twitter.util.{Closable, Time, Local}
 
 class SpdyServerDispatcher(
   trans: Transport[HttpResponse, HttpRequest],
@@ -24,7 +24,7 @@ class SpdyServerDispatcher(
     }
   }
 
-  loop()
+  Local.letClear { loop() }
 
   def close(deadline: Time) = trans.close(deadline)
 }

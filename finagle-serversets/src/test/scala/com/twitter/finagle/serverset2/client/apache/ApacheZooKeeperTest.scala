@@ -1,19 +1,19 @@
 package com.twitter.finagle.serverset2.client.apache
 
-import com.twitter.io.Buf
 import com.twitter.conversions.time._
-import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, TimeoutException}
 import com.twitter.finagle.serverset2.client._
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.io.Buf
+import com.twitter.util.Await
+import java.util.concurrent.ExecutionException
 import org.apache.zookeeper
 import org.junit.runner.RunWith
-import org.mockito.Matchers.{eq => meq}
 import org.mockito.ArgumentCaptor
+import org.mockito.Matchers.{eq => meq}
 import org.mockito.Mockito.{doNothing, doThrow, verify, when}
+import org.scalatest.{FlatSpec, OneInstancePerTest}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.{FlatSpec, OneInstancePerTest}
-import java.util.concurrent.ExecutionException
 import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
@@ -94,6 +94,12 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     verify(mockZK).addAuthInfo(scheme, auth)
   }
 
+  "getEphemerals" should "raise unimplemented exception" in {
+    intercept[KeeperException.Unimplemented] {
+      Await.result(zk.getEphemerals())
+    }
+  }
+
   "close" should "submit properly constructed close" in {
     doNothing().when(mockZK).close()
 
@@ -162,7 +168,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     assert(Await.result(created) === expected)
     assert(statsReceiver.counter("write_successes")() === 1)
   }
-  
+
   "create" should "handle ZK error" in {
     val created = zk.create(path, Some(data), List(acl), mode)
 

@@ -42,6 +42,10 @@ private object ZkOp {
      type Res = Watched[Node.Data]
   }
 
+  case class GetEphemerals() extends ZkOp {
+     type Res = Seq[String]
+  }
+
   case class Sync(path: String) extends ZkOp {
      type Res = Unit
   }
@@ -82,6 +86,8 @@ private class OpqueueZkReader(
   def getData(path: String) = enqueue(GetData(path))
   def getDataWatch(path: String) = enqueue(GetDataWatch(path))
 
+  def getEphemerals() = enqueue(GetEphemerals())
+
   def sync(path: String) = enqueue(Sync(path))
   def close(deadline: Time) = enqueue(Close(deadline))
 
@@ -108,7 +114,7 @@ class ZkTest extends FunSuite {
     val o = v.states.register(Witness(ref))
     assert(watchedZk.value.opq === Seq(ExistsWatch("/foo/bar")))
     assert(ref.get === Activity.Pending)
-    
+
     assert(timer.tasks.isEmpty)
     watchedZk.value.opq(0).res() = Throw(new KeeperException.ConnectionLoss(None))
     assert(timer.tasks.size === 1)
@@ -116,23 +122,23 @@ class ZkTest extends FunSuite {
     timer.tick()
     assert(watchedZk.value.opq === Seq(ExistsWatch("/foo/bar"), ExistsWatch("/foo/bar")))
     assert(ref.get === Activity.Pending)
-    
+
     watchedZk.value.opq(1).res() = Throw(new KeeperException.SessionExpired(None))
     assert(watchedZk.value.opq === Seq(ExistsWatch("/foo/bar"), ExistsWatch("/foo/bar")))
     val Activity.Failed(exc) = ref.get
     assert(exc.isInstanceOf[KeeperException.SessionExpired])
   }}
-  
+
   test("Zk.globOf") { Time.withCurrentTimeFrozen { tc =>
     val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
     val zk = new Zk(watchedZk, timer)
 
-    val v = zk.globOf("/foo/bar/*")
+    val v = zk.globOf("/foo/bar/")
     val ref = new AtomicReference[Activity.State[Seq[String]]]
     v.states.register(Witness(ref))
     assert(ref.get === Activity.Pending)
-    
+
     val Seq(ew@ExistsWatch("/foo/bar")) = watchedZk.value.opq
     val ewwatchv = Var[WatchState](WatchState.Pending)
     ew.res() = Return(Watched(None, ewwatchv))
@@ -144,9 +150,9 @@ class ZkTest extends FunSuite {
     assert(ref.get === Activity.Ok(Seq.empty))
     val ew2watchv = Var[WatchState](WatchState.Pending)
     ew2.res() = Return(Watched(Some(Data.Stat(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)), ew2watchv))
-    val Seq(`ew`, `ew2`, gw@GlobWatch("/foo/bar/*")) = watchedZk.value.opq
+    val Seq(`ew`, `ew2`, gw@GetChildrenWatch("/foo/bar")) = watchedZk.value.opq
     assert(ref.get === Activity.Pending)
-    gw.res() = Return(Watched(Seq("/foo/bar/a", "/foo/bar/b", "/foo/bar/c"), Var.value(WatchState.Pending)))
+    gw.res() = Return(Watched(Node.Children(Seq("a", "b", "c"), null), Var.value(WatchState.Pending)))
     assert(ref.get === Activity.Ok(Seq("/foo/bar/a", "/foo/bar/b", "/foo/bar/c")))
     assert(watchedZk.value.opq === Seq(ew, ew2, gw))
 

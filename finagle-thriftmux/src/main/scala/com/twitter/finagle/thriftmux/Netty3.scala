@@ -1,6 +1,6 @@
 package com.twitter.finagle.thriftmux
 
-import com.twitter.finagle.{mux, Dtab, ThriftMuxUtil}
+import com.twitter.finagle.{Failure, mux, Dtab, ThriftMuxUtil}
 import com.twitter.finagle.mux.{BadMessageException, Message}
 import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
@@ -8,6 +8,7 @@ import com.twitter.finagle.thrift._
 import com.twitter.finagle.thrift.thrift.{
   ResponseHeader, RequestContext, RequestHeader, UpgradeReply}
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceContext, TraceId}
+import com.twitter.logging.Level
 import com.twitter.util.{Try, Return, Throw, NonFatal}
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.atomic.AtomicInteger
@@ -21,12 +22,16 @@ import scala.collection.mutable.ArrayBuffer
  * of open ThriftMux and non-Mux downgraded connections in a pair of
  * [[java.util.concurrent.atomic.AtomicInteger AtomicIntegers]].
  */
+// Note: this lives in a file that doesn't match the class name in order
+// to decouple Netty from finagle and isolate everything related to Netty3 into a single file.
 private[finagle] class PipelineFactory(
     statsReceiver: StatsReceiver = NullStatsReceiver,
     protocolFactory: TProtocolFactory = Protocols.binaryFactory())
   extends ChannelPipelineFactory
 {
-  case class UnexpectedRequestException(err: String) extends Exception(err)
+
+  def newUnexpectedRequestException(err: String): Failure =
+    Failure.Cause(err).withLogLevel(Level.DEBUG)
 
   private object TTwitterToMux {
     private val responseHeader = ChannelBuffers.wrappedBuffer(
@@ -114,10 +119,10 @@ private[finagle] class PipelineFactory(
         case Message.RdispatchError(_, _, error) =>
           // OK to throw an exception here as ServerBridge take cares it
           // by logging the error and then closing the channel.
-          throw UnexpectedRequestException(error)
+          throw newUnexpectedRequestException(error)
 
         case unexpected =>
-          throw UnexpectedRequestException(
+          throw newUnexpectedRequestException(
             "Unexpected request type %s".format(unexpected.getClass.getName))
       }
     }
@@ -172,10 +177,10 @@ private[finagle] class PipelineFactory(
         case Message.RdispatchError(_, _, error) =>
           // OK to throw an exception here as ServerBridge take cares it
           // by logging the error and then closing the channel.
-          throw UnexpectedRequestException(error)
+          throw newUnexpectedRequestException(error)
 
         case unexpected =>
-          throw UnexpectedRequestException(
+          throw newUnexpectedRequestException(
             "Unexpected request type %s".format(unexpected.getClass.getName))
       }
     }

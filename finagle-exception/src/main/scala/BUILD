@@ -1,4 +1,9 @@
 scala_library(name='scala',
+  provides = scala_artifact(
+    org = 'com.twitter',
+    name = 'finagle-exception',
+    repo = artifactory,
+  ),
   dependencies=[
     '3rdparty:jackson-databind',
     '3rdparty:jackson-module-scala',
@@ -12,7 +17,4 @@ scala_library(name='scala',
   ],
   sources=rglobs('*.scala'),
   resources=['finagle/finagle-exception/src/main/resources'],
-  provides=artifact(org='com.twitter',
-                    name='finagle-exception',
-                    repo='pants-support/ivy:internal',),
 )

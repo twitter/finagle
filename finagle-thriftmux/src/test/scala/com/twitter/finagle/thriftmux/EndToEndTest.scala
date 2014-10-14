@@ -2,16 +2,17 @@ package com.twitter.finagle.thriftmux
 
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.client.{DefaultClient, Bridge}
+import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.dispatch.{PipeliningDispatcher, SerialClientDispatcher}
 import com.twitter.finagle.netty3.Netty3Listener
-import com.twitter.finagle.param.{Label, Stats}
-import com.twitter.finagle.server.StackServer
+import com.twitter.finagle.param.{Label, Stats, Tracer => PTracer}
+import com.twitter.finagle.server.{StackServer, StdStackServer}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftFramedTransporter, ThriftClientRequest}
+import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientRequest}
 import com.twitter.finagle.thriftmux.thriftscala.{TestService, TestService$FinagleService}
-import com.twitter.finagle.tracing._
 import com.twitter.finagle.tracing.Annotation.{ServerRecv, ClientSend}
+import com.twitter.finagle.tracing._
+import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Promise, RandomSocket}
 import org.apache.thrift.protocol.TCompactProtocol
@@ -31,7 +32,7 @@ object MuxContext {
 class MuxContext extends ContextHandler {
   import MuxContext._
 
-  val key = Buf.Utf8("com.twitter.finagle.mux.MuxContext")
+  val key = Buf.Utf8("com.twitter.finagle.thriftmux.MuxContext")
 
   def handle(body: Buf) {
     handled :+= body
@@ -79,6 +80,46 @@ class EndToEndTest extends FunSuite {
     }
   }
 
+  /* While we're supporting both old & new APIs, temporarily test
+   * the cross-product */
+  val clientId = ClientId("test.service")
+  for ((clientWhich, clientBuilder) <- Seq(
+         "new" -> ClientBuilder().stack(ThriftMux.client.withClientId(clientId)),
+         "old" -> ClientBuilder().stack(ThriftMuxClient.withClientId(clientId)));
+       (serverWhich, serverBuilder) <- Seq(
+         "new" -> ServerBuilder().stack(ThriftMux.server),
+         "old" -> ServerBuilder().stack(ThriftMuxServer))) {
+    test(s"ServerBuilder ($serverWhich) thriftmux server + ClientBuilder ($clientWhich) thriftmux client") {
+      val address = RandomSocket()
+      val iface = new TestService.FutureIface {
+        def query(x: String) =
+          if (x.isEmpty) Future.value(ClientId.current map { _.name } getOrElse(""))
+          else Future.value(x+x)
+      }
+
+      val service = new TestService$FinagleService(iface, Thrift.protocolFactory)
+
+      val server = serverBuilder
+        .bindTo(address)
+        .name("ThriftMuxServer")
+        .build(service)
+
+      val clientId = "test.service"
+      val cbService = clientBuilder
+        .dest("localhost:" + address.getPort)
+        .build()
+
+      val client = new TestService.FinagledClient(cbService, Thrift.protocolFactory)
+
+      1 to 5 foreach { _ =>
+        assert(Await.result(client.query("ok")) === "okok")
+      }
+      assert(Await.result(client.query("")) === clientId)
+    }
+
+   }
+
+/* comment back in when ThriftMux{Server,Client} are deprecated.
   test("ServerBuilder thriftmux server + ClientBuilder thriftmux client") {
     val address = RandomSocket()
     val iface = new TestService.FutureIface {
@@ -90,14 +131,14 @@ class EndToEndTest extends FunSuite {
     val service = new TestService$FinagleService(iface, Thrift.protocolFactory)
 
     val server = ServerBuilder()
-      .stack(ThriftMuxServer)
+      .stack(ThriftMux.server)
       .bindTo(address)
       .name("ThriftMuxServer")
       .build(service)
 
     val clientId = "test.service"
     val cbService = ClientBuilder()
-      .stack(ThriftMuxClient.withClientId(ClientId(clientId)))
+      .stack(ThriftMux.client.withClientId(ClientId(clientId)))
       .dest("localhost:" + address.getPort)
       .build()
 
@@ -108,6 +149,7 @@ class EndToEndTest extends FunSuite {
     }
     assert(Await.result(client.query("")) === clientId)
   }
+*/
 
   test("thriftmux server + Finagle thrift client: propagate Contexts") {
     new ThriftMuxTestServer {
@@ -150,40 +192,21 @@ class EndToEndTest extends FunSuite {
       def sampleTrace(traceId: TraceId): Option[Boolean] = None
     }
 
-    object ThriftMuxListener extends Netty3Listener[ChannelBuffer, ChannelBuffer](
-      "thrift", new thriftmux.PipelineFactory)
+    val server = ThriftMux.server
+      .configured(PTracer(tracer))
+      .serveIface(":*", new TestService.FutureIface {
+        def query(x: String) = Future.value(x + x)
+      })
 
-    // TODO: temporary workaround to capture the ServerRecv record.
-    object TestThriftMuxer extends StackServer[ChannelBuffer, ChannelBuffer] {
-      protected type In = ChannelBuffer
-      protected type Out = ChannelBuffer
+    val client = Thrift.client
+      .configured(PTracer(tracer))
+      .newIface[TestService.FutureIface](server)
 
-      protected val newListener = Function.const(ThriftMuxListener)_
-      protected val newDispatcher: Stack.Params => Dispatcher =
-      Function.const((trans, service) => Trace.unwind {
-        Trace.pushTracer(tracer)
-        new mux.ServerDispatcher(trans, service, true)
-      })_
-    }
-
-    object TestThriftMuxServer extends ThriftMuxServerLike(TestThriftMuxer, Protocols.binaryFactory())
-
-    val testService = new TestService.FutureIface {
-      def query(x: String) = Future.value(x + x)
-    }
-   val server = TestThriftMuxServer.serveIface(":*", testService)
-    val client = Thrift.newIface[TestService.FutureIface](server)
-    var p: Future[String] = null
-    Trace.unwind {
-      Trace.pushTracer(tracer)
-      Trace.setId(TraceId(Some(SpanId(123)), Some(SpanId(456)), SpanId(789), None))
-      p = client.query("ok")
-    }
-    Await.result(p)
+    Await.result(client.query("ok"))
 
     (srvTraceId, cltTraceId) match {
       case (Some(id1), Some(id2)) => assert(id1 === id2)
-      case _ => assert(false, "the trace ids sent by client and received by server do not match")
+      case _ => assert(false, s"the trace ids sent by client and received by server do not match srv: $srvTraceId clt: $cltTraceId")
     }
   }
 
@@ -193,7 +216,7 @@ class EndToEndTest extends FunSuite {
     })
 
     val clientId = "test.service"
-    val client = Thrift
+    val client = Thrift.client
       .withClientId(ClientId(clientId))
       .newIface[TestService.FutureIface](server)
 
@@ -209,7 +232,7 @@ class EndToEndTest extends FunSuite {
 
     val clientId = ClientId("test.service")
     val otherClientId = ClientId("other.bar")
-    val client = Thrift
+    val client = Thrift.client
       .withClientId(clientId)
       .newIface[TestService.FutureIface](server)
 
@@ -239,7 +262,7 @@ class EndToEndTest extends FunSuite {
 
     val clientId = ClientId("test.service")
     val otherClientId = ClientId("other.bar")
-    val client = ThriftMux
+    val client = ThriftMux.client
       .withClientId(clientId)
       .newIface[TestService.FutureIface](server)
 
@@ -250,16 +273,8 @@ class EndToEndTest extends FunSuite {
     }
   }
 
-  object OldPlainThriftClient
-    extends DefaultClient[ThriftClientRequest, Array[Byte]](
-      name = "thrift",
-      endpointer = Bridge[ThriftClientRequest, Array[Byte], ThriftClientRequest, Array[Byte]](
-        ThriftFramedTransporter, new SerialClientDispatcher(_))
-    ) with ThriftRichClient
-  {
-    protected val defaultClientName = "thrift"
-    protected val protocolFactory = Protocols.binaryFactory()
-  }
+  // Skip upnegotiation.
+  object OldPlainThriftClient extends Thrift.Client(stack=StackClient.newStack)
 
   test("thriftmux server + Finagle thrift client w/o protocol upgrade") {
     new ThriftMuxTestServer {
@@ -307,13 +322,12 @@ class EndToEndTest extends FunSuite {
     }
     val server = ThriftMux.serveIface(":*", testService)
 
-    object OldPlainThriftClient
-      extends DefaultClient[ThriftClientRequest, Array[Byte]](
-        name = "thrift",
-        endpointer = Bridge[ThriftClientRequest, Array[Byte], ThriftClientRequest, Array[Byte]](
-          ThriftFramedTransporter, new PipeliningDispatcher(_))
-      )
-    val service = Await.result(OldPlainThriftClient.newClient(server)())
+    object OldPlainPipeliningThriftClient extends Thrift.Client(stack=StackClient.newStack) {
+      override protected def newDispatcher(transport: Transport[ThriftClientRequest, Array[Byte]]) =
+        new PipeliningDispatcher(transport)
+    }
+
+    val service = Await.result(OldPlainPipeliningThriftClient.newClient(server)())
     val client = new TestService.FinagledClient(service, Protocols.binaryFactory())
     val reqs = 1 to nreqs map { i => client.query("ok" + i) }
     // Although the requests are pipelined in the client, they must be
@@ -336,7 +350,7 @@ class EndToEndTest extends FunSuite {
       }
     })
 
-    val client = ThriftMux.withClientId(ClientId("foo.bar"))
+    val client = ThriftMux.client.withClientId(ClientId("foo.bar"))
       .newIface[TestService.FutureIface](server)
 
     assert(Await.result(client.query("ok")) === "foo.bar")
@@ -360,25 +374,25 @@ class EndToEndTest extends FunSuite {
       def query(x: String) = Future.value(x+x)
     }
     val mem = new InMemoryStatsReceiver
-    val label = Label("foobar")
     val sr = Stats(mem)
-    val server = ThriftMuxServer
+    val server = ThriftMux.server
       .configured(sr)
-      .configured(label)
+      .configured(Label("server"))
       .serveIface(":*", iface)
 
-    val client = ThriftMuxClient
+    val client = ThriftMux.client
       .configured(sr)
-      .configured(label)
+      .configured(Label("client"))
       .newIface[TestService.FutureIface](server)
 
     assert(Await.result(client.query("ok")) === "okok")
-    assert(mem.counters(Seq("foobar", "protocol", "thriftmux")) === 2)
+    assert(mem.gauges(Seq("server", "protocol", "thriftmux"))() === 1.0)
+    assert(mem.gauges(Seq("client", "protocol", "thriftmux"))() === 1.0)
   }
 
-  test("ThriftMuxClients are properly labeled and scoped") {
+  test("ThriftMux clients are properly labeled and scoped") {
     new ThriftMuxTestServer {
-      def base(sr: InMemoryStatsReceiver) = ThriftMuxClient.configured(Stats(sr))
+      def base(sr: InMemoryStatsReceiver) = ThriftMux.Client().configured(Stats(sr))
 
       def assertStats(prefix: String, sr: InMemoryStatsReceiver, iface: TestService.FutureIface) {
         assert(Await.result(iface.query("ok")) === "okok")
@@ -401,12 +415,12 @@ class EndToEndTest extends FunSuite {
   test("ThriftMux with TCompactProtocol") {
     val pf = new TCompactProtocol.Factory
 
-    val server = ThriftMux.withProtocolFactory(pf)
+    val server = ThriftMux.server.withProtocolFactory(pf)
       .serveIface(":*", new TestService.FutureIface {
         def query(x: String) = Future.value(x+x)
       })
 
-    val tcompactClient = ThriftMux.withProtocolFactory(pf)
+    val tcompactClient = ThriftMux.client.withProtocolFactory(pf)
       .newIface[TestService.FutureIface](server)
     assert(Await.result(tcompactClient.query("ok")) === "okok")
 

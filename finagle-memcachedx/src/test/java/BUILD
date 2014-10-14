@@ -1,0 +1,13 @@
+junit_tests(name='java',
+  dependencies=[
+    '3rdparty:junit',
+    '3rdparty:netty',
+    '3rdparty:scala-library',
+    '3rdparty/jvm/com/twitter/common:zookeeper-testing',
+    'finagle/finagle-core',
+    'finagle/finagle-memcachedx',
+    'finagle/finagle-memcachedx/src/test/scala:external',
+    'util/util-core',
+  ],
+  sources=rglobs('*.java')
+)

@@ -1,7 +1,7 @@
 package com.twitter.finagle.exp.swift
 
 import com.facebook.swift.codec.metadata.ReflectionHelper.{
-  getAllClassAnnotations, findAnnotatedMethods, 
+  getAllClassAnnotations, findAnnotatedMethods,
   extractParameterNames}
 import com.facebook.swift.codec.metadata.ThriftType
 import com.google.common.collect.Iterables
@@ -28,7 +28,7 @@ object ServiceSym {
    * Construct a service symbol from a java class using the
    * Swift annotations. ServiceSym will throw an exception
    * if the given class cannot be converted. In addition to
-   * the normal Swift requirements -- every type must be 
+   * the normal Swift requirements -- every type must be
    * coercible into its thrift equivalent -- all methods must
    * also return [[com.twitter.util.Future]].
    */
@@ -55,7 +55,7 @@ object ServiceSym {
 case class ArgSym(name: String, id: Short, thriftType: ThriftType)
 
 case class MethodSym(
-    name: String, method: Method, 
+    name: String, method: Method,
     returnType: ThriftType, args: Seq[ArgSym],
     exceptions: Map[Short, ThriftType])
 
@@ -70,14 +70,14 @@ object MethodSym {
       case n => n
     }
     val returnType = ThriftCatalog.getThriftType(m.getGenericReturnType())
-    
+
     // Require that every method actually returns something, and that
     // this is always available asynchronously. This precludes
     // support for oneway functions, but that's a good thing.
     require(classOf[Future[_]].isAssignableFrom(
         TypeToken.of(m.getGenericReturnType()).getRawType()),
         "methods must return Future values")
-    
+
     val types = m.getGenericParameterTypes()
     val names = extractParameterNames(m)
     val annots = m.getParameterAnnotations()
@@ -89,10 +89,10 @@ object MethodSym {
       val id = annot map(_.value()) getOrElse (i+1).toShort
       val name = annot flatMap(a => Option(a.name())) getOrElse names(i)
       val thriftType = ThriftCatalog.getThriftType(types(i))
-      
+
       ArgSym(name, id, thriftType)
     }
-    
+
     // todo: We are silently overwriting exception ids here
     // (later wins). Is this OK?
     val exceptions = Map() ++ annot.exception().map { e =>

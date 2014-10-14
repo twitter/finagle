@@ -108,11 +108,11 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
   public static final Map<_Fields, FieldMetaData> metaDataMap;
   static {
     Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
-    tmpMap.put(_Fields.SPANS, new FieldMetaData("spans", TFieldRequirementType.DEFAULT, 
-        new ListMetaData(TType.LIST, 
+    tmpMap.put(_Fields.SPANS, new FieldMetaData("spans", TFieldRequirementType.DEFAULT,
+        new ListMetaData(TType.LIST,
             new StructMetaData(TType.STRUCT, Span.class))));
-    tmpMap.put(_Fields.CONTEXTS, new FieldMetaData("contexts", TFieldRequirementType.DEFAULT, 
-        new ListMetaData(TType.LIST, 
+    tmpMap.put(_Fields.CONTEXTS, new FieldMetaData("contexts", TFieldRequirementType.DEFAULT,
+        new ListMetaData(TType.LIST,
             new StructMetaData(TType.STRUCT, RequestContext.class))));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     FieldMetaData.addStructMetaDataMap(ResponseHeader.class, metaDataMap);
@@ -366,7 +366,7 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
     while (true)
     {
       field = iprot.readFieldBegin();
-      if (field.type == TType.STOP) { 
+      if (field.type == TType.STOP) {
         break;
       }
       switch (field.id) {
@@ -384,7 +384,7 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
               }
               iprot.readListEnd();
             }
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
@@ -402,7 +402,7 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
               }
               iprot.readListEnd();
             }
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;

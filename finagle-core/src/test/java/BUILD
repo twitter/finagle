@@ -1,5 +1,6 @@
 java_library(name='java',
   dependencies=[
+    '3rdparty:junit',
     '3rdparty:netty',
     'finagle/finagle-core',
     'util/util-core',

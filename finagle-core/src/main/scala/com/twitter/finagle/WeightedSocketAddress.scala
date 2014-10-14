@@ -28,12 +28,12 @@ object WeightedSocketAddress {
     }
 }
 
-object WeightedInetSocketAddress {  
+object WeightedInetSocketAddress {
  /**
    * Destructuring a weighted inet socket address is liberal: we
    * return a weight of 1 if it is unweighted.
    */
-  def unapply(addr: SocketAddress): Option[(InetSocketAddress, Double)] = 
+  def unapply(addr: SocketAddress): Option[(InetSocketAddress, Double)] =
     addr match {
       case WeightedSocketAddress(ia: InetSocketAddress, weight) => Some(ia, weight)
       case ia: InetSocketAddress => Some(ia, 1D)

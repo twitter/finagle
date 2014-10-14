@@ -6,17 +6,18 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
-  val libVersion = "6.20.0"
+  val libVersion = "6.22.0"
   val zkVersion = "3.3.4"
-  val utilVersion = "6.19.0"
-  val ostrichVersion = "9.5.6"
+  val utilVersion = "6.22.0"
+  val ostrichVersion = "9.6.0"
   val jacksonVersion = "2.3.1"
-  val nettyLib = "io.netty" % "netty" % "3.9.1.1.Final"
+  val nettyLib = "io.netty" % "netty" % "3.9.4.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonLibs = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
     "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion exclude("com.google.guava", "guava"),
+    "com.google.guava" % "guava" % "16.0.1"
   )
   val thriftLibs = Seq(
     "org.apache.thrift" % "libthrift" % "0.5.0" intransitive(),
@@ -46,15 +47,11 @@ object Finagle extends Build {
   val sharedSettings = Seq(
     version := libVersion,
     organization := "com.twitter",
-    crossScalaVersions := Seq("2.9.2", "2.10.4"),
-    scalaVersion := "2.9.2",
+    crossScalaVersions := Seq("2.10.4"),
+    scalaVersion := "2.10.4",
     libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" % "1.9.1" % "test",
-      "org.scala-tools.testing" %% "specs" % "1.6.9" % "test" cross CrossVersion.binaryMapped {
-        case "2.9.2" => "2.9.1"
-        case "2.10.4" => "2.10"
-        case x => x
-      },
+      "org.scalatest" %% "scalatest" % "2.2.2" % "test",
+      "org.scala-tools.testing" %% "specs" % "1.6.9" % "test",
       "junit" % "junit" % "4.10" % "test",
       "org.mockito" % "mockito-all" % "1.9.5" % "test"
     ),
@@ -66,10 +63,6 @@ object Finagle extends Build {
     publishM2 <<= Classpaths.publishTask(publishM2Configuration, deliverLocal),
     otherResolvers += m2Repo,
 
-    testOptions in Test <<= scalaVersion map {
-      case "2.10" | "2.10.4" => Seq(Tests.Filter(_ => false))
-      case _ => Seq()
-    },
     javaOptions in Test := Seq("-DSKIP_FLAKY=1"),
 
     ivyXML :=
@@ -298,7 +291,8 @@ object Finagle extends Build {
     name := "finagle-http",
     libraryDependencies ++= Seq(
       util("codec"), util("logging"),
-      "commons-lang" % "commons-lang" % "2.6"
+      "commons-lang" % "commons-lang" % "2.6",
+      "com.google.guava" % "guava" % "16.0.1"
     )
   ).dependsOn(finagleCore)
 
@@ -417,7 +411,7 @@ object Finagle extends Build {
       sharedSettings
     ).settings(
       name := "finagle-mysql",
-      libraryDependencies ++= Seq(util("logging")),
+      libraryDependencies ++= Seq(util("logging"), util("cache")),
       excludeFilter in unmanagedSources := { "EmbeddableMysql.scala" || "ClientTest.scala" }
     ).dependsOn(finagleCore)
 
@@ -484,11 +478,14 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-benchmark",
+    // include again when we can properly depend on finagleSwift
+    excludeFilter in Compile := "ThriftDispatch.scala",
     libraryDependencies ++= Seq(
       util("codec"),
-      "com.google.caliper" % "caliper" % "0.5-rc1"
+      "com.google.caliper" % "caliper" % "0.5-rc1",
+      "com.twitter.common" % "metrics-data-sample" % "0.0.1"
     )
-  ).dependsOn(finagleCore, finagleStats, finagleOstrich4, finagleZipkin)
+  ).dependsOn(finagleCore, finagleStats, finagleOstrich4, finagleZipkin, finagleMemcached)
 
   lazy val finagleTesters = Project(
     id = "finagle-testers",
@@ -508,8 +505,8 @@ object Finagle extends Build {
     name := "finagle-spdy"
   ).dependsOn(finagleCore)
 
-  /*
-  lazy val finagleSwift = Project(
+
+/*  lazy val finagleSwift = Project(
     id = "finagle-swift",
     base = file("finagle-swift"),
     settings = Project.defaultSettings ++
@@ -519,8 +516,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       "com.twitter.com.facebook.swift" % "swift-codec" % "0.6.0"
     )
-  ).dependsOn(finagleCore, finagleThrift)
-   */
+  ).dependsOn(finagleCore, finagleThrift)*/
 
   lazy val finagleDoc = Project(
     id = "finagle-doc",

@@ -27,7 +27,7 @@ class StabilizerTest extends FunSuite {
 
     def assertStabilized(addr: Addr) = assert(ref.get === addr)
     def pulse() = epoch.notify(())
-    
+
     assertStabilized(Addr.Pending)
   }
 
@@ -46,7 +46,7 @@ class StabilizerTest extends FunSuite {
 
     pulse()
     assertStabilized(Addr.Bound(sa2))
-    
+
     pulse()
     assertStabilized(Addr.Neg)
   })
@@ -56,13 +56,13 @@ class StabilizerTest extends FunSuite {
     assertStabilized(Addr.Bound(sa1))
     va() = Addr.Bound(sa2)
     assertStabilized(Addr.Bound(sa1, sa2))
-    
+
     va() = Addr.Failed(new Exception)
     pulse()
     pulse()
-    
+
     assertStabilized(Addr.Bound(sa1, sa2))
-    
+
     va() = Addr.Pending
     pulse()
     pulse()
@@ -74,10 +74,10 @@ class StabilizerTest extends FunSuite {
   test("Removes are delayed while failures are observed") (new Ctx {
     va() = Addr.Bound(sa1, sa2)
     assertStabilized(Addr.Bound(sa1, sa2))
-    
+
     pulse()
     assertStabilized(Addr.Bound(sa1, sa2))
-    
+
     va() = Addr.Bound(sa1)
     assertStabilized(Addr.Bound(sa1, sa2))
 
@@ -89,19 +89,19 @@ class StabilizerTest extends FunSuite {
 
     pulse()
     assertStabilized(Addr.Bound(sa1, sa2))
-    
+
     pulse(); pulse(); pulse()
     assertStabilized(Addr.Bound(sa1, sa2))
-    
+
     va() = Addr.Bound(sa1)
     assertStabilized(Addr.Bound(sa1, sa2))
-    
+
     pulse()
     assertStabilized(Addr.Bound(sa1, sa2))
     pulse()
     assertStabilized(Addr.Bound(sa1))
   })
-  
+
   test("Reflect additions while addrs are unstable") (new Ctx {
     va() = Addr.Bound(sa1, sa2)
     assertStabilized(Addr.Bound(sa1, sa2))
@@ -110,10 +110,10 @@ class StabilizerTest extends FunSuite {
     pulse()
     va() = Addr.Failed(new Exception)
     assertStabilized(Addr.Bound(sa1, sa2))
-    
+
     pulse()
     assertStabilized(Addr.Bound(sa1, sa2))
-    
+
     pulse()
     va() = Addr.Bound(sa3)
     assertStabilized(Addr.Bound(sa1, sa2, sa3))

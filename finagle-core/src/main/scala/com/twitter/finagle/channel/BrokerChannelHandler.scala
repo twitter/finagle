@@ -95,7 +95,7 @@ class BrokerChannelHandler extends SimpleChannelHandler {
   protected def proxyUpstream() {
     upstreamEvent foreach { _.sendUpstream() }
   }
-  
+
   /**
    * Proxy both upstream & downstream events.
    */
@@ -121,7 +121,7 @@ class BrokerChannelHandler extends SimpleChannelHandler {
     // them, so we're stricter: the receiver must synchronize immediately,
     // otherwise we proxy it upstream.
     //
-    // This makes sure that exceptions always get propagated, even if 
+    // This makes sure that exceptions always get propagated, even if
     // the channel handler process has died (eg. it threw an unhandled
     // exception).
     val of = upstreamBroker.send(Exception(e, ctx)) orElse Offer.const {

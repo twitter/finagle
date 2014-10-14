@@ -9,6 +9,7 @@ package com.twitter.finagle
 import com.twitter.finagle.dispatch.{SerialClientDispatcher, SerialServerDispatcher}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.{ChannelTransport, Transport}
+import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.util.Closable
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.channel.{Channel, ChannelPipeline, ChannelPipelineFactory}
@@ -57,7 +58,7 @@ trait Codec[Req, Rep] {
     new SerialClientDispatcher(transport.cast[Req, Rep])
 
   def newServerDispatcher(
-    transport: Transport[Any, Any], 
+    transport: Transport[Any, Any],
     service: Service[Req, Rep]
   ): Closable =
     new SerialServerDispatcher[Req, Rep](transport.cast[Rep, Req], service)
@@ -67,6 +68,12 @@ trait Codec[Req, Rep] {
    * disable failFast for codecs for which it isn't well-behaved.
    */
   def failFastOk = true
+
+  /**
+   * A hack to allow for overriding the TraceInitializerFilter when using
+   * Client/Server Builders rather than stacks.
+   */
+  def newTraceInitializer: Stackable[ServiceFactory[Req, Rep]] = TraceInitializerFilter.clientModule[Req, Rep]
 }
 
 /**
@@ -75,7 +82,7 @@ trait Codec[Req, Rep] {
 abstract class AbstractCodec[Req, Rep] extends Codec[Req, Rep]
 
 object Codec {
-  def ofPipelineFactory[Req, Rep](makePipeline: => ChannelPipeline) = 
+  def ofPipelineFactory[Req, Rep](makePipeline: => ChannelPipeline) =
     new Codec[Req, Rep] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline = makePipeline

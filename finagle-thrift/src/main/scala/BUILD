@@ -1,4 +1,9 @@
 scala_library(name='scala',
+  provides = scala_artifact(
+    org = 'com.twitter',
+    name = 'finagle-thrift',
+    repo = artifactory,
+  ),
   dependencies=[
     '3rdparty:netty',
     '3rdparty:thrift-0.5.0',
@@ -10,7 +15,4 @@ scala_library(name='scala',
   resources=[
     'finagle/finagle-thrift/src/main/resources'
   ],
-  provides=artifact(org='com.twitter',
-                    name='finagle-thrift',
-                    repo='pants-support/ivy:internal',),
 )

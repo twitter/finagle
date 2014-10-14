@@ -1,4 +1,9 @@
 java_library(name='java',
+  provides = artifact(
+    org = 'com.twitter',
+    name = 'finagle-kestrel-java',
+    repo = artifactory,
+  ),
   dependencies=[
     '3rdparty:netty',
     '3rdparty:scala-library',

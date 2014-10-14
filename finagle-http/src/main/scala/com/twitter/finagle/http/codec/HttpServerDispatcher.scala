@@ -6,9 +6,8 @@ import com.twitter.finagle.http._
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Reader, Buf, BufReader}
-import com.twitter.util.{Future, Promise}
+import com.twitter.util.{Future, Promise, Throw, Return}
 import java.net.InetSocketAddress
-import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
 
 class HttpServerDispatcher[REQUEST <: Request](
@@ -16,7 +15,7 @@ class HttpServerDispatcher[REQUEST <: Request](
     service: Service[REQUEST, HttpResponse])
   extends GenSerialServerDispatcher[REQUEST, HttpResponse, Any, Any](trans) {
 
-  import ReaderUtils.{readerFromTransport, streamChunks}
+  import ReaderUtils.{readChunk, streamChunks}
 
   trans.onClose ensure {
     service.close()
@@ -34,14 +33,19 @@ class HttpServerDispatcher[REQUEST <: Request](
 
         override val reader =
           if (reqIn.isChunked) {
-            readerFromTransport(trans, eos)
+            val readr = Reader.writable()
+            Transport.copyToWriter(trans, readr)(readChunk) respond {
+              case Throw(exc) => readr.fail(exc)
+              case Return(_) => readr.close()
+            } proxyTo(eos)
+            readr
           } else {
             eos.setDone()
             BufReader(ChannelBufferBuf(reqIn.getContent))
           }
 
       }.asInstanceOf[REQUEST]
-      
+
       service(req)
 
     case invalid =>
@@ -49,9 +53,10 @@ class HttpServerDispatcher[REQUEST <: Request](
       Future.exception(new IllegalArgumentException("Invalid message "+invalid))
   }
 
-  protected def handle(response: HttpResponse): Future[Unit] = response match {
-    case rep: Response =>
-      if (rep.isChunked) {
+  protected def handle(response: HttpResponse): Future[Unit] = {
+    HttpHeaders.setKeepAlive(response, !isClosing)
+    response match {
+      case rep: Response if rep.isChunked =>
         val p = new Promise[Unit]
         val f = trans.write(rep) before streamChunks(trans, rep.reader)
         // This awkwardness is unfortunate but necessary for now as you may be
@@ -60,14 +65,18 @@ class HttpServerDispatcher[REQUEST <: Request](
         p.become(f onFailure { _ => rep.reader.discard() })
         p setInterruptHandler { case _ => rep.reader.discard() }
         p
-      } else {
+      case rep: Response =>
         // Ensure Content-Length is set if not chunked
         if (!rep.headers.contains(HttpHeaders.Names.CONTENT_LENGTH))
           rep.contentLength = rep.getContent().readableBytes
 
         trans.write(rep)
-      }
-    case _: HttpResponse =>
-      trans.write(response)
+      case _ =>
+        // Ensure Content-Length is set if not chunked
+        if (!response.isChunked && !HttpHeaders.isContentLengthSet(response))
+          HttpHeaders.setContentLength(response, response.getContent().readableBytes)
+
+        trans.write(response)
+    }
   }
 }

@@ -11,7 +11,7 @@ import org.jboss.netty.handler.codec.http._
 /**
  * Stream chunks into StreamResponses.
  */
-private class StreamClientDispatcher(trans: Transport[Any, Any]) 
+private class StreamClientDispatcher(trans: Transport[Any, Any])
     extends GenSerialClientDispatcher[HttpRequest, StreamResponse, Any, Any](trans) {
   import GenSerialClientDispatcher.wrapWriteException
 
@@ -35,7 +35,7 @@ private class StreamClientDispatcher(trans: Transport[Any, Any])
           val out = new Broker[ChannelBuffer]
           val err = new Broker[Throwable]
           val done = new Promise[Unit]
-  
+
           if (!httpRes.isChunked) {
             val content = httpRes.getContent
             if (content.readable) out ! content
@@ -60,8 +60,8 @@ private class StreamClientDispatcher(trans: Transport[Any, Any])
           done ensure {
             trans.close()
           }
-   
-        case invalid => 
+
+        case invalid =>
           Future.exception(
             new IllegalArgumentException("invalid message \"%s\"".format(invalid)))
       }

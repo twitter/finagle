@@ -133,21 +133,21 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
   public static final Map<_Fields, FieldMetaData> metaDataMap;
   static {
     Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
-    tmpMap.put(_Fields.TRACE_ID, new FieldMetaData("trace_id", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.TRACE_ID, new FieldMetaData("trace_id", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.I64)));
-    tmpMap.put(_Fields.NAME, new FieldMetaData("name", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.NAME, new FieldMetaData("name", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.STRING)));
-    tmpMap.put(_Fields.ID, new FieldMetaData("id", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.ID, new FieldMetaData("id", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.I64)));
-    tmpMap.put(_Fields.PARENT_ID, new FieldMetaData("parent_id", TFieldRequirementType.OPTIONAL, 
+    tmpMap.put(_Fields.PARENT_ID, new FieldMetaData("parent_id", TFieldRequirementType.OPTIONAL,
         new FieldValueMetaData(TType.I64)));
-    tmpMap.put(_Fields.ANNOTATIONS, new FieldMetaData("annotations", TFieldRequirementType.DEFAULT, 
-        new ListMetaData(TType.LIST, 
+    tmpMap.put(_Fields.ANNOTATIONS, new FieldMetaData("annotations", TFieldRequirementType.DEFAULT,
+        new ListMetaData(TType.LIST,
             new StructMetaData(TType.STRUCT, Annotation.class))));
-    tmpMap.put(_Fields.BINARY_ANNOTATIONS, new FieldMetaData("binary_annotations", TFieldRequirementType.DEFAULT, 
-        new ListMetaData(TType.LIST, 
+    tmpMap.put(_Fields.BINARY_ANNOTATIONS, new FieldMetaData("binary_annotations", TFieldRequirementType.DEFAULT,
+        new ListMetaData(TType.LIST,
             new StructMetaData(TType.STRUCT, BinaryAnnotation.class))));
-    tmpMap.put(_Fields.DEBUG, new FieldMetaData("debug", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.DEBUG, new FieldMetaData("debug", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.BOOL)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     FieldMetaData.addStructMetaDataMap(Span.class, metaDataMap);
@@ -706,7 +706,7 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
     while (true)
     {
       field = iprot.readFieldBegin();
-      if (field.type == TType.STOP) { 
+      if (field.type == TType.STOP) {
         break;
       }
       switch (field.id) {
@@ -714,14 +714,14 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
           if (field.type == TType.I64) {
             this.trace_id = iprot.readI64();
             setTrace_idIsSet(true);
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
         case 3: // NAME
           if (field.type == TType.STRING) {
             this.name = iprot.readString();
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
@@ -729,7 +729,7 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
           if (field.type == TType.I64) {
             this.id = iprot.readI64();
             setIdIsSet(true);
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
@@ -737,7 +737,7 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
           if (field.type == TType.I64) {
             this.parent_id = iprot.readI64();
             setParent_idIsSet(true);
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
@@ -755,7 +755,7 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
               }
               iprot.readListEnd();
             }
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
@@ -773,7 +773,7 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
               }
               iprot.readListEnd();
             }
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
@@ -781,7 +781,7 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
           if (field.type == TType.BOOL) {
             this.debug = iprot.readBool();
             setDebugIsSet(true);
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;

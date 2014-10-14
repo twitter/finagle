@@ -57,8 +57,8 @@ trait Hashes { self: BaseClient =>
    * @param hash key, fields, amount
    * @return new value of field
    */
-  def hIncrBy(key: ChannelBuffer, field: ChannelBuffer, amount: Long): Future[JLong] = 
-    doRequest(HIncrBy(key, field, amount)) {      
+  def hIncrBy(key: ChannelBuffer, field: ChannelBuffer, amount: Long): Future[JLong] =
+    doRequest(HIncrBy(key, field, amount)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -134,7 +134,7 @@ trait Hashes { self: BaseClient =>
    * @param hash key
    * @return list of values, or empty list when key does not exist
    */
-  def hVals(key: ChannelBuffer): Future[Seq[ChannelBuffer]] = 
+  def hVals(key: ChannelBuffer): Future[Seq[ChannelBuffer]] =
     doRequest(HVals(key)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
       case EmptyMBulkReply()    => Future.Nil

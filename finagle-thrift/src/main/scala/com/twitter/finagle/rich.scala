@@ -195,7 +195,7 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
    */
   def newIface[Iface](name: Name, label: String, cls: Class[_]): Iface = {
     val clsName = cls.getName
-    lazy val underlying = newClient(name, label).toService
+    lazy val underlying = newService(name, label)
     lazy val clientLabel = (label, defaultClientName) match {
       case ("", "") => Showable.show(name)
       case ("", l1) => l1

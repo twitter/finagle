@@ -8,8 +8,8 @@ import java.net.InetSocketAddress
 
 @RunWith(classOf[JUnitRunner])
 class ServerSet2Test extends FunSuite {
-  def ia(port: Int) = new InetSocketAddress("localhost", port)
-  def ep(port: Int) = Endpoint(None, ia(port), None, Endpoint.Status.Alive, port.toString)
+  def ia(port: Int) = HostPort("localhost", port)
+  def ep(port: Int) = Endpoint(None, Some(ia(port)), None, Endpoint.Status.Alive, port.toString)
 
   test("ServerSet2.weighted") {
     val port1 = RandomSocket.nextPort()

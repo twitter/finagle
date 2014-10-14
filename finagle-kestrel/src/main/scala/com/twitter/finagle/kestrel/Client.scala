@@ -13,7 +13,15 @@ import com.twitter.concurrent.{Offer, Broker}
 import com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Item
 import com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Kestrel.FinagledClient
 
+/**
+ * Indicates that a [[com.twitter.finagle.kestrel.ReadHandle]] has been closed.
+ */
 object ReadClosedException extends Exception
+
+/**
+ * Indicates that a [[com.twitter.finagle.kestrel.ReadHandle]] has exceeded its
+ * retry budget.
+ */
 object OutOfRetriesException extends Exception
 
 // TODO(Raghavendra Prabhu): Move ReadHandle and ReadMessage to util-core.

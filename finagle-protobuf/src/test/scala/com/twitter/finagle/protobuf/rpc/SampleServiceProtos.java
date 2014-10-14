@@ -10,7 +10,7 @@ public final class SampleServiceProtos {
   }
   public interface GetWeatherForecastRequestOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
+
     // optional string zip = 1;
     boolean hasZip();
     String getZip();
@@ -23,26 +23,26 @@ public final class SampleServiceProtos {
       super(builder);
     }
     private GetWeatherForecastRequest(boolean noInit) {}
-    
+
     private static final GetWeatherForecastRequest defaultInstance;
     public static GetWeatherForecastRequest getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public GetWeatherForecastRequest getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.internal_static_com_twitter_finagle_protobuf_rpc_GetWeatherForecastRequest_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.internal_static_com_twitter_finagle_protobuf_rpc_GetWeatherForecastRequest_fieldAccessorTable;
     }
-    
+
     private int bitField0_;
     // optional string zip = 1;
     public static final int ZIP_FIELD_NUMBER = 1;
@@ -55,7 +55,7 @@ public final class SampleServiceProtos {
       if (ref instanceof String) {
         return (String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         String s = bs.toStringUtf8();
         if (com.google.protobuf.Internal.isValidUtf8(bs)) {
@@ -67,7 +67,7 @@ public final class SampleServiceProtos {
     private com.google.protobuf.ByteString getZipBytes() {
       java.lang.Object ref = zip_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8((String) ref);
         zip_ = b;
         return b;
@@ -75,7 +75,7 @@ public final class SampleServiceProtos {
         return (com.google.protobuf.ByteString) ref;
       }
     }
-    
+
     private void initFields() {
       zip_ = "";
     }
@@ -83,11 +83,11 @@ public final class SampleServiceProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -96,12 +96,12 @@ public final class SampleServiceProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -111,14 +111,14 @@ public final class SampleServiceProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     public static com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -185,14 +185,14 @@ public final class SampleServiceProtos {
       return newBuilder().mergeFrom(input, extensionRegistry)
                .buildParsed();
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
@@ -206,17 +206,17 @@ public final class SampleServiceProtos {
           getDescriptor() {
         return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.internal_static_com_twitter_finagle_protobuf_rpc_GetWeatherForecastRequest_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.internal_static_com_twitter_finagle_protobuf_rpc_GetWeatherForecastRequest_fieldAccessorTable;
       }
-      
+
       // Construct using com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
+
       private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
@@ -228,27 +228,27 @@ public final class SampleServiceProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         zip_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest.getDescriptor();
       }
-      
+
       public com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest getDefaultInstanceForType() {
         return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest.getDefaultInstance();
       }
-      
+
       public com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest build() {
         com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest result = buildPartial();
         if (!result.isInitialized()) {
@@ -256,7 +256,7 @@ public final class SampleServiceProtos {
         }
         return result;
       }
-      
+
       private com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest buildParsed()
           throws com.google.protobuf.InvalidProtocolBufferException {
         com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest result = buildPartial();
@@ -266,7 +266,7 @@ public final class SampleServiceProtos {
         }
         return result;
       }
-      
+
       public com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest buildPartial() {
         com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest result = new com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest(this);
         int from_bitField0_ = bitField0_;
@@ -279,7 +279,7 @@ public final class SampleServiceProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest) {
           return mergeFrom((com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest)other);
@@ -288,7 +288,7 @@ public final class SampleServiceProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest other) {
         if (other == com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest.getDefaultInstance()) return this;
         if (other.hasZip()) {
@@ -297,11 +297,11 @@ public final class SampleServiceProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -333,9 +333,9 @@ public final class SampleServiceProtos {
           }
         }
       }
-      
+
       private int bitField0_;
-      
+
       // optional string zip = 1;
       private java.lang.Object zip_ = "";
       public boolean hasZip() {
@@ -371,25 +371,25 @@ public final class SampleServiceProtos {
         zip_ = value;
         onChanged();
       }
-      
+
       // @@protoc_insertion_point(builder_scope:com.twitter.finagle.protobuf.rpc.GetWeatherForecastRequest)
     }
-    
+
     static {
       defaultInstance = new GetWeatherForecastRequest(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:com.twitter.finagle.protobuf.rpc.GetWeatherForecastRequest)
   }
-  
+
   public interface GetWeatherForecastResponseOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
+
     // optional string zip = 1;
     boolean hasZip();
     String getZip();
-    
+
     // optional uint32 temp = 2;
     boolean hasTemp();
     int getTemp();
@@ -402,26 +402,26 @@ public final class SampleServiceProtos {
       super(builder);
     }
     private GetWeatherForecastResponse(boolean noInit) {}
-    
+
     private static final GetWeatherForecastResponse defaultInstance;
     public static GetWeatherForecastResponse getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public GetWeatherForecastResponse getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.internal_static_com_twitter_finagle_protobuf_rpc_GetWeatherForecastResponse_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.internal_static_com_twitter_finagle_protobuf_rpc_GetWeatherForecastResponse_fieldAccessorTable;
     }
-    
+
     private int bitField0_;
     // optional string zip = 1;
     public static final int ZIP_FIELD_NUMBER = 1;
@@ -434,7 +434,7 @@ public final class SampleServiceProtos {
       if (ref instanceof String) {
         return (String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         String s = bs.toStringUtf8();
         if (com.google.protobuf.Internal.isValidUtf8(bs)) {
@@ -446,7 +446,7 @@ public final class SampleServiceProtos {
     private com.google.protobuf.ByteString getZipBytes() {
       java.lang.Object ref = zip_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8((String) ref);
         zip_ = b;
         return b;
@@ -454,7 +454,7 @@ public final class SampleServiceProtos {
         return (com.google.protobuf.ByteString) ref;
       }
     }
-    
+
     // optional uint32 temp = 2;
     public static final int TEMP_FIELD_NUMBER = 2;
     private int temp_;
@@ -464,7 +464,7 @@ public final class SampleServiceProtos {
     public int getTemp() {
       return temp_;
     }
-    
+
     private void initFields() {
       zip_ = "";
       temp_ = 0;
@@ -473,11 +473,11 @@ public final class SampleServiceProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -489,12 +489,12 @@ public final class SampleServiceProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -508,14 +508,14 @@ public final class SampleServiceProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     public static com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -582,14 +582,14 @@ public final class SampleServiceProtos {
       return newBuilder().mergeFrom(input, extensionRegistry)
                .buildParsed();
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
@@ -603,17 +603,17 @@ public final class SampleServiceProtos {
           getDescriptor() {
         return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.internal_static_com_twitter_finagle_protobuf_rpc_GetWeatherForecastResponse_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.internal_static_com_twitter_finagle_protobuf_rpc_GetWeatherForecastResponse_fieldAccessorTable;
       }
-      
+
       // Construct using com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
+
       private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
@@ -625,7 +625,7 @@ public final class SampleServiceProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         zip_ = "";
@@ -634,20 +634,20 @@ public final class SampleServiceProtos {
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse.getDescriptor();
       }
-      
+
       public com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse getDefaultInstanceForType() {
         return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse.getDefaultInstance();
       }
-      
+
       public com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse build() {
         com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse result = buildPartial();
         if (!result.isInitialized()) {
@@ -655,7 +655,7 @@ public final class SampleServiceProtos {
         }
         return result;
       }
-      
+
       private com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse buildParsed()
           throws com.google.protobuf.InvalidProtocolBufferException {
         com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse result = buildPartial();
@@ -665,7 +665,7 @@ public final class SampleServiceProtos {
         }
         return result;
       }
-      
+
       public com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse buildPartial() {
         com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse result = new com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse(this);
         int from_bitField0_ = bitField0_;
@@ -682,7 +682,7 @@ public final class SampleServiceProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse) {
           return mergeFrom((com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse)other);
@@ -691,7 +691,7 @@ public final class SampleServiceProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse other) {
         if (other == com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse.getDefaultInstance()) return this;
         if (other.hasZip()) {
@@ -703,11 +703,11 @@ public final class SampleServiceProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -744,9 +744,9 @@ public final class SampleServiceProtos {
           }
         }
       }
-      
+
       private int bitField0_;
-      
+
       // optional string zip = 1;
       private java.lang.Object zip_ = "";
       public boolean hasZip() {
@@ -782,7 +782,7 @@ public final class SampleServiceProtos {
         zip_ = value;
         onChanged();
       }
-      
+
       // optional uint32 temp = 2;
       private int temp_ ;
       public boolean hasTemp() {
@@ -803,21 +803,21 @@ public final class SampleServiceProtos {
         onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:com.twitter.finagle.protobuf.rpc.GetWeatherForecastResponse)
     }
-    
+
     static {
       defaultInstance = new GetWeatherForecastResponse(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:com.twitter.finagle.protobuf.rpc.GetWeatherForecastResponse)
   }
-  
+
   public interface GetHistoricWeatherRequestOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
+
     // optional string zip = 1;
     boolean hasZip();
     String getZip();
@@ -830,26 +830,26 @@ public final class SampleServiceProtos {
       super(builder);
     }
     private GetHistoricWeatherRequest(boolean noInit) {}
-    
+
     private static final GetHistoricWeatherRequest defaultInstance;
     public static GetHistoricWeatherRequest getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public GetHistoricWeatherRequest getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.internal_static_com_twitter_finagle_protobuf_rpc_GetHistoricWeatherRequest_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.internal_static_com_twitter_finagle_protobuf_rpc_GetHistoricWeatherRequest_fieldAccessorTable;
     }
-    
+
     private int bitField0_;
     // optional string zip = 1;
     public static final int ZIP_FIELD_NUMBER = 1;
@@ -862,7 +862,7 @@ public final class SampleServiceProtos {
       if (ref instanceof String) {
         return (String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         String s = bs.toStringUtf8();
         if (com.google.protobuf.Internal.isValidUtf8(bs)) {
@@ -874,7 +874,7 @@ public final class SampleServiceProtos {
     private com.google.protobuf.ByteString getZipBytes() {
       java.lang.Object ref = zip_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8((String) ref);
         zip_ = b;
         return b;
@@ -882,7 +882,7 @@ public final class SampleServiceProtos {
         return (com.google.protobuf.ByteString) ref;
       }
     }
-    
+
     private void initFields() {
       zip_ = "";
     }
@@ -890,11 +890,11 @@ public final class SampleServiceProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -903,12 +903,12 @@ public final class SampleServiceProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -918,14 +918,14 @@ public final class SampleServiceProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     public static com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -992,14 +992,14 @@ public final class SampleServiceProtos {
       return newBuilder().mergeFrom(input, extensionRegistry)
                .buildParsed();
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
@@ -1013,17 +1013,17 @@ public final class SampleServiceProtos {
           getDescriptor() {
         return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.internal_static_com_twitter_finagle_protobuf_rpc_GetHistoricWeatherRequest_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.internal_static_com_twitter_finagle_protobuf_rpc_GetHistoricWeatherRequest_fieldAccessorTable;
       }
-      
+
       // Construct using com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
+
       private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
@@ -1035,27 +1035,27 @@ public final class SampleServiceProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         zip_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest.getDescriptor();
       }
-      
+
       public com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest getDefaultInstanceForType() {
         return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest.getDefaultInstance();
       }
-      
+
       public com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest build() {
         com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest result = buildPartial();
         if (!result.isInitialized()) {
@@ -1063,7 +1063,7 @@ public final class SampleServiceProtos {
         }
         return result;
       }
-      
+
       private com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest buildParsed()
           throws com.google.protobuf.InvalidProtocolBufferException {
         com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest result = buildPartial();
@@ -1073,7 +1073,7 @@ public final class SampleServiceProtos {
         }
         return result;
       }
-      
+
       public com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest buildPartial() {
         com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest result = new com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest(this);
         int from_bitField0_ = bitField0_;
@@ -1086,7 +1086,7 @@ public final class SampleServiceProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest) {
           return mergeFrom((com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest)other);
@@ -1095,7 +1095,7 @@ public final class SampleServiceProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest other) {
         if (other == com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest.getDefaultInstance()) return this;
         if (other.hasZip()) {
@@ -1104,11 +1104,11 @@ public final class SampleServiceProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1140,9 +1140,9 @@ public final class SampleServiceProtos {
           }
         }
       }
-      
+
       private int bitField0_;
-      
+
       // optional string zip = 1;
       private java.lang.Object zip_ = "";
       public boolean hasZip() {
@@ -1178,25 +1178,25 @@ public final class SampleServiceProtos {
         zip_ = value;
         onChanged();
       }
-      
+
       // @@protoc_insertion_point(builder_scope:com.twitter.finagle.protobuf.rpc.GetHistoricWeatherRequest)
     }
-    
+
     static {
       defaultInstance = new GetHistoricWeatherRequest(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:com.twitter.finagle.protobuf.rpc.GetHistoricWeatherRequest)
   }
-  
+
   public interface GetHistoricWeatherResponseOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
+
     // optional string zip = 1;
     boolean hasZip();
     String getZip();
-    
+
     // optional uint32 temp = 2;
     boolean hasTemp();
     int getTemp();
@@ -1209,26 +1209,26 @@ public final class SampleServiceProtos {
       super(builder);
     }
     private GetHistoricWeatherResponse(boolean noInit) {}
-    
+
     private static final GetHistoricWeatherResponse defaultInstance;
     public static GetHistoricWeatherResponse getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public GetHistoricWeatherResponse getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.internal_static_com_twitter_finagle_protobuf_rpc_GetHistoricWeatherResponse_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.internal_static_com_twitter_finagle_protobuf_rpc_GetHistoricWeatherResponse_fieldAccessorTable;
     }
-    
+
     private int bitField0_;
     // optional string zip = 1;
     public static final int ZIP_FIELD_NUMBER = 1;
@@ -1241,7 +1241,7 @@ public final class SampleServiceProtos {
       if (ref instanceof String) {
         return (String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         String s = bs.toStringUtf8();
         if (com.google.protobuf.Internal.isValidUtf8(bs)) {
@@ -1253,7 +1253,7 @@ public final class SampleServiceProtos {
     private com.google.protobuf.ByteString getZipBytes() {
       java.lang.Object ref = zip_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8((String) ref);
         zip_ = b;
         return b;
@@ -1261,7 +1261,7 @@ public final class SampleServiceProtos {
         return (com.google.protobuf.ByteString) ref;
       }
     }
-    
+
     // optional uint32 temp = 2;
     public static final int TEMP_FIELD_NUMBER = 2;
     private int temp_;
@@ -1271,7 +1271,7 @@ public final class SampleServiceProtos {
     public int getTemp() {
       return temp_;
     }
-    
+
     private void initFields() {
       zip_ = "";
       temp_ = 0;
@@ -1280,11 +1280,11 @@ public final class SampleServiceProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -1296,12 +1296,12 @@ public final class SampleServiceProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -1315,14 +1315,14 @@ public final class SampleServiceProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     public static com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1389,14 +1389,14 @@ public final class SampleServiceProtos {
       return newBuilder().mergeFrom(input, extensionRegistry)
                .buildParsed();
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
@@ -1410,17 +1410,17 @@ public final class SampleServiceProtos {
           getDescriptor() {
         return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.internal_static_com_twitter_finagle_protobuf_rpc_GetHistoricWeatherResponse_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.internal_static_com_twitter_finagle_protobuf_rpc_GetHistoricWeatherResponse_fieldAccessorTable;
       }
-      
+
       // Construct using com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
+
       private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
@@ -1432,7 +1432,7 @@ public final class SampleServiceProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         zip_ = "";
@@ -1441,20 +1441,20 @@ public final class SampleServiceProtos {
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse.getDescriptor();
       }
-      
+
       public com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse getDefaultInstanceForType() {
         return com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse.getDefaultInstance();
       }
-      
+
       public com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse build() {
         com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse result = buildPartial();
         if (!result.isInitialized()) {
@@ -1462,7 +1462,7 @@ public final class SampleServiceProtos {
         }
         return result;
       }
-      
+
       private com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse buildParsed()
           throws com.google.protobuf.InvalidProtocolBufferException {
         com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse result = buildPartial();
@@ -1472,7 +1472,7 @@ public final class SampleServiceProtos {
         }
         return result;
       }
-      
+
       public com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse buildPartial() {
         com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse result = new com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse(this);
         int from_bitField0_ = bitField0_;
@@ -1489,7 +1489,7 @@ public final class SampleServiceProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse) {
           return mergeFrom((com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse)other);
@@ -1498,7 +1498,7 @@ public final class SampleServiceProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse other) {
         if (other == com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse.getDefaultInstance()) return this;
         if (other.hasZip()) {
@@ -1510,11 +1510,11 @@ public final class SampleServiceProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1551,9 +1551,9 @@ public final class SampleServiceProtos {
           }
         }
       }
-      
+
       private int bitField0_;
-      
+
       // optional string zip = 1;
       private java.lang.Object zip_ = "";
       public boolean hasZip() {
@@ -1589,7 +1589,7 @@ public final class SampleServiceProtos {
         zip_ = value;
         onChanged();
       }
-      
+
       // optional uint32 temp = 2;
       private int temp_ ;
       public boolean hasTemp() {
@@ -1610,35 +1610,35 @@ public final class SampleServiceProtos {
         onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:com.twitter.finagle.protobuf.rpc.GetHistoricWeatherResponse)
     }
-    
+
     static {
       defaultInstance = new GetHistoricWeatherResponse(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:com.twitter.finagle.protobuf.rpc.GetHistoricWeatherResponse)
   }
-  
+
   public static abstract class WeatherService
       implements com.google.protobuf.Service {
     protected WeatherService() {}
-    
+
     public interface Interface {
       public abstract void getWeatherForecast(
           com.google.protobuf.RpcController controller,
           com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest request,
           com.google.protobuf.RpcCallback<com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse> done);
-      
+
       public abstract void getHistoricWeather(
           com.google.protobuf.RpcController controller,
           com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest request,
           com.google.protobuf.RpcCallback<com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse> done);
-      
+
     }
-    
+
     public static com.google.protobuf.Service newReflectiveService(
         final Interface impl) {
       return new WeatherService() {
@@ -1649,7 +1649,7 @@ public final class SampleServiceProtos {
             com.google.protobuf.RpcCallback<com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse> done) {
           impl.getWeatherForecast(controller, request, done);
         }
-        
+
         @java.lang.Override
         public  void getHistoricWeather(
             com.google.protobuf.RpcController controller,
@@ -1657,10 +1657,10 @@ public final class SampleServiceProtos {
             com.google.protobuf.RpcCallback<com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse> done) {
           impl.getHistoricWeather(controller, request, done);
         }
-        
+
       };
     }
-    
+
     public static com.google.protobuf.BlockingService
         newReflectiveBlockingService(final BlockingInterface impl) {
       return new com.google.protobuf.BlockingService() {
@@ -1668,7 +1668,7 @@ public final class SampleServiceProtos {
             getDescriptorForType() {
           return getDescriptor();
         }
-        
+
         public final com.google.protobuf.Message callBlockingMethod(
             com.google.protobuf.Descriptors.MethodDescriptor method,
             com.google.protobuf.RpcController controller,
@@ -1688,7 +1688,7 @@ public final class SampleServiceProtos {
               throw new java.lang.AssertionError("Can't get here.");
           }
         }
-        
+
         public final com.google.protobuf.Message
             getRequestPrototype(
             com.google.protobuf.Descriptors.MethodDescriptor method) {
@@ -1706,7 +1706,7 @@ public final class SampleServiceProtos {
               throw new java.lang.AssertionError("Can't get here.");
           }
         }
-        
+
         public final com.google.protobuf.Message
             getResponsePrototype(
             com.google.protobuf.Descriptors.MethodDescriptor method) {
@@ -1724,20 +1724,20 @@ public final class SampleServiceProtos {
               throw new java.lang.AssertionError("Can't get here.");
           }
         }
-        
+
       };
     }
-    
+
     public abstract void getWeatherForecast(
         com.google.protobuf.RpcController controller,
         com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest request,
         com.google.protobuf.RpcCallback<com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse> done);
-    
+
     public abstract void getHistoricWeather(
         com.google.protobuf.RpcController controller,
         com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest request,
         com.google.protobuf.RpcCallback<com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse> done);
-    
+
     public static final
         com.google.protobuf.Descriptors.ServiceDescriptor
         getDescriptor() {
@@ -1747,7 +1747,7 @@ public final class SampleServiceProtos {
         getDescriptorForType() {
       return getDescriptor();
     }
-    
+
     public final void callMethod(
         com.google.protobuf.Descriptors.MethodDescriptor method,
         com.google.protobuf.RpcController controller,
@@ -1774,7 +1774,7 @@ public final class SampleServiceProtos {
           throw new java.lang.AssertionError("Can't get here.");
       }
     }
-    
+
     public final com.google.protobuf.Message
         getRequestPrototype(
         com.google.protobuf.Descriptors.MethodDescriptor method) {
@@ -1792,7 +1792,7 @@ public final class SampleServiceProtos {
           throw new java.lang.AssertionError("Can't get here.");
       }
     }
-    
+
     public final com.google.protobuf.Message
         getResponsePrototype(
         com.google.protobuf.Descriptors.MethodDescriptor method) {
@@ -1810,23 +1810,23 @@ public final class SampleServiceProtos {
           throw new java.lang.AssertionError("Can't get here.");
       }
     }
-    
+
     public static Stub newStub(
         com.google.protobuf.RpcChannel channel) {
       return new Stub(channel);
     }
-    
+
     public static final class Stub extends com.twitter.finagle.protobuf.rpc.SampleServiceProtos.WeatherService implements Interface {
       private Stub(com.google.protobuf.RpcChannel channel) {
         this.channel = channel;
       }
-      
+
       private final com.google.protobuf.RpcChannel channel;
-      
+
       public com.google.protobuf.RpcChannel getChannel() {
         return channel;
       }
-      
+
       public  void getWeatherForecast(
           com.google.protobuf.RpcController controller,
           com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest request,
@@ -1841,7 +1841,7 @@ public final class SampleServiceProtos {
             com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse.class,
             com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse.getDefaultInstance()));
       }
-      
+
       public  void getHistoricWeather(
           com.google.protobuf.RpcController controller,
           com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest request,
@@ -1857,31 +1857,31 @@ public final class SampleServiceProtos {
             com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse.getDefaultInstance()));
       }
     }
-    
+
     public static BlockingInterface newBlockingStub(
         com.google.protobuf.BlockingRpcChannel channel) {
       return new BlockingStub(channel);
     }
-    
+
     public interface BlockingInterface {
       public com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse getWeatherForecast(
           com.google.protobuf.RpcController controller,
           com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest request)
           throws com.google.protobuf.ServiceException;
-      
+
       public com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse getHistoricWeather(
           com.google.protobuf.RpcController controller,
           com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest request)
           throws com.google.protobuf.ServiceException;
     }
-    
+
     private static final class BlockingStub implements BlockingInterface {
       private BlockingStub(com.google.protobuf.BlockingRpcChannel channel) {
         this.channel = channel;
       }
-      
+
       private final com.google.protobuf.BlockingRpcChannel channel;
-      
+
       public com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse getWeatherForecast(
           com.google.protobuf.RpcController controller,
           com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastRequest request)
@@ -1892,8 +1892,8 @@ public final class SampleServiceProtos {
           request,
           com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetWeatherForecastResponse.getDefaultInstance());
       }
-      
-      
+
+
       public com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse getHistoricWeather(
           com.google.protobuf.RpcController controller,
           com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherRequest request)
@@ -1904,10 +1904,10 @@ public final class SampleServiceProtos {
           request,
           com.twitter.finagle.protobuf.rpc.SampleServiceProtos.GetHistoricWeatherResponse.getDefaultInstance());
       }
-      
+
     }
   }
-  
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_com_twitter_finagle_protobuf_rpc_GetWeatherForecastRequest_descriptor;
   private static
@@ -1928,7 +1928,7 @@ public final class SampleServiceProtos {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_com_twitter_finagle_protobuf_rpc_GetHistoricWeatherResponse_fieldAccessorTable;
-  
+
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -1998,6 +1998,6 @@ public final class SampleServiceProtos {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
   }
-  
+
   // @@protoc_insertion_point(outer_class_scope)
 }

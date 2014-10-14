@@ -19,7 +19,7 @@ class BackupRequestFilterTest extends FunSuite with MockitoSugar {
     val sorted = ds.sorted
     sorted(which*sorted.size/100)
   }
-  
+
   def newCtx() = new {
     val range = 10.seconds
     val timer = new MockTimer
@@ -60,7 +60,7 @@ class BackupRequestFilterTest extends FunSuite with MockitoSugar {
     Time.withCurrentTimeFrozen { tc =>
       val ctx = newCtx()
       import ctx._
-      
+
       for (l <- latencies) {
         val p = new Promise[String]
         when(underlying("ok")) thenReturn p
@@ -74,16 +74,16 @@ class BackupRequestFilterTest extends FunSuite with MockitoSugar {
       assert(timer.tasks.isEmpty)
       assert(statsReceiver.counters(Seq("won")) === latencies.size)
       assert(cutoff() > Duration.Zero)
-      
+
       val p = new Promise[String]
       when(underlying("a")) thenReturn p
       verify(underlying, times(0)).apply("a")
-      
+
       val f = service("a")
       verify(underlying).apply("a")
       assert(!f.isDefined)
       assert(timer.tasks.size === 1)
-      
+
       tc.advance(cutoff()/2)
       timer.tick()
       assert(timer.tasks.size === 1)
@@ -102,7 +102,7 @@ class BackupRequestFilterTest extends FunSuite with MockitoSugar {
       assert(statsReceiver.counters(Seq("lost")) === 1)
     }
   }
-  
+
   test("cancels backup when original wins") {
     Time.withCurrentTimeFrozen { tc =>
       val ctx = newCtx()

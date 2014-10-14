@@ -1,4 +1,9 @@
 scala_library(name='scala',
+  provides = scala_artifact(
+    org = 'com.twitter',
+    name = 'finagle-mux',
+    repo = artifactory,
+  ),
   dependencies=[
     '3rdparty:netty',
     'finagle/finagle-core',
@@ -6,7 +11,4 @@ scala_library(name='scala',
     'util/util-core',
   ],
   sources=rglobs('*.scala'),
-  provides=artifact(org='com.twitter',
-                    name='finagle-mux',
-                    repo='pants-support/ivy:internal',),
 )

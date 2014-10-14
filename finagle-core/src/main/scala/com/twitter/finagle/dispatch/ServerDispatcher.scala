@@ -61,12 +61,16 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
     }
   }
 
-  private[this] val looping = loop()
+  // Clear all locals to start the loop; we want a clean slate.
+  private[this] val looping = Local.letClear { loop() }
 
   trans.onClose ensure {
     looping.raise(cancelled)
     state.getAndSet(Closed).raise(cancelled)
   }
+
+  /** Exposed for testing */
+  protected[dispatch] def isClosing: Boolean = state.get() eq Closed
 
   // Note: this is racy, but that's inherent in draining (without
   // protocol support). Presumably, half-closing TCP connection is

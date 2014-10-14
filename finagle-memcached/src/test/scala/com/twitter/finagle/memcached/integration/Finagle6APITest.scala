@@ -13,7 +13,7 @@ import com.twitter.io.Charsets
 import com.twitter.util.Await
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
 
 @RunWith(classOf[JUnitRunner])
 class Finagle6APITest extends FunSuite with BeforeAndAfter {
@@ -72,9 +72,12 @@ class Finagle6APITest extends FunSuite with BeforeAndAfter {
     }
   }
 
-  override def withFixture(test: NoArgTest) {
+  override def withFixture(test: NoArgTest): Outcome = {
     if (!testServers.isEmpty) test()
-    else info("Cannot start memcached. Skipping test...")
+    else {
+      info("Cannot start memcached. Skipping test...")
+      cancel()
+    }
   }
 
   if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {

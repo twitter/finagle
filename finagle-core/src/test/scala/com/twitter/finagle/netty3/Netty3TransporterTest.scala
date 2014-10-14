@@ -1,10 +1,13 @@
 package com.twitter.finagle.netty3
 
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.socks.SocksConnectHandler
+import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
+import java.net.InetSocketAddress
 import org.jboss.netty.channel.{Channels, ChannelPipeline, ChannelPipelineFactory}
 import org.junit.runner.RunWith
 import org.scalatest.FunSpec
 import org.scalatest.junit.JUnitRunner
+import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class Netty3TransporterTest extends FunSpec {
@@ -44,6 +47,46 @@ class Netty3TransporterTest extends FunSpec {
 
       Channels.close(secondChannel)
       hasConnections("second", 0)
+    }
+
+    describe("SocksConnectHandler") {
+      val loopbackSockAddr = new InetSocketAddress("127.0.0.1", 9999)
+      val linkLocalSockAddr = new InetSocketAddress("169.254.0.1", 9999)
+      val routableSockAddr = new InetSocketAddress("8.8.8.8", 9999)
+
+      def hasSocksConnectHandler(pipeline: ChannelPipeline) =
+        pipeline.toMap.asScala.values.exists {
+          case _: SocksConnectHandler => true
+          case _ => false
+        }
+
+      it ("is not added if no proxy address is given") {
+        val pipelineFactory = Channels.pipelineFactory(Channels.pipeline())
+        val transporter = new Netty3Transporter[Int, Int]("name", pipelineFactory)
+        val pipeline = transporter.newPipeline(loopbackSockAddr, NullStatsReceiver)
+        assert(!hasSocksConnectHandler(pipeline))
+      }
+
+      it ("is not added if proxy address is given but address isLoopback") {
+        val pipelineFactory = Channels.pipelineFactory(Channels.pipeline())
+        val transporter = new Netty3Transporter[Int, Int]("name", pipelineFactory, socksProxy = Some(loopbackSockAddr))
+        val pipeline = transporter.newPipeline(loopbackSockAddr, NullStatsReceiver)
+        assert(!hasSocksConnectHandler(pipeline))
+      }
+
+      it ("is not added if proxy address is given but address isLinkLocal") {
+        val pipelineFactory = Channels.pipelineFactory(Channels.pipeline())
+        val transporter = new Netty3Transporter[Int, Int]("name", pipelineFactory, socksProxy = Some(loopbackSockAddr))
+        val pipeline = transporter.newPipeline(linkLocalSockAddr, NullStatsReceiver)
+        assert(!hasSocksConnectHandler(pipeline))
+      }
+
+      it ("is added if proxy address is given and addr is routable") {
+        val pipelineFactory = Channels.pipelineFactory(Channels.pipeline())
+        val transporter = new Netty3Transporter[Int, Int]("name", pipelineFactory, socksProxy = Some(loopbackSockAddr))
+        val pipeline = transporter.newPipeline(routableSockAddr, NullStatsReceiver)
+        assert(hasSocksConnectHandler(pipeline))
+      }
     }
   }
 }

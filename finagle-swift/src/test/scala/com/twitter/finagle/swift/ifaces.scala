@@ -17,10 +17,10 @@ trait Test1 {
   @ThriftMethod(exception = Array(
     new ThriftException(`type` = classOf[Test1Exc], id=1)))
   def ab(
-      a: String, 
+      a: String,
       b: java.util.Map[String, java.lang.Integer]
   ): Future[java.util.Map[String, java.lang.Integer]]
-  
+
   @ThriftMethod
   def ping(msg: String): Future[String]
 }

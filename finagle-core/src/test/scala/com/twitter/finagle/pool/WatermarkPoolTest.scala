@@ -10,6 +10,7 @@ import org.mockito.Mockito.{never, times, verify, when}
 import org.scalatest.FunSpec
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
+import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class WatermarkPoolTest extends FunSpec with MockitoSugar {

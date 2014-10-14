@@ -1,0 +1,37 @@
+package com.twitter.finagle.httpx
+
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+
+@RunWith(classOf[JUnitRunner])
+class ResponseTest extends FunSuite {
+  test("constructors") {
+    List(
+      Response(),
+      Response(Version.Http11, Status.Ok),
+      Response()
+    ).foreach { response =>
+      assert(response.version === Version.Http11)
+      assert(response.status === Status.Ok)
+    }
+  }
+
+  test("encode") {
+    val response = Response()
+    response.headers.set("Server", "macaw")
+
+    val expected = "HTTP/1.1 200 OK\r\nServer: macaw\r\n\r\n"
+    val actual = response.encodeString()
+
+    assert(actual === expected)
+  }
+
+  test("decode") {
+    val response = Response.decodeString(
+      "HTTP/1.1 200 OK\r\nServer: macaw\r\nContent-Length: 0\r\n\r\n")
+
+    assert(response.status === Status.Ok)
+    assert(response.headers.get(Fields.Server) === "macaw")
+  }
+}

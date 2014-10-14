@@ -39,7 +39,7 @@ object CloseNotifier {
     private[this] val closing = new Promise[Unit]
     private[this] val notifier = makeLifo(closing)
 
-    def close(deadline: Time) = { 
+    def close(deadline: Time) = {
       closing.updateIfEmpty(Return(()))
       Future.Done
     }

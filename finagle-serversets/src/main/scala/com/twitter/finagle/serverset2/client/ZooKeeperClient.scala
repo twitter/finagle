@@ -41,6 +41,17 @@ private[serverset2] trait ZooKeeperClient extends Closable {
    def addAuthInfo(scheme: String, auth: Buf): Future[Unit]
 
   /**
+   * Get the existing ephemeral nodes created with the current session ID.
+   *
+   * NOTE: This method is not universally implemented. The Future will fail
+   * with KeeperException.Unimplemented if this is the case.
+   *
+   * @return a Future[Seq[String]] of ephemeral node paths.
+   */
+
+  def getEphemerals(): Future[Seq[String]]
+
+  /**
    * String representation of this ZooKeeper client. Suitable for things
    * like logging.
    *
@@ -102,13 +113,6 @@ private[serverset2] trait ZooKeeperReader extends ZooKeeperClient {
   def getChildrenWatch(path: String): Future[Watched[Node.Children]]
 
   /**
-   * Expand paths which match the prefix. e.g. in a tree /a/b/foo_1, 
-   * /a/b/bar_2, /a/b/foo_3, globPrefixWatch("/a/b/foo_") returns 
-   * /a/b/foo_1 and /a/b/foo_3.
-   */
-  def globPrefixWatch(pat: String): Future[Watched[Seq[String]]]
-
-  /**
    * Sync. Flushes channel between process and leader.
    *
    * @param path the path of the node to sync.
@@ -128,7 +132,7 @@ object ZooKeeperReader {
 
     val path = if (slash == 0) "/" else pat.substring(0, slash)
     val prefix = pat.substring(slash+1, pat.length)
-    
+
     (path, prefix)
   }
 

@@ -106,7 +106,7 @@ trait Group[T] { outer =>
  * name, but mostly this is to ship names under the cover of old
  * APIs. (And hopefully will be deprecated soon enough.)
  */
-private[finagle] case class NameGroup(name: Name.Bound) 
+private[finagle] case class NameGroup(name: Name.Bound)
   extends Group[SocketAddress] {
     protected[finagle] lazy val set: Var[Set[SocketAddress]] = name.addr map {
       case Addr.Bound(set) => set
@@ -135,7 +135,7 @@ object Group {
   def apply[T](staticMembers: T*): Group[T] = new Group[T] {
     protected[finagle] val set = Var(Set(staticMembers:_*))
   }
-  
+
   def fromVarAddr(va: Var[Addr]): Group[SocketAddress] = new Group[SocketAddress] {
     protected[finagle] val set = va map {
       case Addr.Bound(sockaddrs) => sockaddrs

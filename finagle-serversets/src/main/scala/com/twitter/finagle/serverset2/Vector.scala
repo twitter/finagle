@@ -1,14 +1,13 @@
 package com.twitter.finagle.serverset2
 
-import com.twitter.finagle.util.InetSocketAddressUtil.parseHosts
-import java.net.InetSocketAddress
+import com.twitter.finagle.util.InetSocketAddressUtil.parseHostPorts
 import com.twitter.util.NonFatal
 
 private[serverset2] sealed trait Selector { def matches(e: Entry): Boolean }
 private[serverset2] object Selector {
-  case class Host(ia: InetSocketAddress) extends Selector {
+  case class Host(hp: HostPort) extends Selector {
     def matches(e: Entry) = e match {
-      case Endpoint(_, addr, _, _, _) => addr == ia
+      case Endpoint(_, Some(addr), _, _, _) => addr == hp
       case _ => false
     }
   }
@@ -19,7 +18,7 @@ private[serverset2] object Selector {
       case _ => false
     }
   }
-  
+
   case class Shard(which: Int) extends Selector {
     def matches(e: Entry) = e match {
       case Endpoint(_, _, Some(id), _, _) => which == id
@@ -29,7 +28,7 @@ private[serverset2] object Selector {
 
   def parse(select: String) = select.split("=", 2) match {
     case Array("inet", arg) =>
-      try Some(Host(parseHosts(arg).head)) catch {
+      try Some(Host(HostPort.tupled(parseHostPorts(arg).head))) catch {
         case NonFatal(_) => None
       }
     case Array("member", which) => Some(Member(which))
@@ -71,7 +70,7 @@ private[serverset2] case class Vector(vector: Seq[Descriptor]) {
 private[serverset2] object Vector {
   def parseJson(json: String): Option[Vector] = {
     val d = JsonDict(json)
-    val vec = for { 
+    val vec = for {
       SeqObj(vec) <- d("vector").toSeq
       DictObj(d) <- vec
       desc <- Descriptor.parseDict(d)

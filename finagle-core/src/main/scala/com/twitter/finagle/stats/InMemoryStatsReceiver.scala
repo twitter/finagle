@@ -14,7 +14,7 @@ class InMemoryStatsReceiver extends StatsReceiver {
   val gauges   = new mutable.WeakHashMap[Seq[String], () => Float]
                    with mutable.SynchronizedMap[Seq[String], () => Float]
 
-  def counter(name: String*): ReadableCounter = 
+  def counter(name: String*): ReadableCounter =
     new ReadableCounter {
 
       def incr(delta: Int): Unit = synchronized {

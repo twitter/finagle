@@ -3,7 +3,7 @@ package com.twitter.finagle.server
 import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter}
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.{StatsReceiver, ServerStatsReceiver}
-import com.twitter.finagle.tracing.{DefaultTracer, Tracer}
+import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultMonitor, DefaultTimer, DefaultLogger, ReporterFactory, LoadedReporterFactory}
 import com.twitter.finagle.{param, Stack}
@@ -51,21 +51,34 @@ case class DefaultServer[Req, Rep, In, Out](
   logger: java.util.logging.Logger = DefaultLogger,
   statsReceiver: StatsReceiver = ServerStatsReceiver,
   tracer: Tracer = DefaultTracer,
-  reporter: ReporterFactory = LoadedReporterFactory
+  reporter: ReporterFactory = LoadedReporterFactory,
+  newTraceInitializer: Stack.Simple[ServiceFactory[Req, Rep]] = TraceInitializerFilter.serverModule[Req, Rep]
 ) extends Server[Req, Rep] {
 
   val stack = StackServer.newStack[Req, Rep]
     .replace(StackServer.Role.preparer, prepare)
-    
+    .replace(TraceInitializerFilter.role, newTraceInitializer)
+
   private type _In = In
   private type _Out = Out
 
-  val underlying = new StackServer[Req, Rep](stack, Stack.Params.empty) {
+  private case class Server(
+    stack: Stack[ServiceFactory[Req, Rep]] = stack,
+    params: Stack.Params = Stack.Params.empty
+  ) extends StdStackServer[Req, Rep, Server] {
+    protected def copy1(
+      stack: Stack[ServiceFactory[Req, Rep]] = this.stack,
+      params: Stack.Params = this.params
+    ) = copy(stack, params)
+
     protected type In = _In
     protected type Out = _Out
-    protected val newListener = Function.const(listener) _
-    protected val newDispatcher = Function.const(serviceTransport) _
+    protected def newListener() = listener
+    protected def newDispatcher(transport: Transport[In, Out], service: Service[Req, Rep]) =
+      serviceTransport(transport, service)
   }
+
+  val underlying: StackServer[Req, Rep] = Server()
 
   val configured = underlying
     .configured(param.Label(name))

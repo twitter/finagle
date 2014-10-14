@@ -1,10 +1,11 @@
 package com.twitter.finagle
 
 import com.twitter.util.{Return, Throw, Activity, Witness, Try}
-import java.net.InetSocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class NamerTest extends FunSuite with AssertionsForJUnit {
@@ -20,21 +21,26 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
       def contains(path: String) = acts contains Path.read(path)
 
       def apply(path: String): Witness[Try[NameTree[Path]]] = {
-        val (_, wit) = acts(Path.read(path))
+        val p = Path.read(path)
+        val (_, wit) = acts.getOrElse(p, addPath(p))
         wit
+      }
+
+      private def addPath(p: Path) = {
+        val tup = Activity[NameTree[Path]]
+        acts += p -> tup
+        tup
       }
 
       val pathNamer = new Namer {
         def lookup(path: Path): Activity[NameTree[Name]] = path match {
           // Don't capture system paths.
           case Path.Utf8("$", _*) => Activity.value(NameTree.Neg)
-          case Path.Utf8(elems@_*) =>
-            val p = Path.Utf8(elems: _*)
+          case p@Path.Utf8(elems@_*) =>
             acts.get(p) match {
               case Some((a, _)) => a map { tree => tree.map(Name(_)) }
               case None =>
-                val tup@(act, _) = Activity[NameTree[Path]]()
-                acts += p -> tup
+                val (act, _) = addPath(p)
                 act map { tree => tree.map(Name(_)) }
             }
           case _ => Activity.value(NameTree.Neg)
@@ -50,7 +56,10 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
   }
 
   def assertEval(res: Activity[NameTree[Name.Bound]], ias: InetSocketAddress*) {
-    assert(res.sample().eval === Some((ias map { ia => Name.bound(ia) }).toSet))
+    res.sample().eval match {
+      case Some(actual) => assert(actual.map(_.addr.sample) === ias.map(Addr.Bound(_)).toSet)
+      case _ => assert(false)
+    }
   }
 
   test("NameTree.bind: union")(new Ctx {
@@ -104,11 +113,22 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
     assertEval(res, ia(3))
   })
 
+  test("NameTree.bind: Alt with Fail/Empty")(new Ctx {
+    assert(namer.bind(NameTree.read("(! | /test/1 | /test/2)")).sample() == NameTree.Fail)
+    assert(namer.bind(NameTree.read("(~ | /$/fail | /test/1)")).sample() == NameTree.Fail)
+    assert(namer.bind(NameTree.read("(/$/nil | /$/fail | /test/1)")).sample() == NameTree.Empty)
+  })
+
+  def assertLookup(path: String, ias: SocketAddress*) {
+    Namer.global.lookup(Path.read(path)).sample() match {
+      case NameTree.Leaf(Name.Bound(addr)) => assert(addr.sample() === Addr.Bound(ias.toSet))
+      case _ => assert(false)
+    }
+  }
+
   test("Namer.global: /$/inet") {
-    assert(Namer.global.lookup(Path.read("/$/inet/1234")).sample()
-        === NameTree.Leaf(Name.bound(new InetSocketAddress(1234))))
-    assert(Namer.global.lookup(Path.read("/$/inet/127.0.0.1/1234")).sample()
-        === NameTree.Leaf(Name.bound(new InetSocketAddress("127.0.0.1", 1234))))
+    assertLookup("/$/inet/1234", new InetSocketAddress(1234))
+    assertLookup("/$/inet/127.0.0.1/1234", new InetSocketAddress("127.0.0.1", 1234))
 
     intercept[ClassNotFoundException] {
       Namer.global.lookup(Path.read("/$/inet")).sample()
@@ -131,6 +151,14 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
         === NameTree.Empty)
     assert(Namer.global.lookup(Path.read("/$/nil/foo/bar")).sample()
         === NameTree.Empty)
+  }
+
+  test("Namer.global: /{$,#}/{className}") {
+    assert(Namer.global.lookup(Path.read("/$/com.twitter.finagle.TestNamer/foo")).sample()
+      === NameTree.Leaf(Name.Path(Path.Utf8("bar"))))
+
+    assert(Namer.global.lookup(Path.read("/#/com.twitter.finagle.TestNamer/foo")).sample()
+      === NameTree.Leaf(Name.Path(Path.Utf8("bar"))))
   }
 
   test("Namer.global: negative resolution") {
@@ -174,4 +202,23 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
       /3=>/bar3
       """)
   }
+
+  test("Namer.resolve") {
+    assert(Namer.resolve("invalid").sample() match {
+      case Addr.Failed(_: IllegalArgumentException) => true
+      case _ => false
+    })
+  }
+}
+
+class TestNamer extends Namer {
+  def lookup(path: Path): Activity[NameTree[Name]] =
+    Activity.value(
+      path match {
+        case Path.Utf8("foo") => NameTree.Leaf(Name.Path(Path.Utf8("bar")))
+        case _ => NameTree.Neg
+      })
+
+  def enum(prefix: Path): Activity[Dtab] =
+    Activity.exception(new UnsupportedOperationException)
 }

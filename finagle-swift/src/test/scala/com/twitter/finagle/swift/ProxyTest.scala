@@ -21,10 +21,10 @@ class ProxyTest extends FunSuite with MockitoSugar {
 
     when(service(any[ThriftClientRequest])).thenReturn(Future.never)
     proxy.ping("hello")
-    
+
     val arg = ArgumentCaptor.forClass(classOf[ThriftClientRequest])
     verify(service).apply(arg.capture())
-    
+
     val request = arg.getValue()
     assert(!request.oneway)
 
@@ -41,17 +41,17 @@ class ProxyTest extends FunSuite with MockitoSugar {
     in.readFieldEnd()
     in.readStructEnd()
   }
-  
+
   test("parses replies") {
     val service = mock[Service[ThriftClientRequest, Array[Byte]]]
     val proxy = SwiftProxy.newClient[Test1](service)
-    
+
     val reply = Util.newMessage("ping", TMessageType.REPLY) { out =>
       out.writeFieldBegin(new TField("success", TType.STRING, 0))
       out.writeString("YAY")
     }
     when(service(any[ThriftClientRequest])).thenReturn(Future.value(reply))
-    
+
     assert(Await.result(proxy.ping("OH HEY")) === "YAY")
   }
 }

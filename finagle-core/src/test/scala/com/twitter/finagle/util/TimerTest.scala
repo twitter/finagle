@@ -6,13 +6,16 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.jboss.netty.{util => nu}
 import org.mockito.ArgumentCaptor
 import com.twitter.util.TimeConversions._
+import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito.{verify, when, atMost}
 import org.mockito.Matchers._
 import org.mockito.stubbing.Answer
 import org.mockito.invocation.InvocationOnMock
 
+@RunWith(classOf[JUnitRunner])
 class TimerTest extends FunSuite with MockitoSugar {
   test("TimerFromNettyTimer should Support cancelling recurring tasks") {
     val timer = mock[nu.Timer]

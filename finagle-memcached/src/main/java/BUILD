@@ -1,4 +1,9 @@
 java_library(name='java',
+  provides = artifact(
+    org = 'com.twitter',
+    name = 'finagle-memcached-java',
+    repo = artifactory,
+  ),
   dependencies=[
     '3rdparty:guava',
     '3rdparty:netty',

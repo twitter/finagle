@@ -16,8 +16,10 @@ import scala.collection.immutable
  * transformations; they are designed to represent 'template' stacks
  * which can be configured in various ways before materializing the
  * stack itself.
+ *
+ * Note: Stacks are advanced and sometimes subtle. For expert use
+ * only!
  */
-private[finagle]
 sealed trait Stack[T] {
   import Stack._
 
@@ -27,7 +29,6 @@ sealed trait Stack[T] {
    * @note `head` does not give access to the value `T`, use `make` instead
    * @see [[com.twitter.finagle.Stack.Head]]
    */
-
   val head: Stack.Head
 
   /**
@@ -54,7 +55,7 @@ sealed trait Stack[T] {
    */
   def remove(target: Role): Stack[T] =
     this match {
-      case Node(head, mk, next) => 
+      case Node(head, mk, next) =>
         if (head.role == target) next.remove(target)
         else Node(head, mk, next.remove(target))
       case leaf@Leaf(_, _) => leaf
@@ -66,11 +67,11 @@ sealed trait Stack[T] {
    * role, then an unmodified stack is returned.
    */
   def replace(target: Role, replacement: Stackable[T]): Stack[T] = transform {
-    case n@Node(head, _, next) if head.role == target => 
+    case n@Node(head, _, next) if head.role == target =>
       replacement +: next
     case stk => stk
   }
-  
+
   /**
    * Replace any stack elements matching the argument role with a given
    * [[com.twitter.finagle.Stackable]]. If no elements match the
@@ -125,7 +126,7 @@ sealed trait Stack[T] {
   }
 }
 
-private[finagle] object Stack {
+object Stack {
   /**
    * Base trait for Stack roles. A stack's role is indicative of its
    * functionality. Roles provide a way to group similarly-purposed stacks and
@@ -140,16 +141,16 @@ private[finagle] object Stack {
   }
 
   /**
-   * Trait encompassing all associated metadata of a stack element. 
+   * Trait encompassing all associated metadata of a stack element.
    * [[com.twitter.finagle.Stackable Stackables]] extend this trait.
    */
   trait Head {
-    /** 
+    /**
      * The [[com.twitter.finagle.Stack.Role Role]] that the element can serve
      */
     val role: Stack.Role
 
-    /** 
+    /**
      * The description of the functionality of the element
      */
     val description: String
@@ -165,7 +166,7 @@ private[finagle] object Stack {
    * some way.
    */
   case class Node[T](head: Stack.Head, mk: (Params, Stack[T]) => Stack[T], next: Stack[T])
-    extends Stack[T] 
+    extends Stack[T]
   {
     def make(params: Params) = mk(params, next).make(params)
   }
@@ -261,6 +262,19 @@ private[finagle] object Stack {
   }
 
   /**
+   * A mix-in for describing an object that is parameterized.
+   */
+  trait Parameterized[+T] {
+    def params: Stack.Params
+
+    def configured[P: Stack.Param](p: P): T =
+      withParams(params+p)
+
+    def withParams(ps: Stack.Params): T
+  }
+
+
+  /**
    * A convenient class to construct stackable modules. This variant
    * operates over stack values. Useful for building stack elements:
    *
@@ -304,7 +318,6 @@ private[finagle] object Stack {
       Node(this, (params, next) => make(next)(params), next)
     }
   }
-     
 }
 
 /**
@@ -313,13 +326,13 @@ private[finagle] object Stack {
 trait Stackable[T] extends Stack.Head {
   private val _params = mutable.Map.empty[String, String]
 
-  def params: immutable.Map[String, String] = _params.toMap
+  def params: immutable.Map[String, String] = synchronized { _params.toMap }
 
   def toStack(next: Stack[T]): Stack[T]
 
 
   // Record the parameter names and values
-  private def register(paramVal: Product): Unit = {
+  private def register(paramVal: Product): Unit = synchronized {
     // zip two lists, and pair any unmatched values with `padding`
     def zipWithPadding[T](l1: List[T], l2: List[T], padding: T): List[(T, T)] =
       (l1.length - l2.length) match {
@@ -335,12 +348,12 @@ trait Stackable[T] extends Stack.Head {
 
   // Using get[<param name>] when accessing parameters in Stackables causes
   // the parameter name and value to be recorded in the params map of the
-  // Stackable.head. Per-module recorded parameters are shown by 
-  // [[com.twitter.server.TwitterServer TwitterServer]] at the admin endpoint 
+  // Stackable.head. Per-module recorded parameters are shown by
+  // [[com.twitter.server.TwitterServer TwitterServer]] at the admin endpoint
   // "/admin/clients/<client name>")
-  // TODO: Replace signature with equivalent: 
+  // TODO: Replace signature with equivalent:
   //   def get[P <: Product : Stack.Param](implicit params: Stack.Params): P
-  // Once upgraded to Scala 2.10 (2.9 does not support having both implicit 
+  // Once upgraded to Scala 2.10 (2.9 does not support having both implicit
   // parameters and context bounds)
   protected def get[P <: Product](implicit param: Stack.Param[P], params: Stack.Params): P = {
     val paramVal = params[P]

@@ -6,9 +6,13 @@ ServiceTimeoutException, TimeoutException}
 import com.twitter.util.{Await, Future, Promise, Return, Time}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{verify, when}
+import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
+import scala.language.reflectiveCalls
 
+@RunWith(classOf[JUnitRunner])
 class TimeoutFactoryTest extends FunSuite with MockitoSugar {
 
   trait TimeoutFactoryHelper {

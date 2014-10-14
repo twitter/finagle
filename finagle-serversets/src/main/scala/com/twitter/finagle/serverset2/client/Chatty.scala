@@ -27,6 +27,7 @@ private[serverset2] trait ChattyClient extends ZooKeeperClient {
   def close(deadline: Time): Future[Unit] =
     printOp("close", underlying.close(deadline))
 
+  def getEphemerals(): Future[Seq[String]] = printOp("getEphemerals", underlying.getEphemerals())
   def sessionId: Long = underlying.sessionId
   def sessionPasswd: Buf = underlying.sessionPasswd
   def sessionTimeout: Duration = underlying.sessionTimeout
@@ -49,9 +50,6 @@ private[serverset2] trait ChattyReader extends ChattyClient with ZooKeeperReader
 
   def getChildrenWatch(path: String): Future[Watched[Node.Children]] =
     printOp("getChildrenWatch", underlying.getChildrenWatch(path), path)
-
-  def globPrefixWatch(pat: String): Future[Watched[Seq[String]]] =
-    printOp("glob", underlying.globPrefixWatch(pat), pat)
 
   def getData(path: String): Future[Node.Data] =
     printOp("getData", underlying.getData(path), path)

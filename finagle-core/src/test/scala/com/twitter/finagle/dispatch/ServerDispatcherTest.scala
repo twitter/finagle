@@ -9,6 +9,7 @@ import org.mockito.Matchers.any
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
+import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
@@ -48,7 +49,7 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     verify(trans, times(2)).read()
   })
 
-  test("Delimit com.twitter.util.Local") (new Ctx {
+  test("Clear and delimit com.twitter.util.Local") (new Ctx {
     val l = new Local[String]
     var ncall = 0
 
@@ -61,8 +62,8 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
       }
     }
 
-    val disp = new SerialServerDispatcher(trans, s)
     l() = "orig"
+    val disp = new SerialServerDispatcher(trans, s)
 
     readp.setValue("blah")
     assert(ncall === 1)
@@ -138,6 +139,12 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     val disp = new SerialServerDispatcher(trans, service)
     verify(trans).read()
   }
+
+  test("isClosing") ( new Ictx {
+    assert(!disp.isClosing)
+    disp.close(Time.now)
+    assert(disp.isClosing)
+  })
 
   test("drain: while reading") (new Dctx {
     disp.close(Time.now)

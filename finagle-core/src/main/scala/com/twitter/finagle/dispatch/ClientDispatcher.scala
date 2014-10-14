@@ -12,8 +12,7 @@ import java.net.InetSocketAddress
  */
 
 abstract class GenSerialClientDispatcher[Req, Rep, In, Out](trans: Transport[In, Out])
-    extends Service[Req, Rep] {
-  import GenSerialClientDispatcher._
+  extends Service[Req, Rep] {
 
   private[this] val semaphore = new AsyncSemaphore(1)
   private[this] val localAddress: InetSocketAddress = trans.localAddress match {
@@ -78,7 +77,7 @@ object GenSerialClientDispatcher {
 }
 
 class SerialClientDispatcher[Req, Rep](trans: Transport[Req, Rep])
-    extends GenSerialClientDispatcher[Req, Rep, Req, Rep](trans) {
+  extends GenSerialClientDispatcher[Req, Rep, Req, Rep](trans) {
   import GenSerialClientDispatcher.wrapWriteException
 
   protected def dispatch(req: Req, p: Promise[Rep]): Future[Unit] = {

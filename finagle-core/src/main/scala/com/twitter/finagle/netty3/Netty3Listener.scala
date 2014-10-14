@@ -1,7 +1,8 @@
 package com.twitter.finagle.netty3
 
 import com.twitter.finagle._
-import com.twitter.finagle.channel.{ChannelRequestStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler}
+import com.twitter.finagle.channel.{
+  ChannelRequestStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler}
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.ssl.{Engine, SslShutdownHandler}
 import com.twitter.finagle.stats.{ServerStatsReceiver, StatsReceiver}
@@ -320,6 +321,15 @@ case class Netty3Listener[In, Out](
     }
 }
 
+private[netty3] object ServerBridge {
+  private val FinestIOExceptionMessages = Set(
+    "Connection reset by peer",
+    "Broken pipe",
+    "Connection timed out",
+    "No route to host",
+    "")
+}
+
 /**
  * Bridges a channel (pipeline) onto a transport. This must be
  * installed as the last handler.
@@ -330,22 +340,21 @@ private[netty3] class ServerBridge[In, Out](
   statsReceiver: StatsReceiver,
   channels: ChannelGroup
 ) extends SimpleChannelHandler {
+  import ServerBridge.FinestIOExceptionMessages
+
   private[this] val readTimeoutCounter = statsReceiver.counter("read_timeout")
   private[this] val writeTimeoutCounter = statsReceiver.counter("write_timeout")
 
-  private[this] def severity(exc: Throwable) = exc match {
+  private[this] def severity(exc: Throwable): Level = exc match {
+    case e: Failure => e.logLevel
     case
         _: java.nio.channels.ClosedChannelException
       | _: javax.net.ssl.SSLException
       | _: ReadTimeoutException
       | _: WriteTimedOutException
       | _: javax.net.ssl.SSLException => Level.FINEST
-    case e: java.io.IOException if (
-      e.getMessage == "Connection reset by peer" ||
-      e.getMessage == "Broken pipe" ||
-      e.getMessage == "Connection timed out" ||
-      e.getMessage == "No route to host"
-    ) => Level.FINEST
+    case e: java.io.IOException if FinestIOExceptionMessages.contains(e.getMessage) =>
+      Level.FINEST
     case _ => Level.WARNING
   }
 

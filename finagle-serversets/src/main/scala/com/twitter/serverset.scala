@@ -8,7 +8,7 @@ import com.twitter.util.Activity
 import java.net.InetSocketAddress
 
 object newZk extends GlobalFlag(
-  false, 
+  false,
   "Use the new ZooKeeper implementation "+
   "for /$/com.twitter.serverset")
 
@@ -48,7 +48,11 @@ class serverset extends Namer {
         "%s!%s!/%s".format(whichZk, hosts, rest mkString "/")
       }
 
-      val name@Name.Bound(va) = Resolver.eval(spec)
+      val Name.Bound(va) = Resolver.eval(spec)
+      // Clients may depend on Name.Bound ids being Paths which resolve
+      // back to the same Name.Bound
+      val id = Path.Utf8("$", "com.twitter.serverset") ++ path
+      val name = Name.Bound(va, id)
 
       // We have to bind the name ourselves in order to know whether
       // it resolves negatively.
@@ -58,7 +62,7 @@ class serverset extends Namer {
         case Addr.Pending => Activity.Pending
         case Addr.Failed(exc) => Activity.Failed(exc)
       })
-      
+
 
     case _ =>
       Activity.exception(new Exception("Invalid com.twitter.namer path "+path.show))
@@ -67,4 +71,3 @@ class serverset extends Namer {
   def enum(prefix: Path): Activity[Dtab] = Activity.value(Dtab.empty)
 
 }
-

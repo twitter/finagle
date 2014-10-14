@@ -97,6 +97,19 @@ object BufChannelBuffer {
   }
 }
 
+/**
+ * A [[org.jboss.netty.buffer.ChannelBuffer]] wrapper for
+ * [[com.twitter.io.Buf Bufs]].
+ *
+ * @note Since `Buf`s are immutable, all `set` methods of this class throw
+ * [[java.nio.ReadOnlyBufferException]]. These same semantics apply to `slice`s
+ * taken from `BufChannelBuffer`s.
+ *
+ * @param buf The [[com.twitter.io.Buf]] to be wrapped in a
+ * [[org.jboss.netty.buffer.ChannelBuffer]] interface.
+ * @param endianness The endianness of `buf`, which will be reflected in the
+ * `ChannelBuffer` wrapper.
+ */
 private class BufChannelBuffer(buf: Buf, endianness: ByteOrder) extends AbstractChannelBuffer {
   writerIndex(buf.length)
 

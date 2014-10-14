@@ -2,7 +2,9 @@ package com.twitter.finagle.exp.mysql.integration
 
 import com.twitter.finagle.exp.mysql._
 import com.twitter.util.{Await, Time}
-import java.util.Calendar
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
+import java.util.{Calendar, TimeZone}
 import org.junit.runner.RunWith
 import org.scalatest.BeforeAndAfter
 import org.scalatest.FunSuite
@@ -289,41 +291,40 @@ class DateTimeTypeTest extends FunSuite with IntegrationClient {
       }
     }
 
-    test("extract %s from %s".format("datetime", rowType)) {
-      row("datetime") match {
-        case Some(TimestampValue(t)) =>
+    val timestampValueLocal = new TimestampValue(TimeZone.getDefault(), TimeZone.getDefault())
+    val timestampValueUTC = new TimestampValue(TimeZone.getDefault(), TimeZone.getTimeZone("UTC"))
+    val timestampValueEST = new TimestampValue(TimeZone.getDefault(), TimeZone.getTimeZone("EST"))
 
-          val time = Time.fromMilliseconds(t.getTime)
-
-          val timestamp = java.sql.Timestamp.valueOf("2013-11-02 19:56:24")
-          val cal = Calendar.getInstance()
-          val offset = cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)
-          val utcTimeStamp = new java.sql.Timestamp(timestamp.getTime + offset)
-
-          assert(t === utcTimeStamp)
-
-        case a => fail("Expected TimestampValue but got %s".format(a))
+    for ((repr, secs) <- Seq(("datetime", 24), ("timestamp", 36))) {
+      test("extract %s from %s in local time".format(repr, rowType)) {
+        row(repr) match {
+          case Some(timestampValueLocal(t)) =>
+            val timestamp = java.sql.Timestamp.valueOf("2013-11-02 19:56:" + secs)
+            assert(t === timestamp)
+          case a => fail("Expected TimestampValue but got %s".format(a))
+        }
       }
-    }
 
-    test("extract %s from %s".format("timestamp", rowType)) {
-      row("timestamp") match {
-        case Some(TimestampValue(t)) =>
-          
-          val time = Time.fromMilliseconds(t.getTime)
+      test("extract %s from %s in UTC".format(repr, rowType)) {
+        row(repr) match {
+          case Some(timestampValueUTC(t)) =>
+            val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            format.setTimeZone(TimeZone.getTimeZone("UTC"))
+            val timestamp = new Timestamp(format.parse("2013-11-02 19:56:" + secs).getTime)
+            assert(t === timestamp)
+          case a => fail("Expected TimestampValue but got %s".format(a))
+        }
+      }
 
-          val timestamp = java.sql.Timestamp.valueOf("2013-11-02 19:56:36")
-          val cal = Calendar.getInstance()
-          val offset = cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)
-          val utcTimestamp = new java.sql.Timestamp(timestamp.getTime + offset)
-
-          assert(t === utcTimestamp)
-
-          val time2 = Time.fromMilliseconds(utcTimestamp.getTime)
-
-          assert(time === time2)
-
-        case a => fail("Expected TimestampValue but got %s".format(a))
+      test("extract %s from %s in EST".format(repr, rowType)) {
+        row(repr) match {
+          case Some(timestampValueEST(t)) =>
+            val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            format.setTimeZone(TimeZone.getTimeZone("EST"))
+            val timestamp = new Timestamp(format.parse("2013-11-02 19:56:" + secs).getTime)
+            assert(t === timestamp)
+          case a => fail("Expected TimestampValue but got %s".format(a))
+        }
       }
     }
 

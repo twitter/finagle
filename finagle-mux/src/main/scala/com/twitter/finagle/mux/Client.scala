@@ -6,20 +6,33 @@ import com.twitter.finagle.mux.lease.Acting
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
-import com.twitter.io.Buf
 import com.twitter.util.{Future, Promise, Time, Duration}
 import com.twitter.conversions.time._
 import java.util.logging.Logger
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
+/**
+ * Indicates that a client request was denied by the server.
+ */
 object RequestNackedException
   extends Exception("The request was nackd by the server")
   with WriteException with NoStacktrace
 
+/**
+ * Indicates that the server failed to interpret or act on the request. This
+ * could mean that the client sent a [[com.twitter.finagle.mux]] message type
+ * that the server is unable to process.
+ */
 case class ServerError(what: String)
   extends Exception(what)
   with NoStacktrace
 
+/**
+ * Indicates that the server encountered an error whilst processing the client's
+ * request. In contrast to [[com.twitter.finagle.mux.ServerError]], a
+ * ServerApplicationError relates to server application failure rather than
+ * failure to interpret the request.
+ */
 case class ServerApplicationError(what: String)
   extends Exception(what)
   with NoStacktrace
@@ -145,9 +158,9 @@ private[finagle] class ClientDispatcher (
       case None =>
         Future.exception(WriteException(new Exception("Exhausted tags")))
       case Some(tag) =>
-        trans.write(encode(Tping(tag))) onFailure { case exc =>
+        trans.write(encode(Tping(tag))).onFailure { case exc =>
           reqs.unmap(tag)
-        } flatMap(Function.const(p)) map(Function.const(()))
+        }.flatMap(Function.const(p)).unit
     }
   }
 
@@ -188,7 +201,6 @@ private[finagle] class ClientDispatcher (
     if (traceWrite) {
       // Record tracing info to track Mux adoption across clusters.
       Trace.record(ClientDispatcher.ClientEnabledTraceMessage)
-      Trace.record(Annotation.ClientSend())
     }
 
     trans.write(encode(msg)) onFailure { case exc =>
@@ -200,12 +212,7 @@ private[finagle] class ClientDispatcher (
           reqP.setException(cause)
         }
       }
-
-      p onSuccess { _ =>
-        // Note: Client receipt is unconditional on `traceWrite`, so we do not
-        // need to guard this trace.
-        Trace.record(Annotation.ClientRecv())
-      }
+      p
     }
 
     if (couldDispatch == Cap.Unknown) {

@@ -111,11 +111,11 @@ public class Endpoint implements TBase<Endpoint, Endpoint._Fields>, java.io.Seri
   public static final Map<_Fields, FieldMetaData> metaDataMap;
   static {
     Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
-    tmpMap.put(_Fields.IPV4, new FieldMetaData("ipv4", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.IPV4, new FieldMetaData("ipv4", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.I32)));
-    tmpMap.put(_Fields.PORT, new FieldMetaData("port", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.PORT, new FieldMetaData("port", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.I16)));
-    tmpMap.put(_Fields.SERVICE_NAME, new FieldMetaData("service_name", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.SERVICE_NAME, new FieldMetaData("service_name", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     FieldMetaData.addStructMetaDataMap(Endpoint.class, metaDataMap);
@@ -393,7 +393,7 @@ public class Endpoint implements TBase<Endpoint, Endpoint._Fields>, java.io.Seri
     while (true)
     {
       field = iprot.readFieldBegin();
-      if (field.type == TType.STOP) { 
+      if (field.type == TType.STOP) {
         break;
       }
       switch (field.id) {
@@ -401,7 +401,7 @@ public class Endpoint implements TBase<Endpoint, Endpoint._Fields>, java.io.Seri
           if (field.type == TType.I32) {
             this.ipv4 = iprot.readI32();
             setIpv4IsSet(true);
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
@@ -409,14 +409,14 @@ public class Endpoint implements TBase<Endpoint, Endpoint._Fields>, java.io.Seri
           if (field.type == TType.I16) {
             this.port = iprot.readI16();
             setPortIsSet(true);
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
         case 3: // SERVICE_NAME
           if (field.type == TType.STRING) {
             this.service_name = iprot.readString();
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;

@@ -6,6 +6,45 @@ import java.net.{InetSocketAddress, SocketAddress}
 import java.util.logging.Logger
 import scala.collection.mutable
 
+/**
+ * Indicates that an [[com.twitter.finagle.Announcer]] was not found for the
+ * given `scheme`.
+ *
+ * Announcers are discovered via Finagle's [[com.twitter.finagle.util.LoadService]]
+ * mechanism. These exceptions typically suggest that there are no libraries
+ * on the classpath that define an Announcer for the given scheme.
+ */
+class AnnouncerNotFoundException(scheme: String)
+  extends Exception("Announcer not found for scheme \"%s\"".format(scheme))
+
+/**
+ * Indicates that multiple [[com.twitter.finagle.Announcer Announcers]] were
+ * discovered for given `scheme`.
+ *
+ * Announcers are discovered via Finagle's [[com.twitter.finagle.util.LoadService]]
+ * mechanism. These exceptions typically suggest that there are multiple
+ * libraries on the classpath with conflicting scheme definitions.
+ */
+class MultipleAnnouncersPerSchemeException(announcers: Map[String, Seq[Announcer]])
+  extends NoStacktrace
+{
+  override def getMessage = {
+    val msgs = announcers map { case (scheme, rs) =>
+      "%s=(%s)".format(scheme, rs.map(_.getClass.getName).mkString(", "))
+    } mkString(" ")
+    "Multiple announcers defined: %s".format(msgs)
+  }
+}
+
+/**
+ * Indicates that a forum string passed to an [[com.twitter.finagle.Announcer]]
+ * was invalid according to the forum grammar [1].
+ *
+ * [1] http://twitter.github.io/finagle/guide/Names.html
+ */
+class AnnouncerForumInvalid(forum: String)
+  extends Exception("Announcer forum \"%s\" is not valid".format(forum))
+
 trait Announcement extends Closable {
   def close(deadline: Time) = unannounce()
   def unannounce(): Future[Unit]
@@ -18,23 +57,6 @@ trait ProxyAnnouncement extends Announcement with Proxy {
 trait Announcer {
   val scheme: String
   def announce(addr: InetSocketAddress, name: String): Future[Announcement]
-}
-
-class AnnouncerNotFoundException(scheme: String)
-  extends Exception("Announcer not found for scheme \"%s\"".format(scheme))
-
-class AnnouncerForumInvalid(forum: String)
-  extends Exception("Announcer forum \"%s\" is not valid".format(forum))
-
-class MultipleAnnouncersPerSchemeException(announcers: Map[String, Seq[Announcer]])
-  extends NoStacktrace
-{
-  override def getMessage = {
-    val msgs = announcers map { case (scheme, rs) =>
-      "%s=(%s)".format(scheme, rs.map(_.getClass.getName).mkString(", "))
-    } mkString(" ")
-    "Multiple announcers defined: %s".format(msgs)
-  }
 }
 
 object Announcer {

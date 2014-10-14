@@ -51,7 +51,7 @@ private[finagle] object FinagleScheduler {
 
     log.info("Using bridged scheduler with %d workers".format(numWorkers))
   }
-  
+
   private def switchToForkJoin(numWorkers: Int) {
     log.info("Using forkjoin scheduler with %d workers".format(numWorkers))
     Scheduler.setUnsafe(

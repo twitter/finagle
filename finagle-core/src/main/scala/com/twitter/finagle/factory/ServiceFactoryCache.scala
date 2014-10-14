@@ -11,7 +11,7 @@ import com.twitter.finagle.tracing.Trace
  * A service factory that keeps track of idling times to implement
  * cache eviction.
  */
-private class IdlingFactory[Req, Rep](self: ServiceFactory[Req, Rep]) 
+private class IdlingFactory[Req, Rep](self: ServiceFactory[Req, Rep])
   extends ServiceFactoryProxy[Req, Rep](self) {
   @volatile private[this] var watch = Stopwatch.start()
   private[this] val n = new AtomicInteger(0)
@@ -99,7 +99,7 @@ private class ServiceFactoryCache[Key, Req, Rep](
       readLock.lock()
       writeLock.unlock()
       try {
-        return cache(key).apply(conn) 
+        return cache(key).apply(conn)
       } finally {
         readLock.unlock()
       }
@@ -117,7 +117,7 @@ private class ServiceFactoryCache[Key, Req, Rep](
         cache(key).apply(conn)
       } else {
         findEvictee() match {
-          case Some(evicted) => 
+          case Some(evicted) =>
             nevict.incr()
             cache(evicted).close()
             cache = cache - evicted + (key -> factory)

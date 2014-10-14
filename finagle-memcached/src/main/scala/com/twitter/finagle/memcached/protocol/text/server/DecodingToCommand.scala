@@ -96,7 +96,7 @@ class DecodingToCommand extends AbstractDecodingToCommand[Command] {
     val args = tokens.tail
     commandName match {
       case GET     => Get(args)
-      case GETS    => Get(args)
+      case GETS    => Gets(args)
       case DELETE  => Delete(validateDeleteCommand(args))
       case INCR    => tupled(Incr)(validateArithmeticCommand(args))
       case DECR    => tupled(Decr)(validateArithmeticCommand(args))

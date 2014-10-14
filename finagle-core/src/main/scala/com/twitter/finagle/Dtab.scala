@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.app.Flaggable
 import com.twitter.util.{Local, Var, Activity}
 import java.io.PrintWriter
 import java.net.SocketAddress
@@ -23,17 +24,24 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
   def length = dentries0.length
   override def isEmpty = length == 0
 
+  private def rewriteApplies(prefix: Path, path: Path) =
+    (prefix, path) match {
+      case (Path(), Path.Utf8("#", _*)) => false
+      case _ => path startsWith prefix
+    }
+
   private def lookup0(path: Path): NameTree[Path] = {
     val matches = dentries collect {
-      case Dentry(prefix, dst) if path startsWith prefix =>
+      case Dentry(prefix, dst) if rewriteApplies(prefix, path) =>
         val suff = path drop prefix.size
         dst map { pfx => pfx ++ suff }
     }
 
-    if (matches.nonEmpty)
-      NameTree.Alt(matches:_*)
-    else
-      NameTree.Neg
+    matches.size match {
+      case 0 => NameTree.Neg
+      case 1 => matches(0)
+      case _ => NameTree.Alt(matches:_*)
+    }
   }
 
   def lookup(path: Path): Activity[NameTree[Name]] =
@@ -214,7 +222,7 @@ object Dentry {
    * where the productions ``path`` and ``tree`` are from the grammar
    * documented in [[com.twitter.finagle.NameTree$ NameTree.read]].
    */
-  def read(s: String): Dentry = DentryParser(s)
+  def read(s: String): Dentry = NameTreeParsers.parseDentry(s)
 
   // The prefix to this is an illegal path in the sense that the
   // concrete syntax will not admit it. It will do for a no-op.
@@ -302,7 +310,7 @@ object Dtab {
    * [[com.twitter.finagle.Dentry$ Dentry.read]]
    *
    */
-  def read(s: String): Dtab = DtabParser(s)
+  def read(s: String): Dtab = NameTreeParsers.parseDtab(s)
 
   /** Scala collection plumbing required to build new dtabs */
   def newBuilder: DtabBuilder = new DtabBuilder
@@ -312,6 +320,17 @@ object Dtab {
       def apply(_ign: TraversableOnce[Dentry]): DtabBuilder = newBuilder
       def apply(): DtabBuilder = newBuilder
     }
+
+  /**
+   * implicit conversion from [[com.twitter.finagle.Dtab]] to
+   * [[com.twitter.app.Flaggable]], allowing Dtabs to be easily used as
+   * [[com.twitter.app.Flag]]s
+   */
+  implicit val flaggable: Flaggable[Dtab] = new Flaggable[Dtab] {
+    override def default = None
+    def parse(s: String) = Dtab.read(s)
+    override def show(dtab: Dtab) = dtab.show
+  }
 }
 
 final class DtabBuilder extends Builder[Dentry, Dtab] {
@@ -325,35 +344,4 @@ final class DtabBuilder extends Builder[Dentry, Dtab] {
   def clear() = builder.clear()
 
   def result(): Dtab = Dtab(builder.result)
-}
-
-private trait DtabParsers extends NameTreePathParsers {
-  lazy val dtab: Parser[Dtab] = repsep(dentry, ";") <~ opt(";") ^^ { dentries =>
-    Dtab(dentries.toIndexedSeq)
-  }
-
-  lazy val dentry: Parser[Dentry] =
-    path ~ "=>" ~ tree ^^ {
-      case p ~ "=>" ~ t => Dentry(p, t)
-    }
-}
-
-private object DtabParser extends DtabParsers {
-  def apply(str: String): Dtab = synchronized {
-    parseAll(dtab, str) match {
-      case Success(dtab, _) => dtab
-      case err: NoSuccess =>
-        throw new IllegalArgumentException(err.msg+" at "+err.next.first)
-    }
-  }
-}
-
-private object DentryParser extends DtabParsers {
-  def apply(str: String): Dentry = synchronized {
-    parseAll(dentry, str) match {
-      case Success(dentry, _) => dentry
-      case err: NoSuccess =>
-        throw new IllegalArgumentException(err.msg+" at "+err.next.first)
-    }
-  }
 }

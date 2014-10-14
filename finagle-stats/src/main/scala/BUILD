@@ -1,4 +1,9 @@
 scala_library(name='scala',
+  provides = scala_artifact(
+    org = 'com.twitter',
+    name = 'finagle-stats',
+    repo = artifactory,
+  ),
   dependencies=[
     '3rdparty:jackson-core',
     '3rdparty:jackson-databind',
@@ -13,7 +18,4 @@ scala_library(name='scala',
   resources=[
     'finagle/finagle-stats/src/main/resources'
   ],
-  provides=artifact(org='com.twitter',
-                    name='finagle-stats',
-                    repo='pants-support/ivy:internal',),
 )

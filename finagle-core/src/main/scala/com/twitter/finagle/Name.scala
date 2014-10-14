@@ -59,7 +59,7 @@ object Name {
   /**
    * Create a pre-bound address.
    */
-  def bound(addrs: SocketAddress*): Name.Bound = 
+  def bound(addrs: SocketAddress*): Name.Bound =
     Name.Bound(Var.value(Addr.Bound(addrs:_*)), addrs.toSet)
 
   /**
@@ -95,7 +95,7 @@ object Name {
    * Create a path-based Name which is interpreted vis-à-vis
    * the current request-local delegation table.
    */
-  def apply(path: com.twitter.finagle.Path): Name = 
+  def apply(path: com.twitter.finagle.Path): Name =
     Name.Path(path)
 
   /**
@@ -109,7 +109,7 @@ object Name {
    * Create a name representing the union of the passed-in
    * names.
    */
-  def all(names: Set[Name.Bound]): Name.Bound = 
+  def all(names: Set[Name.Bound]): Name.Bound =
     if (names.isEmpty) empty
     else if (names.size == 1) names.head
     else {
@@ -119,14 +119,14 @@ object Name {
             case Addr.Bound(as) => as
             case _ => Set.empty: Set[SocketAddress]
           }).toSet)
-    
+
         case addrs if addrs.forall(_ == Addr.Neg) => Addr.Neg
         case addrs if addrs.forall({case Addr.Failed(_) => true; case _ => false}) =>
           Addr.Failed(new Exception)
-    
+
         case _ => Addr.Pending
       }
-      
+
       val id = names map { case bound@Name.Bound(_) => bound.id }
       Name.Bound(va, id)
     }

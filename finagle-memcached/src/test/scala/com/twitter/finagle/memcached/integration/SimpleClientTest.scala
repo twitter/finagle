@@ -11,7 +11,7 @@ import com.twitter.io.Charsets
 import com.twitter.util.Await
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
 
 @RunWith(classOf[JUnitRunner])
 class SimpleClientTest extends FunSuite with BeforeAndAfter {
@@ -40,9 +40,12 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
       testServer map { _.stop() }
   }
 
-  override def withFixture(test: NoArgTest) {
+  override def withFixture(test: NoArgTest): Outcome = {
     if (testServer.isDefined) test()
-    else info("Cannot start memcached. Skipping test...")
+    else {
+      info("Cannot start memcached. Skipping test...")
+      cancel()
+    }
   }
 
   test("set & get") {

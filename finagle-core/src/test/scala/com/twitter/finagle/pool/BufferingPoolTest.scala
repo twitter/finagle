@@ -1,12 +1,15 @@
 package com.twitter.finagle.pool
 
+import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.Matchers._
 import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
 import com.twitter.util.{Await, Future, Time}
 
+@RunWith(classOf[JUnitRunner])
 class BufferingPoolTest extends FunSuite with MockitoSugar {
   class Helper {
     val underlying = mock[ServiceFactory[Int, Int]]

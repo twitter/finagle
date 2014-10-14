@@ -18,13 +18,26 @@ class CookieMapTest extends FunSuite {
     assert(request.cookies("name").value === "value")
     assert(request.cookies("name2").value === "value2")
     assert(request.cookies.isValid === true)
+
+    val cookie = new Cookie("name3", "value3")
+    request.cookies += cookie
+    assert(request.headers.get("Cookie") === "name=value; name2=value2; name3=value3")
   }
 
   test("response cookie basics") {
     val response = Response()
-    response.headers.set("Set-Cookie", "name=value; name2=value2")
+    response.headers.add("Set-Cookie", "name=value")
+    response.headers.add("Set-Cookie", "name2=value2")
     assert(response.cookies("name").value === "value")
     assert(response.cookies("name2").value === "value2")
+
+    val cookie = new Cookie("name3", "value3")
+    response.cookies += cookie
+    val cookieHeaders = response.headerMap.getAll("Set-Cookie")
+    assert(cookieHeaders.size === 3)
+    assert(cookieHeaders.toSeq.contains("name=value"))
+    assert(cookieHeaders.toSeq.contains("name2=value2"))
+    assert(cookieHeaders.toSeq.contains("name3=value3"))
   }
 
   test("cookie with attributes") {
@@ -52,9 +65,9 @@ class CookieMapTest extends FunSuite {
     request.cookies += cookie
     request.cookies += cookie
 
+    assert(request.cookies.size === 1)
     assert(request.cookies("name").value === "value")
     assert(request.headers.get("Cookie") === "name=value")
-    assert(request.cookies.size === 1)
   }
 
   test("add same cookie more than once") {
@@ -66,11 +79,7 @@ class CookieMapTest extends FunSuite {
 
     assert(request.cookies.size === 2)
     assert(request.cookies("name").value === "value")
-
-    val cookieHeaders = request.headerMap.getAll("Cookie")
-    assert(cookieHeaders.size === 2)
-    assert(cookieHeaders.toSeq.contains("name=value"))
-    assert(cookieHeaders.toSeq.contains("name=value2"))
+    assert(request.headers.get("Cookie") === "name=value")
   }
 
   test("remove cookie") {

@@ -46,7 +46,7 @@ trait IntegrationClient {
     val username = p.getProperty("username", "<user>")
     val password = p.getProperty("password", "<password>")
     val db = p.getProperty("db", "test")
-    Some(Mysql
+    Some(Mysql.client
       .withCredentials(username, password)
       .withDatabase(db)
       .newRichClient("localhost:3306"))

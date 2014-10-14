@@ -5,7 +5,15 @@ import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.util.Future
 
 /**
- * This filter can only be used with finagle thrift codec.
+ * Indicates that a request without a [[com.twitter.finagle.thrift.ClientId]]
+ * was issued to a server that requires them. See
+ * [[com.twitter.finagle.thrift.ClientIdRequiredFilter]] for details.
+ */
+class NoClientIdSpecifiedException extends RequestException
+
+/**
+ * A [[com.twitter.finagle.Filter]] for Thrift services that enforces all
+ * requests specify a [[com.twitter.finagle.thrift.ClientId]].
  */
 class ClientIdRequiredFilter[Req, Rep](statsReceiver: StatsReceiver = NullStatsReceiver)
   extends SimpleFilter[Req, Rep]
@@ -22,6 +30,3 @@ class ClientIdRequiredFilter[Req, Rep](statsReceiver: StatsReceiver = NullStatsR
     }
   }
 }
-
-class NoClientIdSpecifiedException extends RequestException
-

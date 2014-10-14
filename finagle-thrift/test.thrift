@@ -12,6 +12,7 @@ find . -type f -print0 | cpio -pmud0 ../src/test/java
 include "fb303.thrift"
 
 namespace java com.twitter.test
+#@namespace scala com.twitter.test.thriftscala
 
 exception AnException {}
 

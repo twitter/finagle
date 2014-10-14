@@ -2,19 +2,26 @@ package com.twitter.finagle.builder
 
 import com.twitter.finagle.{Failure, SourcedException}
 import com.twitter.util.Monitor
+import java.io.IOException
 import java.util.logging.{Level, Logger}
 
 /**
  * A monitor that unrolls the exception causes to report source information if any
- * @param logger
  * @param which either client or server
  */
 class SourceTrackingMonitor(logger: Logger, which: String) extends Monitor {
-  def handle(exc: Throwable) = {
+  def handle(exc: Throwable): Boolean = {
+    // much like ChannelStatsHandler.exceptionCaught,
+    // we don't want these noisy IOExceptions leaking into the logs.
+    val level = exc match {
+      case _: IOException => Level.FINE
+      case _ => Level.SEVERE
+    }
     logger.log(
-      Level.SEVERE,
+      level,
       "A " + which + " service " +
-        unrollCauses(exc).mkString(" on behalf of ") + " threw an exception", exc)
+        unrollCauses(exc).mkString(" on behalf of ") + " threw an exception",
+      exc)
     false
   }
 

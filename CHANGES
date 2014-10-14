@@ -5,19 +5,143 @@
 6.x
 -----
 
+6.22.0
+~~~~~~
+
+Breaking API Changes
+--------------------
+
+  * finagle-core: Removed unused `com.twitter.finagle.service.ProxyService`. It wasn't
+    sufficiently general to be used outside of finagle, and was no longer used
+    in finagle.
+
+New Features
+------------
+
+  * finagle-core: BroadcastStatsReceiver, introduce specialized implementation
+  * finagle-core: Introduce gauges in SummarizingStatsReceiver
+  * finagle-core: Introduce Transport#copyToWriter
+  * finagle-core: Make base Dtab used in BindingFactory a Stack.Param
+  * finagle-core: Proper decay in experimental ewma load metric
+  * finagle-core: Simplify Stack{Client, Server} and unify around them
+
+
+Runtime Behavior Changes
+------------------------
+
+  * finagle-core: Add support for non-URLClassloaders to LoadService
+  * finagle-core: clear locals before entering server dispatch loop
+  * finagle-core: Defer DNS Resolution in InetResolver to FuturePool
+  * finagle-core: for paths starting with /#/, skip rewrites where prefix is /
+  * finagle-core: include name resolution in tracing request span
+  * finagle-core: Properly wrap some IOException into ConnectionFailedException
+  * finagle-core: Scope InetResolver's stats properly
+  * finagle-http: Send "Connection: close" header while dispatcher is closing
+  * finagle-http: Set content length header when appropriate
+  * finagle-memcached: Use interruptible future for the client request readiness
+  * finagle-stats: Add content-type response header to JsonExporter
+  * finagle-thrift: Add back connection_preparation_latency stat in Thrift
+  * finagle-thriftmux: Record protocol as a gauge rather than a counter
+
+Documentation
+-------------
+
+  * finagle-core: Add Scaladocs for ChannelBufferBuf and BufChannelBuffer
+  * finagle-core: link to the FAQ in FailedFastException
+  * finagle-serversets: Defer DNS resolution for endpoints to InetResolver
+  * finagle-thrift{,mux}: Clarified with* deprecation warning
+  * Fix minor issues and missing code blocks in Finagle documentation
+
+Optimization
+------------
+
+  * finagle-core: GlobalFlag isn't caching the property value
+  * finagle-core: recursive-descent Path / NameTree / Dentry / Dtab parsers to reduce heap allocation
+
+Bug Fixes
+---------
+
+  * finagle-core: Fix a deadlock in Contexts
+  * finagle-core: Fix breaking ABI change in SummarizingStatsReceiver
+  * finagle-core: Fix bug in computing array index in SummarizingStatsReceiver
+  * finagle-core: Fix build.properties location for maven builds
+  * finagle-core: Fix synchronization in LeasedFactory
+  * finagle-core: Fix tracing with Stack{Client, Server}
+  * finagle-core: Make FailedFastException an instance variable.
+  * finagle-core: Synchronized access to the Stackable mutable.params map
+  * finagle-http: Fix CookieMap.rewriteCookieHeaders()
+  * finagle-http: Fix the memory leak in HttpClientDispatcher
+  * finagle-mysql: Fix timestamp fractional seconds encoding
+  * finagle-mysql: Properly heed timezone when extracting TimestampValue
+  * mux: clear contexts after receive, not in 'finally' clause
+
+6.21.0
+~~~~~~~
+
+- `finagle`: Upgrade to scala_2.10
+- `finagle-core`: Add weighted address support to InetResolver.
+- `finagle-core`: Adds ClientRegistry.expAllRegisteredClientsResolved
+- `finagle-core`: Attach Dtab.local to NoBrokersAvailableException in filter
+- `finagle-core`: Attempt to add dtab stats to all clients and servers
+- `finagle-core`: Avoid SOCKS proxy for both loopback and link-local addresses
+- `finagle-core`: Bind names lazily under Alt so we don't do needless lookups
+- `finagle-core`: DelayedFactory to detachable implementation
+- `finagle-core`: Fix a race in load balancer initialization
+- `finagle-core`: Improve loadbalancer logging
+- `finagle-core`: Introduce ewma load metric
+- `finagle-core`: Log state for ewma load metric
+- `finagle-core`: Redesign of twitter-server admin page
+- `finagle-core`: Register StackClient with Path dest in ClientRegistry as evaluated against Dtab.base Problem
+- `finagle-core`: Rewrote ServiceLoader to avoid creating
+- `finagle-core`: SingletonPool: a single-service pool with good semantics
+- `finagle-core`: Zipkin tracing for name resolution
+- `finagle-core`: fix synchronization in SummarizingStatsReceiver
+- `finagle-core`: reusing pool: isAvailable === underlying.isAvailable
+- `finagle-docs`: A better picture for filters. (Replaces hand-drawn monstrosity.)
+- `finagle-docs`: Add Scaladocs for all public exception classes in Finagle.
+- `finagle-docs`: Add a section to the FAQ regarding FailedFastExceptions
+- `finagle-exp`: Generify the DarkTrafficFilter problem
+- `finagle-guide`: Document stabilizing serverset metrics.
+- `finagle-http`: Add support for a Dtab-Local header
+- `finagle-http`: Fail requests with invalid X-Dtab headers
+- `finagle-http`: Fail requests with invalid X-Dtab headers
+- `finagle-http`: TextualContentCompressor should compress textual Content-Type's even when containing a charset
+- `finagle-mux`,thriftmux: explain why the files are named Netty3
+- `finagle-mux`: Better gc avoidance flags for experimentation
+- `finagle-mux`: Enable gc avoidance for parallel gc
+- `finagle-mux`: Improve mux's handling of client disconnects
+- `finagle-mux`: Improved Garbage Collection Avoidance Docs
+- `finagle-mux`: docs and minor cleansing in Message subclasses
+- `finagle-mysql`: Switches PreparedCache over to util-cache FutureCache
+- `finagle-serversets`: Add support for getEphemerals ZooKeeper call
+- `finagle-serversets`: Memoize getChildrenWatchOp instead of globPrefixWatchOp
+- `finagle-serversets`: Reuse ObjectMapper in JSON parser.
+- `finagle-serversets`: add latency metrics for ServerSet2.
+- `finagle-zipkin`: Reduce allocations when tracing
+
 6.20.0
 ~~~~~~~
 
+- `finagle`: Smattering of minor cleanups in util and finagle
 - `finagle`: Upgrade sbt to 0.13
+- `finagle`: Upgrade to Netty 3.9.1.1.Final
+- `finagle-core`: Add NameTree.Fail to permit failing a name without fallback
 - `finagle-core`: Add a generic DtabStatsFilter
 - `finagle-core`: Add a singleton exception and a counter in WatermarkPool
 - `finagle-core`: DefaultClient in terms of StackClient
 - `finagle-core`: Disable Netty's thread renaming
+- `finagle-core`: Fix CumulativeGauge memory leak
 - `finagle-core`: Fix negative resolution in Namer.global
+- `finagle-core`: Fixed ChannelStatsHandler to properly filter exceptions
+- `finagle-core`: Forces finagle-core to use ipv4 network stack
 - `finagle-core`: Improve `Failure.toString`
+- `finagle-core`: Include path and Dtab.local in NoBrokersAvailableException
 - `finagle-core`: Log exceptions caught by ChannelStatsHandler
 - `finagle-core`: Make timer-based DNS resolution as default of InetResolver
+- `finagle-core`: Reader and getContent symmetry
 - `finagle-core`: Reduces log level for common exceptions
+- `finagle-core`: Register clients centrally
+- `finagle-doc`: Add fintop to companion projects list on Finagle website
 - `finagle-http`: Don't emit (illegal) newlines in lengthy dtab header values
 - `finagle-http`: Fix code style from an open-source contribution
 - `finagle-http`: Migrate from specs to scalatest
@@ -26,6 +150,7 @@
 - `finagle-mux`: Fix broken draining behavior
 - `finagle-mux`: Improve granularity of rate to bytes/millisecond
 - `finagle-serversets`: Handle errors that occur when fetching endpoints
+- `finagle-serversets`: Increase ZK session timeout to 10 seconds
 - `finagle-serversets`: Merge WeightedSocketAddresses with same host:port but different weight in Stabilizer
 - `finagle-serversets`: Synchronize bug fixes & test coverage across ZK facades
 - `finagle-swift`: Fixes pants build warning
@@ -76,7 +201,7 @@
 - `finagle-serversets`: Randomizes backoff interval in ZK2
 - `finagle-serversets`: Start resolution eagerly in ZK2
 - `finagle-stats`: Add a stat-filtration GlobalFlag
-- `release ostrich v9.5.2
+- `ostrich`: release ostrich v9.5.2
 - `user guide`: Add Google Analytics tracking code
 - `user guide`: Add sections about review process and starter issues
 - `user guide`: Update Finagle adopter list on user guide website

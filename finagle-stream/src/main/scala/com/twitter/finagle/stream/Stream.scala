@@ -58,7 +58,7 @@ class Stream extends CodecFactory[HttpRequest, StreamResponse] {
       }
 
       override def newServerDispatcher(
-          transport: Transport[Any, Any], 
+          transport: Transport[Any, Any],
           service: Service[HttpRequest, StreamResponse]): Closable =
         new StreamServerDispatcher(transport, service)
     }
@@ -82,7 +82,7 @@ class Stream extends CodecFactory[HttpRequest, StreamResponse] {
         underlying: ServiceFactory[HttpRequest, StreamResponse]
       ): ServiceFactory[HttpRequest, StreamResponse] =
         underlying map(new DelayedReleaseService(_))
-      
+
       // TODO: remove when ChannelTransport is the default for clients.
       override def newClientTransport(
           ch: Channel, statsReceiver: StatsReceiver): Transport[Any, Any] =

@@ -1,8 +1,8 @@
 package com.twitter.finagle.builder
 
 import com.twitter.finagle._
-import com.twitter.finagle.client.{DefaultPool, StackClient, Transporter}
-import com.twitter.finagle.factory.TimeoutFactory
+import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Transporter}
+import com.twitter.finagle.factory.{BindingFactory, TimeoutFactory}
 import com.twitter.finagle.filter.ExceptionSourceFilter
 import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, WeightedLoadBalancerFactory}
 import com.twitter.finagle.netty3.Netty3Transporter
@@ -11,7 +11,7 @@ import com.twitter.finagle.ssl.{Engine, Ssl}
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.{
   NullStatsReceiver, ClientStatsReceiver, StatsReceiver, RollupStatsReceiver}
-import com.twitter.finagle.tracing.NullTracer
+import com.twitter.finagle.tracing.{NullTracer, TraceInitializerFilter}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
 import com.twitter.util.TimeConversions._
@@ -300,7 +300,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
           if (label.isEmpty || l != addr)
             this.name(l)
           else
-            this 
+            this
 
         cb.dest(n)
     }
@@ -314,6 +314,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     name: Name
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
     configured(DestName(name))
+
+  /**
+   * The base [[com.twitter.finagle.Dtab]] used to interpret logical
+   * destinations for this client. (This is given as a function to
+   * permit late initialization of [[Dtab.base]].)
+   */
+  def baseDtab(baseDtab: () => Dtab): This =
+    configured(BindingFactory.BaseDtab(baseDtab))
 
   /**
    * Specify a cluster directly.  A
@@ -395,6 +403,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
           .replace(StackClient.Role.prepConn, prepConn)
           .replace(StackClient.Role.prepFactory, (next: ServiceFactory[Req1, Rep1]) =>
             codec.prepareServiceFactory(next))
+          .replace(TraceInitializerFilter.role, codec.newTraceInitializer)
 
         // transform stack wrt. failure accrual
         val newStack =
@@ -413,20 +422,29 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         else newStack
       }
 
-      new StackClient[Req1, Rep1](clientStack, prms) {
+      case class Client(
+        stack: Stack[ServiceFactory[Req1, Rep1]] = clientStack,
+        params: Stack.Params = prms
+      ) extends StdStackClient[Req1, Rep1, Client] {
+        protected def copy1(
+          stack: Stack[ServiceFactory[Req1, Rep1]] = this.stack,
+          params: Stack.Params = this.params): Client = copy(stack, params)
+
         protected type In = Any
         protected type Out = Any
 
-        protected val newTransporter: Stack.Params => Transporter[Any, Any] = { ps =>
-          val Stats(stats) = ps[Stats]
+        protected def newTransporter(): Transporter[Any, Any] = {
+          val Stats(stats) = params[Stats]
           val newTransport = (ch: Channel) => codec.newClientTransport(ch, stats)
           Netty3Transporter[Any, Any](codec.pipelineFactory,
-            ps + Netty3Transporter.TransportFactory(newTransport))
+            params + Netty3Transporter.TransportFactory(newTransport))
         }
 
-        protected val newDispatcher: Stack.Params => Dispatcher =
-          Function.const(trans => codec.newClientDispatcher(trans))
+        protected def newDispatcher(transport: Transport[In, Out]) =
+          codec.newClientDispatcher(transport)
       }
+
+      Client()
     })
 
   /** Used internally by `codec` to require hostConnectionLimit */
@@ -445,10 +463,16 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * For this reason, the builder assumes that hostConnectionLimit is irrelevant
    * when using `stack`.
    */
+  @deprecated("Use stack(client: Stack.Parameterized)", "7.0.0")
   def stack[Req1, Rep1](
     mk: Stack.Params => Client[Req1, Rep1]
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, Yes] =
     copy(params, mk)
+
+  def stack[Req1, Rep1](
+    client: Stack.Parameterized[Client[Req1, Rep1]]
+  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, Yes] =
+    copy(params, client.withParams)
 
   @deprecated("Use tcpConnectTimeout instead", "5.0.1")
   def connectionTimeout(duration: Duration): This = tcpConnectTimeout(duration)
@@ -800,7 +824,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
       ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
   ): Service[Req, Rep] = {
-    val service: Service[Req, Rep] = new FactoryToService[Req, Rep](buildFactory())
+    val factory = configured(FactoryToService.Enabled(true)).buildFactory()
+    val service: Service[Req, Rep] = new FactoryToService[Req, Rep](factory)
 
     val Label(label) = params[Label]
     val Timer(timer) = params[Timer]

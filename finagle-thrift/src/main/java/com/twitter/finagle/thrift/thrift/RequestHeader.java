@@ -148,25 +148,25 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
   public static final Map<_Fields, FieldMetaData> metaDataMap;
   static {
     Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
-    tmpMap.put(_Fields.TRACE_ID, new FieldMetaData("trace_id", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.TRACE_ID, new FieldMetaData("trace_id", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.I64)));
-    tmpMap.put(_Fields.SPAN_ID, new FieldMetaData("span_id", TFieldRequirementType.DEFAULT, 
+    tmpMap.put(_Fields.SPAN_ID, new FieldMetaData("span_id", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.I64)));
-    tmpMap.put(_Fields.PARENT_SPAN_ID, new FieldMetaData("parent_span_id", TFieldRequirementType.OPTIONAL, 
+    tmpMap.put(_Fields.PARENT_SPAN_ID, new FieldMetaData("parent_span_id", TFieldRequirementType.OPTIONAL,
         new FieldValueMetaData(TType.I64)));
-    tmpMap.put(_Fields.SAMPLED, new FieldMetaData("sampled", TFieldRequirementType.OPTIONAL, 
+    tmpMap.put(_Fields.SAMPLED, new FieldMetaData("sampled", TFieldRequirementType.OPTIONAL,
         new FieldValueMetaData(TType.BOOL)));
-    tmpMap.put(_Fields.CLIENT_ID, new FieldMetaData("client_id", TFieldRequirementType.OPTIONAL, 
+    tmpMap.put(_Fields.CLIENT_ID, new FieldMetaData("client_id", TFieldRequirementType.OPTIONAL,
         new StructMetaData(TType.STRUCT, ClientId.class)));
-    tmpMap.put(_Fields.FLAGS, new FieldMetaData("flags", TFieldRequirementType.OPTIONAL, 
+    tmpMap.put(_Fields.FLAGS, new FieldMetaData("flags", TFieldRequirementType.OPTIONAL,
         new FieldValueMetaData(TType.I64)));
-    tmpMap.put(_Fields.CONTEXTS, new FieldMetaData("contexts", TFieldRequirementType.DEFAULT, 
-        new ListMetaData(TType.LIST, 
+    tmpMap.put(_Fields.CONTEXTS, new FieldMetaData("contexts", TFieldRequirementType.DEFAULT,
+        new ListMetaData(TType.LIST,
             new StructMetaData(TType.STRUCT, RequestContext.class))));
-    tmpMap.put(_Fields.DEST, new FieldMetaData("dest", TFieldRequirementType.OPTIONAL, 
+    tmpMap.put(_Fields.DEST, new FieldMetaData("dest", TFieldRequirementType.OPTIONAL,
         new FieldValueMetaData(TType.STRING)));
-    tmpMap.put(_Fields.DELEGATIONS, new FieldMetaData("delegations", TFieldRequirementType.OPTIONAL, 
-        new ListMetaData(TType.LIST, 
+    tmpMap.put(_Fields.DELEGATIONS, new FieldMetaData("delegations", TFieldRequirementType.OPTIONAL,
+        new ListMetaData(TType.LIST,
             new StructMetaData(TType.STRUCT, Delegation.class))));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     FieldMetaData.addStructMetaDataMap(RequestHeader.class, metaDataMap);
@@ -836,7 +836,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     while (true)
     {
       field = iprot.readFieldBegin();
-      if (field.type == TType.STOP) { 
+      if (field.type == TType.STOP) {
         break;
       }
       switch (field.id) {
@@ -844,7 +844,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
           if (field.type == TType.I64) {
             this.trace_id = iprot.readI64();
             setTrace_idIsSet(true);
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
@@ -852,7 +852,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
           if (field.type == TType.I64) {
             this.span_id = iprot.readI64();
             setSpan_idIsSet(true);
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
@@ -860,7 +860,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
           if (field.type == TType.I64) {
             this.parent_span_id = iprot.readI64();
             setParent_span_idIsSet(true);
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
@@ -868,7 +868,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
           if (field.type == TType.BOOL) {
             this.sampled = iprot.readBool();
             setSampledIsSet(true);
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
@@ -876,7 +876,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
           if (field.type == TType.STRUCT) {
             this.client_id = new ClientId();
             this.client_id.read(iprot);
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
@@ -884,7 +884,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
           if (field.type == TType.I64) {
             this.flags = iprot.readI64();
             setFlagsIsSet(true);
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
@@ -902,14 +902,14 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
               }
               iprot.readListEnd();
             }
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
         case 9: // DEST
           if (field.type == TType.STRING) {
             this.dest = iprot.readString();
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
@@ -927,7 +927,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
               }
               iprot.readListEnd();
             }
-          } else { 
+          } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;

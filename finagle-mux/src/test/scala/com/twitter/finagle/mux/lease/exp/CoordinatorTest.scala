@@ -1,15 +1,17 @@
 package com.twitter.finagle.mux.lease.exp
 
-import com.twitter.util.{Time, Duration}
 import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
 import com.twitter.conversions.time._
+import com.twitter.util.{Time, Duration}
+import java.lang.management.{GarbageCollectorMXBean, MemoryPoolMXBean}
 import java.util.logging.Logger
 import org.junit.runner.RunWith
-import org.scalatest.concurrent.Eventually
-import org.scalatest.FunSuite
 import org.mockito.Mockito.{when, verify}
+import org.scalatest.FunSuite
+import org.scalatest.concurrent.Eventually
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
+import scala.collection.mutable.Buffer
 
 @RunWith(classOf[JUnitRunner])
 class CoordinatorTest extends ExecElsewhere with MockitoSugar {
@@ -90,6 +92,30 @@ class CoordinatorTest extends ExecElsewhere with MockitoSugar {
         }
       )
     }
+  }
+
+  test("test parallelGc scrapes the right beans") {
+    val edenBean = mock[MemoryPoolMXBean]
+    when(edenBean.getName).thenReturn("PS Eden Space")
+    val scavBean = mock[GarbageCollectorMXBean]
+    when(scavBean.getName).thenReturn("PS Scavenge")
+    val oldBean = mock[GarbageCollectorMXBean]
+    when(oldBean.getName).thenReturn("PS MarkSweep")
+    val garbages = Buffer(scavBean, oldBean)
+    val memories = Buffer(edenBean)
+    assert(Coordinator.parallelGc(memories, garbages).isDefined)
+  }
+
+  test("test parNewCMS scrapes the right beans") {
+    val edenBean = mock[MemoryPoolMXBean]
+    when(edenBean.getName).thenReturn("Par Eden Space")
+    val scavBean = mock[GarbageCollectorMXBean]
+    when(scavBean.getName).thenReturn("ParNew")
+    val oldBean = mock[GarbageCollectorMXBean]
+    when(oldBean.getName).thenReturn("ConcurrentMarkSweep")
+    val garbages = Buffer(scavBean, oldBean)
+    val memories = Buffer(edenBean)
+    assert(Coordinator.parNewCMS(memories, garbages).isDefined)
   }
 
   test("Coordinator sleeps until discount remaining") {

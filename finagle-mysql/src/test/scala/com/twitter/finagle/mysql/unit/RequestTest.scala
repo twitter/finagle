@@ -1,8 +1,7 @@
 package com.twitter.finagle.exp.mysql
 
 import java.sql.{Timestamp, Date => SQLDate}
-import java.util.Calendar
-import java.util.Date
+import java.util.{Calendar, Date, TimeZone}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -201,15 +200,12 @@ class ExecuteRequestTest extends FunSuite {
       assert(br.readDouble() === doubleVal)
     }
 
+    val timestampValueLocal = new TimestampValue(TimeZone.getDefault(), TimeZone.getDefault())
+
     test("java.sql.Timestamp") {
       val raw = RawValue(Type.Timestamp, Charset.Binary, true, br.readLengthCodedBytes())
-      val TimestampValue(ts) = raw
-
-      val cal = Calendar.getInstance()
-      val offset = cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)
-      val utcTimeStamp = new Timestamp(timestamp.getTime + offset)
-
-      assert(ts === utcTimeStamp)
+      val timestampValueLocal(ts) = raw
+      assert(ts === timestamp)
     }
 
     test("java.sql.Date") {
@@ -220,13 +216,8 @@ class ExecuteRequestTest extends FunSuite {
 
     test("java.util.Date") {
       val raw = RawValue(Type.DateTime, Charset.Binary, true, br.readLengthCodedBytes())
-      val TimestampValue(dt) = raw
-
-      val cal = Calendar.getInstance()
-      val offset = cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)
-      val utcDateTime = new Date(datetime.getTime + offset)
-
-      assert(dt.getTime === utcDateTime.getTime)
+      val timestampValueLocal(dt) = raw
+      assert(dt.getTime === timestamp.getTime)
     }
 
     test("StringValue") {

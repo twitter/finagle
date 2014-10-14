@@ -2,14 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.twitter</groupId>
-  <artifactId>finagle-core</artifactId>
+  <artifactId>finagle-core_2.10</artifactId>
   <packaging>jar</packaging>
-  <version>6.20.1-SNAPSHOT</version>
+  <version>6.22.1-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
-    <artifactId>scala-parent-292</artifactId>
-    <version>0.1.6</version>
-    <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
+    <artifactId>scala-parent-2104_2.10</artifactId>
+    <version>0.1.14</version>
+    <relativePath>../../parents/scala-parent-2104/pom.xml</relativePath>
   </parent>
   <properties>
     <git.dir>${project.basedir}/../../.git</git.dir>
@@ -19,7 +19,7 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty</artifactId>
-      <version>3.9.1.1.Final</version>
+      <version>3.9.4.Final</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -35,50 +35,64 @@
     </dependency>
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_2.9.2</artifactId>
-      <version>1.9.1</version>
+      <artifactId>scalatest_2.10</artifactId>
+      <version>2.2.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.scalacheck</groupId>
+      <artifactId>scalacheck_2.10</artifactId>
+      <version>1.11.3</version>
       <scope>test</scope>
     </dependency>
     <!-- project dependencies -->
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>finagle-test</artifactId>
+      <artifactId>finagle-test_2.10</artifactId>
       <scope>test</scope>
-      <version>6.20.1-SNAPSHOT</version>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>util-app</artifactId>
-      <version>6.19.1-SNAPSHOT</version>
+      <artifactId>util-app_2.10</artifactId>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>util-collection</artifactId>
-      <version>6.19.1-SNAPSHOT</version>
+      <artifactId>util-collection_2.10</artifactId>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>util-core</artifactId>
-      <version>6.19.1-SNAPSHOT</version>
+      <artifactId>util-core_2.10</artifactId>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>util-hashing</artifactId>
-      <version>6.19.1-SNAPSHOT</version>
+      <artifactId>util-hashing_2.10</artifactId>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>util-jvm</artifactId>
-      <version>6.19.1-SNAPSHOT</version>
+      <artifactId>util-jvm_2.10</artifactId>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>util-logging</artifactId>
-      <version>6.19.1-SNAPSHOT</version>
+      <artifactId>util-logging_2.10</artifactId>
+      <version>6.22.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
     <plugins>
+      <plugin>
+        <groupId>com.twitter</groupId>
+        <artifactId>maven-build-properties-plugin</artifactId>
+        <version>0.0.2</version>
+        <configuration>
+          <buildPropertiesPackage>com.twitter.finagle-core</buildPropertiesPackage>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>

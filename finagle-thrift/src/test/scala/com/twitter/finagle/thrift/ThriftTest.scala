@@ -3,7 +3,7 @@ package com.twitter.finagle.thrift
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ServerBuilder, ClientBuilder}
 import com.twitter.finagle.thrift._
-import com.twitter.finagle.tracing.{DefaultTracer, BufferingTracer}
+import com.twitter.finagle.tracing.{DefaultTracer, BufferingTracer, Trace}
 import java.net.{SocketAddress, InetSocketAddress}
 import org.apache.thrift.protocol._
 import org.scalatest.FunSuite
@@ -42,6 +42,13 @@ trait ThriftTest { self: FunSuite =>
     thriftTests += ThriftTestDefinition(label, clientIdOpt, theTest)
   }
 
+  def skipTestThrift(
+    label: String,
+    clientIdOpt: Option[ClientId] = None
+  )(theTest: (Iface, BufferingTracer) => Unit) {
+    () // noop
+  }
+
   private val newBuilderServer = (protocolFactory: TProtocolFactory) => new {
     val server = ServerBuilder()
       .codec(ThriftServerFramedCodec(protocolFactory))
@@ -78,7 +85,7 @@ trait ThriftTest { self: FunSuite =>
   }
 
   private val newAPIServer = (protocolFactory: TProtocolFactory) => new {
-    val server = Thrift
+    val server = Thrift.server
       .withProtocolFactory(protocolFactory)
       .serveIface("thriftserver=:*", processor)
     val boundAddr = server.boundAddress
@@ -95,7 +102,7 @@ trait ThriftTest { self: FunSuite =>
   ) => new {
     implicit val cls = ifaceManifest
     val client = {
-      val thrift = clientIdOpt.foldLeft(Thrift.withProtocolFactory(protocolFactory)) {
+      val thrift = clientIdOpt.foldLeft(Thrift.client.withProtocolFactory(protocolFactory)) {
         case (thrift, clientId) => thrift.withClientId(clientId)
       }
 
@@ -107,8 +114,8 @@ trait ThriftTest { self: FunSuite =>
 
   private val protocols = Map(
     // Commenting out due to flakiness - see DPT-175 and DPT-181
-    // "binary" -> new TBinaryProtocol.Factory()
-    //"compact" -> new TCompactProtocol.Factory()
+    "binary" -> new TBinaryProtocol.Factory()
+//    "compact" -> new TCompactProtocol.Factory()
 // Unsupported. Add back when we upgrade Thrift.
 // (There's a test that will fail when we do.)
 //    "json" -> new TJSONProtocol.Factory()
@@ -135,6 +142,16 @@ trait ThriftTest { self: FunSuite =>
     "api" -> newAPIServer
   )
 
+  lazy val notSkipFlaky = !Option(System.getProperty("SKIP_FLAKY")).isDefined
+
+  def testOrSkipFlaky(name: String)(testFun: => Unit) = {
+    if(notSkipFlaky){
+      test(name)(testFun)
+    } else {
+      ignore(name)(testFun)
+    }
+  }
+
   /** Invoke this in your test to run all defined thrift tests */
   def runThriftTests() = for {
     (protoName, proto) <- protocols
@@ -142,16 +159,19 @@ trait ThriftTest { self: FunSuite =>
     (serverName, newServer) <- servers
     testDef <- thriftTests
   } test("server:%s client:%s proto:%s %s".format(
-    clientName, serverName, protoName, testDef.label)) {
+    serverName, clientName, protoName, testDef.label)) {
     val tracer = new BufferingTracer
     val previous = DefaultTracer.self
     DefaultTracer.self = tracer
     val server = newServer(proto)
     val client = newClient(proto, server.boundAddr, testDef.clientIdOpt)
-    try testDef.testFunction(client.client, tracer) finally {
-      DefaultTracer.self = previous
-      server.close()
-      client.close()
+    Trace.unwind {
+      Trace.clear()
+      try testDef.testFunction(client.client, tracer) finally {
+        DefaultTracer.self = previous
+        server.close()
+        client.close()
+      }
     }
   }
 }

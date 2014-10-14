@@ -45,7 +45,7 @@ object Example extends App {
   val dbname = flag("database", "test", "default database to connect to")
 
   def main() {
-    val client = Mysql
+    val client = Mysql.client
       .withCredentials(username(), password())
       .withDatabase(dbname())
       .newRichClient("%s:%d".format(host().getHostName, host().getPort))

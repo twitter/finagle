@@ -16,10 +16,10 @@ import scala.reflect.BeanProperty
  * trait TestIface {
  *   @ThriftMethod
  *   def ab(
- *       a: String, 
+ *       a: String,
  *       b: java.util.Map[String, java.lang.Integer]
  *   ): Future[java.util.Map[String, java.lang.Integer]]
- *   
+ *
  *   @ThriftMethod
  *   def ping(msg: String): Future[String]
  * }
