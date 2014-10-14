@@ -180,7 +180,7 @@ object Trace  {
     }
 
   def state_=(state: TraceState) = state match {
-    case NoState =>
+    case NoState  => local.clear()
     case s: State => local.set(Some(s))
   }
 
