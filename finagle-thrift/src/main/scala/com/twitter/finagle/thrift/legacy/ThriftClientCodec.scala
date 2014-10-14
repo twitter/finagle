@@ -28,7 +28,6 @@ private[thrift] class ThriftClientEncoder(protocolFactory: TProtocolFactory)
                        buffer, e.getRemoteAddress)
       case _: Throwable =>
         Channels.fireExceptionCaught(ctx, new IllegalArgumentException)
-        null
     }
 }
 

@@ -36,9 +36,8 @@ class Decoder(storageCommands: collection.Set[ChannelBuffer]) extends AbstractDe
     }
   }
 
-  final protected[memcachedx] def awaitData(tokens: Seq[ChannelBuffer], bytesNeeded: Int) = {
+  final protected[memcachedx] def awaitData(tokens: Seq[ChannelBuffer], bytesNeeded: Int) {
     state = AwaitingData(tokens, bytesNeeded)
-    needMoreData
   }
 
   private[this] def needsData(tokens: Seq[ChannelBuffer]) = {
@@ -49,8 +48,6 @@ class Decoder(storageCommands: collection.Set[ChannelBuffer]) extends AbstractDe
       Some(bytesNeeded)
     } else None
   }
-
-  private[this] val needMoreData = null
 
   private[this] def validateStorageCommand(tokens: Seq[ChannelBuffer]) = {
     if (tokens.size < 5) throw new ClientError("Too few arguments")

@@ -68,9 +68,9 @@ class ClientDispatcher private[exp](
         Future.exception(ExhaustedTagsException)
       case Some(tag) =>
         trans.write(encode(Tping(tag))) transform {
-          case t: Throwable =>
+          case Throw(t) =>
             sent.unmap(tag)
-            Future.const(t)
+            Future.exception(t)
           case Return(_) =>
             p.closed
         }
@@ -89,9 +89,9 @@ class ClientDispatcher private[exp](
           Future.exception(ExhaustedTagsException)
         case Some(tag) =>
           trans.write(encode(Tdrain(tag))) transform {
-            case t: Throwable =>
+            case Throw(t) =>
               sent.unmap(tag)
-              Future.const(t)
+              Future.exception(t)
             case Return(_) =>
               p.closed
           }

@@ -4,7 +4,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.http.Http
 import com.twitter.io.TempFile
-import com.twitter.util.{Await, Future}
+import com.twitter.util.{Await, Future, NonFatal}
 import java.io.File
 import java.net.InetSocketAddress
 import org.jboss.netty.buffer._
@@ -46,8 +46,10 @@ class SslTest extends FunSuite {
     case e: java.io.IOException =>
       println("IOException: I/O error in running setupCA script: " +
         e.getMessage())
-    case e => println("Unknown exception in running setupCA script: " +
+        throw e
+    case NonFatal(e) => println("Unknown exception in running setupCA script: " +
         e.getMessage())
+        throw e
   }
 
   // the chain should have generated the files below

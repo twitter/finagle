@@ -2,7 +2,7 @@ package com.twitter.finagle.memcached.integration
 
 import collection.JavaConversions._
 import com.twitter.conversions.time._
-import com.twitter.util.{Stopwatch, Duration, RandomSocket}
+import com.twitter.util.{Stopwatch, Duration, RandomSocket, NonFatal}
 import java.lang.ProcessBuilder
 import java.net.{BindException, ServerSocket, InetSocketAddress}
 import scala.collection._
@@ -30,7 +30,7 @@ private[memcached] object InternalMemcached {
         def stop() { server.stop(true) }
       })
     } catch {
-      case _ => None
+      case NonFatal(_) => None
     }
   }
 }

@@ -1,8 +1,8 @@
 package com.twitter.finagle.exp.swift
 
 import com.facebook.swift.codec.internal.compiler.CompilerThriftCodecFactory
-import com.facebook.swift.codec.metadata.ThriftCatalog
-import com.facebook.swift.codec.{ThriftCodec, ThriftCodecManager}
+import com.facebook.swift.codec.metadata.{ThriftCatalog => FBThriftCatalog}
+import com.facebook.swift.codec.{ThriftCodec, ThriftCodecManager => FBThriftCodecManager}
 import com.google.common.reflect.TypeToken
 import com.twitter.util.Future
 import java.lang.reflect.Type
@@ -12,7 +12,7 @@ import java.util.Collections
  * A Swift ThriftCatalog modified to also
  * handle [[com.twitter.util.Future]].
 */
-private object ThriftCatalog extends ThriftCatalog {
+private object ThriftCatalog extends FBThriftCatalog {
   private lazy val FutureClass = classOf[Future[_]]
   private lazy val FutureGetType = FutureClass.getMethod("get").getGenericReturnType()
 
@@ -27,7 +27,7 @@ private object ThriftCatalog extends ThriftCatalog {
   }
 }
 
-private object ThriftCodecManager extends ThriftCodecManager(
+private object ThriftCodecManager extends FBThriftCodecManager(
   new CompilerThriftCodecFactory, ThriftCatalog,
   Collections.emptySet[ThriftCodec[_]]())
 

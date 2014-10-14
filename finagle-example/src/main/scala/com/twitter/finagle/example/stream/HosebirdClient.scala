@@ -54,8 +54,6 @@ object HosebirdClient {
             client.close()
             clientFactory.close()
           }
-          // We return a Future indicating when we've completed processing the message.
-          Future.Done
         }
       }
     }
