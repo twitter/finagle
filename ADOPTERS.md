@@ -7,6 +7,7 @@ you're using Finagle. Or even better, add the links yourself and
 [submit a pull request][1]!
 
 * [Box](https://www.box.com/)
+* [DICE](http://dice.se/)
 * [Foursquare](https://foursquare.com/)
 * [Gigya](http://www.gigya.com/)
 * [Green Man Gaming](http://www.greenmangaming.com/)
