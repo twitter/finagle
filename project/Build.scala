@@ -161,7 +161,7 @@ object Finagle extends Build {
     // Protocols
     finagleHttp, finagleStream, finagleNative, finagleThrift,
     finagleMemcached, finagleKestrel, finagleRedis,
-    finagleMux, finagleThriftMux, finagleMySQL, finagleSpdy,
+    finagleMux, finagleThriftMux, finagleMySQL, finagleSpdy, finagleSmtp,
 
     // Use and integration
     // removing benchmark because swift can't build outside of twitter for now
@@ -348,6 +348,16 @@ object Finagle extends Build {
     name := "finagle-kestrel",
     libraryDependencies ++= scroogeLibs
   ).dependsOn(finagleCore, finagleMemcached, finagleThrift)
+
+  lazy val finagleSmtp = Project(
+    id = "finagle-smtp",
+    base = file("finagle-smtp"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+  ).settings(
+      name := "finagle-smtp",
+      libraryDependencies ++= Seq(util("logging"))
+    ).dependsOn(finagleCore)
 
 /*  notyet
   lazy val finagleProtobuf = Project(
