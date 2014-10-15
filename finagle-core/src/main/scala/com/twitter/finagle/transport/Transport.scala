@@ -118,9 +118,17 @@ private[finagle] object Transport {
   /**
    * $param the TLS engine for a `Transport`.
    */
-  case class TLSEngine(e: Option[() => com.twitter.finagle.ssl.Engine])
-  implicit object TLSEngine extends Stack.Param[TLSEngine] {
-    val default = TLSEngine(None)
+  case class TLSClientEngine(e: Option[SocketAddress => com.twitter.finagle.ssl.Engine])
+  implicit object TLSClientEngine extends Stack.Param[TLSClientEngine] {
+    val default = TLSClientEngine(None)
+  }
+
+  /**
+   * $param the TLS engine for a `Transport`.
+   */
+  case class TLSServerEngine(e: Option[() => com.twitter.finagle.ssl.Engine])
+  implicit object TLSServerEngine extends Stack.Param[TLSServerEngine] {
+    val default = TLSServerEngine(None)
   }
 
   /**

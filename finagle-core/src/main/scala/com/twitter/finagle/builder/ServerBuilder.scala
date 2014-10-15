@@ -298,7 +298,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     newFinagleSslEngine(() => new Engine(newSsl()))
 
   def newFinagleSslEngine(v: () => Engine): This =
-    configured(Transport.TLSEngine(Some(v)))
+    configured(Transport.TLSServerEngine(Some(v)))
 
   def maxConcurrentRequests(max: Int): This =
     configured(RequestSemaphoreFilter.Param(max))

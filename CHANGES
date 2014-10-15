@@ -75,6 +75,12 @@ Bug Fixes
   * finagle-mysql: Properly heed timezone when extracting TimestampValue
   * mux: clear contexts after receive, not in 'finally' clause
 
+      Removed TLSEngine, and replaced it with two, TLSClientEngine, and
+      TLSServerEngine, where TLSServerEngine is the same as TLSEngine, and
+      TLSClientEngine takes a SocketAddress instead of ().  The other changed
+      API is the Netty3TransporterTLSConfig now takes a function
+      SocketAddress => Engine, instead of () => Engine.
+
 6.21.0
 ~~~~~~~
 

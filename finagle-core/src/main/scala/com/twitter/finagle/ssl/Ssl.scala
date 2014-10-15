@@ -65,7 +65,7 @@ object Ssl {
   def client(): Engine = JSSE.client()
 
   /**
-   * Get a client engine, from the given context
+   * Get a client engine from the given context
    */
   def client(sslContext : SSLContext): Engine = JSSE.client(sslContext)
 
@@ -76,4 +76,22 @@ object Ssl {
    */
   def clientWithoutCertificateValidation(): Engine =
     JSSE.clientWithoutCertificateValidation()
+
+  /**
+   * Get a client engine
+   */
+  def client(peerHost: String, peerPort: Int): Engine = JSSE.client(peerHost, peerPort)
+
+  /**
+   * Get a client engine from the given context
+   */
+  def client(sslContext : SSLContext, peerHost: String, peerPort: Int): Engine = JSSE.client(sslContext, peerHost, peerPort)
+
+  /**
+   * Get a client engine that doesn't check the validity of certificates
+   *
+   * N.B.: This is probably a bad idea for anything but testing!
+   */
+  def clientWithoutCertificateValidation(peerHost: String, peerPort: Int): Engine =
+    JSSE.clientWithoutCertificateValidation(peerHost, peerPort)
 }

@@ -88,15 +88,21 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
       new HttpClientDispatcher(transport)
 
     def withTls(cfg: Netty3TransporterTLSConfig): Client =
-      configured((Transport.TLSEngine(Some(cfg.newEngine))))
+      configured((Transport.TLSClientEngine(Some(cfg.newEngine))))
         .configured(Transporter.TLSHostname(cfg.verifyHost))
         .transformed { stk => http.TlsFilter.module +: stk }
 
     def withTls(hostname: String): Client =
-      withTls(new Netty3TransporterTLSConfig({ () => Ssl.client() }, Some(hostname)))
+      withTls(new Netty3TransporterTLSConfig({
+        case inet: InetSocketAddress => Ssl.client(hostname, inet.getPort)
+        case _ => Ssl.client()
+      }, Some(hostname)))
 
     def withTlsWithoutValidation(): Client =
-      configured(Transport.TLSEngine(Some({ () => Ssl.clientWithoutCertificateValidation() })))
+      configured(Transport.TLSClientEngine(Some({
+        case inet: InetSocketAddress => Ssl.clientWithoutCertificateValidation(inet.getHostString, inet.getPort)
+        case _ => Ssl.clientWithoutCertificateValidation()
+      })))
 
     def withMaxRequestSize(size: StorageUnit): Client =
       configured(param.MaxRequestSize(size))
@@ -140,7 +146,7 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
     ): Server = copy(stack, params)
 
     def withTls(cfg: Netty3ListenerTLSConfig): Server =
-      configured(Transport.TLSEngine(Some(cfg.newEngine)))
+      configured(Transport.TLSServerEngine(Some(cfg.newEngine)))
 
     def withMaxRequestSize(size: StorageUnit): Server =
       configured(param.MaxRequestSize(size))
