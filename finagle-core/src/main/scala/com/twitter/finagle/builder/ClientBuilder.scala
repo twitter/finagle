@@ -16,7 +16,7 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
 import com.twitter.util.TimeConversions._
 import com.twitter.util.{Duration, Future, NullMonitor, Time, Var, Try}
-import java.net.SocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Level
 import javax.net.ssl.SSLContext
@@ -641,12 +641,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def channelFactory(cf: ChannelFactory): This =
     configured(Netty3Transporter.ChannelFactory(cf))
 
-    /**
+  /**
    * Encrypt the connection with SSL.  Hostname verification will be
    * provided against the given hostname.
    */
   def tls(hostname: String): This = {
-    configured(Transport.TLSEngine(Some({ () => Ssl.client() })))
+    configured((Transport.TLSClientEngine(Some({
+      case inet: InetSocketAddress => Ssl.client(hostname, inet.getPort)
+      case _ => Ssl.client()
+    }))))
       .configured(Transporter.TLSHostname(Some(hostname)))
   }
 
@@ -656,23 +659,31 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * No SSL Hostname Validation is performed
    */
   def tls(sslContext: SSLContext): This =
-    configured(Transport.TLSEngine(Some({ () => Ssl.client(sslContext) })))
+    configured((Transport.TLSClientEngine(Some({
+      case inet: InetSocketAddress => Ssl.client(sslContext, inet.getHostString, inet.getPort)
+      case _ => Ssl.client(sslContext)
+    }))))
 
   /**
    * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
    * This allows the user to use client certificates
    * SSL Hostname Validation is performed, on the passed in hostname
    */
-  def tls(sslContext: SSLContext, hostname: Option[String]): This = {
-    configured((Transport.TLSEngine(Some({ () => Ssl.client(sslContext) }))))
+  def tls(sslContext: SSLContext, hostname: Option[String]): This =
+    configured((Transport.TLSClientEngine(Some({
+      case inet: InetSocketAddress => Ssl.client(sslContext, hostname.getOrElse(inet.getHostString), inet.getPort)
+      case _ => Ssl.client(sslContext)
+    }))))
       .configured(Transporter.TLSHostname(hostname))
-  }
 
   /**
    * Do not perform TLS validation. Probably dangerous.
    */
   def tlsWithoutValidation(): This =
-    configured(Transport.TLSEngine(Some({ () => Ssl.clientWithoutCertificateValidation() })))
+    configured(Transport.TLSClientEngine(Some({
+      case inet: InetSocketAddress => Ssl.clientWithoutCertificateValidation(inet.getHostString, inet.getPort)
+      case _ => Ssl.clientWithoutCertificateValidation()
+    })))
 
   /**
    * Make connections via the given HTTP proxy.

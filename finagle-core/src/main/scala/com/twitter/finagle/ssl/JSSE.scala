@@ -71,10 +71,25 @@ object JSSE {
   def client(): Engine = new Engine(defaultSSLContext.createSSLEngine())
 
   /**
+   * Get a client
+   */
+  def client(host: String, port: Int): Engine =
+    new Engine(defaultSSLContext.createSSLEngine(host, port))
+
+  /**
    * Get a client from the given Context
    */
-  def client(ctx : SSLContext) : Engine = {
+  def client(ctx: SSLContext): Engine = {
     val sslEngine = ctx.createSSLEngine();
+    sslEngine.setUseClientMode(true);
+    new Engine(sslEngine)
+  }
+
+  /**
+   * Get a client from the given Context
+   */
+  def client(ctx: SSLContext, host: String, port: Int): Engine = {
+    val sslEngine = ctx.createSSLEngine(host, port);
     sslEngine.setUseClientMode(true);
     new Engine(sslEngine)
   }
@@ -87,10 +102,26 @@ object JSSE {
   def clientWithoutCertificateValidation(): Engine =
     client(trustAllCertificates())
 
+  /**
+   * Get a client that skips verification of certificates.
+   *
+   * Security Warning: This defeats the purpose of SSL.
+   */
+  def clientWithoutCertificateValidation(host: String, port: Int): Engine =
+    client(trustAllCertificates(), host, port)
+
   private[this] def client(trustManagers: Array[TrustManager]): Engine = {
     val ctx = SSLContext.getInstance(protocol)
     ctx.init(null, trustManagers, null)
-    new Engine(ctx.createSSLEngine())
+    val sslEngine = ctx.createSSLEngine()
+    new Engine(sslEngine)
+  }
+
+  private[this] def client(trustManagers: Array[TrustManager], host: String, port: Int): Engine = {
+    val ctx = SSLContext.getInstance(protocol)
+    ctx.init(null, trustManagers, null)
+    val sslEngine = ctx.createSSLEngine(host, port)
+    new Engine(sslEngine)
   }
 
   /**
