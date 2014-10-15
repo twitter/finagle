@@ -3,7 +3,6 @@ package com.twitter.finagle.httpx
 import com.twitter.finagle.Service
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceId, Trace}
 import com.twitter.util.Future
-import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -54,7 +53,6 @@ class TracingTest extends FunSuite {
       }
     }
 
-    val addr = new InetSocketAddress(0)
     val filter = new HttpServerTracingFilter[Request, Response]("testservice")
     val req = Request("/test.json")
     req.headers.add(Header.TraceId, "0000000000000001")
@@ -72,7 +70,6 @@ class TracingTest extends FunSuite {
       }
     }
 
-    val addr = new InetSocketAddress(0)
     val filter = new HttpServerTracingFilter[Request, Response]("testservice")
     val req = Request("/test.json")
     // push span id, but no trace id
@@ -88,7 +85,6 @@ class TracingTest extends FunSuite {
       }
     }
 
-    val addr = new InetSocketAddress(0)
     val filter = new HttpServerTracingFilter[Request, Response]("testservice")
     val req = Request("/test.json")
     req.headers.add(Header.TraceId, "0000000000000001")
@@ -105,7 +101,6 @@ class TracingTest extends FunSuite {
       }
     }
 
-    val addr = new InetSocketAddress(0)
     val filter = new HttpServerTracingFilter[Request, Response]("testservice")
     val req = Request("/test.json")
     req.headers.add(Header.TraceId, "0000000000000001")

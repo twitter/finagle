@@ -118,20 +118,15 @@ case class Http(
         }
       }
 
-      override def prepareConnFactory(
-        underlying: ServiceFactory[Request, Response]
-      ): ServiceFactory[Request, Response] =
-        if (_enableTracing) {
-          new HttpClientTracingFilter[Request, Response](config.serviceName) andThen
-            super.prepareConnFactory(underlying)
-        } else
-          super.prepareConnFactory(underlying)
-
       override def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any,Any] =
         new HttpTransport(super.newClientTransport(ch, statsReceiver))
 
       override def newClientDispatcher(transport: Transport[Any, Any]) =
         new DtabHttpDispatcher(transport)
+
+      override def newTraceInitializer =
+        if (_enableTracing) new HttpClientTraceInitializer[Request, Response]
+        else TraceInitializerFilter.empty[Request, Response]
     }
   }
 
@@ -178,20 +173,14 @@ case class Http(
 
       override def prepareConnFactory(
         underlying: ServiceFactory[Request, Response]
-      ): ServiceFactory[Request, Response] = {
-        val checkRequest = new CheckRequestFilter
+      ): ServiceFactory[Request, Response] =
+        new DtabFilter.Finagle[Request] andThen
+          new CheckRequestFilter andThen
+            underlying
 
-        val tracing = if (_enableTracing) {
-          new HttpServerTracingFilter[Request, Response](config.serviceName)
-        } else {
-          Filter.identity[Request, Response]
-        }
-
-        tracing andThen
-          new DtabFilter.Finagle[Request] andThen
-          checkRequest andThen
-          underlying
-      }
+      override def newTraceInitializer =
+        if (_enableTracing) new HttpServerTraceInitializer[Request, Response]
+        else TraceInitializerFilter.empty[Request, Response]
     }
   }
 }
@@ -223,74 +212,10 @@ object HttpTracing {
   }
 }
 
-object HttpClientTracingFilter {
-  val role = Stack.Role("HttpClientTracing")
-
-  /**
-   * Creates a [[com.twitter.finagle.Stackable]]
-   * [[com.twitter.finagle.http.HttpClientTracingFilter]].
-   */
-  def module[Req <: Request, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
-      val role = HttpClientTracingFilter.role
-      val description = "Add tracing info to the http request."
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-        val param.Label(label) = get[param.Label]
-        new HttpClientTracingFilter[Req, Rep](label) andThen next
-      }
-    }
-}
-
-/**
- * Pass along headers with the required tracing information.
- */
-class HttpClientTracingFilter[Req <: Request, Res](serviceName: String)
-  extends SimpleFilter[Req, Res]
-{
+private object TraceInfo {
   import HttpTracing._
 
-  def apply(request: Req, service: Service[Req, Res]) = Trace.unwind {
-    Header.All foreach { request.headers.remove(_) }
-
-    request.headers.add(Header.TraceId, Trace.id.traceId.toString)
-    request.headers.add(Header.SpanId, Trace.id.spanId.toString)
-    // no parent id set means this is the root span
-    Trace.id._parentId foreach { id =>
-      request.headers.add(Header.ParentSpanId, id.toString)
-    }
-    // three states of sampled, yes, no or none (let the server decide)
-    Trace.id.sampled foreach { sampled =>
-      request.headers.add(Header.Sampled, sampled.toString)
-    }
-    request.headers.add(Header.Flags, Trace.id.flags.toLong)
-
-    if (Trace.isActivelyTracing) {
-      Trace.recordServiceName(serviceName)
-      Trace.recordRpc(request.getMethod.getName)
-      Trace.recordBinary("http.uri", stripParameters(request.getUri))
-
-      Trace.record(Annotation.ClientSend())
-      service(request) map { response =>
-        Trace.record(Annotation.ClientRecv())
-        response
-      }
-    }
-    else
-      service(request)
-  }
-}
-
-/**
- * Adds tracing annotations for each http request we receive.
- * Including uri, when request was sent and when it was received.
- */
-class HttpServerTracingFilter[Req <: Request, Res](serviceName: String)
-  extends SimpleFilter[Req, Res]
-{
-  import HttpTracing._
-
-  def apply(request: Req, service: Service[Req, Res]) = Trace.unwind {
-
+  def setTraceIdFromRequestHeaders(request: Request): Unit = {
     if (Header.Required.forall { request.headers.contains(_) }) {
       val spanId = SpanId.fromString(request.headers.get(Header.SpanId))
 
@@ -315,32 +240,103 @@ class HttpServerTracingFilter[Req <: Request, Res](serviceName: String)
     // remove so the header is not visible to users
     Header.All foreach { request.headers.remove(_) }
 
-    // even if no trace id was passed from the client we log the annotations
-    // with a locally generated id
+    traceRpc(request)
+  }
+
+  def setClientRequestHeaders(request: Request): Unit = {
+    Header.All foreach { request.headers.remove(_) }
+
+    request.headers.add(Header.TraceId, Trace.id.traceId.toString)
+    request.headers.add(Header.SpanId, Trace.id.spanId.toString)
+    // no parent id set means this is the root span
+    Trace.id._parentId foreach { id =>
+      request.headers.add(Header.ParentSpanId, id.toString)
+    }
+    // three states of sampled, yes, no or none (let the server decide)
+    Trace.id.sampled foreach { sampled =>
+      request.headers.add(Header.Sampled, sampled.toString)
+    }
+    request.headers.add(Header.Flags, Trace.id.flags.toLong)
+    traceRpc(request)
+  }
+
+  def traceRpc(request: Request): Unit = {
     if (Trace.isActivelyTracing) {
-      Trace.recordServiceName(serviceName)
       Trace.recordRpc(request.getMethod.getName)
       Trace.recordBinary("http.uri", stripParameters(request.getUri))
-
-      Trace.record(Annotation.ServerRecv())
-      service(request) map { response =>
-        Trace.record(Annotation.ServerSend())
-        response
-      }
     }
-    else
-      service(request)
   }
 
   /**
    * Safely extract the flags from the header, if they exist. Otherwise return empty flag.
    */
-  def getFlags(request: Req): Flags = {
+  def getFlags(request: Request): Flags = {
     try {
       Flags(Option(request.headers.get(Header.Flags)).map(_.toLong).getOrElse(0L))
     } catch {
       case _: Throwable => Flags()
     }
+  }
+}
+
+private[finagle] class HttpServerTraceInitializer[Req <: Request, Rep]
+  extends Stack.Simple[ServiceFactory[Req, Rep]] {
+  val role = TraceInitializerFilter.role
+  val description = "Initialize the tracing system with trace info from the incoming request"
+  def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+    val param.Tracer(tracer) = get[param.Tracer]
+    val traceInitializer = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
+      Trace.unwind {
+        Trace.pushTracer(tracer)
+        TraceInfo.setTraceIdFromRequestHeaders(req)
+        svc(req)
+      }
+    }
+    traceInitializer andThen next
+  }
+}
+
+private[finagle] class HttpClientTraceInitializer[Req <: Request, Rep]
+  extends Stack.Simple[ServiceFactory[Req, Rep]] {
+  val role = TraceInitializerFilter.role
+  val description = "Sets the next TraceId and attaches trace information to the outgoing request"
+  def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+    val param.Tracer(tracer) = get[param.Tracer]
+    val traceInitializer = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
+      Trace.unwind {
+        Trace.pushTracerAndSetNextId(tracer)
+        TraceInfo.setClientRequestHeaders(req)
+        svc(req)
+      }
+    }
+    traceInitializer andThen next
+  }
+}
+
+/**
+ * Pass along headers with the required tracing information.
+ */
+private[finagle] class HttpClientTracingFilter[Req <: Request, Res](serviceName: String)
+  extends SimpleFilter[Req, Res]
+{
+  import HttpTracing._
+
+  def apply(request: Req, service: Service[Req, Res]) = Trace.unwind {
+    TraceInfo.setClientRequestHeaders(request)
+    service(request)
+  }
+}
+
+/**
+ * Adds tracing annotations for each http request we receive.
+ * Including uri, when request was sent and when it was received.
+ */
+private[finagle] class HttpServerTracingFilter[Req <: Request, Res](serviceName: String)
+  extends SimpleFilter[Req, Res]
+{
+  def apply(request: Req, service: Service[Req, Res]) = Trace.unwind {
+    TraceInfo.setTraceIdFromRequestHeaders(request)
+    service(request)
   }
 }
 
@@ -384,11 +380,7 @@ case class RichHttp[REQUEST <: Request](
         // Note: This is a horrible hack to ensure that close() calls from
         // ExpiringService do not propagate until all chunks have been read
         // Waiting on CSL-915 for a proper fix.
-        val delayedReleaseService = underlying map(new DelayedReleaseService(_))
-        if (httpFactory._enableTracing)
-          new HttpClientTracingFilter[REQUEST, Response](config.serviceName) andThen delayedReleaseService
-        else
-          delayedReleaseService
+        underlying map(new DelayedReleaseService(_))
        }
 
       override def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any,Any] =
@@ -396,6 +388,10 @@ case class RichHttp[REQUEST <: Request](
 
       override def newClientDispatcher(transport: Transport[Any, Any]) =
         new HttpClientDispatcher(transport)
+
+      override def newTraceInitializer =
+        if (httpFactory._enableTracing) new HttpClientTraceInitializer[REQUEST, Response]
+        else TraceInitializerFilter.empty[REQUEST, Response]
     }
   }
 
@@ -416,17 +412,12 @@ case class RichHttp[REQUEST <: Request](
 
       override def prepareConnFactory(
         underlying: ServiceFactory[REQUEST, Response]
-      ): ServiceFactory[REQUEST, Response] = {
-        val dtab = new DtabFilter.Finagle[REQUEST]
-        val tracing = if (httpFactory._enableTracing)
-          new HttpServerTracingFilter[REQUEST, Response](config.serviceName)
-        else
-          Filter.identity[REQUEST, Response]
+      ): ServiceFactory[REQUEST, Response] = 
+        new DtabFilter.Finagle[REQUEST] andThen underlying
 
-        tracing andThen
-          dtab andThen
-          underlying
-      }
+      override def newTraceInitializer =
+        if (httpFactory._enableTracing) new HttpServerTraceInitializer[REQUEST, Response]
+        else TraceInitializerFilter.empty[REQUEST, Response]
     }
   }
 }
