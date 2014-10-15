@@ -3,8 +3,8 @@ package com.twitter.finagle.kestrelx;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import com.twitter.finagle.Addr;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.kestrelx.protocol.Kestrel;
@@ -16,6 +16,9 @@ import com.twitter.util.Var$;
  * A compilation test for using MultiReader in Java.
  */
 public class MultiReaderUsage {
+  /**
+   * make a MultiReader ReadHandle
+   */
   public ReadHandle make() {
     ArrayList<SocketAddress> clusterMembers = new ArrayList<SocketAddress>();
     clusterMembers.add(new InetSocketAddress(0));
