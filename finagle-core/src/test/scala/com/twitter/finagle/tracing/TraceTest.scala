@@ -85,6 +85,21 @@ class TraceTest extends FunSuite with BeforeAndAfter with OneInstancePerTest wit
     assert(didRun)
     assert(Trace.id === priorId)
   }
+  
+  test("Trace.letTracerAndId") {
+    val tracer = new BufferingTracer
+    val id = Trace.nextId
+    var runs = 0
+
+    Trace.letTracerAndId(tracer, id) {
+      runs += 1
+      Trace.record("test message")
+    }
+
+    val Seq(Record(`id`, _, Annotation.Message("test message"), None)) = tracer.toSeq
+    assert(runs === 1)
+  }
+
 
   test("Trace.unwind") {
     var didRun = false
