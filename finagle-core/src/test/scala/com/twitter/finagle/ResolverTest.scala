@@ -79,4 +79,34 @@ class ResolverTest extends FunSuite {
     assert(Resolver.eval("test!xyz") === Resolver.eval("test!xyz"))
     assert(Resolver.eval("test!xyz") != Resolver.eval("test!xxx"))
   }
+
+  test("throw when registering multiple resolvers for the same scheme") {
+    object TestResolver extends BaseResolver(() => Seq(new TestResolver, new TestResolver))
+
+    intercept[MultipleResolversPerSchemeException] {
+      TestResolver.get(classOf[TestResolver])
+    }
+  }
+
+  class TwCacheResolver extends Resolver {
+    val scheme = "twcache"
+    def bind(arg: String) = {
+      val addr = Addr.Bound(TestAddr(arg))
+      Var.value(addr)
+    }
+  }
+
+  test("permit multiple twcache scheme resolvers") {
+    object TestResolver extends BaseResolver(() => Seq(new TwCacheResolver, new TwCacheResolver))
+
+    val Some(resolver) = TestResolver.get(classOf[TwCacheResolver])
+    assert(resolver.scheme === "twcache")
+    val cacheBinding = resolver.bind("twcache!xyz")
+
+    Var.sample(cacheBinding) match {
+      case Addr.Bound(addrs) if addrs.size == 1 =>
+        assert(addrs.head === TestAddr("twcache!xyz"))
+      case _ => fail()
+    }
+  }
 }

@@ -212,20 +212,31 @@ object FailResolver extends Resolver {
   def bind(arg: String) = Var.value(Addr.Failed(new Exception(arg)))
 }
 
-object Resolver {
+private[finagle] abstract class BaseResolver(f: () => Seq[Resolver]) {
   private[this] val inetResolver = InetResolver()
 
+  // TODO(dschobel): remove duplicate whitelisting logic after we have a mono-twcache resolver
+  private[this] val dupCheckWhitelist = Set("twcache")
+
   private[this] lazy val resolvers = {
-    val rs = LoadService[Resolver]()
+    val rs = f()
     val log = Logger.getLogger(getClass.getName)
     val resolvers = Seq(inetResolver, NegResolver, NilResolver, FailResolver) ++ rs
 
-    val dups = resolvers groupBy(_.scheme) filter { case (_, rs) => rs.size > 1 }
+    val dups = resolvers
+      .filterNot(resolver => dupCheckWhitelist(resolver.scheme))
+      .groupBy(_.scheme)
+      .filter { case (_, rs) => rs.size > 1 }
+
     if (dups.size > 0) throw new MultipleResolversPerSchemeException(dups)
 
-    for (r <- resolvers)
+    // another distinctness pass to account for whitelisted schemes
+    val distinctByScheme = resolvers.groupBy(_.scheme).map { case (_, rs) => rs.head }
+
+    for (r <- distinctByScheme)
       log.info("Resolver[%s] = %s(%s)".format(r.scheme, r.getClass.getName, r))
-    resolvers
+
+    distinctByScheme
   }
 
   def get[T <: Resolver](clazz: Class[T]): Option[T] =
@@ -276,11 +287,11 @@ object Resolver {
   @deprecated("Use Resolver.eval", "6.7.x")
   def resolve(addr: String): Try[Group[SocketAddress]] =
     Try { eval(addr) } flatMap {
-        case Name.Path(_) =>
-          Throw(new IllegalArgumentException("Resolver.resolve does not support logical names"))
-        case bound@Name.Bound(_) =>
-          Return(NameGroup(bound))
-      }
+      case Name.Path(_) =>
+        Throw(new IllegalArgumentException("Resolver.resolve does not support logical names"))
+      case bound@Name.Bound(_) =>
+        Return(NameGroup(bound))
+    }
 
   /**
    * Parse and evaluate the argument into a Name. Eval parses
@@ -331,6 +342,8 @@ object Resolver {
     (eval(delex(rest)), label)
   }
 }
+
+object Resolver extends BaseResolver(() => LoadService[Resolver]())
 
 private object ServerRegistry {
   private val addrNames = new WeakHashMap[SocketAddress, String]
