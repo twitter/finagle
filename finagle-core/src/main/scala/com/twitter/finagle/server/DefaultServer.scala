@@ -6,7 +6,7 @@ import com.twitter.finagle.stats.{StatsReceiver, ServerStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultMonitor, DefaultTimer, DefaultLogger, ReporterFactory, LoadedReporterFactory}
-import com.twitter.finagle.{param, Stack}
+import com.twitter.finagle.{param, Stack, Stackable}
 import com.twitter.finagle.{Server, Service, ServiceFactory, ListeningServer}
 import com.twitter.util.{Closable, Duration, Future, Monitor, Timer}
 import java.net.SocketAddress
@@ -52,7 +52,7 @@ case class DefaultServer[Req, Rep, In, Out](
   statsReceiver: StatsReceiver = ServerStatsReceiver,
   tracer: Tracer = DefaultTracer,
   reporter: ReporterFactory = LoadedReporterFactory,
-  newTraceInitializer: Stack.Simple[ServiceFactory[Req, Rep]] = TraceInitializerFilter.serverModule[Req, Rep]
+  newTraceInitializer: Stackable[ServiceFactory[Req, Rep]] = TraceInitializerFilter.serverModule[Req, Rep]
 ) extends Server[Req, Rep] {
 
   val stack = StackServer.newStack[Req, Rep]
