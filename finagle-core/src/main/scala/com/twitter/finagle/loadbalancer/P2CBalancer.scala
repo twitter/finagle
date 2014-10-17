@@ -96,7 +96,7 @@ private object P2CBalancer {
      * @note The fact that `nanoTime` is not guaranteed to be monotonic is
      * accounted for internally.
      */
-    def ewma(sr: StatsReceiver, name: String, nanoTime: () => Long) = new LoadMetric {
+    def ewma(name: String, nanoTime: () => Long) = new LoadMetric {
       private[this] val epoch = nanoTime()
       private[this] val Penalty: Double = Double.MaxValue/2
       // The mean lifetime of `cost`, it reaches its half-life after Tau*ln(2).
@@ -107,10 +107,6 @@ private object P2CBalancer {
       private[this] var stamp: Long = epoch   // last timestamp in nanos we observed an rtt
       private[this] var pending: Int = 0      // instantaneous rate
       private[this] var cost: Double = 0D     // ewma of rtt, sensitive to peaks.
-
-      private[this] val loadGauge = sr.addGauge("loadms") {
-        TimeUnit.NANOSECONDS.toMillis(get().toLong).toFloat
-      }
 
       def rate(): Int = synchronized { pending }
 
@@ -368,15 +364,15 @@ class P2CBalancer[Req, Rep](
   // clock used by p2c's load metrics, useful to override for testing.
   protected def nanoTime(): Long = System.nanoTime()
 
-  private[this] val newMetric: ((StatsReceiver, String) => LoadMetric) = {
+  private[this] val newMetric: (String => LoadMetric) = {
     val log = Logger.getLogger("com.twitter.finagle.loadbalancer.P2CBalancer")
     exp.loadMetric() match {
       case "ewma" =>
         log.info("Using load metric ewma")
-        LoadMetric.ewma(_, _, nanoTime)
+        LoadMetric.ewma(_, nanoTime)
       case _ =>
         log.info("Using load metric leastReq")
-        (_, _) => LoadMetric.leastReq()
+        _ => LoadMetric.leastReq()
     }
   }
 
@@ -394,7 +390,7 @@ class P2CBalancer[Req, Rep](
         case (f, w) if transferNodes contains f =>
           transferNodes(f).copy(weight=w)
         case (f, w) =>
-          Node(f, w, newMetric(statsReceiver.scope(f.toString), f.toString))
+          Node(f, w, newMetric(f.toString))
       }
       nodes = Nodes(newNodes.toIndexedSeq, rng, emptyException)
 
