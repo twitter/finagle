@@ -6,13 +6,14 @@ import com.twitter.finagle.dispatch.SerialServerDispatcher
 import com.twitter.finagle.httpx.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.httpx.filter.DtabFilter
 import com.twitter.finagle.httpx.{
-  HttpTransport, HttpServerTracingFilter, HttpClientTracingFilter, Request,
-  Response
+  HttpTransport, HttpServerTraceInitializer, HttpClientTraceInitializer,
+  Request, Response
 }
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.server._
 import com.twitter.finagle.ssl.Ssl
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.tracing._
 import com.twitter.util.{Future, StorageUnit}
 import java.net.{InetSocketAddress, SocketAddress}
 
@@ -73,12 +74,12 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
   }
 
   object Client {
-    val stack: Stack[ServiceFactory[Request, Response]] =
-      HttpClientTracingFilter.module[Request, Response] +: StackClient.newStack
+    val stack: Stack[ServiceFactory[Request, Response]] = StackClient.newStack
   }
 
   case class Client(
-    stack: Stack[ServiceFactory[Request, Response]] = Client.stack,
+    stack: Stack[ServiceFactory[Request, Response]] = Client.stack.replace(
+        TraceInitializerFilter.role, new HttpClientTraceInitializer[Request, Response]),
     params: Stack.Params = StackClient.defaultParams
   ) extends StdStackClient[Request, Response, Client] {
     protected type In = Any
@@ -102,15 +103,21 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
       new HttpClientDispatcher(transport)
 
     def withTls(cfg: Netty3TransporterTLSConfig): Client =
-      configured((Transport.TLSEngine(Some(cfg.newEngine))))
+      configured((Transport.TLSClientEngine(Some(cfg.newEngine))))
         .configured(Transporter.TLSHostname(cfg.verifyHost))
         .transformed { stk => httpx.TlsFilter.module +: stk }
 
     def withTls(hostname: String): Client =
-      withTls(new Netty3TransporterTLSConfig({ () => Ssl.client() }, Some(hostname)))
+      withTls(new Netty3TransporterTLSConfig({
+        case inet: InetSocketAddress => Ssl.client(hostname, inet.getPort)
+        case _ => Ssl.client()
+      }, Some(hostname)))
 
     def withTlsWithoutValidation(): Client =
-      configured(Transport.TLSEngine(Some({ () => Ssl.clientWithoutCertificateValidation() })))
+      configured(Transport.TLSClientEngine(Some({
+        case inet: InetSocketAddress => Ssl.clientWithoutCertificateValidation(inet.getHostString, inet.getPort)
+        case _ => Ssl.clientWithoutCertificateValidation()
+      })))
 
     def withMaxRequestSize(size: StorageUnit): Client =
       configured(param.MaxRequestSize(size))
@@ -125,7 +132,10 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
     client.newClient(dest, label)
 
   case class Server(
-    stack: Stack[ServiceFactory[Request, Response]] = StackServer.newStack,
+    stack: Stack[ServiceFactory[Request, Response]] =
+      StackServer.newStack.replace(
+        TraceInitializerFilter.role,
+        new HttpServerTraceInitializer[Request, Response]),
     params: Stack.Params = StackServer.defaultParams
   ) extends StdStackServer[Request, Response, Server] {
     protected type In = Any
@@ -143,11 +153,8 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
     protected def newDispatcher(transport: Transport[In, Out],
         service: Service[Request, Response]) = {
       val dtab = new DtabFilter.Finagle[Request]
-      val tracingFilter = new HttpServerTracingFilter[Request, Response]("http")
       new HttpServerDispatcher(
-        new HttpTransport(transport),
-        tracingFilter andThen dtab andThen service
-      )
+        new HttpTransport(transport), dtab andThen service)
     }
 
     protected def copy1(
@@ -156,7 +163,7 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
     ): Server = copy(stack, params)
 
     def withTls(cfg: Netty3ListenerTLSConfig): Server =
-      configured(Transport.TLSEngine(Some(cfg.newEngine)))
+      configured(Transport.TLSServerEngine(Some(cfg.newEngine)))
 
     def withMaxRequestSize(size: StorageUnit): Server =
       configured(param.MaxRequestSize(size))

@@ -33,9 +33,8 @@ class FinagleClientThriftServerTest extends FunSuite with OneInstancePerTest {
           def add(a: Int, b: Int): Int = { throw new AnException }
           def add_one(a: Int, b: Int) = {}
           def complex_return(someString: String) = new SomeStruct(123, someString)
-          def someway() = {
+          def someway() {
             somewayPromise() = Return(())
-            Future.Void
           }
           def show_me_your_dtab() = ""
           def show_me_your_dtab_size() = 0

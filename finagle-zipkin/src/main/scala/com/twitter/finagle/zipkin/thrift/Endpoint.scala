@@ -2,6 +2,7 @@ package com.twitter.finagle.zipkin.thrift
 
 import com.twitter.finagle.core.util.InetAddressUtil
 import com.twitter.finagle.thrift.thrift
+import com.twitter.util.NonFatal
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.nio.ByteBuffer
 import java.util.logging.Logger
@@ -39,7 +40,7 @@ object Endpoint {
       val ipv4 = Endpoint.toIpv4(InetAddressUtil.Loopback)
       Endpoint(ipv4,0)
     } catch {
-      case _ => Endpoint.Unknown
+      case NonFatal(_) => Endpoint.Unknown
     }
   }
 

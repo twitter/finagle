@@ -72,6 +72,6 @@ abstract class AbstractDecoder extends FrameDecoder {
 
   private[this] val needMoreData = null
 
-  protected[memcachedx] def start()
-  protected[memcachedx] def awaitData(tokens: Seq[ChannelBuffer], bytesNeeded: Int)
+  protected[memcachedx] def start(): Unit
+  protected[memcachedx] def awaitData(tokens: Seq[ChannelBuffer], bytesNeeded: Int): Unit
 }

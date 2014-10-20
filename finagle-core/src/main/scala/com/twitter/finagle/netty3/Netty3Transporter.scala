@@ -129,7 +129,7 @@ object Netty3Transporter {
     val Transporter.HttpProxy(httpProxy) = params[Transporter.HttpProxy]
     val Transporter.SocksProxy(socksProxy, credentials) = params[Transporter.SocksProxy]
     val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
-    val Transport.TLSEngine(tls) = params[Transport.TLSEngine]
+    val Transport.TLSClientEngine(tls) = params[Transport.TLSClientEngine]
     val Transport.Liveness(readerTimeout, writerTimeout, keepAlive) = params[Transport.Liveness]
 
     val transporter = Netty3Transporter[In, Out](
@@ -170,7 +170,7 @@ object Netty3Transporter {
  * against the given value.
  */
 case class Netty3TransporterTLSConfig(
-  newEngine: () => Engine, verifyHost: Option[String])
+  newEngine: SocketAddress => Engine, verifyHost: Option[String])
 
 /**
  * A transporter for netty3 which, given an endpoint name (socket
@@ -261,7 +261,7 @@ case class Netty3Transporter[In, Out](
     for (Netty3TransporterTLSConfig(newEngine, verifyHost) <- tlsConfig) {
       import org.jboss.netty.handler.ssl._
 
-      val engine = newEngine()
+      val engine = newEngine(addr)
       engine.self.setUseClientMode(true)
       engine.self.setEnableSessionCreation(true)
       val sslHandler = new SslHandler(engine.self)

@@ -172,6 +172,18 @@ object Trace  {
     } else
       local() = newState
   }
+  
+  /**
+   * Run computation `f` with the given tracer and trace id.
+   *
+   * @param terminal true if the next traceId is a terminal id. Future
+   *                 attempts to set nextId will be ignored.
+   */
+  def letTracerAndId[R](tracer: Tracer, id: TraceId, terminal: Boolean = false)(f: => R): R = Trace.unwind {
+    setId(id, terminal)
+    pushTracer(tracer)
+    f
+  }
 
   def state: TraceState =
     local() match {
@@ -180,7 +192,7 @@ object Trace  {
     }
 
   def state_=(state: TraceState) = state match {
-    case NoState =>
+    case NoState  => local.clear()
     case s: State => local.set(Some(s))
   }
 

@@ -53,7 +53,6 @@ class MDNSAnnouncer extends Announcer {
     new DNSSDAnnouncer
   } catch {
     case _: ClassNotFoundException => new JmDNSAnnouncer
-    case e => throw e
   }
 
   /**
@@ -79,7 +78,6 @@ class MDNSResolver extends Resolver {
     new DNSSDResolver
   } catch {
     case _: ClassNotFoundException => new JmDNSResolver
-    case e => throw e
   }
 
   /**

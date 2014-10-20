@@ -159,7 +159,7 @@ object Netty3Listener {
     val Listener.Backlog(backlog) = params[Listener.Backlog]
     val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
     val Transport.Liveness(readTimeout, writeTimeout, keepAlive) = params[Transport.Liveness]
-    val Transport.TLSEngine(engine) = params[Transport.TLSEngine]
+    val Transport.TLSServerEngine(engine) = params[Transport.TLSServerEngine]
     val snooper = params[Transport.Verbose] match {
       case Transport.Verbose(true) => Some(ChannelSnooper(label)(logger.log(Level.INFO, _, _)))
       case _ => None

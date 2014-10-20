@@ -1,23 +1,20 @@
 package com.twitter.finagle.memcachedx.unit
 
-import java.io.{BufferedReader, InputStreamReader}
-
-import scala.collection.{immutable, mutable}
-
-import org.junit.runner.RunWith
-import org.mockito.Matchers._
-import org.mockito.Mockito.{verify, when, times, RETURNS_SMART_NULLS}
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
-import org.scalatest.FunSuite
-
 import com.twitter.concurrent.Broker
-import com.twitter.finagle.{Group, Service, ShardNotAvailableException}
+import com.twitter.finagle.{CancelledRequestException, Group, MutableGroup, Service, ShardNotAvailableException}
 import com.twitter.finagle.memcachedx._
 import com.twitter.finagle.memcachedx.protocol._
 import com.twitter.hashing.KeyHasher
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Duration, Future}
+import scala.collection.{immutable, mutable}
+import _root_.java.io.{BufferedReader, InputStreamReader}
+import org.junit.runner.RunWith
+import org.mockito.Matchers._
+import org.mockito.Mockito.{verify, verifyZeroInteractions, when, times, RETURNS_SMART_NULLS}
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
+import org.scalatest.FunSuite
 
 @RunWith(classOf[JUnitRunner])
 class KetamaClientTest extends FunSuite with MockitoSugar {
@@ -77,6 +74,37 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
     }
   }
 
+  test("interrupted request does not change ready") {
+    val mockService = mock[Service[Command, Response]]
+    val client1 = CacheNode("10.0.1.1", 11211, 600)
+    val mockBuilder =
+      (node: CacheNode, k: KetamaClientKey, _: Broker[NodeHealth], _: (Int, Duration)) => mockService
+    // create a client with no members (yet)
+    val backends: MutableGroup[CacheNode] = Group.mutable()
+    val ketamaClient = new KetamaClient(backends, KeyHasher.KETAMA, 160, (Int.MaxValue, Duration.Zero), Some(mockBuilder))
+
+    // simulate a cancelled request
+    val r = ketamaClient.getResult(Seq("key"))
+    assert(r.poll === None)
+    r.raise(new CancelledRequestException())
+    try {
+      Await.result(r)
+      assert(false)
+    } catch {
+      case e: Throwable => Unit
+    }
+
+    // a second request must not be resolved yet
+    val r2 = ketamaClient.incr("key")
+    assert(r2.poll === None)
+
+    // resolve the group: request proceeds
+    verifyZeroInteractions(mockService)
+    when(mockService.apply(any[Incr])) thenReturn Future.value(Number(42))
+    backends.update(scala.collection.immutable.Set(client1))
+    assert(Await.result(r2).get === 42)
+  }
+
   test("ejects dead clients") {
     trait KetamaClientBuilder {
       val serviceA = mock[Service[Command,Response]](RETURNS_SMART_NULLS)
@@ -132,7 +160,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
       verify(serviceA, times(2)).apply(any())
       broker !! NodeRevived(nodeKeyB)
     }
-    
+
     info("primary leaves and rejoins")
     new KetamaClientBuilder {
       mutableGroup.update(immutable.Set(nodeB)) // nodeA leaves

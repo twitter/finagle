@@ -8,6 +8,7 @@ URLs if possible) and [submit a pull request][1]!
 
 * [Box](https://www.box.com/)
 * [Chartboost](https://www.chartboost.com/)
+* [Crimson Hexagon](http://www.crimsonhexagon.com/)
 * [DICE](http://dice.se/)
 * [Foursquare](https://foursquare.com/)
 * [Gigya](https://www.gigya.com/)

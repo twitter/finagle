@@ -21,7 +21,7 @@ abstract class HeaderMap
   def getAll(key: String): Iterable[String]
 
   /** Add a header but don't replace existing header(s). */
-  def add(k: String, v: String)
+  def add(k: String, v: String): Unit
 
   override def empty: HeaderMap = new MapHeaderMap(mutable.Map.empty)
 }
@@ -33,9 +33,8 @@ class MapHeaderMap(underlying: mutable.Map[String, Seq[String]]) extends HeaderM
   def getAll(key: String): Iterable[String] =
     underlying.getOrElse(key, Nil)
 
-  def add(k: String, v: String) = {
+  def add(k: String, v: String): Unit = {
     underlying(k) = underlying.getOrElse(k, Nil) :+ v
-    this
   }
 
   // For Map/MapLike
@@ -120,10 +119,8 @@ class MessageHeaderMap(httpMessage: HttpMessage) extends HeaderMap {
   def getAll(key: String): Iterable[String] =
     httpMessage.headers.getAll(key).asScala
 
-  def add(k: String, v: String) = {
+  def add(k: String, v: String) =
     httpMessage.headers.add(k, v)
-    this
-  }
 }
 
 

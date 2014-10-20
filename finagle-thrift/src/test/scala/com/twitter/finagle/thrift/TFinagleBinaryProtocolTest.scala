@@ -114,4 +114,36 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Shoul
     assertSerializedBytes(expected, trans)
   }
 
+  test("writeBinary accepts read-only ByteBuffer's with offset and limit") {
+    val len = 24
+    val offset = 4
+    val limit = 18
+
+    val buffer = ByteBuffer.allocate(len)
+    0.until(len).foreach { i => buffer.put(i.toByte) }
+    buffer.position(offset)
+    buffer.limit(limit)
+
+    val trans = new TMemoryBuffer(128)
+    val protocol = new TFinagleBinaryProtocol(trans, NullCounter, NullCounter)
+    protocol.writeBinary(buffer.asReadOnlyBuffer())
+
+    val expected = buffer.array().drop(offset).take(limit - offset)
+    assertSerializedBytes(expected, trans)
+  }
+
+  test("writeBinary accepts read-only ByteBuffer's") {
+    val len = 24
+
+    val buffer = ByteBuffer.allocate(len)
+    0.until(len).foreach { i => buffer.put(i.toByte) }
+    buffer.position(0)
+
+    val trans = new TMemoryBuffer(128)
+    val protocol = new TFinagleBinaryProtocol(trans, NullCounter, NullCounter)
+    protocol.writeBinary(buffer.asReadOnlyBuffer())
+
+    val expected = buffer.array()
+    assertSerializedBytes(expected, trans)
+  }
 }
