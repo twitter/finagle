@@ -2,6 +2,7 @@ package com.twitter.finagle.serverset2
 
 import collection.JavaConverters._
 import collection.mutable.ArrayBuffer
+import collection.mutable
 import java.net.InetSocketAddress
 
 /**
@@ -104,8 +105,27 @@ object Endpoint {
     val tmpl = Endpoint.Empty.copy(shard=shard, status=status)
     val eps = new ArrayBuffer[Endpoint]
 
+    // a typical serverset entry contains several references to the
+    // same host and several to the same host/port; by memoizing the
+    // hosts and HostPorts we trade off a little short-term allocation
+    // (the HashMaps here, which become garbage immediately) to save
+    // long-term allocation (by eliminating duplicate strings and
+    // HostPorts which would be held for the lifetime of the serverset
+    // entry).
+    val hostPortsMemo = {
+      val hostsMemo = mutable.HashMap.empty[String, String]
+      val hostPortsMemo = mutable.HashMap.empty[HostPort, HostPort]
+
+      { (hostPort: HostPort) =>
+        val host = hostPort.host
+        val host2 = hostsMemo.getOrElseUpdate(host, host)
+        val hostPort2 = hostPort.copy(host = host2)
+        hostPortsMemo.getOrElseUpdate(hostPort2, hostPort2)
+      }
+    }
+
     for (map <- d("serviceEndpoint"); addr <- parseEndpoint(map))
-      eps += tmpl.copy(addr=Some(addr))
+      eps += tmpl.copy(addr=Some(hostPortsMemo(addr)))
 
     for {
       map <- d("additionalEndpoints") collect {
@@ -114,7 +134,7 @@ object Endpoint {
       key <- map.keySet().asScala collect { case k: String => k }
       if key.isInstanceOf[String]
       addr <- parseEndpoint(map.get(key))
-    } eps += tmpl.copy(name=Some(key), addr=Some(addr))
+    } eps += tmpl.copy(name=Some(key), addr=Some(hostPortsMemo(addr)))
 
     eps.result
   }
