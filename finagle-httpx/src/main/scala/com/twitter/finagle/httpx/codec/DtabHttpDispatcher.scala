@@ -19,6 +19,7 @@ private[finagle] class DtabHttpDispatcher(
   import GenSerialClientDispatcher.wrapWriteException
 
   protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] = {
+    HttpDtab.clear(req)
     HttpDtab.write(Dtab.local, req)
     trans.write(req) rescue(wrapWriteException) flatMap { _ =>
       trans.read() flatMap {
