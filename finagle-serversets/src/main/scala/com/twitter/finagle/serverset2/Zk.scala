@@ -201,10 +201,16 @@ private[serverset2] object Zk extends FnZkFactory(
   private def randomizedDelay(minDelay: Duration): Duration =
     minDelay + Duration.fromMilliseconds(Rng.threadLocal.nextInt(minDelay.inMilliseconds.toInt))
 
+  /**
+   * Produce a `Var[Zk]` representing a ZooKeeper session that automatically
+   * reconnects upon session expiry. Reconnect attempts cease when any
+   * observation of the resultant `Var[Zk]` is closed.
+   */
   def retrying(
-      backoff: Duration,
-      newZk: () => Zk,
-      timer: Timer = DefaultTimer.twitter): Var[Zk] = Var.async(nil) { u =>
+    backoff: Duration,
+    newZk: () => Zk,
+    timer: Timer = DefaultTimer.twitter
+  ): Var[Zk] = Var.async(nil) { u =>
     @volatile var closing = false
     @volatile var zk: Zk = Zk.nil
 

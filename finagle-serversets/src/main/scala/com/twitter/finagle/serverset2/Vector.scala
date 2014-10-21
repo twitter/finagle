@@ -3,7 +3,10 @@ package com.twitter.finagle.serverset2
 import com.twitter.finagle.util.InetSocketAddressUtil.parseHostPorts
 import com.twitter.util.NonFatal
 
-private[serverset2] sealed trait Selector { def matches(e: Entry): Boolean }
+private[serverset2] sealed trait Selector {
+  def matches(e: Entry): Boolean
+}
+
 private[serverset2] object Selector {
   case class Host(hp: HostPort) extends Selector {
     def matches(e: Entry) = e match {
@@ -41,10 +44,10 @@ private[serverset2] object Selector {
 }
 
 private[serverset2] case class Descriptor(
-    selector: Selector,
-    weight: Double,
-    priority: Int) {
-
+  selector: Selector,
+  weight: Double,
+  priority: Int
+) {
   def matches(e: Entry) = selector matches e
 }
 
