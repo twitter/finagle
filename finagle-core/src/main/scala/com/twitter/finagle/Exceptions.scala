@@ -270,7 +270,7 @@ class InconsistentStateException(remoteAddress: SocketAddress) extends ChannelEx
 
 /**
  * A catch-all exception class for uncategorized
- * [[com.twitter.finagle.ChannelExceptions].
+ * [[com.twitter.finagle.ChannelException ChannelExceptions]].
  */
 case class UnknownChannelException(underlying: Throwable, override val remoteAddress: SocketAddress)
   extends ChannelException(underlying, remoteAddress) {
