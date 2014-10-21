@@ -6,7 +6,7 @@ import com.twitter.finagle.{Addr, InetResolver, Resolver}
 import com.twitter.finagle.stats.{DefaultStatsReceiver, Stat, StatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
-import com.twitter.util._
+import com.twitter.util.{Activity, Closable, Future, Memoize, Stopwatch, Var, Witness}
 import java.nio.charset.Charset
 import java.util.concurrent.atomic.AtomicInteger
 import com.google.common.cache.{Cache, CacheBuilder}
@@ -21,6 +21,20 @@ private[serverset2] object eprintln {
   def apply(l: String) = System.err.println(l)
 }
 
+private[serverset2] object Zk2Resolver {
+  /**
+   * A representation of an Addr accompanied by its total size and the number of
+   * members that are in "limbo".
+   */
+  case class State(addr: Addr, limbo: Int, size: Int)
+
+  /** Compute the size of an Addr, where non-bound equates to a size of zero. */
+  def sizeOf(addr: Addr): Int = addr match {
+    case Addr.Bound(set) => set.size
+    case _ => 0
+  }
+}
+
 /**
  * A [[com.twitter.finagle.Resolver]] for the "zk2" service discovery scheme.
  *
@@ -28,6 +42,7 @@ private[serverset2] object eprintln {
  * service discovery ZooKeeper cluster. See `Zk2Resolver.bind` for details.
  */
 class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
+  import Zk2Resolver._
 
   def this() = this(DefaultStatsReceiver.scope("zk2"))
 
@@ -44,7 +59,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
   // Cache of ServerSet2 instances.
   private[this] val serverSets = Memoize.snappable[String, ServerSet2] { hosts =>
     val varZk = Zk.retrying(ServerSet2.DefaultRetrying, () => zkFactory(hosts))
-    new ServerSet2(varZk)
+    new ServerSet2(varZk, statsReceiver)
   }
 
   private[this] val gauges = Seq(
@@ -73,10 +88,18 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
         sr.scope(s"endpoint=${endpoint.getOrElse("default")}")
       }
 
+      @volatile var nlimbo = 0
+      @volatile var size = 0
+
+      // The lifetimes of these gauges need to be managed if we
+      // ever de-memoize addrOf.
+      scoped.provideGauge("limbo") { nlimbo }
+      scoped.provideGauge("size") { size }
+
       // First, convert the Op-based serverset address to a
       // Var[Addr], filtering out only the endpoints we are
       // interested in.
-      val va: Var[Addr] = serverset.weightedOf(path, scoped).run flatMap {
+      val va: Var[Addr] = serverset.weightedOf(path).run flatMap {
         case Activity.Pending => Var.value(Addr.Pending)
         case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
         case Activity.Ok(eps) =>
@@ -97,34 +120,21 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
       // them in a limbo state for at least one epoch.
       val stabilized = Stabilizer(va, epoch)
 
-      // Finally, we output a State, which is always a nonpending
+      // Finally we output `State`s, which are always nonpending
       // address coupled with statistics from the stabilization
       // process.
-      case class State(addr: Addr, limbo: Int, size: Int)
-
-      def naddr(addr: Addr) = addr match {
-        case Addr.Bound(set) => set.size
-        case _ => 0
-      }
-
       val states = (stabilized.changes joinLast va.changes) collect {
         case (stable, unstable) if stable != Addr.Pending =>
-          val nstable = naddr(stable)
-          val nunstable = naddr(unstable)
+          val nstable = sizeOf(stable)
+          val nunstable = sizeOf(unstable)
           State(stable, nstable-nunstable, nstable)
       }
-
-      @volatile var nlimbo = 0
-      @volatile var size = 0
-
-      // The lifetimes of these gauges need to be managed if we
-      // ever de-memoize addrOf.
-      scoped.provideGauge("limbo") { nlimbo }
-      scoped.provideGauge("size") { size }
 
       val stabilizedVa = Var.async(Addr.Pending: Addr) { u =>
         nsets.incrementAndGet()
 
+        // Previous value of `u`, used to smooth out state changes in which the
+        // stable Addr doesn't vary.
         var lastu: Addr = Addr.Pending
 
         val reg = states.register(Witness { state: State =>
@@ -234,8 +244,13 @@ private[serverset2] object ServerSet2 {
  * A representation of a ServerSet, providing resolution of path strings to
  * various data structure representations of clusters.
  */
-private[serverset2] class ServerSet2(varZk: Var[Zk]) {
+private[serverset2] class ServerSet2(varZk: Var[Zk], statsReceiver: StatsReceiver) {
   import ServerSet2._
+
+  private[this] val zkEntriesReadStat = statsReceiver.scope("entries").stat("read_ms")
+  private[this] val zkEntriesParseStat = statsReceiver.scope("entries").stat("parse_ms")
+  private[this] val zkVectorsReadStat = statsReceiver.scope("vectors").stat("read_ms")
+  private[this] val zkVectorsParseStat = statsReceiver.scope("vectors").stat("parse_ms")
 
   private[this] val actZk = Activity(varZk.map(Activity.Ok(_)))
 
@@ -249,10 +264,9 @@ private[serverset2] class ServerSet2(varZk: Var[Zk]) {
 
   private[this] def dataOf(
     pattern: String,
-    statsReceiver: StatsReceiver
+    readStat: Stat
   ): Activity[Seq[(String, Option[Buf])]] = {
-    val readStat = statsReceiver.stat("read_ms")
-    actZk flatMap { zk =>
+    Activity(varZk.map(Activity.Ok(_))) flatMap { zk =>
       zk.globOf(pattern) flatMap { paths =>
         timedOf(readStat)(zk.collectImmutableDataOf(paths))
       }
@@ -261,12 +275,10 @@ private[serverset2] class ServerSet2(varZk: Var[Zk]) {
 
   def entriesOf(
     path: String,
-    cache: PathCache,
-    statsReceiver: StatsReceiver
+    cache: PathCache
   ): Activity[Set[Entry]] = {
-    val parseStat = statsReceiver.stat("parse_ms")
-    dataOf(path + EndpointGlob, statsReceiver) flatMap { pathmap =>
-      timedOf[Set[Entry]](parseStat) {
+    dataOf(path + EndpointGlob, zkEntriesReadStat) flatMap { pathmap =>
+      timedOf[Set[Entry]](zkEntriesParseStat) {
         val endpoints = pathmap flatMap {
           case (_, null) => None // no data
           case (path, Some(Buf.Utf8(data))) =>
@@ -288,12 +300,10 @@ private[serverset2] class ServerSet2(varZk: Var[Zk]) {
 
   def vectorsOf(
     path: String,
-    cache: PathCache,
-    statsReceiver: StatsReceiver
+    cache: PathCache
   ): Activity[Set[Vector]] = {
-    val parseStat = statsReceiver.stat("parse_ms")
-    dataOf(path + VectorGlob, statsReceiver) flatMap { pathmap =>
-      timedOf[Set[Vector]](parseStat) {
+    dataOf(path + VectorGlob, zkVectorsReadStat) flatMap { pathmap =>
+      timedOf[Set[Vector]](zkVectorsParseStat) {
         val vectors = pathmap flatMap {
           case (path, None) =>
             cache.vectors.getIfPresent(path) match {
@@ -318,10 +328,10 @@ private[serverset2] class ServerSet2(varZk: Var[Zk]) {
   /**
    * Look up the weighted ServerSet entries for a given path.
    */
-  def weightedOf(path: String, statsReceiver: StatsReceiver): Activity[Set[(Entry, Double)]] = {
+  def weightedOf(path: String): Activity[Set[(Entry, Double)]] = {
     val cache = new PathCache(16000)
-    val es = entriesOf(path, cache, statsReceiver.scope("entries")).run
-    val vs = vectorsOf(path, cache, statsReceiver.scope("vectors")).run
+    val es = entriesOf(path, cache).run
+    val vs = vectorsOf(path, cache).run
 
     Activity((es join vs) map {
       case (Activity.Pending, _) => Activity.Pending
