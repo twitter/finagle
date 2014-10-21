@@ -1,15 +1,14 @@
 package com.twitter.finagle.http.codec
 
-import com.twitter.concurrent.AsyncMutex
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.http.{Response, Request, ReaderUtils}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.Dtab
-import com.twitter.io.{Buf, Reader, BufReader}
+import com.twitter.io.{Reader, BufReader}
 import com.twitter.util.{Future, Promise, Return, Throw}
 import org.jboss.netty.handler.codec.http.{
-  HttpChunk, HttpRequest, HttpResponse, HttpHeaders
+  HttpRequest, HttpResponse, HttpHeaders
 }
 
 /**
@@ -34,6 +33,7 @@ class HttpClientDispatcher[Req <: HttpRequest](
     // It's kind of nasty to modify the request inline like this, but it's
     // in-line with what we already do in finagle-http. For example:
     // the body buf gets read without slicing.
+    HttpDtab.clear(req)
     HttpDtab.write(Dtab.local, req)
 
     if (!req.isChunked && !HttpHeaders.isContentLengthSet(req)) {
