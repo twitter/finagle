@@ -2,7 +2,7 @@ package com.twitter.finagle.benchmark
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.loadbalancer.P2CBalancer
+import com.twitter.finagle.loadbalancer.Balancers
 import com.twitter.finagle.stats.{StatsReceiver, SummarizingStatsReceiver}
 import com.twitter.finagle.util.{Drv, Rng, DefaultTimer}
 import com.twitter.util.{Function => _, _}
@@ -109,7 +109,7 @@ private[finagle] object P2CBenchmark extends com.twitter.app.App {
     val stable: Seq[ServiceFactory[Unit, Unit]] = Seq.tabulate(9) { i => newFactory(i, dist) }
 
     val underlying = Var(stable)
-    val p2c = new P2CBalancer[Unit, Unit](
+    val p2c = Balancers.newP2C[Unit, Unit](
       Activity(underlying map { facs => Activity.Ok(facs map { fac => (fac, 1D) }) }),
       statsReceiver=stats.scope("p2c"))
     val balancer = p2c.toService
