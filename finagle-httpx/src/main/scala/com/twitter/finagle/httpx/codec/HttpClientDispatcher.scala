@@ -1,16 +1,15 @@
 package com.twitter.finagle.httpx.codec
 
-import com.twitter.concurrent.AsyncMutex
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.httpx.{Response, Request, ReaderUtils}
 import com.twitter.finagle.httpx.netty.Bijections._
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.Dtab
-import com.twitter.io.{Buf, Reader, BufReader}
+import com.twitter.io.{Reader, BufReader}
 import com.twitter.util.{Future, Promise, Return, Throw}
 import org.jboss.netty.handler.codec.http.{
-  HttpChunk, HttpRequest, HttpResponse, HttpHeaders
+  HttpRequest, HttpResponse, HttpHeaders
 }
 
 /**
@@ -33,8 +32,9 @@ class HttpClientDispatcher[Req <: Request](
   // "errors" shouldn't be counted against the retry budget.)
   protected def dispatch(req: Req, p: Promise[Response]): Future[Unit] = {
     // It's kind of nasty to modify the request inline like this, but it's
-    // in-line with what we already do in finagle.httpx. For example:
+    // in-line with what we already do in finagle-httpx. For example:
     // the body buf gets read without slicing.
+    HttpDtab.clear(req)
     HttpDtab.write(Dtab.local, req)
 
     if (!req.isChunked && !HttpHeaders.isContentLengthSet(req)) {
