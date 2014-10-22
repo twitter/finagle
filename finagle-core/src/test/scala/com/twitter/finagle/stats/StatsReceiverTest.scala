@@ -123,9 +123,6 @@ class StatsReceiverTest extends FunSuite {
     assert(NullStatsReceiver.scope("foo").scope("bar").isNull)
   }
 
-  // CSL-1191
-  if (!sys.props.contains("SKIP_FLAKY"))
-
   test("rollup statsReceiver work in action") {
     val never = new Service[String, String] {
       def apply(request: String) = new Promise[String]
