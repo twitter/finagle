@@ -5,10 +5,15 @@ import java.net.SocketAddress
 
 /**
  * A trait for exceptions that have a source. The name of the source is
- * specified as a `serviceName`.
+ * specified as a `serviceName`. The "unspecified" value is used if no
+ * `serviceName` is provided by the implementation.
  */
 trait SourcedException extends Exception {
-  var serviceName: String = "unspecified"
+  var serviceName: String = SourcedException.UnspecifiedServiceName
+}
+
+object SourcedException {
+  val UnspecifiedServiceName = "unspecified"
 }
 
 /**
@@ -57,7 +62,7 @@ trait TimeoutException extends SourcedException { self: Exception =>
   protected val timeout: Duration
   protected def explanation: String
 
-  override def getMessage = "exceeded %s to %s while %s".format(timeout, serviceName, explanation)
+  override def getMessage = s"exceeded $timeout to $serviceName while $explanation"
 }
 
 /**
@@ -223,12 +228,16 @@ class ChannelException(underlying: Throwable, val remoteAddress: SocketAddress)
 {
   def this(underlying: Throwable) = this(underlying, null)
   def this() = this(null, null)
-  override def getMessage =
-    (underlying, remoteAddress) match {
+  override def getMessage = {
+    val message = (underlying, remoteAddress) match {
       case (_, null) => super.getMessage
-      case (null, _) => "ChannelException at remote address: %s".format(remoteAddress.toString)
-      case (_, _) => "%s at remote address: %s".format(underlying.getMessage, remoteAddress.toString)
+      case (null, _) => s"ChannelException at remote address: ${remoteAddress.toString}"
+      case (_, _) => s"${underlying.getMessage} at remote address: ${remoteAddress.toString}"
     }
+
+    if (serviceName == SourcedException.UnspecifiedServiceName) message
+    else s"$message from service: $serviceName"
+  }
 }
 
 /**
