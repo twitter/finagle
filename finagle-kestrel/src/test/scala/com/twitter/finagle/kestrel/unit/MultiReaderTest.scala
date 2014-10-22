@@ -241,10 +241,8 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
     }
   }
 
-  ignore("This test stopped working. " +
-    "static ReadHandle cluster should round robin from multiple available queues") {
+  test("static ReadHandle cluster should round robin from multiple available queues") {
     // We use frozen time for deterministic randomness.
-    // The message output order was simply determined empirically.
     new MultiReaderHelper {
       Time.withTimeAt(Time.epoch + 1.seconds) { _ =>
         // stuff the queues beforehand
@@ -255,9 +253,10 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
         }
 
         val handle = MultiReaderHelper.merge(va)
-        assert((handle.messages ??) === ms(0))
-        assert((handle.messages ??) === ms(2))
-        assert((handle.messages ??) === ms(1))
+        assert(
+          ISet((handle.messages ??), (handle.messages ??), (handle.messages ??)) ===
+          ISet(ms(0), ms(1), ms(2))
+        )
       }
     }
   }
