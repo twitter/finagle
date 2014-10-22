@@ -1,17 +1,17 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.{FailedFastException, ServiceFactory, Service}
-import com.twitter.util._
-import com.twitter.finagle.MockTimer
-import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.conversions.time._
+
 import java.util.concurrent.atomic.AtomicInteger
+import com.twitter.conversions.time._
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.{FailedFastException, MockTimer, Service, ServiceFactory, SourcedException}
+import com.twitter.util._
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
-import org.mockito.Mockito.{never, verify, when, times}
+import org.mockito.Mockito.{never, times, verify, when}
+import org.scalatest.FunSuite
 import org.scalatest.concurrent.Conductors
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.FunSuite
 import org.scalatest.mock.MockitoSugar
 import scala.language.reflectiveCalls
 
@@ -193,7 +193,7 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
         ctx.p() = Throw(new Exception)
         ctx.failfast().poll match {
           case Some(Throw(ex: FailedFastException)) => {
-            assert(ex.serviceName === "unspecified")
+            assert(ex.serviceName === SourcedException.UnspecifiedServiceName)
           }
           case _ => throw new Exception
         }

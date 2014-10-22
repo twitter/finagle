@@ -68,7 +68,8 @@ class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
           latencyStat.add(elapsed().inMilliseconds)
           failureReceiver.counter(Throwables.mkString(e): _*).incr()
           e match {
-            case sourced: SourcedException if sourced.serviceName != "unspecified" =>
+            case sourced: SourcedException
+              if sourced.serviceName != SourcedException.UnspecifiedServiceName =>
               sourcedFailuresReceiver
                 .counter(sourced.serviceName +: Throwables.mkString(sourced): _*)
                 .incr()

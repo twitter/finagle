@@ -47,6 +47,14 @@ class ExceptionsTest extends FunSuite with MockitoSugar {
     }
   }
 
+  test("ChannelException should generate message with service name when it's available") {
+    new ExceptionsHelper {
+      val ex = new ChannelException(null, null)
+      ex.serviceName = "foo"
+      assert(ex.getMessage.contains("foo"))
+    }
+  }
+
   test("ChannelException should provide access to remote address") {
     new ExceptionsHelper {
       val ex = new ChannelException(underlying, address)
