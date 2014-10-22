@@ -16,6 +16,31 @@ import scala.collection.immutable
 package exp {
   object loadMetric extends GlobalFlag("leastReq", "Metric used to measure load across endpoints (leastReq | ewma)")
   object decayTime extends GlobalFlag(10.seconds, "The window of latency observations")
+
+  class P2CBalancerPeakEwmaFactory(decayTime: Duration = exp.decayTime()) extends WeightedLoadBalancerFactory {
+    private val log = Logger.getLogger(getClass.getName)
+
+    def newLoadBalancer[Req, Rep](
+      factories: Var[Set[(ServiceFactory[Req, Rep], Double)]],
+      statsReceiver: StatsReceiver,
+      emptyException: NoBrokersAvailableException
+    ): ServiceFactory[Req, Rep] =
+      newWeightedLoadBalancer(
+        Activity(factories map(Activity.Ok(_))),
+        statsReceiver, emptyException)
+
+    def newWeightedLoadBalancer[Req, Rep](
+      activity: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
+      statsReceiver: StatsReceiver,
+      emptyException: NoBrokersAvailableException
+    ): ServiceFactory[Req, Rep] = {
+        log.info("Using load metric ewma")
+        new P2CBalancerPeakEwma[Req, Rep](activity,
+          decayTime = decayTime,
+          statsReceiver = statsReceiver,
+          emptyException = emptyException)
+      }
+  }
 }
 
 object P2CBalancerFactory extends WeightedLoadBalancerFactory {
@@ -27,7 +52,7 @@ object P2CBalancerFactory extends WeightedLoadBalancerFactory {
     emptyException: NoBrokersAvailableException
   ): ServiceFactory[Req, Rep] =
     newWeightedLoadBalancer(
-      Activity(factories map(Activity.Ok(_))), 
+      Activity(factories map(Activity.Ok(_))),
       statsReceiver, emptyException)
 
   def newWeightedLoadBalancer[Req, Rep](
@@ -78,9 +103,9 @@ private class P2CBalancer[Req, Rep](
     protected val rng: Rng = Rng.threadLocal,
     protected val statsReceiver: StatsReceiver = NullStatsReceiver,
     protected val emptyException: NoBrokersAvailableException = new NoBrokersAvailableException)
-  extends Balancer[Req, Rep] 
-  with LeastLoaded[Req, Rep] 
-  with P2C[Req, Rep] 
+  extends Balancer[Req, Rep]
+  with LeastLoaded[Req, Rep]
+  with P2C[Req, Rep]
   with Updating[Req, Rep]
 
 /**
@@ -89,7 +114,7 @@ private class P2CBalancer[Req, Rep](
  *
  * Peak EWMA is designed to converge quickly when encountering
  * slow endpoints. It is quick to react to latency spikes, recovering
- * only cautiously. Peak EWMA takes history into account, so that 
+ * only cautiously. Peak EWMA takes history into account, so that
  * slow behavior is penalized relative to the supplied decay time.
  *
  * @param underlying An activity that updates with the set of
@@ -117,9 +142,9 @@ private class P2CBalancerPeakEwma[Req, Rep](
     protected val rng: Rng = Rng.threadLocal,
     protected val statsReceiver: StatsReceiver = NullStatsReceiver,
     protected val emptyException: NoBrokersAvailableException = new NoBrokersAvailableException)
-  extends Balancer[Req, Rep] 
-  with PeakEwma[Req, Rep] 
-  with P2C[Req, Rep] 
+  extends Balancer[Req, Rep]
+  with PeakEwma[Req, Rep]
+  with P2C[Req, Rep]
   with Updating[Req, Rep]
 
 private object PeakEwma {
@@ -128,7 +153,7 @@ private object PeakEwma {
 
 private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
   import PeakEwma.log
-  
+
   protected def decayTime: Duration
 
   protected def nanoTime(): Long = System.nanoTime()
@@ -203,7 +228,7 @@ private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
       super.apply(conn) transform {
         case Return(svc) =>
           Future.value(new ServiceProxy(svc) {
-            override def close(deadline: Time) = 
+            override def close(deadline: Time) =
               super.close(deadline) ensure {
                 metric.end(ts)
               }
@@ -220,7 +245,7 @@ private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
     Node(factory, weight, new Metric(statsReceiver, factory.toString))
 
   protected def failingNode(cause: Throwable) = Node(
-    new FailingFactory(cause), 0D, 
+    new FailingFactory(cause), 0D,
     new Metric(NullStatsReceiver, "failing"))
 }
 
