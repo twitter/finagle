@@ -25,10 +25,10 @@ object NullListener extends Listener[Any, Any] {
 }
 
 /**
- * A collection of [[com.twitter.finagle.Stack.Param]]'s useful for configuring
+ * A collection of [[com.twitter.finagle.Stack.Param Stack.Params]] useful for configuring
  * a [[com.twitter.finagle.server.Listener]].
  */
-private[finagle] object Listener {
+object Listener {
   /**
    * A [[com.twitter.finagle.Stack.Param]] used to configure
    * the `Listener` backlog.
