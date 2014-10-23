@@ -8,10 +8,9 @@ import com.twitter.util.Activity
 import java.net.InetSocketAddress
 
 object newZk extends GlobalFlag(
-  false,
-  "If set to true, the new zk2 com.twitter.finagle.Resolver is used. This entails a " +
-    "newer ServerSets implementation (i.e. resolution of /$/com.twitter.serverset " +
-    "paths) and includes support for read-only ZooKeeper connections "
+  true,
+  "If set to true, the new zk2 com.twitter.finagle.Resolver is used. Otherwise, " +
+  "an older, less reliable zookeeper client is used."
 )
 
 /**
