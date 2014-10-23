@@ -132,6 +132,7 @@ abstract class SimpleRetryPolicy[A](i: Int) extends RetryPolicy[A]
 object RetryPolicy extends JavaSingleton {
   object RetryableWriteException {
     def unapply(thr: Throwable): Option[Throwable] = thr match {
+      case exc@Failure.Retryable(_) => Some(exc)
       // We don't retry interruptions by default since they
       // indicate that the request was discarded.
       case Failure.InterruptedBy(_) => None
@@ -150,6 +151,8 @@ object RetryPolicy extends JavaSingleton {
   }
 
   val TimeoutAndWriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = WriteExceptionsOnly orElse {
+    case Throw(Failure.Cause(_: TimeoutException)) => true
+    case Throw(Failure.Cause(_: UtilTimeoutException)) => true
     case Throw(_: TimeoutException) => true
     case Throw(_: UtilTimeoutException) => true
   }
