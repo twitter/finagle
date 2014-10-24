@@ -52,13 +52,16 @@ object DefaultPool {
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module[ServiceFactory[Req, Rep]] {
       import com.twitter.finagle.pool.{CachingPool, WatermarkPool, BufferingPool}
-
       val role = DefaultPool.Role
       val description = "Control client connection pool"
-      def make(next: Stack[ServiceFactory[Req, Rep]])(implicit params: Params) = {
-        val DefaultPool.Param(low, high, bufferSize, idleTime, maxWaiters) = get[DefaultPool.Param]
-        val param.Stats(statsReceiver) = get[param.Stats]
-        val param.Timer(timer) = get[param.Timer]
+      val parameters = Seq(
+        implicitly[Stack.Param[Param]],
+        implicitly[Stack.Param[param.Stats]],
+        implicitly[Stack.Param[param.Timer]])
+      def make(prms: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
+        val Param(low, high, bufferSize, idleTime, maxWaiters) = prms[Param]
+        val param.Stats(statsReceiver) = prms[param.Stats]
+        val param.Timer(timer) = prms[param.Timer]
 
         val stack = new StackBuilder[ServiceFactory[Req, Rep]](next)
 

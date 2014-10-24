@@ -32,14 +32,14 @@ private[finagle] object IdleConnectionFilter {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.channel.IdleConnectionFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module2[Param, param.Stats, ServiceFactory[Req, Rep]] {
       val role = IdleConnectionFilter.role
       val description = "Refuse requests and try to close idle connections " +
         "based on the number of active connections"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Stack.Params) = {
-        get[IdleConnectionFilter.Param] match {
-          case IdleConnectionFilter.Param(Some(thres)) =>
-            val param.Stats(sr) = get[param.Stats]
+      def make(_param: Param, _stats: param.Stats, next: ServiceFactory[Req, Rep]) = {
+        _param match {
+          case Param(Some(thres)) =>
+            val param.Stats(sr) = _stats
             new IdleConnectionFilter(next, thres, sr.scope("idle"))
           case _ => next
         }

@@ -5,6 +5,19 @@
 6.x
 -----
 
+6.23.0
+~~~~~~
+
+Breaking API Changes
+--------------------
+
+  * finagle-core: `c.t.f.Stackable`s maintained state about which parameters were
+    accessed via `get`. This was error prone and violated the assumption that `Stack`s
+    are immutable data structures. We removed this in favor of annotating modules with
+    parameters. The abstract classes for Stackables were also simplified. Now we only have
+    `Module` and `ModuleN` variants which are more convenient for most definitions.
+    Since this is an advanced API, it should not impact standard usage of finagle.
+
 6.22.0
 ~~~~~~
 

@@ -19,13 +19,18 @@ private[finagle] object TimeoutFactory {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.factory.TimeoutFactory]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module3[Param, param.Timer, param.Label, ServiceFactory[Req, Rep]] {
       val role = TimeoutFactory.role
       val description = "Time out service acquisition after a given period"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-        val TimeoutFactory.Param(timeout) = get[TimeoutFactory.Param]
-        val param.Label(label) = get[param.Label]
-        val param.Timer(timer) = get[param.Timer]
+      def make(
+        _timeout: Param,
+        _timer: param.Timer,
+        _label: param.Label,
+        next: ServiceFactory[Req, Rep]
+      ) = {
+        val Param(timeout) = _timeout
+        val param.Label(label) = _label
+        val param.Timer(timer) = _timer
 
         val exc = new ServiceTimeoutException(timeout)
         exc.serviceName = label

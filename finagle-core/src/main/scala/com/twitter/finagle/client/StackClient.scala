@@ -184,16 +184,18 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
    * A stackable module that creates new `Transports` (via transporter)
    * when applied.
    */
-  protected def endpointer = new Stack.Simple[ServiceFactory[Req, Rep]] {
-    val role = Endpoint
-    val description = "Send requests over the wire"
-    def make(next: ServiceFactory[Req, Rep])(implicit prms: Stack.Params) = {
-      val Transporter.EndpointAddr(addr) = get[Transporter.EndpointAddr]
-      val endpointClient = copy1(params=prms)
-      val transporter = endpointClient.newTransporter()
-      ServiceFactory(() => transporter(addr).map(endpointClient.newDispatcher))
+  protected def endpointer: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Module[ServiceFactory[Req, Rep]] {
+      val role = Endpoint
+      val description = "Send requests over the wire"
+      val parameters = Seq(implicitly[Stack.Param[Transporter.EndpointAddr]])
+      def make(prms: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
+        val Transporter.EndpointAddr(addr) = prms[Transporter.EndpointAddr]
+        val endpointClient = copy1(params=prms)
+        val transporter = endpointClient.newTransporter()
+        Stack.Leaf(this, ServiceFactory(() => transporter(addr).map(endpointClient.newDispatcher)))
+      }
     }
-  }
 
   def newClient(dest: Name, label0: String): ServiceFactory[Req, Rep] = {
     val Stats(stats) = params[Stats]

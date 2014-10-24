@@ -110,10 +110,10 @@ object Filter {
     : CanStackFrom[Filter[Req, Rep, Req, Rep], Service[Req, Rep]] =
     new CanStackFrom[Filter[Req, Rep, Req, Rep], Service[Req, Rep]] {
       def toStackable(_role: Stack.Role, filter: Filter[Req, Rep, Req, Rep]) =
-        new Stack.Simple[Service[Req, Rep]] {
+        new Stack.Module0[Service[Req, Rep]] {
           val role = _role
           val description = role.name
-          def make(next: Service[Req, Rep])(implicit params: Params) = filter andThen next
+          def make(next: Service[Req, Rep]) = filter andThen next
         }
     }
 
@@ -121,10 +121,10 @@ object Filter {
     : CanStackFrom[Filter[Req, Rep, Req, Rep], ServiceFactory[Req, Rep]] =
     new CanStackFrom[Filter[Req, Rep, Req, Rep], ServiceFactory[Req, Rep]] {
       def toStackable(_role: Stack.Role, filter: Filter[Req, Rep, Req, Rep]) =
-        new Stack.Simple[ServiceFactory[Req, Rep]] {
+        new Stack.Module0[ServiceFactory[Req, Rep]] {
           val role = _role
           val description = role.name
-          def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = filter andThen next
+          def make(next: ServiceFactory[Req, Rep]) = filter andThen next
         }
     }
 

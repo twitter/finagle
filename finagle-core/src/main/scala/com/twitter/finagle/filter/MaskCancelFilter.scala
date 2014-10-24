@@ -6,6 +6,8 @@ import com.twitter.util.{Future, Promise}
 private[finagle] object MaskCancelFilter {
   val role = Stack.Role("MaskCancel")
 
+  // TODO: we should simply transform the stack for boolean
+  // stackables like this.
   case class Param(yesOrNo: Boolean)
   implicit object Param extends Stack.Param[Param] {
     val default = Param(false)
@@ -16,11 +18,11 @@ private[finagle] object MaskCancelFilter {
    * [[com.twitter.finagle.filter.MaskCancelFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module1[Param, ServiceFactory[Req, Rep]] {
       val role = MaskCancelFilter.role
       val description = "Prevent cancellations from propagating to other services"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-        get[Param] match {
+      def make(_param: Param, next: ServiceFactory[Req, Rep]) = {
+        _param match {
           case Param(true) => new MaskCancelFilter[Req, Rep] andThen next
           case _ => next
         }

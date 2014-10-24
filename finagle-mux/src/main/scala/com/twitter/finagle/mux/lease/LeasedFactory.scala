@@ -7,10 +7,10 @@ object LeasedFactory {
   val role = Stack.Role("Leased")
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module0[ServiceFactory[Req, Rep]] {
       val role = LeasedFactory.role
       val description = "Bridge gap between ServiceFactory.isAvailable and Acting.isActive"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
+      def make(next: ServiceFactory[Req, Rep]) = {
         val mk: () => Future[Service[Req, Rep] with Acting] = { () =>
           next() map {
             // the warning is OK, this should go away when we fix the abstraction
