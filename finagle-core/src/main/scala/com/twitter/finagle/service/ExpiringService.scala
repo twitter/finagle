@@ -25,13 +25,18 @@ private[finagle] object ExpiringService {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.ExpiringService]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module3[Param, param.Timer, param.Stats, ServiceFactory[Req, Rep]] {
       val role = ExpiringService.role
       val description = "Expire a service after a certain amount of idle time"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-        val param.Timer(timer) = get[param.Timer]
-        val ExpiringService.Param(idleTime, lifeTime) = get[ExpiringService.Param]
-        val param.Stats(statsReceiver) = get[param.Stats]
+      def make(
+        _param: Param,
+        _timer: param.Timer,
+        _stats: param.Stats,
+        next: ServiceFactory[Req, Rep]
+      ) = {
+        val param.Timer(timer) = _timer
+        val ExpiringService.Param(idleTime, lifeTime) = _param
+        val param.Stats(statsReceiver) = _stats
 
         val idle = if (idleTime.isFinite) Some(idleTime) else None
         val life = if (lifeTime.isFinite) Some(lifeTime) else None

@@ -22,14 +22,13 @@ object TimeoutFilter {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.TimeoutFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module2[TimeoutFilter.Param, param.Timer, ServiceFactory[Req, Rep]] {
       val role = TimeoutFilter.role
       val description = "Apply a timeout to requests"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-        val TimeoutFilter.Param(timeout) = get[TimeoutFilter.Param]
-        val param.Timer(timer) = get[param.Timer]
-        if (!timeout.isFinite) next
-        else {
+      def make(_param: Param, _timer: param.Timer, next: ServiceFactory[Req, Rep]) = {
+        val Param(timeout) = _param
+        val param.Timer(timer) = _timer
+        if (!timeout.isFinite) next else {
           val exc = new IndividualRequestTimeoutException(timeout)
           new TimeoutFilter(timeout, exc, timer) andThen next
         }

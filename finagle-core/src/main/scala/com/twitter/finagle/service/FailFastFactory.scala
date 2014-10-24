@@ -26,13 +26,12 @@ private[finagle] object FailFastFactory {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.FailFastFactory]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module2[param.Stats, param.Timer, ServiceFactory[Req, Rep]] {
       val role = FailFastFactory.role
-      val description =
-        "Backoff exponentially from hosts to which we cannot establish a connection"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-        val param.Stats(statsReceiver) = get[param.Stats]
-        val param.Timer(timer) = get[param.Timer]
+      val description = "Backoff exponentially from hosts to which we cannot establish a connection"
+      def make(_stats: param.Stats, _timer: param.Timer, next: ServiceFactory[Req, Rep]) = {
+        val param.Stats(statsReceiver) = _stats
+        val param.Timer(timer) = _timer
         new FailFastFactory(next, statsReceiver.scope("failfast"), timer)
       }
     }

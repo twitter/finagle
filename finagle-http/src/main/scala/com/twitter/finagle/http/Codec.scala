@@ -292,11 +292,12 @@ private object TraceInfo {
   }
 }
 
-private[finagle] class HttpServerTraceInitializer[Req <: HttpRequest, Rep] extends Stack.Simple[ServiceFactory[Req, Rep]] {
+private[finagle] class HttpServerTraceInitializer[Req <: HttpRequest, Rep]
+  extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
   val role = TraceInitializerFilter.role
   val description = "Initialize the tracing system with trace info from the incoming request"
-  def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-    val param.Tracer(tracer) = get[param.Tracer]
+  def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
+    val param.Tracer(tracer) = _tracer
     val traceInitializer = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
       Trace.unwind {
         Trace.pushTracer(tracer)
@@ -308,11 +309,12 @@ private[finagle] class HttpServerTraceInitializer[Req <: HttpRequest, Rep] exten
   }
 }
 
-private[finagle] class HttpClientTraceInitializer[Req <: HttpRequest, Rep] extends Stack.Simple[ServiceFactory[Req, Rep]] {
+private[finagle] class HttpClientTraceInitializer[Req <: HttpRequest, Rep]
+  extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
   val role = TraceInitializerFilter.role
   val description = "Sets the next TraceId and attaches trace information to the outgoing request"
-  def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-    val param.Tracer(tracer) = get[param.Tracer]
+  def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
+    val param.Tracer(tracer) = _tracer
     val traceInitializer = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
       Trace.unwind {
         Trace.pushTracerAndSetNextId(tracer)

@@ -20,13 +20,14 @@ private object ThriftMuxUtil {
         throw new IllegalArgumentException("Iface is not a valid thrift iface", cause)
     }
 
-  val protocolRecorder = new Stack.Simple[ServiceFactory[CB, CB]] {
-    val role = ThriftMuxUtil.role
-    val description = "Record ThriftMux protocol usage"
-    def make(next: ServiceFactory[CB, CB])(implicit params: Stack.Params) = {
-      val param.Stats(stats) = params[param.Stats]
-      stats.scope("protocol").provideGauge("thriftmux")(1)
-      next
+  val protocolRecorder: Stackable[ServiceFactory[CB, CB]] =
+    new Stack.Module1[param.Stats, ServiceFactory[CB, CB]] {
+      val role = ThriftMuxUtil.role
+      val description = "Record ThriftMux protocol usage"
+      def make(_stats: param.Stats, next: ServiceFactory[CB, CB]) = {
+        val param.Stats(stats) = _stats
+        stats.scope("protocol").provideGauge("thriftmux")(1)
+        next
+      }
     }
-  }
 }

@@ -15,11 +15,11 @@ private[finagle] object SingletonPool {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.pool.SingletonPool]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module1[param.Stats, ServiceFactory[Req, Rep]] {
       val role = SingletonPool.role
       val description = "Maintain at most one connection"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Stack.Params) = {
-        val param.Stats(sr) = get[param.Stats]
+      def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]) = {
+        val param.Stats(sr) = _stats
         new SingletonPool(next, sr.scope("singletonpool"))
       }
     }

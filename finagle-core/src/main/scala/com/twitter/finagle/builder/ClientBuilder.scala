@@ -380,11 +380,11 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       val Timer(timer) = params[Timer]
       val codec = codecFactory(ClientCodecConfig(name))
 
-      val prepConn = new Stack.Simple[ServiceFactory[Req1, Rep1]] {
+      val prepConn = new Stack.Module1[Stats, ServiceFactory[Req1, Rep1]] {
         val role = StackClient.Role.prepConn
         val description = "Connection preparation phase as defined by a Codec"
-        def make(next: ServiceFactory[Req1, Rep1])(implicit params: Params) = {
-          val Stats(stats) = params[Stats]
+        def make(_stats: Stats, next: ServiceFactory[Req1, Rep1]) = {
+          val Stats(stats) = _stats
           val underlying = codec.prepareConnFactory(next)
           new ServiceFactoryProxy(underlying) {
             val stat = stats.stat("codec_connection_preparation_latency_ms")

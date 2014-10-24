@@ -72,10 +72,19 @@ private[finagle] object LoadBalancerFactory {
     new Stack.Module[ServiceFactory[Req, Rep]] {
       val role = LoadBalancerFactory.role
       val description = "Balance requests across multiple endpoints"
-      def make(next: Stack[ServiceFactory[Req, Rep]])(implicit params: Params) = {
-        val ErrorLabel(errorLabel) = get[ErrorLabel]
-        val Dest(dest) = get[Dest]
-        val Param(loadBalancerFactory) = get[Param]
+      val parameters = Seq(
+        implicitly[Stack.Param[ErrorLabel]],
+        implicitly[Stack.Param[Dest]],
+        implicitly[Stack.Param[LoadBalancerFactory.Param]],
+        implicitly[Stack.Param[LoadBalancerFactory.HostStats]],
+        implicitly[Stack.Param[param.Stats]],
+        implicitly[Stack.Param[param.Logger]],
+        implicitly[Stack.Param[param.Monitor]],
+        implicitly[Stack.Param[param.Reporter]])
+      def make(params: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
+        val ErrorLabel(errorLabel) = params[ErrorLabel]
+        val Dest(dest) = params[Dest]
+        val Param(loadBalancerFactory) = params[Param]
 
         // Determine which stats receiver to use based on the flag
         // 'com.twitter.finagle.loadbalancer.perHostStats'
@@ -84,12 +93,12 @@ private[finagle] object LoadBalancerFactory {
         val hostStatsReceiver =
           if (!params.contains[HostStats]) {
             if (perHostStats()) LoadedStatsReceiver else NullStatsReceiver
-          } else get[HostStats].hostStatsReceiver
-        val param.Stats(statsReceiver) = get[param.Stats]
-        val param.Logger(log) = get[param.Logger]
-        val param.Label(label) = get[param.Label]
-        val param.Monitor(monitor) = get[param.Monitor]
-        val param.Reporter(reporter) = get[param.Reporter]
+          } else params[HostStats].hostStatsReceiver
+        val param.Stats(statsReceiver) = params[param.Stats]
+        val param.Logger(log) = params[param.Logger]
+        val param.Label(label) = params[param.Label]
+        val param.Monitor(monitor) = params[param.Monitor]
+        val param.Reporter(reporter) = params[param.Reporter]
 
         val noBrokersException = new NoBrokersAvailableException(errorLabel)
 

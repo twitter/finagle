@@ -204,24 +204,25 @@ object FactoryToService {
    * [[FactoryToService]]. This makes per-request service acquisition
    * part of the stack so it can be wrapped by filters such as tracing.
    */
-  def module[Req, Rep] = new Stack.Simple[ServiceFactory[Req, Rep]] {
-    val role = FactoryToService.role
-    val description = "Apply service factory on each service request"
-    def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-      if (params[Enabled].enabled) {
-        // we want to pass through the ServiceFactory.close but not the Service.close
-        // which is called by the upstream FactoryToService
-        val service = Future.value(new ServiceProxy[Req, Rep](new FactoryToService(next)) {
-          override def close(deadline: Time) = Future.Done
-        })
-        new ServiceFactoryProxy(next) {
-          override def apply(conn: ClientConnection) = service
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Module1[Enabled, ServiceFactory[Req, Rep]] {
+      val role = FactoryToService.role
+      val description = "Apply service factory on each service request"
+      def make(_enabled: Enabled, next: ServiceFactory[Req, Rep]) = {
+        if (_enabled.enabled) {
+          // we want to pass through the ServiceFactory.close but not the Service.close
+          // which is called by the upstream FactoryToService
+          val service = Future.value(new ServiceProxy[Req, Rep](new FactoryToService(next)) {
+            override def close(deadline: Time) = Future.Done
+          })
+          new ServiceFactoryProxy(next) {
+            override def apply(conn: ClientConnection) = service
+          }
+        } else {
+          next
         }
-      } else {
-        next
       }
     }
-  }
 }
 
 /**

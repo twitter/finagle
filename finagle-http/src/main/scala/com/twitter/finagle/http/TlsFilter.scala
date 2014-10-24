@@ -21,11 +21,11 @@ object TlsFilter {
   val role = Stack.Role("HttpTlsHost")
 
   def module: Stackable[ServiceFactory[HttpRequest, HttpResponse]] =
-    new Stack.Simple[ServiceFactory[HttpRequest, HttpResponse]] {
+    new Stack.Module1[Transporter.TLSHostname, ServiceFactory[HttpRequest, HttpResponse]] {
       val role = TlsFilter.role
       val description = "Add host headers to TLS-enabled requests"
-      def make(next: ServiceFactory[HttpRequest, HttpResponse])(implicit params: Params) =
-        get[Transporter.TLSHostname] match {
+      def make(tlsHostname: Transporter.TLSHostname, next: ServiceFactory[HttpRequest, HttpResponse]) =
+        tlsHostname match {
           case Transporter.TLSHostname(Some(host)) => new TlsFilter(host) andThen next
           case Transporter.TLSHostname(None) => next
         }

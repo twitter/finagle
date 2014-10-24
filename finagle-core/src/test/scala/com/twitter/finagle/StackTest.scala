@@ -15,7 +15,7 @@ class StackTest extends FunSuite {
   val testHead4 = new Stack.Head {
     val role = testRole4
     val description = testRole4.toString
-    val params = Map.empty[String, String]
+    val parameters = Nil
   }
 
   def newStack() = {
@@ -49,10 +49,10 @@ class StackTest extends FunSuite {
   }
 
   test("Stack.replace") {
-    val stack = newStack().replace(testRole2, new Stack.Simple[List[Int]] {
+    val stack = newStack().replace(testRole2, new Stack.Module0[List[Int]] {
       val role = testRole2
       val description = testRole2.toString
-      def make(next: List[Int])(implicit params: Stack.Params): List[Int] = 100 :: next
+      def make(next: List[Int]): List[Int] = 100 :: next
     })
 
     assert(stack.make(Stack.Params.empty) === Seq(20,100,1,2,3,4))
@@ -87,71 +87,6 @@ class StackTest extends FunSuite {
     assert(params[TestParam] === TestParam(1))
     assert(params2[TestParam] === TestParam(999))
     assert(params3[TestParam] === TestParam(100))
-  }
-
-  test("Head params get param in map") {
-    val params = Stack.Params.empty + TestParam(5)
-    val stack = newStack().replace(testRole3,
-      new Stack.Simple[List[Int]] {
-        val role = testRole3
-        val description = testRole3.toString
-        def make(next: List[Int])(implicit params: Stack.Params): List[Int] = {
-          val TestParam(num) = get[TestParam]
-          num :: next
-        }
-      })
-
-    assert(stack.head.params.isEmpty)
-    stack.make(params)
-    stack.head.params.get("p1") match {
-      case None => fail("Parameter p1 not added to the map")
-      case Some(x) => assert(x.contains("5"))
-    }
-  }
-
-  test("Head params get param not in map") {
-    val params = Stack.Params.empty + TestParam(5)
-    val stack = newStack().replace(testRole3,
-      new Stack.Simple[List[Int]] {
-        val role = testRole3
-        val description = testRole3.toString
-        def make(next: List[Int])(implicit params: Stack.Params): List[Int] = {
-          val TestParam(num) = get[TestParam]
-          num :: next
-        }
-      })
-
-    stack.make(params)
-    stack.head.params.get("foo") match {
-      case None =>
-      case _ => fail("Getting non-existant param from params did not return None")
-    }
-  }
-
-  test("Head params when fields/values of params class unequal lengths") {
-    val params = Stack.Params.empty + TestParamInnerVar(5)
-    val stack = newStack().replace(testRole3,
-      new Stack.Simple[List[Int]] {
-        val role = testRole3
-        val description = testRole3.toString
-        def make(next: List[Int])(implicit params: Stack.Params): List[Int] = {
-          val TestParamInnerVar(num) = get[TestParamInnerVar]
-          num :: next
-        }
-      })
-
-    assert(stack.head.params.isEmpty)
-    stack.make(params)
-
-    stack.head.params.get("p1") match {
-      case None => fail("Parameter p1 not added to the map")
-      case Some(x) => assert(x.contains("5"))
-    }
-
-    stack.head.params.get("p2") match {
-      case None => fail("Parameter p2 should be added to map but have unknown value")
-      case Some(x) => assert(x.contains("unknown"))
-    }
   }
 
   test("Role.toString: should return lowercase object name") {

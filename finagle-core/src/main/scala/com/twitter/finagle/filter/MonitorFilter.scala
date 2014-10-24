@@ -11,11 +11,11 @@ private[finagle] object MonitorFilter {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.filter.MonitorFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]]{
+    new Stack.Module1[param.Monitor, ServiceFactory[Req, Rep]]{
       val role = MonitorFilter.role
       val description = "Act as last-resort exception handler"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-        val param.Monitor(monitor) = get[param.Monitor]
+      def make(_monitor: param.Monitor, next: ServiceFactory[Req, Rep]) = {
+        val param.Monitor(monitor) = _monitor
         new MonitorFilter(monitor) andThen next
       }
     }

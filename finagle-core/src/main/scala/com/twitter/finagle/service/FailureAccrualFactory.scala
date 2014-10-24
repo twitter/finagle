@@ -30,12 +30,12 @@ private[finagle] object FailureAccrualFactory {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.FailureAccrualFactory]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module2[Param, param.Timer, ServiceFactory[Req, Rep]] {
       val role = FailureAccrualFactory.role
       val description = "Backoff from hosts that we cannot successfully make requests to"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-        val FailureAccrualFactory.Param(n, d) = get[FailureAccrualFactory.Param]
-        val param.Timer(timer) = get[param.Timer]
+      def make(_param: Param, _timer: param.Timer, next: ServiceFactory[Req, Rep]) = {
+        val FailureAccrualFactory.Param(n, d) = _param
+        val param.Timer(timer) = _timer
         wrapper(n, d)(timer) andThen next
       }
     }

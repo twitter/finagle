@@ -44,12 +44,12 @@ private[finagle] object NamerTracingFilter {
    * [[com.twitter.finagle.factory.NamerTracingFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module2[BindingFactory.BaseDtab, BoundPath, ServiceFactory[Req, Rep]] {
       val role = NamerTracingFilter.role
       val description = "Trace the details of the Namer lookup"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-        val BindingFactory.BaseDtab(baseDtab) = get[BindingFactory.BaseDtab]
-        get[BoundPath] match {
+      def make(_baseDtab: BindingFactory.BaseDtab, boundPath: BoundPath, next: ServiceFactory[Req, Rep]) = {
+        val BindingFactory.BaseDtab(baseDtab) = _baseDtab
+        boundPath match {
           case BoundPath(Some((path, bound))) =>
             new NamerTracingFilter[Req, Rep](path, baseDtab, bound) andThen next
           case _ => next
@@ -318,10 +318,14 @@ private[finagle] object BindingFactory {
     new Stack.Module[ServiceFactory[Req, Rep]] {
       val role = BindingFactory.role
       val description = "Bind destination names to endpoints"
-      def make(next: Stack[ServiceFactory[Req, Rep]])(implicit params: Params) = {
-        val Label(label) = get[Label]
-        val Stats(stats) = get[Stats]
-        val Dest(dest) = get[Dest]
+      val parameters = Seq(
+        implicitly[Stack.Param[BindingFactory.Dest]],
+        implicitly[Stack.Param[Label]],
+        implicitly[Stack.Param[Stats]])
+      def make(params: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
+        val Label(label) = params[Label]
+        val Stats(stats) = params[Stats]
+        val Dest(dest) = params[Dest]
 
         val factory =
           dest match {

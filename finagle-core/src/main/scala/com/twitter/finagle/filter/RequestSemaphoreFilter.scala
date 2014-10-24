@@ -19,14 +19,14 @@ private[finagle] object RequestSemaphoreFilter {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.filter.RequestSemaphoreFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module2[Param, param.Stats, ServiceFactory[Req, Rep]] {
       val role = RequestSemaphoreFilter.role
       val description = "Restrict number of concurrent requests"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) =
-        get[RequestSemaphoreFilter.Param] match {
-          case RequestSemaphoreFilter.Param(Int.MaxValue) => next
-          case RequestSemaphoreFilter.Param(max) =>
-            val param.Stats(statsReceiver) = get[param.Stats]
+      def make(_param: Param, _stats: param.Stats, next: ServiceFactory[Req, Rep]) =
+        _param match {
+          case Param(Int.MaxValue) => next
+          case Param(max) =>
+            val param.Stats(statsReceiver) = _stats
             val sem = new AsyncSemaphore(max)
             val filter = new RequestSemaphoreFilter[Req, Rep](sem) {
               // We capture the gauges inside of here so their
@@ -35,7 +35,7 @@ private[finagle] object RequestSemaphoreFilter {
               val g0 = statsReceiver.addGauge("request_concurrency") { max - sem.numPermitsAvailable }
               val g1 = statsReceiver.addGauge("request_queue_size") { sem.numWaiters }
             }
-          filter andThen next
+            filter andThen next
         }
     }
 }

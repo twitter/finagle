@@ -11,11 +11,11 @@ private[finagle] object HandletimeFilter {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.filter.HandletimeFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module1[param.Stats, ServiceFactory[Req, Rep]] {
       val role = HandletimeFilter.role
       val description = "Record elapsed execution time of underlying service"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-        val param.Stats(statsReceiver) = get[param.Stats]
+      def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]) = {
+        val param.Stats(statsReceiver) = _stats
         new HandletimeFilter(statsReceiver) andThen next
       }
     }
