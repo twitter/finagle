@@ -230,7 +230,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
 /**
  * A Balancer mix-in to provide automatic updating via Activities.
  */
-private trait Updating[Req, Rep] extends OnReady { self: Balancer[Req, Rep] =>
+private trait Updating[Req, Rep] extends Balancer[Req, Rep] with OnReady {
   private[this] val ready = new Promise[Unit]
   def onReady: Future[Unit] = ready
 
@@ -259,7 +259,7 @@ private trait Updating[Req, Rep] extends OnReady { self: Balancer[Req, Rep] =>
   }
 
   override def close(deadline: Time): Future[Unit] = {
-    observation.close(deadline) transform { _ => self.close(deadline) } ensure {
+    observation.close(deadline) transform { _ => super.close(deadline) } ensure {
       ready.setDone()
     }
   }

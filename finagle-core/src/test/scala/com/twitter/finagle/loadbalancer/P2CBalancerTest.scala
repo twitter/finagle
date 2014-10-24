@@ -289,8 +289,15 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     assert(vec()(1).load === 0)
     assert(stats.load === 0)
   }
-}
 
+  test("Closes") {
+    val init = Vector.tabulate(N) { i => new LoadedFactory(i, 1) }
+    val bal = newBal(Var.value(init))
+    // Give it some traffic.
+    for (_ <- 0 until R) bal()
+    Await.result(bal.close(), 5.seconds)
+  }
+}
 
 @RunWith(classOf[JUnitRunner])
 class P2CBalancerEwmaTest extends FunSuite with App with P2CSuite {
@@ -374,4 +381,3 @@ class P2CBalancerEwmaTest extends FunSuite with App with P2CSuite {
     assert((vec(0).meanLoad - 2*vec(N).meanLoad) < ε)
   }
 }
-
