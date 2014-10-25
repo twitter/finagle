@@ -198,6 +198,8 @@ object RetryPolicy extends JavaSingleton {
    */
   def tries(numTries: Int): RetryPolicy[Try[Nothing]] = tries(numTries, WriteExceptionsOnly)
 
+  private[this] val AlwaysFalse = Function.const(false) _
+
   /**
    * Retry based on a series of backoffs defined by a `Stream[Duration]`. The
    * stream is consulted to determine the duration after which a request is to
@@ -208,7 +210,7 @@ object RetryPolicy extends JavaSingleton {
     backoffs: Stream[Duration]
   )(shouldRetry: PartialFunction[A, Boolean]): RetryPolicy[A] = {
     RetryPolicy { e =>
-      if (shouldRetry.isDefinedAt(e) && shouldRetry(e)) {
+      if (shouldRetry.applyOrElse(e, AlwaysFalse)) {
         backoffs match {
           case howlong #:: rest =>
             Some((howlong, backoff(rest)(shouldRetry)))
