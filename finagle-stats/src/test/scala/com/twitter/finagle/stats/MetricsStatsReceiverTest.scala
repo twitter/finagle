@@ -14,10 +14,13 @@ class MetricsStatsReceiverTest extends FunSuite {
 
   private[this] def readInRoot(name: String) = read(rootReceiver, name)
 
-  test("MetricsStatsReceiver should store and read gauge into the root StatsReceiver") {
-    val x = 1.5f
-    rootReceiver.addGauge("my_gauge")(x)
-    assert(readInRoot("my_gauge") === x)
+  // https://jira.twitter.biz/browse/CSL-1209
+  if (!sys.props.contains("SKIP_FLAKY")) {
+    test("MetricsStatsReceiver should store and read gauge into the root StatsReceiver") {
+      val x = 1.5f
+      rootReceiver.addGauge("my_gauge")(x)
+      assert(readInRoot("my_gauge") === x)
+    }
   }
 
   test("cumulative gauge is working") {
