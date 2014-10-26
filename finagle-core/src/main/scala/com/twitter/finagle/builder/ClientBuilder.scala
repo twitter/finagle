@@ -222,7 +222,7 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  * http://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6
  */
 class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle](
-  params: Stack.Params,
+  val params: Stack.Params,
   mk: Stack.Params => Client[Req, Rep]
 ) {
   import ClientConfig._

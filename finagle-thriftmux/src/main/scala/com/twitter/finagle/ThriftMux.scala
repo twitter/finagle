@@ -1,8 +1,10 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.param.{Label, Stats}
-import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientRequest, HandleUncaughtApplicationExceptions}
+import com.twitter.finagle.thrift.{
+  ClientId, Protocols, ThriftClientRequest, HandleUncaughtApplicationExceptions}
 import com.twitter.finagle.client.StackClient
+import com.twitter.finagle.mux.lease.exp.ClockedDrainer
 import com.twitter.finagle.server.{StackServer, StdStackServer, Listener}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.netty3.Netty3Listener
@@ -40,13 +42,18 @@ import com.twitter.util.{Future, Time, Local}
  * @define clientExampleObject ThriftMux
  * @define serverExampleObject ThriftMux
  */
-
 object ThriftMux
-    extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
-    with Server[Array[Byte], Array[Byte]] with ThriftRichServer {
+  extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
+  with Server[Array[Byte], Array[Byte]] with ThriftRichServer
+{
+  /**
+   * Base [[com.twitter.finagle.Stack Stacks]] for Mux client and servers.
+   */
+  private[twitter] val BaseClientStack = ThriftMuxUtil.protocolRecorder +: Mux.client.stack
+  private[twitter] val BaseServerStack = ThriftMuxUtil.protocolRecorder +: Mux.server.stack
+
   case class Client(
-    muxer: StackClient[CB, CB] = Mux.client.copy(
-      stack = ThriftMuxUtil.protocolRecorder +: Mux.client.stack),
+    muxer: StackClient[CB, CB] = Mux.client.copy(stack = BaseClientStack),
     // TODO: consider stuffing these into Stack.Params
     clientId: Option[ClientId] = None,
     protocolFactory: TProtocolFactory = Protocols.binaryFactory()
@@ -164,8 +171,7 @@ object ThriftMux
    */
 
   case class ServerMuxer(
-    stack: Stack[ServiceFactory[CB, CB]] =
-      ThriftMuxUtil.protocolRecorder +: Mux.server.stack,
+    stack: Stack[ServiceFactory[CB, CB]] = BaseServerStack,
     params: Stack.Params = Mux.server.params
   ) extends StdStackServer[CB, CB, ServerMuxer] {
     protected type In = CB
@@ -197,7 +203,7 @@ object ThriftMux
 
     protected def newDispatcher(transport: Transport[In, Out], service: Service[CB, CB]) = {
       val param.Tracer(tracer) = params[param.Tracer]
-      new mux.ServerDispatcher(transport, service, true, mux.lease.exp.ClockedDrainer.flagged, tracer)
+      new mux.ServerDispatcher(transport, service, true, ClockedDrainer.flagged, tracer)
     }
   }
 
