@@ -157,7 +157,7 @@ private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName
  * - `backlog`: OS-defined default value
  */
 class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
-  params: Stack.Params,
+  val params: Stack.Params,
   mk: Stack.Params => FinagleServer[Req, Rep]
 ) {
   import ServerConfig._
