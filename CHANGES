@@ -17,6 +17,8 @@ Breaking API Changes
     parameters. The abstract classes for Stackables were also simplified. Now we only have
     `Module` and `ModuleN` variants which are more convenient for most definitions.
     Since this is an advanced API, it should not impact standard usage of finagle.
+  * finagle-core: Update ConcurrentRingBuffer to use ClassTag instead of ClassManifest; 
+    rename size argument to capacity.
 
 6.22.0
 ~~~~~~

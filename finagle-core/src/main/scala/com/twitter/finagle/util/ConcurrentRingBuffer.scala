@@ -2,6 +2,7 @@ package com.twitter.finagle.util
 
 import java.util.concurrent.atomic.AtomicLong
 import scala.annotation.tailrec
+import scala.reflect.ClassTag
 
 /**
  * A simple, lock-free, non-blocking ring buffer.
@@ -19,12 +20,12 @@ import scala.annotation.tailrec
  * references (though this would require another allocation for each
  * item).
  */
-class ConcurrentRingBuffer[T : ClassManifest](size: Int) {
-  assert(size > 0)
+class ConcurrentRingBuffer[T : ClassTag](capacity: Int) {
+  assert(capacity > 0)
 
   private[this] val nextRead, nextWrite = new AtomicLong(0)
   private[this] val publishedWrite = new AtomicLong(-1)
-  private[this] val ring = new Array[T](size)
+  private[this] val ring = new Array[T](capacity)
 
   private[this] def publish(which: Long) {
     while (publishedWrite.get != which - 1) {}
@@ -47,11 +48,24 @@ class ConcurrentRingBuffer[T : ClassManifest](size: Int) {
     if (w < r)
       return None
 
-    val el = ring(r%size toInt)
+    val el = ring((r%capacity).toInt)
     if (nextRead.compareAndSet(r, r+1))
       Some(el)
     else
       tryGet()
+  }
+
+  /**
+   * Returns the next element without changing the read position.
+   *
+   * @return the next element or None if buffer is empty
+   */
+  final def tryPeek: Option[T] = {
+    val w = publishedWrite.get
+    val r = nextRead.get
+
+    if (w < r) None
+    else Some(ring((r%capacity).toInt))
   }
 
   /**
@@ -63,13 +77,21 @@ class ConcurrentRingBuffer[T : ClassManifest](size: Int) {
     val w = nextWrite.get
     val r = nextRead.get
 
-    if (w - r >= size)
+    if (w - r >= capacity)
       return false
 
     if (!nextWrite.compareAndSet(w, w+1)) tryPut(el) else {
-      ring(w%size toInt) = el
+      ring((w%capacity).toInt) = el
       publish(w)
       true
     }
   }
+
+  /**
+   * Current size of the buffer.
+   *
+   * The returned value is only quiescently consistent; treat it
+   * as a fast approximation.
+   */
+  final def size: Int = (nextWrite.get - nextRead.get).toInt
 }
