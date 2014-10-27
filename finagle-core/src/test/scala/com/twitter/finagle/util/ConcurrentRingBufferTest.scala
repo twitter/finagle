@@ -51,4 +51,43 @@ class ConcurrentRingBufferTest extends FunSuite {
     for (i <- 0 until N)
       assert(b.tryGet() === Some(i * 2))
   }
+
+  test("ConcurrentRingBuffer should return the size correctly") {
+    val N = 128
+    val b = new ConcurrentRingBuffer[Int](N)
+
+    for (i <- 0 until N / 2) assert(b.tryPut(i))
+
+    assert(b.size === 64)
+
+    b.tryGet()
+
+    assert(b.size === 63)
+  }
+
+  test("ConcurrentRingBuffer should allow peeking") {
+    val N = 128
+    val b = new ConcurrentRingBuffer[Int](N)
+
+    assert(b.tryPeek === None)
+
+    for (i <- 0 until N / 2) {
+      assert(b.tryPut(i))
+      assert(b.tryPeek === Some(0))
+    }
+
+    assert(b.size === 64)
+
+    for (i <- 0 until N / 2) {
+      assert(b.tryPeek === Some(i))
+      assert(b.tryGet() === Some(i))
+    }
+
+    assert(b.tryGet() === None)
+    assert(b.size === 0)
+
+    for (i <- N/2 until N) b.tryGet() // fully drain
+
+    assert(b.tryPeek === None)
+  }
 }
