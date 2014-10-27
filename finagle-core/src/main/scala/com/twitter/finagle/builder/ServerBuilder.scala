@@ -245,18 +245,32 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
   /**
    * Overrides the stack and [[com.twitter.finagle.Server]] that will be used
-   * by this builder. The `mk` function is passed the state of configuration
-   * when `build` is called. There is no guarantee that all the builder parameters
-   * may be used by the server created by `mk`, it is up to the discretion of
-   * the server and protocol implementation.
+   * by this builder.
+   *
+   * @param mk A function that materializes a `Server` from a set of `Params`.
+   * `mk` is passed the state of configuration when `build` is called. There is
+   * no guarantee that all the builder parameters will be used by the server
+   * created by `mk`; it is up to the discretion of the server and protocol
+   * implementation.
    */
+  @deprecated("Use stack(server: Stack.Parameterized)", "7.0.0")
   def stack[Req1, Rep1](
     mk: Stack.Params => FinagleServer[Req1, Rep1]
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
     copy(params, mk)
 
+  /**
+   * Overrides the stack and [[com.twitter.finagle.Server]] that will be used
+   * by this builder.
+   *
+   * @param server A `Parameterized` representation of a
+   * [[com.twitter.finagle.Server]]. `server` is materialized with the state of
+   * configuration when `build` is called. There is no guarantee that all
+   * builder parameters will be used by the resultant `Server`; it is up to the
+   * discretion of `server` itself and the protocol implementation.
+   */
   def stack[Req1, Rep1](
-    server: Stack.Parameterized[com.twitter.finagle.Server[Req1, Rep1]]
+    server: Stack.Parameterized[FinagleServer[Req1, Rep1]]
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
     copy(params, server.withParams)
 
