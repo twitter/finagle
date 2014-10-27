@@ -1,9 +1,8 @@
 package com.twitter.finagle.service
 
-
 import java.util.concurrent.atomic.AtomicInteger
 import com.twitter.conversions.time._
-import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.{FailedFastException, MockTimer, Service, ServiceFactory, SourcedException}
 import com.twitter.util._
 import org.junit.runner.RunWith
@@ -26,7 +25,8 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
     val underlying = mock[ServiceFactory[Int, Int]]
     when(underlying.isAvailable).thenReturn(true)
     when(underlying.close(any[Time])).thenReturn(Future.Done)
-    val failfast = new FailFastFactory(underlying, NullStatsReceiver, timer, backoffs)
+    val stats = new InMemoryStatsReceiver
+    val failfast = new FailFastFactory(underlying, stats, timer, backoffs)
 
     val p, q, r = new Promise[Service[Int, Int]]
     when(underlying()).thenReturn(p)
@@ -54,6 +54,7 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
       p() = Throw(new Exception)
       verify(underlying).apply()
       assert(failfast.isAvailable === false)
+      assert(stats.counters.get(Seq("marked_dead")) === Some(1))
     }
   }
 
@@ -86,6 +87,7 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
       q() = Return(service)
       assert(timer.tasks.isEmpty)
       assert(failfast.isAvailable === true)
+      assert(stats.counters.get(Seq("marked_available")) === Some(1))
     }
   }
 
@@ -206,4 +208,13 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
     }
   }
 
+  test("accepts empty backoff stream") {
+    Time.withCurrentTimeFrozen { tc =>
+      val ctx = newCtx()
+      import ctx._
+
+      val failfast = new FailFastFactory(underlying, stats, timer, Stream.empty)
+      failfast()
+    }
+  }
 }
