@@ -67,6 +67,25 @@ private[finagle] class FailFastFactory[Req, Rep](
     new FailedFastException(s"Endpoint is marked down. For more details see: $url")
   }
 
+  private[this] val markedAvailableCounter = statsReceiver.counter("marked_available")
+  private[this] val markedDeadCounter = statsReceiver.counter("marked_dead")
+
+  private[this] val unhealthyForMsGauge =
+    statsReceiver.addGauge("unhealthy_for_ms") {
+      state match {
+        case Retrying(since, _, _, _) => since.untilNow.inMilliseconds
+        case _ => 0
+      }
+    }
+
+  private[this] val unhealthyNumRetriesGauge =
+    statsReceiver.addGauge("unhealthy_num_tries") {
+      state match {
+        case Retrying(_, _, ntries, _) => ntries
+        case _ => 0
+      }
+    }
+
   private[this] def getBackoffs(): Stream[Duration] = backoffs map { duration =>
     // Add a 10% jitter to reduce correlation.
     val ms = duration.inMilliseconds
@@ -79,10 +98,14 @@ private[finagle] class FailFastFactory[Req, Rep](
     case Observation.Success if state != Ok =>
       val Retrying(_, task, _, _) = state
       task.cancel()
+      markedAvailableCounter.incr()
       state = Ok
 
     case Observation.Fail if state == Ok =>
-      val wait #:: rest = getBackoffs()
+      val (wait, rest) = getBackoffs() match {
+        case Stream.Empty => (Duration.Zero, Stream.empty[Duration])
+        case wait #:: rest => (wait, rest)
+      }
       val now = Time.now
       val task = timer.schedule(now + wait) { proc ! Observation.Timeout }
       markedDeadCounter.incr()
@@ -91,6 +114,8 @@ private[finagle] class FailFastFactory[Req, Rep](
     case Observation.TimeoutFail if state != Ok =>
       state match {
         case Retrying(_, _, _, Stream.Empty) =>
+          // Backoff schedule exhausted. Optimistically become available in
+          // order to continue trying.
           state = Ok
 
         case Retrying(since, _, ntries, wait #:: rest) =>
@@ -119,24 +144,6 @@ private[finagle] class FailFastFactory[Req, Rep](
 
     case _ => ()
   }
-
-  private[this] val unhealthyForMsGauge =
-    statsReceiver.addGauge("unhealthy_for_ms") {
-      state match {
-        case Retrying(since, _, _, _) => since.untilNow.inMilliseconds
-        case _ => 0
-      }
-    }
-
-  private[this] val unhealthyNumRetriesGauge =
-    statsReceiver.addGauge("unhealthy_num_tries") {
-      state match {
-        case Retrying(_, _, ntries, _) => ntries
-        case _ => 0
-      }
-    }
-
-  private[this] val markedDeadCounter = statsReceiver.counter("marked_dead")
 
   override def apply(conn: ClientConnection) =
     if (state != Ok) failedFastExc else {
