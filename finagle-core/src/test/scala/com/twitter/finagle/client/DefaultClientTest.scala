@@ -3,6 +3,7 @@ package com.twitter.finagle.client
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle._
 import com.twitter.finagle.dispatch.SerialClientDispatcher
+import com.twitter.finagle.service.FailureAccrualFactory
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.util.{Await, Future, MockTimer, Time, Var, Closable, Return}
 import com.twitter.util.TimeConversions.intToTimeableNumber
@@ -53,13 +54,13 @@ class DefaultClientTest extends FunSuite with Eventually with AssertionsForJUnit
     val client: Client[Int, Int] = DefaultClient[Int, Int](name, endPointer)
   }
 
-  trait SourcedExceptionHelper extends QueueTransportHelper with
-      SourcedExceptionDispatcherHelper with
-      BaseClientHelper
+  trait SourcedExceptionHelper extends QueueTransportHelper
+    with SourcedExceptionDispatcherHelper
+    with BaseClientHelper
 
-  class DefaultClientHelper extends QueueTransportHelper with
-      SerialDispatcherHelper with
-      BaseClientHelper
+  class DefaultClientHelper extends QueueTransportHelper
+    with SerialDispatcherHelper
+    with BaseClientHelper
 
   test("DefaultClient should successfully add sourcedexception") {
     new SourcedExceptionHelper {
@@ -81,10 +82,10 @@ class DefaultClientTest extends FunSuite with Eventually with AssertionsForJUnit
       new SerialClientDispatcher(_)
   }
 
-  trait TimeoutHelper extends TimingHelper with
-      QueueTransportHelper with
-      SerialDispatcherHelper with
-      ServiceHelper {
+  trait TimeoutHelper extends TimingHelper
+    with QueueTransportHelper
+    with SerialDispatcherHelper
+    with ServiceHelper {
     val pool = new DefaultPool[Int, Int](0, 1, timer = timer) // pool of size 1
   }
 
@@ -126,11 +127,11 @@ class DefaultClientTest extends FunSuite with Eventually with AssertionsForJUnit
     }
   }
 
-  trait StatsHelper extends TimingHelper with
-      QueueTransportHelper with
-      SerialDispatcherHelper with
-      StatsReceiverHelper with
-      ServiceHelper {
+  trait StatsHelper extends TimingHelper
+    with QueueTransportHelper
+    with SerialDispatcherHelper
+    with StatsReceiverHelper
+    with ServiceHelper {
 
     val pool = new DefaultPool[Int, Int](0, 1, timer = timer) // pool of size 1
     val client = new DefaultClient[Int, Int](
@@ -193,4 +194,69 @@ class DefaultClientTest extends FunSuite with Eventually with AssertionsForJUnit
       assert(closed, "client not closed")
     }
   }
+
+  class FailureAccrualException extends Exception
+
+  trait FailureAccuralDispatchHelper extends DispatcherHelper {
+    var initialFailures: Int = 5 // default failure accrual
+
+    val dispatcher: Transport[Int, Int] => Service[Int, Int] = { _ =>
+      Service.mk { _ =>
+        initialFailures -= 1
+        if (initialFailures >= 0)
+          Future.exception(new FailureAccrualException)
+        else
+          Future.value(3)
+      }
+    }
+  }
+
+  trait DefaultFailureAccrualHelper extends TimingHelper
+    with QueueTransportHelper
+    with FailureAccuralDispatchHelper
+    with StatsReceiverHelper
+    with ServiceHelper {
+
+    val pool = new DefaultPool[Int, Int](0, 1, timer = timer) // pool of size 1
+
+    val client = new DefaultClient[Int, Int](
+      name,
+      endPointer,
+      pool = pool,
+      timer = timer,
+      statsReceiver = statsReceiver
+    )
+  }
+
+  test("DefaultClient should handle failureAccrual default") {
+    new DefaultFailureAccrualHelper {
+      0 until 10 foreach { service(_) }
+      assert(statsReceiver.counters(Seq("failure_accrual", "removals")) === 1)
+    }
+  }
+
+  test("DefaultClient should handle passed-in failure accrual") {
+    new DefaultFailureAccrualHelper {
+      initialFailures = 10
+      override val client = new DefaultClient[Int, Int](
+        name,
+        endPointer,
+        pool = pool,
+        timer = timer,
+        statsReceiver = statsReceiver,
+        failureAccrual = { factory: ServiceFactory[Int, Int] =>
+          FailureAccrualFactory.wrapper(statsReceiver, 6, 3.seconds)(timer) andThen factory
+        }
+      )
+
+      Time.withCurrentTimeFrozen { control =>
+        0 until 10 foreach { service(_) }
+        assert(statsReceiver.counters(Seq("failure_accrual", "removals")) === 1)
+        control.advance(4.seconds)
+        timer.tick()
+        assert(statsReceiver.counters(Seq("failure_accrual", "revivals")) === 1)
+      }
+    }
+  }
+
 }

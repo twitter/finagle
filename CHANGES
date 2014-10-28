@@ -5,6 +5,13 @@
 6.x
 -----
 
+ * finagle-core: Deprecated the mechanisms of FailureAccrual that use
+   factory Transformers.  It's better to just use the Params to
+   configure the existing FailureAccrualFactory.  However, if you've
+   actually written your own failure accrual transformer that's
+   significantly different, then you can do stack.replace() to swap it
+   in.
+
 6.23.0
 ~~~~~~
 

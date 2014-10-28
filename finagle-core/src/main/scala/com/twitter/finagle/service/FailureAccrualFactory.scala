@@ -2,14 +2,18 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.util.{Duration, Time, Timer, TimerTask, Try}
 
-private[finagle] object FailureAccrualFactory {
-  def wrapper(
-    numFailures: Int, markDeadFor: Duration)(timer: Timer): ServiceFactoryWrapper = {
+object FailureAccrualFactory {
+  private[finagle] def wrapper(
+    statsReceiver: StatsReceiver,
+    numFailures: Int,
+    markDeadFor: Duration
+  )(timer: Timer): ServiceFactoryWrapper = {
     new ServiceFactoryWrapper {
       def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) =
-        new FailureAccrualFactory(factory, numFailures, markDeadFor, timer)
+        new FailureAccrualFactory(factory, numFailures, markDeadFor, timer, statsReceiver.scope("failure_accrual"))
     }
   }
 
@@ -30,13 +34,14 @@ private[finagle] object FailureAccrualFactory {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.FailureAccrualFactory]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module2[Param, param.Timer, ServiceFactory[Req, Rep]] {
+    new Stack.Module3[param.Stats, Param, param.Timer, ServiceFactory[Req, Rep]] {
       val role = FailureAccrualFactory.role
       val description = "Backoff from hosts that we cannot successfully make requests to"
-      def make(_param: Param, _timer: param.Timer, next: ServiceFactory[Req, Rep]) = {
+      def make(_stats: param.Stats, _param: Param, _timer: param.Timer, next: ServiceFactory[Req, Rep]) = {
         val FailureAccrualFactory.Param(n, d) = _param
         val param.Timer(timer) = _timer
-        wrapper(n, d)(timer) andThen next
+        val param.Stats(statsReceiver) = _stats
+        wrapper(statsReceiver, n, d)(timer) andThen next
       }
     }
 }
@@ -52,12 +57,16 @@ class FailureAccrualFactory[Req, Rep](
   underlying: ServiceFactory[Req, Rep],
   numFailures: Int,
   markDeadFor: Duration,
-  timer: Timer
+  timer: Timer,
+  statsReceiver: StatsReceiver
 ) extends ServiceFactory[Req, Rep]
 {
   private[this] var failureCount = 0
   @volatile private[this] var markedDead = false
   private[this] var reviveTimerTask: Option[TimerTask] = None
+
+  private[this] val removalCounter = statsReceiver.counter("removals")
+  private[this] val revivalCounter = statsReceiver.counter("revivals")
 
   private[this] def didFail() = synchronized {
     failureCount += 1
@@ -70,6 +79,7 @@ class FailureAccrualFactory[Req, Rep](
 
   protected def markDead() = synchronized {
     if (!markedDead) {
+      removalCounter.incr()
       markedDead = true
       val timerTask = timer.schedule(markDeadFor.fromNow) { revive() }
       reviveTimerTask = Some(timerTask)
@@ -77,6 +87,7 @@ class FailureAccrualFactory[Req, Rep](
   }
 
   protected def revive() = synchronized {
+    if (markedDead) revivalCounter.incr()
     markedDead = false
     reviveTimerTask foreach { _.cancel() }
     reviveTimerTask = None
@@ -84,7 +95,7 @@ class FailureAccrualFactory[Req, Rep](
 
   protected def isSuccess(response: Try[Rep]): Boolean = response.isReturn
 
-  def apply(conn: ClientConnection) =
+  def apply(conn: ClientConnection) = {
     underlying(conn) map { service =>
       new Service[Req, Rep] {
         def apply(request: Req) = {
@@ -99,6 +110,7 @@ class FailureAccrualFactory[Req, Rep](
           service.isAvailable && FailureAccrualFactory.this.isAvailable
       }
     } onFailure { _ => didFail() }
+  }
 
   override def isAvailable = !markedDead && underlying.isAvailable
 
@@ -108,4 +120,11 @@ class FailureAccrualFactory[Req, Rep](
   }
 
   override val toString = "failure_accrual_%s".format(underlying.toString)
+
+  @deprecated("Please call the FailureAccrualFactory constructor that supplies a StatsReceiver", "6.22.1")
+  def this(
+    underlying: ServiceFactory[Req, Rep],
+    numFailures: Int,
+    markDeadFor: Duration,
+    timer: Timer) = this(underlying, numFailures, markDeadFor, timer, NullStatsReceiver)
 }
