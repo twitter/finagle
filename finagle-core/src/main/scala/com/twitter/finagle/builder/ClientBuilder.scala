@@ -89,7 +89,10 @@ object ClientConfig {
     val default = Daemonize(true)
   }
 
+  // TODO - @bmdhacks - make these private after deprecation ends
+  @deprecated("Please use `FailureAccrualFactory.Param` instead", "6.22.1")
   case class FailureAccrualFac(fac: com.twitter.util.Timer => ServiceFactoryWrapper)
+  @deprecated("Please use `FailureAccrualFactory.Param` instead", "6.22.1")
   implicit object FailureAccrualFac extends Stack.Param[FailureAccrualFac] {
     val default = FailureAccrualFac(Function.const(ServiceFactoryWrapper.identity)_)
   }
@@ -761,12 +764,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def failureAccrualParams(pair: (Int, Duration)): This = {
     val (numFailures, markDeadFor) = pair
-    failureAccrualFactory(FailureAccrualFactory.wrapper(numFailures, markDeadFor)(_))
+    failureAccrualFactory(FailureAccrualFactory.wrapper(statsReceiver, numFailures, markDeadFor)(_))
   }
 
+  @deprecated("Use failureAccrualParams", "6.22.1")
   def failureAccrual(failureAccrual: ServiceFactoryWrapper): This =
     failureAccrualFactory { _ => failureAccrual }
 
+  @deprecated("Use failureAccrualParams", "6.22.1")
   def failureAccrualFactory(factory: com.twitter.util.Timer => ServiceFactoryWrapper): This =
     configured(FailureAccrualFac(factory))
 
@@ -796,7 +801,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /*** BUILD ***/
 
-  // still used by finagle-memcached.
+  // This is only used for client alterations outside of the stack.
+  // a more ideal usage would be to retrieve the stats param inside your specific module
+  // instead of using this statsReceiver as it keeps the params closer to where they're used
   private[finagle] lazy val statsReceiver = {
     val Stats(sr) = params[Stats]
     val Label(label) = params[Label]
