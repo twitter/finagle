@@ -201,9 +201,11 @@ object Namer  {
       case Empty => Activity.value(Empty)
 
       case Union() => Activity.value(Neg)
-      case Union(tree) => bind(namer, depth)(tree)
+      case Union(Weighted(_, tree)) => bind(namer, depth)(tree)
       case Union(trees@_*) =>
-        Activity.collect(trees map bind(namer, depth)) map { trees =>
+        Activity.collect(
+          trees map { case Weighted(w, t) => bind(namer, depth)(t) map(Weighted(w, _)) }
+        ) map { trees =>
           Union.fromSeq(trees).simplified
         }
 
@@ -230,13 +232,15 @@ object Namer  {
     tree match {
       case NameTree.Union(trees@_*) =>
         if (trees.isEmpty) Activity.value(Dtab.empty) else {
-          val expanded = Activity.collect(trees map expandTree(namer, depth+1))
-          expanded map { dtabs => dtabs.reduceLeft(_.union(_)) }
+          val expanded = Activity.collect(trees map {
+            case Weighted(w, t) => expandTree(namer, depth+1)(t).map((w, _))
+          })
+          expanded map { dtabs => Dtab.union(dtabs:_*) }
         }
       case NameTree.Alt(trees@_*) =>
         if (trees.isEmpty) Activity.value(Dtab.empty) else {
           val expanded = Activity.collect(trees map expandTree(namer, depth+1))
-          expanded map { dtabs => dtabs.reduceLeft(_.alt(_)) }
+          expanded map { dtabs => Dtab.alt(dtabs:_*) }
         }
 
       case NameTree.Leaf(path) => expandPath(namer, depth+1)(path)

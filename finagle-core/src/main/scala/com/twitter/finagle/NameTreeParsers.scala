@@ -105,6 +105,24 @@ private class NameTreeParsers private (str: String) {
     Buf.ByteArray(baos.getBuf, 0, baos.size)
   }
 
+  private[this] def isNumberChar(c: Char) = c.isDigit || c == '.'
+
+  private[this] def parseNumber(): Double = {
+    val sb = new StringBuilder
+    var seenDot = false
+
+    while (isNumberChar(peek)) {
+      if (peek == '.') {
+        if (seenDot) illegal("number char", peek)
+        else seenDot = true
+      }
+      sb += peek
+      next()
+    }
+
+    sb.toString.toDouble // can fail if string is too long
+  }
+
   private[this] def parsePath(): Path = {
     eatWhitespace()
     eat('/')
@@ -138,17 +156,17 @@ private class NameTreeParsers private (str: String) {
   }
 
   private[this] def parseTree1(): NameTree[Path] = {
-    val trees = Buffer[NameTree[Path]]()
+    val trees = Buffer[NameTree.Weighted[Path]]()
 
     do {
-      trees += parseSimple()
+      trees += parseWeighted()
       eatWhitespace()
     } while (maybeEat('&'))
 
     if (trees.size > 1)
       NameTree.Union(trees:_*)
     else
-      trees(0)
+      trees(0).tree
   }
 
   private[this] def parseSimple(): NameTree[Path] = {
@@ -180,6 +198,20 @@ private class NameTreeParsers private (str: String) {
       case c =>
         illegal("simple", c)
     }
+  }
+
+  private[this] def parseWeighted(): NameTree.Weighted[Path] = {
+    eatWhitespace()
+    val weight =
+      if (!isNumberChar(peek)) NameTree.Weighted.defaultWeight
+      else {
+        val weight = parseNumber()
+        eatWhitespace()
+        eat('*')
+        eatWhitespace()
+        weight
+      }
+    NameTree.Weighted(weight, parseSimple())
   }
 
   private[this] def parseDentry(): Dentry = {
