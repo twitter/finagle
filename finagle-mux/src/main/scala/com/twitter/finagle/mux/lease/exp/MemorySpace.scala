@@ -51,7 +51,7 @@ private[lease] class MemorySpace(
 
       // choose a random number of bytes between 0 and discountRange
       val discountWin = (rnd() % (maxDiscount - low).inBytes).bytes
-      lr.record("discountWin", discountWin.inBytes.toString)
+      lr.record("discountWin", discountWin.toString)
 
       // take the min of jitter within a range + handlebytes, and maxDiscount
       val discountTotal = low + discountWin

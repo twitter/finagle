@@ -64,7 +64,7 @@ package com.twitter.finagle
  * ''size:4 Tinit:1 tag:3 version:2 (key~4 value~4)*'' reinitializes a
  * session. Clients typically send this at the beginning of the session.
  * When doing so, the sender may issue no more T messages until the
- * corresponding ''size:4 Rinit:1 version:2 (key~4 value~4)*'' has been
+ * corresponding ''size:4 Rinit:1 tag:3 version:2 (key~4 value~4)*'' has been
  * received. After the Rinit was received, all connection state has been
  * reset (outstanding tags are invalidated) and the stream is resumed
  * according to the newly negotiated parameters. Prior to the first
@@ -123,7 +123,7 @@ package com.twitter.finagle
  * Treq.
  *
  * ''size:4 Tlease:1 tag:3 unit:1 howmuch:8'' is a marker message indicating that a
- * lease has been issued for ''howmuch'' unit. Unit '1' is reserved for duration in
+ * lease has been issued for ''howmuch'' unit. Unit '0' is reserved for duration in
  * milliseconds. Whenever a lease has not been issued, a client can assume it holds
  * an indefinite lease. Adhering to the lease is optional, but the server may
  * reject requests or provide degraded service should the lease expire. This is

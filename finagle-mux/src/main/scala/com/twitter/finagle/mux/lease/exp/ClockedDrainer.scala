@@ -232,9 +232,7 @@ private[finagle] class ClockedDrainer(
     closedFor = NilStopwatch.start()
 
     stats.undrain.incr()
-    val iter = lessees.iterator()
-    while (iter.hasNext)
-      iter.next().issue(Duration.Top)
+    issueAll(Duration.Top)
   }
 
   // FLUSHING

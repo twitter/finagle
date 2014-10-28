@@ -277,7 +277,7 @@ private[finagle] object Message {
 
     def apply(howLong: Duration): Tlease = {
       require(howLong >= MinLease && howLong <= MaxLease, "lease out of range")
-      Tlease(0, howLong.inMilliseconds)
+      Tlease(MillisDuration, howLong.inMilliseconds)
     }
     def apply(end: Time): Tlease = Tlease(1, end.sinceEpoch.inMilliseconds)
   }
