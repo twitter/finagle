@@ -14,22 +14,20 @@ class MetricsStatsReceiverTest extends FunSuite {
 
   private[this] def readInRoot(name: String) = read(rootReceiver, name)
 
-  // https://jira.twitter.biz/browse/CSL-1209
-  if (!sys.props.contains("SKIP_FLAKY")) {
-    test("MetricsStatsReceiver should store and read gauge into the root StatsReceiver") {
-      val x = 1.5f
-      rootReceiver.addGauge("my_gauge")(x)
-      assert(readInRoot("my_gauge") === x)
-    }
+  test("MetricsStatsReceiver should store and read gauge into the root StatsReceiver") {
+    val x = 1.5f
+    // gauges are weakly referenced by the registry so we need to keep a strong reference
+    val g = rootReceiver.addGauge("my_gauge")(x)
+    assert(readInRoot("my_gauge") === x)
   }
 
   test("cumulative gauge is working") {
     val x = 1
     val y = 2
     val z = 3
-    rootReceiver.addGauge("my_cumulative_gauge")(x)
-    rootReceiver.addGauge("my_cumulative_gauge")(y)
-    rootReceiver.addGauge("my_cumulative_gauge")(z)
+    val g1 = rootReceiver.addGauge("my_cumulative_gauge")(x)
+    val g2 = rootReceiver.addGauge("my_cumulative_gauge")(y)
+    val g3 = rootReceiver.addGauge("my_cumulative_gauge")(z)
     assert(readInRoot("my_cumulative_gauge") === x + y + z)
   }
 
@@ -57,8 +55,8 @@ class MetricsStatsReceiverTest extends FunSuite {
 
   test("separate gauge/stat/metric between detached Metrics and root Metrics") {
     val detachedReceiver = new MetricsStatsReceiver(Metrics.createDetached())
-    detachedReceiver.addGauge("xxx")(1.0f)
-    rootReceiver.addGauge("xxx")(2.0f)
+    val g1 = detachedReceiver.addGauge("xxx")(1.0f)
+    val g2 = rootReceiver.addGauge("xxx")(2.0f)
     assert(read(detachedReceiver, "xxx") != read(rootReceiver, "xxx"))
   }
 }
