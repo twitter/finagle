@@ -63,7 +63,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase 
   class Helper {
     val monitor = Mockito.spy(new MockMonitor)
     val inner = new MockSourcedException("FakeService1")
-    val outer = new MockSourcedException(inner, "unspecified")
+    val outer = new MockSourcedException(inner, SourcedException.UnspecifiedServiceName)
 
     val mockLogger = Mockito.spy(Logger.getLogger("MockServer"))
     // add handler to redirect and mute output, so that it doesn't show up in the console during a test run.

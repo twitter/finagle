@@ -21,11 +21,11 @@ import com.twitter.util.{Duration, Future}
 import scala.collection.mutable
 
 private object MemcachedxTraceInitializer {
-  object Module extends Stack.Simple[ServiceFactory[Command, Response]] {
+  object Module extends Stack.Module1[param.Tracer, ServiceFactory[Command, Response]] {
     val role = TraceInitializerFilter.role
     val description = "Initialize traces for the client and record hits/misses"
-    def make(next: ServiceFactory[Command, Response])(implicit params: Params) = {
-      val param.Tracer(tracer) = get[param.Tracer]
+    def make(_tracer: param.Tracer, next: ServiceFactory[Command, Response]) = {
+      val param.Tracer(tracer) = _tracer
       val filter = new Filter(tracer)
       filter andThen next
     }

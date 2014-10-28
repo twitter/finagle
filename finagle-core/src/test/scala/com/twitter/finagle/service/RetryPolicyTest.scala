@@ -38,6 +38,7 @@ class RetryPolicyTest extends FunSpec {
       assert(weo(Throw(new Exception)) === false)
       assert(weo(Throw(WriteException(new Exception))) === true)
       assert(weo(Throw(Failure.InterruptedBy(new Exception))) === false)
+      assert(weo(Throw(Failure.InterruptedBy(new Exception).withRetryable(true))) === true)
       assert(weo(Throw(timeoutExc)) === false)
     }
 
@@ -47,6 +48,7 @@ class RetryPolicyTest extends FunSpec {
       assert(taweo(Throw(new Exception)) === false)
       assert(taweo(Throw(WriteException(new Exception))) === true)
       assert(taweo(Throw(Failure.InterruptedBy(new Exception))) === false)
+      assert(taweo(Throw(Failure.InterruptedBy(timeoutExc))) === true)
       assert(taweo(Throw(timeoutExc)) === true)
       assert(taweo(Throw(new com.twitter.util.TimeoutException(""))) === true)
     }

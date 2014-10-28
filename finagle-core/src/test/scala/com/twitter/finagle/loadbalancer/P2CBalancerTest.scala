@@ -40,14 +40,12 @@ private[loadbalancer] trait P2CSuite {
     fs: Var[Traversable[P2CServiceFactory]],
     sr: StatsReceiver = NullStatsReceiver,
     clock: (() => Long) = System.nanoTime
-  ) = new P2CBalancer(
+  ): ServiceFactory[Unit, Int] = new P2CBalancer(
     Activity(fs map { fs => Activity.Ok(fs.map(_.tup)) }),
     rng = Rng(12345L),
     statsReceiver = sr,
     emptyException = noBrokers
-  ) {
-    override def nanoTime(): Long = clock()
-  }
+  )
 
   def assertEven(fs: Traversable[P2CServiceFactory]) {
     val nml = fs.head.normMeanLoad
@@ -291,13 +289,33 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     assert(vec()(1).load === 0)
     assert(stats.load === 0)
   }
+
+  test("Closes") {
+    val init = Vector.tabulate(N) { i => new LoadedFactory(i, 1) }
+    val bal = newBal(Var.value(init))
+    // Give it some traffic.
+    for (_ <- 0 until R) bal()
+    Await.result(bal.close(), 5.seconds)
+  }
 }
 
 @RunWith(classOf[JUnitRunner])
 class P2CBalancerEwmaTest extends FunSuite with App with P2CSuite {
   override val ε: Double = 0.0005*R
-  flag.parseArgs(Array("-com.twitter.finagle.loadbalancer.exp.loadMetric=ewma"))
-  flag.parseArgs(Array("-com.twitter.finagle.loadbalancer.exp.decayTime=150.nanoseconds"))
+
+  override def newBal(
+    fs: Var[Traversable[P2CServiceFactory]],
+    sr: StatsReceiver = NullStatsReceiver,
+    clock: (() => Long) = System.nanoTime
+  ): ServiceFactory[Unit, Int] = new P2CBalancerPeakEwma(
+    Activity(fs map { fs => Activity.Ok(fs.map(_.tup)) }),
+    decayTime = 150.nanoseconds,
+    rng = Rng(12345L),
+    statsReceiver = sr,
+    emptyException = noBrokers
+  ) {
+    override def nanoTime() = clock()
+  }
 
   def run(fs: Traversable[P2CServiceFactory], n: Int): Unit = {
     val clock = new Clock

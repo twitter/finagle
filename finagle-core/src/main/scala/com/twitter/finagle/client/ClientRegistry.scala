@@ -80,7 +80,7 @@ private[twitter] object ClientRegistry {
   def clientInfo(name: String): Option[ClientInfo] = synchronized {
     clients.get(name) map { case(dest, client) =>
       val modules = client.stack.tails.toList map { n =>
-        ClientModuleInfo(n.head.role.name, n.head.description.toString, n.head.params.toMap)
+        ClientModuleInfo(n.head.role.name, n.head.description.toString, Map.empty)
       }
       ClientInfo(name, parseDest(dest), modules)
     }

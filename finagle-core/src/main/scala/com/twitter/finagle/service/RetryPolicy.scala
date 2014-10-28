@@ -6,7 +6,7 @@ import com.twitter.util.{
   TimeoutException => UtilTimeoutException, Duration, JavaSingleton, Throw, Try}
 import java.util.{concurrent => juc}
 import java.{util => ju}
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
  * A function defining retry behavior for a given value type `A`.
@@ -132,6 +132,7 @@ abstract class SimpleRetryPolicy[A](i: Int) extends RetryPolicy[A]
 object RetryPolicy extends JavaSingleton {
   object RetryableWriteException {
     def unapply(thr: Throwable): Option[Throwable] = thr match {
+      case exc@Failure.Retryable(_) => Some(exc)
       // We don't retry interruptions by default since they
       // indicate that the request was discarded.
       case Failure.InterruptedBy(_) => None
@@ -140,11 +141,18 @@ object RetryPolicy extends JavaSingleton {
     }
   }
 
+  /**
+   * Failures that are generally retryable because the request failed
+   * before it finished being written to the remote service.
+   * See [[com.twitter.finagle.WriteException]].
+   */
   val WriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
     case Throw(RetryableWriteException(_)) => true
   }
 
   val TimeoutAndWriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = WriteExceptionsOnly orElse {
+    case Throw(Failure.Cause(_: TimeoutException)) => true
+    case Throw(Failure.Cause(_: UtilTimeoutException)) => true
     case Throw(_: TimeoutException) => true
     case Throw(_: UtilTimeoutException) => true
   }
@@ -154,7 +162,7 @@ object RetryPolicy extends JavaSingleton {
   }
 
   /**
-   * Lifts a function of type A => Option[(Duration, RetryPolicy[A])] in the `RetryPolicy` type.
+   * Lifts a function of type `A => Option[(Duration, RetryPolicy[A])]` in the  `RetryPolicy` type.
    */
   def apply[A](f: A => Option[(Duration, RetryPolicy[A])]): RetryPolicy[A] =
     new RetryPolicy[A] {
@@ -162,8 +170,15 @@ object RetryPolicy extends JavaSingleton {
     }
 
   /**
-   * Retry a specific number of times. A `PartialFunction` argument determines
-   * which request types are retryable.
+   * Try up to a specific number of times, based on the supplied `PartialFunction[A, Boolean]`.
+   * A value of type `A` is considered retryable if and only if the PartialFunction
+   * is defined at and returns true for that value.
+   *
+   * @param numTries the maximum number of attempts (including retries) that can be made.
+   *   A value of `1` means one attempt and no retries on failure.
+   *   A value of `2` means one attempt and then a single retry if the failure meets the
+   *   criteria of `shouldRetry`.
+   * @param shouldRetry which `A`-typed values are considered retryable.
    */
   def tries[A](
     numTries: Int,
@@ -173,9 +188,17 @@ object RetryPolicy extends JavaSingleton {
   }
 
   /**
-   * Retry a specific number of times on WriteExceptions.
+   * Try up to a specific number of times of times on failures that are
+   * [[com.twitter.finagle.service.RetryPolicy.WriteExceptionsOnly]].
+   *
+   * @param numTries the maximum number of attempts (including retries) that can be made.
+   *   A value of `1` means one attempt and no retries on failure.
+   *   A value of `2` means one attempt and then a single retry if the failure meets the
+   *   criteria of [[com.twitter.finagle.service.RetryPolicy.WriteExceptionsOnly]].
    */
   def tries(numTries: Int): RetryPolicy[Try[Nothing]] = tries(numTries, WriteExceptionsOnly)
+
+  private[this] val AlwaysFalse = Function.const(false) _
 
   /**
    * Retry based on a series of backoffs defined by a `Stream[Duration]`. The
@@ -187,7 +210,7 @@ object RetryPolicy extends JavaSingleton {
     backoffs: Stream[Duration]
   )(shouldRetry: PartialFunction[A, Boolean]): RetryPolicy[A] = {
     RetryPolicy { e =>
-      if (shouldRetry.isDefinedAt(e) && shouldRetry(e)) {
+      if (shouldRetry.applyOrElse(e, AlwaysFalse)) {
         backoffs match {
           case howlong #:: rest =>
             Some((howlong, backoff(rest)(shouldRetry)))
@@ -207,7 +230,7 @@ object RetryPolicy extends JavaSingleton {
     backoffs: juc.Callable[ju.Iterator[Duration]],
     shouldRetry: PartialFunction[A, Boolean]
   ): RetryPolicy[A] = {
-    backoff[A](backoffs.call().toStream)(shouldRetry)
+    backoff[A](backoffs.call().asScala.toStream)(shouldRetry)
   }
 
   /**
@@ -263,7 +286,7 @@ object RetryPolicy extends JavaSingleton {
 /**
  * Implements various backoff strategies. Strategies are defined by a
  * `Stream[Duration]` and intended for use with
- * [[com.twitter.service.RetryingFilter#backoff]] to determine the duration
+ * [[com.twitter.finagle.service.RetryingFilter#backoff]] to determine the duration
  * after which a request is to be retried
  */
 object Backoff {
@@ -289,7 +312,7 @@ object Backoff {
    */
   def toJava(backoffs: Stream[Duration]): ju.concurrent.Callable[ju.Iterator[Duration]] = {
     new ju.concurrent.Callable[ju.Iterator[Duration]] {
-      def call() = backoffs.toIterator
+      def call() = backoffs.toIterator.asJava
     }
   }
 }

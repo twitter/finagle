@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.client.{StdStackClient, StackClient, Transporter}
 import com.twitter.finagle.dispatch.{SerialClientDispatcher, SerialServerDispatcher}
 import com.twitter.finagle.netty3.{Netty3Transporter, Netty3Listener}
-import com.twitter.finagle.param.Stats
+import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.server.{StdStackServer, StackServer, Listener}
 import com.twitter.finagle.thrift.{ClientId => _, _}
 import com.twitter.finagle.transport.Transport
@@ -60,38 +60,40 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
   protected val defaultClientName = "thrift"
 
   object param {
-    case class ClientId(clientId: thrift.ClientId)
+    case class ClientId(clientId: Option[thrift.ClientId])
     implicit object ClientId extends Stack.Param[ClientId] {
-      val default = ClientId(thrift.ClientId("unknown"))
+      val default = ClientId(None)
     }
   }
 
   object Client {
-    private val preparer = new Stack.Simple[ServiceFactory[ThriftClientRequest, Array[Byte]]] {
-      val role = StackClient.Role.prepConn
-      val description = "Prepare TTwitter thrift connection"
-      def make(next: ServiceFactory[ThriftClientRequest, Array[Byte]])
-          (implicit params: Params) = {
-        val com.twitter.finagle.param.Label(label) = get[com.twitter.finagle.param.Label]
-        val clientId = if (params.contains[param.ClientId]) {
-          val param.ClientId(id) = get[param.ClientId]
-          Some(id)
-        } else None
-
-        val preparer = new ThriftClientPreparer(protocolFactory, label, clientId)
-        val underlying = preparer.prepare(next)
-        val Stats(stats) = params[Stats]
-        new ServiceFactoryProxy(underlying) {
-          val stat = stats.stat("codec_connection_preparation_latency_ms")
-          override def apply(conn: ClientConnection) = {
-            val elapsed = Stopwatch.start()
-            super.apply(conn) ensure {
-              stat.add(elapsed().inMilliseconds)
+    private val preparer: Stackable[ServiceFactory[ThriftClientRequest, Array[Byte]]] =
+      new Stack.Module3[param.ClientId, Label, Stats,
+        ServiceFactory[ThriftClientRequest, Array[Byte]]] {
+        val role = StackClient.Role.prepConn
+        val description = "Prepare TTwitter thrift connection"
+        def make(
+          _clientId: param.ClientId,
+          _label: Label,
+          _stats: Stats,
+          next: ServiceFactory[ThriftClientRequest, Array[Byte]]
+        ) = {
+          val Label(label) = _label
+          val param.ClientId(clientId) = _clientId
+          val preparer = new ThriftClientPreparer(protocolFactory, label, clientId)
+          val underlying = preparer.prepare(next)
+          val Stats(stats) = _stats
+          new ServiceFactoryProxy(underlying) {
+            val stat = stats.stat("codec_connection_preparation_latency_ms")
+            override def apply(conn: ClientConnection) = {
+              val elapsed = Stopwatch.start()
+              super.apply(conn) ensure {
+                stat.add(elapsed().inMilliseconds)
+              }
             }
           }
         }
       }
-    }
 
     // We must do 'preparation' this way in order to let Finagle set up tracing & so on.
     val stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = StackClient.newStack
@@ -129,13 +131,9 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
       copy(protocolFactory=protocolFactory)
 
     def withClientId(clientId: thrift.ClientId): Client =
-      configured(param.ClientId(clientId))
+      configured(param.ClientId(Some(clientId)))
 
-    def clientId: Option[thrift.ClientId] =
-      if (params.contains[param.ClientId])
-        Some(params[param.ClientId].clientId)
-      else
-        None
+    def clientId: Option[thrift.ClientId] = params[param.ClientId].clientId
   }
 
 
@@ -151,14 +149,14 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
   @deprecated("Use `Thrift.client.withClientId`", "6.22.0")
   def withClientId(clientId: thrift.ClientId): Client =
-    client.configured(param.ClientId(clientId))
+    client.configured(param.ClientId(Some(clientId)))
 
   object Server {
-    private val preparer = new Stack.Simple[ServiceFactory[Array[Byte], Array[Byte]]] {
+    private val preparer = new Stack.Module1[Label, ServiceFactory[Array[Byte], Array[Byte]]] {
       val role = StackClient.Role.prepConn
       val description = "Prepare TTwitter thrift connection"
-      def make(next: ServiceFactory[Array[Byte], Array[Byte]])(implicit params: Params) = {
-        val com.twitter.finagle.param.Label(label) = get[com.twitter.finagle.param.Label]
+      def make(_label: Label, next: ServiceFactory[Array[Byte], Array[Byte]]) = {
+        val Label(label) = _label
         val preparer = new thrift.ThriftServerPreparer(protocolFactory, label)
         preparer.prepare(next)
       }

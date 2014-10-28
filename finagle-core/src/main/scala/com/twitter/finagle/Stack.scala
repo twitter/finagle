@@ -26,7 +26,8 @@ sealed trait Stack[T] {
   /**
    * The head field of the Stack composes all associated metadata
    * of the topmost element of the stack.
-   * @note `head` does not give access to the value `T`, use `make` instead
+   *
+   * @note `head` does not give access to the value `T`, use `make` instead.
    * @see [[com.twitter.finagle.Stack.Head]]
    */
   val head: Stack.Head
@@ -119,8 +120,8 @@ sealed trait Stack[T] {
 
   override def toString = {
     val elems = tails map {
-      case Node(head, mk, _) => "Node(role = %s, description = %s)".format(head.role, head.description)
-      case Leaf(head, t) => "Leaf(role = %s, description = %s)".format(head.role, head.description)
+      case Node(head, mk, _) => s"Node(role = ${head.role}, description = ${head.description})"
+      case Leaf(head, t) => s"Leaf(role = ${head.role}, description = ${head.description})"
     }
     elems mkString "\n"
   }
@@ -146,19 +147,20 @@ object Stack {
    */
   trait Head {
     /**
-     * The [[com.twitter.finagle.Stack.Role Role]] that the element can serve
+     * The [[com.twitter.finagle.Stack.Role Role]] that the element can serve.
      */
-    val role: Stack.Role
+    def role: Stack.Role
 
     /**
-     * The description of the functionality of the element
+     * The description of the functionality of the element.
      */
-    val description: String
+    def description: String
 
     /**
-     * The [[com.twitter.finagle.Stack.Param Params]] used to configure the element
+     * The [[com.twitter.finagle.Stack.Param Params]] that the element
+     * is interested in.
      */
-    def params: Map[String, String]
+    def parameters: Seq[Stack.Param[_]]
   }
 
   /**
@@ -195,7 +197,7 @@ object Stack {
       val head = new Stack.Head {
         val role = _role
         val description = _role.toString
-        val params = Map.empty[String, String]
+        val parameters = Nil
       }
       Leaf(head, t)
     }
@@ -273,35 +275,17 @@ object Stack {
     def withParams(ps: Stack.Params): T
   }
 
-
-  /**
-   * A convenient class to construct stackable modules. This variant
-   * operates over stack values. Useful for building stack elements:
-   *
-   * {{{
-   * def myNode = new Simple[Int=>Int]("myelem") {
-   *   def make(params: Params, next: Int=>Int): (Int=>Int) = {
-   *     val Multiplied(m) = params[Multiplier]
-   *     i => next(i*m)
-   *   }
-   * }
-   * }}}
-   */
-  abstract class Simple[T] extends Stackable[T] {
-    type Params = Stack.Params
-    def make(next: T)(implicit params: Params): T
-
-    def toStack(next: Stack[T]) = {
-      Node(this, (params, next) => Leaf(this, make(next.make(params))(params)), next)
-    }
-  }
-
   /**
    * A convenience class to construct stackable modules. This variant
-   * operates over stacks. Useful for building stack elements:
+   * operates over stacks and the entire parameter map. The `ModuleN` variants
+   * may be more convenient for most definitions as they operate over `T` types
+   * and the paramater extraction is derived from type parameters.
    *
    * {{{
    * def myNode = new Module[Int=>Int]("myelem") {
+   *   val role = "Multiplier"
+   *   val description = "Multiplies values by a multiplier"
+   *   val parameters = Seq(implicitly[Stack.Param[Multiplied]])
    *   def make(params: Params, next: Stack[Int=>Int]): Stack[Int=>Int] = {
    *     val Multiplier(m) = params[Multiplier]
    *     if (m == 1) next // It's a no-op, skip it.
@@ -311,12 +295,46 @@ object Stack {
    * }}}
    */
   abstract class Module[T] extends Stackable[T] {
-    type Params = Stack.Params
-    def make(next: Stack[T])(implicit params: Params): Stack[T]
+    def make(params: Params, next: Stack[T]): Stack[T]
+    def toStack(next: Stack[T]) =
+      Node(this, (prms, next) => make(prms, next), next)
+  }
 
-    def toStack(next: Stack[T]) = {
-      Node(this, (params, next) => make(next)(params), next)
-    }
+  /** A module of 0 parameters. */
+  abstract class Module0[T] extends Stackable[T] {
+    final val parameters = Nil
+    def make(next: T): T
+    def toStack(next: Stack[T]) =
+      Node(this, (prms, next) => Leaf(this, make(next.make(prms))), next)
+  }
+
+  /** A module of 1 parameter. */
+  abstract class Module1[P1: Param, T] extends Stackable[T] {
+    final val parameters = Seq(implicitly[Param[P1]])
+    def make(p1: P1, next: T): T
+    def toStack(next: Stack[T]) =
+      Node(this, (prms, next) => Leaf(this, make(prms[P1], next.make(prms))), next)
+  }
+
+  /** A module of 2 parameters. */
+  abstract class Module2[P1: Param, P2: Param, T] extends Stackable[T] {
+    final val parameters = Seq(implicitly[Param[P1]], implicitly[Param[P2]])
+    def make(p1: P1, p2: P2, next: T): T
+    def toStack(next: Stack[T]) =
+      Node(this, (prms, next) => Leaf(this,
+        make(prms[P1], prms[P2], next.make(prms))), next)
+  }
+
+  /** A module of 3 parameters. */
+  abstract class Module3[P1: Param, P2: Param, P3: Param, T] extends Stackable[T] {
+    final val parameters = Seq(
+      implicitly[Param[P1]],
+      implicitly[Param[P2]],
+      implicitly[Param[P3]])
+    def make(p1: P1, p2: P2, p3: P3, next: T): T
+    def toStack(next: Stack[T]) =
+      Node(this, (prms, next) => Leaf(this,
+        make(prms[P1], prms[P2], prms[P3], next.make(prms))), next)
   }
 }
 
@@ -324,42 +342,7 @@ object Stack {
  * Produce a stack from a `T`-typed element.
  */
 trait Stackable[T] extends Stack.Head {
-  private val _params = mutable.Map.empty[String, String]
-
-  def params: immutable.Map[String, String] = synchronized { _params.toMap }
-
   def toStack(next: Stack[T]): Stack[T]
-
-
-  // Record the parameter names and values
-  private def register(paramVal: Product): Unit = synchronized {
-    // zip two lists, and pair any unmatched values with `padding`
-    def zipWithPadding[T](l1: List[T], l2: List[T], padding: T): List[(T, T)] =
-      (l1.length - l2.length) match {
-        case 0 => l1 zip l2
-        case x if x > 0 => l1 zip (l2 ++ List.fill(x)(padding))
-        case x if x < 0 => (l1 ++ List.fill(-x)(padding)) zip l2
-      }
-
-    val paramValues = paramVal.productIterator.toList.map(_.toString)
-    val paramNames = paramVal.getClass.getDeclaredFields().map(_.getName()).toList
-    zipWithPadding(paramNames, paramValues, "<unknown>").map { case (k, v) => _params.put(k, v) }
-  }
-
-  // Using get[<param name>] when accessing parameters in Stackables causes
-  // the parameter name and value to be recorded in the params map of the
-  // Stackable.head. Per-module recorded parameters are shown by
-  // [[com.twitter.server.TwitterServer TwitterServer]] at the admin endpoint
-  // "/admin/clients/<client name>")
-  // TODO: Replace signature with equivalent:
-  //   def get[P <: Product : Stack.Param](implicit params: Stack.Params): P
-  // Once upgraded to Scala 2.10 (2.9 does not support having both implicit
-  // parameters and context bounds)
-  protected def get[P <: Product](implicit param: Stack.Param[P], params: Stack.Params): P = {
-    val paramVal = params[P]
-    register(paramVal)
-    paramVal
-  }
 }
 
 /**
@@ -375,12 +358,11 @@ trait CanStackFrom[-From, To] {
 object CanStackFrom {
   implicit def fromFun[T]: CanStackFrom[T=>T, T] =
     new CanStackFrom[T=>T, T] {
-      def toStackable(role: Stack.Role, fn: T => T): Stackable[T] = {
-        val test = role
-        new Stack.Simple[T] {
-          val role = test
-          val description = role.name
-          def make(next: T)(implicit params: Stack.Params) = fn(next)
+      def toStackable(r: Stack.Role, fn: T => T): Stackable[T] = {
+        new Stack.Module0[T] {
+          val role = r
+          val description = r.name
+          def make(next: T) = fn(next)
         }
       }
     }
@@ -425,5 +407,5 @@ class StackBuilder[T](init: Stack[T]) {
    */
   def make(params: Stack.Params): T = result.make(params)
 
-  override def toString = "Builder(%s)".format(stack)
+  override def toString = s"Builder($stack)"
 }

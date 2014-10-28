@@ -30,11 +30,11 @@ trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
 }
 
 object MySqlClientTracingFilter {
-  object Stackable extends Stack.Simple[ServiceFactory[Request, Result]] {
+  object Stackable extends Stack.Module1[param.Label, ServiceFactory[Request, Result]] {
     val role = ClientTracingFilter.role
     val description = "Add MySql client specific annotations to the trace"
-    def make(next: ServiceFactory[Request, Result])(implicit params: Params) = {
-      val param.Label(label) = get[param.Label]
+    def make(_label: param.Label, next: ServiceFactory[Request, Result]) = {
+      val param.Label(label) = _label
       // TODO(jeff): should be able to get this directly from ClientTracingFilter
       val annotations = new AnnotatingTracingFilter[Request, Result](
         label, Annotation.ClientSend(), Annotation.ClientRecv())

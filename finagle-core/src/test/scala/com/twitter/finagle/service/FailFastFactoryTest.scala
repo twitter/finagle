@@ -1,17 +1,16 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.{FailedFastException, ServiceFactory, Service}
-import com.twitter.util._
-import com.twitter.finagle.MockTimer
-import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.conversions.time._
 import java.util.concurrent.atomic.AtomicInteger
+import com.twitter.conversions.time._
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.{FailedFastException, MockTimer, Service, ServiceFactory, SourcedException}
+import com.twitter.util._
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
-import org.mockito.Mockito.{never, verify, when, times}
+import org.mockito.Mockito.{never, times, verify, when}
+import org.scalatest.FunSuite
 import org.scalatest.concurrent.Conductors
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.FunSuite
 import org.scalatest.mock.MockitoSugar
 import scala.language.reflectiveCalls
 
@@ -26,7 +25,8 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
     val underlying = mock[ServiceFactory[Int, Int]]
     when(underlying.isAvailable).thenReturn(true)
     when(underlying.close(any[Time])).thenReturn(Future.Done)
-    val failfast = new FailFastFactory(underlying, NullStatsReceiver, timer, backoffs)
+    val stats = new InMemoryStatsReceiver
+    val failfast = new FailFastFactory(underlying, stats, timer, backoffs)
 
     val p, q, r = new Promise[Service[Int, Int]]
     when(underlying()).thenReturn(p)
@@ -54,6 +54,7 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
       p() = Throw(new Exception)
       verify(underlying).apply()
       assert(failfast.isAvailable === false)
+      assert(stats.counters.get(Seq("marked_dead")) === Some(1))
     }
   }
 
@@ -86,6 +87,7 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
       q() = Return(service)
       assert(timer.tasks.isEmpty)
       assert(failfast.isAvailable === true)
+      assert(stats.counters.get(Seq("marked_available")) === Some(1))
     }
   }
 
@@ -193,7 +195,7 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
         ctx.p() = Throw(new Exception)
         ctx.failfast().poll match {
           case Some(Throw(ex: FailedFastException)) => {
-            assert(ex.serviceName === "unspecified")
+            assert(ex.serviceName === SourcedException.UnspecifiedServiceName)
           }
           case _ => throw new Exception
         }
@@ -206,4 +208,13 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
     }
   }
 
+  test("accepts empty backoff stream") {
+    Time.withCurrentTimeFrozen { tc =>
+      val ctx = newCtx()
+      import ctx._
+
+      val failfast = new FailFastFactory(underlying, stats, timer, Stream.empty)
+      failfast()
+    }
+  }
 }

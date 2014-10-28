@@ -18,9 +18,12 @@ trait Transporter[In, Out] {
 }
 
 /**
+ * A collection of [[com.twitter.finagle.Stack.Param Stack.Params]] useful for configuring
+ * a [[com.twitter.finagle.client.Transporter]].
+ *
  * @define $param a [[com.twitter.finagle.Stack.Param]] used to configure
  */
-private[finagle] object Transporter {
+object Transporter {
   import com.twitter.conversions.time._
 
   /**
@@ -38,8 +41,7 @@ private[finagle] object Transporter {
    * $param the connect timeout of a `Transporter`.
    *
    * @param howlong A maximum amount of time a transport
-   * is allowed to spend connecting. Only relevant if the transport
-   * represents a client transport.
+   * is allowed to spend connecting.
    */
   case class ConnectTimeout(howlong: Duration)
   implicit object ConnectTimeout extends Stack.Param[ConnectTimeout] {

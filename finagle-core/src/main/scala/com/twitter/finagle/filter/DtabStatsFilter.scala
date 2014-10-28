@@ -10,11 +10,11 @@ object DtabStatsFilter {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.filter.DtabStatsFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module1[param.Stats, ServiceFactory[Req, Rep]] {
       val role = DtabStatsFilter.role
       val description = "Report dtab statistics"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-        val param.Stats(statsReceiver) = get[param.Stats]
+      def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]) = {
+        val param.Stats(statsReceiver) = _stats
         if (statsReceiver.isNull) next
         else new DtabStatsFilter[Req, Rep](statsReceiver) andThen next
       }

@@ -13,6 +13,7 @@ import scala.concurrent.forkjoin.ThreadLocalRandom
 trait Rng {
   def nextDouble(): Double
   def nextInt(n: Int): Int
+  def nextInt(): Int = nextInt(Int.MaxValue)
 }
 
 object Rng {

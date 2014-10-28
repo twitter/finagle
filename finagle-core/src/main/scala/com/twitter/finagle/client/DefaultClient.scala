@@ -71,7 +71,7 @@ case class DefaultClient[Req, Rep](
   monitor: Monitor = DefaultMonitor,
   reporter: ReporterFactory = LoadedReporterFactory,
   loadBalancer: WeightedLoadBalancerFactory = DefaultBalancerFactory,
-  newTraceInitializer: Stack.Simple[ServiceFactory[Req, Rep]] = TraceInitializerFilter.clientModule[Req, Rep]
+  newTraceInitializer: Stackable[ServiceFactory[Req, Rep]] = TraceInitializerFilter.clientModule[Req, Rep]
 ) extends Client[Req, Rep] { outer =>
 
   private[this] def transform(stack: Stack[ServiceFactory[Req, Rep]]) = {
@@ -116,15 +116,16 @@ case class DefaultClient[Req, Rep](
     def newTransporter() = throw unimpl
     protected def newDispatcher(transport: Transport[In, Out]) = throw unimpl
 
-    override protected val endpointer = new Stack.Simple[ServiceFactory[Req, Rep]] {
-      val role = com.twitter.finagle.stack.Endpoint
-      val description = "Send requests over the wire"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Stack.Params) = {
-        val param.Stats(sr) = get[param.Stats]
-        val Transporter.EndpointAddr(addr) = get[Transporter.EndpointAddr]
-        outer.endpointer(addr, sr)
+    override protected val endpointer: Stackable[ServiceFactory[Req, Rep]] =
+      new Stack.Module2[Transporter.EndpointAddr, param.Stats, ServiceFactory[Req, Rep]] {
+        val role = com.twitter.finagle.stack.Endpoint
+        val description = "Send requests over the wire"
+        def make(_addr: Transporter.EndpointAddr, _stats: param.Stats, next: ServiceFactory[Req, Rep]) = {
+          val Transporter.EndpointAddr(addr) = _addr
+          val param.Stats(sr) = _stats
+          outer.endpointer(addr, sr)
+        }
       }
-    }
   }
 
   private[this] val underlying = Client()

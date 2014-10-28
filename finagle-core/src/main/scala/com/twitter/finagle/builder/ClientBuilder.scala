@@ -222,7 +222,7 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  * http://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6
  */
 class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle](
-  params: Stack.Params,
+  val params: Stack.Params,
   mk: Stack.Params => Client[Req, Rep]
 ) {
   import ClientConfig._
@@ -380,11 +380,11 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       val Timer(timer) = params[Timer]
       val codec = codecFactory(ClientCodecConfig(name))
 
-      val prepConn = new Stack.Simple[ServiceFactory[Req1, Rep1]] {
+      val prepConn = new Stack.Module1[Stats, ServiceFactory[Req1, Rep1]] {
         val role = StackClient.Role.prepConn
         val description = "Connection preparation phase as defined by a Codec"
-        def make(next: ServiceFactory[Req1, Rep1])(implicit params: Params) = {
-          val Stats(stats) = params[Stats]
+        def make(_stats: Stats, next: ServiceFactory[Req1, Rep1]) = {
+          val Stats(stats) = _stats
           val underlying = codec.prepareConnFactory(next)
           new ServiceFactoryProxy(underlying) {
             val stat = stats.stat("codec_connection_preparation_latency_ms")
@@ -455,13 +455,17 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * Overrides the stack and [[com.twitter.finagle.Client]] that will be used
-   * by this builder. The `mk` function is passed the state of configuration
-   * when `build` is called. There is no guarantee that all the builder parameters
-   * may be used by the client created by `mk`, it is up to the discretion of
-   * the client and protocol implementation. For example, most of connection pool
-   * parameters (hostConnectionLimit, etc) don't apply to [[com.twitter.finagle.ThriftMux]].
-   * For this reason, the builder assumes that hostConnectionLimit is irrelevant
-   * when using `stack`.
+   * by this builder.
+   *
+   * @param mk A function that materializes a `Client` from a set of `Params`.
+   * `mk` is passed the state of configuration when `build` is called. There is
+   * no guarantee that all the builder parameters will be used by the client
+   * created by `mk`; it is up to the discretion of the client and protocol
+   * implementation. For example, the Mux protocol has no use for most
+   * connection pool parameters (e.g. `hostConnectionLimit`). Thus when
+   * configuring [[com.twitter.finagle.ThriftMux]] clients (via
+   * `.stack(ThriftMuxClient)`), such connection pool parameters will not be
+   * applied.
    */
   @deprecated("Use stack(client: Stack.Parameterized)", "7.0.0")
   def stack[Req1, Rep1](
@@ -469,6 +473,20 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, Yes] =
     copy(params, mk)
 
+  /**
+   * Overrides the stack and [[com.twitter.finagle.Client]] that will be used
+   * by this builder.
+   *
+   * @param client A `Parameterized` representation of a
+   * [[com.twitter.finagle.Client]]. `client` is materialized with the state of
+   * configuration when `build` is called. There is no guarantee that all
+   * builder parameters will be used by the resultant `Client`; it is up to the
+   * discretion of `client` itself and the protocol implementation. For example,
+   * the Mux protocol has no use for most connection pool parameters (e.g.
+   * `hostConnectionLimit`). Thus when configuring
+   * [[com.twitter.finagle.ThriftMux]] clients (via `.stack(ThriftMux.client)`),
+   * such connection pool parameters will not be applied.
+   */
   def stack[Req1, Rep1](
     client: Stack.Parameterized[Client[Req1, Rep1]]
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, Yes] =

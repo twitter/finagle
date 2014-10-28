@@ -13,11 +13,11 @@ private[finagle] object StatsFilter {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.StatsFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module1[param.Stats, ServiceFactory[Req, Rep]] {
       val role = StatsFilter.role
       val description = "Report request statistics"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-        val param.Stats(statsReceiver) = get[param.Stats]
+      def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]) = {
+        val param.Stats(statsReceiver) = _stats
         if (statsReceiver.isNull) next
         else new StatsFilter(new RollupStatsReceiver(statsReceiver)) andThen next
       }
@@ -68,7 +68,8 @@ class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
           latencyStat.add(elapsed().inMilliseconds)
           failureReceiver.counter(Throwables.mkString(e): _*).incr()
           e match {
-            case sourced: SourcedException if sourced.serviceName != "unspecified" =>
+            case sourced: SourcedException
+              if sourced.serviceName != SourcedException.UnspecifiedServiceName =>
               sourcedFailuresReceiver
                 .counter(sourced.serviceName +: Throwables.mkString(sourced): _*)
                 .incr()
@@ -97,11 +98,11 @@ private[finagle] object StatsServiceFactory {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.StatsServiceFactory]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module1[param.Stats, ServiceFactory[Req, Rep]] {
       val role = StatsServiceFactory.role
       val description = "Report connection statistics"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-        val param.Stats(statsReceiver) = get[param.Stats]
+      def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]) = {
+        val param.Stats(statsReceiver) = _stats
         if (statsReceiver.isNull) next
         else new StatsServiceFactory(next, statsReceiver)
       }

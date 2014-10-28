@@ -10,12 +10,12 @@ private[finagle] object TracingFilter {
    */
   @deprecated("Use TraceInitializerFilter and (Client|Server)TracingFilter", "6.20.0")
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module2[param.Tracer, param.Label, ServiceFactory[Req, Rep]] {
       val role = TracingFilter.role
       val description = "Handle span lifecycle events to report tracing from protocols"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-        val param.Tracer(tracer) = get[param.Tracer]
-        val param.Label(label) = get[param.Label]
+      def make(_tracer: param.Tracer, _label: param.Label, next: ServiceFactory[Req, Rep]) = {
+        val param.Tracer(tracer) = _tracer
+        val param.Label(label) = _label
         val tracingFilter = new TracingFilter[Req,Rep](tracer, label)
         tracingFilter andThen next
       }
@@ -50,12 +50,13 @@ class TracingFilter[Req, Rep](tracer: Tracer, label: String) extends SimpleFilte
 private[finagle] object TraceInitializerFilter {
   val role = Stack.Role("TraceInitializerFilter")
 
-  private[finagle] class Module[Req, Rep](newId: Boolean) extends Stack.Simple[ServiceFactory[Req, Rep]] {
+  private[finagle] class Module[Req, Rep](newId: Boolean)
+    extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
     def this() = this(true)
     val role = TraceInitializerFilter.role
     val description = "Initialize the tracing system"
-    def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-      val param.Tracer(tracer) = get[param.Tracer]
+    def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
+      val param.Tracer(tracer) = _tracer
       val traceInitializer = new TraceInitializerFilter[Req,Rep](tracer, newId)
       traceInitializer andThen next
     }
@@ -73,11 +74,12 @@ private[finagle] object TraceInitializerFilter {
    */
   def serverModule[Req, Rep] = new Module[Req, Rep](false)
 
-  def empty[Req, Rep] = new Stack.Simple[ServiceFactory[Req, Rep]] {
-    val role = TraceInitializerFilter.role
-    val description = "Empty Stackable, used Default(Client|Server)"
-    def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = next
-  }
+  def empty[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Module0[ServiceFactory[Req, Rep]] {
+      val role = TraceInitializerFilter.role
+      val description = "Empty Stackable, used Default(Client|Server)"
+      def make(next: ServiceFactory[Req, Rep]) = next
+    }
 }
 
 /**
@@ -160,11 +162,11 @@ private[finagle] object ServerTracingFilter {
     Annotation.ServerRecv(), Annotation.ServerSend(), finagleVersion)
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module1[param.Label, ServiceFactory[Req, Rep]] {
       val role = ServerTracingFilter.role
       val description = "Report finagle information and server recv/send events"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-        val param.Label(label) = get[param.Label]
+      def make(_label: param.Label, next: ServiceFactory[Req, Rep]) = {
+        val param.Label(label) = _label
         TracingFilter[Req, Rep](label) andThen next
       }
     }
@@ -183,11 +185,11 @@ private[finagle] object ClientTracingFilter {
       Annotation.ClientSend(), Annotation.ClientRecv(), finagleVersion)
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Simple[ServiceFactory[Req, Rep]] {
+    new Stack.Module1[param.Label, ServiceFactory[Req, Rep]] {
       val role = ClientTracingFilter.role
       val description = "Report finagle information and client send/recv events"
-      def make(next: ServiceFactory[Req, Rep])(implicit params: Params) = {
-        val param.Label(label) = get[param.Label]
+      def make(_label: param.Label, next: ServiceFactory[Req, Rep]) = {
+        val param.Label(label) = _label
         TracingFilter[Req, Rep](label) andThen next
       }
     }

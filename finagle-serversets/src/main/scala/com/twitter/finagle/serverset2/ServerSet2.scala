@@ -2,11 +2,11 @@ package com.twitter.finagle.serverset2
 
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
-import com.twitter.finagle.stats.{Stat, StatsReceiver, DefaultStatsReceiver}
-import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Addr, InetResolver, Resolver}
+import com.twitter.finagle.stats.{DefaultStatsReceiver, Stat, StatsReceiver}
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
-import com.twitter.util._
+import com.twitter.util.{Activity, Closable, Future, Memoize, Stopwatch, Var, Witness}
 import java.nio.charset.Charset
 import java.util.concurrent.atomic.AtomicInteger
 import com.google.common.cache.{Cache, CacheBuilder}
@@ -21,11 +21,28 @@ private[serverset2] object eprintln {
   def apply(l: String) = System.err.println(l)
 }
 
+private[serverset2] object Zk2Resolver {
+  /**
+   * A representation of an Addr accompanied by its total size and the number of
+   * members that are in "limbo".
+   */
+  case class State(addr: Addr, limbo: Int, size: Int)
+
+  /** Compute the size of an Addr, where non-bound equates to a size of zero. */
+  def sizeOf(addr: Addr): Int = addr match {
+    case Addr.Bound(set) => set.size
+    case _ => 0
+  }
+}
+
 /**
- * The actual, public zk2 resolver. Provides Addrs from serverset
- * paths.
+ * A [[com.twitter.finagle.Resolver]] for the "zk2" service discovery scheme.
+ *
+ * Resolution is achieved by looking up registered ServerSet paths within a
+ * service discovery ZooKeeper cluster. See `Zk2Resolver.bind` for details.
  */
 class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
+  import Zk2Resolver._
 
   def this() = this(DefaultStatsReceiver.scope("zk2"))
 
@@ -36,25 +53,29 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
   private[this] val inetResolver = InetResolver(statsReceiver)
   private[this] val sessionTimeout = 10.seconds
   private[this] val zkFactory = Zk.withTimeout(sessionTimeout)
-  private[this] var cache = Map.empty[String, ServerSet2]
   private[this] val epoch = Stabilizer.epochs(sessionTimeout*4)
   private[this] val nsets = new AtomicInteger(0)
 
+  // Cache of ServerSet2 instances.
+  private[this] val serverSets = Memoize.snappable[String, ServerSet2] { hosts =>
+    val varZk = Zk.retrying(ServerSet2.DefaultRetrying, () => zkFactory(hosts))
+    new ServerSet2(varZk, statsReceiver)
+  }
+
   private[this] val gauges = Seq(
-    statsReceiver.addGauge("session_cache_size") { synchronized(cache.size) },
+    statsReceiver.addGauge("session_cache_size") { serverSets.snap.size.toFloat },
     statsReceiver.addGauge("observed_serversets") { nsets.get() }
   )
 
-  private[this] def serverSetOf(hosts: String) = synchronized {
+  private[this] def serverSetOf(hosts: String) = {
     val key = hosts.split(",").sorted mkString ","
-    if (!(cache contains key)) {
-      val newZk = () => zkFactory(hosts)
-      val vzk = Zk.retrying(ServerSet2.DefaultRetrying, newZk)
-      cache += key -> ServerSet2(vzk)
+    val value = serverSets(key)
+
+    if (chatty()) {
+      eprintf("ServerSet2(%s->%s)\n", hosts, value)
     }
-    if (chatty())
-      eprintf("ServerSet2(%s->%s)\n", hosts, cache(key))
-    cache(key)
+
+    value
   }
 
   private[this] val addrOf_ = Memoize[(ServerSet2, String, Option[String]), Var[Addr]] {
@@ -64,43 +85,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
           path.split("/").filter(_.nonEmpty).foldLeft(statsReceiver) {
             case (sr, ns) => sr.scope(ns)
           }
-        sr.scope("endpoint="+endpoint.getOrElse("default"))
-      }
-
-      // First, convert the Op-based serverset address to a
-      // Var[Addr], filtering out only the endpoints we are
-      // interested in.
-      val va: Var[Addr] = serverset.weightedOf(path, scoped).run flatMap {
-        case Activity.Pending => Var.value(Addr.Pending)
-        case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
-        case Activity.Ok(eps) =>
-          val subset = eps collect {
-            case (Endpoint(`endpoint`, Some(HostPort(host, port)), _, Endpoint.Status.Alive, _), weight) =>
-              (host, port, weight)
-          }
-          if (chatty())
-            eprintf("Received new serverset vector: %s\n", eps mkString ",")
-          if (subset.isEmpty) Var.value(Addr.Neg)
-            else inetResolver.bindWeightedHostPortsToAddr(subset.toSeq)
-      }
-
-      // The stabilizer ensures that we qualify removals by putting
-      // them in a limbo state for at least one epoch.
-      val stabilized = Stabilizer(va, epoch)
-
-      // Finally, we output a State, which is always a nonpending
-      // address coupled with statistics from the stabilization
-      // process.
-      case class State(addr: Addr, limbo: Int, size: Int)
-      def naddr(addr: Addr) = addr match {
-        case Addr.Bound(set) => set.size
-        case _ => 0
-      }
-      val states = (stabilized.changes joinLast va.changes) collect {
-        case (stable, unstable) if stable != Addr.Pending =>
-          val nstable = naddr(stable)
-          val nunstable = naddr(unstable)
-          State(stable, nstable-nunstable, nstable)
+        sr.scope(s"endpoint=${endpoint.getOrElse("default")}")
       }
 
       @volatile var nlimbo = 0
@@ -111,9 +96,45 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
       scoped.provideGauge("limbo") { nlimbo }
       scoped.provideGauge("size") { size }
 
+      // First, convert the Op-based serverset address to a
+      // Var[Addr], filtering out only the endpoints we are
+      // interested in.
+      val va: Var[Addr] = serverset.weightedOf(path).run flatMap {
+        case Activity.Pending => Var.value(Addr.Pending)
+        case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
+        case Activity.Ok(eps) =>
+          val subset = eps collect {
+            case (Endpoint(`endpoint`, Some(HostPort(host, port)), _, Endpoint.Status.Alive, _), weight) =>
+              (host, port, weight)
+          }
+
+          if (chatty()) {
+            eprintf("Received new serverset vector: %s\n", eps mkString ",")
+          }
+
+          if (subset.isEmpty) Var.value(Addr.Neg)
+          else inetResolver.bindWeightedHostPortsToAddr(subset.toSeq)
+      }
+
+      // The stabilizer ensures that we qualify removals by putting
+      // them in a limbo state for at least one epoch.
+      val stabilized = Stabilizer(va, epoch)
+
+      // Finally we output `State`s, which are always nonpending
+      // address coupled with statistics from the stabilization
+      // process.
+      val states = (stabilized.changes joinLast va.changes) collect {
+        case (stable, unstable) if stable != Addr.Pending =>
+          val nstable = sizeOf(stable)
+          val nunstable = sizeOf(unstable)
+          State(stable, nstable-nunstable, nstable)
+      }
+
       val stabilizedVa = Var.async(Addr.Pending: Addr) { u =>
         nsets.incrementAndGet()
 
+        // Previous value of `u`, used to smooth out state changes in which the
+        // stable Addr doesn't vary.
         var lastu: Addr = Addr.Pending
 
         val reg = states.register(Witness { state: State =>
@@ -157,70 +178,60 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
       stabilizedVa
   }
 
-  def addrOf(hosts: String, path: String, endpoint: Option[String]): Var[Addr] =
+  /**
+   * Construct a Var[Addr] from the components of a ServerSet path.
+   */
+  private[twitter] def addrOf(hosts: String, path: String, endpoint: Option[String]): Var[Addr] =
     addrOf_(serverSetOf(hosts), path, endpoint)
 
+  /**
+   * Bind a string into a variable address using the zk2 scheme.
+   *
+   * Argument strings must adhere to either of the following formats:
+   *
+   *     zk2!<hosts>:2181!<path>
+   *     zk2!<hosts>:2181!<path>!<endpoint>
+   *
+   * where
+   *
+   * - <hosts>: The hostname(s) of service discovery ZooKeeper cluster
+   * - <path>: A ServerSet path (e.g. /twitter/service/userservice/prod/server)
+   * - <endpoint>: An endpoint name (optional)
+   */
   def bind(arg: String): Var[Addr] = arg.split("!") match {
-    // zk2!host:2181!/path
     case Array(hosts, path) =>
       addrOf(hosts, path, None)
 
-    // zk2!hosts:2181!/path!endpoint
     case Array(hosts, path, endpoint) =>
       addrOf(hosts, path, Some(endpoint))
 
     case _ =>
-      throw new IllegalArgumentException("Invalid address \"%s\"".format(arg))
-  }
-}
-
-private[serverset2] trait PathCache {
-  val entries: Cache[String, Set[Entry]]
-  val vectors: Cache[String, Option[Vector]]
-}
-
-private[serverset2] object PathCache {
-  def apply(maxSize: Int): PathCache = new PathCache {
-    val entries: Cache[String, Set[Entry]] =
-      CacheBuilder.newBuilder()
-        .maximumSize(maxSize)
-        .build()
-
-    val vectors: Cache[String, Option[Vector]] =
-      CacheBuilder.newBuilder()
-        .maximumSize(maxSize)
-        .build()
-  }
-}
-
-private[serverset2] trait ServerSet2 {
-  def entriesOf(path: String, cache: PathCache, statsReceiver: StatsReceiver): Activity[Set[Entry]]
-  def vectorsOf(path: String, cache: PathCache, statsReceiver: StatsReceiver): Activity[Set[Vector]]
-
-  def weightedOf(path: String, statsReceiver: StatsReceiver): Activity[Set[(Entry, Double)]] = {
-    val cache = PathCache(16000)
-    val vs = vectorsOf(path, cache, statsReceiver.scope("vectors")).run
-    val es = entriesOf(path, cache, statsReceiver.scope("entries")).run
-    Activity((es join vs) map {
-      case (Activity.Pending, _) => Activity.Pending
-      case (f@Activity.Failed(_), _) => f
-      case (Activity.Ok(ents), Activity.Ok(vecs)) =>
-        Activity.Ok(ServerSet2.weighted(ents, vecs))
-      case (Activity.Ok(ents), _) =>
-        Activity.Ok(ents map (_ -> 1D))
-    })
+      throw new IllegalArgumentException(s"Invalid address '${arg}'")
   }
 }
 
 private[serverset2] object ServerSet2 {
+  class PathCache(maxSize: Int) {
+    val entries: Cache[String, Set[Entry]] = CacheBuilder.newBuilder()
+      .maximumSize(maxSize)
+      .build()
+
+    val vectors: Cache[String, Option[Vector]] = CacheBuilder.newBuilder()
+      .maximumSize(maxSize)
+      .build()
+  }
+
   val DefaultRetrying = 5.seconds
+  val Utf8 = Charset.forName("UTF-8")
+  val EndpointGlob = "/member_"
+  val VectorGlob = "/vector_"
 
-  def apply(hosts: String): ServerSet2 =
-    apply(Zk.retrying(DefaultRetrying, () => Zk(hosts)))
-
-  def apply(zk: Var[Zk]): ServerSet2 =
-     new VarServerSet2(zk map { zk => new ZkServerSet2(zk) })
-
+  /**
+   * Compute weights for a set of ServerSet entries.
+   *
+   * Each entry in `ents` is paired with the product of all weights for that
+   * entry in `vecs`.
+   */
   def weighted(ents: Set[Entry], vecs: Set[Vector]): Set[(Entry, Double)] = {
     ents map { ent =>
       val w = vecs.foldLeft(1.0) { case (w, vec) => w*vec.weightOf(ent) }
@@ -229,21 +240,19 @@ private[serverset2] object ServerSet2 {
   }
 }
 
-private[serverset2] class VarServerSet2(v: Var[ServerSet2]) extends ServerSet2 {
-  def entriesOf(path: String, cache: PathCache, statsReceiver: StatsReceiver): Activity[Set[Entry]] =
-    Activity(v flatMap (_.entriesOf(path, cache, statsReceiver).run))
-  def vectorsOf(path: String, cache: PathCache, statsReceiver: StatsReceiver): Activity[Set[Vector]] =
-    Activity(v flatMap (_.vectorsOf(path, cache, statsReceiver).run))
-}
+/**
+ * A representation of a ServerSet, providing resolution of path strings to
+ * various data structure representations of clusters.
+ */
+private[serverset2] class ServerSet2(varZk: Var[Zk], statsReceiver: StatsReceiver) {
+  import ServerSet2._
 
-private[serverset2] object ZkServerSet2 {
-  private val Utf8 = Charset.forName("UTF-8")
-  private val EndpointGlob = "/member_"
-  private val VectorGlob = "/vector_"
-}
+  private[this] val zkEntriesReadStat = statsReceiver.scope("entries").stat("read_ms")
+  private[this] val zkEntriesParseStat = statsReceiver.scope("entries").stat("parse_ms")
+  private[this] val zkVectorsReadStat = statsReceiver.scope("vectors").stat("read_ms")
+  private[this] val zkVectorsParseStat = statsReceiver.scope("vectors").stat("parse_ms")
 
-private[serverset2] case class ZkServerSet2(zk: Zk) extends ServerSet2 {
-  import ZkServerSet2._
+  private[this] val actZk = Activity(varZk.map(Activity.Ok(_)))
 
   private[this] def timedOf[T](stat: Stat)(f: => Activity[T]): Activity[T] = {
     val elapsed = Stopwatch.start()
@@ -253,17 +262,23 @@ private[serverset2] case class ZkServerSet2(zk: Zk) extends ServerSet2 {
     }
   }
 
-  private[this] def dataOf(pat: String, statsReceiver: StatsReceiver): Activity[Seq[(String, Option[Buf])]] = {
-    val readStat = statsReceiver.stat("read_ms")
-    zk.globOf(pat) flatMap { paths =>
-      timedOf(readStat)(zk.collectImmutableDataOf(paths))
+  private[this] def dataOf(
+    pattern: String,
+    readStat: Stat
+  ): Activity[Seq[(String, Option[Buf])]] = {
+    Activity(varZk.map(Activity.Ok(_))) flatMap { zk =>
+      zk.globOf(pattern) flatMap { paths =>
+        timedOf(readStat)(zk.collectImmutableDataOf(paths))
+      }
     }
   }
 
-  def entriesOf(path: String, cache: PathCache, statsReceiver: StatsReceiver): Activity[Set[Entry]] = {
-    val parseStat = statsReceiver.stat("parse_ms")
-    dataOf(path+EndpointGlob, statsReceiver) flatMap { pathmap =>
-      timedOf[Set[Entry]](parseStat){
+  def entriesOf(
+    path: String,
+    cache: PathCache
+  ): Activity[Set[Entry]] = {
+    dataOf(path + EndpointGlob, zkEntriesReadStat) flatMap { pathmap =>
+      timedOf[Set[Entry]](zkEntriesParseStat) {
         val endpoints = pathmap flatMap {
           case (_, null) => None // no data
           case (path, Some(Buf.Utf8(data))) =>
@@ -283,10 +298,12 @@ private[serverset2] case class ZkServerSet2(zk: Zk) extends ServerSet2 {
     }
   }
 
-  def vectorsOf(path: String, cache: PathCache, statsReceiver: StatsReceiver): Activity[Set[Vector]] = {
-    val parseStat = statsReceiver.stat("parse_ms")
-    dataOf(path + VectorGlob, statsReceiver) flatMap { pathmap =>
-      timedOf[Set[Vector]](parseStat) {
+  def vectorsOf(
+    path: String,
+    cache: PathCache
+  ): Activity[Set[Vector]] = {
+    dataOf(path + VectorGlob, zkVectorsReadStat) flatMap { pathmap =>
+      timedOf[Set[Vector]](zkVectorsParseStat) {
         val vectors = pathmap flatMap {
           case (path, None) =>
             cache.vectors.getIfPresent(path) match {
@@ -306,5 +323,23 @@ private[serverset2] case class ZkServerSet2(zk: Zk) extends ServerSet2 {
         Activity.value(vectors.toSet)
       }
     }
+  }
+
+  /**
+   * Look up the weighted ServerSet entries for a given path.
+   */
+  def weightedOf(path: String): Activity[Set[(Entry, Double)]] = {
+    val cache = new PathCache(16000)
+    val es = entriesOf(path, cache).run
+    val vs = vectorsOf(path, cache).run
+
+    Activity((es join vs) map {
+      case (Activity.Pending, _) => Activity.Pending
+      case (f@Activity.Failed(_), _) => f
+      case (Activity.Ok(ents), Activity.Ok(vecs)) =>
+        Activity.Ok(ServerSet2.weighted(ents, vecs))
+      case (Activity.Ok(ents), _) =>
+        Activity.Ok(ents map (_ -> 1D))
+    })
   }
 }
