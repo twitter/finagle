@@ -22,26 +22,6 @@ class NameTreeTest extends FunSuite {
   def pick[T](xs: Seq[T]): T = xs(rng.nextInt(xs.length))
 
   test("NameTree.{read,show}") {
-    def splice(tree: NameTree[Path]): NameTree[Path] = tree match {
-      case NameTree.Alt(tree) => splice(tree)
-      case NameTree.Alt(trees@_*) =>
-        val spliced = trees map splice flatMap {
-          case NameTree.Alt(trees1@_*) => trees1
-          case other => Seq(other)
-        }
-        NameTree.Alt(spliced:_*)
-
-      case NameTree.Union(tree) => splice(tree)
-      case NameTree.Union(trees@_*) =>
-        val spliced = trees map splice flatMap {
-          case NameTree.Union(trees1@_*) => trees1
-          case other => Seq(other)
-        }
-        NameTree.Union(spliced:_*)
-
-      case leaf => leaf
-    }
-
     def newPath(): NameTree[Path] = {
       val elems = Seq.fill(1+rng.nextInt(10)) { pick(words) }
       NameTree.Leaf(Path.Utf8(elems:_*))
@@ -61,22 +41,32 @@ class NameTreeTest extends FunSuite {
         case 0 => newLeaf()
 
         case 1 =>
-          val trees = Seq.fill(1+rng.nextInt(3)) { newTree(depth-1) }
-          NameTree.Union(trees:_*)
+          val trees = Seq.fill(1+rng.nextInt(3)) {
+            // TODO(jdonham) test fractional weights
+            val weight = rng.nextInt(10).toDouble
+            NameTree.Weighted(weight, newTree(depth-1))
+          }
+          if (trees.size == 1)
+            trees(0).tree
+          else
+            NameTree.Union(trees:_*)
 
         case 2 =>
           val trees = Seq.fill(1+rng.nextInt(3)) { newTree(depth-1) }
-          NameTree.Alt(trees:_*)
+          if (trees.size == 1)
+            trees(0)
+          else
+            NameTree.Alt(trees:_*)
       }
 
     val trees = Seq.fill(100) { newTree(2) }
     for (tree <- trees)
       try {
-        assert(splice(NameTree.read(tree.show)) === splice(tree))
+        assert(NameTree.read(tree.show) === tree)
       } catch {
         case NonFatal(exc) =>
-          fail("Exception %s while parsing %s: %s; spliced: %s".format(
-            exc, tree.show, tree, splice(tree)))
+          fail("Exception %s while parsing %s: %s".format(
+            exc, tree.show, tree))
       }
   }
 

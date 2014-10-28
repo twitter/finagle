@@ -29,20 +29,38 @@ class NameTreeParsersTest extends FunSuite with AssertionsForJUnit {
   }
 
   test("parseNameTree") {
+    val defaultWeight = NameTree.Weighted.defaultWeight
+
     assert(NameTreeParsers.parseNameTree("! | ~ | $") === NameTree.Alt(NameTree.Fail, NameTree.Neg, NameTree.Empty))
     assert(NameTreeParsers.parseNameTree("/foo/bar") === NameTree.Leaf(Path.Utf8("foo", "bar")))
     assert(NameTreeParsers.parseNameTree("  /foo & /bar  ") ===
-      NameTree.Union(NameTree.Leaf(Path.Utf8("foo")), NameTree.Leaf(Path.Utf8("bar"))))
+      NameTree.Union(
+        NameTree.Weighted(defaultWeight, NameTree.Leaf(Path.Utf8("foo"))),
+        NameTree.Weighted(defaultWeight, NameTree.Leaf(Path.Utf8("bar")))))
     assert(NameTreeParsers.parseNameTree("  /foo | /bar  ") ===
       NameTree.Alt(NameTree.Leaf(Path.Utf8("foo")), NameTree.Leaf(Path.Utf8("bar"))))
     assert(NameTreeParsers.parseNameTree("/foo & /bar | /bar & /baz") ===
       NameTree.Alt(
-        NameTree.Union(NameTree.Leaf(Path.Utf8("foo")), NameTree.Leaf(Path.Utf8("bar"))),
-        NameTree.Union(NameTree.Leaf(Path.Utf8("bar")), NameTree.Leaf(Path.Utf8("baz")))))
+        NameTree.Union(
+          NameTree.Weighted(defaultWeight, NameTree.Leaf(Path.Utf8("foo"))),
+          NameTree.Weighted(defaultWeight, NameTree.Leaf(Path.Utf8("bar")))),
+        NameTree.Union(
+          NameTree.Weighted(defaultWeight, NameTree.Leaf(Path.Utf8("bar"))),
+          NameTree.Weighted(defaultWeight, NameTree.Leaf(Path.Utf8("baz"))))))
+
+    assert(NameTreeParsers.parseNameTree("1 * /foo & 2 * /bar | .5 * /bar & .5 * /baz") ===
+      NameTree.Alt(
+        NameTree.Union(
+          NameTree.Weighted(1D, NameTree.Leaf(Path.Utf8("foo"))),
+          NameTree.Weighted(2D, NameTree.Leaf(Path.Utf8("bar")))),
+        NameTree.Union(
+          NameTree.Weighted(0.5D, NameTree.Leaf(Path.Utf8("bar"))),
+          NameTree.Weighted(0.5D, NameTree.Leaf(Path.Utf8("baz"))))))
 
     intercept[IllegalArgumentException] { NameTreeParsers.parseNameTree("") }
     intercept[IllegalArgumentException] { NameTreeParsers.parseNameTree("#") }
     intercept[IllegalArgumentException] { NameTreeParsers.parseNameTree("/foo &") }
+    intercept[IllegalArgumentException] { NameTreeParsers.parseNameTree("/foo & 0.1.2 * /bar")}
   }
 
   test("parseDentry") {
