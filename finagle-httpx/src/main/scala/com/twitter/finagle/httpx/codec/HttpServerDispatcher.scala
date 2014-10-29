@@ -9,7 +9,7 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Reader, Buf, BufReader}
 import com.twitter.util.{Future, Promise, Throw, Return}
 import java.net.InetSocketAddress
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
+import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpHeaders}
 
 class HttpServerDispatcher[REQUEST <: Request](
     trans: Transport[Any, Any],
@@ -56,6 +56,13 @@ class HttpServerDispatcher[REQUEST <: Request](
 
   protected def handle(rep: Response): Future[Unit] = {
     if (rep.isChunked) {
+      // We remove content length here in case the content is later
+      // compressed. This is a pretty bad violation of modularity:
+      // this is likely an issue with the Netty content
+      // compressors, which (should?) adjust headers regardless of
+      // transfer encoding.
+      rep.headers.remove(HttpHeaders.Names.CONTENT_LENGTH)
+
       val p = new Promise[Unit]
       val f = trans.write(from[Response, HttpResponse](rep)) before
         streamChunks(trans, rep.reader)

@@ -57,6 +57,13 @@ class HttpServerDispatcher[REQUEST <: Request](
     HttpHeaders.setKeepAlive(response, !isClosing)
     response match {
       case rep: Response if rep.isChunked =>
+        // We remove content length here in case the content is later
+        // compressed. This is a pretty bad violation of modularity:
+        // this is likely an issue with the Netty content
+        // compressors, which (should?) adjust headers regardless of
+        // transfer encoding.
+        rep.headers.remove(HttpHeaders.Names.CONTENT_LENGTH)
+
         val p = new Promise[Unit]
         val f = trans.write(rep) before streamChunks(trans, rep.reader)
         // This awkwardness is unfortunate but necessary for now as you may be
