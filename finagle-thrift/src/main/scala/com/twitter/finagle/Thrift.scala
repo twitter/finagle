@@ -199,7 +199,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     def withBufferedTransport(): Server = copy(framed=false)
   }
 
-  val  server = Server()
+  val server = Server()
 
   def serve(addr: SocketAddress, service: ServiceFactory[Array[Byte], Array[Byte]])
     : ListeningServer = server.serve(addr, service)
