@@ -681,7 +681,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def tls(sslContext: SSLContext): This =
     configured((Transport.TLSClientEngine(Some({
-      case inet: InetSocketAddress => Ssl.client(sslContext, inet.getHostString, inet.getPort)
+      case inet: InetSocketAddress => Ssl.client(sslContext, inet.getHostName, inet.getPort)
       case _ => Ssl.client(sslContext)
     }))))
 
@@ -692,7 +692,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def tls(sslContext: SSLContext, hostname: Option[String]): This =
     configured((Transport.TLSClientEngine(Some({
-      case inet: InetSocketAddress => Ssl.client(sslContext, hostname.getOrElse(inet.getHostString), inet.getPort)
+      case inet: InetSocketAddress => Ssl.client(sslContext, hostname.getOrElse(inet.getHostName), inet.getPort)
       case _ => Ssl.client(sslContext)
     }))))
       .configured(Transporter.TLSHostname(hostname))
@@ -702,7 +702,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def tlsWithoutValidation(): This =
     configured(Transport.TLSClientEngine(Some({
-      case inet: InetSocketAddress => Ssl.clientWithoutCertificateValidation(inet.getHostString, inet.getPort)
+      case inet: InetSocketAddress => Ssl.clientWithoutCertificateValidation(inet.getHostName, inet.getPort)
       case _ => Ssl.clientWithoutCertificateValidation()
     })))
 
