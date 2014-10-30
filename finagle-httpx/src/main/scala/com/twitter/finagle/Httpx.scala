@@ -115,7 +115,7 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
 
     def withTlsWithoutValidation(): Client =
       configured(Transport.TLSClientEngine(Some({
-        case inet: InetSocketAddress => Ssl.clientWithoutCertificateValidation(inet.getHostString, inet.getPort)
+        case inet: InetSocketAddress => Ssl.clientWithoutCertificateValidation(inet.getHostName, inet.getPort)
         case _ => Ssl.clientWithoutCertificateValidation()
       })))
 
