@@ -44,5 +44,5 @@ private[finagle] class TraceContext extends ContextHandler {
   }
 
   def emit(): Option[Buf] =
-    Some(Buf.ByteArray(TraceId.serialize(Trace.id)))
+    Some(Buf.ByteArray.Unsafe(TraceId.serialize(Trace.id)))
 }

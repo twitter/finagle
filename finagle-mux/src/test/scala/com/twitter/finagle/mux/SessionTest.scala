@@ -355,7 +355,7 @@ private[mux] class SessionTest(rolesReversed: Boolean) extends FunSuite with One
     when(service(any[Buf])).thenAnswer(
       new Answer[Future[Buf]]() {
         def answer(invocation: InvocationOnMock) = {
-          val traceId = Buf.ByteArray(
+          val traceId = Buf.ByteArray.Unsafe(
             Trace.id.toString.getBytes(Charsets.Utf8))
           Future.value(traceId)
         }
@@ -382,7 +382,7 @@ private[mux] class SessionTest(rolesReversed: Boolean) extends FunSuite with One
         def answer(invocation: InvocationOnMock) = {
           val buf = ChannelBuffers.directBuffer(8)
           buf.writeLong(Trace.id.flags.toLong)
-          Future.value(ChannelBufferBuf(buf))
+          Future.value(ChannelBufferBuf.Unsafe(buf))
         }
       }
     )

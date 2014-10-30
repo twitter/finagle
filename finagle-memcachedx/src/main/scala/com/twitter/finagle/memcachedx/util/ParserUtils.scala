@@ -40,43 +40,20 @@ object ParserUtils {
     true
   }
 
-
   /**
-   * @return true if every byte in the Buf is a digit,
-   * false otherwise.
+   * @return true iff the Buf is non empty and every byte in the Buf is a digit.
    */
-  def isDigits(buf: Buf): Boolean = {
-    if (buf.length == 0)
-      return false
-
-    buf match {
-      case ChannelBufferBuf(cb) => // TODO(dschobel): this case can be rm'd after
-        isDigits(cb)               // finagle-memcached's frame decoding code is
-                                   // ported off netty3
-      case Buf.ByteArray(bytes, start, end) =>
-        var i = start
-        while (i < end) {
-          if (bytes(i) < '0' || bytes(i) > '9')
-            return false
-          i += 1
-        }
-      case Buf.ByteBuffer(bb) =>
-        while(bb.hasRemaining) {
-          val b = bb.get
-          if(b < '0' || b > '9')
-            return false
-        }
-      case buf =>
-        val len = buf.length
-        val bytes = new Array[Byte](len)
-        buf.write(bytes, 0)
-        var i = 0
-        while(i < len) {
-          if(bytes(i) < '0' || bytes(i) > '9')
-            return false
-          i += 1
-        }
+  def isDigits(buf: Buf): Boolean =
+    if (buf.isEmpty) false
+    else {
+      val Buf.ByteArray.Unsafe(bytes, begin, end) = Buf.ByteArray.coerce(buf)
+      var i = begin
+      while (i < end) {
+        if (bytes(i) < '0' || bytes(i) > '9')
+          return false
+        i += 1
+      }
+      true
     }
-    true
-  }
+
 }

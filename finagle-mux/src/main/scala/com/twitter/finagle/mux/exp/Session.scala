@@ -7,7 +7,7 @@ import com.twitter.finagle.netty3.{
 import com.twitter.finagle.stats.ClientStatsReceiver
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Dtab, CancelledRequestException, Context, ListeningServer, Stack}
+import com.twitter.finagle.{Dtab, CancelledRequestException, Context, ListeningServer}
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.SocketAddress
@@ -97,11 +97,11 @@ class Session private[finagle](
       // One-way message
       case Tdispatch(tag, contexts, /*ignore*/_dst, dtab, buf) if tag == MarkerTag =>
         for ((k, v) <- contexts)
-          Context.handle(ChannelBufferBuf(k), ChannelBufferBuf(v))
+          Context.handle(ChannelBufferBuf.Unsafe(k), ChannelBufferBuf.Unsafe(v))
         if (dtab.length > 0)
           Dtab.local ++= dtab
 
-        service.send(ChannelBufferBuf(buf))
+        service.send(ChannelBufferBuf.Unsafe(buf))
 
       // RPC
       case Tdispatch(tag, contexts, /*ignore*/_dst, dtab, req) =>
@@ -110,7 +110,7 @@ class Session private[finagle](
           trans.write(encode(RdispatchNack(masked, Seq.empty)))
         } else {
           for ((k, v) <- contexts)
-            Context.handle(ChannelBufferBuf(k), ChannelBufferBuf(v))
+            Context.handle(ChannelBufferBuf.Unsafe(k), ChannelBufferBuf.Unsafe(v))
           if (dtab.length > 0)
             Dtab.local ++= dtab
 
@@ -126,10 +126,10 @@ class Session private[finagle](
           if ((tag & TagMSB) == 0) {
             incoming.remove(masked)
             Trace.record(Annotation.ServerRecv())
-            source.offerAndClose(ChannelBufferBuf(req))
+            source.offerAndClose(ChannelBufferBuf.Unsafe(req))
           } else {
             Trace.record(Annotation.ServerRecvFragment())
-            source.offer(ChannelBufferBuf(req))
+            source.offer(ChannelBufferBuf.Unsafe(req))
           }
         }
 

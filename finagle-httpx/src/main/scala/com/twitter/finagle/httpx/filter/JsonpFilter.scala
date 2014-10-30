@@ -29,7 +29,7 @@ class JsonpFilter[Req <: Request] extends SimpleFilter[Req, Response] {
       if (response.mediaType == Some(MediaType.Json)) {
         response.content = Seq(
           JsonpFilter.Comment,
-          Buf.ByteArray(callback.getBytes("UTF-8")),
+          Buf.Utf8(callback),
           JsonpFilter.LeftParen,
           response.content,
           JsonpFilter.RightParenSemicolon

@@ -30,8 +30,8 @@ private[http] object ReaderUtils {
    * of stream.
    */
   def chunkOfBuf(buf: Buf): HttpChunk = buf match {
-    case cb: ChannelBufferBuf =>
-      new DefaultHttpChunk(cb.buf)
+    case ChannelBufferBuf.Unsafe(buf) =>
+      new DefaultHttpChunk(buf)
     case buf =>
       new DefaultHttpChunk(BufChannelBuffer(buf))
   }

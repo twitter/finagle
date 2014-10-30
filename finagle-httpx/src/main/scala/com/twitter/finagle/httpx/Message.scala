@@ -43,7 +43,8 @@ abstract class Message extends HttpMessageProxy {
   def isRequest: Boolean
   def isResponse = !isRequest
 
-  def content: Buf = ChannelBufferBuf(getContent())
+  // XXX should we may be using the Copied variants here?
+  def content: Buf = ChannelBufferBuf.Unsafe(getContent())
   def content_=(content: Buf) { setContent(BufChannelBuffer(content)) }
 
   def version: Version = from(getProtocolVersion())
@@ -305,9 +306,9 @@ abstract class Message extends HttpMessageProxy {
   /** Set the content as a string. */
   def contentString_=(value: String) {
     if (value != "")
-      setContent(BufChannelBuffer(Buf.ByteArray(value.getBytes("UTF-8"))))
+      setContent(BufChannelBuffer(Buf.Utf8(value)))
     else
-      setContent(BufChannelBuffer(Buf.Empty))
+      setContent(ChannelBuffers.EMPTY_BUFFER)
   }
   def setContentString(value: String) { contentString = value }
 

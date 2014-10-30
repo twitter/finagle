@@ -47,7 +47,7 @@ private class BufChannelBufferFactory(defaultOrder: ByteOrder) extends ChannelBu
    * `capacity` zeros and `order` endianness.
    */
   def getBuffer(order: ByteOrder, capacity: Int): ChannelBuffer =
-    BufChannelBuffer(Buf.ByteArray(new Array[Byte](capacity)), order)
+    new BufChannelBuffer(Buf.ByteArray.Unsafe(new Array[Byte](capacity)), order)
 
   /**
    * Returns a read-only ChannelBuffer whose content is equal to the
@@ -80,21 +80,31 @@ private class BufChannelBufferFactory(defaultOrder: ByteOrder) extends ChannelBu
 }
 
 object BufChannelBuffer {
-  /**
-   * Creates a read-only ChannelBuffer from `buf` with big-endian ByteOrder.
-   */
-  def apply(buf: Buf): ChannelBuffer = this(buf, ByteOrder.BIG_ENDIAN)
 
   /**
-   * Creates a read-only ChannelBuffer from `buf` with `endianness` ByteOrder.
+   * Creates a ChannelBuffer from `buf` with `endianness` ByteOrder.
+   *
+   * The returned ChannelBuffer should not be mutated.
    */
   def apply(buf: Buf, endianness: ByteOrder): ChannelBuffer = buf match {
-    case Buf.ByteArray(bytes, begin, end) =>
-      ChannelBuffers.unmodifiableBuffer(
-        ChannelBuffers.wrappedBuffer(endianness, bytes, begin, end - begin))
+    case empty if empty.isEmpty =>
+      ChannelBuffers.EMPTY_BUFFER
+
+    case ChannelBufferBuf.Unsafe(cb) if endianness == cb.order =>
+      cb
+
+    case Buf.ByteArray.Unsafe(bytes, begin, end) =>
+      ChannelBuffers.wrappedBuffer(endianness, bytes).slice(begin, end-begin)
+
     case _ =>
       new BufChannelBuffer(buf, endianness)
   }
+
+  /** Creates a ChannelBuffer from `buf` with big-endian ByteOrder. */
+  def apply(buf: Buf): ChannelBuffer = apply(buf, ByteOrder.BIG_ENDIAN)
+
+  /** Extract a Buf from a BufChannelBuffer. */
+  def unapply(bcb: BufChannelBuffer): Option[Buf] = Some(bcb.buf)
 }
 
 /**
@@ -110,7 +120,7 @@ object BufChannelBuffer {
  * @param endianness The endianness of `buf`, which will be reflected in the
  * `ChannelBuffer` wrapper.
  */
-private class BufChannelBuffer(buf: Buf, endianness: ByteOrder) extends AbstractChannelBuffer {
+private class BufChannelBuffer(val buf: Buf, endianness: ByteOrder) extends AbstractChannelBuffer {
   writerIndex(buf.length)
 
   def this(buf: Buf) = this(buf, ByteOrder.BIG_ENDIAN)
@@ -206,7 +216,7 @@ private class BufChannelBuffer(buf: Buf, endianness: ByteOrder) extends Abstract
   }
 
   def duplicate(): ChannelBuffer = {
-    val dup = BufChannelBuffer(buf, endianness)
+    val dup = new BufChannelBuffer(buf, endianness)
     dup.setIndex(readerIndex(), writerIndex())
     dup
   }
@@ -221,7 +231,7 @@ private class BufChannelBuffer(buf: Buf, endianness: ByteOrder) extends Abstract
     if (index + length > buf.length)
       throw new IndexOutOfBoundsException("index + length > buf.length")
 
-    val bcb = BufChannelBuffer(buf.slice(index, index + length), endianness)
+    val bcb = new BufChannelBuffer(buf.slice(index, index + length), endianness)
     bcb.writerIndex(length)
     bcb
   }
@@ -236,7 +246,7 @@ private class BufChannelBuffer(buf: Buf, endianness: ByteOrder) extends Abstract
     if (index + length > buf.length)
       throw new IndexOutOfBoundsException("index + length > buf.length")
 
-    val bcb = BufChannelBuffer(buf.slice(index, index + length), endianness)
+    val bcb = new BufChannelBuffer(buf.slice(index, index + length), endianness)
     bcb.writerIndex(length)
     bcb
   }
