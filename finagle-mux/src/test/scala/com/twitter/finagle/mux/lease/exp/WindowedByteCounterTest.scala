@@ -12,6 +12,7 @@ import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
 class WindowedByteCounterTest extends FunSuite with Eventually {
+  if (!sys.props.contains("SKIP_FLAKY")) { // CSL-1206
   trait ByteCounterHelper {
     val fakePool = new FakeMemoryPool(new FakeMemoryUsage(StorageUnit.zero, StorageUnit.zero))
     val fakeBean = new FakeGarbageCollectorMXBean(0, 0)
@@ -198,4 +199,6 @@ class WindowedByteCounterTest extends FunSuite with Eventually {
       assert(counter.lastGc === saved)
     }
   }
+  }
 }
+
