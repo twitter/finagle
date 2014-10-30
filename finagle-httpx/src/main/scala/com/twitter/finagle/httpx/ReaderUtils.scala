@@ -1,12 +1,10 @@
 package com.twitter.finagle.httpx
 
-import com.twitter.concurrent.AsyncMutex
-import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Buf, Reader}
-import com.twitter.util.{Future, Promise, Return}
+import com.twitter.util.{Future, Return}
 import org.jboss.netty.handler.codec.http.{HttpChunk, DefaultHttpChunk}
-import org.jboss.netty.buffer.ChannelBuffers
 
 private[httpx] object ReaderUtils {
   /**
@@ -29,12 +27,8 @@ private[httpx] object ReaderUtils {
    * Translates a Buf into HttpChunk. Beware: an empty buffer indicates end
    * of stream.
    */
-  def chunkOfBuf(buf: Buf): HttpChunk = buf match {
-    case cb: ChannelBufferBuf =>
-      new DefaultHttpChunk(cb.buf)
-    case buf =>
-      new DefaultHttpChunk(BufChannelBuffer(buf))
-  }
+  def chunkOfBuf(buf: Buf): HttpChunk =
+    new DefaultHttpChunk(ChannelBufferBuf.Unsafe.extract(buf))
 
   /**
    * Continuously read from a Reader, writing everything to a Transport.

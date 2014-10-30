@@ -88,7 +88,7 @@ private[finagle] class ServerDispatcher private[finagle](
           Trace.unwind {
             Trace.pushTracer(tracer)
             for ((k, v) <- contexts)
-              Context.handle(ChannelBufferBuf(k), ChannelBufferBuf(v))
+              Context.handle(ChannelBufferBuf.Unsafe(k), ChannelBufferBuf.Unsafe(v))
             if (dtab.length > 0)
               Dtab.local ++= dtab
             val elapsed = Stopwatch.start()

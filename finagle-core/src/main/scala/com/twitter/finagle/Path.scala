@@ -28,14 +28,7 @@ case class Path(elems: Buf*) {
     // there are nonbase delegations, we need to serialize the paths
     // to strings
     val nbuf = buf.length
-    val bytes = buf match {
-      case Buf.ByteArray(bytes, 0, _) => bytes
-      case buf =>
-        val bytes = new Array[Byte](nbuf)
-        buf.write(bytes, 0)
-        bytes
-    }
-
+    val bytes = Buf.ByteArray.Unsafe.extract(buf)
     if (Path.showableAsString(bytes, nbuf))
       new String(bytes, 0, nbuf, Path.Utf8Charset)
     else {

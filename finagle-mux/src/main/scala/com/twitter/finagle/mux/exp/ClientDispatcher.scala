@@ -214,11 +214,11 @@ class ClientDispatcher private[exp](
   private[mux] val recv: Message => Unit = {
     case RdispatchOk(tag, _, rsp) if (tag & TagMSB) > 0 =>
       for (p <- sent.get(tag & MaxTag))
-        p.offer(ChannelBufferBuf(rsp))
+        p.offer(ChannelBufferBuf.Unsafe(rsp))
 
     case RdispatchOk(tag, _, rsp) =>
       for (p <- sent.unmap(tag))
-        p.offerAndClose(ChannelBufferBuf(rsp))
+        p.offerAndClose(ChannelBufferBuf.Unsafe(rsp))
 
     case RdispatchError(tag, _, error) =>
       for (p <- sent.unmap(tag))

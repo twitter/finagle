@@ -51,7 +51,7 @@ class TraceContextTest
     val bytes = new Array[Byte](33)
 
     intercept[IllegalArgumentException] {
-      handler.handle(Buf.ByteArray(bytes))
+      handler.handle(Buf.ByteArray.Unsafe(bytes))
     }
   }
 }

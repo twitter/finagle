@@ -65,20 +65,19 @@ private[thrift] class TTwitterClientFilter(
         // calls into here. This should never happen in practice;
         // however if the ClientIdContext handler failed to load for
         // some reason, a pass-through context would be used instead.
-        if (k != ClientIdContext.Key){
-          val c = new thrift.RequestContext(
-            Buf.toByteBuffer(k), Buf.toByteBuffer(buf))
-          ctxs.add(i, c)
+        if (k != ClientIdContext.Key) {
+          val kbb = Buf.ByteBuffer.Unsafe.extract(k)
+          val vbb = Buf.ByteBuffer.Unsafe.extract(buf)
+          ctxs.add(i, new thrift.RequestContext(kbb, vbb))
           i += 1
         }
       }
 
       clientIdBuf match {
         case Some(buf) =>
-          val ctx = new thrift.RequestContext(
-            Buf.toByteBuffer(ClientIdContext.Key),
-            Buf.toByteBuffer(buf))
-          ctxs.add(i, ctx)
+          val kbb = Buf.ByteBuffer.Unsafe.extract(ClientIdContext.Key)
+          val vbb = Buf.ByteBuffer.Unsafe.extract(buf)
+          ctxs.add(i, new thrift.RequestContext(kbb, vbb))
 
         case None => // skip
       }

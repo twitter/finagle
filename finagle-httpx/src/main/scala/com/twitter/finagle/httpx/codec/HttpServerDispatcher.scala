@@ -42,7 +42,7 @@ class HttpServerDispatcher[REQUEST <: Request](
             readr
           } else {
             eos.setDone()
-            BufReader(ChannelBufferBuf(reqIn.getContent))
+            BufReader(ChannelBufferBuf.Unsafe(reqIn.getContent))
           }
 
       }.asInstanceOf[REQUEST]

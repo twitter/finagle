@@ -360,7 +360,12 @@ class RequestBuilder[HasUrl, HasForm] private[httpx](
 
     config.formElements.foreach {
       case FileElement(name, content, contentType, filename) =>
-        HttpPostRequestEncoderEx.addBodyFileUpload(encoder, dataFactory, req)(name, filename.getOrElse(""), BufChannelBuffer(content), contentType.getOrElse(null), false)
+        HttpPostRequestEncoderEx.addBodyFileUpload(encoder, dataFactory, req)(
+          name, filename.getOrElse(""),
+          BufChannelBuffer(content),
+          contentType.getOrElse(null),
+          false)
+
       case SimpleElement(name, value) =>
         encoder.addBodyAttribute(name, value)
     }
