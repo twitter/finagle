@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.twitter</groupId>
-  <artifactId>finagle-httpx_2.10</artifactId>
+  <artifactId>finagle-httpx-compat_2.10</artifactId>
   <packaging>jar</packaging>
   <version>6.22.1-SNAPSHOT</version>
   <parent>
@@ -17,31 +17,9 @@
   <dependencies>
     <!-- library dependencies -->
     <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>2.6</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>16.0.1</version>
-    </dependency>
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.10</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <version>1.9.5</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.scala-tools.testing</groupId>
-      <artifactId>specs_2.10</artifactId>
-      <version>1.6.9-BMD2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -50,10 +28,26 @@
       <version>2.2.2</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.scalacheck</groupId>
+      <artifactId>scalacheck_2.10</artifactId>
+      <version>1.11.3</version>
+      <scope>test</scope>
+    </dependency>
     <!-- project dependencies -->
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core_2.10</artifactId>
+      <version>6.22.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>finagle-http_2.10</artifactId>
+      <version>6.22.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>finagle-httpx_2.10</artifactId>
       <version>6.22.1-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -67,15 +61,4 @@
       <version>6.22.3-SNAPSHOT</version>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <argLine>-Xmx1024m -Djava.net.preferIPv4Stack=true</argLine>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>

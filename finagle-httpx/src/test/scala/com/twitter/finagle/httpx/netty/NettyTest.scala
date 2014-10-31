@@ -33,7 +33,7 @@ class NettyTest extends FunSuite {
         false
       } catch {
         case _: IndexOutOfBoundsException => true
-        case _ => false
+        case _: Throwable => false
       }
     }
   }
