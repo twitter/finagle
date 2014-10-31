@@ -60,6 +60,9 @@ ChannelStatsHandler
 **connections**
   a gauge of the total number of connections that are currently open in the channel
 
+**exn/<exception_name>+**
+  a counter of the number of times a specific exception has been thrown within a Netty pipeline
+
 IdleChannelHandler
 <<<<<<<<<<<<<<<<<<
 

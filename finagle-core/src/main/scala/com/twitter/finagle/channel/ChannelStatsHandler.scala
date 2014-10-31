@@ -1,9 +1,5 @@
 package com.twitter.finagle.channel
 
-/**
- * Keeps channel/connection statistics. The handler is meant to be
- * shared as to keep statistics across a number of channels.
- */
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.{Duration, Future, Monitor, Stopwatch, Time}
 import java.net.{PortUnreachableException, ConnectException}
@@ -15,6 +11,12 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{ChannelHandlerContext, ChannelStateEvent,
   ExceptionEvent, MessageEvent, SimpleChannelHandler}
 
+/**
+ * A [[org.jboss.netty.channel.ChannelHandler]] that tracks channel/connection
+ * statistics. The handler is meant to be shared by all
+ * [[org.jboss.netty.channel.Channel Channels]] within a Finagle client or
+ * server in order to consolidate statistics across a number of channels.
+ */
 class ChannelStatsHandler(statsReceiver: StatsReceiver)
   extends SimpleChannelHandler
   with ConnectionLifecycleHandler
