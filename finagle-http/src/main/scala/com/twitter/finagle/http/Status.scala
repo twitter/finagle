@@ -4,6 +4,8 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus
 
 /** Scala aliases for HttpResponseStatus.  Java users should use Netty's HttpResponseStatus. */
 object Status {
+  type Type = HttpResponseStatus
+
   val Continue                     = HttpResponseStatus.CONTINUE
   val Processing                   = HttpResponseStatus.PROCESSING
   val Ok                           = HttpResponseStatus.OK
