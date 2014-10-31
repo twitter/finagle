@@ -160,9 +160,10 @@ object Finagle extends Build {
     finagleExp, finagleMdns, finagleTesters,
 
     // Protocols
-    finagleHttp, finagleHttpX, finagleStream, finagleNative, finagleThrift,
-    finagleMemcached, finagleMemcachedX, finagleKestrel, finagleKestrelX, 
-    finagleRedis, finagleMux, finagleThriftMux, finagleMySQL, finagleSpdy,
+    finagleHttp, finagleHttpX, finagleHttpXCompat, finagleStream, finagleNative,
+    finagleThrift, finagleMemcached, finagleMemcachedX, finagleKestrel,
+    finagleKestrelX, finagleRedis, finagleMux, finagleThriftMux, finagleMySQL,
+    finagleSpdy,
 
     // Use and integration
     // removing benchmark because swift can't build outside of twitter for now
@@ -311,6 +312,15 @@ object Finagle extends Build {
       "commons-lang" % "commons-lang" % "2.6",
       "com.google.guava" % "guava" % "16.0.1"
     )
+  ).dependsOn(finagleCore)
+
+  lazy val finagleHttpXCompat = Project(
+    id = "finagle-httpx-compat",
+    base = file("finagle-httpx-compat"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-httpx-compat"
   ).dependsOn(finagleCore)
 
   lazy val finagleNative = Project(

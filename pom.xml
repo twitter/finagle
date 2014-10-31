@@ -26,6 +26,7 @@
     <module>finagle-exp</module>
     <module>finagle-http</module>
     <module>finagle-httpx</module>
+    <module>finagle-httpx-compat</module>
     <module>finagle-kestrel</module>
     <module>finagle-mdns</module>
     <module>finagle-memcached</module>
