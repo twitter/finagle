@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VER="1.1.27"
+VER="1.1.32"
 REL="tomcat-native-$VER"
 SRC="$REL-src"
 TARBALL="$SRC.tar.gz"
