@@ -10,7 +10,7 @@ Some stats are only visible when certain optional classes are used.
 NB: Finagle uses RollupStatsReceiver internally, which will take stats like
 "failures/twitter/TimeoutException" and roll them up, aggregating into "failures/twitter"
 and also "failures".  For example, if there are 3 "failures/twitter/TimeoutException" counted,
-and 4 "failures/twitter/ConnectTimeoutException", then it will cound 7 "failures/twitter".
+and 4 "failures/twitter/ConnectTimeoutException", then it will count 7 "failures/twitter".
 
 Public
 ------
@@ -20,6 +20,13 @@ Public
 These stats come from the public interface, and are the ones that you should look at first
 to figure out whether a client is abusing you, or you are misusing a downstream service.
 They are also useful in diagnosing what contributes to request latency.
+
+Note that the `StatsFilter` stats at your service's root scope will not take retries into account,
+which can result in success rates that are artificially low, for example, since a request that fails
+but then succeeds on retry will still increment the failure count. If your clients have been
+constructed using `ClientBuilder` and configured to retry, the `StatsFilter` stats will also be
+available under a "tries/" scope, and these values will take retries into account, resulting in more
+accurate success and failure rates.
 
 .. include:: metrics/Public.rst
 
