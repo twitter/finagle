@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-2104_2.10</artifactId>
-    <version>0.1.14</version>
+    <version>0.1.16</version>
     <relativePath>../../parents/scala-parent-2104/pom.xml</relativePath>
   </parent>
   <properties>
