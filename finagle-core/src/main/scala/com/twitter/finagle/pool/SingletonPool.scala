@@ -169,23 +169,27 @@ extends ServiceFactory[Req, Rep] {
    * SingletonPool closes asynchronously; the underlying connection is
    * closed once all references are returned.
    */
+  final def close(deadline: Time): Future[Unit] =
+    closeService(deadline) before underlying.close(deadline)
+
   @tailrec
-  final def close(deadline: Time): Future[Unit] = state.get match {
-    case s@Idle =>
-      if (!state.compareAndSet(s, Closed)) close(deadline)
-      else Future.Done
-
-    case s@Open(svc) =>
-      if (!state.compareAndSet(s, Closed)) close(deadline)
-      else svc.close(deadline)
-
-    case s@Awaiting(done) =>
-      if (!state.compareAndSet(s, Closed)) close(deadline) else {
-        done.raise(new ServiceClosedException)
+  private[this] def closeService(deadline: Time): Future[Unit] = 
+    state.get match {
+      case s@Idle =>
+        if (!state.compareAndSet(s, Closed)) closeService(deadline)
+        else Future.Done
+  
+      case s@Open(svc) =>
+        if (!state.compareAndSet(s, Closed)) closeService(deadline)
+        else svc.close(deadline)
+  
+      case s@Awaiting(done) =>
+        if (!state.compareAndSet(s, Closed)) closeService(deadline) else {
+          done.raise(new ServiceClosedException)
+          Future.Done
+        }
+  
+      case Closed =>
         Future.Done
-      }
-
-    case Closed =>
-      Future.Done
-  }
+    }
 }

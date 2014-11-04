@@ -14,7 +14,8 @@ import org.scalatest.mock.MockitoSugar
 class SingletonPoolTest extends FunSuite with MockitoSugar {
   class Ctx {
     val underlying = mock[ServiceFactory[Int, Int]]
-    when(underlying.close(any[Time])).thenReturn(Future.Done)
+    val closeP = new Promise[Unit]
+    when(underlying.close(any[Time])).thenReturn(closeP)
     when(underlying.isAvailable).thenReturn(true)
     val service = mock[Service[Int, Int]]
     when(service.close(any[Time])).thenReturn(Future.Done)
@@ -144,6 +145,8 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     val ctx = new Ctx
     import ctx._
 
+    closeP.setDone()
+
     assert(pool.close().poll === Some(Return.Unit))
     assertClosed()
 
@@ -153,6 +156,8 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
   test("close(): after connection creation, before underlying") {
     val ctx = new Ctx
     import ctx._
+
+    closeP.setDone()
 
     val f = pool()
     assert(!f.isDefined)
@@ -181,6 +186,8 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     val ctx = new Ctx
     import ctx._
 
+    closeP.setDone()
+
     val f = pool()
     assert(!f.isDefined)
     underlyingP.setValue(service)
@@ -192,6 +199,30 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     verify(service, never).close(any[Time])
     assert(Await.result(f).close().poll === Some(Return.Unit))
     verify(service, times(1)).close(any[Time])
+  }
+
+  test("close: closes underlying") {
+    val ctx = new Ctx
+    import ctx._
+
+    val f = pool()
+    underlyingP.setValue(service)
+    assert(f.isDefined)
+    Await.result(f).close()
+
+    verify(underlying, never).close(any[Time])
+    
+    val close = pool.close()
+    assert(!close.isDefined)
+    
+    // The pool is closed for business, even if it isn't done
+    // *closing* yet.
+    assertClosed()
+
+    verify(underlying, times(1)).close(any[Time])
+    
+    closeP.setDone()
+    assert(close.isDefined)
   }
 
   test("does not close, reuses idle connections") {
