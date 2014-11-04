@@ -1,6 +1,9 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.Service
 import com.twitter.finagle.client._
+import com.twitter.finagle.mux.lease.Acting
+import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
@@ -35,7 +38,7 @@ object Mux extends Client[CB, CB] with Server[CB, CB] {
 
     protected def newTransporter(): Transporter[In, Out] =
       Netty3Transporter(mux.PipelineFactory, params)
-    protected def newDispatcher(transport: Transport[CB, CB]) = {
+    override protected def newDispatcher(transport: Transport[CB, CB]): Service[CB, CB] with Acting = {
       val param.Stats(sr) = params[param.Stats]
       new mux.ClientDispatcher(transport, sr)
     }
@@ -63,7 +66,8 @@ object Mux extends Client[CB, CB] with Server[CB, CB] {
       Netty3Listener(mux.PipelineFactory, params)
     protected def newDispatcher(transport: Transport[In, Out], service: Service[CB, CB]) = {
       val param.Tracer(tracer) = params[param.Tracer]
-      new mux.ServerDispatcher(transport, service, true, mux.lease.exp.ClockedDrainer.flagged, tracer)
+      val Lessor.Param(lessor) = params[Lessor.Param]
+      new mux.ServerDispatcher(transport, service, true, lessor, tracer)
     }
   }
 
