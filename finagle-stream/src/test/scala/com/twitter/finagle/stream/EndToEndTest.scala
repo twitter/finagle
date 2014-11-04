@@ -34,16 +34,6 @@ class EndToEndTest extends FunSuite {
     def apply(request: HttpRequest) = Future.value(response)
   }
 
-  val notSkipFlaky = !Option(System.getProperty("SKIP_FLAKY")).isDefined
-
-  def testOrSkipFlaky(name: String)(testFun: => Unit) = {
-    if (notSkipFlaky) {
-      test(name)(testFun)
-    } else {
-      ignore(name)(testFun)
-    }
-  }
-
   class WorkItContext(){
     val httpRequest: DefaultHttpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
     val httpResponse: DefaultHttpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
@@ -54,7 +44,7 @@ class EndToEndTest extends FunSuite {
   }
 
   def workIt(what: String)(mkClient: (MyStreamResponse) => (Service[HttpRequest, StreamResponse], SocketAddress)) {
-    testOrSkipFlaky("Streams %s: writes from the server arrive on the client's channel".format(what)) {
+    test("Streams %s: writes from the server arrive on the client's channel".format(what)) {
       val c = new WorkItContext()
       import c._
       val (client, _) = mkClient(serverRes)
@@ -81,8 +71,7 @@ class EndToEndTest extends FunSuite {
       client.close()
     }
 
-    // Flaky test. See https://jira.twitter.biz/browse/DPB-1358
-    testOrSkipFlaky("Streams %s: writes from the server are queued before the client responds".format(what)) {
+    test("Streams %s: writes from the server are queued before the client responds".format(what)) {
       val c = new WorkItContext()
       import c._
       val (client, _) = mkClient(serverRes)
@@ -106,7 +95,7 @@ class EndToEndTest extends FunSuite {
       client.close()
     }
 
-    testOrSkipFlaky("Streams %s: the client does not admit concurrent requests".format(what)) {
+    test("Streams %s: the client does not admit concurrent requests".format(what)) {
       val c = new WorkItContext()
       import c._
       val (client, _) = mkClient(serverRes)
@@ -118,8 +107,7 @@ class EndToEndTest extends FunSuite {
       client.close()
     }
 
-    //"the server does not admit concurrent requests"
-    ignore("Streams %s: the server does not admit concurrent requests".format(what)) {
+    test("Streams %s: the server does not admit concurrent requests".format(what)) {
       val c = new WorkItContext()
       import c._
       val (client, address) = mkClient(serverRes)
@@ -315,8 +303,7 @@ class EndToEndTest extends FunSuite {
     (client, proxy.localAddress)
   }
 
-  // TODO: investigate test flakiness (CSL-117)
-  testOrSkipFlaky("Streams: delay release until complete response") {
+  test("Streams: delay release until complete response") {
     @volatile var count: Int = 0
     val c = new WorkItContext()
     import c.{synchronized => _sync, _}
