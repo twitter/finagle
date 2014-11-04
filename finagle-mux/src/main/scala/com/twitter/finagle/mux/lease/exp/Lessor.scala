@@ -1,5 +1,6 @@
 package com.twitter.finagle.mux.lease.exp
 
+import com.twitter.finagle.Stack
 import com.twitter.util.Duration
 
 /*
@@ -15,7 +16,7 @@ import com.twitter.util.Duration
  * The lessee provides an interface that lets the lessor notify the lessee about
  * lease information, and lets the lessor query the lessee for draining info.
  */
-private[mux] trait Lessee {
+private[finagle] trait Lessee {
   /**
    * The Lessee is given the lease for d, starting now.
    */
@@ -30,7 +31,7 @@ private[mux] trait Lessee {
 /**
  * The Lessor is the entity that gives leases.
  */
-private[mux] trait Lessor {
+private[finagle] trait Lessor {
 
   /**
    * The lessor will notify all lessees that have been registered and have not
@@ -55,7 +56,12 @@ private[mux] trait Lessor {
   def observeArrival()
 }
 
-private[mux] object Lessor {
+private[finagle] object Lessor {
+  case class Param(lessor: Lessor)
+  implicit object Param extends Stack.Param[Param] {
+    val default = Param(ClockedDrainer.flagged)
+  }
+
   val nil: Lessor = new Lessor {
     def register(lessee: Lessee) = ()
     def unregister(lessee: Lessee) = ()
