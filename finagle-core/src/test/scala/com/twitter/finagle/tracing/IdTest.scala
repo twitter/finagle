@@ -35,7 +35,7 @@ class IdTest extends FunSuite {
 
   test("fail to deserialize incorrect traces") {
     val badTrace = "not-a-trace".getBytes()
-    assert(TraceId.deserialize(badTrace).isThrow) 
+    assert(TraceId.deserialize(badTrace).isThrow)
   }
 
   test("return sampled true if debug mode") {
@@ -55,5 +55,11 @@ class IdTest extends FunSuite {
       val l = rng.nextLong()
       assert(hex(l) === SpanId(l).toString)
     }
+  }
+
+  test("hashCode only accounts for id fields") {
+    assert(
+      TraceId(Some(SpanId(1L)), Some(SpanId(2L)), SpanId(3L), Some(true)).hashCode ===
+      TraceId(Some(SpanId(1L)), Some(SpanId(2L)), SpanId(3L), Some(false)).hashCode)
   }
 }
