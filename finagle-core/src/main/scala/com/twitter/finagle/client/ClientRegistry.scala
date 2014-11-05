@@ -1,48 +1,12 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
-import com.twitter.finagle.{Addr, Name, param, Stack}
-import com.twitter.util.{Future, FuturePool, Promise}
+import com.twitter.finagle.util.StackRegistry
+import com.twitter.finagle.{Addr, param, Stack}
+import com.twitter.util.Future
 import java.util.logging.Level
-import scala.collection.mutable
 
-private[twitter] case class ClientModuleInfo(
-  role: String,
-  description: String,
-  perModuleParams: Map[String, String]
-)
-
-/**
- * Contains information about a client
- * name: client name
- * dest: addrs of the client
- */
-private[twitter] case class ClientInfo(name: String, dest: Seq[String], modules: Seq[ClientModuleInfo])
-
-/**
- * Maintains information about clients that register.
- * Call ClientRegistry.register(clientLabel, client) to register a client
- */
-private[twitter] object ClientRegistry {
-
-  private[this] val clients = mutable.Map.empty[String, (Name, StackClient[_, _])]
-
-  private[finagle] def register(name: String, dest: Name, client: StackClient[_, _]): Unit =
-    synchronized { clients += name -> (dest, client) }
-
-  private[this] def parseDest(dest: Name): Seq[String] = (dest match {
-    case Name.Bound(addr) => addr.sample match {
-      case Addr.Bound(addrs) => addrs.toSeq
-      case addr => Seq(addr)
-    }
-    case Name.Path(addr) => Seq(addr)
-  }).map(_.toString)
-
-  // added for tests
-  private[finagle] def clear() {
-    synchronized { clients.clear() }
-  }
-
+private[twitter] object ClientRegistry extends StackRegistry {
   /**
    * Get a Future which is satisfied when the dest of every currently
    * registered client is no longer pending.
@@ -53,9 +17,9 @@ private[twitter] object ClientRegistry {
    *       availability as a Var.
    */
   def expAllRegisteredClientsResolved(): Future[Set[String]] = synchronized {
-    val fs = clients map { case (name, (_, stackClient)) =>
-      val LoadBalancerFactory.Dest(va) = stackClient.params[LoadBalancerFactory.Dest]
-      val param.Logger(log) = stackClient.params[param.Logger]
+    val fs = registrants map { case StackRegistry.Entry(name, _, _, params) =>
+      val LoadBalancerFactory.Dest(va) = params[LoadBalancerFactory.Dest]
+      val param.Logger(log) = params[param.Logger]
 
       val resolved = va.changes.filter(_ != Addr.Pending).toFuture
       resolved map { resolution =>
@@ -65,24 +29,5 @@ private[twitter] object ClientRegistry {
     }
 
     Future.collect(fs.toSeq).map(_.toSet)
-  }
-
-  /**
-   * Get a list of all registered clients. No module information is included.
-   */
-  def clientList(): Seq[ClientInfo] = synchronized {
-    clients map { case (name, (dest, _)) => ClientInfo(name, parseDest(dest), Seq.empty) } toSeq
-  }
-
-  /**
-   * Get information about a registered client with a given name
-   */
-  def clientInfo(name: String): Option[ClientInfo] = synchronized {
-    clients.get(name) map { case(dest, client) =>
-      val modules = client.stack.tails.toList map { n =>
-        ClientModuleInfo(n.head.role.name, n.head.description.toString, Map.empty)
-      }
-      ClientInfo(name, parseDest(dest), modules)
-    }
   }
 }

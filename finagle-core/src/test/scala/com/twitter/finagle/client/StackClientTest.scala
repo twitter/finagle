@@ -1,12 +1,12 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.tracing._
+import com.twitter.finagle.util.StackRegistry
 import com.twitter.finagle.{param, Name}
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.Eventually.eventually
+import org.scalatest.FunSuite
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 
 @RunWith(classOf[JUnitRunner])
@@ -38,17 +38,14 @@ class StackClientTest extends FunSuite with StringClient with AssertionsForJUnit
   })
 
   test("Client added to client registry") (new Ctx {
-    val name = "clientTest"
+    ClientRegistry.clear()
 
-    assert(ClientRegistry.clientInfo(name).isEmpty)
-    assert(ClientRegistry.clientList() filter { case ClientInfo(n, d, _) =>
-      name == n
-    } isEmpty)
-
+    val name = "testClient"
     client.newClient(Name.bound(new InetSocketAddress(8080)), name)
-    assert(!ClientRegistry.clientInfo(name).isEmpty)
-    assert((ClientRegistry.clientList() filter { case ClientInfo(n, d, _) =>
-      name == n
-    } length) == 1)
+    client.newClient(Name.bound(new InetSocketAddress(8080)), name)
+
+    assert((ClientRegistry.registrants filter {
+      case e: StackRegistry.Entry => name == e.name
+    }).size === 1)
   })
 }

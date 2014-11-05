@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.server.ServerRegistry
 import com.twitter.finagle.util.InetSocketAddressUtil
 import com.twitter.util._
 import java.net.{InetSocketAddress, SocketAddress}

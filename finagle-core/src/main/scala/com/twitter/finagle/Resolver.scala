@@ -8,7 +8,6 @@ import com.google.common.cache.{Cache, CacheBuilder}
 import java.net.{InetAddress, SocketAddress, UnknownHostException}
 import java.security.{PrivilegedAction, Security}
 import java.util.concurrent.TimeUnit.SECONDS
-import java.util.WeakHashMap
 import java.util.logging.{Level, Logger}
 
 /**
@@ -344,24 +343,3 @@ private[finagle] abstract class BaseResolver(f: () => Seq[Resolver]) {
 }
 
 object Resolver extends BaseResolver(() => LoadService[Resolver]())
-
-private object ServerRegistry {
-  private val addrNames = new WeakHashMap[SocketAddress, String]
-
-  // This is a terrible hack until we have a better
-  // way of labelling addresses.
-
-  def register(addr: String): SocketAddress =
-    addr.split("=", 2) match {
-      case Array(addr) =>
-        val Seq(ia) = InetSocketAddressUtil.parseHosts(addr)
-        ia
-      case Array(name, addr) =>
-        val Seq(ia) = InetSocketAddressUtil.parseHosts(addr)
-        addrNames.put(ia, name)
-        ia
-    }
-
-  def nameOf(addr: SocketAddress): Option[String] =
-    Option(addrNames.get(addr))
-}

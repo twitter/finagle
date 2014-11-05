@@ -3,7 +3,7 @@ package com.twitter.finagle.netty3
 import com.twitter.finagle._
 import com.twitter.finagle.channel.{
   ChannelRequestStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler}
-import com.twitter.finagle.server.Listener
+import com.twitter.finagle.server.{Listener, ServerRegistry}
 import com.twitter.finagle.ssl.{Engine, SslShutdownHandler}
 import com.twitter.finagle.stats.{ServerStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.{ChannelTransport, Transport}
