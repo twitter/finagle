@@ -222,10 +222,8 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
         case Name.Path(path) => Namer.resolve(path)
       }
 
-    ClientRegistry.register(clientLabel, dest, copy1(
-      stack = clientStack,
-      params = clientParams + LoadBalancerFactory.Dest(va)
-    ))
+    ClientRegistry.register(clientLabel, Showable.show(dest), clientStack,
+      clientParams + LoadBalancerFactory.Dest(va))
 
     clientStack.make(clientParams)
   }

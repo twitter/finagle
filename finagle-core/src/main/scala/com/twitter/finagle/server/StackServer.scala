@@ -200,6 +200,8 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
         }
       }
 
+      ServerRegistry.register(serverLabel, addr.toString, server.stack, server.params)
+
       protected def closeServer(deadline: Time) = closeAwaitably {
         // Here be dragons
         // We want to do four things here in this order:
