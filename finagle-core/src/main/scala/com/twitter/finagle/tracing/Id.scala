@@ -135,13 +135,15 @@ final case class TraceId(
   // debug flag overrides sampled to be true
   lazy val sampled = if (flags.isDebug) Some(true) else _sampled
 
+  private[TraceId] def ids = (traceId, parentId, spanId)
+
   override def equals(other: Any) = other match {
-    case other: TraceId =>
-      (this.traceId equals other.traceId) &&
-      (this.parentId equals other.parentId) &&
-      (this.spanId equals other.spanId)
+    case other: TraceId => this.ids equals other.ids
     case _ => false
   }
+
+  override def hashCode(): Int =
+    ids.hashCode()
 
   override def toString =
     "%s.%s<:%s".format(traceId, spanId, parentId)
