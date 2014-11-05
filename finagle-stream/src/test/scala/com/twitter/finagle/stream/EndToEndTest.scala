@@ -99,7 +99,7 @@ class EndToEndTest extends FunSuite {
       val c = new WorkItContext()
       import c._
       val (client, _) = mkClient(serverRes)
-      val clientRes = Await.result(client(httpRequest), 1.second)
+      val clientRes = Await.result(client(httpRequest), 15.seconds)
       assert(client(httpRequest).poll match {
         case Some(Throw(_: TooManyConcurrentRequestsException)) => true
         case _ => false
