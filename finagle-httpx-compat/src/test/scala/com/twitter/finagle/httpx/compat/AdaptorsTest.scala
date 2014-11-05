@@ -1,20 +1,17 @@
 package com.twitter.finagle.httpx.compat
 
 import com.twitter.finagle.http
-import com.twitter.finagle.httpx.{Fields, Request, Response, Method, Version}
+import com.twitter.finagle.httpx.{Fields, Request, Method, Version}
 import com.twitter.finagle.httpx.netty.Bijections
-import com.twitter.util.{Await, Duration}
+import com.twitter.util.Await
 import com.twitter.io.{Buf, BufReader, Reader}
 import org.junit.runner.RunWith
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.jboss.netty.handler.codec.http.{
-  HttpResponseStatus, DefaultHttpResponse, HttpResponse
-}
-import java.net.InetSocketAddress
+import org.jboss.netty.handler.codec.http.{HttpResponseStatus, HttpResponse}
+import java.net.{InetSocketAddress, URI}
 
 @RunWith(classOf[JUnitRunner])
 class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
@@ -27,20 +24,30 @@ class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   val arbKeys = Gen.oneOf("Foo", "Bar", "Foo-Bar", "Bar-Baz")
 
+  val arbUri = for {
+    scheme  <- Gen.oneOf("http", "https")
+    hostLen <- Gen.choose(1,20)
+    pathLen <- Gen.choose(1,20)
+    tld     <- Gen.oneOf(".net",".com", "org", ".edu")
+    host = util.Random.alphanumeric.take(hostLen).mkString
+    path = util.Random.alphanumeric.take(pathLen).mkString
+  } yield (new URI(scheme, host + tld, "/" + path, null)).toASCIIString
+
   val arbHeader = for {
     key <- arbKeys
     len <- Gen.choose(0, 100)
   } yield (key, util.Random.alphanumeric.take(len).mkString)
 
+
   val arbRequest = for {
     method  <- arbMethod
-    path    <- arbitrary[String]
+    uri     <- arbUri
     version <- Gen.oneOf(Version.Http10, Version.Http11)
     chunked <- arbitrary[Boolean]
     headers <- Gen.containerOf[Seq, (String, String)](arbHeader)
     body    <- arbitrary[String]
   } yield {
-    val reqIn = Request(method, path, version)
+    val reqIn = Request(method, uri, version)
     headers foreach { case (k, v) => reqIn.headers.add(k, v) }
     val req = new Request {
       val httpRequest = reqIn.httpRequest
@@ -115,7 +122,7 @@ class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
         val out = Await.result(NettyAdaptor.in(in))
         assert(out.getProtocolVersion === from(in.version))
         assert(out.getMethod === from(in.method))
-        assert(out.getUri === in.path)
+        assert(out.getUri === in.getUri)
         assert(out.headers === in.headers)
         assert(out.isChunked === in.isChunked)
         assert(out.getContent === in.getContent)
