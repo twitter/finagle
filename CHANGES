@@ -15,6 +15,9 @@ Deprecations
    significantly different, then you can do stack.replace() to swap it
    in.
 
+ * finagle-memcached: Have cas() operation return false on NotFound()
+   state instead of throw IllegalStateException
+
 6.23.0
 ------
 
