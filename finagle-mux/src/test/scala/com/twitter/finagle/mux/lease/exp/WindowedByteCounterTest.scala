@@ -1,9 +1,7 @@
 package com.twitter.finagle.mux.lease.exp
 
 import com.twitter.util._
-import com.twitter.util.Local.Context
 import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
-import com.twitter.conversions.time.intToTimeableNumber
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite
@@ -12,7 +10,7 @@ import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
 class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationPatience {
-  if (!sys.props.contains("SKIP_FLAKY")) { // CSL-1206
+
   trait ByteCounterHelper {
     val fakePool = new FakeMemoryPool(new FakeMemoryUsage(StorageUnit.zero, StorageUnit.zero))
     val fakeBean = new FakeGarbageCollectorMXBean(0, 0)
@@ -26,6 +24,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
     Time.withCurrentTimeFrozen { ctl =>
       val nfo = new JvmInfo(fakePool, fakeBean)
       val counter = new WindowedByteCounter(nfo, Local.save())
+      counter.start()
       eventually {
         assert(counter.getState === Thread.State.TIMED_WAITING)
       }
@@ -62,14 +61,13 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
     val h = new ByteCounterHelper{}
     import h._
 
-    Time.withCurrentTimeFrozen { ctl =>
-      val counter = new WindowedByteCounter(nfo, Local.save())
+    val counter = new WindowedByteCounter(nfo, Local.save())
+    counter.start()
 
-      assert(counter.close().poll === Some(Return(())))
+    assert(counter.close().poll === Some(Return(())))
 
-      counter.join()
-      assert(counter.isAlive === false)
-    }
+    counter.join()
+    assert(counter.isAlive === false)
   }
 
   test("ByteCounter should give a trivial rate without info") {
@@ -198,7 +196,6 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
 
       assert(counter.lastGc === saved)
     }
-  }
   }
 }
 

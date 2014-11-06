@@ -5,6 +5,13 @@
 6.x
 -----
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-mux: `c.t.f.mux.lease.exp.WindowedByteCounter` no longer
+    calls `Thread.start()` in its constructor. This should be now be
+    done by the caller.
+
 Deprecations
 ~~~~~~~~~~~~
 
