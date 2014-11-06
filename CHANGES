@@ -5,6 +5,9 @@
 6.x
 -----
 
+Deprecations
+~~~~~~~~~~~~
+
  * finagle-core: Deprecated the mechanisms of FailureAccrual that use
    factory Transformers.  It's better to just use the Params to
    configure the existing FailureAccrualFactory.  However, if you've
@@ -13,10 +16,10 @@
    in.
 
 6.23.0
-~~~~~~
+------
 
 Breaking API Changes
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
   * finagle-core: `c.t.f.Stackable`s maintained state about which parameters were
     accessed via `get`. This was error prone and violated the assumption that `Stack`s
@@ -28,29 +31,34 @@ Breaking API Changes
     rename size argument to capacity.
 
 Deprecations
-------------
+~~~~~~~~~~~~
 
   * `ServerBuilder.stack[Req1, Rep1](mk: Stack.Params => Server[Req1, Rep1])` is
     deprecated in favor of
     `ServerBuilder.stack[Req1, Rep1](server: Stack.Parameterized[Server[Req1, Rep1]])`
 
 Runtime Behavior Changes
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 
   * `finagle`: Improve allocation semantics for uses of Buf.
 
 6.22.0
-~~~~~~
+-------
 
 Breaking API Changes
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
   * finagle-core: Removed unused `com.twitter.finagle.service.ProxyService`. It wasn't
     sufficiently general to be used outside of finagle, and was no longer used
     in finagle.
+  * Removed TLSEngine, and replaced it with two, TLSClientEngine, and
+    TLSServerEngine, where TLSServerEngine is the same as TLSEngine, and
+    TLSClientEngine takes a SocketAddress instead of (). Additionally,
+    the Netty3TransporterTLSConfig now takes a function SocketAddress => Engine,
+    instead of () => Engine.
 
 New Features
-------------
+~~~~~~~~~~~~
 
   * finagle-core: BroadcastStatsReceiver, introduce specialized implementation
   * finagle-core: Introduce gauges in SummarizingStatsReceiver
@@ -61,7 +69,7 @@ New Features
 
 
 Runtime Behavior Changes
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 
   * finagle-core: Add support for non-URLClassloaders to LoadService
   * finagle-core: clear locals before entering server dispatch loop
@@ -78,7 +86,7 @@ Runtime Behavior Changes
   * finagle-thriftmux: Record protocol as a gauge rather than a counter
 
 Documentation
--------------
+~~~~~~~~~~~~~
 
   * finagle-core: Add Scaladocs for ChannelBufferBuf and BufChannelBuffer
   * finagle-core: link to the FAQ in FailedFastException
@@ -87,13 +95,13 @@ Documentation
   * Fix minor issues and missing code blocks in Finagle documentation
 
 Optimization
-------------
+~~~~~~~~~~~~
 
   * finagle-core: GlobalFlag isn't caching the property value
   * finagle-core: recursive-descent Path / NameTree / Dentry / Dtab parsers to reduce heap allocation
 
 Bug Fixes
----------
+~~~~~~~~~
 
   * finagle-core: Fix a deadlock in Contexts
   * finagle-core: Fix breaking ABI change in SummarizingStatsReceiver
@@ -109,14 +117,8 @@ Bug Fixes
   * finagle-mysql: Properly heed timezone when extracting TimestampValue
   * mux: clear contexts after receive, not in 'finally' clause
 
-      Removed TLSEngine, and replaced it with two, TLSClientEngine, and
-      TLSServerEngine, where TLSServerEngine is the same as TLSEngine, and
-      TLSClientEngine takes a SocketAddress instead of ().  The other changed
-      API is the Netty3TransporterTLSConfig now takes a function
-      SocketAddress => Engine, instead of () => Engine.
-
 6.21.0
-~~~~~~~
+------
 
 - `finagle`: Upgrade to scala_2.10
 - `finagle-core`: Add weighted address support to InetResolver.
@@ -160,7 +162,7 @@ Bug Fixes
 - `finagle-zipkin`: Reduce allocations when tracing
 
 6.20.0
-~~~~~~~
+-------
 
 - `finagle`: Smattering of minor cleanups in util and finagle
 - `finagle`: Upgrade sbt to 0.13
@@ -198,7 +200,7 @@ Bug Fixes
 - `finagle-thrift`: Remove usage of java_sources, should be able to depend on it normally
 
 6.19.0
-~~~~~~~
+-------
 
 - `finagle-core`: Allow trailing semicolons in dtabs
 - `finagle-core`: Rescue exceptions thrown by filter in `Filter.andthen(Filter)`
@@ -217,7 +219,7 @@ Bug Fixes
 - `finagle-thriftmux`: Don't reuse InMemoryStatsReceiver in the same test
 
 6.18.0
-~~~~~~~
+-------
 
 - `finagle-*`: release scrooge v3.16.0
 - `finagle-*`: release util v6.18.0
@@ -248,7 +250,7 @@ Bug Fixes
 - `wily`: Add Dtab expansion
 
 6.17.0
-~~~~~~~
+-------
 
 - `finagle`: Add list of Finagle adopters
 - `finagle`: Upgrade third-party dependencies
@@ -286,7 +288,7 @@ Bug Fixes
 - `finagle-thriftmux`: pass along ClientId with ClientBuilder API
 
 6.16.0
-~~~~~~~
+-------
 
 - `finagle-core`: Add Stack#remove
 - `finagle-core`: Add a copy constructor to Stack{Client, Server}
@@ -320,7 +322,7 @@ Bug Fixes
 - `finagle-{core,thrift,mux}`: Clean up contexts, delimit Locals
 
 6.15.0
-~~~~~~~
+-------
 
 - `finagle-core`: Fixed DefaultClient to use the base close method
 - `finagle-core`: Fix a race condition when closing in DefaultServer
@@ -355,7 +357,7 @@ Bug Fixes
 - `finagle-serversets`: facade for ZooKeeper libraries
 
 6.14.0
-~~~~~~~
+-------
 
 - `finagle-*`: Add com.twitter.io.Charsets and replace the use of org.jboss.netty.util.CharsetUtil
 - `finagle-benchmark`: Fix caliper failures due to new guava
