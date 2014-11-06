@@ -1,23 +1,16 @@
 package com.twitter.finagle.thrift
 
-import com.twitter.util.{Await, Throw, Future, Time}
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.time.{Span, Millis, Seconds}
 import com.twitter.finagle._
 import com.twitter.finagle.tracing.{Record, Trace, Annotation}
 import com.twitter.test._
+import com.twitter.util.{Await, Duration, Future}
 import java.io.{StringWriter, PrintWriter}
 
 @RunWith(classOf[JUnitRunner])
-class EndToEndTest extends FunSuite
-  with ThriftTest
-  with Eventually
-  with IntegrationPatience
-  with BeforeAndAfter {
-
+class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   var saveBase: Dtab = Dtab.empty
   before {
     saveBase = Dtab.base
@@ -56,27 +49,20 @@ class EndToEndTest extends FunSuite
   val serviceToIface = new B.ServiceToClient(_, _)
 
   testThrift("unique trace ID") { (client, tracer) =>
-    Time.withCurrentTimeFrozen { tc =>
-      val anException = Some(Throw(new AnException))
-      val f1 = client.add(1, 2)
-      eventually {
-        assert(f1.poll === anException)
-      }
-      val idSet1 = (tracer map(_.traceId.traceId)).toSet
+    val f1 = client.add(1, 2)
+    intercept[AnException] { Await.result(f1, Duration.fromSeconds(15)) }
+    val idSet1 = (tracer map (_.traceId.traceId)).toSet
 
-      tracer.clear()
+    tracer.clear()
 
-      val f2 = client.add(2, 3)
-      eventually {
-        assert(f2.poll === anException)
-      }
-      val idSet2 = (tracer map(_.traceId.traceId)).toSet
+    val f2 = client.add(2, 3)
+    intercept[AnException] { Await.result(f2, Duration.fromSeconds(15)) }
+    val idSet2 = (tracer map (_.traceId.traceId)).toSet
 
-      assert(idSet1.nonEmpty)
-      assert(idSet2.nonEmpty)
+    assert(idSet1.nonEmpty)
+    assert(idSet2.nonEmpty)
 
-      assert(idSet1 != idSet2)
-    }
+    assert(idSet1 != idSet2)
   }
 
   skipTestThrift("propagate Dtab") { (client, tracer) =>
