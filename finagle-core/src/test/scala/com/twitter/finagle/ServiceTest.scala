@@ -1,15 +1,14 @@
 package com.twitter.finagle
 
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
-import org.scalatest.mock.MockitoSugar
-import org.mockito.Mockito.{times, verify, when}
-import org.mockito.Matchers._
 import com.twitter.util._
-import scala.Some
+import org.junit.runner.RunWith
+import org.mockito.Matchers._
+import org.mockito.Mockito.{times, verify, when}
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class ServiceTest extends FunSuite with MockitoSugar {
@@ -82,4 +81,87 @@ class ServiceTest extends FunSuite with MockitoSugar {
     verify(service).close(any)
   }
 
+  trait Ctx {
+    var serviceCloseCalled = false
+    var factoryCloseCalled = false
+    var isAvailableCalled = false
+
+    val underlyingFactory = new ServiceFactory[Unit, Unit] {
+      def apply(conn: ClientConnection) = Future.value(new Service[Unit, Unit] {
+        def apply(request: Unit): Future[Unit] = Future.Unit
+        override def close(deadline: Time) = {
+          serviceCloseCalled = true
+          Future.Done
+        }
+      })
+      override def close(deadline: Time) = {
+        factoryCloseCalled = true
+        Future.Done
+      }
+      override def isAvailable = {
+        isAvailableCalled = true
+        true
+      }
+    }
+  }
+
+  test("FactoryToService closes underlying service after request, does not close factory") (new Ctx {
+    val service = new FactoryToService(underlyingFactory)
+    Await.result(service(Unit))
+
+    assert(serviceCloseCalled)
+    assert(!factoryCloseCalled)
+  })
+
+  test("FactoryToService delegates isAvailable / close to underlying factory") (new Ctx {
+    val service = new FactoryToService(underlyingFactory)
+    service.isAvailable
+    service.close()
+
+    assert(isAvailableCalled)
+    assert(factoryCloseCalled)
+  })
+
+  test("FactoryToService module delegates isAvailable / close to underlying factory") (new Ctx {
+    val stack =
+      FactoryToService.module.toStack(
+        Stack.Leaf(Stack.Role("role"), underlyingFactory))
+
+    val factory = stack.make(Stack.Params.empty + FactoryToService.Enabled(true))
+
+    factory.isAvailable
+    factory.close()
+
+    assert(isAvailableCalled)
+    assert(factoryCloseCalled)
+  })
+
+  test("FactoryToService around module closes underlying service after request, does not close underlying factory") (new Ctx {
+    val stack =
+      FactoryToService.module.toStack(
+        Stack.Leaf(Stack.Role("role"), underlyingFactory))
+
+    val factory = stack.make(Stack.Params.empty + FactoryToService.Enabled(true))
+
+    val service = new FactoryToService(factory)
+    Await.result(service(Unit))
+
+    assert(serviceCloseCalled)
+    assert(!factoryCloseCalled)
+  })
+
+  test("FactoryToService around module delegates isAvailable / close to underlying factory") (new Ctx {
+    val stack =
+      FactoryToService.module.toStack(
+        Stack.Leaf(Stack.Role("role"), underlyingFactory))
+
+    val factory = stack.make(Stack.Params.empty + FactoryToService.Enabled(true))
+
+    val service = new FactoryToService(factory)
+    service.isAvailable
+    service.close()
+
+    assert(isAvailableCalled)
+    assert(factoryCloseCalled)
+  })
 }

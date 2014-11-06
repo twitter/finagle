@@ -90,9 +90,9 @@ object StackClient {
       new RefcountedFactory(fac))
     stk.push(TimeoutFactory.module)
     stk.push(StatsFactoryWrapper.module)
+    stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
     stk.push(FactoryToService.module)
     stk.push(ClientTracingFilter.module)
-    stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
     // The TraceInitializerFilter must be pushed after most other modules so that
     // any Tracing produced by those modules is enclosed in the appropriate
     // span.

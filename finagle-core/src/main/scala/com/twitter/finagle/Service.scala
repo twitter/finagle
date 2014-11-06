@@ -210,8 +210,29 @@ object FactoryToService {
       val description = "Apply service factory on each service request"
       def make(_enabled: Enabled, next: ServiceFactory[Req, Rep]) = {
         if (_enabled.enabled) {
-          // we want to pass through the ServiceFactory.close but not the Service.close
-          // which is called by the upstream FactoryToService
+          /*
+           * The idea here is to push FactoryToService down the stack
+           * so that service acquisition in the course of a request is
+           * wrapped by tracing, timeouts, etc. for that request.
+           *
+           * We can't return a Service directly (since the stack type
+           * is ServiceFactory); instead we wrap it in a
+           * ServiceFactoryProxy which returns the singleton Service.
+           * An outer FactoryToService (wrapping the whole stack)
+           * unwraps it.
+           *
+           * This outer FactoryToService also closes the service after
+           * each request, but we don't want to close the singleton,
+           * since it is itself a FactoryToService, so closing it
+           * closes the underlying factory; thus we wrap the service
+           * in a proxy which ignores the close.
+           *
+           * The underlying services are still closed by the inner
+           * FactoryToService, and the underlying factory is still
+           * closed when close is called on the outer FactoryToService.
+           *
+           * This is too complicated.
+           */
           val service = Future.value(new ServiceProxy[Req, Rep](new FactoryToService(next)) {
             override def close(deadline: Time) = Future.Done
           })
