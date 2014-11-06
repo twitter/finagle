@@ -18,7 +18,7 @@ private object Svc extends Service[HttpRequest, HttpResponse] {
 
 @RunWith(classOf[JUnitRunner])
 class TraceInitializationTest extends FunSuite {
-  val req = RequestBuilder().url("http://foo/this/is/a/uri/path").buildGet()
+  def req = RequestBuilder().url("http://foo/this/is/a/uri/path").buildGet()
 
   def assertAnnotationsInOrder(records: Seq[Record], annos: Seq[Annotation]) {
     assert(records.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } === annos)
@@ -75,5 +75,25 @@ class TraceInitializationTest extends FunSuite {
         .tracer(clientTracer)
         .build()
     }
+  }
+
+  test("TraceId is set when a client does not proagate one") {
+    val tracer = new BufferingTracer
+    val port = RandomSocket.nextPort()
+
+    FHttp.server.configured(param.Tracer(tracer)).serve("theServer=:" + port, Svc)
+
+    val client = ClientBuilder()
+      .name("theClient")
+      .hosts(new java.net.InetSocketAddress(port))
+      .codec(Http(_enableTracing = false))
+      .hostConnectionLimit(1)
+      .build()
+
+    (0 until 2) foreach { _ =>
+      Await.result(client(req))
+    }
+
+    assert(tracer.map(_.traceId).toSet.size === 2)
   }
 }

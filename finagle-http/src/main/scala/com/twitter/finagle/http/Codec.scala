@@ -248,6 +248,8 @@ private object TraceInfo {
       // this is to allow developers to just set the debug flag to ensure their
       // trace is collected
       Trace.setId(Trace.id.copy(flags = getFlags(request)))
+    } else {
+      Trace.setId(Trace.nextId)
     }
 
     // remove so the header is not visible to users
