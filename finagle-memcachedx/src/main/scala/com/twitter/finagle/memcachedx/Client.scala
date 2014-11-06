@@ -444,10 +444,11 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def cas(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf) = {
     try {
       service(Cas(key, flags, expiry, value, casUnique)) map {
-        case Stored() => true
-        case Exists() => false
-        case Error(e) => throw e
-        case _        => throw new IllegalStateException
+        case Stored()   => true
+        case Exists()   => false
+        case NotFound() => false
+        case Error(e)   => throw e
+        case _          => throw new IllegalStateException
       }
     } catch {
       case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
