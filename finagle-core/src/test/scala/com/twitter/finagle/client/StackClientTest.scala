@@ -1,8 +1,11 @@
 package com.twitter.finagle.client
 
+import com.twitter.finagle._
+import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.StackRegistry
 import com.twitter.finagle.{param, Name}
+import com.twitter.util._
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -53,4 +56,83 @@ class StackClientTest extends FunSuite
       case e: StackRegistry.Entry => name == e.name
     }).size === 1)
   })
+
+  test("FactoryToService close propagated to underlying service") {
+    /*
+     * This test ensures that the following one doesn't succeed vacuously.
+     */
+
+    var closed = false
+
+    val underlyingFactory = new ServiceFactory[Unit, Unit] {
+      def apply(conn: ClientConnection) = Future.value(new Service[Unit, Unit] {
+        def apply(request: Unit): Future[Unit] = Future.Unit
+        override def close(deadline: Time) = {
+          closed = true
+          Future.Done
+        }
+      })
+      def close(deadline: Time) = Future.Done
+    }
+
+    val stack = (StackClient.newStack ++ Stack.Leaf(Stack.Role("role"), underlyingFactory))
+      // don't pool or else we don't see underlying close until service is ejected from pool
+      .remove(DefaultPool.Role)
+
+    val factory = stack.make(Stack.Params.empty +
+      FactoryToService.Enabled(true) +
+
+      // default Dest is /$/fail
+      BindingFactory.Dest(Name.Path(Path.read("/$/inet/localhost/0"))))
+
+    val service = new FactoryToService(factory)
+    Await.result(service(Unit))
+
+    assert(closed)
+  }
+
+  test("prepFactory above FactoryToService") {
+    /*
+     * This approximates code in finagle-http which wraps services (in
+     * prepFactory) so the close is delayed until the chunked response
+     * has been read. We need prepFactory above FactoryToService or
+     * else FactoryToService closes the underlying service too soon.
+     */
+
+    var closed = false
+
+    val underlyingFactory = new ServiceFactory[Unit, Unit] {
+      def apply(conn: ClientConnection) = Future.value(new Service[Unit, Unit] {
+        def apply(request: Unit): Future[Unit] = Future.Unit
+        override def close(deadline: Time) = {
+          closed = true
+          Future.Done
+        }
+      })
+      def close(deadline: Time) = Future.Done
+    }
+
+    val stack = (StackClient.newStack ++ Stack.Leaf(Stack.Role("role"), underlyingFactory))
+      // don't pool or else we don't see underlying close until service is ejected from pool
+      .remove(DefaultPool.Role)
+
+      .replace(StackClient.Role.prepFactory, { next: ServiceFactory[Unit, Unit] =>
+        next map { service: Service[Unit, Unit] =>
+          new ServiceProxy[Unit, Unit](service) {
+            override def close(deadline: Time) = Future.never
+          }
+        }
+      })
+
+    val factory = stack.make(Stack.Params.empty +
+      FactoryToService.Enabled(true) +
+
+      // default Dest is /$/fail
+      BindingFactory.Dest(Name.Path(Path.read("/$/inet/localhost/0"))))
+
+    val service = new FactoryToService(factory)
+    Await.result(service(Unit))
+
+    assert(!closed)
+  }
 }
