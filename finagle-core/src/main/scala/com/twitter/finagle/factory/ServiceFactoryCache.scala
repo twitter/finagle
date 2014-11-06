@@ -6,6 +6,7 @@ import com.twitter.finagle.{Service, ServiceFactory, ClientConnection, ServicePr
 import com.twitter.util.{Closable, Future, Stopwatch, Throw, Return, Time, Duration}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.Trace
+import scala.collection.immutable
 
 /**
  * A service factory that keeps track of idling times to implement
@@ -65,7 +66,7 @@ private class ServiceFactoryCache[Key, Req, Rep](
   assert(maxCacheSize > 0)
 
   @volatile private[this] var cache =
-    Map.empty: Map[Key, IdlingFactory[Req, Rep]]
+    immutable.Map.empty: immutable.Map[Key, IdlingFactory[Req, Rep]]
 
   private[this] val (readLock, writeLock) = {
     val rw = new ReentrantReadWriteLock()
@@ -80,6 +81,14 @@ private class ServiceFactoryCache[Key, Req, Rep](
   }
   private[this] val misstime = statsReceiver.stat("misstime_ms")
 
+  /*
+   * This returns a Service rather than a ServiceFactory to avoid
+   * complicated bookkeeping around closing ServiceFactories. They can
+   * be safely closed when evicted from the cache, when the entire
+   * cache is closed, or in the case of one-shot services when the
+   * service is closed; in all cases there are no references outside
+   * of ServiceFactoryCache.
+   */
   def apply(key: Key, conn: ClientConnection): Future[Service[Req, Rep]] = {
     readLock.lock()
     try {
@@ -158,4 +167,19 @@ private class ServiceFactoryCache[Key, Req, Rep](
 
   def close(deadline: Time) = Closable.all(cache.values.toSeq:_*).close(deadline)
   def isAvailable = cache.isEmpty || cache.values.exists(_.isAvailable)
+
+  def isAvailable(key: Key): Boolean = {
+    readLock.lock()
+    try {
+      if (cache.contains(key))
+        return cache(key).isAvailable
+    } finally {
+      readLock.unlock()
+    }
+
+    val factory = newFactory(key)
+    val available = factory.isAvailable
+    factory.close()
+    available
+  }
 }
