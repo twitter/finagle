@@ -8,7 +8,6 @@ import java.util.logging.Logger
 import org.junit.runner.RunWith
 import org.mockito.Mockito.{when, verify}
 import org.scalatest.FunSuite
-import org.scalatest.concurrent.Eventually
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import scala.collection.mutable.Buffer

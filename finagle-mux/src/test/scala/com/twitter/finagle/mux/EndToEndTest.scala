@@ -12,11 +12,11 @@ import java.io.{PrintWriter, StringWriter}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite}
-import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class EndToEndTest extends FunSuite with Eventually with BeforeAndAfter {
+class EndToEndTest extends FunSuite with Eventually with IntegrationPatience with BeforeAndAfter {
   var saveBase: Dtab = Dtab.empty
   before {
     saveBase = Dtab.base

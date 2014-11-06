@@ -4,14 +4,14 @@ import com.twitter.finagle.{Announcer, Resolver, Addr}
 import com.twitter.util.{Await, RandomSocket, Var}
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
-import org.scalatest.concurrent.Eventually._
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.concurrent.Timeouts._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.time.SpanSugar._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
-class MdnsTest extends FunSuite {
+class MdnsTest extends FunSuite with Eventually with IntegrationPatience {
   if (!sys.props.contains("SKIP_FLAKY")) test("bind locally") {
     val ia = RandomSocket()
     val resolver = new MDNSResolver

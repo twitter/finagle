@@ -11,11 +11,11 @@ import com.twitter.finagle.stats.{StatsReceiver, InMemoryStatsReceiver}
 import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{JUnitRunner, AssertionsForJUnit}
 
 @RunWith(classOf[JUnitRunner])
-class DefaultClientTest extends FunSuite with Eventually with AssertionsForJUnit {
+class DefaultClientTest extends FunSuite with Eventually with IntegrationPatience with AssertionsForJUnit {
   trait StatsReceiverHelper {
     val statsReceiver = new InMemoryStatsReceiver()
   }

@@ -4,7 +4,7 @@ import com.twitter.util.{Await, Throw, Future, Time}
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.time.{Span, Millis, Seconds}
 import com.twitter.finagle._
 import com.twitter.finagle.tracing.{Record, Trace, Annotation}
@@ -12,7 +12,12 @@ import com.twitter.test._
 import java.io.{StringWriter, PrintWriter}
 
 @RunWith(classOf[JUnitRunner])
-class EndToEndTest extends FunSuite with ThriftTest with Eventually with BeforeAndAfter {
+class EndToEndTest extends FunSuite
+  with ThriftTest
+  with Eventually
+  with IntegrationPatience
+  with BeforeAndAfter {
+
   var saveBase: Dtab = Dtab.empty
   before {
     saveBase = Dtab.base
@@ -49,9 +54,6 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually with BeforeA
 
   val ifaceToService = new B.Service(_, _)
   val serviceToIface = new B.ServiceToClient(_, _)
-
-  implicit override val patienceConfig =
-    PatienceConfig(timeout = scaled(Span(2, Seconds)), interval = scaled(Span(5, Millis)))
 
   testThrift("unique trace ID") { (client, tracer) =>
     Time.withCurrentTimeFrozen { tc =>

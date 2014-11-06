@@ -6,7 +6,7 @@ import org.mockito.Matchers._
 import org.scalatest.FunSuite
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.concurrent.Eventually._
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.junit.runner.RunWith
 import com.twitter.finagle.integration.IntegrationBase
 import com.twitter.finagle.{WriteException, Service, ServiceFactory}
@@ -14,7 +14,11 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util._
 
 @RunWith(classOf[JUnitRunner])
-class ClientBuilderTest extends FunSuite with MockitoSugar with IntegrationBase {
+class ClientBuilderTest extends FunSuite
+  with Eventually
+  with IntegrationPatience
+  with MockitoSugar
+  with IntegrationBase {
 
   trait ClientBuilderHelper {
     val preparedFactory = mock[ServiceFactory[String, String]]
