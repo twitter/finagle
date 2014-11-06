@@ -1,7 +1,5 @@
 package com.twitter.finagle.mux.lease.exp
 
-import java.lang.management.GarbageCollectorMXBean
-import java.util.concurrent.atomic.AtomicReferenceArray
 import com.twitter.conversions.time._
 import com.twitter.util._
 import com.twitter.util.Local.Context
@@ -30,6 +28,9 @@ private[lease] trait ByteCounter {
  *
  * Knowing the rate is useful for guessing when our next gc will happen, and how
  * long we should wait for outstanding requests to finish draining.
+ *
+ * '''Note:''' You must call `start()` on this [[java.lang.Thread]] for it to begin
+ * running.
  */
 // It might be simpler to just make it an exponential moving average.
 private[lease] class WindowedByteCounter private[lease](
@@ -127,7 +128,6 @@ private[lease] class WindowedByteCounter private[lease](
   }
 
   setDaemon(true)
-  start()
 }
 
 private[lease] object WindowedByteCounter {
