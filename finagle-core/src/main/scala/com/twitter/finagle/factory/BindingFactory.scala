@@ -5,6 +5,7 @@ import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.util.{Drv, Rng}
 import com.twitter.util._
 import java.net.SocketAddress
 import scala.collection.immutable
@@ -92,15 +93,15 @@ private[finagle] class NamerTracingFilter[Req, Rep](
  * requests while it is pending.
  */
 private class DynNameFactory[Req, Rep](
-    name: Activity[Name.Bound],
-    newService: (Name.Bound, ClientConnection) => Future[Service[Req, Rep]],
+    name: Activity[NameTree[Name.Bound]],
+    newService: (NameTree[Name.Bound], ClientConnection) => Future[Service[Req, Rep]],
     traceNamerFailure: Throwable => Unit)
   extends ServiceFactory[Req, Rep] {
 
   private sealed trait State
   private case class Pending(q: immutable.Queue[(ClientConnection, Promise[Service[Req, Rep]])])
     extends State
-  private case class Named(name: Name.Bound) extends State
+  private case class Named(name: NameTree[Name.Bound]) extends State
   private case class Failed(exc: Throwable) extends State
   private case class Closed() extends State
 
@@ -199,23 +200,88 @@ private class DynNameFactory[Req, Rep](
 }
 
 /**
+ * Builds a factory from a [[com.twitter.finagle.NameTree]]. Leaves
+ * are taken from the given
+ * [[com.twitter.finagle.factory.ServiceFactoryCache]]; Unions become
+ * random weighted distributors.
+ */
+private[finagle] object NameTreeFactory {
+
+  def apply[Key, Req, Rep](
+    path: Path,
+    tree: NameTree[Key],
+    factoryCache: ServiceFactoryCache[Key, Req, Rep],
+    rng: Rng = Rng.threadLocal
+  ): ServiceFactory[Req, Rep] = {
+
+    lazy val noBrokersAvailableFactory = Failed(new NoBrokersAvailableException(path.show))
+
+    case class Failed(exn: Throwable) extends ServiceFactory[Req, Rep] {
+      val service: Future[Service[Req, Rep]] = Future.exception(exn)
+
+      def apply(conn: ClientConnection) = service
+      override def isAvailable = false
+      def close(deadline: Time) = Future.Done
+    }
+
+    case class Leaf(key: Key) extends ServiceFactory[Req, Rep] {
+      def apply(conn: ClientConnection) = factoryCache.apply(key, conn)
+      override def isAvailable = factoryCache.isAvailable(key)
+      def close(deadline: Time) = Future.Done
+    }
+
+    case class Weighted(
+      drv: Drv,
+      factories: Seq[ServiceFactory[Req, Rep]]
+    ) extends ServiceFactory[Req, Rep] {
+      def apply(conn: ClientConnection) = factories(drv(rng)).apply(conn)
+      override def isAvailable = factories.forall(_.isAvailable)
+      def close(deadline: Time) = Future.Done
+    }
+
+    def factoryOfTree(tree: NameTree[Key]): ServiceFactory[Req, Rep] =
+      tree match {
+        case NameTree.Neg | NameTree.Fail => noBrokersAvailableFactory
+        case NameTree.Leaf(key) => Leaf(key)
+
+        // it's an invariant of Namer.bind that it returns no Alts
+        case NameTree.Alt(_*) => Failed(new IllegalArgumentException("NameTreeFactory"))
+
+        case NameTree.Union(weightedTrees@_*) =>
+          val (weights, trees) = weightedTrees.unzip { case NameTree.Weighted(w, t) => (w, t) }
+          Weighted(Drv.fromWeights(weights), trees.map(factoryOfTree))
+      }
+
+    factoryOfTree(tree)
+  }
+}
+
+/**
  * A factory that routes to the local binding of the passed-in
- * [[com.twitter.finagle.Name.Path Name.Path]]. It calls `newFactory`
- * to mint a new [[com.twitter.finagle.ServiceFactory
- * ServiceFactory]] for novel name evaluations.
+ * [[com.twitter.finagle.Path Path]]. It calls `newFactory` to mint a
+ * new [[com.twitter.finagle.ServiceFactory ServiceFactory]] for novel
+ * name evaluations.
  *
- * A two-level caching scheme is employed for efficiency:
+ * A three-level caching scheme is employed for efficiency:
  *
- * First, Name-trees are evaluated by the default evaluation
- * strategy, which produces a set of [[com.twitter.finagle.Name.Bound
- * Name.Bound]]; these name-sets are cached individually so that they
- * can be reused. Should different name-tree evaluations yield the
- * same name-set, they will use the same underlying (cached) factory.
+ * First, the [[ServiceFactory]] for a [[Path]] is cached by the local
+ * [[com.twitter.finagle.Dtab Dtab]]. This permits sharing in the
+ * common case that no local [[Dtab]] is given. (It also papers over the
+ * mutability of [[Dtab.base]].)
  *
- * Secondly, in order to avoid evaluating names unnecessarily, we
- * also cache the evaluation relative to a [[com.twitter.finagle.Dtab
- * Dtab]]. This is done to short-circuit the evaluation process most
- * of the time (as we expect most requests to share a namer).
+ * Second, the [[ServiceFactory]] for a [[Path]] (relative to a
+ * [[Dtab]]) is cached by the [[com.twitter.finagle.NameTree
+ * NameTree]] it is bound to by that [[Dtab]]. Binding a path results
+ * in an [[com.twitter.util.Activity Activity]], so this cache permits
+ * sharing when the same tree is returned in different updates of the
+ * [[Activity]]. (In particular it papers over nuisance updates of the
+ * [[Activity]] where the value is unchanged.)
+ *
+ * Third, the ServiceFactory for a [[com.twitter.finagle.Name.Bound
+ * Name.Bound]] appearing in a [[NameTree]] is cached by its
+ * [[Name.Bound]]. This permits sharing when the same [[Name.Bound]]
+ * appears in different [[NameTree]]s (or the same [[NameTree]]
+ * resulting from different bindings of the [[Path]]).
  *
  * @bug This is far too complicated, though it seems necessary for
  * efficiency when namers are occasionally overriden.
@@ -228,6 +294,7 @@ private[finagle] class BindingFactory[Req, Rep](
     baseDtab: () => Dtab = BindingFactory.DefaultBaseDtab,
     statsReceiver: StatsReceiver = NullStatsReceiver,
     maxNameCacheSize: Int = 8,
+    maxNameTreeCacheSize: Int = 8,
     maxNamerCacheSize: Int = 4)
   extends ServiceFactory[Req, Rep] {
 
@@ -239,22 +306,19 @@ private[finagle] class BindingFactory[Req, Rep](
       statsReceiver.scope("namecache"),
       maxNameCacheSize)
 
-  private[this] val noBrokersAvailableException =
-    new NoBrokersAvailableException(path.show)
+  private[this] val nameTreeCache =
+    new ServiceFactoryCache[NameTree[Name.Bound], Req, Rep](
+      tree => NameTreeFactory(path, tree, nameCache),
+      statsReceiver.scope("nametreecache"),
+      maxNameTreeCacheSize)
 
   private[this] val dtabCache = {
     val newFactory: Dtab => ServiceFactory[Req, Rep] = { dtab =>
       val namer = dtab orElse Namer.global
-      val name: Activity[Name.Bound] = namer.bind(tree).map(_.eval) flatMap {
-        case None => Activity.exception(noBrokersAvailableException)
-        case Some(set) if set.isEmpty => Activity.exception(noBrokersAvailableException)
-        case Some(set) if set.size == 1 => Activity.value(set.head)
-        case Some(set) => Activity.value(Name.all(set))
-      }
 
       new DynNameFactory(
-        name,
-        nameCache.apply,
+        namer.bind(tree),
+        nameTreeCache.apply,
         exc => NamerTracingFilter.trace(path, baseDtab(), Throw(exc)))
     }
 
@@ -275,7 +339,7 @@ private[finagle] class BindingFactory[Req, Rep](
   }
 
   def close(deadline: Time) =
-    Closable.sequence(dtabCache, nameCache).close(deadline)
+    Closable.sequence(dtabCache, nameTreeCache, nameCache).close(deadline)
 
   override def isAvailable = dtabCache.isAvailable
 }
