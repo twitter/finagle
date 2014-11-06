@@ -6,7 +6,7 @@ import com.twitter.util.{Var, Return, Activity}
 
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite}
-import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
 
 import java.net.SocketAddress
@@ -26,7 +26,12 @@ class crtnamer extends Namer {
 }
 
 @RunWith(classOf[JUnitRunner])
-class ClientRegistryTest extends FunSuite with StringClient with Eventually with BeforeAndAfter {
+class ClientRegistryTest extends FunSuite
+  with StringClient
+  with Eventually
+  with IntegrationPatience
+  with BeforeAndAfter {
+
   trait Ctx {
     val sr = new InMemoryStatsReceiver
     val stackClient = stringClient

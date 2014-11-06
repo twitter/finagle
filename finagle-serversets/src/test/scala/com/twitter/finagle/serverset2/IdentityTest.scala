@@ -4,7 +4,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.Assertions._
-import org.scalatest.concurrent.Eventually._
 
 class TestIdentity extends Identity {
   val scheme = "test"

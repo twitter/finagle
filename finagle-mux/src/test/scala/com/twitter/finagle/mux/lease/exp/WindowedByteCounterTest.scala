@@ -5,13 +5,13 @@ import com.twitter.util.Local.Context
 import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
 import com.twitter.conversions.time.intToTimeableNumber
 import org.junit.runner.RunWith
-import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
-class WindowedByteCounterTest extends FunSuite with Eventually {
+class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationPatience {
   if (!sys.props.contains("SKIP_FLAKY")) { // CSL-1206
   trait ByteCounterHelper {
     val fakePool = new FakeMemoryPool(new FakeMemoryUsage(StorageUnit.zero, StorageUnit.zero))

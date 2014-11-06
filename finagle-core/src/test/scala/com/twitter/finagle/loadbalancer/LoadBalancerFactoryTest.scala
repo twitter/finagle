@@ -7,11 +7,14 @@ import com.twitter.finagle.stats.{InMemoryStatsReceiver, LoadedStatsReceiver, Nu
 import com.twitter.util.Await
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.concurrent.Eventually.eventually
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class LoadBalancerFactoryTest extends FunSuite with StringClient {
+class LoadBalancerFactoryTest extends FunSuite
+  with StringClient
+  with Eventually
+  with IntegrationPatience {
 
   trait Ctx {
     val sr = new InMemoryStatsReceiver

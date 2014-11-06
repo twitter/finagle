@@ -8,7 +8,7 @@ import com.twitter.io.Buf
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
 import org.junit.runner.RunWith
-import org.scalatest.concurrent.Eventually._
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
@@ -98,7 +98,7 @@ private class OpqueueZkReader(
 }
 
 @RunWith(classOf[JUnitRunner])
-class ZkTest extends FunSuite {
+class ZkTest extends FunSuite with Eventually with IntegrationPatience {
 
   import ZkOp._
 

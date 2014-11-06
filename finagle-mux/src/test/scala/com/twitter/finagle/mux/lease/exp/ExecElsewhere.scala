@@ -1,10 +1,10 @@
 package com.twitter.finagle.mux.lease.exp
 
 import com.twitter.util.Local
-import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite
 
-trait ExecElsewhere extends FunSuite with Eventually {
+trait ExecElsewhere extends FunSuite with Eventually with IntegrationPatience {
   def exec(setup: () => Unit, nexts: () => Unit*) {
     val saved = Local.save()
     val runnable = new Runnable {
