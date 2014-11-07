@@ -27,9 +27,7 @@ class EndToEndTest extends FunSuite with Eventually with IntegrationPatience wit
     Dtab.base = saveBase
   }
 
-
-  // Tagging as flaky until CSL-794 is fixed.
-  if (!sys.props.contains("SKIP_FLAKY")) test("Discard request properly sent") {
+  test("Discard request properly sent") {
     @volatile var handled = false
     val p = Promise[ChannelBuffer]()
     p.setInterruptHandler { case t: Throwable =>
