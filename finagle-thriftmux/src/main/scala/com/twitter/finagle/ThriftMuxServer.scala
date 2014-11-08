@@ -68,7 +68,7 @@ class ThriftMuxServerLike private[finagle](server: ThriftMux.Server)
    * protocolFactory.
    */
   def withProtocolFactory(pf: TProtocolFactory): ThriftMuxServerLike =
-    new ThriftMuxServerLike(server)
+    new ThriftMuxServerLike(server.withProtocolFactory(pf))
 
   def serve(addr: SocketAddress, factory: ServiceFactory[Array[Byte], Array[Byte]]) =
     server.serve(addr, factory)
