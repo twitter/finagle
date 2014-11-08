@@ -4,11 +4,14 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util._
 import com.twitter.util._
+import com.twitter.app.GlobalFlag
 import com.google.common.cache.{Cache, CacheBuilder}
 import java.net.{InetAddress, SocketAddress, UnknownHostException}
 import java.security.{PrivilegedAction, Security}
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.logging.{Level, Logger}
+
+object asyncDns extends GlobalFlag(true, "Resolve Internet addresses asynchronously.")
 
 /**
  * Indicates that a [[com.twitter.finagle.Resolver]] was not found for the
@@ -84,6 +87,13 @@ trait Resolver {
 abstract class AbstractResolver extends Resolver
 
 /**
+ * A resolver for Inet addresses.
+ */
+trait InetResolver extends Resolver {
+  private[finagle] def bindWeightedHostPortsToAddr(hosts: Seq[InetSocketAddressUtil.WeightedHostPort]): Var[Addr]
+}
+
+/**
  * Resolver for inet scheme.
  *
  * The Var is refreshed after each TTL timeout, set from "networkaddress.cache.ttl",
@@ -93,10 +103,15 @@ abstract class AbstractResolver extends Resolver
 object InetResolver {
   def apply(): InetResolver = apply(DefaultStatsReceiver)
   def apply(statsReceiver: StatsReceiver): InetResolver =
-    new InetResolver(statsReceiver.scope("inet").scope("dns"))
+    if (asyncDns()) {
+      new AsyncInetResolver(statsReceiver.scope("inet").scope("dns"))
+    } else {
+      Logger.getLogger("InetResolver").log(Level.INFO, "Using synchronous DNS resolver")
+      new SyncInetResolver
+    }
 }
 
-class InetResolver(statsReceiver: StatsReceiver) extends Resolver {
+private class AsyncInetResolver(statsReceiver: StatsReceiver) extends InetResolver {
   import InetSocketAddressUtil._
 
   private[this] val CACHE_SIZE = 16000L
@@ -193,6 +208,95 @@ class InetResolver(statsReceiver: StatsReceiver) extends Resolver {
       bindWeightedHostPortsToAddr(whp)
     case Throw(exc) =>
       Var.value(Addr.Failed(exc))
+  }
+}
+
+/**
+ * Synchronous resolver for inet scheme. This Resolver resolves DNS after each TTL timeout.
+ * The TTL is gotten from "networkaddress.cache.ttl", a Java Security Property.
+ * If "networkaddress.cache.ttl" is not set or set to a non-positive value, DNS
+ * cache refresh will be turned off.
+ */
+private class SyncInetResolver extends InetResolver {
+  import InetSocketAddressUtil._
+
+  val scheme = "inet"
+  private val log = Logger.getLogger(getClass.getName)
+  private val ttlOption = {
+    val t = Try(Option(java.security.AccessController.doPrivileged(
+      new PrivilegedAction[String] {
+        override def run(): String = Security.getProperty("networkaddress.cache.ttl")
+      }
+    )) map { s => s.toInt })
+
+    t match {
+      case Return(Some(value)) =>
+        if (value <= 0) {
+          log.log(Level.INFO,
+            "networkaddress.cache.ttl is set as non-positive value, DNS cache refresh turned off")
+          None
+        } else {
+          val duration = value.seconds
+          log.log(Level.CONFIG, "networkaddress.cache.ttl found to be %s".format(duration) +
+            " will refresh DNS every %s.".format(duration))
+          Some(duration)
+        }
+      case Return(None) =>
+        log.log(Level.INFO, "networkaddress.cache.ttl is not set, DNS cache refresh turned off")
+        None
+      case Throw(exc: NumberFormatException) =>
+        log.log(Level.WARNING,
+          "networkaddress.cache.ttl is set as non-number, DNS cache refresh turned off", exc)
+        None
+      case Throw(exc) =>
+        log.log(Level.WARNING, "Unexpected Exception is thrown when getting " +
+          "networkaddress.cache.ttl, DNS cache refresh turned off", exc)
+        None
+    }
+  }
+  private val timer = DefaultTimer.twitter
+  private val futurePool = FuturePool.unboundedPool
+
+  /**
+   * Binds to the specified hostnames, and refreshes the DNS information periodically.
+   */
+  def bind(hosts: String): Var[Addr] = {
+    val hostPorts = parseHostPorts(hosts)
+    val init = Addr.Bound(resolveHostPorts(hostPorts))
+    ttlOption match {
+      case Some(ttl) =>
+        Var.async(init) { u =>
+          implicit val intPri = new Prioritized[Int] { def apply(i: Int) = i }
+          val updater = Updater { _: Int =>
+            val addr = resolveHostPorts(hostPorts)
+            u() = Addr.Bound(addr)
+          }
+          timer.schedule(ttl.fromNow, ttl) {
+            futurePool {
+              updater(0)
+            } onFailure { ex =>
+              log.log(Level.WARNING, "failed to resolve hosts ", ex)
+            }
+          }
+        }
+      case None =>
+        Var.value(init)
+    }
+  }
+  
+  /**
+   * This implementation is pretty dumb. It does not deal with TTLs. But that's ok;
+   * this is used in very narrow circumstances and will anyhow be removed shortly.
+   */
+  private[finagle] def bindWeightedHostPortsToAddr(whp: Seq[WeightedHostPort]): Var[Addr] = {
+    val (hosts, ports, weights) = whp.unzip3
+    val hostports = hosts.zip(ports)
+    val addrs = resolveHostPortsSeq(hostports)
+    val weighted = addrs.zip(weights) collect {
+      case (Seq(a, _*), w) => WeightedSocketAddress(a, w)
+    }
+
+    Var.value(Addr.Bound(weighted.toSet))
   }
 }
 

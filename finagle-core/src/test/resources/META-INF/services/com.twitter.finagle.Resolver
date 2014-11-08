@@ -1,2 +1,2 @@
 com.twitter.finagle.TestResolver
-com.twitter.finagle.AsyncInetResolver
+com.twitter.finagle.TestAsyncInetResolver
