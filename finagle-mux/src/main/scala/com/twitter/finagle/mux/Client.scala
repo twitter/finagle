@@ -8,6 +8,7 @@ import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Context, Dtab, Service, WriteException, NoStacktrace}
 import com.twitter.util.{Future, Promise, Time, Duration}
+import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.logging.Logger
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
@@ -67,6 +68,12 @@ private[finagle] class ClientDispatcher (
   trans: Transport[ChannelBuffer, ChannelBuffer],
   sr: StatsReceiver
 ) extends Service[ChannelBuffer, ChannelBuffer] with Acting {
+  // protects the "drained" field, so that we don't send a request
+  // after sending an Rdrain message
+  private[this] val drainLock = new ReentrantReadWriteLock
+  private[this] val checkDrained = drainLock.readLock
+  private[this] val setDrained = drainLock.writeLock
+
   import Message._
 
   @volatile private[this] var canDispatch: Cap.State = Cap.Unknown
@@ -115,8 +122,14 @@ private[finagle] class ClientDispatcher (
     case Tping(tag) =>
       trans.write(encode(Rping(tag)))
     case Tdrain(tag) =>
-      drained = true
-      trans.write(encode(Rdrain(tag)))
+      // must be synchronized to avoid writing after Rdrain has been sent
+      setDrained.lockInterruptibly()
+      try {
+        drained = true
+        trans.write(encode(Rdrain(tag)))
+      } finally {
+        setDrained.unlock()
+      }
     case Tlease(unit, howMuch) =>
       Lease.parse(unit, howMuch) foreach { newLease =>
         log.fine("leased for " + newLease + " to " + trans.remoteAddress)
@@ -164,11 +177,17 @@ private[finagle] class ClientDispatcher (
     }
   }
 
-  def apply(req: ChannelBuffer): Future[ChannelBuffer] =
-    if (drained)
-      futureNackedException
-    else
-      dispatch(req, true)
+  def apply(req: ChannelBuffer): Future[ChannelBuffer] = {
+    checkDrained.lockInterruptibly()
+    try {
+      if (drained)
+        futureNackedException
+      else
+        dispatch(req, true)
+    } finally {
+      checkDrained.unlock()
+    }
+  }
 
   /**
    * Dispatch a request.
@@ -229,9 +248,9 @@ private[finagle] class ClientDispatcher (
     } else p
   }
 
-  override def isAvailable = !drained && trans.isOpen
+  override def isAvailable: Boolean = trans.isOpen
 
-  def isActive = !lease.expired
+  def isActive: Boolean = !lease.expired && !drained
 
-  override def close(deadline: Time) = trans.close(deadline)
+  override def close(deadline: Time): Future[Unit] = trans.close(deadline)
 }

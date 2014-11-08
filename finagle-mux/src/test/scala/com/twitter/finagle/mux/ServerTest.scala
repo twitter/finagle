@@ -7,6 +7,7 @@ import com.twitter.finagle.mux.Message.Treq
 import com.twitter.finagle.mux.lease.exp.{Lessor, nackOnExpiredLease}
 import com.twitter.finagle.transport.{Transport, QueueTransport}
 import com.twitter.finagle.{Dtab, Service}
+import com.twitter.io.Charsets
 import com.twitter.util.{Return, Future, Time, Duration, Promise}
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.junit.runner.RunWith
@@ -58,7 +59,6 @@ class ServerTest extends FunSuite with MockitoSugar {
       case _ => fail()
     }
   }
-
 
   test("register/unregister with lessor") {
     val ctx = new Ctx
@@ -149,4 +149,132 @@ class ServerTest extends FunSuite with MockitoSugar {
     assert(dispatcher.npending() === 0)
   }
 
+  test("drains properly before closing the socket") {
+    Time.withCurrentTimeFrozen { ctl =>
+      import Message._
+      val buf = ChannelBuffers.copiedBuffer("OK", Charsets.Utf8)
+      val serverToClient = new AsyncQueue[ChannelBuffer]
+      val clientToServer = new AsyncQueue[ChannelBuffer]
+      val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
+
+      val p = Promise[ChannelBuffer]
+      var req: ChannelBuffer = null
+      val server = new ServerDispatcher(transport, Service.mk { buf: ChannelBuffer =>
+        req = buf
+        p
+      }, true)
+
+      clientToServer.offer(encode(Tdispatch(0, Seq.empty, "", Dtab.empty, buf)))
+      // one outstanding request
+
+      val drain = server.close(Time.Top) // synchronously sends drain request to client
+
+      clientToServer.offer(encode(Rdrain(1))) // client draining
+
+      assert(!drain.isDefined) // one outstanding request
+
+      p.setValue(ChannelBuffers.copiedBuffer(req.toString("UTF-8").reverse, Charsets.Utf8))
+
+      assert(drain.isDefined) // zero outstanding requests
+    }
+  }
+
+  test("drains properly before closing the socket with two outstanding") {
+    Time.withCurrentTimeFrozen { ctl =>
+      import Message._
+      val serverToClient = new AsyncQueue[ChannelBuffer]
+      val clientToServer = new AsyncQueue[ChannelBuffer]
+      val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
+
+      var promises: List[Promise[ChannelBuffer]] = Nil
+      val server = new ServerDispatcher(transport, Service.mk { buf: ChannelBuffer =>
+        val p = Promise[ChannelBuffer]()
+        promises ::= p
+        p
+      }, true)
+
+      clientToServer.offer(encode(
+        Tdispatch(0, Seq.empty, "", Dtab.empty, ChannelBuffers.EMPTY_BUFFER)))
+      // one outstanding request
+
+      clientToServer.offer(encode(
+        Tdispatch(1, Seq.empty, "", Dtab.empty, ChannelBuffers.EMPTY_BUFFER)))
+      // two outstanding requests
+
+      val drain = server.close(Time.Top) // synchronously sends drain request to client
+
+      clientToServer.offer(encode(Rdrain(1))) // client draining
+
+      assert(!drain.isDefined) // two outstanding request
+      assert(server.npending() === 2) // two outstanding request
+
+      promises(0).setValue(ChannelBuffers.EMPTY_BUFFER)
+
+      assert(server.npending() === 1) // one outstanding request
+      assert(!drain.isDefined) // one outstanding request
+
+      promises(1).setValue(ChannelBuffers.EMPTY_BUFFER)
+
+      assert(server.npending() === 0) // zero outstanding request
+      assert(drain.isDefined) // zero outstanding requests
+    }
+  }
+
+  test("closes properly without outstanding requests") {
+    Time.withCurrentTimeFrozen { ctl =>
+      import Message._
+      val serverToClient = new AsyncQueue[ChannelBuffer]
+      val clientToServer = new AsyncQueue[ChannelBuffer]
+      val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
+
+      val server = new ServerDispatcher(transport, Service.mk { buf: ChannelBuffer =>
+        Future { ??? }
+      }, true)
+
+      val drain = server.close(Time.Top) // synchronously sends drain request to client
+
+      val Some(Return(tdrain)) = serverToClient.poll.poll
+      val Tdrain(tag) = Message.decode(tdrain)
+
+      assert(!drain.isDefined) // client hasn't acked
+      clientToServer.offer(encode(Rdrain(tag))) // client draining
+      assert(drain.isDefined) // safe to shut down
+    }
+  }
+
+  test("starts nacking only after receiving an rdrain") {
+    Time.withCurrentTimeFrozen { ctl =>
+      import Message._
+      val serverToClient = new AsyncQueue[ChannelBuffer]
+      val clientToServer = new AsyncQueue[ChannelBuffer]
+      val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
+
+      val server = new ServerDispatcher(transport, Service.mk { buf: ChannelBuffer =>
+        Future.value(ChannelBuffers.EMPTY_BUFFER)
+      }, true)
+
+      clientToServer.offer(Message.encode( // request before closing
+        Message.Tdispatch(0, Seq.empty, "", Dtab.empty, ChannelBuffers.EMPTY_BUFFER)))
+      assert(serverToClient.poll.isDefined)
+
+      val drain = server.close(Time.Top) // synchronously sends drain request to client
+
+      val Some(Return(tdrain)) = serverToClient.poll.poll
+      val Tdrain(tag) = Message.decode(tdrain)
+
+      clientToServer.offer(Message.encode( // request after sending tdrain, before getting rdrain
+        Message.Tdispatch(0, Seq.empty, "", Dtab.empty, ChannelBuffers.EMPTY_BUFFER)))
+      assert(serverToClient.poll.isDefined)
+
+      assert(!drain.isDefined) // client hasn't acked
+      clientToServer.offer(encode(Rdrain(tag))) // client draining
+
+      assert(drain.isDefined) // safe to shut down
+
+      clientToServer.offer(Message.encode( // request after closing down
+        Message.Tdispatch(0, Seq.empty, "", Dtab.empty, ChannelBuffers.EMPTY_BUFFER)))
+      val Some(Return(rdrain)) = serverToClient.poll.poll
+      assert(decode(rdrain).isInstanceOf[RdispatchNack])
+    }
+  }
 }

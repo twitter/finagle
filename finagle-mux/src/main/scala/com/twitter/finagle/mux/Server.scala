@@ -69,84 +69,119 @@ private[finagle] class ServerDispatcher private[finagle](
 
   private[this] val log = DefaultLogger
 
-  // TODO: rewrite Treqs into Tdispatches?
-  @volatile protected var receive: Message => Unit = {
-    case Tdispatch(tag, contexts, /*ignore*/_dst, dtab, req) =>
-      if (nackOnExpiredLease() && (lease <= Duration.Zero))
-        trans.write(encode(RdispatchNack(tag, Seq.empty)))
-      else {
-        lessor.observeArrival()
-        if (!canDispatch) {
-          // There seems to be a bug in the Scala pattern matcher:
-          // 	case Tdispatch(..) if canDispatch => ..
-          // results in a match error. Somehow the clause
-          // 	case m@Tmessage(tag) =>
-          // doesn't seem to be evaluated.
-          val msg = Rerr(tag, "Tdispatch not enabled")
-          trans.write(encode(msg))
-        } else {
-          Trace.unwind {
-            Trace.pushTracer(tracer)
-            for ((k, v) <- contexts)
-              Context.handle(ChannelBufferBuf.Unsafe(k), ChannelBufferBuf.Unsafe(v))
-            if (dtab.length > 0)
-              Dtab.local ++= dtab
-            val elapsed = Stopwatch.start()
-            val f = service(req)
-            pending.put(tag, f)
-            f respond { tr =>
-              pending.remove(tag)
-              tr match {
-                case Return(rep) =>
-                  lessor.observe(elapsed())
-                  // Record tracing info to track Mux adoption across clusters.
-                  Trace.record(ServerDispatcher.ServerEnabledTraceMessage)
-                  trans.write(encode(RdispatchOk(tag, Seq.empty, rep)))
-                case Throw(exc) =>
-                  trans.write(encode(RdispatchError(tag, Seq.empty, exc.toString)))
-              }
+  private[this] def dispatch(tdispatch: Tdispatch): Unit = {
+    val Tdispatch(tag, contexts, /*ignore*/_dst, dtab, req) = tdispatch
+    if (nackOnExpiredLease() && (lease <= Duration.Zero))
+      trans.write(encode(RdispatchNack(tag, Seq.empty)))
+    else {
+      lessor.observeArrival()
+      if (!canDispatch) {
+        // There seems to be a bug in the Scala pattern matcher:
+        // 	case Tdispatch(..) if canDispatch => ..
+        // results in a match error. Somehow the clause
+        // 	case m@Tmessage(tag) =>
+        // doesn't seem to be evaluated.
+        val msg = Rerr(tag, "Tdispatch not enabled")
+        trans.write(encode(msg))
+      } else {
+        Trace.unwind {
+          Trace.pushTracer(tracer)
+          for ((k, v) <- contexts)
+            Context.handle(ChannelBufferBuf.Unsafe(k), ChannelBufferBuf.Unsafe(v))
+          if (dtab.length > 0)
+            Dtab.local ++= dtab
+          val elapsed = Stopwatch.start()
+          val f = service(req)
+          pending.put(tag, f)
+          f respond { tr =>
+            removeTag(tag)
+            tr match {
+              case Return(rep) =>
+                lessor.observe(elapsed())
+                // Record tracing info to track Mux adoption across clusters.
+                Trace.record(ServerDispatcher.ServerEnabledTraceMessage)
+                trans.write(encode(RdispatchOk(tag, Seq.empty, rep)))
+              case Throw(exc) =>
+                trans.write(encode(RdispatchError(tag, Seq.empty, exc.toString)))
             }
           }
         }
       }
+    }
+  }
 
-    case Treq(tag, traceId, req) =>
-      lessor.observeArrival()
-      Trace.unwind {
-        Trace.pushTracer(tracer)
-        for (traceId <- traceId)
-          Trace.setId(traceId)
+  private[this] def dispatchTreq(treq: Treq): Unit = {
+    val Treq(tag, traceId, req) = treq
+    lessor.observeArrival()
+    Trace.unwind {
+      Trace.pushTracer(tracer)
+      for (traceId <- traceId)
+        Trace.setId(traceId)
 
-        // Record tracing info to track Mux adoption across clusters.
-        Trace.record(ServerDispatcher.ServerEnabledTraceMessage)
+      // Record tracing info to track Mux adoption across clusters.
+      Trace.record(ServerDispatcher.ServerEnabledTraceMessage)
 
-        val elapsed = Stopwatch.start()
-        val f = service(req)
-        pending.put(tag, f)
-        f respond { tr =>
-          pending.remove(tag)
-          tr match {
-            case Return(rep) =>
-              lessor.observe(elapsed())
-              trans.write(encode(RreqOk(tag, rep)))
-            case Throw(exc) =>
-              trans.write(encode(RreqError(tag, exc.toString)))
-          }
+      val elapsed = Stopwatch.start()
+      val f = service(req)
+      pending.put(tag, f)
+      f respond { tr =>
+        removeTag(tag)
+        tr match {
+          case Return(rep) =>
+            lessor.observe(elapsed())
+            trans.write(encode(RreqOk(tag, rep)))
+          case Throw(exc) =>
+            trans.write(encode(RreqError(tag, exc.toString)))
         }
       }
+    }
+  }
 
+  // TODO: rewrite Treqs into Tdispatches?
+  private[this] val handle: PartialFunction[Message, Unit] = {
+    case tdispatch: Tdispatch => dispatch(tdispatch)
+    case treq: Treq => dispatchTreq(treq)
     case Tdiscarded(tag, why) =>
       pending.get(tag) match {
         case null => ()
         case f => f.raise(new ClientDiscardedRequestException(why))
       }
-
     case Tping(tag) =>
       trans.write(encode(Rping(tag)))
-
     case m@Tmessage(tag) =>
-      val msg = Rerr(tag, "Did not understand Tmessage %d".format(m.typ))
+      val msg = Rerr(tag, f"Did not understand Tmessage ${m.typ}%d")
       trans.write(encode(msg))
+  }
+
+  private[this] val nackRequests: Message => Unit = {
+    case tdispatch: Tdispatch =>
+      trans.write(encode(RdispatchNack(tdispatch.tag, Nil)))
+    case treq: Treq =>
+      trans.write(encode(RreqNack(treq.tag)))
+    case Rerr(tag, error) =>
+      log.warning(f"Error received for tag=$tag%d after server close: $error%s")
+    case Tping(tag) => // swallow pings
+    case unexpected =>
+      val name = unexpected.getClass.getName
+      trans.write(encode(Rerr(
+        unexpected.tag,
+        s"Unexpected message of type $name received after server shutdown"
+      )))
+  }
+
+  private[this] val readyToDrain: PartialFunction[Message, Unit] = {
+    case Rdrain(1) =>
+      draining = true
+      receive = nackRequests
+      if (pending.isEmpty) closep.setDone() // OK because calls to receive are serial
+  }
+
+  // handle is a PartialFunction for the API, but is actually total
+  @volatile protected var receive: Message => Unit = handle
+
+  private[this] def removeTag(tag: Int): Unit = {
+    pending.remove(tag)
+    if (draining && pending.isEmpty) closep.setDone()
   }
 
   private[this] def loop(): Future[Nothing] =
@@ -169,7 +204,7 @@ private[finagle] class ServerDispatcher private[finagle](
     // insert new entries in the pending map.
     val exc = new CancelledRequestException(cause)
     pending.asScala.foreach { case (tag, f) =>
-      pending.remove(tag)
+      removeTag(tag)
       f.raise(exc)
     }
 
@@ -182,6 +217,7 @@ private[finagle] class ServerDispatcher private[finagle](
   }
 
   private[this] val closing = new AtomicBoolean(false)
+  @volatile private[this] var draining = false
   private[this] val closep = new Promise[Unit]
 
   /**
@@ -195,23 +231,7 @@ private[finagle] class ServerDispatcher private[finagle](
     if (!closing.compareAndSet(false, true))
       closep
     else {
-      receive = {
-        case Treq(tag, _, _) =>
-          trans.write(encode(RreqNack(tag)))
-        case Tdispatch(tag, _, _, _, _) =>
-          trans.write(encode(RdispatchNack(tag, Seq.empty)))
-        case Rdrain(1) =>
-          closep.setDone()
-        case Rerr(tag, error) =>
-          log.warning("Error received for tag=%d after server close: %s".format(tag, error))
-        case unexpected =>
-          trans.write(encode(Rerr(
-            unexpected.tag,
-            "Unexpected message of type %s received after server shutdown".format(
-              unexpected.getClass.getName
-            )
-          )))
-      }
+      receive = readyToDrain orElse handle
 
       // Tdrain is the only T-typed message that servers ever send, so we don't
       // need to allocate a distinct tag to differentiate messages.
