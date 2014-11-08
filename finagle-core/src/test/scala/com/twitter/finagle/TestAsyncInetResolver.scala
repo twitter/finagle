@@ -8,7 +8,7 @@ import java.net.InetSocketAddress
  *
  * Used by ResolutionRaceTest.
  */
-class AsyncInetResolver extends Resolver {
+class TestAsyncInetResolver extends Resolver {
   val scheme: String = "asyncinet"
 
   private[this] object Port {

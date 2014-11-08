@@ -52,11 +52,14 @@ object InetSocketAddressUtil {
    * @throws java.net.UnknownHostException if some host cannot be resolved
    */
   def resolveHostPorts(hostPorts: Seq[HostPort]): Set[SocketAddress] =
-    (hostPorts flatMap { case (host, port) =>
-      InetAddress.getAllByName(host) map { addr =>
+    resolveHostPortsSeq(hostPorts).flatten.toSet
+
+  private[finagle] def resolveHostPortsSeq(hostPorts: Seq[HostPort]): Seq[Seq[SocketAddress]] =
+    hostPorts map { case (host, port) =>
+      (InetAddress.getAllByName(host) map { addr =>
         new InetSocketAddress(addr, port)
-      }
-    }).toSet
+      }).toSeq
+    }
 
   /**
    * Resolves host:port:weight triples into a Future[Seq[SocketAddress]. For example,
