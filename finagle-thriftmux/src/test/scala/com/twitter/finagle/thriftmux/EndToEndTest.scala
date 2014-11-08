@@ -413,20 +413,40 @@ class EndToEndTest extends FunSuite {
   }
 
   test("ThriftMux with TCompactProtocol") {
-    val pf = new TCompactProtocol.Factory
+    // ThriftMux.server API
+    {
+      val pf = new TCompactProtocol.Factory
+      val server = ThriftMux.server.withProtocolFactory(pf)
+        .serveIface(":*", new TestService.FutureIface {
+          def query(x: String) = Future.value(x+x)
+        })
 
-    val server = ThriftMux.server.withProtocolFactory(pf)
-      .serveIface(":*", new TestService.FutureIface {
-        def query(x: String) = Future.value(x+x)
-      })
+      val tcompactClient = ThriftMux.client.withProtocolFactory(pf)
+        .newIface[TestService.FutureIface](server)
+      assert(Await.result(tcompactClient.query("ok")) === "okok")
 
-    val tcompactClient = ThriftMux.client.withProtocolFactory(pf)
-      .newIface[TestService.FutureIface](server)
-    assert(Await.result(tcompactClient.query("ok")) === "okok")
+      val tbinaryClient = ThriftMux.newIface[TestService.FutureIface](server)
+      intercept[com.twitter.finagle.mux.ServerApplicationError] {
+        Await.result(tbinaryClient.query("ok"))
+      }
+    }
 
-    val tbinaryClient = ThriftMux.newIface[TestService.FutureIface](server)
-    intercept[com.twitter.finagle.mux.ServerApplicationError] {
-      Await.result(tbinaryClient.query("ok"))
+    // ThriftMuxServer API
+    {
+      val pf = new TCompactProtocol.Factory
+      val server = ThriftMuxServer.withProtocolFactory(pf)
+        .serveIface(":*", new TestService.FutureIface {
+          def query(x: String) = Future.value(x+x)
+        })
+
+      val tcompactClient = ThriftMux.client.withProtocolFactory(pf)
+        .newIface[TestService.FutureIface](server)
+      assert(Await.result(tcompactClient.query("ok")) === "okok")
+
+      val tbinaryClient = ThriftMux.newIface[TestService.FutureIface](server)
+      intercept[com.twitter.finagle.mux.ServerApplicationError] {
+        Await.result(tbinaryClient.query("ok"))
+      }
     }
   }
 }
