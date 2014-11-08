@@ -25,6 +25,12 @@ Deprecations
  * finagle-memcached: Have cas() operation return false on NotFound()
    state instead of throw IllegalStateException
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-mux: Drain mux servers properly, so that shutdowns can be
+    graceful.
+
 6.23.0
 ------
 
