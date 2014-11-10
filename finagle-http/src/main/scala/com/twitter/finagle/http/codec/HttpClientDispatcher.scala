@@ -43,15 +43,19 @@ class HttpClientDispatcher[Req <: HttpRequest](
       // set the content length header for messages without a payload body.
       if (len > 0) HttpHeaders.setContentLength(req, len)
     }
-
+    
+    val reader = req match {
+      case r: Request if r.isChunked => Some(r.reader)
+      case _ => None
+    }
+    
     trans.write(req) rescue(wrapWriteException) before {
       // Do these concurrently:
       Future.join(
         // 1. Drain the Request body into the Transport.
-        req match {
-          case r: Request if r.isChunked => streamChunks(trans, r.reader)
-          case _ => Future.Done
-        },
+        // (If we have a reader.)
+        reader.map(streamChunks(trans, _)).getOrElse(Future.Done),
+
         // 2. Drain the Transport into Response body.
         trans.read() flatMap {
           case res: HttpResponse if !res.isChunked =>
@@ -64,18 +68,14 @@ class HttpClientDispatcher[Req <: HttpRequest](
             Future.Done
 
           case res: HttpResponse =>
-            val readr = Reader.writable()
-            val response = new Response {
+            val coll = Transport.collate(trans, readChunk)
+
+            p.updateIfEmpty(Return(new Response {
               final val httpResponse = res
-              override val reader = readr
-            }
-            p.updateIfEmpty(Return(response))
-            Transport.copyToWriter(trans, readr)(readChunk) respond {
-              case Throw(exc) =>
-                readr.fail(exc)
-                trans.close()
-              case Return(_) => readr.close()
-            }
+              override val reader = coll
+            }))
+
+            coll
 
           case invalid =>
             // We rely on the base class to satisfy p.
@@ -83,6 +83,12 @@ class HttpClientDispatcher[Req <: HttpRequest](
                 "invalid message \"%s\"".format(invalid)))
         }
       ).unit
+    } onFailure { case _ =>
+      // This Future represents the totality of the exchange;
+      // thus failure represents *any* failure that can happen
+      // during the exchange.
+      reader.foreach(_.discard())
+      trans.close()
     }
   }
 }

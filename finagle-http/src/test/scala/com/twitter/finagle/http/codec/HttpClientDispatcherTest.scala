@@ -2,10 +2,11 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.transport.QueueTransport
+import com.twitter.finagle.transport.{Transport, QueueTransport}
 import com.twitter.io.{Buf, Reader}
-import com.twitter.util.{Await, Future, Promise, Return}
+import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
 import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.handler.codec.http.HttpResponseStatus.OK
 import org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1
 import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, DefaultHttpResponse, HttpChunk}
@@ -13,6 +14,61 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.mockito.Mockito.{spy, times, verify}
+
+object OpTransport {
+  sealed trait Op[In, Out]
+  case class Write[In, Out](accept: In => Boolean, res: Future[Unit]) extends Op[In, Out]
+  case class Read[In, Out](res: Future[Out]) extends Op[In, Out]
+  case class Close[In, Out](res: Future[Unit]) extends Op[In, Out]
+
+  def apply[In, Out](ops: Op[In, Out]*) = new OpTransport(ops.toList)
+
+}
+
+class OpTransport[In, Out](_ops: List[OpTransport.Op[In, Out]]) extends Transport[In, Out] {
+  import org.scalatest.Assertions._
+  import OpTransport._
+
+  var ops = _ops
+
+  def read() = ops match {
+    case Read(res) :: rest =>
+      ops = rest
+      res
+    case _ =>
+      fail(s"Expected ${ops.headOption}; got read()")
+  }
+  
+  def write(in: In) = ops match {
+    case Write(accept, res) :: rest =>
+      if (!accept(in))
+        fail(s"Did not accept write $in")
+      
+      ops = rest
+      res
+    case _ =>
+      fail(s"Expected ${ops.headOption}; got write($in)")
+  }
+  
+  def close(deadline: Time) = ops match {
+    case Close(res) :: rest =>
+      ops = rest
+      isOpen = false
+      res respond {
+        case Return(()) =>
+          onClose.setValue(new Exception("closed"))
+        case Throw(exc) =>
+          onClose.setValue(exc)
+      }
+    case _ =>
+      fail(s"Expected ${ops.headOption}; got close($deadline)")
+  }
+
+  var isOpen = true
+  val onClose = new Promise[Throwable]
+  def localAddress = new java.net.SocketAddress{}
+  def remoteAddress = new java.net.SocketAddress{}
+}
 
 @RunWith(classOf[JUnitRunner])
 class HttpClientDispatcherTest extends FunSuite {
@@ -121,5 +177,100 @@ class HttpClientDispatcherTest extends FunSuite {
     out.write("something else")
     intercept[IllegalArgumentException] { Await.result(cc) }
     verify(inSpy, times(1)).close()
+  }
+
+  test("upstream interrupt: before write") {
+    import OpTransport._
+
+    val writep = new Promise[Unit]
+    val transport = OpTransport[Any, Any](
+      Write(Function.const(true), writep),
+      Close(Future.Done))
+
+    val disp = new HttpClientDispatcher[Request](transport)
+    val req = Request()
+    req.setChunked(true)
+    
+    val f = disp(req)
+    val g = req.writer.write(Buf.Utf8(".."))
+    assert(transport.isOpen)
+    assert(!g.isDefined)
+    f.raise(new Exception)
+    assert(!transport.isOpen)
+
+    assert(!g.isDefined)
+    // Simulate what a real transport would do:
+    assert(transport.ops.isEmpty)
+    writep.setException(new Exception)
+
+    assert(g.isDefined)
+    intercept[Reader.ReaderDiscarded] { Await.result(g) }
+  }
+  
+  test("upstream interrupt: during req stream (read)") {
+    import OpTransport._
+    
+    val readp = new Promise[Nothing]
+    val transport = OpTransport[Any, Any](
+      // First write the initial request.
+      Write(_.isInstanceOf[HttpRequest], Future.Done),
+      // Read the response
+      Read(readp),
+      Close(Future.Done))
+
+    val disp = new HttpClientDispatcher[Request](transport)
+    val req = Request()
+    req.setChunked(true)
+
+    val f = disp(req)
+
+    assert(transport.isOpen)
+    f.raise(new Exception)
+    assert(!transport.isOpen)
+
+    // Simulate what a real transport would do:
+    assert(transport.ops.isEmpty)
+    readp.setException(new Exception)
+    
+    // The reader is now discarded
+    intercept[Reader.ReaderDiscarded] { 
+      Await.result(req.writer.write(Buf.Utf8(".")))
+    }
+  }
+  
+  test("upstream interrupt: during req stream (write)") {
+    import OpTransport._
+    
+    val chunkp = new Promise[Unit]
+    val transport = OpTransport[Any, Any](
+      // First write the initial request.
+      Write(_.isInstanceOf[HttpRequest], Future.Done),
+      // Read the response
+      Read(Future.never),
+      // Then we try to write the chunk
+      Write(_.isInstanceOf[HttpChunk], chunkp),
+      Close(Future.Done))
+
+    val disp = new HttpClientDispatcher[Request](transport)
+    val req = Request()
+    req.setChunked(true)
+
+    val f = disp(req)
+
+    // Buffer up for write.
+    Await.result(req.writer.write(Buf.Utf8("..")))
+
+    assert(transport.isOpen)
+    f.raise(new Exception)
+    assert(!transport.isOpen)
+
+    // Simulate what a real transport would do:
+    assert(transport.ops.isEmpty)
+    chunkp.setException(new Exception)
+    
+    // The reader is now discarded
+    intercept[Reader.ReaderDiscarded] { 
+      Await.result(req.writer.write(Buf.Utf8(".")))
+    }
   }
 }

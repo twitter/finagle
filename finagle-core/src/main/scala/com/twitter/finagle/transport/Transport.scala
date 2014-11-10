@@ -2,9 +2,8 @@ package com.twitter.finagle.transport
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Stack
-import com.twitter.io.{Buf, Writer}
-import com.twitter.util.Duration
-import com.twitter.util.{Closable, Future, Promise, Time, Throw}
+import com.twitter.io.{Buf, Reader, Writer}
+import com.twitter.util.{Closable, Future, Promise, Time, Throw, Return, Duration}
 import java.net.SocketAddress
 
 // Mapped: ideally via a util-codec?
@@ -156,11 +155,42 @@ private[finagle] object Transport {
    * @param f A mapping from `A` to `Future[Option[Buf]]`.
    */
   def copyToWriter[A](trans: Transport[_, A], w: Writer)
-                     (f: A => Future[Option[Buf]]): Future[Unit] =
+                     (f: A => Future[Option[Buf]]): Future[Unit] = {
     trans.read().flatMap(f).flatMap {
       case None => Future.Done
       case Some(buf) => w.write(buf) before copyToWriter(trans, w)(f)
     }
+  }
+
+  /**
+   * Collates a transport, using the collation function `chunkOfA`,
+   * into a [[com.twitter.io.Reader]].
+   *
+   * Collation completes when `chunkOfA` returns `Future.None`. The returned
+   * [[com.twitter.io.Reader]] is also a Unit-typed
+   * [[com.twitter.util.Future]], which is satisfied when collation
+   * is complete, or else has failed.
+   *
+   * @note This deserves its own implementation, independently of
+   * using copyToWriter. In particular, in today's implemenation,
+   * the path of interrupts are a little convoluted; they would be
+   * clarified by an independent implementation.
+   */
+  def collate[A](trans: Transport[_, A], chunkOfA: A => Future[Option[Buf]])
+  : Reader with Future[Unit] = new Promise[Unit] with Reader {
+    private[this] val rw = Reader.writable()
+    become(Transport.copyToWriter(trans, rw)(chunkOfA) respond {
+      case Throw(exc) => rw.fail(exc)
+      case Return(_) => rw.close()
+    })
+
+    def read(n: Int) = rw.read(n)
+
+    def discard() {
+      rw.discard()
+      raise(new Reader.ReaderDiscarded)
+    }
+  }
 }
 
 /**

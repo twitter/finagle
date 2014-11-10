@@ -34,12 +34,9 @@ class HttpServerDispatcher[REQUEST <: Request](
 
         override val reader =
           if (reqIn.isChunked) {
-            val readr = Reader.writable()
-            Transport.copyToWriter(trans, readr)(readChunk) respond {
-              case Throw(exc) => readr.fail(exc)
-              case Return(_) => readr.close()
-            } proxyTo(eos)
-            readr
+            val coll = Transport.collate(trans, readChunk)
+            coll.proxyTo(eos)
+            coll: Reader
           } else {
             eos.setDone()
             BufReader(ChannelBufferBuf.Unsafe(reqIn.getContent))

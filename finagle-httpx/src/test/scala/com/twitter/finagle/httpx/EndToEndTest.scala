@@ -1,18 +1,17 @@
 package com.twitter.finagle.httpx
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.{
-  ChannelClosedException, CancelledRequestException, Dtab, Service,
-  ServiceProxy
-}
 import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.{
+  CancelledRequestException, ChannelClosedException, Dtab, Service, ServiceProxy}
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.{Await, Closable, Future, Promise, Time, JavaTimer}
 import java.io.{StringWriter, PrintWriter}
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
-import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite with BeforeAndAfter {
@@ -242,6 +241,34 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       // drip should terminate because the request is discarded.
       intercept[Reader.ReaderDiscarded] { Await.result(drip(req.writer)) }
     }
+    
+    test(name + ": client discard terminates stream and frees up the connection") {
+      val s = new Service[Request, Response] {
+        var rep: Response = null
+
+        def apply(req: Request) = {
+          rep = Response()
+          rep.setChunked(true)
+  
+          // Make sure the body is fully read.
+          // Then we hang forever.
+          val body = Reader.readAll(req.reader)
+
+          Future.value(rep)
+        }
+      }
+
+      val client = connect(s)
+      val rep = Await.result(client(Request()), 10.seconds)
+      assert(s.rep != null)
+      rep.reader.discard()
+
+      s.rep = null
+      
+      // Now, make sure the connection doesn't clog up.
+      Await.result(client(Request()), 10.seconds)
+      assert(s.rep != null)
+    }
 
     test(name + ": two fixed-length requests") {
       val svc = Service.mk[Request, Response] { _ => Future.value(Response()) }
@@ -290,96 +317,92 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     }
   }
 
+  trace("Client/Server") {
+    service =>
+      import com.twitter.finagle.Httpx
+      val server = Httpx.serve(":*", service)
+      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+      val client = Httpx.newService("%s:%d".format(addr.getHostName, addr.getPort))
 
-  if (!sys.props.contains("SKIP_FLAKY")) {
+      new ServiceProxy(client) {
+        override def close(deadline: Time) =
+          Closable.all(client, server).close(deadline)
+      }
+  }
 
-    trace("Client/Server") {
-      service =>
-        import com.twitter.finagle.Httpx
-        val server = Httpx.serve(":*", service)
-        val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-        val client = Httpx.newService("%s:%d".format(addr.getHostName, addr.getPort))
+  trace("ClientBuilder") {
+    service =>
+      val server = ServerBuilder()
+        .codec(Http().enableTracing(true))
+        .bindTo(new InetSocketAddress(0))
+        .name("server")
+        .build(service)
 
-        new ServiceProxy(client) {
-          override def close(deadline: Time) =
-            Closable.all(client, server).close(deadline)
-        }
-    }
+      val client = ClientBuilder()
+        .codec(Http().enableTracing(true))
+        .hosts(Seq(server.localAddress))
+        .hostConnectionLimit(1)
+        .name("client")
+        .build()
 
-    trace("ClientBuilder") {
-      service =>
-        val server = ServerBuilder()
-          .codec(Http().enableTracing(true))
-          .bindTo(new InetSocketAddress(0))
-          .name("server")
-          .build(service)
+      new ServiceProxy(client) {
+        override def close(deadline: Time) =
+          Closable.all(client, server).close(deadline)
+      }
+  }
 
-        val client = ClientBuilder()
-          .codec(Http().enableTracing(true))
-          .hosts(Seq(server.localAddress))
-          .hostConnectionLimit(1)
-          .name("client")
-          .build()
+  go("ClientBuilder") {
+    service =>
+      val server = ServerBuilder()
+        .codec(Http())
+        .bindTo(new InetSocketAddress(0))
+        .name("server")
+        .build(service)
 
-        new ServiceProxy(client) {
-          override def close(deadline: Time) =
-            Closable.all(client, server).close(deadline)
-        }
-    }
+      val client = ClientBuilder()
+        .codec(Http())
+        .hosts(Seq(server.localAddress))
+        .hostConnectionLimit(1)
+        .name("client")
+        .build()
 
-    go("ClientBuilder") {
-      service =>
-        val server = ServerBuilder()
-          .codec(Http())
-          .bindTo(new InetSocketAddress(0))
-          .name("server")
-          .build(service)
+      new ServiceProxy(client) {
+        override def close(deadline: Time) =
+          Closable.all(client, server).close(deadline)
+      }
+  }
 
-        val client = ClientBuilder()
-          .codec(Http())
-          .hosts(Seq(server.localAddress))
-          .hostConnectionLimit(1)
-          .name("client")
-          .build()
+  go("Client/Server") {
+    service =>
+      import com.twitter.finagle.Httpx
+      val server = Httpx.serve(":*", service)
+      val client = Httpx.newService(server)
 
-        new ServiceProxy(client) {
-          override def close(deadline: Time) =
-            Closable.all(client, server).close(deadline)
-        }
-    }
+      new ServiceProxy(client) {
+        override def close(deadline: Time) =
+          Closable.all(client, server).close(deadline)
+      }
+  }
 
-    go("Client/Server") {
-      service =>
-        import com.twitter.finagle.Httpx
-        val server = Httpx.serve(":*", service)
-        val client = Httpx.newService(server)
+  rich("ClientBuilder (RichHttp)") {
+    service =>
+      val server = ServerBuilder()
+        .codec(RichHttp[Request](Http(), aggregateChunks = false))
+        .bindTo(new InetSocketAddress(0))
+        .name("server")
+        .build(service)
 
-        new ServiceProxy(client) {
-          override def close(deadline: Time) =
-            Closable.all(client, server).close(deadline)
-        }
-    }
+      val client = ClientBuilder()
+        .codec(RichHttp[Request](Http(), aggregateChunks = false))
+        .hosts(Seq(server.localAddress))
+        .hostConnectionLimit(1)
+        .name("client")
+        .build()
 
-    rich("ClientBuilder (RichHttp)") {
-      service =>
-        val server = ServerBuilder()
-          .codec(RichHttp[Request](Http(), aggregateChunks = false))
-          .bindTo(new InetSocketAddress(0))
-          .name("server")
-          .build(service)
-
-        val client = ClientBuilder()
-          .codec(RichHttp[Request](Http(), aggregateChunks = false))
-          .hosts(Seq(server.localAddress))
-          .hostConnectionLimit(1)
-          .name("client")
-          .build()
-
-        new ServiceProxy(client) {
-          override def close(deadline: Time) =
-            Closable.all(client, server).close(deadline)
-        }
-    }
+      new ServiceProxy(client) {
+        override def close(deadline: Time) =
+          Closable.all(client, server).close(deadline)
+      }
   }
 
 }
