@@ -2,7 +2,9 @@ package com.twitter.finagle.transport
 
 import com.twitter.io.{Reader, Buf}
 import com.twitter.util.{Await, Future, Promise, Time, Return, Throw}
+import com.twitter.concurrent.AsyncQueue
 import java.net.SocketAddress
+import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
 import org.scalacheck.Prop.forAll
 import org.scalatest.FunSuite
@@ -39,8 +41,10 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     def close(deadline: Time) = Future.exception(new Exception)
   }
 
-  test("Transport.copyToWriter - discard sets done") {
-    val failed = new Failed { override def read() = Future.Done }
+  test("Transport.copyToWriter - discard while writing") {
+    val failed = new Failed {
+      override def read() = Future.Done
+    }
     val reader = Reader.writable()
     val done = Transport.copyToWriter(failed, reader) { _ =>
       Future.value(Some(Buf.Empty))
@@ -109,4 +113,125 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
       assert(done.isDefined)
     }
   }
+
+
+  trait Collate {
+    val writeq = new AsyncQueue[String]
+    val readq = new AsyncQueue[String]
+    val trans = new QueueTransport(writeq, readq)
+    val fail = new Exception("fail")
+    def read(string: String) = string match {
+      case "eof" => Future.None
+      case "fail" => Future.exception(fail)
+      case x => Future.value(Some(Buf.Utf8(x)))
+    }
+    val coll = Transport.collate(trans, read)
+    assert(!coll.isDefined)
+    
+    def assertDiscarded(f: Future[_]) {
+      assert(f.isDefined)
+      intercept[Reader.ReaderDiscarded] { Await.result(f) }
+    }
+  }
+
+  test("Transport.collate: read through") (new Collate {
+    // Long read
+    val r1 = coll.read(10)
+    assert(!r1.isDefined)
+    readq.offer("hello")
+    assert(Await.result(r1) === Some(Buf.Utf8("hello")))
+
+    assert(!coll.isDefined)
+    
+    // Short read
+    val r2 = coll.read(2)
+    assert(!r2.isDefined)
+    readq.offer("hello")
+    assert(Await.result(r2) === Some(Buf.Utf8("he")))
+
+    // Now, the EOF; but this isn't propagated yet.
+    readq.offer("eof")
+    assert(!coll.isDefined)
+    
+    val r3 = coll.read(10)
+    assert(r3.isDefined)
+    assert(Await.result(r3) === Some(Buf.Utf8("llo")))
+    
+    assert(coll.isDefined)
+    Await.result(coll) // no exceptions
+    
+    // Further reads are EOF
+    assert(Await.result(coll.read(10)) === None)
+  })
+  
+  test("Transport.collate: discard while reading") (new Collate {
+    val trans1 = new Transport[String, String] {
+      val p = new Promise[String]
+      var theIntr: Throwable = null
+      p.setInterruptHandler {
+        case intr =>
+          theIntr = intr
+      }
+      def write(s: String) = ???
+      def read() = p
+      def isOpen = ???
+      val onClose = Future.never
+      def localAddress = ???
+      def remoteAddress = ???
+      def close(deadline: Time) = ???
+    }
+    
+    val coll1 = Transport.collate(trans1, read)
+    val r1 = coll1.read(10)
+    assert(!r1.isDefined)
+    
+    assert(trans1.theIntr === null)
+    coll1.discard()
+    assertDiscarded(r1)
+    
+    assert(!coll1.isDefined)
+    assert(trans1.theIntr != null)
+    assert(trans1.theIntr.isInstanceOf[Reader.ReaderDiscarded])
+    
+    // This is what a typical transport will do.
+    trans1.p.setException(trans1.theIntr)
+    assertDiscarded(coll1)
+  })
+
+  test("Transport.collate: discard while writing") (new Collate {
+    readq.offer("hello")
+
+    coll.discard()
+    assertDiscarded(coll)
+    assertDiscarded(coll.read(10))
+  })
+
+  test("Transport.collate: discard while buffering") (new Collate {
+    readq.offer("hello")
+    val r1 = coll.read(1)
+    assert(Await.result(r1) === Some(Buf.Utf8("h")))
+
+    coll.discard()
+    assertDiscarded(coll)
+    assertDiscarded(coll.read(10))
+  })
+
+  test("Transport.collate: conversion failure") (new Collate {
+    readq.offer("hello")
+    val r1 = coll.read(10)
+    assert(Await.result(r1) === Some(Buf.Utf8("hello")))
+    
+    val r2 = coll.read(10)
+    assert(!r2.isDefined)
+    
+    assert(!coll.isDefined)
+
+    readq.offer("fail")
+    
+    assert(r2.isDefined)
+    assert(r2.poll === Some(Throw(fail)))
+    
+    assert(coll.isDefined)
+    assert(coll.poll === Some(Throw(fail)))
+  })
 }

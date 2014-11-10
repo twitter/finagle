@@ -49,7 +49,8 @@ class HttpClientDispatcher[Req <: Request](
       // Do these concurrently:
       Future.join(
         // 1. Drain the Request body into the Transport.
-        if (req.isChunked) streamChunks(trans, req.reader) else Future.Done,
+        if (req.isChunked) streamChunks(trans, req.reader)
+        else Future.Done,
         // 2. Drain the Transport into Response body.
         trans.read() flatMap {
           case res: HttpResponse if !res.isChunked =>
@@ -62,18 +63,14 @@ class HttpClientDispatcher[Req <: Request](
             Future.Done
 
           case res: HttpResponse =>
-            val readr = Reader.writable()
-            val response = new Response {
+            val coll = Transport.collate(trans, readChunk)
+
+            p.updateIfEmpty(Return(new Response {
               final val httpResponse = res
-              override val reader = readr
-            }
-            p.updateIfEmpty(Return(response))
-            Transport.copyToWriter(trans, readr)(readChunk) respond {
-              case Throw(exc) =>
-                trans.close()
-                readr.fail(exc)
-              case Return(_) => readr.close()
-            }
+              override val reader = coll
+            }))
+
+            coll
 
           case invalid =>
             // We rely on the base class to satisfy p.
@@ -81,6 +78,12 @@ class HttpClientDispatcher[Req <: Request](
                 "invalid message \"%s\"".format(invalid)))
         }
       ).unit
+    } onFailure { _ =>
+      // This Future represents the totality of the exchange;
+      // thus failure represents *any* failure that can happen
+      // during the exchange.
+      req.reader.discard()
+      trans.close()
     }
   }
 }
