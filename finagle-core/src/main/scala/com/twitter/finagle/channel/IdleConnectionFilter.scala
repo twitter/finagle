@@ -16,7 +16,7 @@ case class OpenConnectionsThresholds(
   require(lowWaterMark <= highWaterMark, "lowWaterMark must be <= highWaterMark")
 }
 
-private[finagle] object IdleConnectionFilter {
+object IdleConnectionFilter {
   val role = Stack.Role("IdleConnectionAssasin")
 
   /**
@@ -31,7 +31,7 @@ private[finagle] object IdleConnectionFilter {
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.channel.IdleConnectionFilter]].
    */
-  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+  private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module2[Param, param.Stats, ServiceFactory[Req, Rep]] {
       val role = IdleConnectionFilter.role
       val description = "Refuse requests and try to close idle connections " +

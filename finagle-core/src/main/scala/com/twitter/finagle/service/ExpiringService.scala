@@ -6,15 +6,15 @@ import com.twitter.finagle.{param, Service, ServiceFactory, ServiceProxy, Stack,
 import com.twitter.util.{Duration, Promise, Future, NullTimerTask, Timer, Time}
 import java.util.concurrent.atomic.AtomicBoolean
 
-private[finagle] object ExpiringService {
+object ExpiringService {
   val role = Stack.Role("Expiration")
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
-   * [[com.twitter.finagle.server.ExpiringService]].
+   * [[com.twitter.finagle.service.ExpiringService]].
    *
    * @param idleTime max duration for which a connection is allowed to be idle.
-   * @param lifeTIme max lifetime of a connection.
+   * @param lifeTime max lifetime of a connection.
    */
   case class Param(idleTime: Duration, lifeTime: Duration)
   implicit object Param extends Stack.Param[Param] {
@@ -24,7 +24,7 @@ private[finagle] object ExpiringService {
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.ExpiringService]].
    */
-  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+  private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module3[Param, param.Timer, param.Stats, ServiceFactory[Req, Rep]] {
       val role = ExpiringService.role
       val description = "Expire a service after a certain amount of idle time"

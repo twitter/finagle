@@ -7,15 +7,14 @@ import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.{Drv, Rng}
 import com.twitter.util._
-import java.net.SocketAddress
 import scala.collection.immutable
 
-private[finagle] object NamerTracingFilter {
+object NamerTracingFilter {
   /**
    * Trace a lookup from [[com.twitter.finagle.Path]] to
    * [[com.twitter.finagle.Name.Bound]] with the given `record` function.
    */
-  def trace(
+  private[finagle] def trace(
     path: Path,
     baseDtab: Dtab,
     nameTry: Try[Name.Bound],
@@ -44,7 +43,7 @@ private[finagle] object NamerTracingFilter {
    * Creates a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.factory.NamerTracingFilter]].
    */
-  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+  private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module2[BindingFactory.BaseDtab, BoundPath, ServiceFactory[Req, Rep]] {
       val role = NamerTracingFilter.role
       val description = "Trace the details of the Namer lookup"
@@ -344,7 +343,7 @@ private[finagle] class BindingFactory[Req, Rep](
   override def isAvailable = dtabCache.isAvailable
 }
 
-private[finagle] object BindingFactory {
+object BindingFactory {
   val role = Stack.Role("Binding")
 
   /**
@@ -358,7 +357,7 @@ private[finagle] object BindingFactory {
     val default = Dest(Name.Path(Path.read("/$/fail")))
   }
 
-  val DefaultBaseDtab = () => Dtab.base
+  private[finagle] val DefaultBaseDtab = () => Dtab.base
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
@@ -378,7 +377,7 @@ private[finagle] object BindingFactory {
    * `BindingFactory.Dest` (with caching of previously seen
    * `Name.Bound`s).
    */
-  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+  private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module[ServiceFactory[Req, Rep]] {
       val role = BindingFactory.role
       val description = "Bind destination names to endpoints"

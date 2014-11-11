@@ -321,7 +321,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   /**
    * The base [[com.twitter.finagle.Dtab]] used to interpret logical
    * destinations for this client. (This is given as a function to
-   * permit late initialization of [[Dtab.base]].)
+   * permit late initialization of [[com.twitter.finagle.Dtab.base]].)
    */
   def baseDtab(baseDtab: () => Dtab): This =
     configured(BindingFactory.BaseDtab(baseDtab))

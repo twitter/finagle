@@ -194,6 +194,8 @@ abstract class ServiceFactoryProxy[-Req, +Rep](_self: ServiceFactory[Req, Rep])
 object FactoryToService {
   val role = Stack.Role("FactoryToService")
 
+  // TODO: we should simply transform the stack for boolean
+  // stackables like this.
   case class Enabled(enabled: Boolean)
   implicit object Enabled extends Stack.Param[Enabled] {
     val default = Enabled(false)
