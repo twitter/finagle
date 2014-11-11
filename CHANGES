@@ -28,6 +28,10 @@ Deprecations
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-core: All `Stack.Param`s used in `ClientBuilder` and
+    `ServerBuilder` are now publicly exposed for configuration
+    parity.
+
   * finagle-mux: Drain mux servers properly, so that shutdowns can be
     graceful.
 

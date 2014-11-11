@@ -17,7 +17,7 @@ object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n"
   "\tWhen disabled, the configured stats receiver will be used,\n" +
   "\tor the NullStatsReceiver if none given.")
 
-private[finagle] object LoadBalancerFactory {
+object LoadBalancerFactory {
   val role = Stack.Role("LoadBalancer")
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
@@ -68,7 +68,7 @@ private[finagle] object LoadBalancerFactory {
    * in `LoadBalancerFactory.Dest`. Incoming requests are balanced using the load balancer
    * defined by the `LoadBalancerFactory.Param` parameter.
    */
-  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+  private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module[ServiceFactory[Req, Rep]] {
       val role = LoadBalancerFactory.role
       val description = "Balance requests across multiple endpoints"

@@ -68,7 +68,7 @@ trait Transport[In, Out] extends Closable { self =>
  *
  * @define $param a [[com.twitter.finagle.Stack.Param]] used to configure
  */
-private[finagle] object Transport {
+object Transport {
   /**
    * $param the buffer sizes of a `Transport`.
    *
@@ -154,7 +154,7 @@ private[finagle] object Transport {
    *
    * @param f A mapping from `A` to `Future[Option[Buf]]`.
    */
-  def copyToWriter[A](trans: Transport[_, A], w: Writer)
+  private[finagle] def copyToWriter[A](trans: Transport[_, A], w: Writer)
                      (f: A => Future[Option[Buf]]): Future[Unit] = {
     trans.read().flatMap(f).flatMap {
       case None => Future.Done
@@ -176,7 +176,7 @@ private[finagle] object Transport {
    * the path of interrupts are a little convoluted; they would be
    * clarified by an independent implementation.
    */
-  def collate[A](trans: Transport[_, A], chunkOfA: A => Future[Option[Buf]])
+  private[finagle] def collate[A](trans: Transport[_, A], chunkOfA: A => Future[Option[Buf]])
   : Reader with Future[Unit] = new Promise[Unit] with Reader {
     private[this] val rw = Reader.writable()
     become(Transport.copyToWriter(trans, rw)(chunkOfA) respond {
