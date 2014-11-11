@@ -7,7 +7,7 @@ import com.twitter.common.zookeeper.{CompoundServerSet, ZooKeeperUtils, ServerSe
 import com.twitter.conversions.time._
 import com.twitter.finagle.Group
 import com.twitter.finagle.memcached.{ZookeeperCacheNodeGroup, CacheNode, CachePoolConfig}
-import com.twitter.util.{Stopwatch, Duration}
+import com.twitter.util.{Duration, Stopwatch, TimeoutException}
 import java.io.ByteArrayOutputStream
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
@@ -187,15 +187,17 @@ class CacheNodeGroupTest extends FunSuite with BeforeAndAfterEach {
     currentMembers = myPool.members
   }
 
-  private def waitForMemberSize(pool: Group[CacheNode], current: Int, expect: Int, timeout: Duration = 5.seconds): Boolean = {
+  private def waitForMemberSize(pool: Group[CacheNode], current: Int, expect: Int, timeout: Duration = 15.seconds): Boolean = {
     val elapsed = Stopwatch.start()
     def loop(): Boolean = {
       if (current != expect && pool.members.size == expect)
         true // expect pool size changes
       else if (current == expect && pool.members.size != expect)
         false // expect pool size remains
-      else if (timeout < elapsed())
-        if (current != expect) false else true
+      else if (timeout < elapsed()) {
+        if (current != expect) throw new TimeoutException("timed out waiting for CacheNode pool to reach the expected size")
+        else true
+      }
       else {
         Thread.sleep(100)
         loop()
