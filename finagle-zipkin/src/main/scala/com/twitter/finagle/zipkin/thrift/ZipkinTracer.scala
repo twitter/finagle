@@ -2,11 +2,17 @@ package com.twitter.finagle.zipkin.thrift
 
 import com.twitter.finagle.stats.{DefaultStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{TraceId, Record, Tracer}
-import com.twitter.finagle.zipkin.{host => Host, initialSampleRate}
+import com.twitter.finagle.zipkin.{host => Host, initialSampleRate => sampleRateFlag}
+import com.twitter.util.events.{Event, Sink}
 
 object ZipkinTracer {
 
-  lazy val default = mk()
+  lazy val default: Tracer = mk()
+
+  /**
+   * The [[com.twitter.util.events.Event.Type Event.Type]] for trace events.
+   */
+  val Trace: Event.Type = new Event.Type { }
 
   /**
    * @param scribeHost Host to send trace data to
@@ -48,33 +54,54 @@ object ZipkinTracer {
 
   /**
    * Util method since named parameters can't be called from Java
-   * @param sr stats receiver to send successes/failures to
+   * @param statsReceiver stats receiver to send successes/failures to
    */
   def mk(statsReceiver: StatsReceiver): Tracer =
     mk(Host().getHostName, Host().getPort, statsReceiver, Sampler.DefaultSampleRate)
 }
 
 /**
- * Tracer that supports sampling. Will pass through a small subset of the records.
- * @param underlyingTracer Underlying tracer that accumulates the traces and sends off to the collector.
+ * Tracer that supports sampling. Will pass through a subset of the records.
+ * @param underlyingTracer Underlying tracer that accumulates the traces and sends off
+ *          to the collector.
  * @param initialSampleRate Start off with this sample rate. Can be changed later.
+ * @param sink where to send sampled trace events to.
  */
-class SamplingTracer(underlyingTracer: Tracer, initialSampleRate: Float) extends Tracer {
+class SamplingTracer(
+    underlyingTracer: Tracer,
+    initialSampleRate: Float,
+    sink: Sink)
+  extends Tracer
+{
+
+  /**
+   * Tracer that supports sampling. Will pass through a subset of the records.
+   * @param underlyingTracer Underlying tracer that accumulates the traces and sends off
+   *          to the collector.
+   * @param initialSampleRate Start off with this sample rate. Can be changed later.
+   */
+  def this(underlyingTracer: Tracer, initialSampleRate: Float) =
+    this(underlyingTracer, initialSampleRate, Sink.default)
+
+  /**
+   * Tracer that supports sampling. Will pass through a subset of the records.
+   */
+  def this() = this(
+    RawZipkinTracer(Host().getHostName, Host().getPort, DefaultStatsReceiver.scope("zipkin")),
+    sampleRateFlag())
+
   private[this] val sampler = new Sampler
   setSampleRate(initialSampleRate)
 
-  def this() = this(
-    RawZipkinTracer(Host().getHostName, Host().getPort, DefaultStatsReceiver.scope("zipkin")),
-    initialSampleRate())
+  def sampleTrace(traceId: TraceId): Option[Boolean] = sampler.sampleTrace(traceId)
 
-  def sampleTrace(traceId: TraceId) = sampler.sampleTrace(traceId)
-
-  def setSampleRate(sampleRate: Float) = sampler.setSampleRate(sampleRate)
-  def getSampleRate = sampler.sampleRate
+  def setSampleRate(sampleRate: Float): Unit = sampler.setSampleRate(sampleRate)
+  def getSampleRate: Float = sampler.sampleRate
 
   def record(record: Record) {
     if (sampler.sampleRecord(record)) {
       underlyingTracer.record(record)
+      sink.event(ZipkinTracer.Trace, objectVal = record.annotation)
     }
   }
 }
