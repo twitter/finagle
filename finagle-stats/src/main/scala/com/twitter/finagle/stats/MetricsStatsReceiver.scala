@@ -2,13 +2,29 @@ package com.twitter.finagle.stats
 
 import com.twitter.common.metrics.{AbstractGauge, Metrics}
 import com.twitter.finagle.http.HttpMuxHandler
+import com.twitter.util.events.{Event, Sink}
 import java.util.concurrent.ConcurrentHashMap
 
 object MetricsStatsReceiver {
   val defaultRegistry = Metrics.root()
+
+  /**
+   * The [[com.twitter.util.events.Event.Type Event.Type]] for counter increment events.
+   */
+  val CounterIncr: Event.Type = new Event.Type { }
+
+  /**
+   * The [[com.twitter.util.events.Event.Type Event.Type]] for stat add events.
+   */
+  val StatAdd: Event.Type = new Event.Type { }
 }
 
-class MetricsStatsReceiver(val registry: Metrics) extends StatsReceiverWithCumulativeGauges {
+class MetricsStatsReceiver(val registry: Metrics, sink: Sink)
+  extends StatsReceiverWithCumulativeGauges
+{
+  import MetricsStatsReceiver._
+
+  def this(registry: Metrics) = this(registry, Sink.default)
   def this() = this(MetricsStatsReceiver.defaultRegistry)
   val repr = this
 
@@ -26,7 +42,10 @@ class MetricsStatsReceiver(val registry: Metrics) extends StatsReceiverWithCumul
       if (counter == null) {
         counter = new Counter {
           val metricsCounter = registry.createCounter(format(names))
-          def incr(delta: Int) = metricsCounter.add(delta)
+          def incr(delta: Int): Unit = {
+            metricsCounter.add(delta)
+            sink.event(CounterIncr, objectVal = metricsCounter.getName(), longVal = delta)
+          }
         }
         counters.put(names, counter)
       }
@@ -44,7 +63,11 @@ class MetricsStatsReceiver(val registry: Metrics) extends StatsReceiverWithCumul
       if (stat == null) {
         stat = new Stat {
           val histogram = registry.createHistogram(format(names))
-          def add(value: Float) = histogram.add(value.toLong)
+          def add(value: Float): Unit = {
+            val asLong = value.toLong
+            histogram.add(asLong)
+            sink.event(StatAdd, objectVal = histogram.getName(), longVal = asLong)
+          }
         }
         stats.put(names, stat)
       }

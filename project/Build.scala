@@ -210,7 +210,8 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-stats",
     libraryDependencies ++= Seq(
-      "com.twitter.common" % "metrics" % "0.0.29"
+      "com.twitter.common" % "metrics" % "0.0.29",
+      util("events")
     ) ++ jacksonLibs
   ).dependsOn(finagleCore, finagleHttp)
 
@@ -222,7 +223,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-zipkin",
-    libraryDependencies ++= Seq(util("codec")) ++ scroogeLibs
+    libraryDependencies ++= Seq(util("codec"), util("events")) ++ scroogeLibs
   ).dependsOn(finagleCore, finagleThrift, finagleTest % "test")
 
   lazy val finagleException = Project(

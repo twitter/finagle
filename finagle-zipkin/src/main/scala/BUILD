@@ -12,6 +12,7 @@ scala_library(name='scala',
     'util/util-app',
     'util/util-codec',
     'util/util-core',
+    'util/util-events',
   ],
   sources=rglobs('*.scala'),
   resources=[
