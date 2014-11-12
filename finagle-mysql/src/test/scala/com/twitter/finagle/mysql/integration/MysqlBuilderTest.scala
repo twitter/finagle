@@ -11,37 +11,37 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class MysqlBuilderTest extends FunSuite {
-  // Flaky test, see FLAKEY-530
-  if (!sys.props.contains("SKIP_FLAKY")) {
+class MysqlBuilderTest extends FunSuite with IntegrationClient {
   test("clients have granular tracing") {
-    var records = List.empty[Record]
+    Trace.enable()
     var annotations: List[Annotation] = Nil
     val mockTracer = new Tracer {
       def record(record: Record) = {
         annotations ::= record.annotation
-        records ::= record
       }
       def sampleTrace(traceId: TraceId): Option[Boolean] = Some(true)
     }
 
-    val client = Mysql.client
-      .configured(param.Label("myclient"))
-      .configured(param.Tracer(mockTracer))
-      .withDatabase("test")
-      .newRichClient("localhost:3306")
+    // if we have a local instance of mysql running.
+    if (isAvailable) {
+      val client = Mysql.client
+        .configured(param.Label("myclient"))
+        .configured(param.Tracer(mockTracer))
+        .withDatabase("test")
+        .newRichClient("localhost:3306")
 
-    Await.ready(client.query("query"))
-    Await.ready(client.prepare("prepare query")(1))
-    Await.ready(client.ping())
+      Await.ready(client.query("query"))
+      Await.ready(client.prepare("prepare query")(1))
+      Await.ready(client.ping())
 
-    val mysqlTraces = annotations collect {
-      case Annotation.BinaryAnnotation("mysql.query", "query") => ()
-      case Annotation.BinaryAnnotation("mysql.prepare", "prepare query") => ()
-      case Annotation.Message("mysql.PingRequest") => ()
+      val mysqlTraces = annotations collect {
+        case Annotation.BinaryAnnotation("mysql.query", "query") => ()
+        case Annotation.BinaryAnnotation("mysql.prepare", "prepare query") => ()
+        case Annotation.Message("mysql.PingRequest") => ()
+      }
+
+      assert(mysqlTraces.size === 3, "missing traces")
     }
 
-    assert(mysqlTraces.size === 3, "missing traces")
-  }
   }
 }
