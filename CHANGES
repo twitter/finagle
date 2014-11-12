@@ -8,6 +8,12 @@
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-http: Removed `c.t.f.http.CheckRequestFilter` along with
+    `c.t.f.http.CheckHttpRequestFilter`. The functionality has been
+    added to `c.t.f.http.codec.HttpServerDispatcher`. In addition,
+    the codecError in `c.t.f.http.BadHttpRequest` has been replaced
+    with the exception thrown by the HttpServerCodec.
+
   * finagle-mux: `c.t.f.mux.lease.exp.WindowedByteCounter` no longer
     calls `Thread.start()` in its constructor. This should be now be
     done by the caller.

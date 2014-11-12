@@ -9,6 +9,7 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Reader, Buf, BufReader}
 import com.twitter.util.{Future, Promise, Throw, Return}
 import java.net.InetSocketAddress
+import org.jboss.netty.handler.codec.frame.TooLongFrameException
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpHeaders}
 
 class HttpServerDispatcher(
@@ -22,7 +23,32 @@ class HttpServerDispatcher(
     service.close()
   }
 
+  private[this] def BadRequestResponse =
+    Response(Version.Http10, Status.BadRequest)
+
+  private[this] def RequestUriTooLongResponse =
+    Response(Version.Http10, Status.RequestURITooLong)
+
+  private[this] def RequestHeaderFieldsTooLarge =
+    Response(Version.Http10, Status.RequestHeaderFieldsTooLarge)
+
   protected def dispatch(m: Any, eos: Promise[Unit]) = m match {
+    case badReq: BadHttpRequest =>
+      eos.setDone()
+      val response = badReq.exception match {
+        case ex: TooLongFrameException =>
+          // this is very brittle :(
+          if (ex.getMessage().startsWith("An HTTP line is larger than "))
+            RequestUriTooLongResponse
+          else
+            RequestHeaderFieldsTooLarge
+        case _ =>
+          BadRequestResponse
+      }
+      // The connection in unusable, close it
+      HttpHeaders.setKeepAlive(response.httpResponse, false)
+      Future.value(response)
+
     case reqIn: HttpRequest =>
       val req = new Request {
         val httpRequest = reqIn
