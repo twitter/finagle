@@ -144,6 +144,29 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
         }
       })
     }
+
+    test(name + ": request uri too long") {
+      val service = new HttpService {
+        def apply(request: Request) = Future.value(Response())
+      }
+      val client = connect(service)
+      val request = Request("/" + "a" * 4096)
+      val response = Await.result(client(request))
+      assert(response.status === Status.RequestURITooLong)
+      client.close()
+    }
+
+    test(name + ": request header fields too large") {
+      val service = new HttpService {
+        def apply(request: Request) = Future.value(Response())
+      }
+      val client = connect(service)
+      val request = Request()
+      request.headers().add("header", "a" * 8192)
+      val response = Await.result(client(request))
+      assert(response.status === Status.RequestHeaderFieldsTooLarge)
+      client.close()
+    }
   }
 
   def rich(name: String)(connect: HttpService => HttpService) {
@@ -275,6 +298,25 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       val client = connect(svc)
       Await.result(client(Request()))
       Await.result(client(Request()))
+      client.close()
+    }
+
+    test(name + ": request uri too long") {
+      val svc = Service.mk[Request, Response] { _ => Future.value(Response()) }
+      val client = connect(svc)
+      val request = Request("/" + "a" * 4096)
+      val response = Await.result(client(request))
+      assert(response.status === Status.RequestURITooLong)
+      client.close()
+    }
+
+    test(name + ": request header fields too large") {
+      val svc = Service.mk[Request, Response] { _ => Future.value(Response()) }
+      val client = connect(svc)
+      val request = Request()
+      request.headers.add("header", "a" * 8192)
+      val response = Await.result(client(request))
+      assert(response.status === Status.RequestHeaderFieldsTooLarge)
       client.close()
     }
   }

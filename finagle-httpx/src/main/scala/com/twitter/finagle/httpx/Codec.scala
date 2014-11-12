@@ -19,12 +19,12 @@ import org.jboss.netty.channel.{
 import org.jboss.netty.handler.codec.http._
 
 private[finagle] case class BadHttpRequest(
-  httpVersion: HttpVersion, method: HttpMethod, uri: String, codecError: String)
+  httpVersion: HttpVersion, method: HttpMethod, uri: String, exception: Exception)
   extends DefaultHttpRequest(httpVersion, method, uri)
 
 object BadHttpRequest {
-  def apply(codecError: String) =
-    new BadHttpRequest(HttpVersion.HTTP_1_0, HttpMethod.GET, "/bad-http-request", codecError)
+  def apply(exception: Exception) =
+    new BadHttpRequest(HttpVersion.HTTP_1_0, HttpMethod.GET, "/bad-http-request", exception)
 }
 
 /** Convert exceptions to BadHttpRequests */
@@ -44,30 +44,8 @@ class SafeHttpServerCodec(
       case ex: Exception =>
         val channel = ctx.getChannel()
         ctx.sendUpstream(new UpstreamMessageEvent(
-          channel, BadHttpRequest(ex.toString()), channel.getRemoteAddress()))
+          channel, BadHttpRequest(ex), channel.getRemoteAddress()))
     }
-  }
-}
-
-/* Respond to BadHttpRequests with 400 errors */
-class CheckRequestFilter(
-    statsReceiver: StatsReceiver = NullStatsReceiver)
-  extends SimpleFilter[Request, Response]
-{
-  private[this] val badRequestCount = statsReceiver.counter("bad_requests")
-
-  private[this] val BadRequestResponse =
-    Response(Version.Http10, Status.BadRequest)
-
-  def apply(
-    request: Request,
-    service: Service[Request, Response]
-  ): Future[Response] = request match {
-    case httpRequest: BadHttpRequest =>
-      badRequestCount.incr()
-      Future.value(BadRequestResponse)
-    case _ =>
-      service(request)
   }
 }
 
@@ -183,9 +161,7 @@ case class Http(
       override def prepareConnFactory(
         underlying: ServiceFactory[Request, Response]
       ): ServiceFactory[Request, Response] =
-        new DtabFilter.Finagle[Request] andThen
-          new CheckRequestFilter andThen
-            underlying
+        new DtabFilter.Finagle[Request] andThen underlying
 
       override def newTraceInitializer =
         if (_enableTracing) new HttpServerTraceInitializer[Request, Response]

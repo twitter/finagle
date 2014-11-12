@@ -18,12 +18,12 @@ import org.jboss.netty.channel.{
   ChannelEvent, ChannelHandlerContext, SimpleChannelDownstreamHandler, MessageEvent}
 import org.jboss.netty.handler.codec.http._
 
-case class BadHttpRequest(httpVersion: HttpVersion, method: HttpMethod, uri: String, codecError: String)
+case class BadHttpRequest(httpVersion: HttpVersion, method: HttpMethod, uri: String, exception: Exception)
   extends DefaultHttpRequest(httpVersion, method, uri)
 
 object BadHttpRequest {
-  def apply(codecError: String) =
-    new BadHttpRequest(HttpVersion.HTTP_1_0, HttpMethod.GET, "/bad-http-request", codecError)
+  def apply(exception: Exception) =
+    new BadHttpRequest(HttpVersion.HTTP_1_0, HttpMethod.GET, "/bad-http-request", exception)
 }
 
 /** Convert exceptions to BadHttpRequests */
@@ -43,43 +43,10 @@ class SafeHttpServerCodec(
       case ex: Exception =>
         val channel = ctx.getChannel()
         ctx.sendUpstream(new UpstreamMessageEvent(
-          channel, BadHttpRequest(ex.toString()), channel.getRemoteAddress()))
+          channel, BadHttpRequest(ex), channel.getRemoteAddress()))
     }
   }
 }
-
-/* Respond to BadHttpRequests with 400 errors */
-abstract class CheckRequestFilter[Req](
-    statsReceiver: StatsReceiver = NullStatsReceiver)
-  extends SimpleFilter[Req, HttpResponse]
-{
-  private[this] val badRequestCount = statsReceiver.counter("bad_requests")
-
-  private[this] val BadRequestResponse =
-    Response(HttpVersion.HTTP_1_0, HttpResponseStatus.BAD_REQUEST)
-
-  def apply(request: Req, service: Service[Req, HttpResponse]) = {
-    toHttpRequest(request) match {
-      case httpRequest: BadHttpRequest =>
-        badRequestCount.incr()
-        Future.value(BadRequestResponse)
-      case _ =>
-        service(request)
-    }
-  }
-
-  def toHttpRequest(request: Req): HttpRequest
-}
-
-private[this] class CheckHttpRequestFilter extends CheckRequestFilter[HttpRequest]
-{
-  val BadRequestResponse =
-    Response(HttpVersion.HTTP_1_0, HttpResponseStatus.BAD_REQUEST)
-
-
-  def toHttpRequest(request: HttpRequest) = request
-}
-
 
 /**
  * @param _compressionLevel The compression level to use. If passed the default value (-1) then use
@@ -183,13 +150,8 @@ case class Http(
 
       override def prepareConnFactory(
         underlying: ServiceFactory[HttpRequest, HttpResponse]
-      ): ServiceFactory[HttpRequest, HttpResponse] = {
-        val checkRequest = new CheckHttpRequestFilter
-
-        DtabFilter.Netty andThen
-        checkRequest andThen
-        underlying
-      }
+      ): ServiceFactory[HttpRequest, HttpResponse] =
+        DtabFilter.Netty andThen underlying
 
       override def newTraceInitializer =
         if (_enableTracing) new HttpServerTraceInitializer[HttpRequest, HttpResponse]
@@ -356,9 +318,6 @@ private[finagle] class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceN
 }
 
 /**
- * Http codec for rich Request/Response objects. Note the
- * CheckHttpRequestFilter isn't baked in, as in the Http Codec.
- *
  * Ed. note: I'm not sure how parameterizing on REQUEST <: Request
  * works safely, ever. This is a big typesafety bug: the codec is
  * blindly casting Requests to REQUEST.
