@@ -4,80 +4,101 @@ import com.twitter.util.{Time, StorageUnit}
 import com.twitter.conversions.time._
 import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class AlarmTest extends ExecElsewhere {
-  if (!sys.props.contains("SKIP_FLAKY")) { // TODO: unflaky tests
+class AlarmTest extends FunSuite with LocalConductors {
   test("DurationAlarm should work") {
+    val conductor = new Conductor
+    import conductor._
+
     Time.withCurrentTimeFrozen { ctl =>
-      val t = exec(
-        { () =>
-          Alarm.arm({ () =>
-            new DurationAlarm(5.seconds)
-          })
-        },
-        { () =>
-          ctl.advance(5.seconds)
-        }
-      )
+      localThread(conductor) {
+        Alarm.arm({ () =>
+          new DurationAlarm(5.seconds)
+        })
+      }
+
+      localThread(conductor) {
+        waitForBeat(1)
+        ctl.advance(5.seconds)
+      }
+
+      conduct()
     }
   }
 
   test("MinAlarm should take the min time") {
+    val conductor = new Conductor
+    import conductor._
+
     Time.withCurrentTimeFrozen { ctl =>
-      exec(
-        { () =>
-          Alarm.arm({ () =>
-            new DurationAlarm(5.seconds) min new DurationAlarm(2.seconds)
-          })
-        },
-        { () =>
-          ctl.advance(2.seconds)
-        }
-      )
+      localThread(conductor) {
+        Alarm.arm({ () =>
+          new DurationAlarm(5.seconds) min new DurationAlarm(2.seconds)
+        })
+      }
+
+      localThread(conductor) {
+        waitForBeat(1)
+        ctl.advance(2.seconds)
+      }
+
+      conduct()
     }
   }
 
   test("Alarm should continue if not yet finished") {
+    val conductor = new Conductor
+    import conductor._
+
     Time.withCurrentTimeFrozen { ctl =>
-      exec(
-        { () =>
-          Alarm.arm({ () =>
-            new DurationAlarm(5.seconds) min new IntervalAlarm(1.second)
-          })
-        },
-        { () =>
-          ctl.advance(2.seconds)
-        },
-        { () =>
-          ctl.advance(3.seconds)
-        }
-      )
+      localThread(conductor) {
+        Alarm.arm({ () =>
+          new DurationAlarm(5.seconds) min new IntervalAlarm(1.second)
+        })
+      }
+
+      localThread(conductor) {
+        waitForBeat(1)
+        ctl.advance(2.seconds)
+        waitForBeat(2)
+        ctl.advance(3.seconds)
+      }
+
+      conduct()
     }
   }
 
   test("DurationAlarm should sleep until it's over") {
-    Time.withCurrentTimeFrozen { ctl =>
-      @volatile var ctr = 0
-      exec(
-        { () =>
-          Alarm.armAndExecute({ () =>
-            new DurationAlarm(5.seconds)
-          }, { () =>
-            ctr += 1
-          })
-        },
-        { () =>
-          assert(ctr === 1)
-          ctl.advance(2.seconds)
-        },
-        { () =>
-          assert(ctr === 1)
-          ctl.advance(3.seconds)
-        }
-      )
+    val conductor = new Conductor
+    import conductor._
 
+    @volatile var ctr = 0
+
+    Time.withCurrentTimeFrozen { ctl =>
+
+      localThread(conductor) {
+        Alarm.armAndExecute({ () =>
+          new DurationAlarm(5.seconds)
+        }, { () =>
+          ctr += 1
+        })
+      }
+
+      localThread(conductor) {
+        waitForBeat(1)
+        assert(ctr === 1)
+        ctl.advance(2.seconds)
+
+        waitForBeat(2)
+        assert(ctr === 1)
+        ctl.advance(3.seconds)
+      }
+    }
+
+    localWhenFinished(conductor) {
       assert(ctr === 2)
     }
   }
@@ -93,36 +114,47 @@ class AlarmTest extends ExecElsewhere {
     val h = new GenerationAlarmHelper{}
     import h._
 
+    val conductor = new Conductor
+    import conductor._
+
     Time.withCurrentTimeFrozen { ctl =>
-      exec(
-        { () =>
-          Alarm.arm({ () =>
-            new GenerationAlarm(ctr) min new IntervalAlarm(1.second)
-          })
-        },
-        { () =>
-          fakeBean.getCollectionCount = 1
-          ctl.advance(1.second)
-        }
-      )
+
+      localThread(conductor) {
+        Alarm.arm({ () =>
+          new GenerationAlarm(ctr) min new IntervalAlarm(1.second)
+        })
+      }
+
+      localThread(conductor) {
+        waitForBeat(1)
+        fakeBean.getCollectionCount = 1
+        ctl.advance(1.second)
+      }
+
+      conduct()
     }
   }
 
   test("PredicateAlarm") {
+    val conductor = new Conductor
+    import conductor._
+
     Time.withCurrentTimeFrozen { ctl =>
       @volatile var bool = false
 
-      exec(
-        { () =>
-          Alarm.arm({ () =>
-            new PredicateAlarm(() => bool) min new IntervalAlarm(1.second)
-          })
-        },
-        { () =>
-          bool = true
-          ctl.advance(1.second)
-        }
-      )
+      localThread(conductor) {
+        Alarm.arm({ () =>
+          new PredicateAlarm(() => bool) min new IntervalAlarm(1.second)
+        })
+      }
+
+      localThread(conductor) {
+        waitForBeat(1)
+        bool = true
+        ctl.advance(1.second)
+      }
+
+      conduct()
     }
   }
 
@@ -136,6 +168,9 @@ class AlarmTest extends ExecElsewhere {
     val h = new GenerationAlarmHelper{}
     import h._
 
+    val conductor = new Conductor
+    import conductor._
+
     Time.withCurrentTimeFrozen { ctl =>
       val ctr = new FakeByteCounter(1000, Time.now, nfo)
       @volatile var bool = false
@@ -143,17 +178,19 @@ class AlarmTest extends ExecElsewhere {
       val usage = new FakeMemoryUsage(0.bytes, 10.megabytes)
       fakePool.setSnapshot(usage)
 
-      exec(
-        { () =>
-          Alarm.arm({ () =>
-            new BytesAlarm(ctr, () => 5.megabytes)
-          })
-        },
-        { () =>
-          fakePool.setSnapshot(usage.copy(used = 5.megabytes))
-          ctl.advance(100.milliseconds)
-        }
-      )
+      localThread(conductor) {
+        Alarm.arm({ () =>
+          new BytesAlarm(ctr, () => 5.megabytes)
+        })
+      }
+
+      localThread(conductor) {
+        waitForBeat(1)
+        fakePool.setSnapshot(usage.copy(used = 5.megabytes))
+        ctl.advance(100.milliseconds)
+      }
+
+      conduct()
     }
   }
 
@@ -186,6 +223,5 @@ class AlarmTest extends ExecElsewhere {
     // -1MB / 1000000B/S * 8 / 10 === -800.milliseconds
     // -800.milliseconds < 10.milliseconds
     assert(alarm.sleeptime === 10.milliseconds)
-  }
   }
 }
