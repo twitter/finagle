@@ -356,11 +356,11 @@ class RequestBuilder[HasUrl, HasForm] private[httpx](
   ): Request = {
     val dataFactory = new DefaultHttpDataFactory(false) // we don't use disk
     val req = withoutContent(Method.Post)
-    val encoder = new HttpPostRequestEncoder(dataFactory, req, multipart)
+    val encoder = new HttpPostRequestEncoder(dataFactory, req.httpRequest, multipart)
 
     config.formElements.foreach {
       case FileElement(name, content, contentType, filename) =>
-        HttpPostRequestEncoderEx.addBodyFileUpload(encoder, dataFactory, req)(
+        HttpPostRequestEncoderEx.addBodyFileUpload(encoder, dataFactory, req.httpRequest)(
           name, filename.getOrElse(""),
           BufChannelBuffer(content),
           contentType.getOrElse(null),

@@ -28,12 +28,12 @@ class HttpServerDispatcherTest extends FunSuite {
   test("streaming request body") {
     val service = Service.mk { req: Request => ok(req.reader) }
     val (in, out) = mkPair[Any, Any]
-    val disp = new HttpServerDispatcher[Request](out, service)
+    val disp = new HttpServerDispatcher(out, service)
 
     val req = Request()
     req.setChunked(true)
-    in.write(req)
-    val res = Await.result(in.read).asInstanceOf[Response]
+    in.write(req.httpRequest)
+    Await.result(in.read)
 
     testChunk(in, chunk("a"))
     testChunk(in, chunk("foo"))
@@ -45,9 +45,9 @@ class HttpServerDispatcherTest extends FunSuite {
     val service = Service.mk { _: Request => promise }
 
     val (in, out) = mkPair[Any, Any]
-    val disp = new HttpServerDispatcher[Request](out, service)
+    val disp = new HttpServerDispatcher(out, service)
 
-    in.write(Request())
+    in.write(Request().httpRequest)
 
     // Simulate channel closure
     out.close()
@@ -60,10 +60,10 @@ class HttpServerDispatcherTest extends FunSuite {
     val service = Service.mk { _: Request => Future.value(res) }
 
     val (in, out) = mkPair[Any, Any]
-    val disp = new HttpServerDispatcher[Request](out, service)
+    val disp = new HttpServerDispatcher(out, service)
 
     req.response.setChunked(true)
-    in.write(req)
+    in.write(req.httpRequest)
 
     Await.result(in.read())
 
@@ -86,7 +86,7 @@ object HttpServerDispatcherTest {
 
   def ok(readerIn: Reader): Future[Response] = {
     val res = new Response {
-      final val httpResponse = Response()
+      final val httpResponse = Response().httpResponse
       override val reader = readerIn
     }
     res.setChunked(true)

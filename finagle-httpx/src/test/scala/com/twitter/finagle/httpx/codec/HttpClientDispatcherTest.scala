@@ -84,7 +84,7 @@ class HttpClientDispatcherTest extends FunSuite {
 
   test("streaming request body") {
     val (in, out) = mkPair[Any,Any]
-    val disp = new HttpClientDispatcher[Request](in)
+    val disp = new HttpClientDispatcher(in)
     val req = Request()
     req.setChunked(true)
     val f = disp(req)
@@ -93,7 +93,7 @@ class HttpClientDispatcherTest extends FunSuite {
     // discard the request immediately
     out.read()
 
-    val r = Response()
+    val r = Response().httpResponse
     r.setChunked(true)
     out.write(r)
     val res = Await.result(f)
@@ -119,14 +119,14 @@ class HttpClientDispatcherTest extends FunSuite {
 
   test("invalid message") {
     val (in, out) = mkPair[Any,Any]
-    val disp = new HttpClientDispatcher[Request](in)
+    val disp = new HttpClientDispatcher(in)
     out.write("invalid message")
     intercept[IllegalArgumentException] { Await.result(disp(Request())) }
   }
 
   test("not chunked") {
     val (in, out) = mkPair[Any,Any]
-    val disp = new HttpClientDispatcher[Request](in)
+    val disp = new HttpClientDispatcher(in)
     val httpRes = new DefaultHttpResponse(HTTP_1_1, OK)
     val req = Request()
     val f = disp(req)
@@ -138,7 +138,7 @@ class HttpClientDispatcherTest extends FunSuite {
 
   test("chunked") {
     val (in, out) = mkPair[Any,Any]
-    val disp = new HttpClientDispatcher[Request](in)
+    val disp = new HttpClientDispatcher(in)
     val httpRes = new DefaultHttpResponse(HTTP_1_1, OK)
     httpRes.setChunked(true)
 
@@ -161,7 +161,7 @@ class HttpClientDispatcherTest extends FunSuite {
   test("error mid-chunk") {
     val (in, out) = mkPair[Any,Any]
     val inSpy = spy(in)
-    val disp = new HttpClientDispatcher[Request](inSpy)
+    val disp = new HttpClientDispatcher(inSpy)
     val httpRes = new DefaultHttpResponse(HTTP_1_1, OK)
     httpRes.setChunked(true)
 
@@ -187,7 +187,7 @@ class HttpClientDispatcherTest extends FunSuite {
       Write(Function.const(true), writep),
       Close(Future.Done))
 
-    val disp = new HttpClientDispatcher[Request](transport)
+    val disp = new HttpClientDispatcher(transport)
     val req = Request()
     req.setChunked(true)
     
@@ -218,7 +218,7 @@ class HttpClientDispatcherTest extends FunSuite {
       Read(readp),
       Close(Future.Done))
 
-    val disp = new HttpClientDispatcher[Request](transport)
+    val disp = new HttpClientDispatcher(transport)
     val req = Request()
     req.setChunked(true)
 
@@ -251,7 +251,7 @@ class HttpClientDispatcherTest extends FunSuite {
       Write(_.isInstanceOf[HttpChunk], chunkp),
       Close(Future.Done))
 
-    val disp = new HttpClientDispatcher[Request](transport)
+    val disp = new HttpClientDispatcher(transport)
     val req = Request()
     req.setChunked(true)
 

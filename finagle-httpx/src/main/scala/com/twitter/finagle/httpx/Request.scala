@@ -150,7 +150,7 @@ abstract class Request extends Message with HttpRequestProxy {
   /** Encode an HTTP message to Array[Byte] */
   def encodeBytes(): Array[Byte] = {
     val encoder = new EncoderEmbedder[ChannelBuffer](new HttpRequestEncoder)
-    encoder.offer(this)
+    encoder.offer(from[Request, HttpRequest](this))
     val buffer = encoder.poll()
     val bytes = new Array[Byte](buffer.readableBytes())
     buffer.readBytes(bytes)
