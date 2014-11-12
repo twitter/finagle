@@ -29,7 +29,7 @@ abstract class Response extends Message with HttpResponseProxy {
   /** Encode as an HTTP message */
   def encodeString(): String = {
     val encoder = new EncoderEmbedder[ChannelBuffer](new HttpResponseEncoder)
-    encoder.offer(this)
+    encoder.offer(httpResponse)
     val buffer = encoder.poll()
     buffer.toString(Charsets.UTF_8)
   }

@@ -77,6 +77,11 @@ class CheckRequestFilter(
  * compress text-like content-types with the default compression level (6). Otherwise, use
  * [[org.jboss.netty.handler.codec.http.HttpContentCompressor HttpContentCompressor]] for all
  * content-types with specified compression level.
+ * @param streaming Streaming allows applications to work with HTTP messages
+ * that have large (or infinite) content bodies. When this flag is set to
+ * `true`, the message content is available through a [[com.twitter.io.Reader]],
+ * which gives the application a handle to the byte stream. If `false`, the
+ * entire message content is buffered into a [[com.twitter.io.Buf]].
  */
 case class Http(
     _compressionLevel: Int = -1,
@@ -87,9 +92,9 @@ case class Http(
     _annotateCipherHeader: Option[String] = None,
     _enableTracing: Boolean = false,
     _maxInitialLineLength: StorageUnit = 4096.bytes,
-    _maxHeaderSize: StorageUnit = 8192.bytes)
-  extends CodecFactory[Request, Response]
-{
+    _maxHeaderSize: StorageUnit = 8192.bytes,
+    _streaming: Boolean = false
+) extends CodecFactory[Request, Response] {
   def compressionLevel(level: Int) = copy(_compressionLevel = level)
   def maxRequestSize(bufferSize: StorageUnit) = copy(_maxRequestSize = bufferSize)
   def maxResponseSize(bufferSize: StorageUnit) = copy(_maxResponseSize = bufferSize)
@@ -100,6 +105,7 @@ case class Http(
   def enableTracing(enable: Boolean) = copy(_enableTracing = enable)
   def maxInitialLineLength(length: StorageUnit) = copy(_maxInitialLineLength = length)
   def maxHeaderSize(size: StorageUnit) = copy(_maxHeaderSize = size)
+  def streaming(enable: Boolean) = copy(_streaming = enable)
 
   def client = { config =>
     new Codec[Request, Response] {
@@ -107,9 +113,11 @@ case class Http(
         def getPipeline() = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("httpCodec", new HttpClientCodec())
-          pipeline.addLast(
-            "httpDechunker",
-            new HttpChunkAggregator(_maxResponseSize.inBytes.toInt))
+
+          if (!_streaming)
+            pipeline.addLast(
+              "httpDechunker",
+              new HttpChunkAggregator(_maxResponseSize.inBytes.toInt))
 
           if (_decompressionEnabled)
             pipeline.addLast("httpDecompressor", new HttpContentDecompressor)
@@ -122,7 +130,7 @@ case class Http(
         new HttpTransport(super.newClientTransport(ch, statsReceiver))
 
       override def newClientDispatcher(transport: Transport[Any, Any]) =
-        new DtabHttpDispatcher(transport)
+        new HttpClientDispatcher(transport)
 
       override def newTraceInitializer =
         if (_enableTracing) new HttpClientTraceInitializer[Request, Response]
@@ -153,9 +161,10 @@ case class Http(
 
           // Response to ``Expect: Continue'' requests.
           pipeline.addLast("respondToExpectContinue", new RespondToExpectContinue)
-          pipeline.addLast(
-            "httpDechunker",
-            new HttpChunkAggregator(maxRequestSizeInBytes))
+          if (!_streaming)
+            pipeline.addLast(
+              "httpDechunker",
+              new HttpChunkAggregator(maxRequestSizeInBytes))
 
           _annotateCipherHeader foreach { headerName: String =>
             pipeline.addLast("annotateCipher", new AnnotateCipher(headerName))
@@ -340,87 +349,5 @@ private[finagle] class HttpServerTracingFilter[Req <: Request, Res](serviceName:
   def apply(request: Req, service: Service[Req, Res]) = Trace.unwind {
     TraceInfo.setTraceIdFromRequestHeaders(request)
     service(request)
-  }
-}
-
-/**
- * Http codec for rich Request/Response objects. Note the
- * CheckHttpRequestFilter isn't baked in, as in the Http Codec.
- *
- * Ed. note: I'm not sure how parameterizing on REQUEST <: Request
- * works safely, ever. This is a big typesafety bug: the codec is
- * blindly casting Requests to REQUEST.
- *
- * Setting aggregateChunks to false disables the aggregator, and consequently
- * lifts the restriction on request size.
- *
- * @param httpFactory the underlying HTTP CodecFactory
- * @param aggregateChunks if true, the client pipeline collects HttpChunks into the body of each HttpResponse
- */
-case class RichHttp[REQUEST <: Request](
-  httpFactory: Http,
-  aggregateChunks: Boolean = true
-) extends CodecFactory[REQUEST, Response] {
-
-  def client = { config =>
-    new Codec[REQUEST, Response] {
-      def pipelineFactory = new ChannelPipelineFactory {
-        def getPipeline() = {
-          val pipeline = httpFactory.client(config).pipelineFactory.getPipeline
-          if (!aggregateChunks) pipeline.remove("httpDechunker")
-          pipeline
-        }
-      }
-
-      override def prepareServiceFactory(
-        underlying: ServiceFactory[REQUEST, Response]
-      ): ServiceFactory[REQUEST, Response] =
-        underlying map(new DelayedReleaseService(_))
-
-      override def prepareConnFactory(
-        underlying: ServiceFactory[REQUEST, Response]
-      ): ServiceFactory[REQUEST, Response] = {
-        // Note: This is a horrible hack to ensure that close() calls from
-        // ExpiringService do not propagate until all chunks have been read
-        // Waiting on CSL-915 for a proper fix.
-        underlying map(new DelayedReleaseService(_))
-       }
-
-      override def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any,Any] =
-        new HttpTransport(super.newClientTransport(ch, statsReceiver))
-
-      override def newClientDispatcher(transport: Transport[Any, Any]) =
-        new HttpClientDispatcher(transport)
-
-      override def newTraceInitializer =
-        if (httpFactory._enableTracing) new HttpClientTraceInitializer[REQUEST, Response]
-        else TraceInitializerFilter.empty[REQUEST, Response]
-    }
-  }
-
-  def server = { config =>
-    new Codec[REQUEST, Response] {
-      def pipelineFactory = new ChannelPipelineFactory {
-        def getPipeline() = {
-          val pipeline = httpFactory.server(config).pipelineFactory.getPipeline
-          if (!aggregateChunks) pipeline.remove("httpDechunker")
-          pipeline
-        }
-      }
-
-      override def newServerDispatcher(
-          transport: Transport[Any, Any],
-          service: Service[REQUEST, Response]): Closable =
-        new HttpServerDispatcher(new HttpTransport(transport), service)
-
-      override def prepareConnFactory(
-        underlying: ServiceFactory[REQUEST, Response]
-      ): ServiceFactory[REQUEST, Response] =
-        new DtabFilter.Finagle[REQUEST] andThen underlying
-
-      override def newTraceInitializer =
-        if (httpFactory._enableTracing) new HttpServerTraceInitializer[REQUEST, Response]
-        else TraceInitializerFilter.empty[REQUEST, Response]
-    }
   }
 }

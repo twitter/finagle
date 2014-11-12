@@ -58,7 +58,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
       val client = connect(service)
       val response = client(Request("123"))
-      assert(Response(Await.result(response)).contentString === "123")
+      assert(Await.result(response).contentString === "123")
       client.close()
     }
 
@@ -79,7 +79,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       Dtab.unwind {
         Dtab.local ++= Dtab.read("/a=>/b; /c=>/d")
 
-        val res = Response(Await.result(client(Request("/"))))
+        val res = Await.result(client(Request("/")))
         assert(res.contentString === "Dtab(2)\n\t/a => /b\n\t/c => /d\n")
       }
 
@@ -100,7 +100,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
       val client = connect(service)
 
-      val res = Response(Await.result(client(Request("/"))))
+      val res = Await.result(client(Request("/")))
       assert(res.contentString === "0")
 
       client.close()
@@ -120,7 +120,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
       val writer = Reader.writable()
       val client = connect(service(writer))
-      val response = Response(Await.result(client(Request())))
+      val response = Await.result(client(Request()))
       assert(response.contentString === "helloworld")
       client.close()
     }
@@ -305,7 +305,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
         }
       })
 
-      val response = Response(Await.result(outer(Request())))
+      val response = Await.result(outer(Request()))
       val Seq(innerTrace, innerSpan, innerParent) =
         response.contentString.split('.').toSeq
       assert(innerTrace === outerTrace, "traceId")
@@ -384,16 +384,16 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       }
   }
 
-  rich("ClientBuilder (RichHttp)") {
+  rich("ClientBuilder (streaming)") {
     service =>
       val server = ServerBuilder()
-        .codec(RichHttp[Request](Http(), aggregateChunks = false))
+        .codec(Http().streaming(true))
         .bindTo(new InetSocketAddress(0))
         .name("server")
         .build(service)
 
       val client = ClientBuilder()
-        .codec(RichHttp[Request](Http(), aggregateChunks = false))
+        .codec(Http().streaming(true))
         .hosts(Seq(server.localAddress))
         .hostConnectionLimit(1)
         .name("client")
@@ -404,5 +404,4 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
           Closable.all(client, server).close(deadline)
       }
   }
-
 }

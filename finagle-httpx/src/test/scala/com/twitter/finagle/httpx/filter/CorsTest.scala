@@ -4,8 +4,8 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.httpx.{Request, Response, Status, Method}
 import com.twitter.util.{Await, Future}
 import org.junit.runner.RunWith
-import org.scalatest.FlatSpec
-import org.scalatest.junit.{JUnitRunner, MustMatchersForJUnit => MustMatchers}
+import org.scalatest.{FlatSpec, MustMatchers}
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class CorsTest extends FlatSpec with MustMatchers {
