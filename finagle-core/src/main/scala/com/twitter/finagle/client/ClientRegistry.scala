@@ -23,7 +23,8 @@ private[twitter] object ClientRegistry extends StackRegistry {
 
       val resolved = va.changes.filter(_ != Addr.Pending).toFuture
       resolved map { resolution =>
-        log.log(Level.INFO, "ClientRegistery: %s resolved to %s".format(name, resolution))
+        log.info(s"${name} params ${params}")
+        log.info(s"${name} resolved to ${resolution}")
         name
       }
     }
