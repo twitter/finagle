@@ -120,11 +120,11 @@ class EndToEndTest extends FunSuite with Eventually with IntegrationPatience wit
     assertAnnotationsInOrder(tracer.toSeq, Seq(
       Annotation.ServiceName("theClient"),
       Annotation.ClientSend(),
-      Annotation.Message(ClientDispatcher.ClientEnabledTraceMessage),
+      Annotation.BinaryAnnotation("clnt/mux/enabled", true),
       Annotation.ServiceName("theServer"),
       Annotation.ServerRecv(),
+      Annotation.BinaryAnnotation("srv/mux/enabled", true),
       Annotation.ServerSend(),
-      Annotation.Message(ServerDispatcher.ServerEnabledTraceMessage),
       Annotation.ClientRecv()
     ))
   }

@@ -7,11 +7,13 @@ import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.mux.lease.exp.ClockedDrainer
 import com.twitter.finagle.server.{StackServer, StdStackServer, Listener}
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.netty3.Netty3Listener
+import com.twitter.util.NonFatal
 import java.net.SocketAddress
 import com.twitter.finagle.stats.{ClientStatsReceiver, ServerStatsReceiver}
 import org.apache.thrift.protocol.TProtocolFactory
-import org.apache.thrift.protocol.TProtocolFactory
+import org.apache.thrift.transport.TMemoryInputTransport
 import org.jboss.netty.buffer.{ChannelBuffer => CB, ChannelBuffers}
 import com.twitter.util.{Future, Time, Local}
 
@@ -49,8 +51,32 @@ object ThriftMux
   /**
    * Base [[com.twitter.finagle.Stack Stacks]] for Mux client and servers.
    */
-  private[twitter] val BaseClientStack = ThriftMuxUtil.protocolRecorder +: Mux.client.stack
+  private[twitter] val BaseClientStack = (ThriftMuxUtil.protocolRecorder +: Mux.client.stack)
+    .replace(StackClient.Role.protoTracing, ClientRpcTracing)
   private[twitter] val BaseServerStack = ThriftMuxUtil.protocolRecorder +: Mux.server.stack
+
+  private[this] def recordRpc(buffer: Array[Byte]): Unit = try {
+    val inputTransport = new TMemoryInputTransport(buffer)
+    val iprot = protocolFactory.getProtocol(inputTransport)
+    val msg = iprot.readMessageBegin()
+    Trace.recordRpc(msg.name)
+  } catch {
+    case NonFatal(_) =>
+  }
+
+  private object ClientRpcTracing extends Mux.ClientProtoTracing {
+    private[this] val rpcTracer = new SimpleFilter[CB, CB] {
+      def apply(request: CB, svc: Service[CB, CB]): Future[CB] = {
+        // we're reasonably sure that this filter sits just after the ThriftClientRequest's
+        // message array is wrapped by a ChannelBuffer
+        recordRpc(request.array())
+        svc(request)
+      }
+    }
+
+    override def make(next: ServiceFactory[CB, CB]) =
+      rpcTracer andThen super.make(next)
+  }
 
   case class Client(
     muxer: StackClient[CB, CB] = Mux.client.copy(stack = BaseClientStack),
@@ -237,13 +263,20 @@ object ThriftMux
         }
       }
 
+    private[this] val tracingFilter = new SimpleFilter[Array[Byte], Array[Byte]] {
+      def apply(request: Array[Byte], svc: Service[Array[Byte], Array[Byte]]): Future[Array[Byte]] = {
+        recordRpc(request)
+        svc(request)
+      }
+    }
+
     def serve(addr: SocketAddress, factory: ServiceFactory[Array[Byte], Array[Byte]]) = {
       muxer.serve(addr, factory map { service =>
         // Need a HandleUncaughtApplicationExceptions filter here to maintain
         // the backward compatibility with non-mux thrift clients. Mux thrift
         // clients get the same semantics as a side effect.
         val uncaughtExceptionsFilter = new HandleUncaughtApplicationExceptions(protocolFactory)
-        bufToArrayFilter andThen uncaughtExceptionsFilter andThen service
+        bufToArrayFilter andThen tracingFilter andThen uncaughtExceptionsFilter andThen service
       })
     }
 

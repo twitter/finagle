@@ -25,6 +25,7 @@ object StackServer {
     val serverDestTracing = Stack.Role("ServerDestTracing")
     val jvmTracing = Stack.Role("JvmTracing")
     val preparer = Stack.Role("preparer")
+    val protoTracing = Stack.Role("protoTracing")
    }
 
   /**
@@ -60,6 +61,7 @@ object StackServer {
     stk.push(Role.jvmTracing, ((next: ServiceFactory[Req, Rep]) =>
       newJvmFilter[Req, Rep]() andThen next))
     stk.push(HandletimeFilter.module)
+    stk.push(Role.protoTracing, identity[ServiceFactory[Req, Rep]](_))
     stk.push(ServerTracingFilter.module)
     stk.push(Role.preparer, identity[ServiceFactory[Req, Rep]](_))
     // The TraceInitializerFilter must be pushed after most other modules so that

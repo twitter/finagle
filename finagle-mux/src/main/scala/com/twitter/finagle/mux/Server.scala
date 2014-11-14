@@ -23,7 +23,6 @@ import scala.collection.JavaConverters._
 case class ClientDiscardedRequestException(why: String) extends Exception(why)
 
 object ServerDispatcher {
-  val ServerEnabledTraceMessage = "finagle.mux.serverEnabled"
   val Epsilon = 1.second // TODO decide whether this should be hard coded or not
 }
 
@@ -98,8 +97,6 @@ private[finagle] class ServerDispatcher private[finagle](
             tr match {
               case Return(rep) =>
                 lessor.observe(elapsed())
-                // Record tracing info to track Mux adoption across clusters.
-                Trace.record(ServerDispatcher.ServerEnabledTraceMessage)
                 trans.write(encode(RdispatchOk(tag, Seq.empty, rep)))
               case Throw(exc) =>
                 trans.write(encode(RdispatchError(tag, Seq.empty, exc.toString)))
@@ -117,9 +114,6 @@ private[finagle] class ServerDispatcher private[finagle](
       Trace.pushTracer(tracer)
       for (traceId <- traceId)
         Trace.setId(traceId)
-
-      // Record tracing info to track Mux adoption across clusters.
-      Trace.record(ServerDispatcher.ServerEnabledTraceMessage)
 
       val elapsed = Stopwatch.start()
       val f = service(req)
