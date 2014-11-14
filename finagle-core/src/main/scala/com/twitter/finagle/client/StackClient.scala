@@ -26,6 +26,7 @@ object StackClient {
     val prepFactory = Stack.Role("PrepFactory")
     /** PrepConn is special in that it's the first role before the `Endpoint` role */
     val prepConn = Stack.Role("PrepConn")
+    val protoTracing = Stack.Role("protoTracing")
   }
 
   /**
@@ -92,6 +93,7 @@ object StackClient {
     stk.push(StatsFactoryWrapper.module)
     stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
     stk.push(FactoryToService.module)
+    stk.push(Role.protoTracing, identity[ServiceFactory[Req, Rep]](_))
     stk.push(ClientTracingFilter.module)
     // The TraceInitializerFilter must be pushed after most other modules so that
     // any Tracing produced by those modules is enclosed in the appropriate

@@ -57,10 +57,6 @@ private object Cap extends Enumeration {
   val Unknown, Yes, No = Value
 }
 
-object ClientDispatcher {
-  val ClientEnabledTraceMessage = "finagle.mux.clientEnabled"
-}
-
 /**
  * A ClientDispatcher for the mux protocol.
  */
@@ -183,7 +179,7 @@ private[finagle] class ClientDispatcher (
       if (drained)
         futureNackedException
       else
-        dispatch(req, true)
+        dispatch(req)
     } finally {
       checkDrained.unlock()
     }
@@ -196,10 +192,7 @@ private[finagle] class ClientDispatcher (
    * @param traceWrite if true, tracing info will be recorded for the request.
    * If case, no tracing will be performed.
    */
-  private def dispatch(
-    req: ChannelBuffer,
-    traceWrite: Boolean
-  ): Future[ChannelBuffer] = {
+  private def dispatch(req: ChannelBuffer): Future[ChannelBuffer] = {
     val p = new Promise[ChannelBuffer]
     val couldDispatch = canDispatch
 
@@ -216,11 +209,6 @@ private[finagle] class ClientDispatcher (
         }
         Tdispatch(tag, contexts.toSeq, "", Dtab.local, req)
       }
-
-    if (traceWrite) {
-      // Record tracing info to track Mux adoption across clusters.
-      Trace.record(ClientDispatcher.ClientEnabledTraceMessage)
-    }
 
     trans.write(encode(msg)) onFailure { case exc =>
       reqs.unmap(tag)
@@ -243,7 +231,7 @@ private[finagle] class ClientDispatcher (
           // so we fall back to a Treq and disable tracing in order to not
           // double-count the request.
           canDispatch = Cap.No
-          dispatch(req, false)
+          dispatch(req)
       }
     } else p
   }

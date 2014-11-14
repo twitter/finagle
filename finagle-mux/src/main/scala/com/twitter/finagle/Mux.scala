@@ -10,6 +10,7 @@ import com.twitter.finagle.server._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.tracing._
+import com.twitter.util.Future
 import java.net.SocketAddress
 import org.jboss.netty.buffer.{ChannelBuffer => CB}
 
@@ -18,10 +19,30 @@ import org.jboss.netty.buffer.{ChannelBuffer => CB}
  */
 object Mux extends Client[CB, CB] with Server[CB, CB] {
 
+  private[finagle] abstract class ProtoTracing(
+    process: String,
+    val role: Stack.Role
+  ) extends Stack.Module0[ServiceFactory[CB, CB]] {
+    val description = s"Mux specific $process traces"
+
+    private[this] val tracingFilter = new SimpleFilter[CB, CB] {
+      def apply(req: CB, svc: Service[CB, CB]): Future[CB] = {
+        Trace.recordBinary(s"$process/mux/enabled", true)
+        svc(req)
+      }
+    }
+
+    def make(next: ServiceFactory[CB, CB]) =
+      tracingFilter andThen next
+  }
+
+  private[finagle] class ClientProtoTracing extends ProtoTracing("clnt", StackClient.Role.protoTracing)
+
   object Client {
     val stack: Stack[ServiceFactory[CB, CB]] = StackClient.newStack
       .replace(StackClient.Role.pool, SingletonPool.module[CB, CB])
       .replace(StackClient.Role.prepConn, mux.lease.LeasedFactory.module[CB, CB])
+      .replace(StackClient.Role.protoTracing, new ClientProtoTracing)
   }
 
   case class Client(
@@ -49,9 +70,12 @@ object Mux extends Client[CB, CB] with Server[CB, CB] {
   def newClient(dest: Name, label: String): ServiceFactory[CB, CB] =
     client.newClient(dest, label)
 
+  private[finagle] class ServerProtoTracing extends ProtoTracing("srv", StackServer.Role.protoTracing)
+
   case class Server(
     stack: Stack[ServiceFactory[CB, CB]] = StackServer.newStack
-      .remove(TraceInitializerFilter.role),
+      .remove(TraceInitializerFilter.role)
+      .replace(StackServer.Role.protoTracing, new ServerProtoTracing),
     params: Stack.Params = StackServer.defaultParams
   ) extends StdStackServer[CB, CB, Server] {
     protected def copy1(
