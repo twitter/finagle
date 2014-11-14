@@ -36,17 +36,30 @@ class GenerateSpdyStreamId extends SimpleFilter[HttpRequest, HttpResponse] {
 
 case class Spdy(
     _version: SpdyVersion = SpdyVersion.SPDY_3_1,
-    _compressionLevel: Int = 6,
+    _enableHeaderCompression: Boolean = true,
     _maxHeaderSize: StorageUnit = 16384.bytes,
     _maxRequestSize: StorageUnit = 5.megabytes,
     _maxResponseSize: StorageUnit = 5.megabytes)
   extends CodecFactory[HttpRequest, HttpResponse]
 {
   def version(version: SpdyVersion) = copy(_version = version)
-  def compressionLevel(level: Int) = copy(_compressionLevel = level)
+  def enableHeaderCompression(enable: Boolean) = copy(_enableHeaderCompression = enable)
   def maxHeaderSize(size: StorageUnit) = copy(_maxHeaderSize = size)
   def maxRequestSize(size: StorageUnit) = copy(_maxRequestSize = size)
   def maxResponseSize(size: StorageUnit) = copy(_maxResponseSize = size)
+
+  private[this] def spdyFrameCodec = {
+    val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt
+    if (_enableHeaderCompression) {
+      // Header blocks tend to be small so reduce the window-size of the
+      // compressor from 32 KB (15) to 2KB (11) to save memory.
+      // These settings still provide sufficient compression to fit the
+      // compressed header block within the TCP initial congestion window.
+      new SpdyFrameCodec(_version, 8192, maxHeaderSizeInBytes, 9, 11, 8)
+    } else {
+      new SpdyRawFrameCodec(_version, 8192, maxHeaderSizeInBytes)
+    }
+  }
 
   def client = { config =>
     new Codec[HttpRequest, HttpResponse] {
@@ -56,7 +69,7 @@ case class Spdy(
           val maxResponseSizeInBytes = _maxResponseSize.inBytes.toInt
 
           val pipeline = Channels.pipeline()
-          pipeline.addLast("spdyFrameCodec",     new SpdyFrameCodec(_version, 8192, maxHeaderSizeInBytes, _compressionLevel, 11, 8))
+          pipeline.addLast("spdyFrameCodec",     spdyFrameCodec)
           pipeline.addLast("spdySessionHandler", new SpdySessionHandler(_version, false))
           pipeline.addLast("spdyHttpCodec",      new SpdyHttpCodec(_version, maxResponseSizeInBytes))
           pipeline
@@ -81,11 +94,10 @@ case class Spdy(
     new Codec[HttpRequest, HttpResponse] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
-          val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt
           val maxRequestSizeInBytes = _maxRequestSize.inBytes.toInt
 
           val pipeline = Channels.pipeline()
-          pipeline.addLast("spdyFrameCodec",     new SpdyFrameCodec(_version, 8192, maxHeaderSizeInBytes, _compressionLevel, 11, 8))
+          pipeline.addLast("spdyFrameCodec",     spdyFrameCodec)
           pipeline.addLast("spdySessionHandler", new SpdySessionHandler(_version, true))
           pipeline.addLast("spdyHttpCodec",      new SpdyHttpCodec(_version, maxRequestSizeInBytes))
           pipeline
