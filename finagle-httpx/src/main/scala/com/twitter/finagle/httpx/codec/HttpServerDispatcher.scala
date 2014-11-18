@@ -5,17 +5,26 @@ import com.twitter.finagle.dispatch.GenSerialServerDispatcher
 import com.twitter.finagle.httpx._
 import com.twitter.finagle.httpx.netty.Bijections._
 import com.twitter.finagle.netty3.ChannelBufferBuf
+import com.twitter.finagle.stats.{StatsReceiver, DefaultStatsReceiver, RollupStatsReceiver}
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.util.Throwables
 import com.twitter.io.{Reader, Buf, BufReader}
-import com.twitter.util.{Future, Promise, Throw, Return}
+import com.twitter.logging.Logger
+import com.twitter.util.{Future, Promise, Throw, Return, NonFatal}
 import java.net.InetSocketAddress
 import org.jboss.netty.handler.codec.frame.TooLongFrameException
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpHeaders}
 
 class HttpServerDispatcher(
+  trans: Transport[Any, Any],
+  service: Service[Request, Response],
+  stats: StatsReceiver) extends GenSerialServerDispatcher[Request, Response, Any, Any](trans) {
+
+  def this(
     trans: Transport[Any, Any],
-    service: Service[Request, Response])
-  extends GenSerialServerDispatcher[Request, Response, Any, Any](trans) {
+    service: Service[Request, Response]) = this(trans, service, DefaultStatsReceiver)
+
+  private[this] val failureReceiver = new RollupStatsReceiver(stats.scope("stream")).scope("failures")
 
   import ReaderUtils.{readChunk, streamChunks}
 
@@ -92,7 +101,11 @@ class HttpServerDispatcher(
       // This awkwardness is unfortunate but necessary for now as you may be
       // interrupted in the middle of a write, or when there otherwise isn’t
       // an outstanding read (e.g. read-write race).
-      p.become(f onFailure { exc => rep.reader.discard() })
+      p.become(f onFailure { case t: Throwable =>
+        Logger.get(this.getClass.getName).debug(t, "Failed mid-stream. Terminating stream, closing connection")
+        failureReceiver.counter(Throwables.mkString(t): _*).incr()
+        rep.reader.discard()
+      })
       p setInterruptHandler { case intr => rep.reader.discard() }
       p
     } else {

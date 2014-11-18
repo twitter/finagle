@@ -7,6 +7,7 @@ import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatche
 import com.twitter.finagle.http.filter.DtabFilter
 import com.twitter.finagle.http._
 import com.twitter.finagle.netty3._
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.server._
 import com.twitter.finagle.ssl.Ssl
 import com.twitter.finagle.transport.Transport
@@ -135,9 +136,10 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
 
     protected def newDispatcher(transport: Transport[In, Out],
         service: Service[HttpRequest, HttpResponse]) = {
+      val Stats(stats) = params[Stats]
       val dtab = DtabFilter.Netty
       new HttpServerDispatcher(
-        new HttpTransport(transport), dtab andThen service)
+        new HttpTransport(transport), dtab andThen service, stats.scope("dispatch"))
     }
 
     protected def copy1(
