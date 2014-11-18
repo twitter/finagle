@@ -436,5 +436,12 @@ class NameTreeFactoryTest extends FunSuite {
           NameTree.Weighted(1D, NameTree.Leaf(true)),
           NameTree.Weighted(1D, NameTree.Leaf(false)))),
         NameTree.Weighted(1D, NameTree.Leaf(true)))))
+
+    assert(!isAvailable(
+      NameTree.Union(
+        NameTree.Weighted(1D, NameTree.Union(
+          NameTree.Weighted(1D, NameTree.Leaf(true)),
+          NameTree.Weighted(1D, NameTree.Leaf(true)))),
+        NameTree.Weighted(1D, NameTree.Empty))))
   }
 }

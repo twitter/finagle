@@ -240,7 +240,7 @@ private[finagle] object NameTreeFactory {
 
     def factoryOfTree(tree: NameTree[Key]): ServiceFactory[Req, Rep] =
       tree match {
-        case NameTree.Neg | NameTree.Fail => noBrokersAvailableFactory
+        case NameTree.Neg | NameTree.Fail | NameTree.Empty => noBrokersAvailableFactory
         case NameTree.Leaf(key) => Leaf(key)
 
         // it's an invariant of Namer.bind that it returns no Alts
