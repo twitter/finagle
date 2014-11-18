@@ -97,6 +97,9 @@ private[finagle] class LatencyFactory(sr: StatsReceiver) {
 private[finagle] object P2CBenchmark extends com.twitter.app.App {
   val qps = flag("qps", 1250, "QPS at which to run the benchmark")
   val dur = flag("dur", 45.seconds, "Benchmark duration")
+  val nstable = flag("stable", 10, "Number of stable hosts")
+  val bal = flag("bal", "p2c", "Load balancer")
+
   def main() {
     val Qpms = qps()/1000
     val Rem = qps()%1000
@@ -106,13 +109,21 @@ private[finagle] object P2CBenchmark extends com.twitter.app.App {
 
     val data = getClass.getClassLoader.getResource("resources/real_latencies.data")
     val dist = LatencyProfile.fromFile(data)
-    val stable: Seq[ServiceFactory[Unit, Unit]] = Seq.tabulate(9) { i => newFactory(i, dist) }
+    val stable: Seq[ServiceFactory[Unit, Unit]] = Seq.tabulate(nstable()) { i => newFactory(i, dist) }
 
     val underlying = Var(stable)
-    val p2c = Balancers.newP2C[Unit, Unit](
-      Activity(underlying map { facs => Activity.Ok(facs map { fac => (fac, 1D) }) }),
-      statsReceiver=stats.scope("p2c"))
-    val balancer = p2c.toService
+    val factory = bal() match {
+      case "p2c" => Balancers.newP2C[Unit, Unit](
+        Activity(underlying map { facs => Activity.Ok(facs map { fac => (fac, 1D) }) }),
+        statsReceiver=stats.scope("p2c"))
+      
+      case "aperture" =>
+        Balancers.newAperture[Unit, Unit](
+          Activity(underlying map { facs => Activity.Ok(facs map { fac => (fac, 1D) }) }),
+          statsReceiver=stats.scope("aperture"))
+    }
+
+    val balancer = factory.toService
 
     val latstat = stats.stat("latency")
     def call() = stats.timeFuture(TimeUnit.MILLISECONDS, latstat) { balancer(()) }
@@ -121,8 +132,8 @@ private[finagle] object P2CBenchmark extends com.twitter.app.App {
     val p = new LatencyProfile(stopWatch)
 
     val coldStart = p.warmup(10.seconds)_ andThen p.slowWithin(19.seconds, 23.seconds, 10)
-    underlying() :+= newFactory(10, coldStart(dist))
-    underlying() :+= newFactory(11, p.slowBy(2)(dist))
+    underlying() :+= newFactory(nstable()+1, coldStart(dist))
+    underlying() :+= newFactory(nstable()+2, p.slowBy(2)(dist))
 
     var ms = 0
     while (stopWatch() < dur()) {

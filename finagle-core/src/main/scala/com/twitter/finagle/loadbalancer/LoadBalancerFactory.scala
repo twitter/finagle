@@ -265,6 +265,7 @@ object DefaultBalancerFactory extends WeightedLoadBalancerFactory {
     defaultBalancer() match {
       case "choice" => P2CBalancerFactory
       case "heap" => HeapBalancerFactory.toWeighted
+      case "aperture" => ApertureBalancerFactory
       case x =>
         Logger.getLogger("finagle").log(Level.WARNING,
           "Invalid load balancer %s, using balancer \"heap\"".format(x))

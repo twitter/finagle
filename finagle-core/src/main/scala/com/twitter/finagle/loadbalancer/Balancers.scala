@@ -1,9 +1,10 @@
 package com.twitter.finagle.loadbalancer
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.util.Rng
+import com.twitter.finagle.util.{Rng, DefaultTimer}
 import com.twitter.finagle.{ServiceFactory, NoBrokersAvailableException}
-import com.twitter.util.{Activity, Duration}
+import com.twitter.util.{Activity, Duration, Timer}
 import scala.util.Random
 
 /**
@@ -90,4 +91,18 @@ object Balancers {
     rng: Random = new Random
   ): ServiceFactory[Req, Rep] = new HeapBalancer(
     factories, statsReceiver, emptyException, rng)
+
+  def newAperture[Req, Rep](
+    activity: Activity[Traversable[(ServiceFactory[Req, Rep], Double)]],
+    smoothWin: Duration = 5.seconds,
+    lowLoad: Double = 0.5,
+    highLoad: Double = 2,
+    maxEffort: Int = 5,
+    rng: Rng = Rng.threadLocal,
+    timer: Timer = DefaultTimer.twitter,
+    statsReceiver: StatsReceiver = NullStatsReceiver,
+    emptyException: NoBrokersAvailableException = new NoBrokersAvailableException
+  ): ServiceFactory[Req, Rep] = new ApertureLoadBandBalancer(
+      activity, smoothWin, lowLoad, highLoad, maxEffort, rng,
+      timer, statsReceiver, emptyException)
 }
