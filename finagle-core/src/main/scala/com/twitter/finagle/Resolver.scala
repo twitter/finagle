@@ -182,14 +182,17 @@ private class AsyncInetResolver(statsReceiver: StatsReceiver) extends InetResolv
       toAddr(hosts) onSuccess { u() = _ }
       ttlOption match {
         case Some(ttl) =>
-          implicit val intPri = new Prioritized[Int] {
-            def apply(i: Int) = i
-          }
-          val updater = Updater { _: Int =>
-            u() = Await.result(toAddr(hosts))
+          val updater = new Updater[Unit] {
+            val one = Seq(())
+            // Just perform one update at a time.
+            protected def preprocess(elems: Seq[Unit]) = one
+            protected def handle(unit: Unit) {
+              // This always runs in a thread pool; it's okay to block.
+              u() = Await.result(toAddr(hosts))
+            }
           }
           timer.schedule(ttl.fromNow, ttl) {
-            FuturePool.unboundedPool(updater(0))
+            FuturePool.unboundedPool(updater())
           }
         case None =>
           Closable.nop
@@ -266,14 +269,17 @@ private class SyncInetResolver extends InetResolver {
     ttlOption match {
       case Some(ttl) =>
         Var.async(init) { u =>
-          implicit val intPri = new Prioritized[Int] { def apply(i: Int) = i }
-          val updater = Updater { _: Int =>
-            val addr = resolveHostPorts(hostPorts)
-            u() = Addr.Bound(addr)
+          val updater = new Updater[Unit] {
+            val one = Seq(())
+            protected def preprocess(elems: Seq[Unit]) = one
+            protected def handle(unit: Unit) {
+              val addr = resolveHostPorts(hostPorts)
+              u() = Addr.Bound(addr)
+            }
           }
           timer.schedule(ttl.fromNow, ttl) {
             futurePool {
-              updater(0)
+              updater()
             } onFailure { ex =>
               log.log(Level.WARNING, "failed to resolve hosts ", ex)
             }

@@ -2,27 +2,37 @@ package com.twitter.finagle.util
 
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.ConcurrentLinkedQueue
+import scala.collection.mutable.ArrayBuffer
 
 /**
- * Assigns an integral priority to `T`-typed values. Smaller
- * priorities are higher.
+ * An Updater processes updates in sequence. At most one one
+ * update is processed at time; pending updates may be collapsed.
+ * 
+ * When an update is in progress, new updates are enqueued to 
+ * be handled by the thread currently processing updates; the
+ * control is returned to the caller thread immediately. Thus
+ * the thread issuing the first update will process all updates 
+ * until the queue of updates has been drained.
+ *
+ * Fairness is not guaranteed. Provided a sufficiently high rate of
+ * updates, the hapless handler thread may be stuck with the job
+ * indefinitely.
  */
-private[finagle] trait Prioritized[T] extends (T => Int)
-
-/**
- * Process updates of type `T` with the function `f`. When an update
- * arrives while another is being processed, it is queued, to be
- * delivered after the current update completes. When multiple
- * updates have been enqueued, we deliver only the one with the
- * lowest priority (according to the
- * [[com.twitter.finagle.util.Prioritized Prioritized]] instance);
- * when multiple items have the same priority, the one which was
- * enqueued last is chosen.
- */
-private class Updater[T: Prioritized](f: T => Unit) extends (T => Unit) {
+private[finagle] trait Updater[T] extends (T => Unit) {
   private[this] val n = new AtomicInteger(0)
   private[this] val q = new ConcurrentLinkedQueue[T]
-  private[this] val pri = implicitly[Prioritized[T]]
+  
+  /**
+   * Preprocess a nonempty batch of updates. This allows the updater
+   * to collapse, expand, or otherwise manipulate updates before they
+   * are handled.
+   */
+  protected def preprocess(elems: Seq[T]): Seq[T]
+
+  /**
+   * Handle a single update.
+   */
+  protected def handle(elem: T): Unit
 
   def apply(t: T) {
     q.offer(t)
@@ -30,21 +40,16 @@ private class Updater[T: Prioritized](f: T => Unit) extends (T => Unit) {
       return
 
     do {
-      var el = q.peek()
+      val elems = new ArrayBuffer[T](1+n.get)
       while (n.get > 1) {
         n.decrementAndGet()
-        val el1 = q.poll()
-        if (pri(el1) <= pri(el))
-          el = el1
+        elems += q.poll()
       }
 
-      val el1 = q.poll()
-      val min = if (pri(el1) <= pri(el)) el1 else el
-      f(min)
+      elems += q.poll()
+
+      for (elem <- preprocess(elems.result))
+        handle(elem)
     } while (n.decrementAndGet() > 0)
   }
-}
-
-private[finagle] object Updater {
-  def apply[T: Prioritized](f: T => Unit): (T => Unit) = new Updater(f)
 }

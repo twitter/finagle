@@ -3,7 +3,7 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle._
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, Counter}
-import com.twitter.finagle.util.{OnReady, Drv, Rng, Updater, Prioritized}
+import com.twitter.finagle.util.{OnReady, Drv, Rng, Updater}
 import com.twitter.util.{Activity, Future, Promise, Time, Closable, Return, Throw}
 import java.util.concurrent.atomic.AtomicInteger
 import scala.annotation.tailrec
@@ -62,6 +62,12 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
     def weight: Double
     
     /**
+     * A token is a random integer identifying the node.
+     * It persists through node updates.
+     */
+    def token: Int
+
+    /**
      * Nondestructively update this node with the supplied weight.
      */  
     def newWeight(weight: Double): This
@@ -118,6 +124,11 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
      * Rebuild this distributor.
      */
     def rebuild(): This
+    
+    /**
+     * Rebuild this distributor with a new vector.
+     */
+    def rebuild(vector: Vector[Node]): This
   }
   
   /**
@@ -126,12 +137,15 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
   protected type Distributor <: DistributorT { type This = Distributor }
   
   /**
-   * Create a fresh Distributor to load balance over the vector of nodes.
-   * Surviging nodes persist across updates; they are not created anew.
+   * Create an initial distributor.
    */
-  protected def newDistributor(nodes: Vector[Node]): Distributor
+  protected def initDistributor(): Distributor
 
-  @volatile protected var dist: Distributor = newDistributor(Vector.empty)
+  @volatile protected var dist: Distributor = initDistributor()
+  
+  protected def rebuild() {
+    updater(Rebuild(dist))
+  }
 
   private[this] val gauges = Seq(
     statsReceiver.addGauge("available") {
@@ -151,45 +165,56 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
 
   protected sealed trait Update
   protected case class NewList(
-      newList: Traversable[(ServiceFactory[Req, Rep], Double)])
-    extends Update
+    newList: Traversable[(ServiceFactory[Req, Rep], Double)]) extends Update
   protected case class Rebuild(cur: Distributor) extends Update
-  protected object Update {
-    implicit def pri = new Prioritized[Update] {
-      def apply(u: Update) = u match {
-        case NewList(_) => 0
-        case Rebuild(_) => 1
+  protected case class Invoke(fn: Distributor => Unit) extends Update
+
+  private[this] val updater = new Updater[Update] {
+    protected def preprocess(updates: Seq[Update]): Seq[Update] = {
+      if (updates.size == 1)
+        return updates
+
+      val types = updates.reverse.groupBy(_.getClass)
+
+      val update: Seq[Update] = types.get(classOf[NewList]) match {
+        case Some(Seq(last, _*)) => Seq(last)
+        case None => types.getOrElse(classOf[Rebuild], Nil).take(1)
       }
+
+      update ++ types.getOrElse(classOf[Invoke], Nil).reverse
+    }
+
+    def handle(u: Update) = u match {
+      case NewList(newList) =>
+        val newFactories = (newList map { case (f, _) => f }).toSet
+        val (transfer, closed) = dist.vector partition (newFactories contains _.factory)
+
+        for (node <- closed)
+          node.close()
+        removes.incr(closed.size)
+
+        // we could demand that 'n' proxies hashCode, equals (i.e. is a Proxy)
+        val transferNodes = transfer.map(n => n.factory -> n).toMap
+        val newNodes = newList map {
+          case (f, w) if transferNodes contains f =>
+            transferNodes(f).newWeight(w)
+          case (f, w) =>
+            newNode(f, w, statsReceiver.scope(f.toString))
+        }
+
+        dist = dist.rebuild(newNodes.toVector)
+        adds.incr(newList.size - transfer.size)
+  
+      case Rebuild(_dist) if _dist == dist =>
+        dist = dist.rebuild()
+ 
+      case Rebuild(_stale) =>
+
+      case Invoke(fn) =>
+        fn(dist)
     }
   }
 
-  private[this] val updater = Updater[Update] {
-    case NewList(newList) =>
-      val newFactories = (newList map { case (f, _) => f }).toSet
-      val (transfer, closed) = dist.vector partition (newFactories contains _.factory)
-
-      for (node <- closed)
-        node.close()
-      removes.incr(closed.size)
-
-      // we could demand that 'n' proxies hashCode, equals (i.e. is a Proxy)
-      val transferNodes = transfer.map(n => n.factory -> n).toMap
-      val newNodes = newList map {
-        case (f, w) if transferNodes contains f =>
-          transferNodes(f).newWeight(w)
-        case (f, w) =>
-          newNode(f, w, statsReceiver.scope(f.toString))
-      }
-
-      dist = newDistributor(newNodes.toVector)
-      adds.incr(newList.size - transfer.size)
-
-    case Rebuild(_dist) if _dist == dist =>
-      dist = dist.rebuild()
-
-    case Rebuild(_stale) =>
-  }
-  
   /**
    * Update the load balancer's service list. After the update, which
    * may run asynchronously, is completed, the load balancer balances
@@ -197,6 +222,14 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
    */
   def update(factories: Traversable[(ServiceFactory[Req, Rep], Double)]): Unit =
     updater(NewList(factories))
+
+  /**
+   * Invoke `fn` on the current distributor. This is done through the updater
+   * and is serialized with distributor updates and other invocations.
+   */
+  protected def invoke(fn: Distributor => Unit) {
+    updater(Invoke(fn))
+  }
 
   @tailrec
   private[this] def pick(nodes: Distributor, count: Int): Node = {
@@ -213,13 +246,13 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
 
     var n = pick(d, maxEffort)
     if (n == null) {
-      updater(Rebuild(dist))
+      rebuild()
       n = dist.pick()
     }
 
     val f = n(conn)
     if (d.needsRebuild && d == dist)
-      updater(Rebuild(d))
+      rebuild()
     f
   }
 
@@ -270,9 +303,11 @@ private trait Updating[Req, Rep] extends Balancer[Req, Rep] with OnReady {
  * requests and thus will result in least-loaded load balancer.
  */
 private trait LeastLoaded[Req, Rep] { self: Balancer[Req, Rep] =>
-  protected case class Node(factory: ServiceFactory[Req, Rep], weight: Double, counter: AtomicInteger)
-      extends ServiceFactoryProxy[Req, Rep](factory) 
-      with NodeT {
+  protected def rng: Rng
+
+  protected case class Node(factory: ServiceFactory[Req, Rep], weight: Double, counter: AtomicInteger, token: Int)
+    extends ServiceFactoryProxy[Req, Rep](factory) 
+    with NodeT {
 
     type This = Node
 
@@ -299,10 +334,10 @@ private trait LeastLoaded[Req, Rep] { self: Balancer[Req, Rep] =>
   }
 
   protected def newNode(factory: ServiceFactory[Req, Rep], weight: Double, statsReceiver: StatsReceiver) = 
-    Node(factory, weight, new AtomicInteger(0))
+    Node(factory, weight, new AtomicInteger(0), rng.nextInt())
 
   private[this] val failingLoad = new AtomicInteger(0)
-  protected def failingNode(cause: Throwable) = Node(new FailingFactory(cause), 0D, failingLoad)
+  protected def failingNode(cause: Throwable) = Node(new FailingFactory(cause), 0D, failingLoad, 0)
 }
 
 /**
@@ -351,6 +386,8 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
       unavailable.nonEmpty && unavailable.exists(nodeAvail)
 
     def rebuild() = copy()
+    
+    def rebuild(vector: Vector[Node]) = copy(vector=vector)
 
     def pick(): Node = {
       if (vector.isEmpty)
@@ -383,5 +420,5 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
     }
   }
   
-  protected def newDistributor(vector: Vector[Node]) = Distributor(vector)
+  protected def initDistributor() = Distributor(Vector.empty)
 }

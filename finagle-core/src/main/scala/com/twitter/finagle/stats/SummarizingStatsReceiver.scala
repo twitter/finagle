@@ -16,10 +16,9 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
   private[this] val counters = AtomicLongMap.create[Seq[String]]()
 
   // Just keep all the samples.
-  type SampleBuffer = ArrayBuffer[Float] with SynchronizedBuffer[Float]
   private[this] val stats = CacheBuilder.newBuilder()
-    .build(new CacheLoader[Seq[String], SampleBuffer] {
-      def load(k: Seq[String]) = new ArrayBuffer[Float] with SynchronizedBuffer[Float]
+    .build(new CacheLoader[Seq[String], ArrayBuffer[Float]] {
+      def load(k: Seq[String]) = new ArrayBuffer[Float]
     })
 
   // synchronized on `this`
@@ -31,7 +30,9 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
   }
 
   def stat(name: String*) = new Stat {
-    def add(value: Float) = { stats.get(name) += value }
+    def add(value: Float) = SummarizingStatsReceiver.this.synchronized { 
+      stats.get(name) += value
+    }
   }
 
   // Ignoring gauges for now, but we may consider sampling them.
@@ -50,7 +51,7 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
 
   def summary(): String = summary(false)
 
-  def summary(includeTails: Boolean): String = {
+  def summary(includeTails: Boolean): String = synchronized {
     val counterValues = counters.asMap.asScala
     val gaugeValues = gauges.toSeq map {
       case (names, gauge) => variableName(names) -> gauge().toString
@@ -75,7 +76,7 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
     lazy val tailValues = (statValues map { case (k, xs) =>
       val n = xs.size
       def slice(ptile: Double) = {
-        val end = math.ceil(ptile*n).toInt
+        val end = math.floor(ptile*n).toInt
         val start = math.ceil(end-((1.0-ptile)*n)).toInt
         for (i <- start to end) yield xs(i)
       }

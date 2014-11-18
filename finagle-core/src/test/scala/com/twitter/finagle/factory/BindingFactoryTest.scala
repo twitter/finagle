@@ -389,6 +389,9 @@ class NameTreeFactoryTest extends FunSuite {
           intIdx += 1
           i
         }
+        
+        def nextInt() = ???
+        def nextLong(n: Long) = ???
       }
     }
 

@@ -5,7 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.util.{OnReady, Drv, Rng, Updater, Prioritized}
+import com.twitter.finagle.util.{OnReady, Drv, Rng, Updater}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.TimeUnit
@@ -153,6 +153,8 @@ private object PeakEwma {
 
 private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
   import PeakEwma.log
+  
+  protected def rng: Rng
 
   protected def decayTime: Duration
 
@@ -214,7 +216,7 @@ private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
     }
   }
 
-  protected case class Node(factory: ServiceFactory[Req, Rep], weight: Double, metric: Metric)
+  protected case class Node(factory: ServiceFactory[Req, Rep], weight: Double, metric: Metric, token: Int)
       extends ServiceFactoryProxy[Req, Rep](factory)
       with NodeT {
     type This = Node
@@ -242,11 +244,10 @@ private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
   }
 
   protected def newNode(factory: ServiceFactory[Req, Rep], weight: Double, statsReceiver: StatsReceiver): Node =
-    Node(factory, weight, new Metric(statsReceiver, factory.toString))
+    Node(factory, weight, new Metric(statsReceiver, factory.toString), rng.nextInt())
 
   protected def failingNode(cause: Throwable) = Node(
-    new FailingFactory(cause), 0D,
-    new Metric(NullStatsReceiver, "failing"))
+    new FailingFactory(cause), 0D, 
+    new Metric(NullStatsReceiver, "failing"),
+    0)
 }
-
-

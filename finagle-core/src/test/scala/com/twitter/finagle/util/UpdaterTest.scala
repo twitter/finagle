@@ -9,16 +9,20 @@ import java.util.concurrent.{CyclicBarrier, CountDownLatch}
 class UpdaterTest extends FunSuite {
   test("Prioritization") {
     case class Work(p: Int)
-    implicit val workPri = new Prioritized[Work] {def apply(w: Work) = w.p }
-
     @volatile var worked: Seq[Work] = Nil
     val barrier = new CyclicBarrier(2)
     val first = new CountDownLatch(1)
 
-    val u = Updater[Work] { w =>
-      worked :+= w
-      first.countDown()
-      barrier.await()
+    val u = new Updater[Work] {
+      protected def preprocess(elems: Seq[Work]) =
+        Seq(elems.minBy(_.p))
+
+      def handle(w: Work) {
+        worked :+= w
+        first.countDown()
+        barrier.await()
+        ()
+      }
     }
 
     val w0 = Work(0)
