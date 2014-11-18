@@ -1,12 +1,14 @@
 package com.twitter.finagle.builder
 
+import com.twitter.conversions.time._
+import com.twitter.finagle.integration.{DynamicCluster, StringCodec}
+import com.twitter.finagle.{Service, WriteException, IndividualRequestTimeoutException}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.util.{Future, Await, CountDownLatch, Promise}
+import java.net.{SocketAddress, InetSocketAddress}
+import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
-import com.twitter.util.{Future, Await, CountDownLatch, Promise}
-import com.twitter.finagle.Service
-import java.net.{SocketAddress, InetSocketAddress}
-import com.twitter.finagle.integration.{DynamicCluster, StringCodec}
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite {
@@ -81,5 +83,41 @@ class EndToEndTest extends FunSuite {
     }
     thread.start()
     thread.join()
+  }
+
+  test("ClientBuilder should be properly instrumented") {
+    val never = new Service[String, String] {
+      def apply(request: String) = new Promise[String]
+    }
+    val address = new InetSocketAddress(0)
+    val server = ServerBuilder()
+      .codec(StringCodec)
+      .bindTo(address)
+      .name("FinagleServer")
+      .build(never)
+
+    val mem = new InMemoryStatsReceiver
+    val client = ClientBuilder()
+      .name("client")
+      .hosts(server.localAddress)
+      .codec(StringCodec)
+      .requestTimeout(10.millisecond)
+      .hostConnectionLimit(1)
+      .hostConnectionMaxWaiters(1)
+      .reportTo(mem)
+      .build()
+
+    // generate com.twitter.finagle.IndividualRequestTimeoutException
+    intercept[IndividualRequestTimeoutException] { Await.result(client("hi")) }
+    Await.ready(server.close())
+    // generate com.twitter.finagle.WriteException$$anon$1
+    intercept[WriteException] { Await.result(client("hi")) }
+
+    val requestFailures = mem.counters(Seq("client", "failures"))
+    val serviceCreationFailures =
+      mem.counters(Seq("client", "service_creation", "failures"))
+
+    assert(requestFailures === 1)
+    assert(serviceCreationFailures === 1)
   }
 }

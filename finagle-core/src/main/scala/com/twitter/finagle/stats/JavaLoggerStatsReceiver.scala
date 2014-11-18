@@ -2,7 +2,6 @@ package com.twitter.finagle.stats
 
 import collection.mutable.HashMap
 import com.twitter.conversions.time._
-import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Timer, TimerTask}
 import java.util.logging.Logger
