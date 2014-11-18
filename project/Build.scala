@@ -189,7 +189,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-core",
     libraryDependencies ++= Seq(nettyLib, util("app"), util("core"), util("collection"),
-      util("hashing"), util("jvm"), util("logging"))
+      util("hashing"), util("stats"), util("jvm"), util("logging"))
   ).dependsOn(finagleTest % "test")
 
   lazy val finagleOstrich4 = Project(
