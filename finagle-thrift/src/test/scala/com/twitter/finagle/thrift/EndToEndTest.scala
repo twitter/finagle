@@ -140,7 +140,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
       // Verify the count of the annotations. Order may change.
       // These are set twice - by client and server
-      assert(traces.collect { case Record(_, _, Annotation.BinaryAnnotation(k, v), _) => () }.size === 2)
+      assert(traces.collect { case Record(_, _, Annotation.BinaryAnnotation(k, v), _) => () }.size === 3)
       assert(traces.collect { case Record(_, _, Annotation.Rpc("multiply"), _) => () }.size === 2)
       assert(traces.collect { case Record(_, _, Annotation.ServerAddr(_), _) => () }.size === 2)
       // With Stack, we get an extra ClientAddr because of the

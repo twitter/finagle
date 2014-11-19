@@ -84,6 +84,7 @@ private[finagle] class TTwitterServerFilter(
       // If `header.client_id` field is non-null, then allow it to take
       // precedence over the id provided by ClientIdContext.
       extractClientId(header) foreach { clientId => ClientId.set(Some(clientId)) }
+      Trace.recordBinary("srv/thrift/clientId", ClientId.current.getOrElse("None"))
 
       service(request_) map {
         case response if response.isEmpty => response
@@ -110,7 +111,7 @@ private[finagle] class TTwitterServerFilter(
       } else {
         // request from client without tracing support
         Trace.recordRpc(msg.name)
-        Trace.record("finagle.thrift.noUpgrade")
+        Trace.recordBinary("srv/thrift/ttwitter", false)
         service(request)
       }
     }
