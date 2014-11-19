@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.builder.{ServerBuilder, ClientBuilder}
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.tracing.{DefaultTracer, BufferingTracer, Trace}
-import java.net.{SocketAddress, InetSocketAddress}
+import java.net.{SocketAddress, InetSocketAddress, InetAddress}
 import org.apache.thrift.protocol._
 import org.scalatest.FunSuite
 import scala.collection.mutable
@@ -18,6 +18,7 @@ trait ThriftTest { self: FunSuite =>
   val processor: Iface
   val ifaceToService: (Iface, TProtocolFactory) => Service[Array[Byte], Array[Byte]]
   val serviceToIface: (Service[ThriftClientRequest, Array[Byte]], TProtocolFactory) => Iface
+  val loopback = InetAddress.getLoopbackAddress
 
   /**
    * A struct defining the data needed to run a single Thrift test.
@@ -52,7 +53,7 @@ trait ThriftTest { self: FunSuite =>
   private val newBuilderServer = (protocolFactory: TProtocolFactory) => new {
     val server = ServerBuilder()
       .codec(ThriftServerFramedCodec(protocolFactory))
-      .bindTo(new InetSocketAddress(0))
+      .bindTo(new InetSocketAddress(loopback, 0))
       .name("thriftserver")
       .tracer(DefaultTracer)
       .build(ifaceToService(processor, protocolFactory))
@@ -141,16 +142,6 @@ trait ThriftTest { self: FunSuite =>
     "builder" -> newBuilderServer,
     "api" -> newAPIServer
   )
-
-  lazy val notSkipFlaky = !Option(System.getProperty("SKIP_FLAKY")).isDefined
-
-  def testOrSkipFlaky(name: String)(testFun: => Unit) = {
-    if(notSkipFlaky){
-      test(name)(testFun)
-    } else {
-      ignore(name)(testFun)
-    }
-  }
 
   /** Invoke this in your test to run all defined thrift tests */
   def runThriftTests() = for {

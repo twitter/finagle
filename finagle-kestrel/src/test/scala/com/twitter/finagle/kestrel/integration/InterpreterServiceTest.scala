@@ -6,7 +6,7 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.kestrel.Server
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import java.net.InetSocketAddress
+import java.net.{InetSocketAddress, InetAddress}
 import com.twitter.util.{Await, Time}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -14,47 +14,36 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class InterpreterServiceTest extends FunSuite {
+  val queueName = "name"
+  val value = "value"
 
-  trait HelperTrait {
-    var server: Server = null
-    var client: Service[Command, Response] = null
-    var address: InetSocketAddress = null
-    val queueName = "name"
-    val value = "value"
+  def exec(fn: (Server, Service[Command, Response]) => Unit) {
+    val server: Server = new Server(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
+    val address: InetSocketAddress = server.start().localAddress.asInstanceOf[InetSocketAddress]
+    val client: Service[Command, Response] = ClientBuilder()
+      .hosts(address)
+      .codec(Kestrel())
+      .hostConnectionLimit(1)
+      .build()
 
-    def doBefore() = {
-      server = new Server(new InetSocketAddress(0))
-      address = server.start().localAddress.asInstanceOf[InetSocketAddress]
-      client = ClientBuilder()
-        .hosts("localhost:" + address.getPort)
-        .codec(Kestrel())
-        .hostConnectionLimit(1)
-        .build()
-    }
+    fn(server, client)
 
-    def doAfter() = { server.stop() }
+    server.stop()
   }
 
-  if (!sys.props.contains("SKIP_FLAKY"))
   test("InterpreterService should set & get") {
-    new HelperTrait {
-      doBefore()
-
+    exec { case (server, client) =>
       val result = for {
         _ <- client(Flush(queueName))
         _ <- client(Set(queueName, Time.now, value))
         r <- client(Get(queueName))
       } yield r
       assert(Await.result(result, 1.second) === Values(Seq(Value(queueName, value))))
-
-      doAfter()
     }
   }
 
   test("InterpreterService: transactions should set & get/open & get/abort") {
-    new HelperTrait {
-      doBefore()
-
+    exec { case (server, client) =>
       val result = for {
         _ <- client(Set(queueName, Time.now, value))
         _ <- client(Open(queueName))
@@ -62,8 +51,6 @@ class InterpreterServiceTest extends FunSuite {
         r <- client(Open(queueName))
       } yield r
       assert(Await.result(result, 1.second) === Values(Seq(Value(queueName, value))))
-
-      doAfter()
     }
   }
 }

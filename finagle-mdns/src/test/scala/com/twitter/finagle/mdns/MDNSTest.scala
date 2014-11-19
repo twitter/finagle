@@ -2,7 +2,7 @@ package com.twitter.finagle.mdns
 
 import com.twitter.finagle.{Announcer, Resolver, Addr}
 import com.twitter.util.{Await, RandomSocket, Var}
-import java.net.InetSocketAddress
+import java.net.{InetSocketAddress, InetAddress, Socket}
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.concurrent.Timeouts._
@@ -12,8 +12,26 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class MdnsTest extends FunSuite with Eventually with IntegrationPatience {
-  if (!sys.props.contains("SKIP_FLAKY")) test("bind locally") {
-    val ia = RandomSocket()
+  val loopback = InetAddress.getLoopbackAddress
+
+  test("bind locally") {
+    val rawIa = new InetSocketAddress(loopback, 0)
+
+    // this is a terrible hack, but it's tricky to do better.
+    // we want to use ephemeral ports in our tests, but we never need to
+    // bind to a port in this test, so it's difficult to coordinate over resolution.
+    // in order to get around this, we bind to a port explicitly, to convert our
+    // ephemeral port to one we can pass over MDNS.  It's OK to race here, because
+    // we can't collide, given that we never stand up a server to the port.
+    val ia = {
+      val socket = new Socket()
+      try {
+        socket.bind(rawIa)
+        socket.getLocalSocketAddress().asInstanceOf[InetSocketAddress]
+      } finally {
+        socket.close()
+      }
+    }
     val resolver = new MDNSResolver
     val announcer = new MDNSAnnouncer
     val dest = "my-service._finagle._tcp.local."
@@ -43,7 +61,7 @@ class MdnsTest extends FunSuite with Eventually with IntegrationPatience {
   }
 
   test("announce via the main announcer") {
-    val sock = RandomSocket()
+    val sock = new InetSocketAddress(loopback, 0)
     Await.result(Announcer.announce(sock, "local!foo"))
     Await.result(Announcer.announce(sock, "mdns!foo._bar._tcp.local."))
   }
@@ -51,7 +69,7 @@ class MdnsTest extends FunSuite with Eventually with IntegrationPatience {
   test("throws an exception on an imporperly formatted name") {
     val res = new MDNSResolver
     val ann = new MDNSAnnouncer
-    val ia = new InetSocketAddress(0)
+    val ia = new InetSocketAddress(loopback, 0)
     intercept[MDNSAddressException] { ann.announce(ia, "invalidname") }
     intercept[MDNSAddressException] { res.bind("invalidname") }
   }
