@@ -81,7 +81,7 @@ object HttpServerDispatcherTest {
   }
 
   def wrap(msg: String) = ChannelBuffers.wrappedBuffer(msg.getBytes("UTF-8"))
-  def buf(msg: String) = ChannelBufferBuf.Unsafe(wrap(msg))
+  def buf(msg: String) = ChannelBufferBuf.Owned(wrap(msg))
   def chunk(msg: String) = new DefaultHttpChunk(wrap(msg))
 
   def ok(readerIn: Reader): Future[Response] = {

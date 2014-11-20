@@ -43,8 +43,8 @@ abstract class Message extends HttpMessageProxy {
   def isRequest: Boolean
   def isResponse = !isRequest
 
-  // XXX should we may be using the Copied variants here?
-  def content: Buf = ChannelBufferBuf.Unsafe(getContent())
+  // XXX should we may be using the Shared variants here?
+  def content: Buf = ChannelBufferBuf.Owned(getContent())
   def content_=(content: Buf) { setContent(BufChannelBuffer(content)) }
 
   def version: Version = from(getProtocolVersion())

@@ -14,12 +14,12 @@ class ParserUtilsTest extends FunSuite {
 
   private def isDigitsBB(str: String): Boolean = {
     val bb = Charsets.Utf8.encode(str)
-    ParserUtils.isDigits(Buf.ByteBuffer.Unsafe(bb))
+    ParserUtils.isDigits(Buf.ByteBuffer.Owned(bb))
   }
 
   private def isDigitsBA(str: String): Boolean = {
     val bytes = str.getBytes(Charsets.Utf8)
-    ParserUtils.isDigits(Buf.ByteArray.Unsafe(bytes))
+    ParserUtils.isDigits(Buf.ByteArray.Owned(bytes))
   }
 
   private def isDigitsBuf(str: String): Boolean = {

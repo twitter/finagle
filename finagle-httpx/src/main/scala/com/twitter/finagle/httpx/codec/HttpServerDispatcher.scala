@@ -74,7 +74,7 @@ class HttpServerDispatcher(
             coll: Reader
           } else {
             eos.setDone()
-            BufReader(ChannelBufferBuf.Unsafe(reqIn.getContent))
+            BufReader(ChannelBufferBuf.Owned(reqIn.getContent))
           }
 
       }

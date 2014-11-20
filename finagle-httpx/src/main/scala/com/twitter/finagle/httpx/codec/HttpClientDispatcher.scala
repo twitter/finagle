@@ -53,7 +53,7 @@ class HttpClientDispatcher(trans: Transport[Any, Any])
           case res: HttpResponse if !res.isChunked =>
             val response = new Response {
               final val httpResponse = res
-              override val reader = BufReader(ChannelBufferBuf.Unsafe(res.getContent))
+              override val reader = BufReader(ChannelBufferBuf.Owned(res.getContent))
             }
 
             p.updateIfEmpty(Return(response))
