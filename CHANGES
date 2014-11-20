@@ -20,6 +20,11 @@ Breaking API Changes
     
   * finagle-mux: The experimental session API was discontinued.
 
+  * finagle-mux: Introduce new Request and Response types for mux services.
+    The new mux request includes a `destination` path so that, which corresponds
+    to the `destination` field in Tdispatch requests. Furthermore, these new
+    types expose `c.t.io.Buf` instead of Netty's ChannelBuffers.
+
 Deprecations
 ~~~~~~~~~~~~
 

@@ -1,18 +1,14 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client._
 import com.twitter.finagle.param.{Label, Stats}
-import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientRequest}
-import com.twitter.util.{Future, Local, Time}
+import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest}
 import org.apache.thrift.protocol.TProtocolFactory
-import org.jboss.netty.buffer.{ChannelBuffer => CB, ChannelBuffers}
 
 /**
  * A [[com.twitter.finagle.Client]] for the Thrift protocol served over
  * [[com.twitter.finagle.mux]]. This class can't be instantiated. For a default
  * instance of ThriftMuxClientLike, see [[com.twitter.finagle.ThriftMuxClient]].
  */
-
 @deprecated("Use object ThriftMux", "7.0.0")
 class ThriftMuxClientLike private[finagle](client: ThriftMux.Client)
   extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient

@@ -2,13 +2,12 @@ package com.twitter.finagle.mux
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.mux.lease.exp.{Lessor, Lessee, nackOnExpiredLease}
-import com.twitter.finagle.netty3.ChannelBufferBuf
-import com.twitter.finagle.tracing.{Annotation, DefaultTracer, Trace, Tracer}
+import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
+import com.twitter.finagle.tracing.{DefaultTracer, Trace, Tracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
-import com.twitter.finagle.{CancelledRequestException, Context, Dtab, Service, WriteException}
+import com.twitter.finagle.{Path, CancelledRequestException, Context, Dtab, Service}
 import com.twitter.util._
-import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import org.jboss.netty.buffer.ChannelBuffer
@@ -31,27 +30,27 @@ object ServerDispatcher {
  */
 private[finagle] class ServerDispatcher private[finagle](
     trans: Transport[ChannelBuffer, ChannelBuffer],
-    service: Service[ChannelBuffer, ChannelBuffer],
+    service: Service[Request, Response],
     canDispatch: Boolean, // XXX: a hack to indicate whether a server understand {T,R}Dispatch
     lessor: Lessor, // the lessor that the dispatcher should register with in order to get leases
     tracer: Tracer
 ) extends Closable with Lessee {
   def this(
     trans: Transport[ChannelBuffer, ChannelBuffer],
-    service: Service[ChannelBuffer, ChannelBuffer],
+    service: Service[Request, Response],
     canDispatch: Boolean
   ) = this(trans, service, canDispatch, Lessor.nil, DefaultTracer)
 
   def this(
     trans: Transport[ChannelBuffer, ChannelBuffer],
-    service: Service[ChannelBuffer, ChannelBuffer],
+    service: Service[Request, Response],
     canDispatch: Boolean,
     lessor: Lessor
   ) = this(trans, service, canDispatch, lessor, DefaultTracer)
 
   def this(
     trans: Transport[ChannelBuffer, ChannelBuffer],
-    service: Service[ChannelBuffer, ChannelBuffer],
+    service: Service[Request, Response],
     canDispatch: Boolean,
     tracer: Tracer
   ) = this(trans, service, canDispatch, Lessor.nil, tracer)
@@ -68,8 +67,9 @@ private[finagle] class ServerDispatcher private[finagle](
 
   private[this] val log = DefaultLogger
 
+  //// TODO: rewrite Treqs into Tdispatches?
   private[this] def dispatch(tdispatch: Tdispatch): Unit = {
-    val Tdispatch(tag, contexts, /*ignore*/_dst, dtab, req) = tdispatch
+    val Tdispatch(tag, contexts, dst, dtab, bytes) = tdispatch
     if (nackOnExpiredLease() && (lease <= Duration.Zero))
       trans.write(encode(RdispatchNack(tag, Seq.empty)))
     else {
@@ -90,14 +90,14 @@ private[finagle] class ServerDispatcher private[finagle](
           if (dtab.length > 0)
             Dtab.local ++= dtab
           val elapsed = Stopwatch.start()
-          val f = service(req)
+          val f = service(Request(dst, ChannelBufferBuf.Owned(bytes)))
           pending.put(tag, f)
           f respond { tr =>
             removeTag(tag)
             tr match {
               case Return(rep) =>
                 lessor.observe(elapsed())
-                trans.write(encode(RdispatchOk(tag, Seq.empty, rep)))
+                trans.write(encode(RdispatchOk(tag, Seq.empty, BufChannelBuffer(rep.body))))
               case Throw(exc) =>
                 trans.write(encode(RdispatchError(tag, Seq.empty, exc.toString)))
             }
@@ -108,7 +108,7 @@ private[finagle] class ServerDispatcher private[finagle](
   }
 
   private[this] def dispatchTreq(treq: Treq): Unit = {
-    val Treq(tag, traceId, req) = treq
+    val Treq(tag, traceId, bytes) = treq
     lessor.observeArrival()
     Trace.unwind {
       Trace.pushTracer(tracer)
@@ -116,14 +116,14 @@ private[finagle] class ServerDispatcher private[finagle](
         Trace.setId(traceId)
 
       val elapsed = Stopwatch.start()
-      val f = service(req)
+      val f = service(Request(Path.empty, ChannelBufferBuf.Owned(bytes)))
       pending.put(tag, f)
       f respond { tr =>
         removeTag(tag)
         tr match {
           case Return(rep) =>
             lessor.observe(elapsed())
-            trans.write(encode(RreqOk(tag, rep)))
+            trans.write(encode(RreqOk(tag, BufChannelBuffer(rep.body))))
           case Throw(exc) =>
             trans.write(encode(RreqError(tag, exc.toString)))
         }

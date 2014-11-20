@@ -1,21 +1,20 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.param.{Label, Stats}
-import com.twitter.finagle.thrift.{
-  ClientId, Protocols, ThriftClientRequest, HandleUncaughtApplicationExceptions}
 import com.twitter.finagle.client.StackClient
-import com.twitter.finagle.mux.lease.exp.ClockedDrainer
-import com.twitter.finagle.server.{StackServer, StdStackServer, Listener}
-import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.netty3.Netty3Listener
-import com.twitter.util.NonFatal
-import java.net.SocketAddress
+import com.twitter.finagle.param.{Label, Stats}
+import com.twitter.finagle.server.{StackServer, StdStackServer, Listener}
 import com.twitter.finagle.stats.{ClientStatsReceiver, ServerStatsReceiver}
+import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientRequest, HandleUncaughtApplicationExceptions}
+import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.transport.Transport
+import com.twitter.io.Buf
+import com.twitter.util.NonFatal
+import com.twitter.util.{Future, Time, Local}
+import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
 import org.apache.thrift.transport.TMemoryInputTransport
-import org.jboss.netty.buffer.{ChannelBuffer => CB, ChannelBuffers}
-import com.twitter.util.{Future, Time, Local}
+import org.jboss.netty.buffer.{ChannelBuffer => CB}
 
 
 /**
@@ -65,21 +64,25 @@ object ThriftMux
   }
 
   private object ClientRpcTracing extends Mux.ClientProtoTracing {
-    private[this] val rpcTracer = new SimpleFilter[CB, CB] {
-      def apply(request: CB, svc: Service[CB, CB]): Future[CB] = {
+    private[this] val rpcTracer = new SimpleFilter[mux.Request, mux.Response] {
+      def apply(
+        request: mux.Request,
+        svc: Service[mux.Request, mux.Response]
+      ): Future[mux.Response] = {
         // we're reasonably sure that this filter sits just after the ThriftClientRequest's
         // message array is wrapped by a ChannelBuffer
-        recordRpc(request.array())
+        recordRpc(Buf.ByteArray.Owned.extract(request.body))
         svc(request)
       }
     }
 
-    override def make(next: ServiceFactory[CB, CB]) =
+    override def make(next: ServiceFactory[mux.Request, mux.Response]) =
       rpcTracer andThen super.make(next)
   }
 
   case class Client(
-    muxer: StackClient[CB, CB] = Mux.client.copy(stack = BaseClientStack),
+    muxer: StackClient[mux.Request, mux.Response] = Mux.client.copy(
+      stack = BaseClientStack),
     // TODO: consider stuffing these into Stack.Params
     clientId: Option[ClientId] = None,
     protocolFactory: TProtocolFactory = Protocols.binaryFactory()
@@ -128,8 +131,10 @@ object ThriftMux
             val save = Local.save()
             try {
               ClientId.set(clientId)
-              service(ChannelBuffers.wrappedBuffer(req.message)) map { bytes =>
-                ThriftMuxUtil.bufferToArray(bytes)
+              // TODO set the Path here.
+              val muxreq = mux.Request(Path.empty, Buf.ByteArray.Owned(req.message))
+              service(muxreq) map { rep =>
+                Buf.ByteArray.Owned.extract(rep.body)
               }
             } finally {
               Local.restore(save)
@@ -197,14 +202,14 @@ object ThriftMux
    */
 
   case class ServerMuxer(
-    stack: Stack[ServiceFactory[CB, CB]] = BaseServerStack,
+    stack: Stack[ServiceFactory[mux.Request, mux.Response]] = BaseServerStack,
     params: Stack.Params = Mux.server.params
-  ) extends StdStackServer[CB, CB, ServerMuxer] {
+  ) extends StdStackServer[mux.Request, mux.Response, ServerMuxer] {
     protected type In = CB
     protected type Out = CB
 
     protected def copy1(
-      stack: Stack[ServiceFactory[CB, CB]] = this.stack,
+      stack: Stack[ServiceFactory[mux.Request, mux.Response]] = this.stack,
       params: Stack.Params = this.params
     ) = copy(stack, params)
 
@@ -227,16 +232,20 @@ object ThriftMux
       }
     }
 
-    protected def newDispatcher(transport: Transport[In, Out], service: Service[CB, CB]) = {
+    protected def newDispatcher(
+      transport: Transport[In, Out],
+      service: Service[mux.Request, mux.Response]
+    ) = {
       val param.Tracer(tracer) = params[param.Tracer]
-      new mux.ServerDispatcher(transport, service, true, ClockedDrainer.flagged, tracer)
+      new mux.ServerDispatcher(transport, service, true, mux.lease.exp.ClockedDrainer.flagged,
+        tracer)
     }
   }
 
   val serverMuxer = ServerMuxer()
 
   case class Server(
-    muxer: StackServer[CB, CB] = serverMuxer,
+    muxer: StackServer[mux.Request, mux.Response] = serverMuxer,
     protocolFactory: TProtocolFactory = Protocols.binaryFactory()
   ) extends com.twitter.finagle.Server[Array[Byte], Array[Byte]]
       with ThriftRichServer with Stack.Parameterized[Server] {
@@ -253,13 +262,15 @@ object ThriftMux
     def withParams(ps: Stack.Params): Server =
       copy(muxer=muxer.withParams(ps))
 
-    private[this] val bufToArrayFilter =
-      new Filter[CB, CB, Array[Byte], Array[Byte]] {
+    private[this] val muxToArrayFilter =
+      new Filter[mux.Request, mux.Response, Array[Byte], Array[Byte]] {
         def apply(
-          request: CB, service: Service[Array[Byte], Array[Byte]]
-        ): Future[CB] = {
-          val arr = ThriftMuxUtil.bufferToArray(request)
-          service(arr) map ChannelBuffers.wrappedBuffer
+          request: mux.Request, service: Service[Array[Byte], Array[Byte]]
+        ): Future[mux.Response] = {
+          val reqBytes = Buf.ByteArray.Owned.extract(request.body)
+          service(reqBytes) map { repBytes =>
+            mux.Response(Buf.ByteArray.Owned(repBytes))
+          }
         }
       }
 
@@ -276,7 +287,7 @@ object ThriftMux
         // the backward compatibility with non-mux thrift clients. Mux thrift
         // clients get the same semantics as a side effect.
         val uncaughtExceptionsFilter = new HandleUncaughtApplicationExceptions(protocolFactory)
-        bufToArrayFilter andThen tracingFilter andThen uncaughtExceptionsFilter andThen service
+        muxToArrayFilter andThen tracingFilter andThen uncaughtExceptionsFilter andThen service
       })
     }
 

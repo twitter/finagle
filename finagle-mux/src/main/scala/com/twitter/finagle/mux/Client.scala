@@ -2,7 +2,7 @@ package com.twitter.finagle.mux
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.mux.lease.Acting
-import com.twitter.finagle.netty3.BufChannelBuffer
+import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
@@ -10,7 +10,7 @@ import com.twitter.finagle.{Context, Dtab, Service, WriteException, NoStacktrace
 import com.twitter.util.{Future, Promise, Time, Duration}
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.logging.Logger
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 
 /**
  * Indicates that a client request was denied by the server.
@@ -63,7 +63,7 @@ private object Cap extends Enumeration {
 private[finagle] class ClientDispatcher (
   trans: Transport[ChannelBuffer, ChannelBuffer],
   sr: StatsReceiver
-) extends Service[ChannelBuffer, ChannelBuffer] with Acting {
+) extends Service[Request, Response] with Acting {
   // protects the "drained" field, so that we don't send a request
   // after sending an Rdrain message
   private[this] val drainLock = new ReentrantReadWriteLock
@@ -77,7 +77,7 @@ private[finagle] class ClientDispatcher (
 
   private[this] val futureNackedException = Future.exception(RequestNackedException)
   private[this] val tags = TagSet()
-  private[this] val reqs = TagMap[Promise[ChannelBuffer]](tags)
+  private[this] val reqs = TagMap[Promise[Response]](tags)
   private[this] val log = Logger.getLogger(getClass.getName)
 
   @volatile private[this] var lease = new Lease(Time.Top)
@@ -90,7 +90,7 @@ private[finagle] class ClientDispatcher (
   private[this] val receive: Message => Unit = {
     case RreqOk(tag, rep) =>
       for (p <- reqs.unmap(tag))
-        p.setValue(rep)
+        p.setValue(Response(ChannelBufferBuf.Owned(rep)))
     case RreqError(tag, error) =>
       for (p <- reqs.unmap(tag))
         p.setException(ServerApplicationError(error))
@@ -100,7 +100,7 @@ private[finagle] class ClientDispatcher (
 
     case RdispatchOk(tag, _, rep) =>
       for (p <- reqs.unmap(tag))
-        p.setValue(rep)
+        p.setValue(Response(ChannelBufferBuf.Owned(rep)))
     case RdispatchError(tag, _, error) =>
       for (p <- reqs.unmap(tag))
         p.setException(ServerApplicationError(error))
@@ -114,7 +114,7 @@ private[finagle] class ClientDispatcher (
 
     case Rping(tag) =>
       for (p <- reqs.unmap(tag))
-        p.setValue(ChannelBuffers.EMPTY_BUFFER)
+        p.setValue(Response.empty)
     case Tping(tag) =>
       trans.write(encode(Rping(tag)))
     case Tdrain(tag) =>
@@ -162,7 +162,7 @@ private[finagle] class ClientDispatcher (
   }
 
   def ping(): Future[Unit] = {
-    val p = new Promise[ChannelBuffer]
+    val p = new Promise[Response]
     reqs.map(p) match {
       case None =>
         Future.exception(WriteException(new Exception("Exhausted tags")))
@@ -173,7 +173,7 @@ private[finagle] class ClientDispatcher (
     }
   }
 
-  def apply(req: ChannelBuffer): Future[ChannelBuffer] = {
+  def apply(req: Request): Future[Response] = {
     checkDrained.lockInterruptibly()
     try {
       if (drained)
@@ -189,11 +189,9 @@ private[finagle] class ClientDispatcher (
    * Dispatch a request.
    *
    * @param req the buffer representation of the request to be dispatched
-   * @param traceWrite if true, tracing info will be recorded for the request.
-   * If case, no tracing will be performed.
    */
-  private def dispatch(req: ChannelBuffer): Future[ChannelBuffer] = {
-    val p = new Promise[ChannelBuffer]
+  private def dispatch(req: Request): Future[Response] = {
+    val p = new Promise[Response]
     val couldDispatch = canDispatch
 
     val tag = reqs.map(p) getOrElse {
@@ -202,19 +200,20 @@ private[finagle] class ClientDispatcher (
 
     val msg =
       if (couldDispatch == Cap.No)
-        Treq(tag, Some(Trace.id), req)
+        Treq(tag, Some(Trace.id), BufChannelBuffer(req.body))
       else {
         val contexts = Context.emit() map { case (k, v) =>
           (BufChannelBuffer(k), BufChannelBuffer(v))
         }
-        Tdispatch(tag, contexts.toSeq, "", Dtab.local, req)
+        Tdispatch(tag, contexts.toSeq, req.destination, Dtab.local,
+          BufChannelBuffer(req.body))
       }
 
     trans.write(encode(msg)) onFailure { case exc =>
       reqs.unmap(tag)
     } before {
       p.setInterruptHandler { case cause =>
-        for (reqP <- reqs.maybeRemap(tag, new Promise[ChannelBuffer])) {
+        for (reqP <- reqs.maybeRemap(tag, new Promise[Response])) {
           trans.write(encode(Tdiscarded(tag, cause.toString)))
           reqP.setException(cause)
         }

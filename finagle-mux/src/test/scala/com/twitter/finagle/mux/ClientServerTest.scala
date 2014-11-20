@@ -1,21 +1,20 @@
 package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.tracing.{
-  Annotation, BufferingTracer, Flags, Record, SpanId, Trace, TraceId}
-import com.twitter.finagle.transport.QueueTransport
+import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.{Service, ContextHandler}
-import com.twitter.io.{Charsets, Buf}
+import com.twitter.finagle.tracing.{BufferingTracer, Flags, Trace}
+import com.twitter.finagle.transport.QueueTransport
+import com.twitter.finagle.{Path, Service, ContextHandler}
+import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
-import java.net.InetSocketAddress
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify, when}
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{OneInstancePerTest, FunSuite}
 
@@ -36,7 +35,7 @@ class MuxContext extends ContextHandler {
 }
 
 private[mux] class ClientServerTest(canDispatch: Boolean)
-  extends FunSuite with OneInstancePerTest with MockitoSugar
+  extends FunSuite with OneInstancePerTest with MockitoSugar with AssertionsForJUnit
 {
   val tracer = new BufferingTracer
   Trace.pushTracer(tracer)  /* For the client */
@@ -46,7 +45,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     new QueueTransport(writeq=serverToClient, readq=clientToServer)
   val clientTransport =
     new QueueTransport(writeq=clientToServer, readq=serverToClient)
-  val service = mock[Service[ChannelBuffer, ChannelBuffer]]
+  val service = mock[Service[Request, Response]]
   val client = new ClientDispatcher(clientTransport, NullStatsReceiver)
   val server = new ServerDispatcher(serverTransport, service, canDispatch) {
     private val saveReceive = receive
@@ -58,35 +57,37 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     }
   }
 
-  def buf(b: Byte*) = ChannelBuffers.wrappedBuffer(Array[Byte](b:_*))
+  def buf(b: Byte*) = Buf.ByteArray(b:_*)
 
   test("handle concurrent requests, handling out of order replies") {
-    val p1, p2, p3 = new Promise[ChannelBuffer]
-    when(service(buf(1))).thenReturn(p1)
-    when(service(buf(2))).thenReturn(p2)
-    when(service(buf(3))).thenReturn(p3)
+    val p1, p2, p3 = new Promise[Response]
+    val reqs = (1 to 3) map { i => Request(Path.empty, buf(i.toByte)) }
+    when(service(reqs(0))).thenReturn(p1)
+    when(service(reqs(1))).thenReturn(p2)
+    when(service(reqs(2))).thenReturn(p3)
 
-    val f1 = client(buf(1))
-    val f2 = client(buf(2))
-    val f3 = client(buf(3))
+    val f1 = client(reqs(0))
+    val f2 = client(reqs(1))
+    val f3 = client(reqs(2))
 
-    for (i <- 1 to 3)
-      verify(service)(buf(i.toByte))
+    for (i <- 0 to 2)
+      verify(service)(reqs(i))
 
     for (f <- Seq(f1, f2, f3))
       assert(f.poll === None)
 
-    p2.setValue(buf(20))
+    val reps = Seq(10, 20, 9) map { i => Response(buf(i.toByte)) }
+    p2.setValue(reps(1))
     assert(f1.poll === None)
-    assert(f2.poll === Some(Return(buf(20))))
+    assert(f2.poll === Some(Return(reps(1))))
     assert(f3.poll === None)
 
-    p1.setValue(buf(10))
-    assert(f1.poll === Some(Return(buf(10))))
+    p1.setValue(reps(0))
+    assert(f1.poll === Some(Return(reps(0))))
     assert(f3.poll === None)
 
-    p3.setValue(buf(9))
-    assert(f3.poll === Some(Return(buf(9))))
+    p3.setValue(reps(2))
+    assert(f3.poll === Some(Return(reps(2))))
   }
 
   test("server respond to pings") {
@@ -94,30 +95,35 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   }
 
   test("server nacks new requests after draining") {
-    val p1 = new Promise[ChannelBuffer]
-    when(service(buf(1))).thenReturn(p1)
+    val req1 = Request(Path.empty, buf(1))
+    val p1 = new Promise[Response]
+    when(service(req1)).thenReturn(p1)
 
-    val f1 = client(buf(1))
-    verify(service)(buf(1))
+    val f1 = client(req1)
+    verify(service)(req1)
     server.close(Time.now)
     assert(f1.poll === None)
-    assert(client(buf(2)).poll === Some(Throw(RequestNackedException)))
-    verify(service, never)(buf(2))
+    val req2 = Request(Path.empty, buf(2))
+    assert(client(req2).poll === Some(Throw(RequestNackedException)))
+    verify(service, never)(req2)
 
-    p1.setValue(buf(123))
-    assert(f1.poll === Some(Return(buf(123))))
+    val rep1 = Response(buf(123))
+    p1.setValue(rep1)
+    assert(f1.poll === Some(Return(rep1)))
   }
 
   test("handle errors") {
-    when(service(buf(1))).thenReturn(Future.exception(new Exception("sad panda")))
-    assert(client(buf(1)).poll === Some(
+    val req = Request(Path.empty, buf(1))
+    when(service(req)).thenReturn(Future.exception(new Exception("sad panda")))
+    assert(client(req).poll === Some(
       Throw(ServerApplicationError("java.lang.Exception: sad panda"))))
   }
 
   test("propagate interrupts") {
-    val p = new Promise[ChannelBuffer]
-    when(service(buf(1))).thenReturn(p)
-    val f = client(buf(1))
+    val req = Request(Path.empty, buf(1))
+    val p = new Promise[Response]
+    when(service(req)).thenReturn(p)
+    val f = client(req)
 
     assert(f.poll === None)
     assert(p.isInterrupted === None)
@@ -131,36 +137,30 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   }
 
   test("propagate trace ids") {
-    when(service(any[ChannelBuffer])).thenAnswer(
-      new Answer[Future[ChannelBuffer]]() {
-        def answer(invocation: InvocationOnMock) = {
-          val traceId = ChannelBuffers.wrappedBuffer(
-            Trace.id.toString.getBytes(Charsets.Utf8))
-          Future.value(traceId)
-        }
+    when(service(any[Request])).thenAnswer(
+      new Answer[Future[Response]]() {
+        def answer(invocation: InvocationOnMock) =
+          Future.value(Response(Buf.Utf8(Trace.id.toString)))
       }
     )
 
     val id = Trace.nextId
     val resp = Trace.unwind {
       Trace.setId(id)
-      client(buf(1))
+      client(Request(Path.empty, buf(1)))
     }
     assert(resp.poll.isDefined)
-    val respBuf = Await.result(resp)
-    val respArr = new Array[Byte](respBuf.readableBytes)
-    respBuf.readBytes(respArr)
-    val respStr = new String(respArr, Charsets.Utf8)
+    val Buf.Utf8(respStr) = Await.result(resp).body
     assert(respStr === id.toString)
   }
 
   test("propagate trace flags") {
-    when(service(any[ChannelBuffer])).thenAnswer(
-      new Answer[Future[ChannelBuffer]] {
+    when(service(any[Request])).thenAnswer(
+      new Answer[Future[Response]] {
         def answer(invocation: InvocationOnMock) = {
           val buf = ChannelBuffers.directBuffer(8)
           buf.writeLong(Trace.id.flags.toLong)
-          Future.value(buf)
+          Future.value(Response(ChannelBufferBuf.Owned(buf)))
         }
       }
     )
@@ -169,18 +169,28 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     val id = Trace.nextId.copy(flags=flags)
     val resp = Trace.unwind {
       Trace.setId(id)
-      val p = client(buf(1))
+      val p = client(Request(Path.empty, buf(1)))
       p
     }
     assert(resp.poll.isDefined)
-    assert(Await.result(resp).readableBytes === 8)
-    val respFlags = Flags(Await.result(resp).readLong)
+    val respCb = BufChannelBuffer(Await.result(resp).body)
+    assert(respCb.readableBytes === 8)
+    val respFlags = Flags(respCb.readLong())
     assert(respFlags === flags)
   }
 }
 
 @RunWith(classOf[JUnitRunner])
-class ClientServerTestNoDispatch extends ClientServerTest(false)
+class ClientServerTestNoDispatch extends ClientServerTest(false) {
+  test("does not dispatch destinations") {
+    val withDst = Request(Path.read("/dst/name"), buf(123))
+    val withoutDst = Request(Path.empty, buf(123))
+    val rep = Response(buf(23))
+    when(service(withoutDst)).thenReturn(Future.value(rep))
+    assert(Await.result(client(withDst)) === rep)
+    verify(service)(withoutDst)
+  }
+}
 
 @RunWith(classOf[JUnitRunner])
 class ClientServerTestDispatch extends ClientServerTest(true) {
@@ -188,22 +198,29 @@ class ClientServerTestDispatch extends ClientServerTest(true) {
   // since it's a default request context.
 
   test("Transmits request contexts") {
-    when(service(any[ChannelBuffer])).thenReturn(
-      Future.value(ChannelBuffers.EMPTY_BUFFER))
+    when(service(any[Request])).thenReturn(Future.value(Response.empty))
 
     MuxContext.handled = Seq.empty
     MuxContext.buf = Buf.ByteArray(1,2,3,4)
-    var f = client(ChannelBuffers.EMPTY_BUFFER)
+    var f = client(Request.empty)
     assert(f.isDefined)
     Await.result(f)
     assert(MuxContext.handled === Seq(Buf.ByteArray(1,2,3,4)))
 
     MuxContext.buf = Buf.ByteArray(9,8,7,6)
-    f = client(ChannelBuffers.EMPTY_BUFFER)
+    f = client(Request.empty)
     assert(f.isDefined)
     Await.result(f)
 
     assert(MuxContext.handled === Seq(
       Buf.ByteArray(1,2,3,4), Buf.ByteArray(9,8,7,6)))
+  }
+
+  test("dispatches destinations") {
+    val req = Request(Path.read("/dst/name"), buf(123))
+    val rep = Response(buf(23))
+    when(service(req)).thenReturn(Future.value(rep))
+    assert(Await.result(client(req)) === rep)
+    verify(service)(req)
   }
 }
