@@ -47,7 +47,7 @@ private class BufChannelBufferFactory(defaultOrder: ByteOrder) extends ChannelBu
    * `capacity` zeros and `order` endianness.
    */
   def getBuffer(order: ByteOrder, capacity: Int): ChannelBuffer =
-    new BufChannelBuffer(Buf.ByteArray.Unsafe(new Array[Byte](capacity)), order)
+    new BufChannelBuffer(Buf.ByteArray.Owned(new Array[Byte](capacity)), order)
 
   /**
    * Returns a read-only ChannelBuffer whose content is equal to the
@@ -90,10 +90,10 @@ object BufChannelBuffer {
     case empty if empty.isEmpty =>
       ChannelBuffers.EMPTY_BUFFER
 
-    case ChannelBufferBuf.Unsafe(cb) if endianness == cb.order =>
+    case ChannelBufferBuf.Owned(cb) if endianness == cb.order =>
       cb
 
-    case Buf.ByteArray.Unsafe(bytes, begin, end) =>
+    case Buf.ByteArray.Owned(bytes, begin, end) =>
       ChannelBuffers.wrappedBuffer(endianness, bytes).slice(begin, end-begin)
 
     case _ =>

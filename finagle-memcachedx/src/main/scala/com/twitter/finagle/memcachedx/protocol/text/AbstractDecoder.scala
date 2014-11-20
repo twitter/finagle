@@ -65,7 +65,7 @@ abstract class AbstractDecoder extends FrameDecoder {
       buffer.skipBytes(bytesNeeded + DelimiterLength)
 
       start()
-      // Copied rather than wrapped to avoid caching data outside the reader/writer mark.
+      // Shared rather than wrapped to avoid caching data outside the reader/writer mark.
       continue(ChannelBuffers.copiedBuffer(data))
     }
   }

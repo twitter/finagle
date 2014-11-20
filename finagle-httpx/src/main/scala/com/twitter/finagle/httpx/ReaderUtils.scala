@@ -28,7 +28,7 @@ private[httpx] object ReaderUtils {
    * of stream.
    */
   def chunkOfBuf(buf: Buf): HttpChunk =
-    new DefaultHttpChunk(ChannelBufferBuf.Unsafe.extract(buf))
+    new DefaultHttpChunk(ChannelBufferBuf.Owned.extract(buf))
 
   /**
    * Continuously read from a Reader, writing everything to a Transport.

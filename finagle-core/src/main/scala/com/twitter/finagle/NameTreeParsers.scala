@@ -102,7 +102,7 @@ private class NameTreeParsers private (str: String) {
       }
     } while (isLabelChar(peek))
 
-    Buf.ByteArray.Unsafe(baos.getBuf, 0, baos.size)
+    Buf.ByteArray.Owned(baos.getBuf, 0, baos.size)
   }
 
   private[this] def isNumberChar(c: Char) = c.isDigit || c == '.'

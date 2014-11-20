@@ -46,7 +46,7 @@ object ParserUtils {
   def isDigits(buf: Buf): Boolean =
     if (buf.isEmpty) false
     else {
-      val Buf.ByteArray.Unsafe(bytes, begin, end) = Buf.ByteArray.coerce(buf)
+      val Buf.ByteArray.Owned(bytes, begin, end) = Buf.ByteArray.coerce(buf)
       var i = begin
       while (i < end) {
         if (bytes(i) < '0' || bytes(i) > '9')

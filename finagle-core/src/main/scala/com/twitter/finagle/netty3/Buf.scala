@@ -49,8 +49,8 @@ object ChannelBufferBuf {
   /**
    * Obtain a buffer using the provided ChannelBuffer unsafely.
    */
-  @deprecated("Use ChannelBufferBuf.Copied, ChannelBufferBuf.Unsafe.", "6.23.0")
-  def apply(cb: ChannelBuffer): Buf = Unsafe(cb.duplicate)
+  @deprecated("Use ChannelBufferBuf.Shared, ChannelBufferBuf.Owned.", "6.23.0")
+  def apply(cb: ChannelBuffer): Buf = Owned(cb.duplicate)
 
   /** Extract a read-only ChannelBuffer from a ChannelBufferBuf. */
   def unapply(cbb: ChannelBufferBuf): Option[ChannelBuffer] =
@@ -63,12 +63,12 @@ object ChannelBufferBuf {
     case buf: ChannelBufferBuf => buf
     case buf if buf.isEmpty => ChannelBufferBuf.Empty
     case buf =>
-      val Buf.ByteArray.Unsafe(bytes, begin, end) = Buf.ByteArray.coerce(buf)
+      val Buf.ByteArray.Owned(bytes, begin, end) = Buf.ByteArray.coerce(buf)
       val cb = ChannelBuffers.wrappedBuffer(bytes, begin, end - begin)
       new ChannelBufferBuf(cb)
   }
 
-  object Unsafe {
+  object Owned {
 
     // N.B. We cannot use ChannelBuffers.unmodifiableBuffer to ensure
     // correctness because it prevents direct access to its underlying byte
@@ -90,9 +90,9 @@ object ChannelBufferBuf {
     def extract(buf: Buf): ChannelBuffer = ChannelBufferBuf.coerce(buf).underlying
   }
 
-  object Copied {
-    def apply(cb: ChannelBuffer): Buf = Unsafe(cb.copy)
-    def unapply(cbb: ChannelBufferBuf): Option[ChannelBuffer] = Unsafe.unapply(cbb).map(_.copy)
-    def extract(buf: Buf): ChannelBuffer =  Unsafe.extract(buf).copy
+  object Shared {
+    def apply(cb: ChannelBuffer): Buf = Owned(cb.copy)
+    def unapply(cbb: ChannelBufferBuf): Option[ChannelBuffer] = Owned.unapply(cbb).map(_.copy)
+    def extract(buf: Buf): ChannelBuffer =  Owned.extract(buf).copy
   }
 }

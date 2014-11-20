@@ -34,7 +34,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
 
   def drip(w: Writer): Future[Unit] = w.write(buf("*")) before drip(w)
   def buf(msg: String): Buf =
-    ChannelBufferBuf.Unsafe(
+    ChannelBufferBuf.Owned(
       ChannelBuffers.wrappedBuffer(msg.getBytes("UTF-8")))
 
   /**
