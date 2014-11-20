@@ -2,9 +2,11 @@ package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
-import com.twitter.io.Charsets
+import com.twitter.finagle.Path
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.transport.QueueTransport
+import com.twitter.io.{Buf, Charsets}
 import com.twitter.util.{Return, Throw, Time}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
@@ -41,9 +43,10 @@ class ClientTest extends FunSuite {
       val transport = new QueueTransport(writeq=clientToServer, readq=serverToClient)
       val client = new ClientDispatcher(transport, NullStatsReceiver)
 
-      val f = client(buf)
+      val req = Request(Path.empty, ChannelBufferBuf(buf))
+      val f = client(req)
       val Some(Return(treq)) = clientToServer.poll.poll
-      val Tdispatch(tag, contexts, dst, dtab, req) = decode(treq)
+      val Tdispatch(tag, contexts, _, _, _) = decode(treq)
       serverToClient.offer(encode(Tdrain(tag + 1)))
 
       val drained = clientToServer.poll
@@ -54,12 +57,12 @@ class ClientTest extends FunSuite {
       assert(!client.isActive)
       assert(newTag === tag + 1)
 
-      serverToClient.offer(encode(RdispatchOk(tag, contexts, ChannelBuffers.copiedBuffer(req.toString("UTF-8").reverse, Charsets.Utf8))))
+      serverToClient.offer(encode(RdispatchOk(tag, contexts, ChannelBuffers.copiedBuffer(buf.toString("UTF-8").reverse, Charsets.Utf8))))
 
       val Some(Return(result)) = f.poll
-      assert(result === ChannelBuffers.copiedBuffer(buf.toString("UTF-8").reverse, Charsets.Utf8))
+      assert(result === Response(Buf.Utf8("KO")))
 
-      val f2 = client(buf)
+      val f2 = client(req)
       val Some(Throw(nack)) = f2.poll
       assert(nack === RequestNackedException)
 
@@ -76,9 +79,10 @@ class ClientTest extends FunSuite {
       val transport = new QueueTransport(writeq=clientToServer, readq=serverToClient)
       val client = new ClientDispatcher(transport, NullStatsReceiver)
 
-      val f = client(buf)
+      val req = Request(Path.empty, ChannelBufferBuf(buf))
+      val f = client(req)
       val Some(Return(treq)) = clientToServer.poll.poll
-      val Tdispatch(tag, contexts, dst, dtab, req) = decode(treq)
+      val Tdispatch(tag, _, _, _, _) = decode(treq)
       serverToClient.offer(encode(Tdrain(tag + 1)))
 
       val drained = clientToServer.poll

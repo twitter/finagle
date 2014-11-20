@@ -2,7 +2,7 @@ package com.twitter.finagle.mux
 
 import com.twitter.finagle.tracing.{SpanId, TraceId, Flags}
 import com.twitter.finagle.{Dtab, Dentry, NameTree, Path}
-import com.twitter.io.Charsets
+import com.twitter.io.{Buf, Charsets}
 import com.twitter.util.{Duration, Time}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
@@ -14,6 +14,55 @@ case class BadMessageException(why: String) extends Exception(why)
 
 // TODO: when the new com.twitter.codec.Codec arrives, define Message
 // parsing as a bijection between ChannelBuffers and Message.
+
+/** A mux request. */
+trait Request {
+  /** The destination name specified by Tdispatch requests. Otherwise, Path.empty */
+  def destination: Path
+
+  /** The payload of the request. */
+  def body: Buf
+}
+
+object Request {
+  private[this] case class Impl(destination: Path, body: Buf) extends Request {
+    override def toString = s"mux.Request.Impl($destination, $body)"
+  }
+
+  val empty: Request = Impl(Path.empty, Buf.Empty)
+
+  def apply(dst: Path, payload: Buf): Request = Impl(dst, payload)
+}
+
+/** For java compatibility */
+object Requests {
+  val empty: Request = Request.empty
+
+  def make(dst: Path, payload: Buf): Request = Request(dst, payload)
+}
+
+/** A mux response containing an immutable byte buffer. */
+trait Response {
+  /** The payload of the response. */
+  def body: Buf
+}
+
+object Response {
+  private[this] case class Impl(body: Buf) extends Response {
+    override def toString = s"mux.Response.Impl($body)"
+  }
+
+  val empty: Response = Impl(Buf.Empty)
+
+  def apply(buf: Buf): Response = Impl(buf)
+}
+
+/** For java compatibility */
+object Responses {
+  val empty: Response = Response.empty
+
+  def make(payload: Buf): Response = Response(payload)
+}
 
 /**
  * Documentation details are in the [[com.twitter.finagle.mux]] package object.
@@ -123,30 +172,45 @@ private[finagle] object Message {
   case class RreqError(tag: Int, error: String) extends Rreq(1, encodeString(error))
   case class RreqNack(tag: Int) extends Rreq(2, ChannelBuffers.EMPTY_BUFFER)
 
+  private[this] val noBytes = Array.empty[Byte]
+
   case class Tdispatch(
       tag: Int,
       contexts: Seq[(ChannelBuffer, ChannelBuffer)],
-      dst: String,
+      dst: Path,
       dtab: Dtab,
       req: ChannelBuffer
   ) extends Message {
     def typ = Types.Tdispatch
     lazy val buf = {
+      // first, compute how large the message header is (in 'n')
       var n = 2
       var seq = contexts
       while (seq.nonEmpty) {
         val (k, v) = seq.head
-        n += 2+k.readableBytes + 2+v.readableBytes
+        n += 2 + k.readableBytes + 2 + v.readableBytes
         seq = seq.tail
       }
-      n += 2+dst.size
+
+      val dstbytes = if (dst.isEmpty) noBytes else dst.show.getBytes(Charsets.Utf8)
+      n += 2 + dstbytes.size
       n += 2
-      var delegations = dtab.iterator
+
+      val dtabbytes = new Array[(Array[Byte], Array[Byte])](dtab.size)
+      var dtabidx = 0
+      val delegations = dtab.iterator
       while (delegations.hasNext) {
-        val Dentry(src, dst) = delegations.next()
-        n += src.show.size+2 + dst.show.size+2
+        val Dentry(src, tree) = delegations.next()
+        val srcbytes = src.show.getBytes(Charsets.Utf8)
+        val treebytes = tree.show.getBytes(Charsets.Utf8)
+
+        n += srcbytes.size + 2 + treebytes.size + 2
+
+        dtabbytes(dtabidx) = (srcbytes, treebytes)
+        dtabidx += 1
       }
 
+      // then, allocate and populate the header
       val hd = ChannelBuffers.dynamicBuffer(n)
       hd.writeShort(contexts.length)
       seq = contexts
@@ -161,20 +225,18 @@ private[finagle] object Message {
         seq = seq.tail
       }
 
-      val dstbytes = dst.getBytes(Charsets.Utf8)
       hd.writeShort(dstbytes.size)
       hd.writeBytes(dstbytes)
 
       hd.writeShort(dtab.size)
-      delegations = dtab.iterator
-      while (delegations.hasNext) {
-        val Dentry(src, dst) = delegations.next()
-        val srcbytes = src.show.getBytes(Charsets.Utf8)
+      dtabidx = 0
+      while (dtabidx != dtabbytes.size) {
+        val (srcbytes, treebytes) = dtabbytes(dtabidx)
         hd.writeShort(srcbytes.size)
         hd.writeBytes(srcbytes)
-        val dstbytes = dst.show.getBytes(Charsets.Utf8)
-        hd.writeShort(dstbytes.size)
-        hd.writeBytes(dstbytes)
+        hd.writeShort(treebytes.size)
+        hd.writeBytes(treebytes)
+        dtabidx += 1
       }
 
       ChannelBuffers.wrappedBuffer(hd, req)
@@ -405,8 +467,11 @@ private[finagle] object Message {
   private def decodeTdispatch(tag: Int, buf: ChannelBuffer) = {
     val contexts = decodeContexts(buf)
 
-    val dstbuf = buf.readSlice(buf.readUnsignedShort())
-    val dst = decodeUtf8(dstbuf)
+    val ndst = buf.readUnsignedShort()
+    // Path.read("") fails, so special case empty-dst.
+    val dst =
+      if (ndst == 0) Path.empty
+      else Path.read(decodeUtf8(buf.readSlice(ndst)))
 
     val nd = buf.readUnsignedShort()
     val dtab = if (nd == 0) Dtab.empty else {
@@ -415,16 +480,11 @@ private[finagle] object Message {
       while (i < nd) {
         val src = decodeUtf8(buf, buf.readUnsignedShort())
         val dst = decodeUtf8(buf, buf.readUnsignedShort())
-        try {
-          delegations(i) = Dentry(Path.read(src), NameTree.read(dst))
-        } catch {
-          case _: IllegalArgumentException =>
-            delegations(i) = Dentry.nop
-        }
+        delegations(i) = Dentry(Path.read(src), NameTree.read(dst))
         i += 1
       }
       Dtab(delegations)
-   }
+    }
 
     Tdispatch(tag, contexts, dst, dtab, buf.slice())
   }

@@ -1,6 +1,6 @@
 package com.twitter.finagle.thriftmux
 
-import com.twitter.finagle.{Failure, mux, Dtab, ThriftMuxUtil}
+import com.twitter.finagle.{Path, Failure, mux, Dtab, ThriftMuxUtil}
 import com.twitter.finagle.mux.{BadMessageException, Message}
 import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
@@ -71,8 +71,8 @@ private[finagle] class PipelineFactory(
         }
       }
 
-      Message.Tdispatch(
-        Message.MinTag, contextBuf.toSeq, "", Dtab.empty, ChannelBuffers.wrappedBuffer(request_))
+      Message.Tdispatch(Message.MinTag, contextBuf.toSeq, Path.empty, Dtab.empty,
+        ChannelBuffers.wrappedBuffer(request_))
     }
 
     override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent)  {
@@ -134,7 +134,7 @@ private[finagle] class PipelineFactory(
       super.messageReceived(ctx,
         new UpstreamMessageEvent(
           e.getChannel,
-          Message.encode(Message.Tdispatch(Message.MinTag, Seq.empty, "", Dtab.empty, buf)),
+          Message.encode(Message.Tdispatch(Message.MinTag, Seq.empty, Path.empty, Dtab.empty, buf)),
           e.getRemoteAddress))
     }
 
@@ -263,7 +263,9 @@ private[finagle] class PipelineFactory(
         // Rerr corresponds to (tag=0x010001).
         //
         // The hazards of protocol multiplexing.
-        case Throw(_: BadMessageException) | Return(Message.Rerr(65537, _)) | Return(Message.Rerr(65540, _))=>
+        case Throw(_: BadMessageException) |
+             Return(Message.Rerr(65537, _)) |
+             Return(Message.Rerr(65540, _)) =>
           // Increment ThriftMux connection count stats and wire up a callback to
           // decrement on channel closure.
           downgradedConnects.incr()
@@ -283,7 +285,8 @@ private[finagle] class PipelineFactory(
             super.messageReceived(ctx,
               new UpstreamMessageEvent(
                 e.getChannel,
-                Message.encode(Message.Tdispatch(Message.MinTag, Seq.empty, "", Dtab.empty, buf)),
+                Message.encode(
+                  Message.Tdispatch(Message.MinTag, Seq.empty, Path.empty, Dtab.empty, buf)),
                 e.getRemoteAddress))
           }
 

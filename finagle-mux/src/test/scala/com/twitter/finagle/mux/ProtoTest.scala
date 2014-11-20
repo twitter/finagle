@@ -1,18 +1,17 @@
 package com.twitter.finagle.mux
 
-import com.twitter.finagle.tracing
-import com.twitter.finagle.{Dtab, Dentry}
+import com.twitter.finagle.{Path, tracing, Dtab, Dentry}
 import com.twitter.io.Charsets
 import com.twitter.util.Time
 import com.twitter.util.TimeConversions.intToTimeableNumber
 import org.jboss.netty.buffer.ChannelBuffers
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
-class ProtoTest extends FunSuite {
+class ProtoTest extends FunSuite with AssertionsForJUnit {
   def buf(n: Int) = ChannelBuffers.wrappedBuffer((0 until n).toArray.map(_.toByte))
   val body = buf(4)
 
@@ -24,11 +23,9 @@ class ProtoTest extends FunSuite {
     val bytes = s.getBytes(Charsets.Utf8)
     ChannelBuffers.wrappedBuffer(bytes)
   }
-  val goodDentries = Seq(
-    Dentry.read("/a=>/b"),
-    Dentry.read("/foo=>/$/inet/twitter.com/80"))
+  val goodDentries = Seq("/a=>/b", "/foo=>/$/inet/twitter.com/80") map(Dentry.read)
   val goodDtabs = goodDentries.permutations map { ds => Dtab(ds.toIndexedSeq) }
-  val goodDests = Seq("", "okay", "/foo/bar/baz")
+  val goodDests = Seq("/", "/okay", "/foo/bar/baz") map(Path.read)
   val goodDurationLeases = Seq(Message.Tlease.MinLease, Message.Tlease.MaxLease)
   val goodTimeLeases = Seq(Time.epoch, Time.now, Time.now + 5.minutes)
   val goodContexts =
@@ -134,7 +131,7 @@ class ProtoTest extends FunSuite {
 
     assert(ControlMessage.unapply(Treq(tag, None, buf)) === None)
     assert(ControlMessage.unapply(RreqOk(0, buf)) === None)
-    assert(ControlMessage.unapply(Tdispatch(tag, Seq.empty, "", Dtab.empty, buf)) === None)
+    assert(ControlMessage.unapply(Tdispatch(tag, Seq.empty, Path.empty, Dtab.empty, buf)) === None)
     assert(ControlMessage.unapply(RdispatchOk(tag, Seq.empty, buf)) === None)
 
     assert(ControlMessage.unapply(Tdrain(tag)) === Some(tag))

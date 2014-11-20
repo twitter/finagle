@@ -1,5 +1,6 @@
 package com.twitter.finagle.thriftmux
 
+import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.client.StackClient
@@ -19,7 +20,7 @@ import org.apache.thrift.protocol.TCompactProtocol
 import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 
 // Used for testing ThriftMux's Context functionality. Duplicated from the
 // finagle-mux package as a workaround because you can't easily depend on a
@@ -41,7 +42,7 @@ class MuxContext extends ContextHandler {
 }
 
 @RunWith(classOf[JUnitRunner])
-class EndToEndTest extends FunSuite {
+class EndToEndTest extends FunSuite with AssertionsForJUnit {
   trait ThriftMuxTestServer {
     val server = ThriftMux.serveIface(":*", new TestService.FutureIface {
       def query(x: String) = Future.value(x+x)
@@ -333,7 +334,7 @@ class EndToEndTest extends FunSuite {
     // Although the requests are pipelined in the client, they must be
     // received by the service serially.
     1 to nreqs foreach { i =>
-      val req = Await.result(requestReceived(i-1))
+      val req = Await.result(requestReceived(i-1), 5.seconds)
       if (i != nreqs) assert(!requestReceived(i).isDefined)
       assert(testService.nReqReceived === i)
       servicePromises(i-1).setValue(req + req)
