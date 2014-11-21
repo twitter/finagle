@@ -13,6 +13,7 @@ import java.util.ArrayDeque
  * impact by delaying node removals. We do so by disallowing the cluster to shrink. Add
  * events are always propagated but Rem events require a corresponding Add.
  */
+@deprecated("Use `com.twitter.finagle.Name` to represent clusters instead", "2014-11-21")
 class NonShrinkingCluster[T](underlying: Cluster[T]) extends Cluster[T] {
   import Cluster._
 
