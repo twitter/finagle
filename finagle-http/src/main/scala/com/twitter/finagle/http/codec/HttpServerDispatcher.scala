@@ -86,7 +86,7 @@ class HttpServerDispatcher[REQUEST <: Request](
   }
 
   protected def handle(response: HttpResponse): Future[Unit] = {
-    HttpHeaders.setKeepAlive(response, !isClosing)
+    if (isClosing) HttpHeaders.setKeepAlive(response, false)
     response match {
       case rep: Response if rep.isChunked =>
         // We remove content length here in case the content is later

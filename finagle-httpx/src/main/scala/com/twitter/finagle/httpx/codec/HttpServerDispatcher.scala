@@ -87,6 +87,7 @@ class HttpServerDispatcher(
   }
 
   protected def handle(rep: Response): Future[Unit] = {
+    if (isClosing) rep.headers.set(Fields.Connection, "close")
     if (rep.isChunked) {
       // We remove content length here in case the content is later
       // compressed. This is a pretty bad violation of modularity:
