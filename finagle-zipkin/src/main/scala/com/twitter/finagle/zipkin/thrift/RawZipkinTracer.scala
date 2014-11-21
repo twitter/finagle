@@ -28,6 +28,7 @@ object RawZipkinTracer {
     scribePort: Int
   ): Scribe.FutureIface = {
     val transport = ClientBuilder()
+      .name("zipkin-tracer")
       .hosts(new InetSocketAddress(scribeHost, scribePort))
       .codec(ThriftClientFramedCodec())
       .hostConnectionLimit(5)

@@ -135,7 +135,7 @@ object Stack {
    *
    * TODO: CSL-869
    */
-  case class Role(val name: String) {
+  case class Role(name: String) {
     // Override `toString` to return the flat, lowercase object name for use in stats.
     private[this] lazy val _toString = name.toLowerCase
     override def toString = _toString
