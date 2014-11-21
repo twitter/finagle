@@ -302,11 +302,13 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     }
 
     test(name + ": request uri too long") {
-      val svc = Service.mk[Request, Response] { _ => Future.value(Response()) }
+      val ok = Response()
+      val svc = Service.mk[Request, Response] { _ => Future.value(ok) }
       val client = connect(svc)
       val request = Request("/" + "a" * 4096)
       val response = Await.result(client(request))
       assert(response.status === Status.RequestURITooLong)
+      assert(Await.result(client(Request())).status === ok.status)
       client.close()
     }
 

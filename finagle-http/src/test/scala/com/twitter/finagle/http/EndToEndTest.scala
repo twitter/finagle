@@ -153,13 +153,18 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
     }
 
     test(name + ": request uri too long") {
+      val ok = Response()
       val service = new HttpService {
-        def apply(request: HttpRequest) = Future.value(Response())
+        def apply(request: HttpRequest) = Future.value(ok)
       }
       val client = connect(service)
       val request = Request("/" + "a" * 4096)
       val response = Await.result(client(request))
       assert(response.getStatus === HttpResponseStatus.REQUEST_URI_TOO_LONG)
+
+      // Subsequent valid requests should succeed.
+      assert(Await.result(client(Request())).getStatus === ok.status)
+
       client.close()
     }
 

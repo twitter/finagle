@@ -14,6 +14,7 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.tracing._
 import com.twitter.util.{Future, StorageUnit}
 import java.net.{InetSocketAddress, SocketAddress}
+import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http._
 
 /**
@@ -73,11 +74,13 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
 
     protected def newTransporter(): Transporter[Any, Any] = {
       val com.twitter.finagle.param.Label(label) = params[com.twitter.finagle.param.Label]
-      val httpPipeline =
-        param.applyToCodec(params, http.Http())
-          .client(ClientCodecConfig(label))
-          .pipelineFactory
-      Netty3Transporter(httpPipeline, params)
+      val codec = param.applyToCodec(params, http.Http())
+        .client(ClientCodecConfig(label))
+      val Stats(stats) = params[Stats]
+      val newTransport = (ch: Channel) => codec.newClientTransport(ch, stats)
+      Netty3Transporter(
+        codec.pipelineFactory,
+        params + Netty3Transporter.TransportFactory(newTransport))
     }
 
     protected def copy1(
