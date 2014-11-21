@@ -57,13 +57,15 @@ class ClientTest extends FunSuite {
     withServer(closingHandler) { clientBuilder =>
       counter = 0
       val client = clientBuilder.build()
-      // No failures have happened yet.
-      assert(client.isAvailable === true)
-      val future = client(Request(Version.Http11, Method.Get, "/"))
-      val resolved = Try(Await.result(future, 1.second))
-      assert(resolved.isThrow === true)
-      val Throw(cause) = resolved
-      intercept[ChannelClosedException] { throw cause }
+      try {
+        // No failures have happened yet.
+        assert(client.isAvailable === true)
+        val future = client(Request(Version.Http11, Method.Get, "/"))
+        val resolved = Try(Await.result(future, 1.second))
+        assert(resolved.isThrow === true)
+        val Throw(cause) = resolved
+        intercept[ChannelClosedException] {throw cause}
+      } finally client.close()
     }
   }
 
@@ -73,12 +75,14 @@ class ClientTest extends FunSuite {
       val client = clientBuilder
         .retries(10)
         .build()
-      val future = client(Request(Version.Http11, Method.Get, "/"))
-      val resolved = Try(Await.result(future, 1.second))
-      assert(resolved.isThrow === true)
-      val Throw(cause) = resolved
-      intercept[ChannelClosedException] { throw cause }
-      assert(counter === 1)
+      try {
+        val future = client(Request(Version.Http11, Method.Get, "/"))
+        val resolved = Try(Await.result(future, 1.second))
+        assert(resolved.isThrow === true)
+        val Throw(cause) = resolved
+        intercept[ChannelClosedException] {throw cause}
+        assert(counter === 1)
+      } finally client.close()
     }
   }
 }

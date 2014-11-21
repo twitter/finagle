@@ -5,7 +5,7 @@ import com.twitter.finagle.integration.{DynamicCluster, StringCodec}
 import com.twitter.finagle.{Service, WriteException, IndividualRequestTimeoutException}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Future, Await, CountDownLatch, Promise}
-import java.net.{SocketAddress, InetSocketAddress}
+import java.net.{InetAddress, SocketAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -22,7 +22,7 @@ class EndToEndTest extends FunSuite {
         constRes
       }
     }
-    val address = new InetSocketAddress(0)
+    val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
       .codec(StringCodec)
       .bindTo(address)
@@ -49,7 +49,7 @@ class EndToEndTest extends FunSuite {
     val echo = new Service[String, String] {
       def apply(request: String) = Future.value(request)
     }
-    val address = new InetSocketAddress(0)
+    val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
       .codec(StringCodec)
       .bindTo(address)
@@ -89,7 +89,7 @@ class EndToEndTest extends FunSuite {
     val never = new Service[String, String] {
       def apply(request: String) = new Promise[String]
     }
-    val address = new InetSocketAddress(0)
+    val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
       .codec(StringCodec)
       .bindTo(address)

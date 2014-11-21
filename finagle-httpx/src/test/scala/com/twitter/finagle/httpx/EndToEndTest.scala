@@ -8,7 +8,7 @@ import com.twitter.finagle.{
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.{Await, Closable, Future, Promise, Time, JavaTimer}
 import java.io.{StringWriter, PrintWriter}
-import java.net.InetSocketAddress
+import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FunSuite}
@@ -264,7 +264,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       // drip should terminate because the request is discarded.
       intercept[Reader.ReaderDiscarded] { Await.result(drip(req.writer)) }
     }
-    
+
     test(name + ": client discard terminates stream and frees up the connection") {
       val s = new Service[Request, Response] {
         var rep: Response = null
@@ -272,7 +272,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
         def apply(req: Request) = {
           rep = Response()
           rep.setChunked(true)
-  
+
           // Make sure the body is fully read.
           // Then we hang forever.
           val body = Reader.readAll(req.reader)
@@ -287,7 +287,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       rep.reader.discard()
 
       s.rep = null
-      
+
       // Now, make sure the connection doesn't clog up.
       Await.result(client(Request()), 10.seconds)
       assert(s.rep != null)
@@ -376,7 +376,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     service =>
       val server = ServerBuilder()
         .codec(Http().enableTracing(true))
-        .bindTo(new InetSocketAddress(0))
+        .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .name("server")
         .build(service)
 
@@ -397,7 +397,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     service =>
       val server = ServerBuilder()
         .codec(Http())
-        .bindTo(new InetSocketAddress(0))
+        .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .name("server")
         .build(service)
 
@@ -430,7 +430,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     service =>
       val server = ServerBuilder()
         .codec(Http().streaming(true))
-        .bindTo(new InetSocketAddress(0))
+        .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .name("server")
         .build(service)
 

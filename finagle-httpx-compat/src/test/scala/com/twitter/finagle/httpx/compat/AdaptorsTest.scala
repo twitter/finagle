@@ -11,7 +11,7 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.jboss.netty.handler.codec.http.{HttpResponseStatus, HttpResponse}
-import java.net.{InetSocketAddress, URI}
+import java.net.{InetAddress, InetSocketAddress, URI}
 
 @RunWith(classOf[JUnitRunner])
 class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
@@ -52,7 +52,7 @@ class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
     val req = new Request {
       val httpRequest = reqIn.httpRequest
       override val reader = BufReader(Buf.Utf8(body))
-      lazy val remoteSocketAddress = new InetSocketAddress(0)
+      lazy val remoteSocketAddress = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     }
     if (chunked) {
       req.headers.set(Fields.TransferEncoding, "chunked")

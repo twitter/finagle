@@ -11,7 +11,7 @@ import com.twitter.finagle.{ServiceFactory, ChannelException, SourcedException, 
 import com.twitter.finagle.integration.{StringCodec, IntegrationBase}
 import com.twitter.util._
 import java.util.logging.{Level, StreamHandler, Logger}
-import java.net.InetSocketAddress
+import java.net.{InetAddress, InetSocketAddress}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 
 @RunWith(classOf[JUnitRunner])
@@ -75,7 +75,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase 
     val h = new Helper
     import h._
 
-    val address = new InetSocketAddress(0)
+    val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val service = mock[Service[String, String]]
     when(service.close(any[Time])) thenReturn Future.Done
     val server = ServerBuilder()

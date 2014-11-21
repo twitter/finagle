@@ -1,5 +1,6 @@
 package com.twitter.finagle.javaapi;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -13,7 +14,6 @@ import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.ServerBuilder;
 import com.twitter.finagle.http.Http;
 import com.twitter.util.Future;
-import com.twitter.util.RandomSocket;
 
 public class HttpServerTest {
   private static void runServer() {
@@ -34,7 +34,7 @@ public class HttpServerTest {
       service,
       ServerBuilder.get()
       .codec(Http.get())
-      .bindTo(new InetSocketAddress(0))
+      .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0))
       .name("HttpServer"));
   }
 

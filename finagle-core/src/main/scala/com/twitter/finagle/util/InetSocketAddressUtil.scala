@@ -99,9 +99,10 @@ object InetSocketAddressUtil {
    *
    *     InetSocketAddressUtil.parseHosts("127.0.0.1:11211") => Seq(new InetSocketAddress("127.0.0.1", 11211))
    *
-   * @param  hosts  a comma or space-delimited string of hostname and port pairs.
-   * @throws IllegalArgumentException if host and port are not both present
+   * @param hosts a comma or space-delimited string of hostname and port pairs. Or, if it is
+   *          ":*" then an a single InetSocketAddress using an ephemeral port will be returned.
    *
+   * @throws IllegalArgumentException if host and port are not both present
    */
   def parseHosts(hosts: String): Seq[InetSocketAddress] = {
     if (hosts == ":*") return Seq(new InetSocketAddress(0))

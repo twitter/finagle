@@ -11,7 +11,7 @@ import org.jboss.netty.handler.codec.frame.{Delimiters, DelimiterBasedFrameDecod
 import org.jboss.netty.handler.codec.string.{StringEncoder, StringDecoder}
 import com.twitter.io.Charsets
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import java.net.InetSocketAddress
+import java.net.{InetAddress, InetSocketAddress}
 import com.twitter.ostrich.stats.Stats
 
 @RunWith(classOf[JUnitRunner])
@@ -53,7 +53,7 @@ class FinagleStatsTest extends FunSuite with MockitoSugar {
   val codec = new StringCodec
   val server = ServerBuilder()
     .name("server")
-    .bindTo(new InetSocketAddress(0))
+    .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
     .codec(codec)
     .reportTo(statsReceiver)
     .maxConcurrentRequests(5)

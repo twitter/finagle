@@ -6,7 +6,7 @@ import com.twitter.finagle.http.Http
 import com.twitter.io.TempFile
 import com.twitter.util.{Await, Future, NonFatal}
 import java.io.File
-import java.net.InetSocketAddress
+import java.net.{InetAddress, InetSocketAddress}
 import org.jboss.netty.buffer._
 import org.jboss.netty.handler.codec.http._
 import org.junit.runner.RunWith
@@ -95,7 +95,7 @@ class SslTest extends FunSuite {
     val server =
       ServerBuilder()
         .codec(codec)
-        .bindTo(new InetSocketAddress(0))
+        .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .tls(certChain.certPath, certChain.keyPath)
         .name("SSLServer")
         .build(service)
@@ -177,7 +177,7 @@ class SslTest extends FunSuite {
 
     val server = ServerBuilder()
       .codec(codec)
-      .bindTo(new InetSocketAddress(0))
+      .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
       .tls(certChain.certPath,
         certChain.keyPath,
         certChain.validChainPath)

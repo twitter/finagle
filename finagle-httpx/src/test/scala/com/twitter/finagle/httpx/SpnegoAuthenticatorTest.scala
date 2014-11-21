@@ -1,15 +1,13 @@
 package com.twitter.finagle.httpx
 
-import java.util.Arrays.{equals => arrayEquals}
-
 import com.twitter.finagle.{Httpx, Service}
 import com.twitter.util.{Await, Future, Time}
-
+import java.net.InetSocketAddress
+import java.util.Arrays.{equals => arrayEquals}
 import org.ietf.jgss.GSSContext
-
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
-import org.mockito.Mockito.{never, stub, verify}
+import org.mockito.Mockito.{stub, verify}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
@@ -41,7 +39,6 @@ class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
   test("success") {
     val credentials = mock[GSSContext]
     val clientToken: Token = Array[Byte](1,3,3,7)
-    val serverToken: Token = Array[Byte](7,3,3,1)
     val credSrc = new Credentials.ClientSource with Credentials.ServerSource {
       def load() = Future(credentials)
       def init(c: GSSContext, t: Option[Token]) = Future(clientToken)
@@ -79,7 +76,7 @@ class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
       assert(rsp.status == Status.Unauthorized)
       rsp
     } finally {
-      server.close(Time.Bottom)
+      client.close().before(server.close())
     }
   }
 
@@ -89,7 +86,8 @@ class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
   ) = {
     val service = mock[Service[Authenticated[Request], Response]]
     val server = Httpx.serve(":*", new ServerFilter(serverSrc) andThen service)
-    var rawClient = Httpx.newService(server)
+    val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
+    val rawClient = Httpx.newService(s"localhost:$port")
 
     val client =
       clientSrc.map { src =>

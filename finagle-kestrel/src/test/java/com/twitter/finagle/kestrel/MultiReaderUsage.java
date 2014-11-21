@@ -1,9 +1,9 @@
 package com.twitter.finagle.kestrel;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import com.twitter.finagle.Addr;
 import com.twitter.finagle.builder.ClientBuilder;
@@ -18,7 +18,7 @@ import com.twitter.util.Var$;
 public class MultiReaderUsage {
   public ReadHandle make() {
     ArrayList<SocketAddress> clusterMembers = new ArrayList<SocketAddress>();
-    clusterMembers.add(new InetSocketAddress(0));
+    clusterMembers.add(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0));
     Var<Addr> cluster = Var$.MODULE$.apply(Addr.Bound$.MODULE$.apply(clusterMembers));
 
     return

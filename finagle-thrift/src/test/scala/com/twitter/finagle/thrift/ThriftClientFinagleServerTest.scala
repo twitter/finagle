@@ -6,7 +6,7 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.test._
 import com.twitter.util.TimeConversions._
 import com.twitter.util.{Await, Future, Promise, Return, Time}
-import java.net.InetSocketAddress
+import java.net.{InetAddress, InetSocketAddress}
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.{TFramedTransport, TSocket}
@@ -41,7 +41,7 @@ class ThriftClientFinagleServerTest extends FunSuite with BeforeAndAfter with On
 
   val server = ServerBuilder()
     .codec(ThriftServerFramedCodec())
-    .bindTo(new InetSocketAddress(0))
+    .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
     .name("ThriftServer")
     .build(new B.Service(processor, new TBinaryProtocol.Factory()))
   val serverAddr = server.localAddress.asInstanceOf[InetSocketAddress]

@@ -12,7 +12,7 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{param => fparam}
 import com.twitter.io.Charsets
 import com.twitter.util._
-import java.net.{SocketAddress, InetSocketAddress}
+import java.net.{InetAddress, SocketAddress, InetSocketAddress}
 import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 import org.jboss.netty.handler.codec.string.{StringEncoder, StringDecoder}
 import org.junit.runner.RunWith
@@ -103,7 +103,7 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
     testCoreTraces { (serverTracer, clientTracer) =>
       val svc = ServerBuilder()
         .name("theServer")
-        .bindTo(new InetSocketAddress(0))
+        .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .codec(StringServerCodec)
         .tracer(serverTracer)
         .build(Svc)

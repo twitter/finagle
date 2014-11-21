@@ -5,13 +5,13 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.{Service, ServiceProxy, TooManyConcurrentRequestsException}
 import com.twitter.util._
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.nio.charset.Charset
 import java.util.concurrent.Executors
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
-import org.jboss.netty.channel.{ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, ChannelState, ChannelStateEvent, ChannelUpstreamHandler, Channels, MessageEvent, WriteCompletionEvent}
+import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -250,7 +250,7 @@ class EndToEndTest extends FunSuite {
   workIt("straight") { serverRes =>
     val server = ServerBuilder()
       .codec(new Stream)
-      .bindTo(new InetSocketAddress(0))
+      .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
       .name("Streams")
       .build(new MyService(serverRes))
     val address = server.localAddress
@@ -272,7 +272,7 @@ class EndToEndTest extends FunSuite {
   workIt("proxy") { serverRes =>
     val server = ServerBuilder()
       .codec(new Stream)
-      .bindTo(new InetSocketAddress(0))
+      .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
       .name("streamserver")
       .build(new MyService(serverRes))
 
@@ -284,7 +284,7 @@ class EndToEndTest extends FunSuite {
 
     val proxy = ServerBuilder()
       .codec(new Stream)
-      .bindTo(new InetSocketAddress(0))
+      .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
       .name("streamproxy")
       .build(serverClient)
 
@@ -310,7 +310,7 @@ class EndToEndTest extends FunSuite {
 
     val server = ServerBuilder()
       .codec(new Stream)
-      .bindTo(new InetSocketAddress(0))
+      .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
       .name("Streams")
       .build((new MyService(serverRes)) map { r: HttpRequest =>
         synchronized { count += 1 }

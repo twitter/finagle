@@ -7,7 +7,7 @@ import com.twitter.finagle.redis._
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util._
 import com.twitter.util.{Await, Future, Time}
-import java.net.InetSocketAddress
+import java.net.{InetAddress, InetSocketAddress}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.Ignore
 import org.specs.SpecificationWithJUnit
@@ -36,7 +36,7 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
   val server = ServerBuilder()
     .name("redis-server")
     .codec(Redis())
-    .bindTo(new InetSocketAddress(0))
+    .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
     .build(service)
 
 
