@@ -14,6 +14,15 @@ import com.twitter.finagle.util.Showable
  *  2. [[com.twitter.finagle.Name.Path Path]] names are unbound
  *  paths, representing an abstract location which must be resolved
  *  by some context, usually the [[com.twitter.finagle.Dtab Dtab]].
+ *
+ * In practice, clients use a [[com.twitter.finagle.Resolver]] to resolve a
+ * destination name string into a `Name`. This is achieved by passing a
+ * destination name into methods such as
+ * [[com.twitter.finagle.builder.ClientBuilder ClientBuilder.dest]] or
+ * the `newClient` method of the appropriate protocol object
+ * (e.g. `Http.newClient(/s/org/servicename)`). These APIs use `Resolver` under
+ * the hood to resolve the destination names into the `Name` representation
+ * of the appropriate cluster.
  */
 sealed trait Name
 
