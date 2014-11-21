@@ -7,11 +7,10 @@ import java.util.Properties
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 import java.util.logging.Level
 
-
 /**
  * Global initialization of Finagle.
  */
-private object Init {
+private[twitter] object Init {
   private val inited = new AtomicBoolean(false)
   private val log = DefaultLogger
 
