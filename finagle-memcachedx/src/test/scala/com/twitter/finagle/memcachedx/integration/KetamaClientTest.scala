@@ -1,19 +1,13 @@
 package com.twitter.finagle.memcachedx.integration
 
-import _root_.java.lang.{Boolean => JBoolean}
-import java.net.{SocketAddress, InetSocketAddress}
-
-import org.jboss.netty.buffer.ChannelBuffers
+import com.twitter.finagle.memcachedx.{CacheNodeGroup, KetamaClientBuilder}
+import com.twitter.finagle.{Group, Name}
+import com.twitter.io.Buf
+import com.twitter.util.{Await, Future}
+import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FunSuite}
-
-import com.twitter.finagle.memcachedx.{CacheNodeGroup, KetamaClientBuilder}
-import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
-import com.twitter.finagle.netty3.ChannelBufferBuf
-import com.twitter.finagle.{Group, Name}
-import com.twitter.io.{Buf, Charsets}
-import com.twitter.util.{Await, Future}
 
 @RunWith(classOf[JUnitRunner])
 class KetamaClientTest extends FunSuite with BeforeAndAfter {
@@ -27,9 +21,9 @@ class KetamaClientTest extends FunSuite with BeforeAndAfter {
   var address2: InetSocketAddress = null
 
   before {
-    server1 = new InProcessMemcached(new InetSocketAddress(0))
+    server1 = new InProcessMemcached(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
     address1 = server1.start().localAddress.asInstanceOf[InetSocketAddress]
-    server2 = new InProcessMemcached(new InetSocketAddress(0))
+    server2 = new InProcessMemcached(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
     address2 = server2.start().localAddress.asInstanceOf[InetSocketAddress]
   }
 

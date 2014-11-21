@@ -7,7 +7,7 @@ import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.util.{Await, Time}
-import java.net.InetSocketAddress
+import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FunSuite}
@@ -19,7 +19,7 @@ class InterpreterServiceTest extends FunSuite with BeforeAndAfter {
   var client: Service[Command, Response] = null
 
   before {
-    server = new InProcessMemcached(new InetSocketAddress(0))
+    server = new InProcessMemcached(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
     val address = server.start().localAddress
     client = ClientBuilder()
       .hosts(address)

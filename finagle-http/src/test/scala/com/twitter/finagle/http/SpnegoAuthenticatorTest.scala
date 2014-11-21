@@ -1,23 +1,16 @@
 package com.twitter.finagle.http
 
-import java.util.Arrays.{equals => arrayEquals}
-
 import com.twitter.finagle
 import com.twitter.finagle.Service
 import com.twitter.util.{Await, Future, Time}
-
+import java.net.InetSocketAddress
+import java.util.Arrays.{equals => arrayEquals}
 import org.ietf.jgss.GSSContext
-
 import org.jboss.netty.handler.codec.http.{
-  DefaultHttpResponse,
-  HttpHeaders,
-  HttpRequest,
-  HttpResponse
-}
-
+  DefaultHttpResponse, HttpHeaders, HttpRequest, HttpResponse}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
-import org.mockito.Mockito.{never, stub, verify}
+import org.mockito.Mockito.{stub, verify}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
@@ -71,7 +64,8 @@ class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
       assert(resp.getStatus === Status.Ok)
       verify(service).apply(anyAuthenticated)
     } finally {
-      server.close(Time.Bottom)
+      client.close()
+      server.close()
     }
   }
 
@@ -97,7 +91,8 @@ class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
   ) = {
     val service = mock[Service[Authenticated[HttpRequest],HttpResponse]]
     val server = finagle.Http.serve(":*", new ServerFilter(serverSrc) andThen service)
-    var rawClient = finagle.Http.newService(server)
+    val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
+    val rawClient = finagle.Http.newService(s"localhost:$port")
 
     val client =
       clientSrc.map { src =>

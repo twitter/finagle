@@ -9,7 +9,7 @@ import com.twitter.finagle.{
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.{Await, Closable, Future, Promise, Time, JavaTimer}
 import java.io.{StringWriter, PrintWriter}
-import java.net.InetSocketAddress
+import java.net.{InetAddress, InetSocketAddress}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
 import org.junit.runner.RunWith
@@ -165,7 +165,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
 
     test(name + ": request header fields too large") {
       val service = new HttpService {
-        def apply(request: HttpRequest) = Future.value(Response()) 
+        def apply(request: HttpRequest) = Future.value(Response())
       }
       val client = connect(service)
       val request = Request()
@@ -282,7 +282,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
         def apply(req: Request) = {
           rep = Response()
           rep.setChunked(true)
-  
+
           // Make sure the body is fully read.
           // Then we hang forever.
           val body = Reader.readAll(req.reader)
@@ -297,7 +297,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
       rep.reader.discard()
 
       s.rep = null
-      
+
       // Now, make sure the connection doesn't clog up.
       Await.result(client(Request()), 10.seconds)
       assert(s.rep != null)
@@ -386,7 +386,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
     service =>
       val server = ServerBuilder()
         .codec(Http().enableTracing(true))
-        .bindTo(new InetSocketAddress(0))
+        .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .name("server")
         .build(service)
 
@@ -407,7 +407,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
     service =>
       val server = ServerBuilder()
         .codec(Http())
-        .bindTo(new InetSocketAddress(0))
+        .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .name("server")
         .build(service)
 
@@ -440,7 +440,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
     service =>
       val server = ServerBuilder()
         .codec(RichHttp[Request](Http(), aggregateChunks = false))
-        .bindTo(new InetSocketAddress(0))
+        .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .name("server")
         .build(service)
 

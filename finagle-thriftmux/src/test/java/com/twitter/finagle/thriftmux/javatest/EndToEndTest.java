@@ -3,6 +3,7 @@ package com.twitter.finagle.thriftmux.javatest;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.junit.Test;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 import com.twitter.finagle.ListeningServer;
@@ -46,7 +47,7 @@ public class EndToEndTest {
 
   @Test
   public void testBuilders() {
-    InetSocketAddress addr = new InetSocketAddress(0);
+    InetSocketAddress addr = new InetSocketAddress(InetAddress.getLoopbackAddress(), 0);
 
     TestService.FutureIface iface = new TestService.FutureIface() {
       public Future<String> query(String x) {

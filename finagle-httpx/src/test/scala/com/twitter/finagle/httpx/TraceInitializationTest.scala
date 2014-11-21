@@ -1,10 +1,10 @@
 package com.twitter.finagle.httpx
 
-import com.twitter.finagle.{param, Httpx, Service}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.tracing._
-import com.twitter.util.{Await, Future, RandomSocket}
-import java.net.InetSocketAddress
+import com.twitter.finagle.{Httpx, Service, param}
+import com.twitter.util.{Await, Closable, Future}
+import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -25,10 +25,14 @@ class TraceInitializationTest extends FunSuite {
    * Ensure all annotations have the same TraceId (it should be passed between client and server)
    * Ensure core annotations are present and properly ordered
    */
-  def testTraces(f: (Tracer, Tracer) => (Service[Request, Response])) {
+  def testTraces(f: (Tracer, Tracer) => (Service[Request, Response], Closable)) {
     val tracer = new BufferingTracer
 
-    Await.result(f(tracer, tracer)(req))
+    val (svc, closable) = f(tracer, tracer)
+    try Await.result(svc(req)) finally {
+      svc.close()
+      closable.close()
+    }
 
     assertAnnotationsInOrder(tracer.toSeq, Seq(
       Annotation.Rpc("GET"),
@@ -43,54 +47,57 @@ class TraceInitializationTest extends FunSuite {
       Annotation.ClientRecv()))
 
     assert(tracer.map(_.traceId).toSet.size === 1)
-
   }
 
   test("TraceId is propagated through the protocol") {
     testTraces { (serverTracer, clientTracer) =>
-      val port = RandomSocket.nextPort()
-      Httpx.server.configured(param.Tracer(serverTracer)).serve("theServer=:" + port, Svc)
-      Httpx.client.configured(param.Tracer(clientTracer)).newService("theClient=:" + port)
+      val server = Httpx.server.configured(param.Tracer(serverTracer)).serve("theServer=:*", Svc)
+      val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
+      val client = Httpx.client.configured(param.Tracer(clientTracer)).newService("theClient=:" + port)
+      (client, server)
     }
   }
 
   test("TraceId is propagated through the protocol (builder)") {
     testTraces { (serverTracer, clientTracer) =>
-      val socket = new java.net.InetSocketAddress(RandomSocket.nextPort())
-      ServerBuilder()
+      val server = ServerBuilder()
         .name("theServer")
-        .bindTo(socket)
+        .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .codec(Http(_enableTracing = true))
         .tracer(serverTracer)
         .build(Svc)
 
-      ClientBuilder()
+      val port = server.localAddress.asInstanceOf[InetSocketAddress].getPort
+      val client = ClientBuilder()
         .name("theClient")
-        .hosts(socket)
+        .hosts(s"localhost:$port")
         .codec(Http(_enableTracing = true))
         .hostConnectionLimit(1)
         .tracer(clientTracer)
         .build()
+      (client, server)
     }
   }
 
   test("TraceId is set when a client does not proagate one") {
     val tracer = new BufferingTracer
-    val port = RandomSocket.nextPort()
 
-    Httpx.server.configured(param.Tracer(tracer)).serve("theServer=:" + port, Svc)
+    val server = Httpx.server.configured(param.Tracer(tracer)).serve("theServer=:*", Svc)
+    try {
+      val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
+      val client = ClientBuilder()
+        .name("theClient")
+        .hosts(s"localhost:$port")
+        .codec(Http(_enableTracing = false))
+        .hostConnectionLimit(1)
+        .build()
+      try {
+        0.until(2).foreach { _ =>
+          Await.result(client(req))
+        }
 
-    val client = ClientBuilder()
-      .name("theClient")
-      .hosts(new java.net.InetSocketAddress(port))
-      .codec(Http(_enableTracing = false))
-      .hostConnectionLimit(1)
-      .build()
-
-    (0 until 2) foreach { _ =>
-      Await.result(client(req))
-    }
-
-    assert(tracer.map(_.traceId).toSet.size === 2)
+        assert(tracer.map(_.traceId).toSet.size === 2)
+      } finally client.close()
+    } finally server.close()
   }
 }

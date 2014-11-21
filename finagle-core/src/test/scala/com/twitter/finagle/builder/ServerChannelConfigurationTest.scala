@@ -6,7 +6,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.{Codec, CodecFactory}
 import com.twitter.io.Charsets
 import com.twitter.util.{Await, Future}
-import java.net.InetSocketAddress
+import java.net.{InetAddress, InetSocketAddress}
 import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 import org.jboss.netty.handler.codec.frame.{Delimiters, DelimiterBasedFrameDecoder}
 import org.jboss.netty.handler.codec.string.{StringEncoder, StringDecoder}
@@ -59,7 +59,7 @@ class ServerChannelConfigurationTest extends FunSuite {
 
   test("close connection after max life time duration") {
     // create a server builder which will close connections in 2 seconds
-    val address = new InetSocketAddress(0)
+    val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
       .codec(ServerChannelConfigCodec)
       .bindTo(address)
@@ -83,7 +83,7 @@ class ServerChannelConfigurationTest extends FunSuite {
 
   test("close connection after max idle time duration") {
     // create a server builder which will close idle connections in 2 seconds
-    val address = new InetSocketAddress(0)
+    val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
       .codec(ServerChannelConfigCodec)
       .bindTo(address)
