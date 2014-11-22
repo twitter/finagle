@@ -44,7 +44,8 @@ class ThriftMuxServerLike private[finagle](server: ThriftMux.Server)
    */
   def params = server.params
 
-  protected val protocolFactory = server.protocolFactory
+  protected val Thrift.param.ProtocolFactory(protocolFactory) =
+    server.params[Thrift.param.ProtocolFactory]
 
   /**
    * Create a new ThriftMuxServerLike with `params` used to configure the
@@ -52,7 +53,7 @@ class ThriftMuxServerLike private[finagle](server: ThriftMux.Server)
    * [[com.twitter.finagle.builder.ServerBuilder]].
    */
   def apply(params: Stack.Params): Server[Array[Byte], Array[Byte]] =
-    new ThriftMuxServerLike(server.withParams(params))
+    new ThriftMuxServerLike(server.withParams(this.params ++ params))
 
   /**
    * Create a new ThriftMuxServerLike with `p` added to the

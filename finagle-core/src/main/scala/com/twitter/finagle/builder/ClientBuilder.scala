@@ -1,5 +1,6 @@
 package com.twitter.finagle.builder
 
+import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.factory.{BindingFactory, TimeoutFactory}
@@ -7,15 +8,12 @@ import com.twitter.finagle.filter.ExceptionSourceFilter
 import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, WeightedLoadBalancerFactory}
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.service._
-import com.twitter.finagle.ssl.{Engine, Ssl}
-import com.twitter.finagle.stack.nilStack
-import com.twitter.finagle.stats.{
-  NullStatsReceiver, ClientStatsReceiver, StatsReceiver, RollupStatsReceiver}
+import com.twitter.finagle.ssl.Ssl
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver, RollupStatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, TraceInitializerFilter}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
-import com.twitter.util.TimeConversions._
-import com.twitter.util.{Duration, Future, NullMonitor, Time, Var, Try}
+import com.twitter.util.{Duration, Future, NullMonitor, Time, Try}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Level
@@ -55,7 +53,7 @@ object ClientBuilder {
 }
 
 object ClientConfig {
-  sealed abstract trait Yes
+  sealed trait Yes
   type FullySpecified[Req, Rep] = ClientConfig[Req, Rep, Yes, Yes, Yes]
   val DefaultName = "client"
 
@@ -259,7 +257,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * One of the {{hosts}} variations or direct specification of the
    * cluster (via {{cluster}}) is required.
    *
-   * @param hostNamePortcombinations comma-separated "host:port"
+   * @param hostnamePortCombinations comma-separated "host:port"
    * string.
    */
   def hosts(
@@ -487,13 +485,17 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * discretion of `client` itself and the protocol implementation. For example,
    * the Mux protocol has no use for most connection pool parameters (e.g.
    * `hostConnectionLimit`). Thus when configuring
-   * [[com.twitter.finagle.ThriftMux]] clients (via `.stack(ThriftMux.client)`),
+   * [[com.twitter.finagle.ThriftMux]] clients (via [[stack(ThriftMux.client)]]),
    * such connection pool parameters will not be applied.
    */
   def stack[Req1, Rep1](
     client: Stack.Parameterized[Client[Req1, Rep1]]
-  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, Yes] =
-    copy(params, client.withParams)
+  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, Yes] = {
+    val withParams: Stack.Params => Client[Req1, Rep1] = { ps =>
+      client.withParams(client.params ++ ps)
+    }
+    copy(params, withParams)
+  }
 
   @deprecated("Use tcpConnectTimeout instead", "5.0.1")
   def connectionTimeout(duration: Duration): This = tcpConnectTimeout(duration)
@@ -657,7 +659,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Use the given channel factory instead of the default. Note that
    * when using a non-default ChannelFactory, finagle can't
    * meaningfully reference count factory usage, and so the caller is
-   * responsible for calling ``releaseExternalResources()''.
+   * responsible for calling `releaseExternalResources()`.
    */
   def channelFactory(cf: ChannelFactory): This =
     configured(Netty3Transporter.ChannelFactory(cf))
@@ -917,7 +919,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   private def retryFilter(timer: com.twitter.util.Timer) =
     params[Retries] match {
       case Retries(policy) if params.contains[Retries] =>
-        val Label(label) = params[Label]
         val stats = new StatsFilter[Req, Rep](new RollupStatsReceiver(statsReceiver.scope("tries")))
         val retries = new RetryingFilter[Req, Rep](policy, timer, statsReceiver)
         stats andThen retries

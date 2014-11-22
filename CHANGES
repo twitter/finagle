@@ -25,6 +25,14 @@ Breaking API Changes
     to the `destination` field in Tdispatch requests. Furthermore, these new
     types expose `c.t.io.Buf` instead of Netty's ChannelBuffers.
 
+  * finagle-thrift,finagle-thriftmux: `c.t.f.Thrift.Client`, `c.t.f.Thrift.Server`,
+    `c.t.f.ThriftMux.Client` and `c.t.f.ThriftMux.Server` have their
+    `TProtocolFactory` configured via a `c.t.f.thrift.param.ProtocolFactory`
+    `Stack.Param`.
+
+  * finagle-thriftmux: `c.t.f.ThriftMux.Client` now has its `ClientId`
+    configured via a `c.t.f.thrift.param.ClientId` `Stack.Param`.
+
 Deprecations
 ~~~~~~~~~~~~
 

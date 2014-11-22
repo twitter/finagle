@@ -3,20 +3,18 @@ package com.twitter.finagle.builder
 import com.twitter.finagle.{Server => FinagleServer, _}
 import com.twitter.finagle.channel.IdleConnectionFilter
 import com.twitter.finagle.channel.OpenConnectionsThresholds
-import com.twitter.finagle.dispatch.ExpiringServerDispatcher
 import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter}
 import com.twitter.finagle.netty3.Netty3Listener
-import com.twitter.finagle.server.{Listener, NullListener, StackServer, StdStackServer}
+import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service.ExpiringService
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.ssl.{Ssl, Engine}
-import com.twitter.finagle.stack.nilStack
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.util._
 import com.twitter.util.{Closable, Duration, Future, NullMonitor, Time}
-import java.net.{InetAddress, InetSocketAddress, SocketAddress}
+import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Level
 import javax.net.ssl.SSLEngine
@@ -63,7 +61,7 @@ object ServerBuilder {
 }
 
 object ServerConfig {
-  sealed abstract trait Yes
+  sealed trait Yes
   type FullySpecified[Req, Rep] = ServerConfig[Req, Rep, Yes, Yes, Yes]
 
   def nilServer[Req, Rep] = new FinagleServer[Req, Rep] {
@@ -271,8 +269,12 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    */
   def stack[Req1, Rep1](
     server: Stack.Parameterized[FinagleServer[Req1, Rep1]]
-  ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
-    copy(params, server.withParams)
+  ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] = {
+    val withParams: Stack.Params => FinagleServer[Req1, Rep1] = { ps =>
+      server.withParams(server.params ++ ps)
+    }
+    copy(params, withParams)
+  }
 
   def reportTo(receiver: StatsReceiver): This =
     configured(Stats(receiver))

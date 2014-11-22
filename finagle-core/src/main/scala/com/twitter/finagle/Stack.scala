@@ -1,7 +1,6 @@
 package com.twitter.finagle
 
 import scala.collection.mutable
-import scala.collection.immutable
 
 /**
  * Stacks represent stackable elements of type T. It is assumed that
@@ -223,7 +222,7 @@ object Stack {
   /**
    * A parameter map.
    */
-  trait Params {
+  trait Params extends Iterable[(Param[_], Any)] {
     /**
      * Get the current value of the P-typed parameter.
      */
@@ -236,10 +235,28 @@ object Stack {
     def contains[P: Param]: Boolean
 
     /**
+     * Iterator of all `Param`s and their associated values.
+     */
+    def iterator: Iterator[(Param[_], Any)]
+
+    /**
      * Produce a new parameter map, overriding any previous
      * `P`-typed value.
      */
     def +[P: Param](p: P): Params
+
+    /**
+     * Alias for [[addAll(Params)]].
+     */
+    def ++(ps: Params): Params =
+      addAll(ps)
+
+    /**
+     * Produce a new parameter map, overriding any previously
+     * mapped values.
+     */
+    def addAll(ps: Params): Params
+
   }
 
   object Params {
@@ -253,8 +270,14 @@ object Stack {
       def contains[P](implicit param: Param[P]): Boolean =
         map.contains(param)
 
+      def iterator: Iterator[(Param[_], Any)] =
+        map.iterator
+
       def +[P](p: P)(implicit param: Param[P]): Params =
         copy(map + (param -> p))
+
+      def addAll(ps: Params): Params =
+        copy(map ++ ps.iterator)
     }
 
     /**
@@ -336,6 +359,20 @@ object Stack {
       Node(this, (prms, next) => Leaf(this,
         make(prms[P1], prms[P2], prms[P3], next.make(prms))), next)
   }
+
+  /** A module of 4 parameters. */
+  abstract class Module4[P1: Param, P2: Param, P3: Param, P4: Param, T] extends Stackable[T] {
+    final val parameters = Seq(
+      implicitly[Param[P1]],
+      implicitly[Param[P2]],
+      implicitly[Param[P3]],
+      implicitly[Param[P4]])
+    def make(p1: P1, p2: P2, p3: P3, p4: P4, next: T): T
+    def toStack(next: Stack[T]) =
+      Node(this, (prms, next) => Leaf(this,
+        make(prms[P1], prms[P2], prms[P3], prms[P4], next.make(prms))), next)
+  }
+
 }
 
 /**

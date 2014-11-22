@@ -29,19 +29,14 @@ class ThriftMuxClientLike private[finagle](client: ThriftMux.Client)
    * The [[com.twitter.finagle.Stack.Params]] used to configure
    * the stack.
    */
-  def params = client.params
+  def params: Stack.Params = client.params
 
-  protected val protocolFactory = client.protocolFactory
+  protected val Thrift.param.ProtocolFactory(protocolFactory) =
+    client.params[Thrift.param.ProtocolFactory]
 
-  protected lazy val defaultClientName = {
-    val Label(label) = params[Label]
-    label
-  }
+  protected lazy val Label(defaultClientName) = params[Label]
 
-  override protected lazy val stats = {
-    val Stats(sr) = params[Stats]
-    sr
-  }
+  override protected lazy val Stats(stats) = params[Stats]
 
   /**
    * Create a new ThriftMuxClientLike with `params` used to configure the
@@ -51,7 +46,7 @@ class ThriftMuxClientLike private[finagle](client: ThriftMux.Client)
    * muxer.
    */
   def apply(params: Stack.Params): Client[ThriftClientRequest, Array[Byte]] =
-    new ThriftMuxClientLike(client.withParams(params))
+    new ThriftMuxClientLike(client.withParams(this.params ++ params))
 
   /**
    * Create a new ThriftMuxClientLike with `p` added to the

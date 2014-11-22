@@ -1,13 +1,19 @@
 package com.twitter.finagle.thrift
 
-import org.junit.runner.RunWith
-import org.scalatest.{BeforeAndAfter, FunSuite}
-import org.scalatest.junit.JUnitRunner
 import com.twitter.finagle._
-import com.twitter.finagle.tracing.{Record, Trace, Annotation}
+import com.twitter.finagle.builder.{ServerBuilder, ClientBuilder}
+import com.twitter.finagle.param.Stats
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.tracing.{Annotation, Record, Trace}
 import com.twitter.test._
-import com.twitter.util.{Await, Duration, Future}
-import java.io.{StringWriter, PrintWriter}
+import com.twitter.util.{Closable, Await, Duration, Future}
+import java.io.{PrintWriter, StringWriter}
+import java.net.{InetAddress, SocketAddress, InetSocketAddress}
+import org.apache.thrift.TApplicationException
+import org.apache.thrift.protocol.{TProtocolFactory, TCompactProtocol}
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
@@ -24,7 +30,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   type Iface = B.ServiceIface
   def ifaceManifest = implicitly[ClassManifest[B.ServiceIface]]
 
-  val processor = new B.ServiceIface {
+  class BServiceImpl extends B.ServiceIface {
     def add(a: Int, b: Int) = Future.exception(new AnException)
     def add_one(a: Int, b: Int) = Future.Void
     def multiply(a: Int, b: Int) = Future { a * b }
@@ -45,8 +51,119 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
   }
 
+  val processor = new BServiceImpl()
+
   val ifaceToService = new B.Service(_, _)
   val serviceToIface = new B.ServiceToClient(_, _)
+
+  val missingClientIdEx = new IllegalStateException("uh no client id")
+
+  def servers(pf: TProtocolFactory): Seq[(String, Closable, Int)] = {
+    val iface = new BServiceImpl {
+      override def show_me_your_dtab(): Future[String] = {
+        ClientId.current.map(_.name) match {
+          case Some(name) => Future.value(name)
+          case _ => Future.exception(missingClientIdEx)
+        }
+      }
+    }
+
+    val builder = ServerBuilder()
+      .name("server")
+      .bindTo(new InetSocketAddress(0))
+      .stack(Thrift.server.withProtocolFactory(pf))
+      .build(ifaceToService(iface, pf))
+    val proto = Thrift.server
+      .withProtocolFactory(pf)
+      .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
+
+    def port(socketAddr: SocketAddress): Int =
+      socketAddr.asInstanceOf[InetSocketAddress].getPort
+
+    Seq(
+      ("ServerBuilder", builder, port(builder.localAddress)),
+      ("Proto", proto, port(proto.boundAddress))
+    )
+  }
+
+  def clients(
+    pf: TProtocolFactory,
+    clientId: Option[ClientId],
+    port: Int
+  ): Seq[(String, B.ServiceIface, Closable)] = {
+    val dest = s"localhost:$port"
+
+    var clientStack = Thrift.client.withProtocolFactory(pf)
+    clientId.foreach { cId =>
+      clientStack = clientStack.withClientId(cId)
+    }
+
+    val builder = ClientBuilder()
+      .stack(clientStack)
+      .dest(dest)
+      .build()
+    val proto = clientStack.newService(dest)
+
+    def toIface(svc: Service[ThriftClientRequest, Array[Byte]]) =
+      serviceToIface(svc, pf)
+
+    Seq(
+      ("ClientBuilder", toIface(builder), builder),
+      ("Proto", toIface(proto), proto)
+    )
+  }
+
+  // While we're supporting both old & new APIs, test the cross-product
+  test("Mix of client and server creation styles") {
+    for {
+      clientId <- Seq(Some(ClientId("anClient")), None)
+      pf <- Seq(Protocols.binaryFactory(), new TCompactProtocol.Factory())
+      (serverWhich, serverClosable, port) <- servers(pf)
+    } {
+      for {
+        (clientWhich, clientIface, clientClosable) <- clients(pf, clientId, port)
+      } withClue(
+        s"Server ($serverWhich) Client ($clientWhich) clientId $clientId protocolFactory $pf"
+      ) {
+        val resp = clientIface.show_me_your_dtab()
+        clientId match {
+          case Some(cId) =>
+            assert(cId.name === Await.result(resp))
+          case None =>
+            val ex = intercept[TApplicationException] { Await.result(resp) }
+            assert(ex.getMessage.contains(missingClientIdEx.toString))
+        }
+        clientClosable.close()
+      }
+      serverClosable.close()
+    }
+  }
+
+  test("Exceptions are treated as failures") {
+    val protocolFactory = Protocols.binaryFactory()
+
+    val impl = new BServiceImpl {
+      override def add(a: Int, b: Int) =
+        Future.exception(new RuntimeException("lol"))
+    }
+
+    val sr = new InMemoryStatsReceiver()
+    val server = Thrift.server
+      .configured(Stats(sr))
+      .serve(
+        new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+        ifaceToService(impl, protocolFactory))
+    val client = Thrift.client.newIface[B.ServiceIface](server)
+
+    intercept[org.apache.thrift.TApplicationException] {
+      Await.result(client.add(1, 2))
+    }
+
+    assert(sr.counters(Seq("requests")) === 1)
+    assert(sr.counters.get(Seq("success")) === None)
+    assert(sr.counters(Seq("failures")) === 1)
+    server.close()
+  }
 
   testThrift("unique trace ID") { (client, tracer) =>
     val f1 = client.add(1, 2)
@@ -83,9 +200,9 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     // bug in thrift 0.5.0[1]. See THRIFT-1375.
     //  When we upgrade, this test will fail and helpfully
     // remind us to add JSON back.
+    import java.nio.ByteBuffer
     import org.apache.thrift.protocol._
     import org.apache.thrift.transport._
-    import java.nio.ByteBuffer
 
     val bytes = Array[Byte](102, 100, 125, -96, 57, -55, -72, 18,
       -21, 15, -91, -36, 104, 111, 111, -127, -21, 15, -91, -36,
@@ -121,13 +238,6 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       val ids = idSet.filter(_.traceId == id.traceId)
       assert(ids.size === 1)
       val theId = ids.head
-
-      // Compare two annotation records, ignoring time.
-      // This is simpler than trying to freeze time in the listening threads of
-      // the various servers we are constructing.
-      def assertAnn(rec: Record, ann: Annotation) {
-        assert(rec.annotation === ann)
-      }
 
       val traces: Seq[Record] = tracer
         .filter(_.traceId == theId)

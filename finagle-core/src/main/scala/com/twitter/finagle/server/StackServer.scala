@@ -125,8 +125,7 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
     withParams(params+p)
 
   /**
-   * Creates a new StackServer with `p` added to the `params`
-   * used to configure this StackServer's `stack`.
+   * Creates a new StackServer with `params` used to configure this StackServer's `stack`.
    */
   def withParams(params: Stack.Params): This =
     copy1(params = params)
