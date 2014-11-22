@@ -1,14 +1,13 @@
 package com.twitter.finagle.thrift
 
+import org.apache.thrift.TBase
+import org.apache.thrift.protocol.TProtocolFactory
+import org.apache.thrift.transport.TMemoryBuffer
+
 /**
  * OutputBuffers are convenient ways of getting at TProtocols for
  * output to byte arrays
  */
-
-import org.apache.thrift.protocol.TProtocolFactory
-import org.apache.thrift.transport.TMemoryBuffer
-import org.apache.thrift.TBase
-
 private[finagle] object OutputBuffer {
   def messageToArray(message: TBase[_, _], protocolFactory: TProtocolFactory) = {
     val buffer = new OutputBuffer(protocolFactory)

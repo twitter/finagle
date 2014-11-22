@@ -87,6 +87,16 @@ class StackTest extends FunSuite {
     assert(params[TestParam] === TestParam(1))
     assert(params2[TestParam] === TestParam(999))
     assert(params3[TestParam] === TestParam(100))
+
+    assert(!(params ++ params).contains[TestParam])
+    assert((params ++ params2)[TestParam] === TestParam(999))
+    assert((params2 ++ params)[TestParam] === TestParam(999))
+    assert((params2 ++ params3)[TestParam] === TestParam(100))
+    assert((params3 ++ params2)[TestParam] === TestParam(999))
+
+    val params4 = params + TestParamInnerVar(0)
+    assert((params2 ++ params4)[TestParam] === TestParam(999))
+    assert((params2 ++ params4)[TestParamInnerVar] === TestParamInnerVar(0))
   }
 
   test("Role.toString: should return lowercase object name") {

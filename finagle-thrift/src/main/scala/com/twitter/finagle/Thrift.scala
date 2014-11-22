@@ -56,7 +56,7 @@ import org.apache.thrift.protocol.TProtocolFactory
 object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
     with Server[Array[Byte], Array[Byte]] with ThriftRichServer {
 
-  val protocolFactory = Protocols.binaryFactory()
+  val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
   protected val defaultClientName = "thrift"
 
   object param {
@@ -64,23 +64,35 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     implicit object ClientId extends Stack.Param[ClientId] {
       val default = ClientId(None)
     }
+
+    case class ProtocolFactory(protocolFactory: TProtocolFactory)
+    implicit object ProtocolFactory extends Stack.Param[ProtocolFactory] {
+      val default = ProtocolFactory(Protocols.binaryFactory())
+    }
   }
 
   object Client {
     private val preparer: Stackable[ServiceFactory[ThriftClientRequest, Array[Byte]]] =
-      new Stack.Module3[param.ClientId, Label, Stats,
-        ServiceFactory[ThriftClientRequest, Array[Byte]]] {
+      new Stack.Module4[
+        param.ClientId,
+        Label,
+        Stats,
+        param.ProtocolFactory,
+        ServiceFactory[ThriftClientRequest, Array[Byte]]
+      ] {
         val role = StackClient.Role.prepConn
         val description = "Prepare TTwitter thrift connection"
         def make(
           _clientId: param.ClientId,
           _label: Label,
           _stats: Stats,
+          _pf: param.ProtocolFactory,
           next: ServiceFactory[ThriftClientRequest, Array[Byte]]
         ) = {
           val Label(label) = _label
           val param.ClientId(clientId) = _clientId
-          val preparer = new ThriftClientPreparer(protocolFactory, label, clientId)
+          val param.ProtocolFactory(pf) = _pf
+          val preparer = new ThriftClientPreparer(pf, label, clientId)
           val underlying = preparer.prepare(next)
           val Stats(stats) = _stats
           new ServiceFactoryProxy(underlying) {
@@ -103,7 +115,6 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
   case class Client(
     stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = Client.stack,
     params: Stack.Params = StackClient.defaultParams,
-    protocolFactory: TProtocolFactory = Protocols.binaryFactory(),
     framed: Boolean = true
   ) extends StdStackClient[ThriftClientRequest, Array[Byte], Client] with ThriftRichClient {
     protected def copy1(
@@ -116,6 +127,8 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     protected type In = ThriftClientRequest
     protected type Out = Array[Byte]
 
+    protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
+
     protected def newTransporter(): Transporter[In, Out] = {
       val pipeline =
         if (framed) ThriftClientFramedPipelineFactory
@@ -124,11 +137,12 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     }
 
     protected def newDispatcher(
-        transport: Transport[ThriftClientRequest, Array[Byte]]): Service[ThriftClientRequest, Array[Byte]] =
+      transport: Transport[ThriftClientRequest, Array[Byte]]
+    ): Service[ThriftClientRequest, Array[Byte]] =
       new SerialClientDispatcher(transport)
 
     def withProtocolFactory(protocolFactory: TProtocolFactory): Client =
-      copy(protocolFactory=protocolFactory)
+      configured(param.ProtocolFactory(protocolFactory))
 
     def withClientId(clientId: thrift.ClientId): Client =
       configured(param.ClientId(Some(clientId)))
@@ -140,24 +154,32 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
   val client = Client()
 
   def newClient(
-    dest: Name, label: String
+    dest: Name,
+    label: String
   ): ServiceFactory[ThriftClientRequest, Array[Byte]] = client.newClient(dest, label)
 
   @deprecated("Use `Thrift.client.withProtocolFactory`", "6.22.0")
   def withProtocolFactory(protocolFactory: TProtocolFactory): Client =
-    client.copy(protocolFactory=protocolFactory)
+    client.withProtocolFactory(protocolFactory)
 
   @deprecated("Use `Thrift.client.withClientId`", "6.22.0")
   def withClientId(clientId: thrift.ClientId): Client =
-    client.configured(param.ClientId(Some(clientId)))
+    client.withClientId(clientId)
 
   object Server {
-    private val preparer = new Stack.Module1[Label, ServiceFactory[Array[Byte], Array[Byte]]] {
+    private val preparer =
+      new Stack.Module2[Label, param.ProtocolFactory, ServiceFactory[Array[Byte], Array[Byte]]]
+    {
       val role = StackClient.Role.prepConn
       val description = "Prepare TTwitter thrift connection"
-      def make(_label: Label, next: ServiceFactory[Array[Byte], Array[Byte]]) = {
+      def make(
+        _label: Label,
+        _pf: param.ProtocolFactory,
+        next: ServiceFactory[Array[Byte], Array[Byte]]
+      ) = {
         val Label(label) = _label
-        val preparer = new thrift.ThriftServerPreparer(protocolFactory, label)
+        val param.ProtocolFactory(pf) = _pf
+        val preparer = new thrift.ThriftServerPreparer(pf, label)
         preparer.prepare(next)
       }
     }
@@ -169,7 +191,6 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
   case class Server(
     stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = Server.stack,
     params: Stack.Params = StackServer.defaultParams,
-    protocolFactory: TProtocolFactory = Protocols.binaryFactory(),
     framed: Boolean = true
   ) extends StdStackServer[Array[Byte], Array[Byte], Server] with ThriftRichServer {
     protected def copy1(
@@ -180,6 +201,8 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     protected type In = Array[Byte]
     protected type Out = Array[Byte]
 
+    protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
+
     protected def newListener(): Listener[In, Out] = {
       val pipeline =
         if (framed) thrift.ThriftServerFramedPipelineFactory
@@ -188,17 +211,22 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
       Netty3Listener("thrift", pipeline)
     }
 
-    protected def newDispatcher(transport: Transport[In, Out], service: Service[Array[Byte], Array[Byte]]) =
+    protected def newDispatcher(
+      transport: Transport[In, Out],
+      service: Service[Array[Byte], Array[Byte]]
+    ) =
       new SerialServerDispatcher(transport, service)
 
     def withProtocolFactory(protocolFactory: TProtocolFactory): Server =
-      copy(protocolFactory=protocolFactory)
+      configured(param.ProtocolFactory(protocolFactory))
 
     def withBufferedTransport(): Server = copy(framed=false)
   }
 
-  val  server = Server()
+  val server = Server()
 
-  def serve(addr: SocketAddress, service: ServiceFactory[Array[Byte], Array[Byte]])
-    : ListeningServer = server.serve(addr, service)
+  def serve(
+    addr: SocketAddress,
+    service: ServiceFactory[Array[Byte], Array[Byte]]
+  ): ListeningServer = server.serve(addr, service)
 }

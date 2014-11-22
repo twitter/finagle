@@ -2,7 +2,6 @@ package com.twitter.finagle.thrift
 
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ServerBuilder, ClientBuilder}
-import com.twitter.finagle.thrift._
 import com.twitter.finagle.tracing.{DefaultTracer, BufferingTracer, Trace}
 import java.net.{SocketAddress, InetSocketAddress, InetAddress}
 import org.apache.thrift.protocol._

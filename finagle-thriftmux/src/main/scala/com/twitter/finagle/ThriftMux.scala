@@ -3,19 +3,18 @@ package com.twitter.finagle
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.param.{Label, Stats}
-import com.twitter.finagle.server.{StackServer, StdStackServer, Listener}
+import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
 import com.twitter.finagle.stats.{ClientStatsReceiver, ServerStatsReceiver}
-import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientRequest, HandleUncaughtApplicationExceptions}
+import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest, UncaughtAppExceptionFilter}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
-import com.twitter.util.NonFatal
-import com.twitter.util.{Future, Time, Local}
+import com.twitter.util.{Future, Local, NonFatal, Time}
 import java.net.SocketAddress
+import org.apache.thrift.TException
 import org.apache.thrift.protocol.TProtocolFactory
 import org.apache.thrift.transport.TMemoryInputTransport
 import org.jboss.netty.buffer.{ChannelBuffer => CB}
-
 
 /**
  * The `ThriftMux` object is both a [[com.twitter.finagle.Client]] and a
@@ -48,11 +47,24 @@ object ThriftMux
   with Server[Array[Byte], Array[Byte]] with ThriftRichServer
 {
   /**
-   * Base [[com.twitter.finagle.Stack Stacks]] for Mux client and servers.
+   * Base [[com.twitter.finagle.Stack]] for ThriftMux clients.
    */
-  private[twitter] val BaseClientStack = (ThriftMuxUtil.protocolRecorder +: Mux.client.stack)
-    .replace(StackClient.Role.protoTracing, ClientRpcTracing)
-  private[twitter] val BaseServerStack = ThriftMuxUtil.protocolRecorder +: Mux.server.stack
+  private[twitter] val BaseClientStack: Stack[ServiceFactory[mux.Request, mux.Response]] =
+    (ThriftMuxUtil.protocolRecorder +: Mux.client.stack)
+      .replace(StackClient.Role.protoTracing, ClientRpcTracing)
+
+  /**
+   * Base [[com.twitter.finagle.Stack]] for ThriftMux servers.
+   */
+  private[twitter] val BaseServerStack: Stack[ServiceFactory[mux.Request, mux.Response]] = {
+    // NOTE: ideally this would not use the `prepConn` role, but it's conveniently
+    // located in the right location of the stack and is defaulted to a no-op.
+    // We would like this located anywhere before the StatsFilter so that success
+    // and failure can be measured properly before converting the exceptions into
+    // byte arrays. see CSL-1351
+    ThriftMuxUtil.protocolRecorder +:
+      Mux.server.stack.replace(StackServer.Role.preparer, Server.ExnHandler)
+  }
 
   private[this] def recordRpc(buffer: Array[Byte]): Unit = try {
     val inputTransport = new TMemoryInputTransport(buffer)
@@ -81,42 +93,35 @@ object ThriftMux
   }
 
   case class Client(
-    muxer: StackClient[mux.Request, mux.Response] = Mux.client.copy(
-      stack = BaseClientStack),
-    // TODO: consider stuffing these into Stack.Params
-    clientId: Option[ClientId] = None,
-    protocolFactory: TProtocolFactory = Protocols.binaryFactory()
+    muxer: StackClient[mux.Request, mux.Response] = Mux.client.copy(stack = BaseClientStack)
   ) extends com.twitter.finagle.Client[ThriftClientRequest, Array[Byte]]
       with ThriftRichClient with Stack.Parameterized[Client] {
     def stack = muxer.stack
-    def params = muxer.params
+    def params: Stack.Params = muxer.params
 
-    protected lazy val defaultClientName = {
-      val Label(label) = params[Label]
-      label
-    }
+    protected lazy val Label(defaultClientName) = params[Label]
 
-    override protected lazy val stats = {
-      val Stats(sr) = params[Stats]
-      sr
-    }
+    override protected lazy val Stats(stats) = params[Stats]
+
+    protected val Thrift.param.ProtocolFactory(protocolFactory) =
+      params[Thrift.param.ProtocolFactory]
 
     def withParams(ps: Stack.Params): Client =
-      copy(muxer=muxer.withParams(ps))
+      copy(muxer = muxer.withParams(ps))
 
     /**
      * Produce a [[com.twitter.finagle.ThriftMux.Client]] using the provided
      * client ID.
      */
     def withClientId(clientId: ClientId): Client =
-      copy(clientId=Some(clientId))
+      configured(Thrift.param.ClientId(Some(clientId)))
 
     /**
      * Produce a [[com.twitter.finagle.ThriftMux.Client]] using the provided
      * protocolFactory.
      */
     def withProtocolFactory(pf: TProtocolFactory): Client =
-      copy(protocolFactory=pf)
+      configured(Thrift.param.ProtocolFactory(pf))
 
     def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
       muxer.newClient(dest, label) map { service =>
@@ -130,6 +135,7 @@ object ThriftMux
             // com.twitter.finagle.thrift.ClientIdContext to propagate ClientIds.
             val save = Local.save()
             try {
+              val Thrift.param.ClientId(clientId) = params[Thrift.param.ClientId]
               ClientId.set(clientId)
               // TODO set the Path here.
               val muxreq = mux.Request(Path.empty, Buf.ByteArray.Owned(req.message))
@@ -145,23 +151,18 @@ object ThriftMux
           override def close(deadline: Time) = service.close(deadline)
         }
       }
-  }
+    }
 
   val client = Client()
     .configured(Label("thrift"))
     .configured(Stats(ClientStatsReceiver))
 
-  protected lazy val defaultClientName = {
-    val Label(label) = client.params[Label]
-    label
-  }
+  protected lazy val Label(defaultClientName) = client.params[Label]
 
-  override protected lazy val stats = {
-    val Stats(sr) = client.params[Stats]
-    sr
-  }
+  override protected lazy val Stats(stats) = client.params[Stats]
 
-  protected val protocolFactory = client.protocolFactory
+  protected val Thrift.param.ProtocolFactory(protocolFactory) =
+    client.params[Thrift.param.ProtocolFactory]
 
   def newClient(dest: Name, label: String) = client.newClient(dest, label)
 
@@ -171,7 +172,7 @@ object ThriftMux
    */
   @deprecated("Use `ThriftMux.client.withClientId`", "6.22.0")
   def withClientId(clientId: ClientId): Client =
-    client.copy(clientId=Some(clientId))
+    client.withClientId(clientId)
 
   /**
    * Produce a [[com.twitter.finagle.ThriftMux.Client]] using the provided
@@ -179,7 +180,7 @@ object ThriftMux
    */
   @deprecated("Use `ThriftMux.client.withProtocolFactory`", "6.22.0")
   def withProtocolFactory(pf: TProtocolFactory): Client =
-    client.copy(protocolFactory=pf)
+    client.withProtocolFactory(pf)
 
   /**
    * A server for the Thrift protocol served over [[com.twitter.finagle.mux]].
@@ -196,9 +197,6 @@ object ThriftMux
    * It correctly responds to the protocol up-negotiation request and passes the
    * tracing information embedded in the thrift requests to Mux (which has native
    * tracing support).
-   *
-   * This class can't be instantiated. For a default instance of ThriftMuxServerLike,
-   * see [[com.twitter.finagle.ThriftMuxServer]]
    */
 
   case class ServerMuxer(
@@ -217,12 +215,13 @@ object ThriftMux
       val Label(label) = params[Label]
       val Stats(sr) = params[Stats]
       val scoped = sr.scope(label).scope("thriftmux")
+      val Thrift.param.ProtocolFactory(pf) = params[Thrift.param.ProtocolFactory]
 
       // Create a Listener that maintains gauges of how many ThriftMux and non-Mux
       // downgraded connections are listening to clients.
       new Listener[CB, CB] {
         private[this] val underlying = Netty3Listener[CB, CB](
-          new thriftmux.PipelineFactory(scoped),
+          new thriftmux.PipelineFactory(scoped, pf),
           params
         )
 
@@ -244,25 +243,8 @@ object ThriftMux
 
   val serverMuxer = ServerMuxer()
 
-  case class Server(
-    muxer: StackServer[mux.Request, mux.Response] = serverMuxer,
-    protocolFactory: TProtocolFactory = Protocols.binaryFactory()
-  ) extends com.twitter.finagle.Server[Array[Byte], Array[Byte]]
-      with ThriftRichServer with Stack.Parameterized[Server] {
-    def stack = muxer.stack
-    def params = muxer.params
-
-    /**
-     * Produce a [[com.twitter.finagle.ThriftMuxServerLike]] using the provided
-     * protocolFactory.
-     */
-    def withProtocolFactory(pf: TProtocolFactory): Server =
-      copy(protocolFactory=pf)
-
-    def withParams(ps: Stack.Params): Server =
-      copy(muxer=muxer.withParams(ps))
-
-    private[this] val muxToArrayFilter =
+  object Server {
+    private val MuxToArrayFilter =
       new Filter[mux.Request, mux.Response, Array[Byte], Array[Byte]] {
         def apply(
           request: mux.Request, service: Service[Array[Byte], Array[Byte]]
@@ -274,6 +256,61 @@ object ThriftMux
         }
       }
 
+    private[this] class ExnFilter(protocolFactory: TProtocolFactory)
+      extends SimpleFilter[mux.Request, mux.Response]
+    {
+      def apply(
+        request: mux.Request,
+        service: Service[mux.Request, mux.Response]
+      ): Future[mux.Response] = {
+        service(request).handle {
+          case e if !e.isInstanceOf[TException] =>
+            val msg = UncaughtAppExceptionFilter.writeExceptionMessage(
+              request.body, e, protocolFactory)
+            mux.Response(msg)
+        }
+      }
+    }
+
+    private[ThriftMux] val ExnHandler =
+      new Stack.Module1[Thrift.param.ProtocolFactory, ServiceFactory[mux.Request, mux.Response]]
+    {
+      val role = Stack.Role("appExceptionHandling")
+      val description = "Translates uncaught application exceptions into Thrift messages"
+      def make(
+        _pf: Thrift.param.ProtocolFactory,
+        next: ServiceFactory[mux.Request, mux.Response]
+      ) = {
+        val Thrift.param.ProtocolFactory(pf) = _pf
+        val exnFilter = new ExnFilter(pf)
+        exnFilter.andThen(next)
+      }
+    }
+  }
+
+  case class Server(
+      muxer: StackServer[mux.Request, mux.Response] = serverMuxer)
+    extends com.twitter.finagle.Server[Array[Byte], Array[Byte]]
+    with ThriftRichServer with Stack.Parameterized[Server]
+  {
+    import Server.MuxToArrayFilter
+
+    def stack = muxer.stack
+    def params = muxer.params
+
+    protected val Thrift.param.ProtocolFactory(protocolFactory) =
+      params[Thrift.param.ProtocolFactory]
+
+    /**
+     * Produce a [[com.twitter.finagle.Thrift.Server]] using the provided
+     * `TProtocolFactory`.
+     */
+    def withProtocolFactory(pf: TProtocolFactory): Server =
+      configured(Thrift.param.ProtocolFactory(pf))
+
+    def withParams(ps: Stack.Params): Server =
+      copy(muxer = muxer.withParams(ps))
+
     private[this] val tracingFilter = new SimpleFilter[Array[Byte], Array[Byte]] {
       def apply(request: Array[Byte], svc: Service[Array[Byte], Array[Byte]]): Future[Array[Byte]] = {
         recordRpc(request)
@@ -282,15 +319,10 @@ object ThriftMux
     }
 
     def serve(addr: SocketAddress, factory: ServiceFactory[Array[Byte], Array[Byte]]) = {
-      muxer.serve(addr, factory map { service =>
-        // Need a HandleUncaughtApplicationExceptions filter here to maintain
-        // the backward compatibility with non-mux thrift clients. Mux thrift
-        // clients get the same semantics as a side effect.
-        val uncaughtExceptionsFilter = new HandleUncaughtApplicationExceptions(protocolFactory)
-        muxToArrayFilter andThen tracingFilter andThen uncaughtExceptionsFilter andThen service
-      })
+      muxer.serve(
+        addr,
+        MuxToArrayFilter.andThen(tracingFilter).andThen(factory))
     }
-
   }
 
   val server: Server = Server()

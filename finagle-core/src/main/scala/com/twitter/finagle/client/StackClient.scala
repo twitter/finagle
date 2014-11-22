@@ -168,8 +168,7 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
     withParams(params+p)
 
   /**
-   * Creates a new StackClient with `p` added to the `params`
-   * used to configure this StackClient's `stack`.
+   * Creates a new StackClient with `params` used to configure this StackClient's `stack`.
    */
   def withParams(params: Stack.Params): This =
     copy1(params = params)
