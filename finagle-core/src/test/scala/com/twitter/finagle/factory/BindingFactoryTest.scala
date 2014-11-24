@@ -4,16 +4,13 @@ import com.twitter.finagle._
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.Rng
 import com.twitter.util._
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
-import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.{never, times, verify, when}
-import org.mockito.stubbing.Answer
-import org.mockito.invocation.InvocationOnMock
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
+import org.scalatest.{BeforeAndAfter, FunSuite}
 import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
@@ -207,6 +204,24 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     assert(news === 4)
     assert(closes === 2)
   })
+
+  test("BindingFactory.Module: filters with bound residual paths") {
+    val module = new BindingFactory.Module[Path, Path] {
+      protected[this] def boundPathFilter(path: Path) =
+        Filter.mk { (in, service) => service(path ++ in) }
+    }
+
+    val name = Name.Bound(Var(Addr.Pending), "id", Path.read("/alpha"))
+
+    val end = Stack.Leaf(Stack.Role("end"),
+      ServiceFactory(() => Future.value(Service.mk[Path, Path](Future.value))))
+
+    val params = Stack.Params.empty + BindingFactory.Dest(name)
+    val factory = module.toStack(end).make(params)
+    val service = Await.result(factory())
+    val full = Await.result(service(Path.read("/omega")))
+    assert(full === Path.read("/alpha/omega"))
+  }
 }
 
 @RunWith(classOf[JUnitRunner])
