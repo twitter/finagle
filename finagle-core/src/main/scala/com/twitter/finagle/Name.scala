@@ -38,9 +38,14 @@ object Name {
    * Addr]] which carries a host list of internet addresses.
    *
    * Equality of two Names is delegated to `id`. Two Bound instances
-   * are equal whenever their `id`s are.
+   * are equal whenever their `id`s are. `id` identifies the `addr`
+   * and not the `path`.
    */
-  class Bound private(val addr: Var[Addr], val id: Any) extends Name with Proxy {
+  class Bound private(
+    val addr: Var[Addr],
+    val id: Any,
+    val path: com.twitter.finagle.Path
+  ) extends Name with Proxy {
     def self = id
 
     // Workaround for https://issues.scala-lang.org/browse/SI-4807
@@ -48,7 +53,12 @@ object Name {
   }
 
   object Bound {
-    def apply(addr: Var[Addr], id: Any): Name.Bound = new Bound(addr, id)
+    def apply(addr: Var[Addr], id: Any, path: com.twitter.finagle.Path): Name.Bound =
+      new Bound(addr, id, path)
+
+    def apply(addr: Var[Addr], id: Any): Name.Bound =
+      apply(addr, id, com.twitter.finagle.Path.empty)
+
     def unapply(name: Name.Bound): Option[Var[Addr]] = Some(name.addr)
 
     /**

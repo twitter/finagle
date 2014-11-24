@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.client._
+import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.mux.lease.Acting
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.netty3._
@@ -36,11 +37,22 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
   private[finagle] class ClientProtoTracing extends ProtoTracing("clnt", StackClient.Role.protoTracing)
 
+  /** Prepends bound residual paths to outbound Mux requests's destinations. */
+  private[finagle] object MuxBindingFactory
+    extends BindingFactory.Module[mux.Request, mux.Response] {
+
+    protected[this] def boundPathFilter(residual: Path) =
+      Filter.mk[mux.Request, mux.Response, mux.Request, mux.Response] { (req, service) =>
+        service(mux.Request(residual ++ req.destination, req.body))
+      }
+  }
+
   object Client {
     val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackClient.newStack
       .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response])
       .replace(StackClient.Role.prepConn, mux.lease.LeasedFactory.module[mux.Request, mux.Response])
       .replace(StackClient.Role.protoTracing, new ClientProtoTracing)
+      .replace(BindingFactory.role, MuxBindingFactory)
   }
 
   case class Client(

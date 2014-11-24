@@ -62,6 +62,8 @@ New Features
   * finagle-mux: Drain mux servers properly, so that shutdowns can be
     graceful.
 
+  * finagle-mux: Inject bound residual paths into mux requests.
+
 6.23.0
 ------
 

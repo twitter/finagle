@@ -3,7 +3,7 @@ package com.twitter.finagle.factory
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.param.{Label, Stats}
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.{Drv, Rng}
 import com.twitter.util._
@@ -370,47 +370,69 @@ object BindingFactory {
   }
 
   /**
-   * Creates a [[com.twitter.finagle.Stackable]]
-   * [[com.twitter.finagle.factory.BindingFactory]]. The module
-   * creates a new `ServiceFactory` based on the module above it for
-   * each distinct [[com.twitter.finagle.Name.Bound]] resolved from
-   * `BindingFactory.Dest` (with caching of previously seen
-   * `Name.Bound`s).
+   * Base type for BindingFactory modules. Implementers may handle
+   * bound residual paths in a protocol-specific way.
+   *
+   * The module creates a new `ServiceFactory` based on the module
+   * above it for each distinct [[com.twitter.finagle.Name.Bound]]
+   * resolved from `BindingFactory.Dest` (with caching of previously
+   * seen `Name.Bound`s).
    */
-  private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module[ServiceFactory[Req, Rep]] {
-      val role = BindingFactory.role
-      val description = "Bind destination names to endpoints"
-      val parameters = Seq(
-        implicitly[Stack.Param[BindingFactory.Dest]],
-        implicitly[Stack.Param[Label]],
-        implicitly[Stack.Param[Stats]])
-      def make(params: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
-        val Label(label) = params[Label]
-        val Stats(stats) = params[Stats]
-        val Dest(dest) = params[Dest]
+  private[finagle] trait Module[Req, Rep] extends Stack.Module[ServiceFactory[Req, Rep]] {
+    val role = BindingFactory.role
+    val description = "Bind destination names to endpoints"
+    val parameters = Seq(
+      implicitly[Stack.Param[BaseDtab]],
+      implicitly[Stack.Param[Dest]],
+      implicitly[Stack.Param[Label]],
+      implicitly[Stack.Param[Stats]])
 
-        val factory =
-          dest match {
-            case Name.Bound(addr) =>
-              val params1 = (params +
-                LoadBalancerFactory.ErrorLabel(label) +
-                LoadBalancerFactory.Dest(addr))
-              next.make(params1)
+    /**
+     * A request filter that is aware of the bound residual path.
+     *
+     * The returned filter is applied around the ServiceFactory built from the rest of the stack.
+     */
+    protected[this] def boundPathFilter(path: Path): Filter[Req, Rep, Req, Rep]
 
-            case Name.Path(path) =>
-              val BaseDtab(baseDtab) = params[BaseDtab]
-              val params1 = params + LoadBalancerFactory.ErrorLabel(path.show)
+    def make(params: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
+      val Label(label) = params[Label]
+      val Stats(stats) = params[Stats]
+      val Dest(dest) = params[Dest]
 
-              def newStack(bound: Name.Bound) =
-                next.make(params1 +
-                  NamerTracingFilter.BoundPath(Some(path, bound)) +
-                  LoadBalancerFactory.Dest(bound.addr))
+      val factory = dest match {
+        case bound@Name.Bound(addr) =>
+          val client = next.make(params +
+            LoadBalancerFactory.ErrorLabel(label) +
+            LoadBalancerFactory.Dest(addr))
+          boundPathFilter(bound.path) andThen client
 
-              new BindingFactory(path, newStack, baseDtab, stats.scope("interpreter"))
+        case Name.Path(path) =>
+          val BaseDtab(baseDtab) = params[BaseDtab]
+          val params1 = params + LoadBalancerFactory.ErrorLabel(path.show)
+
+          def newStack(bound: Name.Bound) = {
+            val client = next.make(params1 +
+              NamerTracingFilter.BoundPath(Some(path, bound)) +
+              LoadBalancerFactory.Dest(bound.addr))
+            boundPathFilter(bound.path) andThen client
           }
 
-        Stack.Leaf(role, factory)
+          new BindingFactory(path, newStack, baseDtab, stats.scope("interpreter"))
       }
+
+      Stack.Leaf(role, factory)
+    }
+  }
+
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.factory.BindingFactory]].
+   *
+   * Ignores bound residual paths.
+   */
+  private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Module[Req, Rep] {
+      private[this] val f = Filter.identity[Req, Rep]
+      protected[this] def boundPathFilter(path: Path) = f
     }
 }
