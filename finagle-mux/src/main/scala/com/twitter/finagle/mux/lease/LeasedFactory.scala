@@ -30,7 +30,7 @@ object LeasedFactory {
  */
 private[finagle] class LeasedFactory[Req, Rep](mk: () => Future[Service[Req, Rep] with Acting])
     extends ServiceFactory[Req, Rep] { self =>
-  private[this] var current: List[Acting] = Nil
+  private[this] var current: List[Service[Req, Rep] with Acting] = Nil
 
   private[this] def newService(svc: Service[Req, Rep] with Acting) = {
     self.synchronized {
@@ -51,7 +51,15 @@ private[finagle] class LeasedFactory[Req, Rep](mk: () => Future[Service[Req, Rep
       newService(dispatcher)
     }
 
-  override def isAvailable: Boolean = self.synchronized { current forall (_.isActive) }
+  override def isAvailable: Boolean = self.synchronized { current forall { svc =>
+    // svc.isActive means that the service is alive, and ready to handle calls
+    // !svc.isAvailable means that svc is dead.
+    // Once the service is dead, we know we should close the old service and try again.
+    // This means that the ServiceFactory will be available again, if we try to acquire
+    // a new service.
+    // This is a temporary fix until we start using the SF#status API.
+    svc.isActive || !svc.isAvailable
+  }}
 
   def close(deadline: Time): Future[Unit] = Future.Done
 }

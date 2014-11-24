@@ -30,4 +30,27 @@ class LeasedFactoryTest extends FunSuite {
     Await.result(svc.close())
     assert(factory.isAvailable) // trivial case
   }
+
+  test("LeasedFactory should become available again when underlying service is dead") {
+    var _leased = true
+    var _available = true
+    def mk(): Future[Service[Unit, Unit] with Acting] = Future.value(
+      new Service[Unit, Unit] with Acting {
+        def apply(a: Unit) = Future.Done
+        def isActive = _leased
+        override def isAvailable = _available
+      }
+    )
+    val factory = new LeasedFactory(mk)
+    assert(factory.isAvailable) // trivial case
+    val svc = Await.result(factory())
+    assert(factory.isAvailable) // 1 leased
+
+    _leased = false
+    assert(!factory.isAvailable) // no lease
+    _available = false
+    assert(factory.isAvailable) // dead underlying svc
+    Await.result(svc.close())
+    assert(factory.isAvailable) // trivial case
+  }
 }
