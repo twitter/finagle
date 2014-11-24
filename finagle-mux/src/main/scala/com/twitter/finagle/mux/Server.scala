@@ -1,5 +1,6 @@
 package com.twitter.finagle.mux
 
+import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle.mux.lease.exp.{Lessor, Lessee, nackOnExpiredLease}
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
@@ -24,6 +25,8 @@ case class ClientDiscardedRequestException(why: String) extends Exception(why)
 object ServerDispatcher {
   val Epsilon = 1.second // TODO decide whether this should be hard coded or not
 }
+
+object gracefulShutdownEnabled extends GlobalFlag(true, "Graceful shutdown enabled.  Temporary measure to allow servers to deploy without hurting clients.")
 
 /**
  * A ServerDispatcher for the mux protocol.
@@ -227,13 +230,19 @@ private[finagle] class ServerDispatcher private[finagle](
     else {
       receive = readyToDrain orElse handle
 
-      // Tdrain is the only T-typed message that servers ever send, so we don't
-      // need to allocate a distinct tag to differentiate messages.
-      trans.write(encode(Tdrain(1))) before {
-        closep.within(DefaultTimer.twitter, deadline - Time.now) transform { _ =>
-          lessor.unregister(this)
-          trans.close()
+      if (gracefulShutdownEnabled()) {
+        // Tdrain is the only T-typed message that servers ever send, so we don't
+        // need to allocate a distinct tag to differentiate messages.
+        trans.write(encode(Tdrain(1))) before {
+          closep.within(DefaultTimer.twitter, deadline - Time.now) transform { _ =>
+            lessor.unregister(this)
+            trans.close()
+          }
         }
+      } else {
+        closep.setDone
+        lessor.unregister(this)
+        trans.close()
       }
     }
   }
