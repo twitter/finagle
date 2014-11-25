@@ -209,7 +209,7 @@ private object TraceInfo {
       // even if there are no id headers we want to get the debug flag
       // this is to allow developers to just set the debug flag to ensure their
       // trace is collected
-      Trace.setId(Trace.id.copy(flags = getFlags(request)))
+      Trace.setId(Trace.nextId.copy(flags = getFlags(request)))
     } else {
       Trace.setId(Trace.nextId)
     }
