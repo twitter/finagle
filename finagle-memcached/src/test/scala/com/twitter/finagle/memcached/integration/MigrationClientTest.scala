@@ -34,6 +34,7 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
   var connectionFactory: NIOServerCnxn.Factory = null
 
   var testServers: List[TestMemcachedServer] = List()
+  val TIMEOUT = 15.seconds
 
   override def beforeEach() {
     val zookeeperAddress = RandomSocket.nextAddress
@@ -95,22 +96,6 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     testServers = List()
   }
 
-  def waitForEventualResult[A](op: () => A, result: A, timeout: Duration = 15.seconds): Boolean = {
-    val elapsed = Stopwatch.start()
-    def loop(): Boolean = {
-      val res = op()
-      if (res.equals(result))
-        true
-      else if (timeout < elapsed())
-        false
-      else {
-        Thread.sleep(1000)
-        loop()
-      }
-    }
-    loop()
-  }
-
   test("not migrating yet") {
     val client1 = MemcachedClient.newKetamaClient(
       dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
@@ -121,12 +106,12 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
 
     eventually { Await.result(migrationClient.get("test")) }
 
-    assert(Await.result(migrationClient.get("foo")) == None)
-    Await.result(migrationClient.set("foo", "bar"))
-    assert(Await.result(migrationClient.get("foo")).get.toString(Charsets.Utf8) == "bar")
+    assert(Await.result(migrationClient.get("foo"), TIMEOUT) === None)
+    Await.result(migrationClient.set("foo", "bar"), TIMEOUT)
+    assert(Await.result(migrationClient.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
 
-    assert(Await.result(client1.get("foo")).get.toString(Charsets.Utf8) == "bar")
-    assert(waitForEventualResult(() => Await.result(client2.get("foo")), None))
+    assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+    eventually { assert(Await.result(client2.get("foo")) === None) }
   }
 
   test("sending dark traffic") {
@@ -142,13 +127,12 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     migrationClient.loadZKData() // force loading the config to fully set-up the client
 
     eventually { Await.result(migrationClient.get("test")) }
+    assert(Await.result(migrationClient.get("foo"), TIMEOUT) === None)
+    Await.result(migrationClient.set("foo", "bar"), TIMEOUT)
+    assert(Await.result(migrationClient.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
 
-    assert(Await.result(migrationClient.get("foo")) == None)
-    Await.result(migrationClient.set("foo", "bar"))
-    assert(Await.result(migrationClient.get("foo")).get.toString(Charsets.Utf8) == "bar")
-
-    assert(Await.result(client1.get("foo")).get.toString(Charsets.Utf8) == "bar")
-    assert(waitForEventualResult(() => Await.result(client2.get("foo")).map(_.toString(Charsets.Utf8)), Some("bar")))
+    assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+    eventually { assert(Await.result(client2.get("foo")).map(_.toString(Charsets.Utf8)) === Some("bar")) }
   }
 
   test("dark read w/ read repair") {
@@ -165,14 +149,14 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
 
     eventually { Await.result(migrationClient.get("test")) }
 
-    Await.result(client1.set("foo", "bar"))
-    assert(Await.result(client1.get("foo")).get.toString(Charsets.Utf8) == "bar")
-    assert(Await.result(client2.get("foo")) == None)
+    Await.result(client1.set("foo", "bar"), TIMEOUT)
+    assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+    assert(Await.result(client2.get("foo"), TIMEOUT) === None)
 
-    assert(Await.result(migrationClient.get("foo")).get.toString(Charsets.Utf8) == "bar")
+    assert(Await.result(migrationClient.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
 
-    assert(Await.result(client1.get("foo")).get.toString(Charsets.Utf8) == "bar")
-    assert(waitForEventualResult(() => Await.result(client2.get("foo")).map(_.toString(Charsets.Utf8)), Some("bar")))
+    assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+    eventually { assert(Await.result(client2.get("foo")).map(_.toString(Charsets.Utf8)) === Some("bar")) }
   }
 
   test("use new pool with fallback to old pool") {
@@ -189,14 +173,14 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
 
     eventually { Await.result(migrationClient.get("test")) }
 
-    Await.result(client1.set("foo", "bar"))
-    assert(Await.result(client1.get("foo")).get.toString(Charsets.Utf8) == "bar")
-    assert(Await.result(client2.get("foo")) == None)
+    Await.result(client1.set("foo", "bar"), TIMEOUT)
+    assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+    assert(Await.result(client2.get("foo"), TIMEOUT) === None)
 
-    assert(Await.result(migrationClient.get("foo")).get.toString(Charsets.Utf8) == "bar")
+    assert(Await.result(migrationClient.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
 
-    assert(Await.result(client1.get("foo")).get.toString(Charsets.Utf8) == "bar")
-    assert(waitForEventualResult(() => Await.result(client2.get("foo")), None))
+    assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+    eventually { assert(Await.result(client2.get("foo")) === None) }
   }
 
   test("use new pool with fallback to old pool and readrepair") {
@@ -213,13 +197,13 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
 
     eventually { Await.result(migrationClient.get("test")) }
 
-    Await.result(client1.set("foo", "bar"))
-    assert(Await.result(client1.get("foo")).get.toString(Charsets.Utf8) == "bar")
-    assert(Await.result(client2.get("foo")) == None)
+    Await.result(client1.set("foo", "bar"), TIMEOUT)
+    assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+    assert(Await.result(client2.get("foo"), TIMEOUT) === None)
 
-    assert(Await.result(migrationClient.get("foo")).get.toString(Charsets.Utf8) == "bar")
+    assert(Await.result(migrationClient.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
 
-    assert(Await.result(client1.get("foo")).get.toString(Charsets.Utf8) == "bar")
-    assert(waitForEventualResult(() => Await.result(client2.get("foo")).map(_.toString(Charsets.Utf8)), Some("bar")))
+    assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+    eventually { assert(Await.result(client2.get("foo")).map(_.toString(Charsets.Utf8)) === Some("bar")) }
   }
 }
