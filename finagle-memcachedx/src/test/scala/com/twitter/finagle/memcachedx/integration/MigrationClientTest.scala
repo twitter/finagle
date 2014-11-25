@@ -37,6 +37,8 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
 
   var testServers: List[TestMemcachedServer] = List()
 
+  val TIMEOUT = 15.seconds
+
   override def beforeEach() {
     val zookeeperAddress = RandomSocket.nextAddress
     zookeeperServerPort = zookeeperAddress.getPort
@@ -97,22 +99,6 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     testServers = List()
   }
 
-  def waitForEventualResult[A](op: () => A, result: A, timeout: Duration = 15.seconds): Boolean = {
-    val elapsed = Stopwatch.start()
-    def loop(): Boolean = {
-      val res = op()
-      if (res.equals(result))
-        true
-      else if (timeout < elapsed())
-        false
-      else {
-        Thread.sleep(1000)
-        loop()
-      }
-    }
-    loop()
-  }
-
   test("not migrating yet") {
     val client1 = MemcachedxClient.newKetamaClient(
       dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
@@ -123,14 +109,14 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
 
     eventually { Await.result(migrationClient.get("test")) }
 
-    assert(Await.result(migrationClient.get("foo")) == None)
-    Await.result(migrationClient.set("foo", Buf.Utf8("bar")))
-    val Buf.Utf8(res) = Await.result(migrationClient.get("foo")).get
-    assert(res == "bar")
+    assert(Await.result(migrationClient.get("foo"), TIMEOUT) === None)
+    Await.result(migrationClient.set("foo", Buf.Utf8("bar")), TIMEOUT)
+    val Buf.Utf8(res) = Await.result(migrationClient.get("foo"), TIMEOUT).get
+    assert(res === "bar")
 
-    val Buf.Utf8(client1Res) = Await.result(client1.get("foo")).get
-    assert(client1Res == "bar")
-    assert(waitForEventualResult(() => Await.result(client2.get("foo")), None))
+    val Buf.Utf8(client1Res) = Await.result(client1.get("foo"), TIMEOUT).get
+    assert(client1Res === "bar")
+    eventually { assert(Await.result(client2.get("foo")) === None) }
   }
 
   test("sending dark traffic") {
@@ -147,13 +133,13 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
 
     eventually { Await.result(migrationClient.get("test")) }
 
-    assert(Await.result(migrationClient.get("foo")) == None)
-    Await.result(migrationClient.set("foo", Buf.Utf8("bar")))
+    assert(Await.result(migrationClient.get("foo"), TIMEOUT) === None)
+    Await.result(migrationClient.set("foo", Buf.Utf8("bar")), TIMEOUT)
 
-    assert(Await.result(migrationClient.get("foo")).get == Buf.Utf8("bar"))
+    assert(Await.result(migrationClient.get("foo"), TIMEOUT).get === Buf.Utf8("bar"))
 
-    assert(Await.result(client1.get("foo")).get == Buf.Utf8("bar"))
-    assert(waitForEventualResult(() => Await.result(client2.get("foo")).map { case Buf.Utf8(s) => s }, Some("bar")))
+    assert(Await.result(client1.get("foo"), TIMEOUT).get === Buf.Utf8("bar"))
+    eventually { assert(Await.result(client2.get("foo")).map { case Buf.Utf8(s) => s } === Some("bar")) }
   }
 
   test("dark read w/ read repair") {
@@ -170,17 +156,17 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
 
     eventually { Await.result(migrationClient.get("test")) }
 
-    Await.result(client1.set("foo", Buf.Utf8("bar")))
-    val Buf.Utf8(res) = Await.result(client1.get("foo")).get
+    Await.result(client1.set("foo", Buf.Utf8("bar")), TIMEOUT)
+    val Buf.Utf8(res) = Await.result(client1.get("foo"), TIMEOUT).get
     assert(res === "bar")
-    assert(Await.result(client2.get("foo")) == None)
+    assert(Await.result(client2.get("foo"), TIMEOUT) === None)
 
-    val Buf.Utf8(mcRes) = Await.result(migrationClient.get("foo")).get
+    val Buf.Utf8(mcRes) = Await.result(migrationClient.get("foo"), TIMEOUT).get
     assert(mcRes === "bar")
 
-    val Buf.Utf8(cl1Res) = Await.result(client1.get("foo")).get
+    val Buf.Utf8(cl1Res) = Await.result(client1.get("foo"), TIMEOUT).get
     assert(cl1Res === "bar")
-    assert(waitForEventualResult(() => Await.result(client2.get("foo")).map { case Buf.Utf8(s) => s }, Some("bar")))
+    eventually { assert(Await.result(client2.get("foo")).map { case Buf.Utf8(s) => s } === Some("bar")) }
   }
 
   test("use new pool with fallback to old pool") {
@@ -197,17 +183,17 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
 
     eventually { Await.result(migrationClient.get("test")) }
 
-    Await.result(client1.set("foo", Buf.Utf8("bar")))
-    val Buf.Utf8(res) = Await.result(client1.get("foo")).get
-    assert(res == "bar")
-    assert(Await.result(client2.get("foo")) == None)
+    Await.result(client1.set("foo", Buf.Utf8("bar")), TIMEOUT)
+    val Buf.Utf8(res) = Await.result(client1.get("foo"), TIMEOUT).get
+    assert(res === "bar")
+    assert(Await.result(client2.get("foo"), TIMEOUT) === None)
 
-    val Buf.Utf8(res2) = Await.result(migrationClient.get("foo")).get
-    assert(res2 == "bar")
+    val Buf.Utf8(res2) = Await.result(migrationClient.get("foo"), TIMEOUT).get
+    assert(res2 === "bar")
 
-    val Buf.Utf8(res3) = Await.result(client1.get("foo")).get
-    assert(res3 == "bar")
-    assert(waitForEventualResult(() => Await.result(client2.get("foo")), None))
+    val Buf.Utf8(res3) = Await.result(client1.get("foo"), TIMEOUT).get
+    assert(res3 === "bar")
+    eventually { assert(Await.result(client2.get("foo")) === None) }
   }
 
   test("use new pool with fallback to old pool and readrepair") {
@@ -224,16 +210,16 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
 
     eventually { Await.result(migrationClient.get("test")) }
 
-    Await.result(client1.set("foo", Buf.Utf8("bar")))
-    val Buf.Utf8(res) = Await.result(client1.get("foo")).get
-    assert(res == "bar")
-    assert(Await.result(client2.get("foo")) == None)
+    Await.result(client1.set("foo", Buf.Utf8("bar")), TIMEOUT)
+    val Buf.Utf8(res) = Await.result(client1.get("foo"), TIMEOUT).get
+    assert(res === "bar")
+    assert(Await.result(client2.get("foo"), TIMEOUT) === None)
 
-    val Buf.Utf8(res2) = Await.result(migrationClient.get("foo")).get
-    assert(res2 == "bar")
+    val Buf.Utf8(res2) = Await.result(migrationClient.get("foo"), TIMEOUT).get
+    assert(res2 === "bar")
 
-    val Buf.Utf8(res3) = Await.result(client1.get("foo")).get
-    assert(res3 == "bar")
-    assert(waitForEventualResult(() => Await.result(client2.get("foo")) map { case Buf.Utf8(s) => s }, Some("bar")))
+    val Buf.Utf8(res3) = Await.result(client1.get("foo"), TIMEOUT).get
+    assert(res3 === "bar")
+    eventually { assert(Await.result(client2.get("foo")).map { case Buf.Utf8(s) => s } === Some("bar")) }
   }
 }
