@@ -1,4 +1,4 @@
-package com.twitter.finagle.service
+package com.twitter.finagle.httpx.service
 
 import org.jboss.netty.channel.local._
 import org.jboss.netty.channel._

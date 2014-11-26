@@ -53,7 +53,13 @@ object RoutingService {
     new RoutingService(
       new PartialFunction[Request, Service[REQUEST, Response]] {
         def apply(request: Request) = routes((request.method, request.path))
-
         def isDefinedAt(request: Request) = routes.isDefinedAt((request.method, request.path))
+      })
+
+  def byMethodAndPathObject[REQUEST](routes: PartialFunction[(HttpMethod, Path), Service[REQUEST, Response]]) =
+    new RoutingService(
+      new PartialFunction[Request, Service[REQUEST, Response]] {
+        def apply(request: Request) = routes((request.method, Path(request.path)))
+        def isDefinedAt(request: Request) = routes.isDefinedAt((request.method, Path(request.path)))
       })
 }
