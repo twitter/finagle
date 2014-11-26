@@ -4,7 +4,7 @@ import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle.mux.lease.exp.{Lessor, Lessee, nackOnExpiredLease}
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
-import com.twitter.finagle.tracing.{DefaultTracer, Trace, Tracer}
+import com.twitter.finagle.tracing.{NullTracer, Trace, Tracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
 import com.twitter.finagle.{Path, CancelledRequestException, Context, Dtab, Service}
@@ -34,29 +34,10 @@ object gracefulShutdownEnabled extends GlobalFlag(true, "Graceful shutdown enabl
 private[finagle] class ServerDispatcher private[finagle](
     trans: Transport[ChannelBuffer, ChannelBuffer],
     service: Service[Request, Response],
-    canDispatch: Boolean, // XXX: a hack to indicate whether a server understand {T,R}Dispatch
+    canDispatch: Boolean, // XXX: a hack to indicate whether a server understands {T,R}Dispatch
     lessor: Lessor, // the lessor that the dispatcher should register with in order to get leases
     tracer: Tracer
 ) extends Closable with Lessee {
-  def this(
-    trans: Transport[ChannelBuffer, ChannelBuffer],
-    service: Service[Request, Response],
-    canDispatch: Boolean
-  ) = this(trans, service, canDispatch, Lessor.nil, DefaultTracer)
-
-  def this(
-    trans: Transport[ChannelBuffer, ChannelBuffer],
-    service: Service[Request, Response],
-    canDispatch: Boolean,
-    lessor: Lessor
-  ) = this(trans, service, canDispatch, lessor, DefaultTracer)
-
-  def this(
-    trans: Transport[ChannelBuffer, ChannelBuffer],
-    service: Service[Request, Response],
-    canDispatch: Boolean,
-    tracer: Tracer
-  ) = this(trans, service, canDispatch, Lessor.nil, tracer)
 
   import Message._
 
@@ -170,7 +151,10 @@ private[finagle] class ServerDispatcher private[finagle](
     case Rdrain(1) =>
       draining = true
       receive = nackRequests
-      if (pending.isEmpty) closep.setDone() // OK because calls to receive are serial
+      if (pending.isEmpty) {
+        log.info("Finished draining a connection")
+        closep.setDone()
+      } // OK because calls to receive are serial
   }
 
   // handle is a PartialFunction for the API, but is actually total
@@ -178,7 +162,10 @@ private[finagle] class ServerDispatcher private[finagle](
 
   private[this] def removeTag(tag: Int): Unit = {
     pending.remove(tag)
-    if (draining && pending.isEmpty) closep.setDone()
+    if (draining && pending.isEmpty) {
+      log.info("Finished draining a connection")
+      closep.setDone()
+    }
   }
 
   private[this] def loop(): Future[Nothing] =
@@ -233,6 +220,7 @@ private[finagle] class ServerDispatcher private[finagle](
       if (gracefulShutdownEnabled()) {
         // Tdrain is the only T-typed message that servers ever send, so we don't
         // need to allocate a distinct tag to differentiate messages.
+        log.info("Started draining a connection")
         trans.write(encode(Tdrain(1))) before {
           closep.within(DefaultTimer.twitter, deadline - Time.now) transform { _ =>
             lessor.unregister(this)

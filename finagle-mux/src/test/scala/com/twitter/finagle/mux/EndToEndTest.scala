@@ -165,7 +165,7 @@ class EndToEndTest extends FunSuite
 
       val leaseCtr: () => Int = { () =>
         val Some((_, ctr)) = sr.counters.find {
-          case (_ +: Seq("lease_counter"), value) => true
+          case (_ +: Seq("leased"), value) => true
           case _ => false
         }
         ctr

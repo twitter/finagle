@@ -61,6 +61,7 @@ private object Cap extends Enumeration {
  * A ClientDispatcher for the mux protocol.
  */
 private[finagle] class ClientDispatcher (
+  name: String,
   trans: Transport[ChannelBuffer, ChannelBuffer],
   sr: StatsReceiver
 ) extends Service[Request, Response] with Acting {
@@ -85,41 +86,54 @@ private[finagle] class ClientDispatcher (
   private[this] val gauge = sr.addGauge("current_lease_ms") {
     lease.remaining.inMilliseconds
   }
-  private[this] val leaseCounter = sr.counter("lease_counter")
+  private[this] val leaseCounter = sr.counter("leased")
+
+  private[this] def releaseTag(tag: Int): Option[Promise[Response]] = {
+    val result = reqs.unmap(tag)
+    checkDrained.lockInterruptibly()
+    try {
+      if (drained && tags.isEmpty) log.info(s"Finished draining a connection to $name")
+    } finally {
+      checkDrained.unlock()
+    }
+    result
+  }
 
   private[this] val receive: Message => Unit = {
     case RreqOk(tag, rep) =>
-      for (p <- reqs.unmap(tag))
+      for (p <- releaseTag(tag))
         p.setValue(Response(ChannelBufferBuf.Owned(rep)))
     case RreqError(tag, error) =>
-      for (p <- reqs.unmap(tag))
+      for (p <- releaseTag(tag))
         p.setException(ServerApplicationError(error))
     case RreqNack(tag) =>
-      for (p <- reqs.unmap(tag))
+      for (p <- releaseTag(tag))
         p.setException(RequestNackedException)
 
     case RdispatchOk(tag, _, rep) =>
-      for (p <- reqs.unmap(tag))
+      for (p <- releaseTag(tag))
         p.setValue(Response(ChannelBufferBuf.Owned(rep)))
     case RdispatchError(tag, _, error) =>
-      for (p <- reqs.unmap(tag))
+      for (p <- releaseTag(tag))
         p.setException(ServerApplicationError(error))
     case RdispatchNack(tag, _) =>
-      for (p <- reqs.unmap(tag))
+      for (p <- releaseTag(tag))
         p.setException(RequestNackedException)
 
     case Rerr(tag, error) =>
-      for (p <- reqs.unmap(tag))
+      for (p <- releaseTag(tag))
         p.setException(ServerError(error))
 
     case Rping(tag) =>
-      for (p <- reqs.unmap(tag))
+      for (p <- releaseTag(tag))
         p.setValue(Response.empty)
     case Tping(tag) =>
       trans.write(encode(Rping(tag)))
     case Tdrain(tag) =>
       // must be synchronized to avoid writing after Rdrain has been sent
+      log.info(s"Started draining a connection to $name")
       setDrained.lockInterruptibly()
+      if (tags.isEmpty) log.info(s"Finished draining a connection to $name")
       try {
         drained = true
         trans.write(encode(Rdrain(tag)))
@@ -138,7 +152,7 @@ private[finagle] class ClientDispatcher (
     case m@Rmessage(tag) =>
       val what = "Did not understand Rmessage[tag=%d] %s".format(tag, m)
       log.warning(what)
-      for (p <- reqs.unmap(tag))
+      for (p <- releaseTag(tag))
         p.setException(BadMessageException(what))
   }
 
@@ -168,7 +182,7 @@ private[finagle] class ClientDispatcher (
         Future.exception(WriteException(new Exception("Exhausted tags")))
       case Some(tag) =>
         trans.write(encode(Tping(tag))).onFailure { case exc =>
-          reqs.unmap(tag)
+          releaseTag(tag)
         }.flatMap(Function.const(p)).unit
     }
   }
@@ -210,7 +224,7 @@ private[finagle] class ClientDispatcher (
       }
 
     trans.write(encode(msg)) onFailure { case exc =>
-      reqs.unmap(tag)
+      releaseTag(tag)
     } before {
       p.setInterruptHandler { case cause =>
         for (reqP <- reqs.maybeRemap(tag, new Promise[Response])) {
