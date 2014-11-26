@@ -252,7 +252,9 @@ class StreamingTest extends FunSuite with Eventually {
 
     fail.setDone()
     intercept[ChannelClosedException] { await(res.reader.read(1)) }
-    intercept[Reader.ReaderDiscarded] { await(req1.writer.write(buf)) }
+    intercept[Reader.ReaderDiscarded] {
+      await(req1.writer.write(buf) before req1.writer.write(buf))
+    }
 
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))
