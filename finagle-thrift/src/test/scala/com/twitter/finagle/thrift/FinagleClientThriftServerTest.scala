@@ -1,5 +1,6 @@
 package com.twitter.finagle.thrift
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.CodecFactory
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.test.{AnException, B, SomeStruct}
@@ -165,7 +166,7 @@ class FinagleClientThriftServerTest extends FunSuite {
 
       {
         val futures = 0 until NumParties map { _ => client.multiply(1, 2) }
-        val resolved = futures map(Await.result(_))
+        val resolved = futures map(Await.result(_, 5.seconds))
         resolved foreach { r => assert(r === (3)) }
       }
 

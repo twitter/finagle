@@ -247,7 +247,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
       intercept[Reader.ReaderDiscarded] {
         Await.result(
           client.close() before
-          drip(req.writer))
+          drip(req.writer), 5.seconds)
       }
     }
 

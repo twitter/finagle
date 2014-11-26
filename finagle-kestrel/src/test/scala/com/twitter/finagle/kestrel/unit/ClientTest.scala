@@ -72,7 +72,7 @@ class ClientTest extends FunSuite with MockitoSugar {
       verify(client).read("foo")
       val m = msg(0)
       messages ! m
-      assert((h.messages ??) === m)
+      assert(Await.result(h.messages ?, 5.seconds) === m)
 
       val messages2 = new Broker[ReadMessage]
       val error2 = new Broker[Throwable]
