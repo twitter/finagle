@@ -39,6 +39,8 @@ Runtime Behavior Changes
   * finagle-mux: Mark the ServiceFactory available again if the underlying
     Service is no longer available.  This permits it to be closed and reused.
 
+  * finagle-mux: Rename the "lease_counter" counter to "leased" on mux clients.
+
 Deprecations
 ~~~~~~~~~~~~
 
