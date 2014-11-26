@@ -233,7 +233,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       req.setChunked(true)
       client(req)
       client.close()
-      intercept[Reader.ReaderDiscarded] { Await.result(drip(req.writer)) }
+      intercept[Reader.ReaderDiscarded] { Await.result(drip(req.writer), 5.seconds) }
     }
 
     test(name + ": request discard terminates remote stream producer") {
