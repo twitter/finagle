@@ -54,8 +54,14 @@ class HttpServerDispatcher[REQUEST <: Request](
         case _ =>
           BadRequestResponse
       }
-      // The connection in unusable, close it
-      HttpHeaders.setKeepAlive(response, false)
+      // The connection in unusable so we close it here.
+      // Note that state != Idle while inside dispatch
+      // so state will be set to Closed but trans.close
+      // will not be called. Instead isClosing will be
+      // set to true, keep-alive headers set correctly
+      // in handle, and trans.close will be called in
+      // the respond statement of loop().
+      close()
       Future.value(response)
 
     case reqIn: HttpRequest =>
@@ -86,7 +92,7 @@ class HttpServerDispatcher[REQUEST <: Request](
   }
 
   protected def handle(response: HttpResponse): Future[Unit] = {
-    if (isClosing) HttpHeaders.setKeepAlive(response, false)
+    HttpHeaders.setKeepAlive(response, !isClosing)
     response match {
       case rep: Response if rep.isChunked =>
         // We remove content length here in case the content is later

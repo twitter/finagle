@@ -2,7 +2,7 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.{ChannelClosedException, Service}
-import com.twitter.finagle.http.{Request, Response}
+import com.twitter.finagle.http.{BadHttpRequest, Request, Response}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.io.{Reader, Buf}
@@ -23,6 +23,16 @@ class HttpServerDispatcherTest extends FunSuite {
     Await.ready(trans.write(chunk))
     val c = Await.result(f).asInstanceOf[HttpChunk]
     assert(c.getContent === chunk.getContent)
+  }
+
+  test("bad request") {
+    val (in, out) = mkPair[Any, Any]
+    val service = Service.mk { req: Request => Future.value(Response()) }
+    val disp = new HttpServerDispatcher[Request](out, service)
+
+    in.write(BadHttpRequest(new Exception()))
+    Await.result(in.read)
+    assert(!out.isOpen)
   }
 
   test("streaming request body") {

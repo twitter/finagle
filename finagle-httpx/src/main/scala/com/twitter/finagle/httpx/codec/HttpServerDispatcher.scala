@@ -54,8 +54,14 @@ class HttpServerDispatcher(
         case _ =>
           BadRequestResponse
       }
-      // The connection in unusable, close it
-      HttpHeaders.setKeepAlive(response.httpResponse, false)
+      // The connection in unusable so we close it here.
+      // Note that state != Idle while inside dispatch
+      // so state will be set to Closed but trans.close
+      // will not be called. Instead isClosing will be
+      // set to true, keep-alive headers set correctly
+      // in handle, and trans.close will be called in
+      // the respond statement of loop().
+      close()
       Future.value(response)
 
     case reqIn: HttpRequest =>
@@ -87,7 +93,7 @@ class HttpServerDispatcher(
   }
 
   protected def handle(rep: Response): Future[Unit] = {
-    if (isClosing) rep.headers.set(Fields.Connection, "close")
+    setKeepAlive(rep, !isClosing)
     if (rep.isChunked) {
       // We remove content length here in case the content is later
       // compressed. This is a pretty bad violation of modularity:
@@ -115,6 +121,23 @@ class HttpServerDispatcher(
         rep.contentLength = rep.content.length
 
       trans.write(from[Response, HttpResponse](rep))
+    }
+  }
+
+  protected def setKeepAlive(rep: Response, keepAlive: Boolean) {
+    rep.version match {
+      case Version.Http10 =>
+        if (keepAlive) {
+          rep.headers.set(Fields.Connection, "keep-alive")
+        } else {
+          rep.headers.remove(Fields.Connection)
+        }
+      case Version.Http11 =>
+        if (keepAlive) {
+          rep.headers.remove(Fields.Connection)
+        } else {
+          rep.headers.set(Fields.Connection, "close")
+        }
     }
   }
 }
