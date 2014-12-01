@@ -1,11 +1,13 @@
 package com.twitter.finagle.util
 
 import com.twitter.logging.Level
+import com.twitter.util.NonFatal
 import java.io.{File, IOException}
 import java.net.{URI, URISyntaxException, URLClassLoader}
 import java.nio.charset.MalformedInputException
 import java.util.jar.JarFile
 import java.util.ServiceConfigurationError
+
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.io.Source
@@ -178,17 +180,29 @@ object LoadService {
       line <- ClassPath.readLines(Source.fromURL(rsc))
     } yield line
 
-    (classNames ++ classNamesFromRessources).distinct map { className =>
+    (classNames ++ classNamesFromRessources).distinct flatMap { className =>
       val cls = Class.forName(className)
       if (!(iface isAssignableFrom cls))
-        throw new ServiceConfigurationError("%s not a subclass of %s".format(className, ifaceName))
+        throw new ServiceConfigurationError(s"$className not a subclass of $ifaceName")
 
       DefaultLogger.log(
         Level.DEBUG,
-        "LoadService: loaded instance of class %s for requested service %s".format(className, ifaceName)
+        s"LoadService: loaded instance of class $className for requested service $ifaceName"
       )
 
-      cls.newInstance().asInstanceOf[T]
+      try {
+        val instance = cls.newInstance().asInstanceOf[T]
+        Some(instance)
+      } catch {
+        case NonFatal(ex) =>
+          DefaultLogger.log(
+            Level.FATAL,
+            s"LoadService: failed to instantiate '$className' for the requested "
+              + s"service '$ifaceName'",
+            ex
+          )
+          None
+      }
     }
   }
 }
