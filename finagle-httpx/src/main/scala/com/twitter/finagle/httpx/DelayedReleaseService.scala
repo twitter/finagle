@@ -33,8 +33,13 @@ private[finagle] class DelayedReleaseService[-Req <: Request](
         }
 
         def discard() = {
-          done()
+          // Note: Discarding the underlying reader terminates the session and
+          // marks the service as unavailable. It's important that we discard
+          // before releasing the service (by invoking `done`), to ensure that
+          // the service wrapper in the pool will create a new service instead
+          // of reusing this one whose transport is closing.
           in.reader.discard()
+          done()
         }
       }
     }
