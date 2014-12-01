@@ -322,7 +322,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-httpx-compat"
-  ).dependsOn(finagleCore)
+  ).dependsOn(finagleCore, finagleHttp, finagleHttpX)
 
   lazy val finagleNative = Project(
     id = "finagle-native",
