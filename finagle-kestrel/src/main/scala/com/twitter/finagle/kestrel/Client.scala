@@ -24,8 +24,6 @@ object ReadClosedException extends Exception
  */
 object OutOfRetriesException extends Exception
 
-// TODO(Raghavendra Prabhu): Move ReadHandle and ReadMessage to util-core.
-
 /**
  * A message that has been read: consists of the message itself, and
  * an offer to acknowledge.
@@ -45,7 +43,7 @@ case class ReadMessage(
  *   try {
  *     System.out.println(msg.bytes.toString("UTF-8"))
  *   } finally {
- *     msg.ack() // if we don't do this, no more msgs will come to us
+ *     msg.ack() // if we don't do this, no more messages will come to us
  *   }
  * }
  * readHandle.error foreach { System.error.println("zomg! got an error " + _.getMessage) }
@@ -137,6 +135,15 @@ object ReadHandle {
   }
 
   /**
+   * A Java-friendly API for the `ReadHandle() constructor`.
+   */
+  def fromOffers(
+    messages: Offer[ReadMessage],
+    error: Offer[Throwable],
+    closeOf: Offer[Unit]
+  ): ReadHandle = ReadHandle(messages, error, closeOf)
+
+  /**
    * Provide a merged ReadHandle, combining the messages & errors of
    * the given underlying handles.  Closing this handle will close all
    * of the underlying ones.
@@ -148,7 +155,7 @@ object ReadHandle {
   }
 
   /**
-   * A java-friendly interface to {{merged}}
+   * A Java-friendly interface to {{merged}}.
    */
   def merged(handles: _root_.java.util.Iterator[ReadHandle]): ReadHandle =
     merged(handles.toSeq)

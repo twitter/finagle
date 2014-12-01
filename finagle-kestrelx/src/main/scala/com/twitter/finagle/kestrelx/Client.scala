@@ -24,8 +24,6 @@ object ReadClosedException extends Exception
  */
 object OutOfRetriesException extends Exception
 
-// TODO(Raghavendra Prabhu): Move ReadHandle and ReadMessage to util-core.
-
 /**
  * A message that has been read: consists of the message itself, and
  * an offer to acknowledge.
@@ -135,6 +133,16 @@ object ReadHandle {
     val error = _error
     def close() = closeOf.sync()
   }
+
+  /**
+   * A Java-friendly API for the `ReadHandle() constructor`.
+   */
+  def fromOffers(
+    messages: Offer[ReadMessage],
+    error: Offer[Throwable],
+    closeOf: Offer[Unit]
+  ): ReadHandle = ReadHandle(messages, error, closeOf)
+
 
   /**
    * Provide a merged ReadHandle, combining the messages & errors of
