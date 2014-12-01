@@ -1,0 +1,2 @@
+com.twitter.finagle.util.LoadServiceFailingClass
+com.twitter.finagle.util.LoadServiceGoodClass

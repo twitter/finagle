@@ -18,6 +18,15 @@ trait LoadServiceRandomInterface
 
 class LoadServiceRandomInterfaceImpl extends LoadServiceRandomInterface
 
+trait LoadServiceMaybeInterface
+
+class LoadServiceFailingClass extends LoadServiceMaybeInterface {
+  throw new RuntimeException("Cannot instanciate this!")
+}
+
+class LoadServiceGoodClass extends LoadServiceMaybeInterface
+
+
 @RunWith(classOf[JUnitRunner])
 class LoadServiceTest extends FunSuite with MockitoSugar {
   test("LoadService should apply[T] and return a set of instances of T") {
@@ -26,6 +35,11 @@ class LoadServiceTest extends FunSuite with MockitoSugar {
 
   test("LoadService should only load 1 instance of T, even when there's multiple occurence of T") {
     val randomIfaces = LoadService[LoadServiceRandomInterface]()
+    assert(randomIfaces.size == 1)
+  }
+
+  test("LoadService should recover when seeing an initialization exception") {
+    val randomIfaces = LoadService[LoadServiceMaybeInterface]()
     assert(randomIfaces.size == 1)
   }
 
