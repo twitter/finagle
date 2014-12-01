@@ -1,4 +1,4 @@
-package com.twitter.finagle.http
+package com.twitter.finagle.httpx
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Service, ServiceFactory}
@@ -11,9 +11,6 @@ import com.twitter.util.{Await, Closable, Future, Promise}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import org.jboss.netty.channel.Channel
-import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders}
-import org.jboss.netty.handler.codec.http.HttpResponseStatus.OK
-import org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.Eventually
@@ -316,15 +313,17 @@ object StreamingTest {
   def ok(readerIn: Reader) = {
     val res = new Response {
       override val reader = readerIn
-      val httpResponse = new DefaultHttpResponse(HTTP_1_1, OK)
+      val httpResponse = Response(Version.Http11, Status.Ok).httpResponse
     }
     res.setChunked(true)
-    HttpHeaders.setKeepAlive(res, false)
+    res.headers.set("Connection", "close")
     res
   }
 
   type Modifier = Transport[Any, Any] => Transport[Any, Any]
 
+  // TODO We should also do this with the Httpx protocol object, which would
+  // require being able to pass in an arbitrary instance of the CodecFactory.
   def startServer(service: Service[Request, Response], mod: Modifier) =
     ServerBuilder()
       .codec(new Custom(identity, mod))
@@ -364,7 +363,7 @@ object StreamingTest {
         ) = codec.newServerDispatcher(smod(transport), service)
       }
 
-    val factory = RichHttp[Request](Http(), aggregateChunks = false)
+    val factory = Http().streaming(true)
     val client: Client = config => customize(factory.client(config))
     val server: Server = config => customize(factory.server(config))
   }

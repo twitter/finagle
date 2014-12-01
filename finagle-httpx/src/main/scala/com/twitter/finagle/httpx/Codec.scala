@@ -104,6 +104,20 @@ case class Http(
         }
       }
 
+      override def prepareServiceFactory(
+        underlying: ServiceFactory[Request, Response]
+      ): ServiceFactory[Request, Response] =
+        underlying map(new DelayedReleaseService(_))
+
+      override def prepareConnFactory(
+        underlying: ServiceFactory[Request, Response]
+      ): ServiceFactory[Request, Response] = {
+        // Note: This is a horrible hack to ensure that close() calls from
+        // ExpiringService do not propagate until all chunks have been read
+        // Waiting on CSL-915 for a proper fix.
+        underlying map(new DelayedReleaseService(_))
+       }
+
       override def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any,Any] =
         new HttpTransport(super.newClientTransport(ch, statsReceiver))
 
