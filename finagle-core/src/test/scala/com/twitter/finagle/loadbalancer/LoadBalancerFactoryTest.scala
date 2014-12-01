@@ -35,7 +35,7 @@ class LoadBalancerFactoryTest extends FunSuite
     disablePerHostStats()
   }
 
-  test("per-host stats flag not set, no configured per-host stats.\n" +
+  test("per-host stats flag not set, no configured per-host stats. " +
     "No per-host stats should be reported") (new PerHostFlagCtx {
     val loadedStatsReceiver = new InMemoryStatsReceiver
     LoadedStatsReceiver.self = loadedStatsReceiver
@@ -46,7 +46,7 @@ class LoadBalancerFactoryTest extends FunSuite
     disablePerHostStats()
   })
 
-  test("per-host stats flag not set, configured per-host stats.\n" +
+  test("per-host stats flag not set, configured per-host stats. " +
     "Per-host stats should be reported to configured stats receiver") (new PerHostFlagCtx {
     val hostStatsReceiver = new InMemoryStatsReceiver
     client.configured(param.Label(label))
@@ -58,7 +58,7 @@ class LoadBalancerFactoryTest extends FunSuite
     disablePerHostStats()
   })
 
-  test("per-host stats flag set, no configured per-host stats.\n" +
+  test("per-host stats flag set, no configured per-host stats. " +
     "Per-host stats should be reported to loadedStatsReceiver") (new PerHostFlagCtx {
     enablePerHostStats()
 
@@ -72,7 +72,7 @@ class LoadBalancerFactoryTest extends FunSuite
     disablePerHostStats()
   })
 
-  test("per-host stats flag set, configured per-host stats.\n" +
+  test("per-host stats flag set, configured per-host stats. " +
     "Per-host stats should be reported to configured stats receiver") (new PerHostFlagCtx {
     enablePerHostStats()
 
@@ -86,7 +86,7 @@ class LoadBalancerFactoryTest extends FunSuite
     disablePerHostStats()
   })
 
-  test("per-host stats flag set, configured per-host stats is NullStatsReceiver.\n" +
+  test("per-host stats flag set, configured per-host stats is NullStatsReceiver. " +
     "Per-host stats should not be reported") (new PerHostFlagCtx {
     enablePerHostStats()
 
