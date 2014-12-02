@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.util.{Return, Throw, Activity, Witness, Try}
 import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import scala.language.reflectiveCalls
 
@@ -206,6 +206,19 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
   test("Namer.resolve") {
     assert(Namer.resolve("invalid").sample() match {
       case Addr.Failed(_: IllegalArgumentException) => true
+      case _ => false
+    })
+  }
+
+  // For this test to fail, you would need a tighter SecurityManager,
+  // and the code to not be lazy. If the code is not lazy with the
+  // existing manager, you just get a security warning printed by
+  // junit.
+  test("Namer.global: lazy /$/inet lookup should succeed") {
+    val pathName = "/$/inet/api.twitter.com/80"
+    val path = Path.read(pathName)
+    assert(Namer.global.lookup(path).sample() match {
+      case NameTree.Leaf(bound: Name.Bound) => bound.id == path
       case _ => false
     })
   }
