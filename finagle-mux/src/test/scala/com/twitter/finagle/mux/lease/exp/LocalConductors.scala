@@ -1,9 +1,9 @@
 package com.twitter.finagle.mux.lease.exp
 
 import com.twitter.util.Local
-import org.scalatest.concurrent.Conductors
+import org.scalatest.concurrent.{IntegrationPatience, Conductors}
 
-trait LocalConductors extends Conductors {
+trait LocalConductors extends Conductors with IntegrationPatience {
 
   def localThread(conductor: Conductor)(fn: => Unit): Unit = {
     val outer = Local.save()
