@@ -715,12 +715,16 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def httpProxy(httpProxy: SocketAddress): This =
     configured(Transporter.HttpProxy(Some(httpProxy)))
 
+  @deprecated("Use socksProxy(socksProxy: Option[SocketAddress])", "2014-12-02")
+  def socksProxy(socksProxy: SocketAddress): This =
+    configured(params[Transporter.SocksProxy].copy(sa = Some(socksProxy)))
+
   /**
    * Make connections via the given SOCKS proxy.
    * If this is defined concurrently with httpProxy, the order in which they are applied is undefined.
    */
-  def socksProxy(socksProxy: SocketAddress): This =
-    configured(params[Transporter.SocksProxy].copy(sa = Some(socksProxy)))
+  def socksProxy(socksProxy: Option[SocketAddress]): This =
+    configured(params[Transporter.SocksProxy].copy(sa = socksProxy))
 
   /**
    * For the socks proxy use this username for authentication.
