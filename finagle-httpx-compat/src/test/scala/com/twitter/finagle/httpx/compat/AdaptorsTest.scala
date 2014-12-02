@@ -10,7 +10,7 @@ import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.jboss.netty.handler.codec.http.{HttpResponseStatus, HttpResponse}
+import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponseStatus, HttpResponse}
 import java.net.{InetAddress, InetSocketAddress, URI}
 
 @RunWith(classOf[JUnitRunner])
@@ -86,6 +86,11 @@ class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
       (r.httpResponse, body)
     }
 
+  val arbNettyRequest =
+    arbRequest map { case (r: Request, body: String) =>
+      (r.httpRequest, body)
+    }
+
   test("http: httpx request to http") {
     forAll(arbRequest) { case (in: Request, body: String) =>
       val out = Await.result(HttpAdaptor.in(in))
@@ -139,6 +144,23 @@ class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
         val out = Await.result(NettyAdaptor.out(in))
         assert(out.version === from(in.getProtocolVersion))
         assert(out.status === from(in.getStatus))
+        assert(out.headers === in.headers)
+        assert(out.isChunked === in.isChunked)
+        assert(out.getContent === in.getContent)
+      }
+    }
+  }
+
+  test("netty: netty request to httpx") {
+    forAll(arbNettyRequest) { case (in: HttpRequest, body: String) =>
+      if (in.isChunked) {
+        val exc = intercept[Exception] { Await.result(NettyClientAdaptor.in(in)) }
+        assert(NettyClientAdaptor.NoStreaming === exc)
+      } else {
+        val out = Await.result(NettyClientAdaptor.in(in))
+        assert(out.version === from(in.getProtocolVersion))
+        assert(out.method === from(in.getMethod))
+        assert(out.getUri === in.getUri)
         assert(out.headers === in.headers)
         assert(out.isChunked === in.isChunked)
         assert(out.getContent === in.getContent)
