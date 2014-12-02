@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import java.net.{SocketAddress, InetSocketAddress}
+import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -15,7 +15,7 @@ class WeightedSocketAddressTest extends FunSuite {
   }
 
   test("WeightedInetSocketAddress") {
-    val ia = new InetSocketAddress(8080)
+    val ia = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val wsa = WeightedSocketAddress(ia, 8.9)
     val WeightedSocketAddress(`ia`, 8.9) = wsa
     val WeightedSocketAddress(`ia`, 1.0) = ia
