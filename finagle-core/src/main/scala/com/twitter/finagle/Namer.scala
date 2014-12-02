@@ -106,7 +106,8 @@ object Namer  {
         case Path.Utf8("$", "inet", IntegerString(port)) =>
           Some(new InetSocketAddress(port))
         case Path.Utf8("$", "inet", host, IntegerString(port)) =>
-          Some(new InetSocketAddress(host, port))
+          // Needs to be resolved before it can be used
+          Some(InetSocketAddress.createUnresolved(host, port))
         case _ => None
       }
     }
@@ -133,9 +134,20 @@ object Namer  {
     }
 
     def lookup(path: Path): Activity[NameTree[Name]] = path match {
-      // Clients may depend on Name.Bound ids being Paths which resolve
-      // back to the same Name.Bound.
-      case InetPath(addr) => Activity.value(Leaf(Name.Bound(Var.value(Addr.Bound(addr)), path)))
+      case InetPath(addr) =>
+        // resolve the InetSocketAddress only when it is observed
+        val boundVar =
+          Var.async[Addr](Addr.Pending) { u =>
+            val resolved =
+              if (addr.isUnresolved) new InetSocketAddress(addr.getHostString, addr.getPort)
+              else addr
+            u() = Addr.Bound(resolved)
+            Closable.nop
+          }
+
+        // Clients may depend on Name.Bound ids being Paths which resolve
+        // back to the same Name.Bound.
+        Activity.value(Leaf(Name.Bound(boundVar, path)))
 
       case FailPath() => Activity.value(Fail)
       case NilPath() => Activity.value(Empty)
