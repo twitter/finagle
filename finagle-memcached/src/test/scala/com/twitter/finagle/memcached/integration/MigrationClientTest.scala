@@ -1,5 +1,7 @@
 package com.twitter.finagle.memcached.integration
 
+import java.net.{InetAddress, InetSocketAddress}
+
 import com.twitter.common.io.FileUtils._
 import com.twitter.common.quantity.{Time, Amount}
 import com.twitter.common.zookeeper.{ZooKeeperUtils, ServerSets, ZooKeeperClient}
@@ -37,18 +39,19 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
   val TIMEOUT = 15.seconds
 
   override def beforeEach() {
-    val zookeeperAddress = RandomSocket.nextAddress
-    zookeeperServerPort = zookeeperAddress.getPort
+    val loopback = InetAddress.getLoopbackAddress
 
     // start zookeeper server and create zookeeper client
     zookeeperServer = new ZooKeeperServer(
       new FileTxnSnapLog(createTempDir(), createTempDir()),
       new ZooKeeperServer.BasicDataTreeBuilder)
-    connectionFactory = new NIOServerCnxn.Factory(zookeeperAddress)
+    connectionFactory = new NIOServerCnxn.Factory(new InetSocketAddress(loopback, 0))
     connectionFactory.startup(zookeeperServer)
+    zookeeperServerPort = zookeeperServer.getClientPort
+
     zookeeperClient = new ZooKeeperClient(
       Amount.of(10, Time.MILLISECONDS),
-      zookeeperAddress)
+      new InetSocketAddress(loopback, zookeeperServerPort))
 
     // set-up old pool
     val oldPoolCluster = new ZookeeperServerSetCluster(
@@ -114,25 +117,27 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     eventually { assert(Await.result(client2.get("foo")) === None) }
   }
 
-  test("sending dark traffic") {
-    val migrationConfig = MigrationConstants.MigrationConfig("Warming", false, false)
-    val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
-    zookeeperClient.get().setData(basePath, migrationDataArray, -1)
+  if (!sys.props.contains("SKIP_FLAKY")) {
+    test("sending dark traffic") {
+      val migrationConfig = MigrationConstants.MigrationConfig("Warming", false, false)
+      val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
+      zookeeperClient.get().setData(basePath, migrationDataArray, -1)
 
-    val client1 = MemcachedClient.newKetamaClient(
-      dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
-    val client2 = MemcachedClient.newKetamaClient(
-      dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
-    val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
-    migrationClient.loadZKData() // force loading the config to fully set-up the client
+      val client1 = MemcachedClient.newKetamaClient(
+        dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
+      val client2 = MemcachedClient.newKetamaClient(
+        dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
+      val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
+      migrationClient.loadZKData() // force loading the config to fully set-up the client
 
-    eventually { Await.result(migrationClient.get("test")) }
-    assert(Await.result(migrationClient.get("foo"), TIMEOUT) === None)
-    Await.result(migrationClient.set("foo", "bar"), TIMEOUT)
-    assert(Await.result(migrationClient.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+      eventually { Await.result(migrationClient.get("test")) }
+      assert(Await.result(migrationClient.get("foo"), TIMEOUT) === None)
+      Await.result(migrationClient.set("foo", "bar"), TIMEOUT)
+      assert(Await.result(migrationClient.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
 
-    assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
-    eventually { assert(Await.result(client2.get("foo")).map(_.toString(Charsets.Utf8)) === Some("bar")) }
+      assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+      eventually { assert(Await.result(client2.get("foo")).map(_.toString(Charsets.Utf8)) === Some("bar")) }
+    }
   }
 
   test("dark read w/ read repair") {

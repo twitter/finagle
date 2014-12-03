@@ -1,6 +1,7 @@
 package com.twitter.finagle.memcachedx.integration
 
 import java.io.ByteArrayOutputStream
+import java.net.{InetSocketAddress, InetAddress}
 
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog
 import org.apache.zookeeper.server.{NIOServerCnxn, ZooKeeperServer}
@@ -40,18 +41,19 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
   val TIMEOUT = 15.seconds
 
   override def beforeEach() {
-    val zookeeperAddress = RandomSocket.nextAddress
-    zookeeperServerPort = zookeeperAddress.getPort
+    val loopback = InetAddress.getLoopbackAddress
 
     // start zookeeper server and create zookeeper client
     zookeeperServer = new ZooKeeperServer(
       new FileTxnSnapLog(createTempDir(), createTempDir()),
       new ZooKeeperServer.BasicDataTreeBuilder)
-    connectionFactory = new NIOServerCnxn.Factory(zookeeperAddress)
+    connectionFactory = new NIOServerCnxn.Factory(new InetSocketAddress(loopback, 0))
     connectionFactory.startup(zookeeperServer)
+    zookeeperServerPort = zookeeperServer.getClientPort
+
     zookeeperClient = new ZooKeeperClient(
       Amount.of(10, Time.MILLISECONDS),
-      zookeeperAddress)
+      new InetSocketAddress(loopback, zookeeperServerPort))
 
     // set-up old pool
     val oldPoolCluster = new ZookeeperServerSetCluster(
@@ -119,27 +121,29 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     eventually { assert(Await.result(client2.get("foo")) === None) }
   }
 
-  test("sending dark traffic") {
-    val migrationConfig = MigrationConstants.MigrationConfig("Warming", false, false)
-    val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
-    zookeeperClient.get().setData(basePath, migrationDataArray, -1)
+  if (!sys.props.contains("SKIP_FLAKY")) {
+    test("sending dark traffic") {
+      val migrationConfig = MigrationConstants.MigrationConfig("Warming", false, false)
+      val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
+      zookeeperClient.get().setData(basePath, migrationDataArray, -1)
 
-    val client1 = MemcachedxClient.newKetamaClient(
-      dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
-    val client2 = MemcachedxClient.newKetamaClient(
-      dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
-    val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
-    migrationClient.loadZKData() // force loading the config to fully set-up the client
+      val client1 = MemcachedxClient.newKetamaClient(
+        dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
+      val client2 = MemcachedxClient.newKetamaClient(
+        dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
+      val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
+      migrationClient.loadZKData() // force loading the config to fully set-up the client
 
-    eventually { Await.result(migrationClient.get("test")) }
+      eventually { Await.result(migrationClient.get("test")) }
 
-    assert(Await.result(migrationClient.get("foo"), TIMEOUT) === None)
-    Await.result(migrationClient.set("foo", Buf.Utf8("bar")), TIMEOUT)
+      assert(Await.result(migrationClient.get("foo"), TIMEOUT) === None)
+      Await.result(migrationClient.set("foo", Buf.Utf8("bar")), TIMEOUT)
 
-    assert(Await.result(migrationClient.get("foo"), TIMEOUT).get === Buf.Utf8("bar"))
+      assert(Await.result(migrationClient.get("foo"), TIMEOUT).get === Buf.Utf8("bar"))
 
-    assert(Await.result(client1.get("foo"), TIMEOUT).get === Buf.Utf8("bar"))
-    eventually { assert(Await.result(client2.get("foo")).map { case Buf.Utf8(s) => s } === Some("bar")) }
+      assert(Await.result(client1.get("foo"), TIMEOUT).get === Buf.Utf8("bar"))
+      eventually { assert(Await.result(client2.get("foo")).map { case Buf.Utf8(s) => s } === Some("bar")) }
+    }
   }
 
   test("dark read w/ read repair") {
