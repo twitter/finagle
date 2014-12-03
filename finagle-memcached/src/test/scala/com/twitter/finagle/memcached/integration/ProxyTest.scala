@@ -7,8 +7,8 @@ import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.{Service, ServiceClosedException}
 import com.twitter.io.Charsets
-import com.twitter.util.{Await, RandomSocket}
-import java.net.InetSocketAddress
+import com.twitter.util.Await
+import java.net.{InetAddress, InetSocketAddress}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -23,7 +23,7 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
     */
   var externalClient: Client = null
   var server: Server = null
-  var serverPort: InetSocketAddress = null
+  var serverAddress: InetSocketAddress = null
   var proxyService: MemcacheService = null
   var proxyClient: MemcacheService = null
   var testServer: Option[TestMemcachedServer] = None
@@ -40,13 +40,14 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
       proxyService = new MemcacheService {
         def apply(request: Command) = proxyClient(request)
       }
-      serverPort = RandomSocket()
       server = ServerBuilder()
         .codec(Memcached())
-        .bindTo(serverPort)
+        .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .name("memcached")
         .build(proxyService)
-      externalClient = Client("%s:%d".format(serverPort.getHostName, serverPort.getPort))
+
+      serverAddress = server.localAddress.asInstanceOf[InetSocketAddress]
+      externalClient = Client("%s:%d".format(serverAddress.getHostName, serverAddress.getPort))
     }
   }
 
