@@ -1,7 +1,7 @@
 package com.twitter.finagle.exp
 
 import scala.annotation.target.{beanGetter, beanSetter}
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 /**
  * Package swift makes Facebook's [[https://github.com/facebook/swift

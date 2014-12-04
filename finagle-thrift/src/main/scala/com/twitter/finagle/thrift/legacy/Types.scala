@@ -1,6 +1,6 @@
 package com.twitter.finagle.thrift
 
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocol}
 import org.apache.thrift.{TBase, TApplicationException}

@@ -1,7 +1,7 @@
 package com.twitter.finagle.exp.swift
 
 import com.twitter.util.Future
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import scala.annotation.target._
 
 @ThriftStruct
