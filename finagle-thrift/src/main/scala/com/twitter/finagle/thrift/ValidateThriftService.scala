@@ -12,7 +12,7 @@ import com.twitter.util.Future
  * is invalid, where "validity" is determined by
  * [[com.twitter.finagle.thrift.ValidateThriftService]].
  */
-case class InvalidThriftConnectionException extends ServiceException {
+case class InvalidThriftConnectionException() extends ServiceException {
   override def getMessage = "the thrift connection was invalidated"
 }
 

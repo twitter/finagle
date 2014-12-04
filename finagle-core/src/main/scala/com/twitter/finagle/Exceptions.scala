@@ -343,10 +343,10 @@ case class ConnectionRefusedException(override val remoteAddress: SocketAddress)
  * Indicates that requests were failed by a rate-limiter. See
  * [[com.twitter.finagle.service.RateLimitingFilter]] for details.
  */
-case class RefusedByRateLimiter extends ChannelException
+case class RefusedByRateLimiter() extends ChannelException
 
 @deprecated("no longer used by com.twitter.finagle.service.FailFastFactory", "7.0.0")
-case class FailFastException extends ChannelException
+case class FailFastException() extends ChannelException
 
 /**
  * A base class for exceptions encountered in the context of a

@@ -52,7 +52,7 @@ public class ClientBase extends Client {
       underlying.get(JavaConversions.asScalaBuffer(keys));
     return result.map(new Function<scala.collection.immutable.Map<String, Buf>, Map<String, Buf>>() {
       public Map<String, Buf> apply(scala.collection.immutable.Map<String, Buf> underlying) {
-        return JavaConversions.asJavaMap(underlying);
+        return JavaConversions.mapAsJavaMap(underlying);
       }
     });
   }
@@ -66,7 +66,7 @@ public class ClientBase extends Client {
       public Map<String, ResultWithCAS> apply(
         scala.collection.immutable.Map<String, Tuple2<Buf, Buf>> underlying)
       {
-        return JavaConversions.asJavaMap(
+        return JavaConversions.mapAsJavaMap(
           underlying.mapValues(new Function<Tuple2<Buf, Buf>, ResultWithCAS>() {
             public ResultWithCAS apply(Tuple2<Buf, Buf> tuple) {
               return new ResultWithCAS(tuple._1(), tuple._2());
