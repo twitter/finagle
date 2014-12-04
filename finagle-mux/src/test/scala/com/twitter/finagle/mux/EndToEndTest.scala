@@ -37,7 +37,7 @@ class EndToEndTest extends FunSuite
       handled = true
     }
 
-    val server = Mux.serve(":*", Service.mk[Request, Response](_ => p))
+    val server = Mux.serve("localhost:*", Service.mk[Request, Response](_ => p))
 
     val client = Mux.newService(server)
 
@@ -49,7 +49,7 @@ class EndToEndTest extends FunSuite
   }
 
   test("Dtab propagation") {
-    val server = Mux.serve(":*", Service.mk[Request, Response] { _ =>
+    val server = Mux.serve("localhost:*", Service.mk[Request, Response] { _ =>
       val stringer = new StringWriter
       val printer = new PrintWriter(stringer)
       Dtab.local.print(printer)
@@ -69,7 +69,7 @@ class EndToEndTest extends FunSuite
   }
 
   test("(no) Dtab propagation") {
-    val server = Mux.serve(":*", Service.mk[Request, Response] { _ =>
+    val server = Mux.serve("localhost:*", Service.mk[Request, Response] { _ =>
       val buf = ChannelBuffers.buffer(4)
       buf.writeInt(Dtab.local.size)
       Future.value(Response(ChannelBufferBuf.Owned(buf)))
@@ -96,7 +96,7 @@ class EndToEndTest extends FunSuite
     val server = Mux.server
       .configured(param.Tracer(tracer))
       .configured(param.Label("theServer"))
-      .serve(":*", new Service[Request, Response] {
+      .serve("localhost:*", new Service[Request, Response] {
         def apply(req: Request) = {
           count += 1
           if (count >= 1) Future.value(Response(req.body))
@@ -142,7 +142,7 @@ class EndToEndTest extends FunSuite
 
       val server = Mux.server
         .configured(Lessor.Param(lessor))
-        .serve(":*", new Service[mux.Request, mux.Response] {
+        .serve("localhost:*", new Service[mux.Request, mux.Response] {
           def apply(req: Request) = ???
         }
       )

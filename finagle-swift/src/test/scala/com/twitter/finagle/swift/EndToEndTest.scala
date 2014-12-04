@@ -21,7 +21,7 @@ class EndToEndTest extends FunSuite {
   test("end to end, com.twitter.finagle.Thrift integration") {
     val impl = new Impl1
 
-    val server = Thrift.serveIface(":*", impl)
+    val server = Thrift.serveIface("localhost:*", impl)
     val client = Thrift.newIface[Test1](server)
 
     val map = new java.util.HashMap[String, java.lang.Integer]
@@ -40,7 +40,7 @@ class EndToEndTest extends FunSuite {
         Future.exception(Test1Exc("hello, exceptional world", 123))
     }
 
-    val server = Thrift.serveIface(":*", impl)
+    val server = Thrift.serveIface("localhost:*", impl)
     val client = Thrift.newIface[Test1](server)
 
     val exc = intercept[TApplicationException] { Await.result(client.ping("ok")) }

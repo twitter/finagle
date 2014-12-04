@@ -12,7 +12,7 @@ public class UseMux {
   static {
     ServiceFactory<Request, Response> client = Mux.newClient(":8080");
 
-    Mux.serve(":*", new Service<Request, Response>() {
+    Mux.serve("localhost:*", new Service<Request, Response>() {
       public Future<Response> apply(Request req) {
         return Future.value(Responses.empty());
       }

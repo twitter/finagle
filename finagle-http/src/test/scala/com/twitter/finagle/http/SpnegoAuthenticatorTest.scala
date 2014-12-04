@@ -90,7 +90,7 @@ class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
     clientSrc: Option[Credentials.ClientSource] = None
   ) = {
     val service = mock[Service[Authenticated[HttpRequest],HttpResponse]]
-    val server = finagle.Http.serve(":*", new ServerFilter(serverSrc) andThen service)
+    val server = finagle.Http.serve("localhost:*", new ServerFilter(serverSrc) andThen service)
     val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
     val rawClient = finagle.Http.newService(s"localhost:$port")
 
