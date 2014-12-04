@@ -1,12 +1,13 @@
 package com.twitter.finagle.stats
 
-import com.twitter.common.metrics.{AbstractGauge, Metrics}
+import com.twitter.common.metrics.{Histogram, HistogramInterface, AbstractGauge, Metrics}
 import com.twitter.finagle.http.HttpMuxHandler
 import com.twitter.util.events.{Event, Sink}
 import java.util.concurrent.ConcurrentHashMap
 
 object MetricsStatsReceiver {
   val defaultRegistry = Metrics.root()
+  private def defaultFactory(name: String): HistogramInterface = new Histogram(name)
 
   /**
    * The [[com.twitter.util.events.Event.Type Event.Type]] for counter increment events.
@@ -19,13 +20,26 @@ object MetricsStatsReceiver {
   val StatAdd: Event.Type = new Event.Type { }
 }
 
-class MetricsStatsReceiver(val registry: Metrics, sink: Sink)
-  extends StatsReceiverWithCumulativeGauges
-{
+/**
+ * This implementation of StatsReceiver uses the [[com.twitter.common.metrics]] library under
+ * the hood.
+ *
+ * Note: Histogram uses [[com.twitter.common.stats.WindowedApproxHistogram]] under the hood.
+ * It is (by default) configured to store events in a 80 seconds moving window, reporting
+ * metrics on the first 60 seconds. It means that when you add a value, you need to wait at most
+ * 20 seconds before this value will be aggregated in the exported metrics.
+ */
+class MetricsStatsReceiver(
+  val registry: Metrics,
+  sink: Sink,
+  histogramFactory: String => HistogramInterface
+) extends StatsReceiverWithCumulativeGauges {
   import MetricsStatsReceiver._
 
+  def this(registry: Metrics, sink: Sink) = this(registry, sink, MetricsStatsReceiver.defaultFactory)
   def this(registry: Metrics) = this(registry, Sink.default)
   def this() = this(MetricsStatsReceiver.defaultRegistry)
+
   val repr = this
 
   // Use for backward compatibility with ostrich caching behavior
@@ -62,7 +76,8 @@ class MetricsStatsReceiver(val registry: Metrics, sink: Sink)
       stat = stats.get(names)
       if (stat == null) {
         stat = new Stat {
-          val histogram = registry.createHistogram(format(names))
+          val histogram = histogramFactory(format(names))
+          registry.registerHistogram(histogram)
           def add(value: Float): Unit = {
             val asLong = value.toLong
             histogram.add(asLong)
