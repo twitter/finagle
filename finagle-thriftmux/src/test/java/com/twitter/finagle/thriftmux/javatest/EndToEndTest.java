@@ -23,7 +23,7 @@ import static junit.framework.Assert.assertEquals;
 public class EndToEndTest {
   @Test
   public void test() {
-    ListeningServer server = ThriftMux.serveIface(":*", new TestService.FutureIface() {
+    ListeningServer server = ThriftMux.serveIface("localhost:*", new TestService.FutureIface() {
       public Future<String> query(String x) {
         return Future.value(x+x);
       }
@@ -35,7 +35,7 @@ public class EndToEndTest {
 
   @Test
   public void testInterfaces() {
-    ListeningServer server = ThriftMux.server().serveIface(":*", new TestService.FutureIface() {
+    ListeningServer server = ThriftMux.server().serveIface("localhost:*", new TestService.FutureIface() {
       public Future<String> query(String x) {
         return Future.value(x+x);
       }

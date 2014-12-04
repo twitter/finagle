@@ -377,7 +377,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
   trace("Client/Server") {
     service =>
       import com.twitter.finagle.Http
-      val server = Http.serve(":*", service)
+      val server = Http.serve("localhost:*", service)
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
       val client = Http.newService("%s:%d".format(addr.getHostName, addr.getPort))
 
@@ -432,7 +432,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
   go("Client/Server") {
     service =>
       import com.twitter.finagle.Http
-      val server = Http.serve(":*", service)
+      val server = Http.serve("localhost:*", service)
       val client = Http.newService(server)
 
       new ServiceProxy(client) {

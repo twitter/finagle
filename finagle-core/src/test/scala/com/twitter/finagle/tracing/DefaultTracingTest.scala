@@ -71,7 +71,7 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
       val svc = stringServer
         .configured(fparam.Tracer(serverTracer))
         .configured(fparam.Label("theServer"))
-        .serve(":*", Svc)
+        .serve("localhost:*", Svc)
 
       stringClient
         .configured(fparam.Tracer(clientTracer))
@@ -94,7 +94,7 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
           Netty3Transporter("theClient", StringClientPipeline), new SerialClientDispatcher(_)),
         tracer = clientTracer)
 
-      val svc = server.serve(":*", Svc)
+      val svc = server.serve("localhost:*", Svc)
       client.newService(svc)
     }
   }

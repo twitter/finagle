@@ -40,7 +40,11 @@ object InetSocketAddressUtil {
   def parseHostPorts(hosts: String): Seq[HostPort] =
     hosts split Array(' ', ',') filter (_.nonEmpty) map (_.split(":")) map { hp =>
       require(hp.size == 2, "You must specify host and port")
-      (hp(0), hp(1).toInt)
+      hp match {
+        case Array(host, "*") => (host, 0)
+        case Array(host, portStr) => (host, portStr.toInt)
+        case _ => throw new IllegalArgumentException("Malformed host/port specification: " + hosts)
+      }
     }
 
   /**
