@@ -1,36 +1,29 @@
-MinimumSetCluster
-<<<<<<<<<<<<<<<<<
-
-**censored_add**
-  a counter of the number of times there is an attempt to add a server that is already in the
-  minimum set to the cluster
-
-**censored_rem**
-  a counter of the number of times there is an attempt to remove a server that is guaranteed to be
-  in the minimum set to the cluster
-
-**missing**
-  a gauge of the number of servers in the bag-difference between the supplementary cluster and the minimum set.
-  this should be the number of servers that would be missing if we only used the supplementary cluster
-
-**additional**
-  a gauge of the number of servers in the bag-difference between the minimum set and the supplementary cluster.
-  this should be the number of servers that would be missing if we only used the minimum set
-
-HeapBalancer
-<<<<<<<<<<<<
+All Balancers
+<<<<<<<<<<<<<
 
 **size**
-  a gauge of the number of nodes in the heap
-
-**adds**
-  a counter of the number of adds to the heap
-
-**removes**
-  a counter of the number of removes to the heap
+  A gauge of the number of nodes being balanced across
 
 **available**
-  a gauge of the number of available nodes in the heap
+  A gauge of the number of *available* nodes being balanced across
 
 **load**
-  a gauge of the total load over all nodes in the heap
+  A gauge of the total load over all nodes being balanced across
+
+**meanweight**
+  A gauge tracking the arithmetic mean of the weights of the endpoints
+  being load-balanced across. Does not apply to
+  `com.twitter.finagle.loadbalancer.HeapBalancer`.
+
+**adds**
+  A counter of the number of hosts added to the loadbalancer
+
+**removes**
+  A counter of the number of hosts removed from the loadbalancer
+
+ApertureLoadBandBalancer
+<<<<<<<<<<<<<<<<<<<<<<<<
+
+**aperture**
+  A gauge of the width of the window over which endpoints are
+  load-balanced
