@@ -1,6 +1,6 @@
 package com.twitter.finagle.thrift
 
-import com.twitter.finagle.{ServiceProxy, Service, WriteException, ServiceException}
+import com.twitter.finagle.{Status, ServiceProxy, Service, WriteException, ServiceException}
 import java.util.logging.{Logger, Level}
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.{TProtocolFactory, TMessageType}
@@ -44,7 +44,13 @@ class ValidateThriftService(
       }
     }
 
-  override def isAvailable = isValid && self.isAvailable
+  override def status = 
+    if (!isValid) Status.Closed 
+    else self.status
+  
+  
+  // TODO(CSL-1336): Finalize isAvailable
+  override def isAvailable = status != Status.Closed
 
   private def isResponseValid(bytes: Array[Byte]) = try {
     val memoryTransport = new TMemoryInputTransport(bytes)

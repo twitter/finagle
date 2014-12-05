@@ -1,7 +1,7 @@
 package com.twitter.finagle.httpx.codec
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.{ChannelClosedException, Service}
+import com.twitter.finagle.{ChannelClosedException, Service, Status}
 import com.twitter.finagle.httpx.{BadHttpRequest, Request, Response}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.{QueueTransport, Transport}
@@ -32,7 +32,7 @@ class HttpServerDispatcherTest extends FunSuite {
 
     in.write(BadHttpRequest(new Exception()))
     Await.result(in.read)
-    assert(!out.isOpen)
+    assert(out.status === Status.Closed)
   }
 
   test("streaming request body") {

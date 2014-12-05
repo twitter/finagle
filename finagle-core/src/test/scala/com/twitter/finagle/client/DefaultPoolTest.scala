@@ -1,6 +1,6 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
+import com.twitter.finagle.{Status, ClientConnection, Service, ServiceFactory}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Future, Time}
 import org.junit.runner.RunWith
@@ -27,7 +27,8 @@ class DefaultPoolTest extends FunSuite {
       Future.Done
     }
 
-    override def isAvailable: Boolean = !closed
+    override def status: Status = 
+      if (closed) Status.Closed else Status.Open
   }
 
   trait DefaultPoolHelper {

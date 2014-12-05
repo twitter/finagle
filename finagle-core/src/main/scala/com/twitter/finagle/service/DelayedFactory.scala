@@ -58,8 +58,13 @@ class DelayedFactory[Req, Rep](
     }
   }
 
-  override def isAvailable: Boolean =
-    underlyingF.isDefined && Await.result(underlyingF).isAvailable
+  override def status: Status =
+    if (underlyingF.isDefined) Await.result(underlyingF).status
+    else Status.Busy(underlyingF.unit)
+    
+  // CSL-1336. We're relying on being unavailable when Busy,
+  // at least in tests. Remove this dependency when resolving.
+  override def isAvailable = status == Status.Open
 
   private[finagle] def numWaiters(): Int = q.size()
 }

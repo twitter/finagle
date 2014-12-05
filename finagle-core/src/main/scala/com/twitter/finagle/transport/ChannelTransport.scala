@@ -2,7 +2,7 @@ package com.twitter.finagle.transport
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.{
-  CancelledWriteException, ChannelClosedException, ChannelException}
+  CancelledWriteException, ChannelClosedException, ChannelException, Status}
 import com.twitter.util.{Future, Return, Promise, Time}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
@@ -109,7 +109,9 @@ class ChannelTransport[In, Out](ch: Channel)
     p
   }
 
-  def isOpen: Boolean = !failed.get && ch.isOpen
+  def status: Status = 
+    if (failed.get || !ch.isOpen) Status.Closed
+    else Status.Open
 
   def close(deadline: Time): Future[Unit] = {
     if (ch.isOpen)

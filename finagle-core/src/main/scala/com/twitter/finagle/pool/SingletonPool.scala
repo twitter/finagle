@@ -99,8 +99,8 @@ extends ServiceFactory[Req, Rep] {
         complete(Idle)
         Future.exception(exc)
 
-      case Return(svc) if !svc.isAvailable =>
-        // If we are returned an unavailable service, we treat the connect
+      case Return(svc) if svc.status == Status.Closed =>
+        // If we are returned a closed service, we treat the connect
         // as a failure. This is both correct -- the connect did fail -- and
         // also prevents us from entering potentially infinite loops where
         // every returned service is unavailable, which then causes the
@@ -127,7 +127,7 @@ extends ServiceFactory[Req, Rep] {
 
   @tailrec
   final def apply(conn: ClientConnection): Future[Service[Req, Rep]] = state.get match {
-    case Open(svc) if svc.isAvailable =>
+    case Open(svc) if svc.status != Status.Closed =>
       // It is possible that the pool's state has changed by the time
       // we can return the service, so svc is possibly stale. We don't
       // attempt to resolve this race; rather, we let the lower layers deal
@@ -161,7 +161,9 @@ extends ServiceFactory[Req, Rep] {
    * A SingletonPool is available when it is not closed and the underlying
    * factory is also available.
    */
-  override def isAvailable: Boolean = underlying.isAvailable && !(state.get == Closed)
+  override def status: Status = 
+    if (state.get != Closed) underlying.status
+    else Status.Closed
 
   /**
    * @inheritdoc

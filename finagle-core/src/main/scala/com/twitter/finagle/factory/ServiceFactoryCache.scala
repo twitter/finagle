@@ -2,7 +2,7 @@ package com.twitter.finagle.factory
 
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.concurrent.atomic.AtomicInteger
-import com.twitter.finagle.{Service, ServiceFactory, ClientConnection, ServiceProxy, ServiceFactoryProxy}
+import com.twitter.finagle.{Status, Service, ServiceFactory, ClientConnection, ServiceProxy, ServiceFactoryProxy}
 import com.twitter.util.{Closable, Future, Stopwatch, Throw, Return, Time, Duration}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.Trace
@@ -166,20 +166,22 @@ private class ServiceFactoryCache[Key, Req, Rep](
   }
 
   def close(deadline: Time) = Closable.all(cache.values.toSeq:_*).close(deadline)
-  def isAvailable = cache.isEmpty || cache.values.exists(_.isAvailable)
+  def status = Status.bestOf[IdlingFactory[Req, Rep]](cache.values, _.status)
 
-  def isAvailable(key: Key): Boolean = {
+  def status(key: Key): Status = {
     readLock.lock()
     try {
       if (cache.contains(key))
-        return cache(key).isAvailable
+        return cache(key).status
     } finally {
       readLock.unlock()
     }
-
+    
+    // This is somewhat dubious, as the status is outdated
+    // pretty much right after we query it.
     val factory = newFactory(key)
-    val available = factory.isAvailable
+    val status = factory.status
     factory.close()
-    available
+    status
   }
 }

@@ -54,7 +54,7 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
           Service.rescue(new Service[ReqOut, RepIn] {
             def apply(request: ReqOut): Future[RepIn] = next(request, service)
             override def close(deadline: Time) = service.close(deadline)
-            override def isAvailable = service.isAvailable
+            override def status = service.status
           })
         )
       }
@@ -71,7 +71,7 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
   def andThen(service: Service[ReqOut, RepIn]) = new Service[ReqIn, RepOut] {
     def apply(request: ReqIn) = Filter.this.apply(request, Service.rescue(service))
     override def close(deadline: Time) = service.close(deadline)
-    override def isAvailable = service.isAvailable
+    override def status = service.status
   }
 
   def andThen(f: ReqOut => Future[RepIn]): ReqIn => Future[RepOut] = {
@@ -83,7 +83,7 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
     new ServiceFactory[ReqIn, RepOut] {
       def apply(conn: ClientConnection) = factory(conn) map { Filter.this andThen _ }
       def close(deadline: Time) = factory.close(deadline)
-      override def isAvailable = factory.isAvailable
+      override def status = factory.status
       override def toString = factory.toString
     }
 

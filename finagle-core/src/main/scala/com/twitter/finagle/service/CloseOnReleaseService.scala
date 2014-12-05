@@ -1,6 +1,6 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.{Service, ServiceClosedException, ServiceProxy, WriteException}
+import com.twitter.finagle.{Status, Service, ServiceClosedException, ServiceProxy, WriteException}
 import com.twitter.util.{Future, Time}
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -29,5 +29,10 @@ private[finagle] class CloseOnReleaseService[Req, Rep](underlying: Service[Req, 
       Future.Done
   }
 
-  override def isAvailable = !wasReleased.get && super.isAvailable
+  override def status = 
+    if (wasReleased.get) Status.Closed
+    else super.status
+    
+  // TODO(CSL-1336): Finalize isAvailable
+  override def isAvailable = status != Status.Closed
 }

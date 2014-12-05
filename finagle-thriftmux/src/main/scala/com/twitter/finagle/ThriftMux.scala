@@ -147,7 +147,7 @@ object ThriftMux
             }
           }
 
-          override def isAvailable = service.isAvailable
+          override def status = service.status
           override def close(deadline: Time) = service.close(deadline)
         }
       }

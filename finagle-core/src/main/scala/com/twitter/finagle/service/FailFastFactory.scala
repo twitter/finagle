@@ -154,7 +154,14 @@ private[finagle] class FailFastFactory[Req, Rep](
       }
     }
 
-  override def isAvailable = self.isAvailable && state == Ok
+  // TODO(marius): Convert to using Busy.
+  override def status = 
+    if (state != Ok) Status.Closed
+    else self.status
+    
+  // TODO(CSL-1336): Finalize isAvailable
+  override def isAvailable = status != Status.Closed
+
   override val toString = "fail_fast_%s".format(self.toString)
 
   override def close(deadline: Time) = {

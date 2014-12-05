@@ -426,37 +426,37 @@ class NameTreeFactoryTest extends FunSuite {
   }
 
   test("is available iff all leaves are available") {
-    def isAvailable(tree: NameTree[Boolean]): Boolean =
+    def isAvailable(tree: NameTree[Status]): Boolean =
       NameTreeFactory(
         Path.empty,
         tree,
-        new ServiceFactoryCache[Boolean, Unit, Unit](
+        new ServiceFactoryCache[Status, Unit, Unit](
           key => new ServiceFactory[Unit, Unit] {
             def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.value(null)
             def close(deadline: Time) = Future.Done
-            override def isAvailable = key
+            override def status = key
           })
         ).isAvailable
 
     assert(isAvailable(
       NameTree.Union(
         NameTree.Weighted(1D, NameTree.Union(
-          NameTree.Weighted(1D, NameTree.Leaf(true)),
-          NameTree.Weighted(1D, NameTree.Leaf(true)))),
-        NameTree.Weighted(1D, NameTree.Leaf(true)))))
+          NameTree.Weighted(1D, NameTree.Leaf(Status.Open)),
+          NameTree.Weighted(1D, NameTree.Leaf(Status.Open)))),
+        NameTree.Weighted(1D, NameTree.Leaf(Status.Open)))))
 
     assert(!isAvailable(
       NameTree.Union(
         NameTree.Weighted(1D, NameTree.Union(
-          NameTree.Weighted(1D, NameTree.Leaf(true)),
-          NameTree.Weighted(1D, NameTree.Leaf(false)))),
-        NameTree.Weighted(1D, NameTree.Leaf(true)))))
+          NameTree.Weighted(1D, NameTree.Leaf(Status.Open)),
+          NameTree.Weighted(1D, NameTree.Leaf(Status.Closed)))),
+        NameTree.Weighted(1D, NameTree.Leaf(Status.Open)))))
 
     assert(!isAvailable(
       NameTree.Union(
         NameTree.Weighted(1D, NameTree.Union(
-          NameTree.Weighted(1D, NameTree.Leaf(true)),
-          NameTree.Weighted(1D, NameTree.Leaf(true)))),
+          NameTree.Weighted(1D, NameTree.Leaf(Status.Open)),
+          NameTree.Weighted(1D, NameTree.Leaf(Status.Open)))),
         NameTree.Weighted(1D, NameTree.Empty))))
   }
 }

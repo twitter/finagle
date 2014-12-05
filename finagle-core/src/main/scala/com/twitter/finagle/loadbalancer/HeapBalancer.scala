@@ -3,7 +3,9 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.OnReady
-import com.twitter.finagle.{Group, ClientConnection, NoBrokersAvailableException, Service, ServiceFactory, ServiceProxy}
+import com.twitter.finagle.{
+  ClientConnection, Group, NoBrokersAvailableException, Service, ServiceFactory, 
+  ServiceProxy, Status}
 import com.twitter.util._
 import scala.annotation.tailrec
 import scala.util.Random
@@ -258,6 +260,6 @@ class HeapBalancer[Req, Rep](
     Closable.sequence(observation, nodesClosable).close(deadline)
   }
 
-  override def isAvailable = true
+  override def status: Status = Status.Open
   override val toString = synchronized("HeapBalancer(%d)".format(size))
 }

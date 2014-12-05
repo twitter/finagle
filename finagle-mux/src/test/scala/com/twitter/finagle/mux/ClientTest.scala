@@ -2,7 +2,7 @@ package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
-import com.twitter.finagle.Path
+import com.twitter.finagle.{Path, Status}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.{Transport, QueueTransport}
@@ -45,11 +45,11 @@ class ClientTest extends FunSuite {
     import Message._
 
     leaseClient { (client, transport, issue, ctl) =>
-      assert(transport.isOpen)
+      assert(transport.status == Status.Open)
       assert(client.isAvailable)
       issue(1.millisecond)
       ctl.advance(2.milliseconds)
-      assert(!client.isActive && transport.isOpen)
+      assert(!client.isActive && transport.status == Status.Open)
       issue(Tlease.MaxLease)
       assert(client.isActive)
     }

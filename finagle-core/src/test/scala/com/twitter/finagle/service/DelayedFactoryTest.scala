@@ -1,6 +1,6 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, Failure}
+import com.twitter.finagle.{Status, ClientConnection, Service, ServiceFactory, Failure}
 import com.twitter.util.{Await, Future, Promise, Time}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -43,12 +43,12 @@ class DelayedFactoryTest extends FunSuite {
       }
 
       override def close(deadline: Time): Future[Unit] = {
-        avail = false
+        stat = Status.Closed
         Future.Done
       }
 
-      var avail = true
-      override def isAvailable: Boolean = avail
+      var stat = Status.Open: Status
+      override def status: Status = stat
     }
 
     def factory: ServiceFactory[Int, Int]

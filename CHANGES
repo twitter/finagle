@@ -63,6 +63,13 @@ New Features
 
   * finagle-mux: Drain mux servers properly, so that shutdowns can be
     graceful.
+    
+  * finagle-core: Introduce `Service.status` which supersedes
+    `Service.isAvailable`. `Service.status` is a fine-grained
+    health indicator. The default definition of 
+    `Service.isAvailable` is now defined in terms of 
+    `Service.status`; this definition will soon be made
+    final.
 
   * finagle-mux: Inject bound residual paths into mux requests.
 

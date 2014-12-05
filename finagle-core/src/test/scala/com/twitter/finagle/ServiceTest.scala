@@ -16,27 +16,27 @@ class ServiceTest extends FunSuite with MockitoSugar {
   test("ServiceProxy should proxy all requests") {
     val service = mock[Service[String, String]]
     when(service.close(any)) thenReturn Future.Done
-    when(service.isAvailable) thenReturn false
+    when(service.status) thenReturn Status.Closed
 
     val proxied = new ServiceProxy(service) {}
 
     when(service.apply(any[String])) thenAnswer {
       new Answer[Future[String]] {
         override def answer(invocation: InvocationOnMock) = {
-          if (proxied.isAvailable) service("ok")
+          if (proxied.status === Status.Open) service("ok")
           else Future("service is not available")
         }
       }
     }
 
     verify(service, times(0)).close(any)
-    verify(service, times(0)).isAvailable
+    verify(service, times(0)).status
     verify(service, times(0))(any[String])
 
     proxied.close(Time.now)
     verify(service).close(any)
-    assert(!proxied.isAvailable)
-    verify(service).isAvailable
+    assert(proxied.status === Status.Closed)
+    verify(service).status
 
     assert(Await.result(proxied("ok")) === "service is not available")
     verify(service)("ok")
@@ -84,7 +84,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
   trait Ctx {
     var serviceCloseCalled = false
     var factoryCloseCalled = false
-    var isAvailableCalled = false
+    var statusCalled = false
 
     val underlyingFactory = new ServiceFactory[Unit, Unit] {
       def apply(conn: ClientConnection) = Future.value(new Service[Unit, Unit] {
@@ -98,9 +98,9 @@ class ServiceTest extends FunSuite with MockitoSugar {
         factoryCloseCalled = true
         Future.Done
       }
-      override def isAvailable = {
-        isAvailableCalled = true
-        true
+      override def status: Status = {
+        statusCalled = true
+        Status.Open
       }
     }
   }
@@ -113,12 +113,12 @@ class ServiceTest extends FunSuite with MockitoSugar {
     assert(!factoryCloseCalled)
   })
 
-  test("FactoryToService delegates isAvailable / close to underlying factory") (new Ctx {
+  test("FactoryToService delegates status / close to underlying factory") (new Ctx {
     val service = new FactoryToService(underlyingFactory)
-    service.isAvailable
+    service.status
     service.close()
 
-    assert(isAvailableCalled)
+    assert(statusCalled)
     assert(factoryCloseCalled)
   })
 
@@ -129,10 +129,10 @@ class ServiceTest extends FunSuite with MockitoSugar {
 
     val factory = stack.make(Stack.Params.empty + FactoryToService.Enabled(true))
 
-    factory.isAvailable
+    factory.status
     factory.close()
 
-    assert(isAvailableCalled)
+    assert(statusCalled)
     assert(factoryCloseCalled)
   })
 
@@ -158,10 +158,10 @@ class ServiceTest extends FunSuite with MockitoSugar {
     val factory = stack.make(Stack.Params.empty + FactoryToService.Enabled(true))
 
     val service = new FactoryToService(factory)
-    service.isAvailable
+    service.status
     service.close()
 
-    assert(isAvailableCalled)
+    assert(statusCalled)
     assert(factoryCloseCalled)
   })
 }

@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import scala.annotation.tailrec
 
 class BufferingPool[Req, Rep](underlying: ServiceFactory[Req, Rep], size: Int)
-  extends ServiceFactory[Req, Rep]
+  extends ServiceFactoryProxy[Req, Rep](underlying)
 {
   @volatile private[this] var draining = false
 
@@ -25,7 +25,7 @@ class BufferingPool[Req, Rep](underlying: ServiceFactory[Req, Rep], size: Int)
     override def close(deadline: Time) = {
       // The ordering here is peculiar but important, avoiding races
       // between draining and giving back to the pool.
-      if (!isAvailable || !buffer.tryPut(this) || draining)
+      if (status == Status.Closed || !buffer.tryPut(this) || draining)
         releaseSelf()
       else
         Future.Done
@@ -39,7 +39,7 @@ class BufferingPool[Req, Rep](underlying: ServiceFactory[Req, Rep], size: Int)
     buffer.tryGet() match {
       case None =>
         underlying() map(new Wrapped(_))
-      case Some(service) if service.isAvailable =>
+      case Some(service) if service.status != Status.Closed =>
         Future.value(service)
       case Some(service) =>
         service.releaseSelf()
@@ -56,15 +56,13 @@ class BufferingPool[Req, Rep](underlying: ServiceFactory[Req, Rep], size: Int)
     }
   }
 
-  def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
+  override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
     if (draining) underlying() else get()
 
-  def close(deadline: Time) = {
+  override def close(deadline: Time) = {
     drain()
     underlying.close()
   }
-
-  override def isAvailable = underlying.isAvailable
 
   override def toString = "BufferingPool(%d)".format(size)
 }

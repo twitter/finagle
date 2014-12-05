@@ -1,6 +1,6 @@
 package com.twitter.finagle.benchmark
 
-import com.twitter.finagle.{Service, ChannelClosedException, ListeningServer}
+import com.twitter.finagle.{Service, ChannelClosedException, ListeningServer, Status}
 import com.twitter.finagle.server.{DefaultServer, Listener}
 import com.twitter.finagle.transport.Transport
 import com.twitter.util._
@@ -38,7 +38,7 @@ class FixedNumReadsTransport[In, Out](readVal: Out, nReadsAllowed: Int) extends 
     }
   }
 
-  def isOpen = !closep.isDefined
+  def status: Status = if (closep.isDefined) Status.Closed else Status.Open
 
   def close(deadline: Time) = {
     if (!isOpen)

@@ -63,6 +63,6 @@ class SpdyClientDispatcher(trans: Transport[HttpRequest, HttpResponse])
     p
   }
 
-  override def isAvailable = trans.isOpen
+  override def status = trans.status
   override def close(deadline: Time) = trans.close()
 }

@@ -3,7 +3,7 @@ package com.twitter.finagle.dispatch
 import com.twitter.concurrent.{AsyncSemaphore, Permit}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Service, Failure, WriteException}
+import com.twitter.finagle.{Status, Service, Failure, WriteException}
 import com.twitter.util.{Future, Time, Promise, Throw, Return}
 import java.net.InetSocketAddress
 
@@ -66,7 +66,8 @@ abstract class GenSerialClientDispatcher[Req, Rep, In, Out](trans: Transport[In,
     p
   }
 
-  override def isAvailable = trans.isOpen
+  override def status = trans.status
+
   override def close(deadline: Time) = trans.close()
 }
 

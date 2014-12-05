@@ -16,13 +16,13 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     val underlying = mock[ServiceFactory[Int, Int]]
     val closeP = new Promise[Unit]
     when(underlying.close(any[Time])).thenReturn(closeP)
-    when(underlying.isAvailable).thenReturn(true)
+    when(underlying.status).thenReturn(Status.Open)
     val service = mock[Service[Int, Int]]
     when(service.close(any[Time])).thenReturn(Future.Done)
-    when(service.isAvailable).thenReturn(true)
+    when(service.status).thenReturn(Status.Open)
     val service2 = mock[Service[Int, Int]]
     when(service2.close(any[Time])).thenReturn(Future.Done)
-    when(service2.isAvailable).thenReturn(true)
+    when(service2.status).thenReturn(Status.Open)
     val underlyingP = new Promise[Service[Int, Int]]
     when(underlying(any[ClientConnection])).thenReturn(underlyingP)
     val pool = new SingletonPool(underlying, NullStatsReceiver)
@@ -40,12 +40,12 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     import ctx._
 
     assert(pool.isAvailable)
-    when(underlying.isAvailable).thenReturn(false)
+    when(underlying.status).thenReturn(Status.Closed)
     assert(!pool.isAvailable)
 
-    verify(underlying, times(2)).isAvailable
+    verify(underlying, times(2)).status
 
-    when(underlying.isAvailable).thenReturn(true)
+    when(underlying.status).thenReturn(Status.Open)
     assert(pool.isAvailable)
     pool.close()
     assert(!pool.isAvailable)
@@ -60,7 +60,7 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     assert(pool.isAvailable)
     underlyingP.setValue(service)
     assert(pool.isAvailable)
-    when(underlying.isAvailable).thenReturn(false)
+    when(underlying.status).thenReturn(Status.Closed)
     assert(!pool.isAvailable)
   }
 
@@ -89,14 +89,14 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     assert(fst.poll === Some(Return(service)))
     verify(underlying, times(1)).apply(any[ClientConnection])
 
-    when(service.isAvailable).thenReturn(false)
+    when(service.status).thenReturn(Status.Closed)
     when(underlying(any[ClientConnection])).thenReturn(Future.value(service2))
     verify(service, never).close(any[Time])
-    verify(service, times(2)).isAvailable
+    verify(service, times(2)).status
 
     val snd = pool()
     assert(snd.poll === Some(Return(service2)))
-    verify(service, times(3)).isAvailable
+    verify(service, times(3)).status
 
     verify(service, never).close(any[Time])
     Await.result(fst).close()
@@ -123,7 +123,7 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     val ctx = new Ctx
     import ctx._
 
-    when(service.isAvailable).thenReturn(false)
+    when(service.status).thenReturn(Status.Closed)
     val f = pool()
     assert(!f.isDefined)
     verify(service, never).close(any[Time])
@@ -136,7 +136,7 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     verify(service, times(1)).close(any[Time])
 
     assert(pool.isAvailable)
-    when(service.isAvailable).thenReturn(true)
+    when(service.status).thenReturn(Status.Open)
     assert(pool().poll === Some(Return(service)))
     verify(service, times(1)).close(any[Time])
   }
