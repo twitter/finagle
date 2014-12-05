@@ -52,14 +52,16 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
 
   private[this] val inetResolver = InetResolver(statsReceiver)
   private[this] val sessionTimeout = 10.seconds
-  private[this] val zkFactory = Zk.withTimeout(sessionTimeout)
   private[this] val epoch = Stabilizer.epochs(sessionTimeout*4)
   private[this] val nsets = new AtomicInteger(0)
 
   // Cache of ServerSet2 instances.
   private[this] val serverSets = Memoize.snappable[String, ServerSet2] { hosts =>
-    val varZk = Zk.retrying(ServerSet2.DefaultRetrying, () => zkFactory(hosts))
-    new ServerSet2(varZk, statsReceiver)
+    val varZkSession = ZkSession.retrying(
+      ServerSet2.DefaultRetrying,
+      () => ZkSession(hosts, sessionTimeout = sessionTimeout)
+    )
+    new ServerSet2(varZkSession, statsReceiver)
   }
 
   private[this] val gauges = Seq(
@@ -244,7 +246,10 @@ private[serverset2] object ServerSet2 {
  * A representation of a ServerSet, providing resolution of path strings to
  * various data structure representations of clusters.
  */
-private[serverset2] class ServerSet2(varZk: Var[Zk], statsReceiver: StatsReceiver) {
+private[serverset2] class ServerSet2(
+  varZkSession: Var[ZkSession],
+  statsReceiver: StatsReceiver
+) {
   import ServerSet2._
 
   private[this] val zkEntriesReadStat = statsReceiver.scope("entries").stat("read_ms")
@@ -252,7 +257,7 @@ private[serverset2] class ServerSet2(varZk: Var[Zk], statsReceiver: StatsReceive
   private[this] val zkVectorsReadStat = statsReceiver.scope("vectors").stat("read_ms")
   private[this] val zkVectorsParseStat = statsReceiver.scope("vectors").stat("parse_ms")
 
-  private[this] val actZk = Activity(varZk.map(Activity.Ok(_)))
+  private[this] val actZkSession = Activity(varZkSession.map(Activity.Ok(_)))
 
   private[this] def timedOf[T](stat: Stat)(f: => Activity[T]): Activity[T] = {
     val elapsed = Stopwatch.start()
@@ -265,11 +270,9 @@ private[serverset2] class ServerSet2(varZk: Var[Zk], statsReceiver: StatsReceive
   private[this] def dataOf(
     pattern: String,
     readStat: Stat
-  ): Activity[Seq[(String, Option[Buf])]] = {
-    Activity(varZk.map(Activity.Ok(_))) flatMap { zk =>
-      zk.globOf(pattern) flatMap { paths =>
-        timedOf(readStat)(zk.collectImmutableDataOf(paths))
-      }
+  ): Activity[Seq[(String, Option[Buf])]] = actZkSession flatMap { zkSession =>
+    zkSession.globOf(pattern) flatMap { paths =>
+      timedOf(readStat)(zkSession.collectImmutableDataOf(paths))
     }
   }
 
