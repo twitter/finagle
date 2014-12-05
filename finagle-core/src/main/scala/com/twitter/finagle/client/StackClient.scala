@@ -20,7 +20,6 @@ object StackClient {
    * Canonical Roles for each Client-related Stack modules.
    */
   object Role extends Stack.Role("StackClient"){
-    val loadBalancer = Stack.Role("LoadBalancer")
     val pool = Stack.Role("Pool")
     val requestDraining = Stack.Role("RequestDraining")
     val prepFactory = Stack.Role("PrepFactory")

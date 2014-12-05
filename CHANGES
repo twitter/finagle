@@ -8,7 +8,10 @@
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
-  * finagle-http: Removed `c.t.f.http.CheckRequestFilter` along with
+  * finagle-core: Remove `c.t.f.client.StackClient.Role.loadBalancer`, which
+    was unused and duplicated by `c.t.f.loadbalancer.LoadBalancerFactory.role`.
+
+  * finagle-http: Remove `c.t.f.http.CheckRequestFilter` along with
     `c.t.f.http.CheckHttpRequestFilter`. The functionality has been
     added to `c.t.f.http.codec.HttpServerDispatcher`. In addition,
     the codecError in `c.t.f.http.BadHttpRequest` has been replaced
@@ -18,7 +21,7 @@ Breaking API Changes
     calls `Thread.start()` in its constructor. This should be now be
     done by the caller.
 
-  * finagle-mux: The experimental session API was discontinued.
+  * finagle-mux: The experimental session API is discontinued.
 
   * finagle-mux: Introduce new Request and Response types for mux services.
     The new mux request includes a `destination` path so that, which corresponds
