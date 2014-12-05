@@ -19,6 +19,7 @@ object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n"
 
 object LoadBalancerFactory {
   val role = Stack.Role("LoadBalancer")
+
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] per host
