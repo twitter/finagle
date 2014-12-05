@@ -1,5 +1,6 @@
 package com.twitter.finagle.http
 
+import com.twitter.finagle
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.http.codec.ConnectionManager
 import com.twitter.util.{Future, Time}
@@ -33,7 +34,9 @@ class HttpTransport(self: Transport[Any, Any], manager: ConnectionManager)
       case NonFatal(e) => Future.exception(e)
     }
 
-  def isOpen: Boolean = !manager.shouldClose && self.isOpen
+  def status: finagle.Status = 
+    if (manager.shouldClose) finagle.Status.Closed
+    else self.status
 
   def localAddress: SocketAddress = self.localAddress
 

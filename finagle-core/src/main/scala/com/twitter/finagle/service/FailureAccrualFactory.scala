@@ -106,13 +106,16 @@ class FailureAccrualFactory[Req, Rep](
         }
 
         override def close(deadline: Time) = service.close(deadline)
-        override def isAvailable =
-          service.isAvailable && FailureAccrualFactory.this.isAvailable
+        override def status = Status.worst(service.status, 
+          FailureAccrualFactory.this.status)
       }
     } onFailure { _ => didFail() }
   }
-
-  override def isAvailable = !markedDead && underlying.isAvailable
+  
+  // TODO(CSL-1336): Convert to using Busy
+  override def status = 
+    if (markedDead) Status.Closed
+    else underlying.status
 
   def close(deadline: Time) = underlying.close(deadline) ensure {
     // We revive to make sure we've cancelled timer tasks, etc.

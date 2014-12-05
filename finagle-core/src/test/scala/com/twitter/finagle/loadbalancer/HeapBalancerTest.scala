@@ -1,8 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.{
-ClientConnection, Group, NoBrokersAvailableException, Service, ServiceFactory}
+import com.twitter.finagle._
 import com.twitter.util.{Activity, Await, Future, Promise, Time}
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
@@ -15,10 +14,10 @@ import scala.util.Random
 class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
   class LoadedFactory(which: String) extends ServiceFactory[Unit, LoadedFactory] {
     var load = 0
-    var _isAvailable = true
+    var _status: Status = Status.Open
     var _closed = false
 
-    def setAvailable(x: Boolean) { _isAvailable = x }
+    def setStatus(x: Status) { _status = x }
 
     def apply(conn: ClientConnection) = Future.value {
       load += 1
@@ -28,7 +27,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
       }
     }
 
-    override def isAvailable = _isAvailable
+    override def status = _status
     def isClosed = _closed
     def close(deadline: Time) = {
       _closed = true
@@ -83,8 +82,8 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
     import ctx._
 
     for (_ <- 0 until N) b()
-    factories(0).setAvailable(false)
-    factories(1).setAvailable(false)
+    factories(0).setStatus(Status.Closed)
+    factories(1).setStatus(Status.Closed)
 
     for (_ <- 0 until 2*(N-2)) b()
 
@@ -197,7 +196,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
 
     for (_ <- 0 until N) b()
     for (f <- factories)
-      f.setAvailable(false)
+      f.setStatus(Status.Closed)
     for (_ <- 0 until 100*N) b()
     for (f <- factories)
       assert(f.load === 101)
@@ -233,10 +232,10 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
 
     for (_ <- 0 until N) b()
     for (f <- factories)
-      f.setAvailable(false)
+      f.setStatus(Status.Closed)
     for (_ <- 0 until 100*N) b()
     val f0 = factories(0)
-    f0.setAvailable(true)
+    f0.setStatus(Status.Open)
     for (_ <- 0 until 100) assert(Await.result(Await.result(b()).apply(())) === f0)
 
     assert(f0.load === 201)
@@ -248,11 +247,11 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
     import ctx._
 
     for (_ <- 0 until N) b()
-    factories(1).setAvailable(false)
+    factories(1).setStatus(Status.Closed)
     for (_ <- 0 until N) b()
     assert(factories(1).load === 1)
 
-    factories(1).setAvailable(true)
+    factories(1).setStatus(Status.Open)
     group() -= factories(1)
 
     for (_ <- 0 until N) b()
@@ -267,15 +266,15 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
     assertGauge("size", N)
     assertGauge("available", N)
 
-    factories(1).setAvailable(false)
-    factories(2).setAvailable(false)
+    factories(1).setStatus(Status.Closed)
+    factories(2).setStatus(Status.Closed)
 
     for (_ <- 0 until N) b()
     assertGauge("size", N)
     assertGauge("available", N - 2)
 
-    factories(1).setAvailable(true)
-    factories(2).setAvailable(true)
+    factories(1).setStatus(Status.Open)
+    factories(2).setStatus(Status.Open)
 
     for (_ <- 0 until N) b()
     assertGauge("size", N)
@@ -297,14 +296,14 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
 
     b(); b(); b(); b()
 
-    factories(0).setAvailable(false)
-    factories(1).setAvailable(false)
+    factories(0).setStatus(Status.Closed)
+    factories(1).setStatus(Status.Closed)
 
     for (_ <- 0 until 1000) b()
     assert(factories(0).load === 502)
     assert(factories(1).load === 502)
 
-    factories(1).setAvailable(true)
+    factories(1).setStatus(Status.Open)
 
     for (_ <- 0 until 1000) b()
     assert(factories(0).load === 502)

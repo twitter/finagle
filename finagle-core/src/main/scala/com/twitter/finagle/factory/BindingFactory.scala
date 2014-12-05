@@ -219,13 +219,13 @@ private[finagle] object NameTreeFactory {
       val service: Future[Service[Req, Rep]] = Future.exception(exn)
 
       def apply(conn: ClientConnection) = service
-      override def isAvailable = false
+      override def status = Status.Closed
       def close(deadline: Time) = Future.Done
     }
 
     case class Leaf(key: Key) extends ServiceFactory[Req, Rep] {
       def apply(conn: ClientConnection) = factoryCache.apply(key, conn)
-      override def isAvailable = factoryCache.isAvailable(key)
+      override def status = factoryCache.status(key)
       def close(deadline: Time) = Future.Done
     }
 
@@ -234,7 +234,8 @@ private[finagle] object NameTreeFactory {
       factories: Seq[ServiceFactory[Req, Rep]]
     ) extends ServiceFactory[Req, Rep] {
       def apply(conn: ClientConnection) = factories(drv(rng)).apply(conn)
-      override def isAvailable = factories.forall(_.isAvailable)
+
+      override def status = Status.worstOf[ServiceFactory[Req, Rep]](factories, _.status)
       def close(deadline: Time) = Future.Done
     }
 
@@ -285,7 +286,7 @@ private[finagle] object NameTreeFactory {
  * @bug This is far too complicated, though it seems necessary for
  * efficiency when namers are occasionally overriden.
  *
- * @bug 'isAvailable' has a funny definition.
+ * @bug 'status' has a funny definition.
  */
 private[finagle] class BindingFactory[Req, Rep](
     path: Path,
@@ -340,7 +341,7 @@ private[finagle] class BindingFactory[Req, Rep](
   def close(deadline: Time) =
     Closable.sequence(dtabCache, nameTreeCache, nameCache).close(deadline)
 
-  override def isAvailable = dtabCache.isAvailable
+  override def status = dtabCache.status
 }
 
 object BindingFactory {

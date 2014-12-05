@@ -3,7 +3,7 @@ package com.twitter.finagle.service
 import com.twitter.conversions.time._
 import com.twitter.finagle.MockTimer
 import com.twitter.finagle.stats.{Counter, StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.Service
+import com.twitter.finagle.{Service, Status}
 import com.twitter.util.{Future, Time, Promise, Return, Duration, Timer}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
@@ -42,7 +42,7 @@ class ExpiringServiceTest extends FunSuite with MockitoSugar {
     when(underlying.close(any[Time])).thenReturn(Future.Done)
     val promise = new Promise[Int]
     when(underlying(123)).thenReturn(promise)
-    when(underlying.isAvailable).thenReturn(true)
+    when(underlying.status).thenReturn(Status.Open)
   }
 
   test("cancelling timers on release") {

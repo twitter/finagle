@@ -1,5 +1,6 @@
 package com.twitter.finagle.transport
 
+import com.twitter.finagle.Status
 import com.twitter.io.{Reader, Buf}
 import com.twitter.util.{Await, Future, Promise, Time, Return, Throw}
 import com.twitter.concurrent.AsyncQueue
@@ -24,7 +25,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
         Future.value(Some(head))
       }
     }
-    val isOpen = true
+    val status = Status.Open
     val onClose = new Promise[Throwable]
     val localAddress = new SocketAddress {}
     val remoteAddress = new SocketAddress {}
@@ -35,7 +36,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     def write(in: Any) = Future.exception(new Exception)
     def read(): Future[Any] = Future.exception(new Exception)
     val onClose = new Promise[Throwable]
-    val isOpen = false
+    val status = Status.Closed
     val localAddress = new SocketAddress {}
     val remoteAddress = new SocketAddress {}
     def close(deadline: Time) = Future.exception(new Exception)
@@ -174,7 +175,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
       }
       def write(s: String) = ???
       def read() = p
-      def isOpen = ???
+      def status = ???
       val onClose = Future.never
       def localAddress = ???
       def remoteAddress = ???

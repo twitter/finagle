@@ -3,7 +3,7 @@ package com.twitter.finagle.service
 import java.util.concurrent.atomic.AtomicInteger
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.{FailedFastException, MockTimer, Service, ServiceFactory, SourcedException}
+import com.twitter.finagle.{Status, FailedFastException, MockTimer, Service, ServiceFactory, SourcedException}
 import com.twitter.util._
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
@@ -23,7 +23,7 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
     val service = mock[Service[Int, Int]]
     when(service.close(any[Time])).thenReturn(Future.Done)
     val underlying = mock[ServiceFactory[Int, Int]]
-    when(underlying.isAvailable).thenReturn(true)
+    when(underlying.status).thenReturn(Status.Open)
     when(underlying.close(any[Time])).thenReturn(Future.Done)
     val stats = new InMemoryStatsReceiver
     val failfast = new FailFastFactory(underlying, stats, timer, backoffs)
@@ -32,7 +32,7 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
     when(underlying()).thenReturn(p)
     val pp = failfast()
     assert(pp.isDefined === false)
-    assert(failfast.isAvailable === true)
+    assert(failfast.isAvailable === true, s"Failfast status: ${failfast.status}")
     assert(timer.tasks.isEmpty)
   }
 
@@ -143,10 +143,15 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
       failfast.close()
       verify(underlying).close()
       assert(timer.tasks.isEmpty)
-      assert(failfast.isAvailable === underlying.isAvailable)
-      val ia = !underlying.isAvailable
-      when(underlying.isAvailable).thenReturn(ia)
-      assert(failfast.isAvailable === underlying.isAvailable)
+      assert(failfast.status === underlying.status)
+
+      val status = underlying.status match {
+        case Status.Open => Status.Closed
+        case Status.Closed => Status.Open
+        case status => fail(s"bad status $status")
+      }
+      when(underlying.status).thenReturn(status)
+      assert(failfast.status === underlying.status)
     }
   }
 

@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.util.Future
-import com.twitter.finagle.Service
+import com.twitter.finagle.{Service, Status}
 
 /**
  * A [[com.twitter.finagle.Service]] that returns a constant result.
@@ -16,7 +16,7 @@ class ConstantService[Req, Rep](reply: Future[Rep]) extends Service[Req, Rep] {
 class FailedService(failure: Throwable)
   extends ConstantService[Any, Nothing](Future.exception(failure))
 {
-  override def isAvailable = false
+  override def status: Status = Status.Closed
 }
 
 /**

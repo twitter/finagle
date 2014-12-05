@@ -50,12 +50,19 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) with Closable {
   final def release() { close() }
 
   def close(deadline: Time) = Future.Done
+  
+  /**
+   * The current availability [[Status]] of this Service.
+   */
+  def status: Status = Status.Open
 
   /**
    * Determines whether this service is available (can accept requests
    * with a reasonable likelihood of success).
+   *
+   * TODO(CSL-1336): Finalize isAvailable
    */
-  def isAvailable: Boolean = true
+  def isAvailable: Boolean = status != Status.Closed
 }
 
 /**
@@ -102,6 +109,21 @@ abstract class ServiceProxy[-Req, +Rep](val self: Service[Req, Rep])
 {
   def apply(request: Req) = self(request)
   override def close(deadline: Time) = self.close(deadline)
+
+  /**
+   * @inheritdoc
+   *
+   * [[ServiceProxy.status]] and [[ServiceProxy.isAvailable]] must be
+   * overridden together, pending CSL-1336.
+   */
+  override def status = self.status
+
+  /**
+   * @inheritdoc
+   *
+   * [[ServiceProxy.status]] and [[ServiceProxy.isAvailable]] must be
+   * overridden together, pending CSL-1336.
+   */
   override def isAvailable = self.isAvailable
   override def toString = self.toString
 }
@@ -135,6 +157,7 @@ abstract class ServiceFactory[-Req, +Rep]
           f(service) onFailure { _ => service.close() }
         }
       def close(deadline: Time) = self.close(deadline)
+      // TODO(CSL-1336): Finalize isAvailable
       override def isAvailable = self.isAvailable
       override def toString() = self.toString()
     }
@@ -151,8 +174,14 @@ abstract class ServiceFactory[-Req, +Rep]
    * releases the service.
    */
   final def toService: Service[Req, Rep] = new FactoryToService(this)
+  
+  /**
+   * The current availability [[Status]] of this ServiceFactory
+   */
+  def status: Status = Status.Open
 
-  def isAvailable: Boolean = true
+  // TODO(CSL-1336): Finalize isAvailable
+  def isAvailable: Boolean = status != Status.Closed
 }
 
 object ServiceFactory {
@@ -178,6 +207,21 @@ trait ProxyServiceFactory[-Req, +Rep] extends ServiceFactory[Req, Rep] with Prox
   def self: ServiceFactory[Req, Rep]
   def apply(conn: ClientConnection) = self(conn)
   def close(deadline: Time) = self.close(deadline)
+
+  /**
+   * @inheritdoc
+   *
+   * [[ServiceFactoryProxy.status]] and [[ServiceFactoryProxy.isAvailable]] must
+   * be overridden together, pending CSL-1336.
+   */
+  override def status = self.status
+
+  /**
+   * @inheritdoc
+   *
+   * [[ServiceFactoryProxy.status]] and [[ServiceFactoryProxy.isAvailable]] must
+   * be overridden together, pending CSL-1336.
+   */
   override def isAvailable = self.isAvailable
 }
 
@@ -264,6 +308,8 @@ class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
     }
 
   override def close(deadline: Time) = factory.close(deadline)
+  override def status = factory.status
+  // TODO(CSL-1336): Finalize isAvailable
   override def isAvailable = factory.isAvailable
 }
 

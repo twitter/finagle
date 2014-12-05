@@ -51,15 +51,19 @@ private[finagle] class LeasedFactory[Req, Rep](mk: () => Future[Service[Req, Rep
       newService(dispatcher)
     }
 
-  override def isAvailable: Boolean = self.synchronized { current forall { svc =>
-    // svc.isActive means that the service is alive, and ready to handle calls
-    // !svc.isAvailable means that svc is dead.
-    // Once the service is dead, we know we should close the old service and try again.
-    // This means that the ServiceFactory will be available again, if we try to acquire
-    // a new service.
-    // This is a temporary fix until we start using the SF#status API.
-    svc.isActive || !svc.isAvailable
-  }}
+  override def status: Status = {
+    val active = self.synchronized { current forall { svc =>
+      // svc.isActive means that the service is alive, and ready to handle calls
+      // !svc.isAvailable means that svc is dead.
+      // Once the service is dead, we know we should close the old service and try again.
+      // This means that the ServiceFactory will be available again, if we try to acquire
+      // a new service.
+      svc.isActive || !svc.isAvailable
+    }}
+    // TODO(marius): convert to fine-grained statuses
+    if (active) Status.Open
+    else Status.Closed
+  }
 
   def close(deadline: Time): Future[Unit] = Future.Done
 }

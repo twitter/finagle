@@ -61,7 +61,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
   flag.parseArgs(Array("-com.twitter.finagle.loadbalancer.exp.loadMetric=leastReq"))
 
   case class LoadedFactory(which: Int, weight: Double) extends P2CServiceFactory {
-    var available = true
+    var stat: Status = Status.Open
     var load = 0
     var sum = 0
     var count = 0
@@ -88,7 +88,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
 
     def close(deadline: Time) = Future.Done
     override def toString = "LoadedFactory(%d)".format(load)
-    override def isAvailable = available
+    override def status = stat
   }
 
   def statsDict(r: InMemoryStatsReceiver) = new {
@@ -188,7 +188,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     run(R)
 
     val init0Load = init(0).load
-    init(0).available = false
+    init(0).stat = Status.Closed
 
     run(R)
     assert(init0Load === init(0).load)
@@ -199,7 +199,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     assert(init(0).load === 0)
     assertEven(init drop 1)
 
-    init(0).available = true
+    init(0).stat = Status.Open
 
     run(R)
 
@@ -232,14 +232,14 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     assertEven(init)
 
     val init0Load = init(0).load
-    for (f <- init) f.available = false
+    for (f <- init) f.stat = Status.Closed
     for (_ <- 0 until R) Await.result(bal()) // make sure we don't throw
 
     assertEven(init)
     val init0Load2 = init(0).load
     assert(math.abs(init0Load*2 - init0Load2) < ε)
 
-    for (f <- init drop N/2) f.available = true
+    for (f <- init drop N/2) f.stat = Status.Open
     for (_ <- 0 until R) bal()
 
     assert(init0Load2 === init(0).load)
@@ -278,7 +278,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     assert(stats.available === 2)
     assert(stats.meanweight === 1.5)
 
-    vec()(0).available = false
+    vec()(0).stat = Status.Closed
     assert(stats.available === 1)
 
     val svcs = Seq.fill(R) { Await.result(bal()) }
@@ -351,7 +351,7 @@ class P2CBalancerEwmaTest extends FunSuite with App with P2CSuite {
     }
     def close(deadline: Time) = Future.Done
     override def toString = which.toString
-    override def isAvailable = true
+    override def status = Status.Open
   }
 
   test("Balances evenly across identical nodes") {

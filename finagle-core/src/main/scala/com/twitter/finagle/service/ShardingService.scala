@@ -3,7 +3,7 @@ package com.twitter.finagle.service
 import com.twitter.util.{Future, Closable, Time}
 import com.twitter.hashing._
 import com.twitter.finagle.{
-  Service, NotShardableException, ShardNotAvailableException}
+  Service, Status, NotShardableException, ShardNotAvailableException}
 
 /**
  * ShardingService takes a `Distributor` where the handle is a service.
@@ -28,14 +28,14 @@ class ShardingService[Req, Rep](
   def apply(request: Req): Future[Rep] = {
     hash(request) map { hash =>
         val shard = distributor.nodeForHash(hash)
-        if (shard.isAvailable)
+        if (shard.status != Status.Closed)
           shard(request)
         else
           Future.exception(ShardingService.ShardNotAvailableException)
     } getOrElse(Future.exception(ShardingService.NotShardableException))
   }
 
-  override def isAvailable: Boolean = distributor.nodes exists { _.isAvailable }
+  override def status: Status = Status.bestOf[Service[Req, Rep]](distributor.nodes, _.status)
   override def close(deadline: Time) =
     Closable.all(distributor.nodes:_*).close(deadline)
 }

@@ -59,7 +59,7 @@ class WatermarkPool[Req, Rep](
         if (!isOpen) {
           numServices -= 1
           true
-        } else if (!isAvailable) {
+        } else if (status == Status.Closed) {
           numServices -= 1
           // If we just disposed of an service, and this bumped us beneath
           // the high watermark, then we are free to satisfy the first
@@ -91,7 +91,7 @@ class WatermarkPool[Req, Rep](
       None
     } else {
       val service = queue.removeFirst()
-      if (!service.isAvailable) {
+      if (service.status == Status.Closed) {
         // Note: since these are ServiceWrappers, accounting is taken
         // care of by ServiceWrapper.close()
         service.close()
@@ -164,7 +164,9 @@ class WatermarkPool[Req, Rep](
     factory.close(deadline)
   }
 
-  override def isAvailable = isOpen && factory.isAvailable
+  override def status = 
+    if (isOpen) factory.status
+    else Status.Closed
 
   override val toString = "watermark_pool_%s".format(factory.toString)
 }

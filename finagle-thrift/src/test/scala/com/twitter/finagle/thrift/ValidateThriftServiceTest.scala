@@ -1,6 +1,6 @@
 package com.twitter.finagle.thrift
 
-import com.twitter.finagle.{Service, WriteException}
+import com.twitter.finagle.{Status, Service, WriteException}
 import com.twitter.util.{Await, Future, Promise, Return, Throw}
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
@@ -20,7 +20,7 @@ class ValidateThriftServiceTest extends FunSuite with MockitoSugar {
     lazy val service: Service[ThriftClientRequest, Array[Byte]] = {
       val service = mock[Service[ThriftClientRequest, Array[Byte]]]
       when(service(Matchers.any[ThriftClientRequest])).thenReturn(p)
-      when(service.isAvailable).thenReturn(true)
+      when(service.status).thenReturn(Status.Open)
       service
     }
     val req: ThriftClientRequest = mock[ThriftClientRequest]
@@ -32,12 +32,12 @@ class ValidateThriftServiceTest extends FunSuite with MockitoSugar {
     val c = ValidateThriftServiceContext()
     import c._
 
-    when(service.isAvailable).thenReturn(true)
+    when(service.status).thenReturn(Status.Open)
     assert(validate.isAvailable)
-    verify(service).isAvailable
-    when(service.isAvailable).thenReturn(false)
-    assert(validate.isAvailable === false)
-    verify(service, times(2)).isAvailable
+    verify(service).status
+    when(service.status).thenReturn(Status.Closed)
+    assert(!validate.isAvailable)
+    verify(service, times(2)).status
   }
 
   test("ValidateThriftService should handle no-exception messages") {
@@ -79,7 +79,7 @@ class ValidateThriftServiceTest extends FunSuite with MockitoSugar {
       val f = validate(req)
       assert(f.isDefined)
       assert(Await.result(f) === arr)
-      assert(validate.isAvailable === false)
+      assert(!validate.isAvailable)
       val resp = validate(req).poll
 
       assert(resp.isDefined)

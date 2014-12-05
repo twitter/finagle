@@ -1,6 +1,7 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
+import com.twitter.finagle.Status
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.transport.{Transport, QueueTransport}
 import com.twitter.io.{Buf, Reader}
@@ -53,7 +54,7 @@ class OpTransport[In, Out](_ops: List[OpTransport.Op[In, Out]]) extends Transpor
   def close(deadline: Time) = ops match {
     case Close(res) :: rest =>
       ops = rest
-      isOpen = false
+      status = Status.Closed
       res respond {
         case Return(()) =>
           onClose.setValue(new Exception("closed"))
@@ -64,7 +65,7 @@ class OpTransport[In, Out](_ops: List[OpTransport.Op[In, Out]]) extends Transpor
       fail(s"Expected ${ops.headOption}; got close($deadline)")
   }
 
-  var isOpen = true
+  var status: Status = Status.Open
   val onClose = new Promise[Throwable]
   def localAddress = new java.net.SocketAddress{}
   def remoteAddress = new java.net.SocketAddress{}
@@ -193,10 +194,10 @@ class HttpClientDispatcherTest extends FunSuite {
     
     val f = disp(req)
     val g = req.writer.write(Buf.Utf8(".."))
-    assert(transport.isOpen)
+    assert(transport.status === Status.Open)
     assert(!g.isDefined)
     f.raise(new Exception)
-    assert(!transport.isOpen)
+    assert(transport.status === Status.Closed)
 
     assert(!g.isDefined)
     // Simulate what a real transport would do:
@@ -224,9 +225,9 @@ class HttpClientDispatcherTest extends FunSuite {
 
     val f = disp(req)
 
-    assert(transport.isOpen)
+    assert(transport.status === Status.Open)
     f.raise(new Exception)
-    assert(!transport.isOpen)
+    assert(transport.status === Status.Closed)
 
     // Simulate what a real transport would do:
     assert(transport.ops.isEmpty)
@@ -260,9 +261,9 @@ class HttpClientDispatcherTest extends FunSuite {
     // Buffer up for write.
     Await.result(req.writer.write(Buf.Utf8("..")))
 
-    assert(transport.isOpen)
+    assert(transport.status === Status.Open)
     f.raise(new Exception)
-    assert(!transport.isOpen)
+    assert(transport.status === Status.Closed)
 
     // Simulate what a real transport would do:
     assert(transport.ops.isEmpty)

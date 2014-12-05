@@ -1,7 +1,7 @@
 package com.twitter.finagle.transport
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.Stack
+import com.twitter.finagle.{Stack, Status}
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.{Closable, Future, Promise, Time, Throw, Return, Duration}
 import java.net.SocketAddress
@@ -26,7 +26,11 @@ trait Transport[In, Out] extends Closable { self =>
    */
   def read(): Future[Out]
 
-  def isOpen: Boolean
+  /**
+   * The status of this transport; see [[com.twitter.finagle.Status$]] for
+   * status definitions.
+   */
+  def status: Status
 
   /**
    * The channel closed with the given exception. This is the
@@ -54,7 +58,7 @@ trait Transport[In, Out] extends Closable { self =>
   def cast[In1, Out1]: Transport[In1, Out1] = new Transport[In1, Out1] {
     def write(req: In1) = self.write(req.asInstanceOf[In])
     def read(): Future[Out1] = self.read().asInstanceOf[Future[Out1]]
-    def isOpen = self.isOpen
+    def status = self.status
     val onClose = self.onClose
     def localAddress = self.localAddress
     def remoteAddress = self.remoteAddress
@@ -218,7 +222,7 @@ class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
     readq.poll() onFailure { exc =>
       closep.setValue(exc)
     }
-  def isOpen = !closep.isDefined
+  def status = if (closep.isDefined) Status.Closed else Status.Open
   def close(deadline: Time) = {
     val ex = new IllegalStateException("close() is undefined on QueueTransport")
     closep.updateIfEmpty(Throw(ex))

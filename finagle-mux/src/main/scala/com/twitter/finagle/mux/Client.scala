@@ -6,7 +6,7 @@ import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Context, Dtab, Service, WriteException, NoStacktrace}
+import com.twitter.finagle.{Context, Dtab, Service, WriteException, NoStacktrace, Status}
 import com.twitter.util.{Future, Promise, Time, Duration}
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.logging.Logger
@@ -249,7 +249,7 @@ private[finagle] class ClientDispatcher (
     } else p
   }
 
-  override def isAvailable: Boolean = trans.isOpen
+  override def status: Status = trans.status
 
   def isActive: Boolean = !lease.expired && !drained
 

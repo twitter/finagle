@@ -35,7 +35,7 @@ class SingletonFactory[Req, Rep](service: Service[Req, Rep])
     p
   }
 
-  override def isAvailable = service.isAvailable
+  override def status = service.status
 
   override val toString = "singleton_factory_%s".format(service.toString)
 }

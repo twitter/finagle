@@ -1,14 +1,15 @@
 package com.twitter.finagle.service
 
+import com.twitter.finagle.Status
+import com.twitter.finagle.{NotShardableException, ShardNotAvailableException, Service}
+import com.twitter.hashing.Distributor
 import com.twitter.util.{Await, Future}
+import org.junit.runner.RunWith
+import org.mockito.Matchers._
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import org.scalatest.mock.MockitoSugar
-import org.mockito.Mockito.{times, verify, when}
-import org.mockito.Matchers._
-import com.twitter.hashing.Distributor
-import com.twitter.finagle.{NotShardableException, ShardNotAvailableException, Service}
 
 @RunWith(classOf[JUnitRunner])
 class ShardingServiceTest extends FunSuite with MockitoSugar {
@@ -45,13 +46,13 @@ class ShardingServiceTest extends FunSuite with MockitoSugar {
     when(serviceForB.close(any)) thenReturn Future.Done
 
     when(distributor.nodeForHash(1L)) thenReturn serviceForA
-    when(serviceForA.isAvailable) thenReturn true
+    when(serviceForA.status) thenReturn Status.Open
     when(serviceForA.apply(reqA)) thenReturn reply
     service(reqA)
     verify(serviceForA).apply(reqA)
 
     when(distributor.nodeForHash(2L)) thenReturn serviceForB
-    when(serviceForB.isAvailable) thenReturn true
+    when(serviceForB.status) thenReturn Status.Open
     when(serviceForB.apply(reqB)) thenReturn reply
     service(reqB)
     verify(serviceForB).apply(reqB)
@@ -62,7 +63,7 @@ class ShardingServiceTest extends FunSuite with MockitoSugar {
     import h._
 
     when(distributor.nodeForHash(1L)) thenReturn serviceForA
-    when(serviceForA.isAvailable) thenReturn false
+    when(serviceForA.status) thenReturn Status.Closed
     intercept[ShardNotAvailableException] {
       Await.result(service(reqA))
     }

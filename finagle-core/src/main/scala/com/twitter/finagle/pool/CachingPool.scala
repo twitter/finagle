@@ -3,8 +3,8 @@ package com.twitter.finagle.pool
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.Cache
 import com.twitter.finagle.{
-  ClientConnection, Service, ServiceClosedException, ServiceFactory, ServiceProxy
-}
+  ClientConnection, Service, ServiceClosedException, ServiceFactory, ServiceProxy, 
+  Status}
 import com.twitter.util.{Future, Time, Duration, Timer}
 import scala.annotation.tailrec
 
@@ -30,7 +30,7 @@ private[finagle] class CachingPool[Req, Rep](
     extends ServiceProxy[Req, Rep](underlying)
   {
     override def close(deadline: Time) =
-      if (this.isAvailable && CachingPool.this.isOpen) {
+      if (this.status != Status.Closed && CachingPool.this.isOpen) {
         cache.put(underlying)
         Future.Done
       } else
@@ -40,7 +40,7 @@ private[finagle] class CachingPool[Req, Rep](
   @tailrec
   private[this] def get(): Option[Service[Req, Rep]] = {
     cache.get() match {
-      case s@Some(service) if service.isAvailable => s
+      case s@Some(service) if service.status != Status.Closed => s
       case Some(service) /* unavailable */ => service.close(); get()
       case None => None
     }
@@ -64,7 +64,9 @@ private[finagle] class CachingPool[Req, Rep](
     factory.close(deadline)
   }
 
-  override def isAvailable = isOpen && factory.isAvailable
+  override def status = 
+    if (isOpen) factory.status
+    else Status.Closed
 
   override val toString = "caching_pool_%s".format(factory.toString)
 }
