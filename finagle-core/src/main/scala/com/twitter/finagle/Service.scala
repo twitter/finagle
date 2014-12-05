@@ -62,7 +62,7 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) with Closable {
    *
    * TODO(CSL-1336): Finalize isAvailable
    */
-  def isAvailable: Boolean = status != Status.Closed
+  def isAvailable: Boolean = status == Status.Open
 }
 
 /**
@@ -181,7 +181,7 @@ abstract class ServiceFactory[-Req, +Rep]
   def status: Status = Status.Open
 
   // TODO(CSL-1336): Finalize isAvailable
-  def isAvailable: Boolean = status != Status.Closed
+  def isAvailable: Boolean = status == Status.Open
 }
 
 object ServiceFactory {

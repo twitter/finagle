@@ -160,7 +160,7 @@ private[finagle] class FailFastFactory[Req, Rep](
     else self.status
     
   // TODO(CSL-1336): Finalize isAvailable
-  override def isAvailable = status != Status.Closed
+  override def isAvailable = status == Status.Open
 
   override val toString = "fail_fast_%s".format(self.toString)
 
