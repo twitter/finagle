@@ -62,7 +62,9 @@ private object ZkOp {
 private class OpqueueZkReader(
     val sessionId: Long,
     val sessionPasswd: Buf,
-    val sessionTimeout: Duration) extends ZooKeeperReader {
+    val sessionTimeout: Duration)
+  extends ZooKeeperReader
+{
 
   import ZkOp._
 
@@ -103,9 +105,9 @@ class ZkTest extends FunSuite with Eventually with IntegrationPatience {
   import ZkOp._
 
   test("ops retry safely") { Time.withCurrentTimeFrozen { tc =>
-    val timer = new MockTimer
+    implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val zk = new Zk(watchedZk, timer)
+    val zk = new ZkSession(watchedZk)
 
     val v = zk.existsOf("/foo/bar")
     // An unobserved Var makes no side effect.
@@ -130,9 +132,9 @@ class ZkTest extends FunSuite with Eventually with IntegrationPatience {
   }}
 
   test("Zk.globOf") { Time.withCurrentTimeFrozen { tc =>
-    val timer = new MockTimer
+    implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val zk = new Zk(watchedZk, timer)
+    val zk = new ZkSession(watchedZk)
 
     val v = zk.globOf("/foo/bar/")
     val ref = new AtomicReference[Activity.State[Seq[String]]]
@@ -165,10 +167,10 @@ class ZkTest extends FunSuite with Eventually with IntegrationPatience {
   test("factory authenticates and closes on expiry") { Time.withCurrentTimeFrozen { tc =>
     val identity = Identities.get().head
     val authInfo = "%s:%s".format(identity, identity)
-    val timer = new MockTimer
+    implicit val timer = new MockTimer
     val zkState: Var[WatchState] with Updatable[WatchState] = Var(WatchState.Pending)
     val watchedZk = Watched(new OpqueueZkReader(), zkState)
-    val zk = Zk.retrying(5.seconds, () => new Zk(watchedZk, timer), timer)
+    val zk = ZkSession.retrying(5.seconds, () => new ZkSession(watchedZk))
 
     zk.changes.respond {
       case _ => ()
