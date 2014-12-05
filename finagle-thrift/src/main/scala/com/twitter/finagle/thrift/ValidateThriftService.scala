@@ -50,7 +50,7 @@ class ValidateThriftService(
   
   
   // TODO(CSL-1336): Finalize isAvailable
-  override def isAvailable = status != Status.Closed
+  override def isAvailable = status == Status.Open
 
   private def isResponseValid(bytes: Array[Byte]) = try {
     val memoryTransport = new TMemoryInputTransport(bytes)

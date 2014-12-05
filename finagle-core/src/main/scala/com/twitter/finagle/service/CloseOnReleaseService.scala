@@ -34,5 +34,5 @@ private[finagle] class CloseOnReleaseService[Req, Rep](underlying: Service[Req, 
     else super.status
     
   // TODO(CSL-1336): Finalize isAvailable
-  override def isAvailable = status != Status.Closed
+  override def isAvailable = status == Status.Open
 }
