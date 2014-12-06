@@ -1,13 +1,14 @@
 package com.twitter.finagle.exception
 
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.twitter.finagle.core.util.InetAddressUtil
-import com.twitter.streamyj.Streamy
 import com.twitter.util.{GZIPStringEncoder, Time}
 import java.lang.{Throwable, StackTraceElement => javaSTE}
 import java.net.{SocketAddress, InetSocketAddress, InetAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import scala.collection.JavaConverters._
 
 /**
  * An object that generates a service exception and verifies its JSON representation.
@@ -57,7 +58,8 @@ private[exception] class TestServiceException(
       assert(false, "unknown element found in " + location + ": " + badKey)
     }
 
-    val s = Streamy(json)
+    val mapper = new ObjectMapper
+    val s: JsonNode = mapper.readTree(json)
 
     var hasName = false
     var hasTraceId = false
@@ -70,25 +72,53 @@ private[exception] class TestServiceException(
     var hasSource = false
     var hasCardinality = false
 
-    s readObject {
-      case "name" => hasName = verify(s.readString(), serviceName, "bad service name", hasName)
-      case "traceId" => hasTraceId = verifyOption(s.readLong(), traceId, "bad traceId", hasTraceId, false)
-      case "timestamp" => hasTimestamp = verifyOption(s.readLong(), time, "incorrect time", hasTimestamp, false)
-      case "exceptionContents" => {
-        assert(!hasExceptionContents, "got exception contents >1 times")
-        hasExceptionContents = true
+    assert(s.isObject)
+    s.fields.asScala foreach { mapEntry =>
+      val jsonValue = mapEntry.getValue
 
-        s readObject {
-          case "exceptionClass" => hasExceptionClass = verify(s.readString(), "java.lang.Throwable", "bad exception class", hasExceptionClass)
-          case "message" => hasMessage = verify(s.readString(), exceptionMessage, "bad excepution message", hasMessage)
-          case "stackTrace" => hasStackTrace = verify(s.readString(), ste.toString + "\n" + ste.toString, "bad stacktrace", hasStackTrace)
-          case a => fail(a, "exception contents")
+      mapEntry.getKey match {
+        case "name" =>
+          assert(jsonValue.isTextual)
+          hasName = verify(jsonValue.textValue, serviceName, "bad service name", hasName)
+        case "traceId" =>
+          assert(jsonValue.isNumber)
+          hasTraceId = verifyOption(jsonValue.longValue, traceId, "bad traceId", hasTraceId, false)
+        case "timestamp" =>
+          assert(jsonValue.isNumber)
+          hasTimestamp = verifyOption(jsonValue.longValue, time, "incorrect time", hasTimestamp, false)
+        case "exceptionContents" => {
+          assert(!hasExceptionContents, "got exception contents >1 times")
+          hasExceptionContents = true
+
+          assert(jsonValue.isObject)
+          jsonValue.fields.asScala foreach { contentsMapEntry =>
+            val contentsJsonValue = contentsMapEntry.getValue
+
+            contentsMapEntry.getKey match {
+              case "exceptionClass" =>
+                assert(contentsJsonValue.isTextual)
+                hasExceptionClass = verify(contentsJsonValue.textValue, "java.lang.Throwable", "bad exception class", hasExceptionClass)
+              case "message" =>
+                assert(contentsJsonValue.isTextual)
+                hasMessage = verify(contentsJsonValue.textValue, exceptionMessage, "bad excepution message", hasMessage)
+              case "stackTrace" =>
+                assert(contentsJsonValue.isTextual)
+                hasStackTrace = verify(contentsJsonValue.textValue, ste.toString + "\n" + ste.toString, "bad stacktrace", hasStackTrace)
+              case a => fail(a, "exception contents")
+            }
+          }
         }
+        case "peer" =>
+          assert(jsonValue.isTextual)
+          hasClient = verifyOption(jsonValue.textValue, clientAddress, "peer", hasClient)
+        case "sourceAddress" =>
+          assert(jsonValue.isTextual)
+          hasSource = verifyOption(jsonValue.textValue, sourceAddress, "source", hasSource)
+        case "cardinality" =>
+          assert(jsonValue.isNumber)
+          hasCardinality = verifyOption(jsonValue.intValue, cardinality map { _+1 }, "cardinality", hasCardinality, false)
+        case a => fail(a, "service exception")
       }
-      case "peer" => hasClient = verifyOption(s.readString(), clientAddress, "peer", hasClient)
-      case "sourceAddress" => hasSource = verifyOption(s.readString(), sourceAddress, "source", hasSource)
-      case "cardinality" => hasCardinality = verifyOption(s.readInt(), cardinality map { _+1 }, "cardinality", hasCardinality, false)
-      case a => fail(a, "service exception")
     }
 
     assert(hasName, "no name")
