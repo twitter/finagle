@@ -10,13 +10,18 @@ object Finagle extends Build {
   val zkVersion = "3.3.4"
   val utilVersion = "6.22.2"
   val ostrichVersion = "9.6.3"
-  val jacksonVersion = "2.3.1"
   val nettyLib = "io.netty" % "netty" % "3.9.4.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
-  val jacksonLibs = Seq(
-    "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
-    "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion exclude("com.google.guava", "guava"),
+  // The following won't be necessary once we've upgraded internally to 2.4.
+  def jacksonVersion(scalaVersion: String) =
+    CrossVersion.partialVersion(scalaVersion) match {
+      case Some((2, 11)) => "2.4.4"
+      case _ => "2.3.1"
+    }
+  def jacksonLibs(scalaVersion: String) = Seq(
+    "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion(scalaVersion),
+    "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion(scalaVersion),
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion(scalaVersion) exclude("com.google.guava", "guava"),
     "com.google.guava" % "guava" % "16.0.1"
   )
   val thriftLibs = Seq(
@@ -24,7 +29,7 @@ object Finagle extends Build {
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
   )
   val scroogeLibs = thriftLibs ++ Seq(
-    "com.twitter" %% "scrooge-core" % "3.16.1")
+    "com.twitter" %% "scrooge-core" % "3.17.0")
 
   def util(which: String) =
     "com.twitter" %% ("util-"+which) % utilVersion excludeAll(
@@ -47,12 +52,11 @@ object Finagle extends Build {
   val sharedSettings = Seq(
     version := libVersion,
     organization := "com.twitter",
-    crossScalaVersions := Seq("2.10.4"),
+    crossScalaVersions := Seq("2.10.4", "2.11.4"),
     scalaVersion := "2.10.4",
     libraryDependencies ++= Seq(
       "org.scalacheck" %% "scalacheck" % "1.11.3" % "test",
       "org.scalatest" %% "scalatest" % "2.2.2" % "test",
-      "org.scala-tools.testing" %% "specs" % "1.6.9" % "test",
       "junit" % "junit" % "4.10" % "test",
       "org.mockito" % "mockito-all" % "1.9.5" % "test"
     ),
@@ -154,7 +158,7 @@ object Finagle extends Build {
       )
   ) aggregate(
     // Core, support.
-    finagleCore, finagleTest, finagleOstrich4, finagleStats,
+    finagleCore, finagleTest, finagleStats,
     finagleZipkin, finagleServersets,
     finagleException, finagleCommonsStats,
     finagleExp, finagleMdns, finagleTesters,
@@ -162,13 +166,18 @@ object Finagle extends Build {
     // Protocols
     finagleHttp, finagleHttpX, finagleHttpXCompat, finagleStream, finagleNative,
     finagleThrift, finagleMemcached, finagleMemcachedX, finagleKestrel,
-    finagleKestrelX, finagleRedis, finagleMux, finagleThriftMux, finagleMySQL,
-    finagleSpdy,
+    finagleKestrelX, finagleMux, finagleThriftMux, finagleMySQL,
+    finagleSpdy
 
     // Use and integration
     // removing benchmark because swift can't build outside of twitter for now
-    //    finagleStress, finagleExample, finagleBenchmark
-        finagleStress, finagleExample
+    // finagleBenchmark
+
+    // Removing projects that depend on Ostrich
+    // finagleOstrich4, finagleStress, finagleExample
+
+    // Removing projects with specs tests
+    // finagleRedis
   )
 
   lazy val finagleTest = Project(
@@ -199,6 +208,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-ostrich4",
+    crossScalaVersions ~= { versions => versions filter (_ != "2.11.4") },
     libraryDependencies ++= Seq(ostrichLib)
   ).dependsOn(finagleCore, finagleHttp)
 
@@ -212,7 +222,8 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       "com.twitter.common" % "metrics" % "0.0.29",
       util("events")
-    ) ++ jacksonLibs
+    ),
+    libraryDependencies <++= scalaVersion(jacksonLibs(_))
   ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleZipkin = Project(
@@ -235,9 +246,9 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-exception",
     libraryDependencies ++= Seq(
-      util("codec"),
-      "com.twitter" % "streamyj" % "0.4.1" % "test"
-    ) ++ scroogeLibs ++ jacksonLibs
+      util("codec")
+    ) ++ scroogeLibs,
+    libraryDependencies <++= scalaVersion(jacksonLibs(_))
   ).dependsOn(finagleCore, finagleThrift)
 
   lazy val finagleCommonsStats = Project(
@@ -263,7 +274,8 @@ object Finagle extends Build {
       util("zk-common"),
       "com.twitter.common.zookeeper" % "server-set" % "1.0.83",
       "com.google.guava" % "guava" % "16.0.1"
-    ) ++ jacksonLibs,
+    ),
+    libraryDependencies <++= scalaVersion(jacksonLibs(_)),
     excludeFilter in unmanagedSources := "ZkTest.scala",
     ivyXML :=
       <dependencies>
@@ -363,7 +375,8 @@ object Finagle extends Build {
       util("hashing"),
       "com.google.guava" % "guava" % "16.0.1",
       "com.twitter.common" % "zookeeper-testing" % "0.0.46" % "test"
-    ) ++ jacksonLibs
+    ),
+    libraryDependencies <++= scalaVersion(jacksonLibs(_))
   ).dependsOn(finagleCore, finagleServersets)
 
   lazy val finagleMemcachedX = Project(
@@ -377,7 +390,8 @@ object Finagle extends Build {
       util("hashing"),
       "com.google.guava" % "guava" % "16.0.1",
       "com.twitter.common" % "zookeeper-testing" % "0.0.46" % "test"
-    ) ++ jacksonLibs
+    ),
+    libraryDependencies <++= scalaVersion(jacksonLibs(_))
   ).dependsOn(finagleCore, finagleServersets)
 
   lazy val finagleKestrel = Project(
@@ -425,8 +439,10 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-redis",
+    crossScalaVersions ~= { versions => versions filter (_ != "2.11.4") },
     libraryDependencies ++= Seq(
-      util("logging")
+      util("logging"),
+      "org.scala-tools.testing" %% "specs" % "1.6.9" % "test"
     ),
     testOptions in Test := Seq(Tests.Filter {
       case "com.twitter.finagle.redis.integration.ClientSpec" => false
@@ -491,6 +507,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-stress",
+    crossScalaVersions ~= { versions => versions filter (_ != "2.11.4") },
     libraryDependencies ++= Seq(ostrichLib, util("logging")) ++ thriftLibs,
     libraryDependencies += "com.google.caliper" % "caliper" % "0.5-rc1"
   ).dependsOn(finagleCore, finagleOstrich4, finagleThrift, finagleHttp, finagleThriftMux)
@@ -513,6 +530,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-example",
+    crossScalaVersions ~= { versions => versions filter (_ != "2.11.4") },
     libraryDependencies ++= Seq(
       util("codec"),
       "com.twitter.common" % "flags" % "0.0.1" exclude("com.twitter", "util-core"),
@@ -531,6 +549,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-benchmark",
+    crossScalaVersions ~= { versions => versions filter (_ != "2.11.4") },
     // include again when we can properly depend on finagleSwift
     excludeFilter in Compile := "ThriftDispatch.scala",
     libraryDependencies ++= Seq(
