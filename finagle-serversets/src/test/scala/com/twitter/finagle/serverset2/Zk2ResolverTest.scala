@@ -15,7 +15,13 @@ import scala.collection.JavaConverters.mapAsJavaMapConverter
 import scala.language.implicitConversions
 
 @RunWith(classOf[JUnitRunner])
-class ZkResolverTest extends FunSuite with BeforeAndAfter with Eventually with PatienceConfiguration with SpanSugar {
+class Zk2ResolverTest
+  extends FunSuite
+  with BeforeAndAfter
+  with Eventually
+  with PatienceConfiguration
+  with SpanSugar
+{
   val zkTimeout: Span = 100.milliseconds
 
   implicit val config = PatienceConfig(

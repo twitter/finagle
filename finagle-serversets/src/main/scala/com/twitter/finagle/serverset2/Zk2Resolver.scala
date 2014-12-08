@@ -3,13 +3,10 @@ package com.twitter.finagle.serverset2
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Addr, InetResolver, Resolver}
-import com.twitter.finagle.stats.{DefaultStatsReceiver, Stat, StatsReceiver}
+import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.io.Buf
-import com.twitter.util.{Activity, Closable, Future, Memoize, Stopwatch, Var, Witness}
-import java.nio.charset.Charset
+import com.twitter.util.{Activity, Closable, Future, Memoize, Var, Witness}
 import java.util.concurrent.atomic.AtomicInteger
-import com.google.common.cache.{Cache, CacheBuilder}
 
 object chatty extends GlobalFlag(false, "Log resolved ServerSet2 addresses")
 
@@ -55,33 +52,33 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
   private[this] val epoch = Stabilizer.epochs(sessionTimeout*4)
   private[this] val nsets = new AtomicInteger(0)
 
-  // Cache of ServerSet2 instances.
-  private[this] val serverSets = Memoize.snappable[String, ServerSet2] { hosts =>
+  // Cache of ServiceDiscoverer instances.
+  private[this] val discoverers = Memoize.snappable[String, ServiceDiscoverer] { hosts =>
     val varZkSession = ZkSession.retrying(
-      ServerSet2.DefaultRetrying,
+      ServiceDiscoverer.DefaultRetrying,
       () => ZkSession(hosts, sessionTimeout = sessionTimeout)
     )
-    new ServerSet2(varZkSession, statsReceiver)
+    new ServiceDiscoverer(varZkSession, statsReceiver)
   }
 
   private[this] val gauges = Seq(
-    statsReceiver.addGauge("session_cache_size") { serverSets.snap.size.toFloat },
+    statsReceiver.addGauge("session_cache_size") { discoverers.snap.size.toFloat },
     statsReceiver.addGauge("observed_serversets") { nsets.get() }
   )
 
-  private[this] def serverSetOf(hosts: String) = {
+  private[this] def mkDiscoverer(hosts: String) = {
     val key = hosts.split(",").sorted mkString ","
-    val value = serverSets(key)
+    val value = discoverers(key)
 
     if (chatty()) {
-      eprintf("ServerSet2(%s->%s)\n", hosts, value)
+      eprintf("ServiceDiscoverer(%s->%s)\n", hosts, value)
     }
 
     value
   }
 
-  private[this] val addrOf_ = Memoize[(ServerSet2, String, Option[String]), Var[Addr]] {
-    case (serverset, path, endpoint) =>
+  private[this] val addrOf_ = Memoize[(ServiceDiscoverer, String, Option[String]), Var[Addr]] {
+    case (discoverer, path, endpoint) =>
       val scoped = {
         val sr =
           path.split("/").filter(_.nonEmpty).foldLeft(statsReceiver) {
@@ -101,7 +98,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
       // First, convert the Op-based serverset address to a
       // Var[Addr], filtering out only the endpoints we are
       // interested in.
-      val va: Var[Addr] = serverset.weightedOf(path).run flatMap {
+      val va: Var[Addr] = discoverer(path).run flatMap {
         case Activity.Pending => Var.value(Addr.Pending)
         case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
         case Activity.Ok(eps) =>
@@ -184,7 +181,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
    * Construct a Var[Addr] from the components of a ServerSet path.
    */
   private[twitter] def addrOf(hosts: String, path: String, endpoint: Option[String]): Var[Addr] =
-    addrOf_(serverSetOf(hosts), path, endpoint)
+    addrOf_(mkDiscoverer(hosts), path, endpoint)
 
   /**
    * Bind a string into a variable address using the zk2 scheme.
@@ -209,140 +206,5 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
 
     case _ =>
       throw new IllegalArgumentException(s"Invalid address '${arg}'")
-  }
-}
-
-private[serverset2] object ServerSet2 {
-  class PathCache(maxSize: Int) {
-    val entries: Cache[String, Set[Entry]] = CacheBuilder.newBuilder()
-      .maximumSize(maxSize)
-      .build()
-
-    val vectors: Cache[String, Option[Vector]] = CacheBuilder.newBuilder()
-      .maximumSize(maxSize)
-      .build()
-  }
-
-  val DefaultRetrying = 5.seconds
-  val Utf8 = Charset.forName("UTF-8")
-  val EndpointGlob = "/member_"
-  val VectorGlob = "/vector_"
-
-  /**
-   * Compute weights for a set of ServerSet entries.
-   *
-   * Each entry in `ents` is paired with the product of all weights for that
-   * entry in `vecs`.
-   */
-  def weighted(ents: Set[Entry], vecs: Set[Vector]): Set[(Entry, Double)] = {
-    ents map { ent =>
-      val w = vecs.foldLeft(1.0) { case (w, vec) => w*vec.weightOf(ent) }
-      ent -> w
-    }
-  }
-}
-
-/**
- * A representation of a ServerSet, providing resolution of path strings to
- * various data structure representations of clusters.
- */
-private[serverset2] class ServerSet2(
-  varZkSession: Var[ZkSession],
-  statsReceiver: StatsReceiver
-) {
-  import ServerSet2._
-
-  private[this] val zkEntriesReadStat = statsReceiver.scope("entries").stat("read_ms")
-  private[this] val zkEntriesParseStat = statsReceiver.scope("entries").stat("parse_ms")
-  private[this] val zkVectorsReadStat = statsReceiver.scope("vectors").stat("read_ms")
-  private[this] val zkVectorsParseStat = statsReceiver.scope("vectors").stat("parse_ms")
-
-  private[this] val actZkSession = Activity(varZkSession.map(Activity.Ok(_)))
-
-  private[this] def timedOf[T](stat: Stat)(f: => Activity[T]): Activity[T] = {
-    val elapsed = Stopwatch.start()
-    f map { rv =>
-      stat.add(elapsed().inMilliseconds)
-      rv
-    }
-  }
-
-  private[this] def dataOf(
-    pattern: String,
-    readStat: Stat
-  ): Activity[Seq[(String, Option[Buf])]] = actZkSession flatMap { zkSession =>
-    zkSession.globOf(pattern) flatMap { paths =>
-      timedOf(readStat)(zkSession.collectImmutableDataOf(paths))
-    }
-  }
-
-  def entriesOf(
-    path: String,
-    cache: PathCache
-  ): Activity[Set[Entry]] = {
-    dataOf(path + EndpointGlob, zkEntriesReadStat) flatMap { pathmap =>
-      timedOf[Set[Entry]](zkEntriesParseStat) {
-        val endpoints = pathmap flatMap {
-          case (_, null) => None // no data
-          case (path, Some(Buf.Utf8(data))) =>
-            cache.entries.getIfPresent(path) match {
-              case null =>
-                val ents = Entry.parseJson(path, data)
-                val entset = ents.toSet
-                cache.entries.put(path, entset)
-                entset
-              case ent => ent
-            }
-
-          case _ => None  // Invalid encoding
-        }
-        Activity.value(endpoints.toSet)
-      }
-    }
-  }
-
-  def vectorsOf(
-    path: String,
-    cache: PathCache
-  ): Activity[Set[Vector]] = {
-    dataOf(path + VectorGlob, zkVectorsReadStat) flatMap { pathmap =>
-      timedOf[Set[Vector]](zkVectorsParseStat) {
-        val vectors = pathmap flatMap {
-          case (path, None) =>
-            cache.vectors.getIfPresent(path) match {
-              case null => None
-              case vec => vec
-            }
-          case (path, Some(Buf.Utf8(data))) =>
-            cache.vectors.getIfPresent(path) match {
-              case null =>
-                val vec = Vector.parseJson(data)
-                cache.vectors.put(path, vec)
-                vec
-              case vec => vec
-            }
-          case _ => None // Invalid encoding
-        }
-        Activity.value(vectors.toSet)
-      }
-    }
-  }
-
-  /**
-   * Look up the weighted ServerSet entries for a given path.
-   */
-  def weightedOf(path: String): Activity[Set[(Entry, Double)]] = {
-    val cache = new PathCache(16000)
-    val es = entriesOf(path, cache).run
-    val vs = vectorsOf(path, cache).run
-
-    Activity((es join vs) map {
-      case (Activity.Pending, _) => Activity.Pending
-      case (f@Activity.Failed(_), _) => f
-      case (Activity.Ok(ents), Activity.Ok(vecs)) =>
-        Activity.Ok(ServerSet2.weighted(ents, vecs))
-      case (Activity.Ok(ents), _) =>
-        Activity.Ok(ents map (_ -> 1D))
-    })
   }
 }

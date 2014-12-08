@@ -7,11 +7,11 @@ import org.scalatest.FunSuite
 import java.net.InetSocketAddress
 
 @RunWith(classOf[JUnitRunner])
-class ServerSet2Test extends FunSuite {
+class ServiceDiscovererTest extends FunSuite {
   def ia(port: Int) = HostPort("localhost", port)
   def ep(port: Int) = Endpoint(None, Some(ia(port)), None, Endpoint.Status.Alive, port.toString)
 
-  test("ServerSet2.weighted") {
+  test("ServiceDiscoverer.zipWithWeights") {
     val port1 = RandomSocket.nextPort()
     val port2 = RandomSocket.nextPort()
     val ents = Set[Entry](ep(port1), ep(port2), ep(3), ep(4))
@@ -22,7 +22,7 @@ class ServerSet2Test extends FunSuite {
     val v2 = Vector(Seq(Descriptor(Selector.Member(port2.toString), 2.0, 1)))
     val vecs = Set(v1, v2)
 
-    assert(ServerSet2.weighted(ents, vecs) === Set(
+    assert(ServiceDiscoverer.zipWithWeights(ents, vecs) === Set(
       ep(port1) -> 1.1,
       ep(port2) -> 2.8,
       ep(3) -> 3.1,

@@ -100,7 +100,7 @@ private class OpqueueZkReader(
 }
 
 @RunWith(classOf[JUnitRunner])
-class ZkTest extends FunSuite with Eventually with IntegrationPatience {
+class ZkSessionTest extends FunSuite with Eventually with IntegrationPatience {
 
   import ZkOp._
 
@@ -131,7 +131,7 @@ class ZkTest extends FunSuite with Eventually with IntegrationPatience {
     assert(exc.isInstanceOf[KeeperException.SessionExpired])
   }}
 
-  test("Zk.globOf") { Time.withCurrentTimeFrozen { tc =>
+  test("ZkSession.globOf") { Time.withCurrentTimeFrozen { tc =>
     implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
     val zk = new ZkSession(watchedZk)
