@@ -1,10 +1,10 @@
 package com.twitter.finagle.stream
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.transport.Transport
-import org.jboss.netty.handler.codec.http._
 import com.twitter.finagle.dispatch.GenSerialServerDispatcher
+import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Future, Promise}
+import org.jboss.netty.handler.codec.http._
 
 /**
  * Stream StreamResponse messages into HTTP chunks.
@@ -58,11 +58,17 @@ private class StreamServerDispatcher(
         HttpHeaders.Values.CLOSE)
     }
 
-    trans.write(httpRes) flatMap { unit =>
+    val f = trans.write(httpRes).before {
       writeChunks(rep)
-    } ensure {
+    }.ensure {
       rep.release()
       trans.close()
     }
+
+    val p = new Promise[Unit]()
+    f.proxyTo(p)
+    p.setInterruptHandler { case _ => rep.release() }
+    p
   }
+
 }
