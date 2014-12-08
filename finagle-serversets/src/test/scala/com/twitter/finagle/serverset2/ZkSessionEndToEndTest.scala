@@ -13,7 +13,7 @@ import org.scalatest.time._
 import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
 
 @RunWith(classOf[JUnitRunner])
-class ZooKeeperZkTest extends FunSuite with BeforeAndAfter {
+class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
   val zkTimeout = 100.milliseconds
   @volatile var inst: ZkInstance = _
 
@@ -40,13 +40,8 @@ class ZooKeeperZkTest extends FunSuite with BeforeAndAfter {
     inst.stop()
   }
 
-  // Tagging tests as flaky until https://jira.twitter.biz/browse/COORD-339 is resolved
-  override def test(testName: String, testTags: Tag*)(f: => Unit) {
-    if (!sys.props.contains("SKIP_FLAKY"))
-      super.test(testName, testTags:_*)(f)
-  }
-
-  test("Session expiration 2") {
+  // COORD-339
+  if (!sys.props.contains("SKIP_FLAKY")) test("Session expiration 2") {
     implicit val timer = new MockTimer
     val connected: (WatchState => Boolean) = {
       case WatchState.SessionState(SessionState.SyncConnected) => true
@@ -88,10 +83,10 @@ class ZooKeeperZkTest extends FunSuite with BeforeAndAfter {
       SessionState.Disconnected, SessionState.SyncConnected))
   }
 
-  test("ZkSession.retrying") {
+  // COORD-339
+  if (!sys.props.contains("SKIP_FLAKY")) test("ZkSession.retrying") {
     implicit val timer = new MockTimer
     val watch = Stopwatch.start()
-
     val varZkSession = ZkSession.retrying(zkTimeout, () => ZkSession(inst.zookeeperConnectstring))
     val varZkState = varZkSession flatMap { _.state }
 
@@ -159,5 +154,4 @@ class ZooKeeperZkTest extends FunSuite with BeforeAndAfter {
     }
     assert(sessions.size === 2)
   }
-
 }
