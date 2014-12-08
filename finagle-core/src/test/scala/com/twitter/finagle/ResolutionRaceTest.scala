@@ -18,7 +18,8 @@ class ResolutionRaceTest extends FunSuite with AssertionsForJUnit {
    * If this test fails intermittently, IT IS NOT FLAKY, it's broken.
    * Or maybe its flakey in terms of port allocations.
    */
-  test("resolution raciness") {
+   // Fails in CI, see CSL-1307 and CSL-1358
+   if (!sys.props.contains("SKIP_FLAKY")) test("resolution raciness") {
     val socketAddr = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = Echo.serve(socketAddr, Echoer)
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
