@@ -51,40 +51,6 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
       case _ => Activity.value(lookup0(path) map { path => Name(path) })
     }
 
-  def enum(prefix: Path): Activity[Dtab] = {
-    val dtab = Dtab(dentries0 collect {
-      case Dentry(path, dst) if path startsWith prefix =>
-        Dentry(path drop prefix.size, dst)
-    })
-
-    Activity.value(dtab)
-  }
-
-  /**
-   * Construct a Dtab representing the alternative composition of
-   * ``this`` with its argument, under evaluation; that is
-   *
-   * {{{
-   * val a, b: Dtab = ..
-   * a.alt(b).lookup(path).eval == NameTree.Alt(a.lookup(path), b.lookup(path)).eval
-   * }}}
-   */
-  def alt(other: Dtab): Dtab = Dtab.alt(this, other)
-
-  /**
-   * Construct a Dtab representing the union composition of ``this``
-   * with its argument, under evaluation; that is
-   *
-   * {{{
-   * val a, b: Dtab = ..
-   * a.union(b).lookup(path).eval == NameTree.Union(a.lookup(path), b.lookup(path)).eval
-   * }}}
-   */
-  def union(other: Dtab): Dtab =
-    Dtab.union(
-      (NameTree.Weighted.defaultWeight, this),
-      (NameTree.Weighted.defaultWeight, other))
-
   /**
    * Construct a new Dtab with the given delegation
    * entry appended.
@@ -273,78 +239,6 @@ object Dtab {
    *
    */
   def read(s: String): Dtab = NameTreeParsers.parseDtab(s)
-
-  /**
-   * Construct a Dtab representing the alternative composition of
-   * the argument Dtabs; that is
-   *
-   * {{{
-   * val a, b: Dtab = ..
-   * Dtab.alt(a, b).lookup(path).eval == NameTree.Alt(a.lookup(path), b.lookup(path)).eval
-   * }}}
-   */
-  def alt(dtabs: Dtab*): Dtab = dtabs.reduceLeft({ (l: Dtab, r: Dtab) => r ++ l })
-
-  /**
-   * Construct a Dtab representing the weighted union composition of
-   * the argument Dtabs; that is
-   *
-   * {{{
-   * val a, b: Dtab = ..
-   * Dtab.union((wa, a), (wb, b)).lookup(path).eval ==
-   *   NameTree.Union(NameTree.Weighted(wa, a.lookup(path)), NameTree.Weighted(wb, b.lookup(path))).eval
-   * }}}
-   */
-  def union(dtabs: (Double, Dtab)*): Dtab = {
-    // This uses a somewhat funny but simple algorithm. We consider
-    // all unique paths in the Dtabs's left-hand sides. These represent
-    // all valid prefixes for the combined Dtab. We then construct a
-    // new Dtab by looking up all possible prefixes in both dtabs,
-    // and setting the destination name tree to their union.
-    //
-    // The resulting dentries each represent what a lookup in the union
-    // Dtab would return for queries with this prefix. Thus, if we
-    // sort the resulting Dtab by prefix size, the most specific
-    // applicable dentry will be used (first); it in turn embodies
-    // the most specific (and correct) answer of the comined dtab.
-    //
-    // Consider the union of the Dtabs
-    //
-    //    /a/b => /two;
-    //    /a => /one
-    //
-    // and
-    //
-    //    /a/b => /three;
-    //    /b => /four
-    //
-    // We look up, /a, /b, and /a/b, taking the union of their results; i.e.
-    //
-    //   /a => /one;
-    //   /b => /four;
-    //   /a/b => /three & (/one/b | /two)
-    //
-    // The Dtab
-    //
-    //   /foo/bar -> /quux;
-    //   /foo -> /xyzzy
-    //
-    // unioned with itself requires looking up /foo and /foo/bar:
-    //
-    //   /foo => /xyzzy & /zyzzy
-    //   /foo/bar => (/xyzzy/bar & /quux) | (/xyzzy/bar & /quux)
-
-    val paths: Set[Path] = dtabs.flatMap { case (_, dtab) => dtab.map(_.prefix) }.toSet
-
-    val dentries = for (path: Path <- paths.toIndexedSeq) yield {
-      val trees = dtabs.map { case (weight, dtab) =>
-        NameTree.Weighted(weight, dtab.lookup0(path))
-      }
-      Dentry(path, NameTree.Union(trees:_*))
-    }
-
-    Dtab(dentries.sortBy(_.prefix.size))
-  }
 
   /** Scala collection plumbing required to build new dtabs */
   def newBuilder: DtabBuilder = new DtabBuilder

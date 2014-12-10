@@ -22,11 +22,6 @@ trait Namer { self =>
   def lookup(path: Path): Activity[NameTree[Name]]
 
   /**
-   * Enumerate entries in this namer by prefix.
-   */
-  def enum(prefix: Path): Activity[Dtab]
-
-  /**
    * Bind the given tree with this namer. Bind recursively follows
    * paths by looking them up in this namer. A recursion depth of up
    * to 100 is allowed.
@@ -45,21 +40,10 @@ trait Namer { self =>
       case Activity.Pending => Var.value(Addr.Pending)
       case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
     }
-
-  /**
-   * Expand a prefix of this Namer, producing a Dtab reflecting the
-   * this prefixed namespace. The returned Dtab does not contain any
-   * root entries (/=>...), and thus represents valid suffixes of the
-   * given prefix.
-   */
-  final def expand(prefix: Path): Activity[Dtab] = Namer.expand(this, prefix)
 }
 
 private case class FailingNamer(exc: Throwable) extends Namer {
   def lookup(path: Path): Activity[NameTree[Name]] =
-    Activity.exception(exc)
-
-  def enum(prefix: Path): Activity[Dtab] =
     Activity.exception(exc)
 }
 
@@ -135,15 +119,6 @@ object Namer  {
       case _ => Activity.value(Neg)
     }
 
-    def enum(prefix: Path) = prefix match {
-      case FailPath() => Activity.value(Dtab.fail)
-      case NilPath() => Activity.value(Dtab.empty)
-      case NamerPath(namer, rest) => namer.enum(rest)
-      case _ =>
-        // Can't enumerate the 'inet' namespace
-        Activity.exception(new UnsupportedOperationException)
-    }
-
     override def toString = "Namer.global"
   }
 
@@ -216,53 +191,10 @@ object Namer  {
           }
         loop(trees)
     }
-
-  private def expandTree(namer: Namer, depth: Int)(tree: NameTree[Path]): Activity[Dtab] = {
-    if (depth > MaxDepth)
-      return Activity.exception(new IllegalArgumentException("Max recursion level reached."))
-
-    tree match {
-      case NameTree.Union(trees@_*) =>
-        if (trees.isEmpty) Activity.value(Dtab.empty) else {
-          val expanded = Activity.collect(trees map {
-            case Weighted(w, t) => expandTree(namer, depth+1)(t).map((w, _))
-          })
-          expanded map { dtabs => Dtab.union(dtabs:_*) }
-        }
-      case NameTree.Alt(trees@_*) =>
-        if (trees.isEmpty) Activity.value(Dtab.empty) else {
-          val expanded = Activity.collect(trees map expandTree(namer, depth+1))
-          expanded map { dtabs => Dtab.alt(dtabs:_*) }
-        }
-
-      case NameTree.Leaf(path) => expandPath(namer, depth+1)(path)
-      case NameTree.Fail => Activity.value(Dtab(Vector(Dentry(Path(), NameTree.Fail))))
-      case NameTree.Neg => Activity.value(Dtab(Vector(Dentry(Path(), NameTree.Neg))))
-      case NameTree.Empty => Activity.value(Dtab.empty)
-    }
-  }
-
-  private def expandPath(namer: Namer, depth: Int)(prefix: Path): Activity[Dtab] = {
-    if (depth > MaxDepth)
-      return Activity.exception(new IllegalArgumentException("Max recursion level reached."))
-
-    namer.enum(prefix) flatMap { dtab =>
-      val dtabs = Activity.collect(dtab map {
-        case Dentry(Path(), tree) => expandTree(namer, depth+1)(tree)
-        case dentry => Activity.value(Vector(dentry))
-      })
-
-      dtabs map { dtabs => Dtab(dtabs.flatten) }
-    }
-  }
-
-  private def expand(namer: Namer, prefix: Path): Activity[Dtab] =
-    expandPath(namer, 0)(prefix).map(_.simplified)
 }
 
 package namer {
   class global extends Namer {
     def lookup(path: Path) = Namer.global.lookup(path)
-    def enum(prefix: Path) = Namer.global.enum(prefix)
   }
 }
