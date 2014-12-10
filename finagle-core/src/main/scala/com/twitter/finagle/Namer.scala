@@ -27,14 +27,6 @@ trait Namer { self =>
   def enum(prefix: Path): Activity[Dtab]
 
   /**
-   * Compose this [[com.twitter.finagle.Namer Namer]] with `next`;
-   * the returned [[com.twitter.finagle.Namer Namer]]. The result is
-   * the [[com.twitter.finagle.NameTree Alt]]-tree of both lookups,
-   * with this namer's result first.
-   */
-  def orElse(next: Namer): Namer = Namer.OrElse(self, next)
-
-  /**
    * Bind the given tree with this namer. Bind recursively follows
    * paths by looking them up in this namer. A recursion depth of up
    * to 100 is allowed.
@@ -73,6 +65,13 @@ private case class FailingNamer(exc: Throwable) extends Namer {
 
 object Namer  {
   import NameTree._
+
+  private[finagle] val namerOfKind: (String => Namer) = Memoize { kind =>
+    try Class.forName(kind).newInstance().asInstanceOf[Namer] catch {
+      case NonFatal(exc) => FailingNamer(exc)
+    }
+  }
+
   /**
    * The global [[com.twitter.finagle.Namer Namer]]. It binds paths of the form
    *
@@ -94,20 +93,12 @@ object Namer  {
    * to force empty resolutions.
    */
   val global: Namer = new Namer {
-    val namerOfKind: (String => Namer) = Memoize {
-      kind =>
-        try Class.forName(kind).newInstance().asInstanceOf[Namer] catch {
-          case NonFatal(exc) => FailingNamer(exc)
-        }
-    }
-
     private[this] object InetPath {
       def unapply(path: Path): Option[InetSocketAddress] = path match {
         case Path.Utf8("$", "inet", IntegerString(port)) =>
           Some(new InetSocketAddress(port))
         case Path.Utf8("$", "inet", host, IntegerString(port)) =>
-          // Needs to be resolved before it can be used
-          Some(InetSocketAddress.createUnresolved(host, port))
+          Some(new InetSocketAddress(host, port))
         case _ => None
       }
     }
@@ -128,26 +119,15 @@ object Namer  {
 
     private[this] object NamerPath {
       def unapply(path: Path): Option[(Namer, Path)] = path match {
-        case Path.Utf8(("$" | "#"), kind, rest@_*) => Some((namerOfKind(kind), Path.Utf8(rest: _*)))
+        case Path.Utf8("$", kind, rest@_*) => Some((namerOfKind(kind), Path.Utf8(rest: _*)))
         case _ => None
       }
     }
 
     def lookup(path: Path): Activity[NameTree[Name]] = path match {
-      case InetPath(addr) =>
-        // resolve the InetSocketAddress only when it is observed
-        val boundVar =
-          Var.async[Addr](Addr.Pending) { u =>
-            val resolved =
-              if (addr.isUnresolved) new InetSocketAddress(addr.getHostString, addr.getPort)
-              else addr
-            u() = Addr.Bound(resolved)
-            Closable.nop
-          }
-
-        // Clients may depend on Name.Bound ids being Paths which resolve
-        // back to the same Name.Bound.
-        Activity.value(Leaf(Name.Bound(boundVar, path)))
+      // Clients may depend on Name.Bound ids being Paths which resolve
+      // back to the same Name.Bound.
+      case InetPath(addr) => Activity.value(Leaf(Name.Bound(Var.value(Addr.Bound(addr)), path)))
 
       case FailPath() => Activity.value(Fail)
       case NilPath() => Activity.value(Empty)
@@ -171,8 +151,8 @@ object Namer  {
    * Resolve a path to an address set (taking [[Dtab.local]] into account).
    */
   def resolve(path: Path): Var[Addr] = {
-    val namer = (Dtab.base ++ Dtab.local) orElse global
-    namer.bindAndEval(NameTree.Leaf(path))
+    val dtab = Dtab.base ++ Dtab.local
+    dtab.bindAndEval(NameTree.Leaf(path))
   }
 
   /**
@@ -278,16 +258,11 @@ object Namer  {
 
   private def expand(namer: Namer, prefix: Path): Activity[Dtab] =
     expandPath(namer, 0)(prefix).map(_.simplified)
+}
 
-  private case class OrElse(fst: Namer, snd: Namer) extends Namer {
-    def lookup(path: Path): Activity[NameTree[Name]] =
-      (fst.lookup(path) join snd.lookup(path)) map {
-        case (left, right) => NameTree.Alt(left, right)
-      }
-
-    def enum(prefix: Path): Activity[Dtab] =
-      (fst.enum(prefix) join snd.enum(prefix)) map {
-        case (left, right) => left.alt(right)
-      }
+package namer {
+  class global extends Namer {
+    def lookup(path: Path) = Namer.global.lookup(path)
+    def enum(prefix: Path) = Namer.global.enum(prefix)
   }
 }

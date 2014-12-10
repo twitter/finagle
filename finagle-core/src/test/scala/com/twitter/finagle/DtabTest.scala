@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.util.Activity
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -44,7 +45,8 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
     """))
 
     def assertEval(dtab: Dtab, path: Path, expected: Name.Bound*) {
-      (dtab orElse Namer.global).bind(NameTree.Leaf(path)).sample().eval match {
+      val dtab2 = Dtab.read("/=>/#/com.twitter.finagle.namer.global") ++ dtab
+      dtab2.bind(NameTree.Leaf(path)).sample().eval match {
         case Some(actual) => assert(actual.map(_.addr.sample) === expected.map(_.addr.sample).toSet)
         case _ => assert(false)
       }
@@ -103,13 +105,15 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
     assert(dtab.length === 2)
   }
 
-  test("/ prefix rewrites non-/#/ paths") {
-    assert(Dtab.read("/ => /foo").lookup(Path.read("/bar/baz/quux")).sample()
-      === NameTree.Leaf(Name.Path(Path.read("/foo/bar/baz/quux"))))
+  test("/# path loads Namer class, rewrite is ignored") {
+    assert(Dtab.read("/# => /foo").lookup(Path.read("/#/com.twitter.finagle.dtabtest.TestNamer")).sample()
+      === NameTree.Leaf(Name.Path(Path.read("/plugh/xyzzy"))))
   }
+}
 
-  test("/ prefix doesn't rewrite /#/ paths") {
-    assert(Dtab.read("/ => /foo").lookup(Path.read("/#/bar/baz/quux")).sample()
-      === NameTree.Neg)
+package dtabtest {
+  class TestNamer extends Namer {
+    def lookup(path: Path) = Activity.value(NameTree.Leaf(Name.Path(Path.read("/plugh/xyzzy"))))
+    def enum(prefix: Path) = throw new UnsupportedOperationException
   }
 }

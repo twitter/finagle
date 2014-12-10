@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.app.Flaggable
-import com.twitter.util.{Local, Var, Activity}
+import com.twitter.util.{Activity, Local, Var}
 import java.io.PrintWriter
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicReference
@@ -24,15 +24,16 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
   def length = dentries0.length
   override def isEmpty = length == 0
 
-  private def rewriteApplies(prefix: Path, path: Path) =
-    (prefix, path) match {
-      case (Path(), Path.Utf8("#", _*)) => false
-      case _ => path startsWith prefix
+  private[this] object NamerPath {
+    def unapply(path: Path): Option[(Namer, Path)] = path match {
+      case Path.Utf8("#", kind, rest@_*) => Some((Namer.namerOfKind(kind), Path.Utf8(rest: _*)))
+      case _ => None
     }
+  }
 
   private def lookup0(path: Path): NameTree[Path] = {
     val matches = dentries collect {
-      case Dentry(prefix, dst) if rewriteApplies(prefix, path) =>
+      case Dentry(prefix, dst) if path startsWith prefix =>
         val suff = path drop prefix.size
         dst map { pfx => pfx ++ suff }
     }
@@ -45,7 +46,10 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
   }
 
   def lookup(path: Path): Activity[NameTree[Name]] =
-    Activity.value(lookup0(path) map { path => Name(path) })
+    path match {
+      case NamerPath(namer, rest) => namer.lookup(rest)
+      case _ => Activity.value(lookup0(path) map { path => Name(path) })
+    }
 
   def enum(prefix: Path): Activity[Dtab] = {
     val dtab = Dtab(dentries0 collect {
@@ -220,7 +224,7 @@ object Dtab {
    * every request in this process. It is generally set at process
    * startup, and not changed thereafter.
    */
-  @volatile var base: Dtab = empty
+  @volatile var base: Dtab = Dtab.read("/=>/#/com.twitter.finagle.namer.global")
 
   /**
    * Java API for ``base_=``

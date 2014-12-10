@@ -3,13 +3,24 @@ package com.twitter.finagle
 import com.twitter.util.{Return, Throw, Activity, Witness, Try}
 import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.FunSuite
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class NamerTest extends FunSuite with AssertionsForJUnit {
   trait Ctx {
+    case class OrElse(fst: Namer, snd: Namer) extends Namer {
+      def lookup(path: Path): Activity[NameTree[Name]] =
+        (fst.lookup(path) join snd.lookup(path)) map {
+          case (left, right) => NameTree.Alt(left, right)
+        }
+      def enum(prefix: Path): Activity[Dtab] =
+        (fst.enum(prefix) join snd.enum(prefix)) map {
+          case (left, right) => left.alt(right)
+        }
+    }
+
     def ia(i: Int) = new InetSocketAddress(i)
 
     val exc = new Exception {}
@@ -49,7 +60,7 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
         def enum(prefix: Path): Activity[Dtab] = Activity.exception(new UnsupportedOperationException)
       }
 
-      val namer = pathNamer orElse Namer.global
+      val namer = OrElse(pathNamer, Namer.global)
       def lookup(path: Path) = namer.lookup(path)
       def enum(prefix: Path): Activity[Dtab] = namer.enum(prefix)
     }
@@ -153,11 +164,8 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
         === NameTree.Empty)
   }
 
-  test("Namer.global: /{$,#}/{className}") {
+  test("Namer.global: /$/{className}") {
     assert(Namer.global.lookup(Path.read("/$/com.twitter.finagle.TestNamer/foo")).sample()
-      === NameTree.Leaf(Name.Path(Path.Utf8("bar"))))
-
-    assert(Namer.global.lookup(Path.read("/#/com.twitter.finagle.TestNamer/foo")).sample()
       === NameTree.Leaf(Name.Path(Path.Utf8("bar"))))
   }
 
@@ -206,19 +214,6 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
   test("Namer.resolve") {
     assert(Namer.resolve("invalid").sample() match {
       case Addr.Failed(_: IllegalArgumentException) => true
-      case _ => false
-    })
-  }
-
-  // For this test to fail, you would need a tighter SecurityManager,
-  // and the code to not be lazy. If the code is not lazy with the
-  // existing manager, you just get a security warning printed by
-  // junit.
-  test("Namer.global: lazy /$/inet lookup should succeed") {
-    val pathName = "/$/inet/api.twitter.com/80"
-    val path = Path.read(pathName)
-    assert(Namer.global.lookup(path).sample() match {
-      case NameTree.Leaf(bound: Name.Bound) => bound.id == path
       case _ => false
     })
   }
