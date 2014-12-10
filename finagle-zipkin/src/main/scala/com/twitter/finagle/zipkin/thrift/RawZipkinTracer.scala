@@ -302,8 +302,7 @@ private[thrift] class RawZipkinTracer(
  */
 private class TracelessFilter[Req, Rep] extends SimpleFilter[Req, Rep] {
   def apply(request: Req, service: Service[Req, Rep]) = {
-    Trace.unwind {
-      Trace.clear()
+    Trace.letClear {
       service(request)
     }
   }

@@ -1,6 +1,8 @@
 package com.twitter.finagle.thrift
 
-import com.twitter.util.Local
+import com.twitter.finagle.context.Contexts
+import com.twitter.util.{Return, Throw}
+import com.twitter.io.Buf
 
 case class ClientId(name: String) {
   def toThrift: thrift.ClientId = new thrift.ClientId(name)
@@ -10,11 +12,7 @@ case class ClientId(name: String) {
    * ClientId.  The current ClientId before executing this will be restored
    * on completion.
    */
-  def asCurrent[T](f: => T): T = {
-    val old = ClientId.current
-    ClientId.set(Some(this))
-    try f finally { ClientId.set(old) }
-  }
+  def asCurrent[T](f: => T): T = ClientId.let(Some(this))(f)
 }
 
 /**
@@ -24,15 +22,33 @@ case class ClientId(name: String) {
  * to specify the client ID in their codec.
  */
 object ClientId {
-  private[this] val _current = new Local[ClientId]
-  def current: Option[ClientId] = _current()
+  // As a matter of legacy, we need to support the notion of
+  // an empty client id. Old version of contexts could serialize
+  // the absence of a client id with an empty buffer.
+  private[finagle] val clientIdCtx = new Contexts.broadcast.Key[Option[ClientId]] {
+    val marshalId = Buf.Utf8("com.twitter.finagle.thrift.ClientIdContext")
 
-  private[finagle] def set(clientId: Option[ClientId]) {
-    clientId match {
-      case Some(id) => _current.update(id)
-      case None => _current.clear()
+    def marshal(clientId: Option[ClientId]): Buf = clientId match {
+      case None => Buf.Empty
+      case Some(ClientId(name)) => Buf.Utf8(name)
+    }
+
+    def tryUnmarshal(buf: Buf) = buf match {
+      case buf if buf.isEmpty => Return.None
+      case Buf.Utf8(name) => Return(Some(ClientId(name)))
+      case invalid => Throw(new IllegalArgumentException("client id not a utf8 string"))
     }
   }
 
-  private[finagle] def clear() = _current.clear()
+  def current: Option[ClientId] = Contexts.broadcast.get(clientIdCtx).flatten
+
+  private[finagle] def let[R](clientId: ClientId)(f: => R): R =
+    Contexts.broadcast.let(clientIdCtx, Some(clientId))(f)
+
+  private[finagle] def let[R](clientId: Option[ClientId])(f: => R): R = {
+    clientId match {
+      case Some(id) => Contexts.broadcast.let(clientIdCtx, Some(id))(f)
+      case None => Contexts.broadcast.letClear(clientIdCtx)(f)
+    }
+  }
 }

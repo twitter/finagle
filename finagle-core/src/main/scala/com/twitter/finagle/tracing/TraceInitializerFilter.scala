@@ -1,6 +1,7 @@
 package com.twitter.finagle.tracing
 
 import com.twitter.finagle._
+import com.twitter.util.Future
 
 private[finagle] object TracingFilter {
   val role = Stack.Role("Tracer")
@@ -37,14 +38,12 @@ class TracingFilter[Req, Rep](tracer: Tracer, label: String) extends SimpleFilte
   @deprecated("Please add a label to the tracing filter constructor", "6.13.x")
   def this(tracer: Tracer) = this(tracer, "Unknown")
 
-  def apply(request: Req, service: Service[Req, Rep]) = {
-    Trace.unwind {
-      Trace.pushTracerAndSetNextId(tracer)
+  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] =
+    Trace.letTracerAndNextId(tracer) {
       Trace.recordBinary("finagle.version", Init.finagleVersion)
       Trace.recordServiceName(label)
       service(request)
     }
-  }
 }
 
 private[finagle] object TraceInitializerFilter {
@@ -95,13 +94,11 @@ private[finagle] object TraceInitializerFilter {
  * @param newId Set the next TraceId when the tracer is pushed (used for clients)
  */
 class TraceInitializerFilter[Req, Rep](tracer: Tracer, newId: Boolean) extends SimpleFilter[Req, Rep] {
-  def apply(request: Req, service: Service[Req, Rep]) = {
-    Trace.unwind {
-      if (newId) Trace.pushTracerAndSetNextId(tracer)
-      else Trace.pushTracer(tracer)
-      service(request)
-    }
-  }
+  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] =
+    if (newId)
+      Trace.letTracerAndNextId(tracer) { service(request) }
+    else
+      Trace.letTracer(tracer) { service(request) }
 }
 
 /**

@@ -14,11 +14,14 @@ package com.twitter.finagle.tracing
  */
 
 import com.twitter.finagle.Init
-import com.twitter.util.{Future, Duration, Time, Local, Stopwatch}
+import com.twitter.util.{Future, Duration, Time, Local, Stopwatch, Try, Throw, Return}
 import java.net.InetSocketAddress
 import scala.util.Random
 import com.twitter.app.GlobalFlag
-
+import com.twitter.finagle.context.Contexts
+import com.twitter.io.Buf
+import com.twitter.finagle.util.ByteArrays
+ 
 object debugTrace extends GlobalFlag(false, "Print all traces to the console.")
 
 /**
@@ -29,16 +32,72 @@ object debugTrace extends GlobalFlag(false, "Print all traces to the console.")
  * `TraceId`.
  * When reporting, we report to all tracers in the list of `Tracer`s.
  */
-object Trace  {
-  sealed trait TraceState
-  private case class State(id: Option[TraceId], terminal: Boolean, tracers: List[Tracer]) extends TraceState
-  private case object NoState extends TraceState
+object Trace {
+  private case class TraceCtx(terminal: Boolean, tracers: List[Tracer]) {
+    def withTracer(tracer: Tracer) = copy(tracers=tracer :: this.tracers)
+    def withTerminal(terminal: Boolean) = 
+      if (terminal == this.terminal) this
+      else copy(terminal=terminal)
+  }
+  
+  private object TraceCtx {
+    val empty = TraceCtx(false, Nil)
+  }
 
-  private[this] val rng = new Random
-  private[this] val defaultId = TraceId(None, None, SpanId(rng.nextLong()), None, Flags())
-  private[this] val local = new Local[State]
+  private val traceCtx = new Contexts.local.Key[TraceCtx]
 
-  @volatile private[this] var tracingEnabled = true
+  private val someTrue = Some(true)
+  
+  private[finagle] val idCtx = new Contexts.broadcast.Key[TraceId] {
+    private val local = new ThreadLocal[Array[Byte]] {
+      override def initialValue() = new Array[Byte](32)
+    }
+
+    val marshalId = Buf.Utf8("com.twitter.finagle.tracing.TraceContext")
+
+    def marshal(id: TraceId) =
+      Buf.ByteArray(TraceId.serialize(id))
+
+    /**
+     * The wire format is (big-endian):
+     *     ''spanId:8 parentId:8 traceId:8 flags:8''
+     */
+    def tryUnmarshal(body: Buf): Try[TraceId] = {
+      if (body.length != 32)
+        return Throw(new IllegalArgumentException("Expected 32 bytes"))
+
+      val bytes = local.get()
+      body.write(bytes, 0)
+
+      val span64 = ByteArrays.get64be(bytes, 0)
+      val parent64 = ByteArrays.get64be(bytes, 8)
+      val trace64 = ByteArrays.get64be(bytes, 16)
+      val flags64 = ByteArrays.get64be(bytes, 24)
+  
+      val flags = Flags(flags64)
+      val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
+        Some(flags.isFlagSet(Flags.Sampled))
+      } else None
+  
+      val traceId = TraceId(
+        if (trace64 == parent64) None else Some(SpanId(trace64)),
+        if (parent64 == span64) None else Some(SpanId(parent64)),
+        SpanId(span64),
+        sampled,
+        flags)
+      
+      Return(traceId)
+    }
+  }
+
+  private val rng = new Random
+  private val defaultId = TraceId(None, None, SpanId(rng.nextLong()), None, Flags())
+  @volatile private var tracingEnabled = true
+
+  private def ctx: TraceCtx = Contexts.local.get(traceCtx) match {
+    case Some(ctx) => ctx
+    case None => TraceCtx.empty
+  }
 
   /**
    * Get the current trace identifier.  If no identifiers have been
@@ -47,42 +106,24 @@ object Trace  {
   def id: TraceId =
     idOption match {
       case Some(id) => id
-      case None     => defaultId
+      case None => defaultId
     }
 
   /**
    * Get the current identifier, if it exists.
    */
   def idOption: Option[TraceId] =
-    local() match {
-      case Some(state) => state.id
-      case None        => None
-    }
+    Contexts.broadcast.get(idCtx)
 
   /**
    * @return true if the current trace id is terminal
    */
-  def isTerminal: Boolean =
-    local() match {
-      case Some(state) => state.terminal
-      case None        => false
-    }
+  def isTerminal: Boolean = ctx.terminal
 
   /**
    * @return the current list of tracers
    */
-  def tracers: List[Tracer] =
-    local() match {
-      case Some(state) => state.tracers
-      case None        => Nil
-    }
-
-  /**
-   * Completely clear the trace stack.
-   */
-  def clear() {
-    local.clear()
-  }
+  def tracers: List[Tracer] = ctx.tracers
 
   /**
    * Turn trace recording on.
@@ -95,8 +136,7 @@ object Trace  {
   def disable() = tracingEnabled = false
 
   /**
-   * Create a derivative TraceId. If there isn't a
-   * current ID, this becomes the root id.
+   * Create a derived id from the current TraceId.
    */
   def nextId: TraceId = {
     val currentId = idOption
@@ -107,102 +147,91 @@ object Trace  {
       currentId map { _.flags} getOrElse Flags())
   }
 
-  @deprecated("use setId() instead", "5.0.1")
-  def pushId(): TraceId = pushId(nextId)
-
-  @deprecated("use setId() instead", "5.0.1")
-  def pushId(traceId: TraceId): TraceId = setId(traceId)
-
   /**
-   * Set the current trace id
-   * Should be used with Trace.unwind for stack-like properties
+   * Run computation `f` with the given traceId.
    *
    * @param traceId  the TraceId to set as the current trace id
    * @param terminal true if traceId is a terminal id. Future calls to set() after a terminal
    *                 id is set will not set the traceId
    */
-  def setId(traceId: TraceId, terminal: Boolean = false): TraceId = {
-    if (!isTerminal)
-      local() match {
-        case None    => local() = State(Some(traceId), terminal, tracers)
-        case Some(s) => local() = s.copy(id = Some(traceId), terminal = terminal)
+  def letId[R](traceId: TraceId, terminal: Boolean = false)(f: => R): R = {
+    if (isTerminal) f
+    else if (terminal) {
+      Contexts.local.let(traceCtx, ctx.withTerminal(terminal)) {
+        Contexts.broadcast.let(idCtx, traceId)(f)
       }
-
-    traceId
+    } else Contexts.broadcast.let(idCtx, traceId)(f)
   }
-
-  def setTerminalId(traceId: TraceId): TraceId = setId(traceId, true)
-
+  
   /**
-   * Push the given tracer.
+   * A version of [com.twitter.finagle.tracing.Trace.letId] providing an
+   * optional ID. If the argument is None, the computation `f` is run without
+   * altering the trace environment.
    */
-  def pushTracer(tracer: Tracer) {
-    local() match {
-      case None    => local() = State(None, false, tracer :: Nil)
-      case Some(s) => local() = s.copy(tracers = tracer :: this.tracers)
+  def letIdOption[R](traceIdOpt: Option[TraceId])(f: => R): R =
+    traceIdOpt match {
+      case Some(traceId) => letId(traceId)(f)
+      case None => f
     }
-  }
 
   /**
-   * Push the given tracer, create a derivative TraceId and set it to be
-   * the current trace id.
+   * Run computation `f` with `tracer` added onto the tracer stack.
+   */
+  def letTracer[R](tracer: Tracer)(f: => R): R =
+    Contexts.local.let(traceCtx, ctx.withTracer(tracer))(f)
+
+  /**
+   * Run computation `f` with the given tracer, and a derivative TraceId.
    * The implementation of this function is more efficient than calling
-   * pushTracer, nextId and setId sequentially as it minimizes the number
-   * of reads and writes to `local`.
+   * letTracer, nextId and letId sequentially as it minimizes the number
+   * of request context changes.
    *
    * @param tracer the tracer to be pushed
    * @param terminal true if the next traceId is a terminal id. Future
    *                 attempts to set nextId will be ignored.
    */
-  def pushTracerAndSetNextId(tracer: Tracer, terminal: Boolean = false) {
-    val currentState = local()
-    val _nextId = nextId
-    val newState = currentState match {
-      case None => State(None, false, tracer :: Nil)
-      case Some(s) => s.copy(tracers = tracer :: s.tracers)
-    }
-    /* Only set traceId of the current State if terminal is not set */
-    if (!newState.terminal) {
-      _nextId.sampled match {
-        case None =>
-          local() = newState.copy(terminal = terminal,
-            id = Some(_nextId.copy(_sampled = tracer.sampleTrace(_nextId))))
-        case Some(_) => local() = newState.copy(terminal = terminal, id = Some(_nextId))
-      }
-    } else
-      local() = newState
-  }
-  
+  def letTracerAndNextId[R](tracer: Tracer, terminal: Boolean = false)(f: => R): R =
+    letTracerAndId(tracer, nextId, terminal)(f)
+
   /**
    * Run computation `f` with the given tracer and trace id.
    *
    * @param terminal true if the next traceId is a terminal id. Future
    *                 attempts to set nextId will be ignored.
    */
-  def letTracerAndId[R](tracer: Tracer, id: TraceId, terminal: Boolean = false)(f: => R): R = Trace.unwind {
-    setId(id, terminal)
-    pushTracer(tracer)
-    f
+  def letTracerAndId[R](tracer: Tracer, id: TraceId, terminal: Boolean = false)(f: => R): R = {
+    if (ctx.terminal) {
+      letTracer(tracer)(f)
+    } else {
+      val newCtx = ctx.withTracer(tracer).withTerminal(terminal)
+      val newId = id.sampled match {
+        case None => id.copy(_sampled = tracer.sampleTrace(id))
+        case Some(_) => id
+      }
+      Contexts.local.let(traceCtx, newCtx) {
+        Contexts.broadcast.let(idCtx, newId)(f)
+      }
+    }
   }
-
-  def state: TraceState =
-    local() match {
-      case Some(state) => state
-      case None        => NoState
+  
+  /**
+   * Run computation `f` with all tracing state (tracers, trace id)
+   * cleared.
+   */
+  def letClear[R](f: => R): R =
+    Contexts.local.letClear(traceCtx) {
+      Contexts.broadcast.letClear(idCtx) {
+        f
+      }
     }
 
-  def state_=(state: TraceState) = state match {
-    case NoState  => local.clear()
-    case s: State => local.set(Some(s))
-  }
-
   /**
-   * Convenience method for event loops in services.  Put your service handling
-   * code inside this to get proper tracing with all the correct fields filled in.
+   * Convenience method for event loops in services.  Put your
+   * service handling code inside this to get proper tracing with all
+   * the correct fields filled in.
    */
   def traceService[T](service: String, rpc: String, hostOpt: Option[InetSocketAddress]=None)(f: => T): T = {
-    unwind {
-      Trace.setId(Trace.nextId)
+    Trace.letId(Trace.nextId) {
       Trace.recordBinary("finagle.version", Init.finagleVersion)
       Trace.recordServiceName(service)
       Trace.recordRpc(rpc)
@@ -215,32 +244,19 @@ object Trace  {
   }
 
   /**
-   * Invoke `f` and then unwind the stack to the starting point.
-   */
-  def unwind[T](f: => T): T = {
-    val saved = local()
-    try f finally local.set(saved)
-  }
-
-  /**
    * Returns true if tracing is enabled with a good tracer pushed and the current
    * trace is sampled
    */
-  def isActivelyTracing: Boolean = {
-    if (!tracingEnabled) false else { // short circuit
-      local() match {
-        case Some(State(Some(TraceId(_, _, _, Some(false), flags)), _, _)) if !flags.isDebug => false
-        case None => false
-        case Some(State(_, _, Nil)) => false
-        case Some(State(_, _, List(NullTracer))) => false
-        case Some(State(Some(TraceId(_, _, _, _, Flags(Flags.Debug))), _, _)) => true
-        case _ => true // backwards compat: default to trace on incomplete data
-      }
-    }
-  }
+  def isActivelyTracing: Boolean = 
+    tracingEnabled && (id match {
+        case TraceId(_, _, _, Some(false), flags) if !flags.isDebug => false
+        case TraceId(_, _, _, _, Flags(Flags.Debug)) => true
+        case _ =>
+          tracers.nonEmpty && (tracers.size > 1 || tracers.head != NullTracer)
+      })
 
   /**
-   * record a raw record without checking if it's sampled/enabled/etc
+   * Record a raw record without checking if it's sampled/enabled/etc.
    */
   private[this] def uncheckedRecord(rec: Record) {
     tracers.distinct.foreach { t: Tracer => t.record(rec) }

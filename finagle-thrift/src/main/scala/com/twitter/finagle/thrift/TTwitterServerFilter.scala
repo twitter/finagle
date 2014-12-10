@@ -1,8 +1,9 @@
 package com.twitter.finagle.thrift
 
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.tracing.{Trace, TraceId, Annotation, SpanId, Flags}
 import com.twitter.finagle.util.ByteArrays
-import com.twitter.finagle.{Service, SimpleFilter, Path, NameTree, Dtab, Dentry, Context}
+import com.twitter.finagle.{Service, SimpleFilter, Path, NameTree, Dtab, Dentry}
 import com.twitter.io.Buf
 import com.twitter.util.Future
 import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocolFactory}
@@ -53,46 +54,51 @@ private[finagle] class TTwitterServerFilter(
         sampled,
         if (header.isSetFlags) Flags(header.getFlags) else Flags()
       )
-
-      Trace.setId(traceId)
-
-      // Destination is ignored for now,
-      // as it really requires a dispatcher.
-      if (header.getDelegationsSize() > 0) {
-        val ds = header.getDelegationsIterator()
-        while (ds.hasNext()) {
-          val d = ds.next()
-          if (d.src != null && d.dst != null) {
-            val src = Path.read(d.src)
-            val dst = NameTree.read(d.dst)
-            Dtab.local += Dentry(src, dst)
+      Trace.letId(traceId) {
+        // Destination is ignored for now,
+        // as it really requires a dispatcher.
+        if (header.getDelegationsSize() > 0) {
+          val ds = header.getDelegationsIterator()
+          while (ds.hasNext()) {
+            val d = ds.next()
+            if (d.src != null && d.dst != null) {
+              val src = Path.read(d.src)
+              val dst = NameTree.read(d.dst)
+              Dtab.local += Dentry(src, dst)
+            }
           }
         }
-      }
 
-      val msg = new InputBuffer(request_, protocolFactory)().readMessageBegin()
-      Trace.recordRpc(msg.name)
-
-      if (header.contexts != null) {
-        val iter = header.contexts.iterator()
-        while (iter.hasNext) {
-          val c = iter.next()
-          Context.handle(Buf.ByteArray(c.getKey()), Buf.ByteArray(c.getValue()))
+        var env = Contexts.broadcast.env
+        if (header.contexts != null) {
+          val iter = header.contexts.iterator()
+          while (iter.hasNext) {
+            val c = iter.next()
+            env = Contexts.broadcast.Translucent(env, Buf.ByteArray(c.getKey()), Buf.ByteArray(c.getValue()))
+          }
         }
-      }
 
-      // If `header.client_id` field is non-null, then allow it to take
-      // precedence over the id provided by ClientIdContext.
-      extractClientId(header) foreach { clientId => ClientId.set(Some(clientId)) }
-      Trace.recordBinary("srv/thrift/clientId", ClientId.current.getOrElse("None"))
+        Trace.recordRpc({
+          val msg = new InputBuffer(request_, protocolFactory)().readMessageBegin()
+          msg.name
+        })
 
-      service(request_) map {
-        case response if response.isEmpty => response
-        case response =>
-          val responseHeader = new thrift.ResponseHeader
-          ByteArrays.concat(
-            OutputBuffer.messageToArray(responseHeader, protocolFactory),
-            response)
+        // If `header.client_id` field is non-null, then allow it to take
+        // precedence over the id provided by ClientIdContext.
+        ClientId.let(extractClientId(header)) {
+          Trace.recordBinary("srv/thrift/clientId", ClientId.current.getOrElse("None"))
+  
+          Contexts.broadcast.letEnv(env) {
+            service(request_) map {
+              case response if response.isEmpty => response
+              case response =>
+                val responseHeader = new thrift.ResponseHeader
+                ByteArrays.concat(
+                  OutputBuffer.messageToArray(responseHeader, protocolFactory),
+                  response)
+            }
+          }
+        }
       }
     } else {
       val buffer = new InputBuffer(request, protocolFactory)

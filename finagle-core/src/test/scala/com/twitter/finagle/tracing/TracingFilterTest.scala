@@ -7,7 +7,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.{spy, verify, atLeastOnce}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
 import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
@@ -19,12 +19,13 @@ class TracingFilterTest
 
   var tracer: Tracer = _
   var captor: ArgumentCaptor[Record] = _
-  before {
-    tracer = spy(new NullTracer)
-    captor = ArgumentCaptor.forClass(classOf[Record])
-
-    Trace.clear()
-    Trace.pushTracer(tracer)
+  
+  override def test(testName: String, testTags: Tag*)(f: => Unit) {
+    super.test(testName, testTags:_*) {
+      tracer = spy(new NullTracer)
+      captor = ArgumentCaptor.forClass(classOf[Record])
+      Trace.letTracer(tracer) { f }
+    }
   }
 
   def record(filter: Filter[Int, Int, Int, Int]): Seq[Record] = {

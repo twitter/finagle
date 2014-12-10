@@ -2,12 +2,14 @@ package com.twitter.finagle.thriftmux
 
 import com.twitter.finagle.{Path, Failure, mux, Dtab, ThriftMuxUtil}
 import com.twitter.finagle.mux.{BadMessageException, Message}
+import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.thrift.thrift.{
-  ResponseHeader, RequestContext, RequestHeader, UpgradeReply}
-import com.twitter.finagle.tracing.{Flags, SpanId, TraceContext, TraceId}
+  RequestContext, RequestHeader, ResponseHeader, UpgradeReply}
+import com.twitter.finagle.tracing.{Trace, Flags, SpanId, TraceId}
+import com.twitter.finagle.{Failure, mux, Dtab, ThriftMuxUtil}
 import com.twitter.logging.Level
 import com.twitter.util.{Try, Return, Throw, NonFatal}
 import java.util.concurrent.LinkedBlockingDeque
@@ -60,10 +62,20 @@ private[finagle] class PipelineFactory(
         if (header.isSetFlags) Flags(header.getFlags) else Flags()
       )
 
-      val clientIdOpt = Option(header.client_id) map { _.name }
       val contextBuf = ArrayBuffer.empty[(ChannelBuffer, ChannelBuffer)]
-      contextBuf += TraceContext.newKVTuple(traceId)
-      contextBuf += ClientIdContext.newKVTuple(clientIdOpt)
+
+      contextBuf += (
+        BufChannelBuffer(Trace.idCtx.marshalId) -> 
+        BufChannelBuffer(Trace.idCtx.marshal(traceId)))
+
+      if (header.client_id != null) {
+        val clientIdBuf = 
+          ClientId.clientIdCtx.marshal(Some(ClientId(header.client_id.name)))
+        contextBuf += (
+          BufChannelBuffer(ClientId.clientIdCtx.marshalId) ->
+          BufChannelBuffer(clientIdBuf))
+      }
+
       if (header.contexts != null) {
         val iter = header.contexts.iterator()
         while (iter.hasNext) {

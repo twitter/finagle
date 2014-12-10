@@ -5,6 +5,7 @@ package com.twitter.finagle.tracing
  */
 
 import com.twitter.finagle.util.LoadService
+import com.twitter.util.Future
 import com.twitter.util.{Duration, Time, TimeFormat}
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
@@ -138,14 +139,22 @@ object DefaultTracer extends Tracer with Proxy {
   def sampleTrace(traceId: TraceId) = self.sampleTrace(traceId)
 }
 
+/**
+ * A tracer that buffers each record in memory. These may then be
+ * iterated over.
+ */
 class BufferingTracer extends Tracer
   with Iterable[Record]
 {
-  private[this] val buf = new ArrayBuffer[Record]
+  private[this] var buf: List[Record] = Nil
 
-  def record(record: Record) { buf += record }
-  def iterator = buf.iterator
-  def clear() = buf.clear()
+  def record(record: Record) = synchronized {
+    buf ::= record
+  }
+
+  def iterator = synchronized(buf).reverse.iterator
+
+  def clear() = synchronized { buf = Nil }
 
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
 }

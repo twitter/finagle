@@ -103,14 +103,14 @@ object Client {
 
     val client = new Tracing1.FinagledClient(
       transport, new TBinaryProtocol.Factory())
-
-    Trace.pushTracer(ConsoleTracer)
-    Trace.record("about to start issuing the root request..")
-
-    println("& my trace id is %s".format(Trace.id))
-    val result = client.computeSomething()
-    result foreach { result =>
-      println("result", result)
+    
+    Trace.letTracer(ConsoleTracer) {
+      Trace.record("about to start issuing the root request..")
+      println("& my trace id is %s".format(Trace.id))
+      val result = client.computeSomething()
+      result foreach { result =>
+        println("result", result)
+      }
     }
   }
 }

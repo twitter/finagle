@@ -133,17 +133,11 @@ object ThriftMux
             // We do a dance here to ensure that the proper ClientId is set when
             // `service` is applied because Mux relies on
             // com.twitter.finagle.thrift.ClientIdContext to propagate ClientIds.
-            val save = Local.save()
-            try {
-              val Thrift.param.ClientId(clientId) = params[Thrift.param.ClientId]
-              ClientId.set(clientId)
+            val Thrift.param.ClientId(clientId) = params[Thrift.param.ClientId]
+            ClientId.let(clientId) {
               // TODO set the Path here.
               val muxreq = mux.Request(Path.empty, Buf.ByteArray.Owned(req.message))
-              service(muxreq) map { rep =>
-                Buf.ByteArray.Owned.extract(rep.body)
-              }
-            } finally {
-              Local.restore(save)
+              service(muxreq).map(rep => Buf.ByteArray.Owned.extract(rep.body))
             }
           }
 

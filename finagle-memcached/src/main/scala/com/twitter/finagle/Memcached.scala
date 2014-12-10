@@ -32,31 +32,31 @@ private[finagle] object MemcachedTraceInitializer {
   }
 
   class Filter(tracer: Tracer) extends SimpleFilter[Command, Response] {
-    def apply(command: Command, service: Service[Command, Response]): Future[Response] = Trace.unwind {
-      Trace.pushTracerAndSetNextId(tracer)
-      Trace.recordRpc(command.name)
-
-      val response = service(command)
-      command match {
-        case command: RetrievalCommand if Trace.isActivelyTracing =>
-          response onSuccess {
-            case Values(vals) =>
-              val cmd = command.asInstanceOf[RetrievalCommand]
-              val misses = mutable.Set.empty[String]
-              cmd.keys foreach { key => misses += key.toString(Utf8) }
-              vals foreach { value =>
-                val key = value.key.toString(Utf8)
-                Trace.recordBinary(key, "Hit")
-                misses.remove(key)
-              }
-              misses foreach { Trace.recordBinary(_, "Miss") }
-            case _ =>
-          }
-        case _ =>
+    def apply(command: Command, service: Service[Command, Response]): Future[Response] =
+      Trace.letTracerAndNextId(tracer) {
+        Trace.recordRpc(command.name)
+  
+        val response = service(command)
+        command match {
+          case command: RetrievalCommand if Trace.isActivelyTracing =>
+            response onSuccess {
+              case Values(vals) =>
+                val cmd = command.asInstanceOf[RetrievalCommand]
+                val misses = mutable.Set.empty[String]
+                cmd.keys foreach { key => misses += key.toString(Utf8) }
+                vals foreach { value =>
+                  val key = value.key.toString(Utf8)
+                  Trace.recordBinary(key, "Hit")
+                  misses.remove(key)
+                }
+                misses foreach { Trace.recordBinary(_, "Miss") }
+              case _ =>
+            }
+          case _ =>
+        }
+        response
       }
-      response
     }
-  }
 }
 
 trait MemcachedRichClient { self: Client[Command, Response] =>

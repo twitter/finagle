@@ -12,40 +12,40 @@ import com.twitter.finagle.thriftmux.thriftscala.{TestService$FinagleClient, Tes
 import com.twitter.finagle.tracing.Annotation.{ServerRecv, ClientSend}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.context.Contexts
 import com.twitter.io.Buf
-import com.twitter.util.{Closable, Await, Future, Promise}
+import com.twitter.util.{Closable, Await, Future, Promise, Return}
 import java.net.{InetAddress, SocketAddress, InetSocketAddress}
 import org.apache.thrift.protocol._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 
-// Used for testing ThriftMux's Context functionality. Duplicated from the
-// finagle-mux package as a workaround because you can't easily depend on a
-// test package in Maven.
-object MuxContext {
-  var handled = Seq[Buf]()
-  var buf: Buf = Buf.Empty
-}
-
-class MuxContext extends ContextHandler {
-  import MuxContext._
-
-  val key = Buf.Utf8("com.twitter.finagle.thriftmux.MuxContext")
-
-  def handle(body: Buf) {
-    handled :+= body
-  }
-  def emit(): Option[Buf] = Some(MuxContext.buf)
-}
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite with AssertionsForJUnit {
+  // Used for testing ThriftMux's Context functionality. Duplicated from the
+  // finagle-mux package as a workaround because you can't easily depend on a
+  // test package in Maven.
+  case class TestContext(buf: Buf)
+
+  val testContext = new Contexts.broadcast.Key[TestContext] {
+    val marshalId = Buf.Utf8("com.twitter.finagle.mux.MuxContext")
+    def marshal(tc: TestContext) = tc.buf
+    def tryUnmarshal(buf: Buf) = Return(TestContext(buf))
+  }
+
   trait ThriftMuxTestServer {
     val server = ThriftMux.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.FutureIface {
-        def query(x: String) = Future.value(x+x)
+        def query(x: String) = 
+          Contexts.broadcast.get(testContext) match {
+            case None => Future.value(x+x)
+            case Some(TestContext(buf)) =>
+              val Buf.Utf8(str) = buf
+              Future.value(str)
+          }
       })
   }
 
@@ -60,15 +60,11 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     new ThriftMuxTestServer {
       val client = ThriftMux.newIface[TestService.FutureIface](server)
 
-      MuxContext.handled = Seq.empty
-      MuxContext.buf = Buf.ByteArray(1,2,3,4)
       assert(Await.result(client.query("ok")) === "okok")
-      assert(MuxContext.handled === Seq(Buf.ByteArray(1,2,3,4)))
-
-      MuxContext.buf = Buf.ByteArray(9,8,7,6)
-      assert(Await.result(client.query("ok")) === "okok")
-      assert(MuxContext.handled === Seq(
-        Buf.ByteArray(1,2,3,4), Buf.ByteArray(9,8,7,6)))
+      
+      Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
+        assert(Await.result(client.query("ok")) === "hello context world")
+      }
     }
   }
 
@@ -183,16 +179,12 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
   test("thriftmux server + Finagle thrift client: propagate Contexts") {
     new ThriftMuxTestServer {
       val client = Thrift.newIface[TestService.FutureIface](server)
-
-      MuxContext.handled = Seq.empty
-      MuxContext.buf = Buf.ByteArray(1,2,3,4)
+      
       assert(Await.result(client.query("ok")) === "okok")
-      assert(MuxContext.handled === Seq(Buf.ByteArray(1,2,3,4)))
-
-      MuxContext.buf = Buf.ByteArray(9,8,7,6)
-      assert(Await.result(client.query("ok")) === "okok")
-      assert(MuxContext.handled === Seq(
-        Buf.ByteArray(1,2,3,4), Buf.ByteArray(9,8,7,6)))
+      
+      Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
+        assert(Await.result(client.query("ok")) === "hello context world")
+      }
     }
   }
 

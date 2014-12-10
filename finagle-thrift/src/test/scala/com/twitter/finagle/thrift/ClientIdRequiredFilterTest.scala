@@ -36,10 +36,11 @@ class ClientIdRequiredFilterTest extends FunSuite with MockitoSugar {
     val c = ClientIdRequiredFilterContext(mock[Service[String,String]])
     import c._
 
-    ClientId.clear()
-    intercept[NoClientIdSpecifiedException]{
-      Await.result(service(request))
+    ClientId.let(None) {
+      intercept[NoClientIdSpecifiedException]{
+        Await.result(service(request))
+      }
+      verify(underlying, times(0)).apply(Matchers.anyString())
     }
-    verify(underlying, times(0)).apply(Matchers.anyString())
   }
 }

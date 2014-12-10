@@ -1,12 +1,13 @@
 package com.twitter.finagle.mux
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.mux.lease.Acting
 import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Context, Dtab, Service, WriteException, NoStacktrace, Status}
+import com.twitter.finagle.{Dtab, Service, WriteException, NoStacktrace, Status}
 import com.twitter.util.{Future, Promise, Time, Duration}
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.logging.Logger
@@ -216,7 +217,7 @@ private[finagle] class ClientDispatcher (
       if (couldDispatch == Cap.No)
         Treq(tag, Some(Trace.id), BufChannelBuffer(req.body))
       else {
-        val contexts = Context.emit() map { case (k, v) =>
+        val contexts = Contexts.broadcast.marshal() map { case (k, v) =>
           (BufChannelBuffer(k), BufChannelBuffer(v))
         }
         Tdispatch(tag, contexts.toSeq, req.destination, Dtab.local,
