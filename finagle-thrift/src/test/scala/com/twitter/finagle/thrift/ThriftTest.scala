@@ -155,8 +155,7 @@ trait ThriftTest { self: FunSuite =>
     DefaultTracer.self = tracer
     val server = newServer(proto)
     val client = newClient(proto, server.boundAddr, testDef.clientIdOpt)
-    Trace.unwind {
-      Trace.clear()
+    Trace.letClear {
       try testDef.testFunction(client.client, tracer) finally {
         DefaultTracer.self = previous
         server.close()

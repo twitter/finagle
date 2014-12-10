@@ -32,30 +32,29 @@ private[finagle] object MemcachedxTraceInitializer {
   }
 
   class Filter(tracer: Tracer) extends SimpleFilter[Command, Response] {
-    def apply(command: Command, service: Service[Command, Response]): Future[Response] = Trace.unwind {
-      Trace.pushTracerAndSetNextId(tracer)
-      Trace.recordRpc(command.name)
-
-      val response = service(command)
-      command match {
-        case command: RetrievalCommand if Trace.isActivelyTracing =>
-          response onSuccess {
-            case Values(vals) =>
-              val cmd = command.asInstanceOf[RetrievalCommand]
-              val misses = mutable.Set.empty[String]
-              cmd.keys foreach { case Buf.Utf8(key) => misses += key }
-              vals foreach { value =>
-                val Buf.Utf8(key) = value.key
-                Trace.recordBinary(key, "Hit")
-                misses.remove(key)
-              }
-              misses foreach { Trace.recordBinary(_, "Miss") }
-            case _ =>
-          }
-        case _ =>
+    def apply(command: Command, service: Service[Command, Response]): Future[Response] = 
+      Trace.letTracerAndNextId(tracer) {
+        val response = service(command)
+        Trace.recordRpc(command.name)
+        command match {
+          case command: RetrievalCommand if Trace.isActivelyTracing =>
+            response onSuccess {
+              case Values(vals) =>
+                val cmd = command.asInstanceOf[RetrievalCommand]
+                val misses = mutable.Set.empty[String]
+                cmd.keys foreach { case Buf.Utf8(key) => misses += key }
+                vals foreach { value =>
+                  val Buf.Utf8(key) = value.key
+                  Trace.recordBinary(key, "Hit")
+                  misses.remove(key)
+                }
+                misses foreach { Trace.recordBinary(_, "Miss") }
+              case _ =>
+            }
+          case _ =>
+        }
+        response
       }
-      response
-    }
   }
 }
 

@@ -338,8 +338,6 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
 
   def trace(name: String)(connect: HttpService => HttpService) {
     test(name + ": trace") {
-      Trace.clear()
-
       var (outerTrace, outerSpan) = ("", "")
 
       val inner = connect(new HttpService {

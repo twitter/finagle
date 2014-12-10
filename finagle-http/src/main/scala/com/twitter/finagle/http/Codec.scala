@@ -190,11 +190,11 @@ object HttpTracing {
 private object TraceInfo {
   import HttpTracing._
 
-  def setTraceIdFromRequestHeaders(request: HttpRequest): Unit = {
-    if (Header.Required.forall { request.headers.contains(_) }) {
+  def letTraceIdFromRequestHeaders[R](request: HttpRequest)(f: => R): R = {
+    val id = if (Header.Required.forall { request.headers.contains(_) }) {
       val spanId = SpanId.fromString(request.headers.get(Header.SpanId))
 
-      spanId foreach { sid =>
+      spanId map { sid =>
         val traceId = SpanId.fromString(request.headers.get(Header.TraceId))
         val parentSpanId = SpanId.fromString(request.headers.get(Header.ParentSpanId))
 
@@ -203,21 +203,30 @@ private object TraceInfo {
         }
 
         val flags = getFlags(request)
-        Trace.setId(TraceId(traceId, parentSpanId, sid, sampled, flags))
+        TraceId(traceId, parentSpanId, sid, sampled, flags)
       }
     } else if (request.headers.contains(Header.Flags)) {
       // even if there are no id headers we want to get the debug flag
       // this is to allow developers to just set the debug flag to ensure their
       // trace is collected
-      Trace.setId(Trace.nextId.copy(flags = getFlags(request)))
+      Some(Trace.nextId.copy(flags = getFlags(request)))
     } else {
-      Trace.setId(Trace.nextId)
+      Some(Trace.nextId)
     }
 
     // remove so the header is not visible to users
     Header.All foreach { request.headers.remove(_) }
 
+    id match {
+      case Some(id) =>
+        Trace.letId(id) {
+          traceRpc(request)
+          f
+        }
+      case None =>
     traceRpc(request)
+        f
+  }
   }
 
   def setClientRequestHeaders(request: HttpRequest): Unit = {
@@ -263,10 +272,8 @@ private[finagle] class HttpServerTraceInitializer[Req <: HttpRequest, Rep]
   def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
     val param.Tracer(tracer) = _tracer
     val traceInitializer = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
-      Trace.unwind {
-        Trace.pushTracer(tracer)
-        TraceInfo.setTraceIdFromRequestHeaders(req)
-        svc(req)
+      Trace.letTracer(tracer) {
+        TraceInfo.letTraceIdFromRequestHeaders(req) { svc(req) }
       }
     }
     traceInitializer andThen next
@@ -280,8 +287,7 @@ private[finagle] class HttpClientTraceInitializer[Req <: HttpRequest, Rep]
   def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
     val param.Tracer(tracer) = _tracer
     val traceInitializer = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
-      Trace.unwind {
-        Trace.pushTracerAndSetNextId(tracer)
+      Trace.letTracerAndNextId(tracer) {
         TraceInfo.setClientRequestHeaders(req)
         svc(req)
       }
@@ -298,7 +304,7 @@ private[finagle] class HttpClientTracingFilter[Req <: HttpRequest, Res](serviceN
 {
   import HttpTracing._
 
-  def apply(request: Req, service: Service[Req, Res]) = Trace.unwind {
+  def apply(request: Req, service: Service[Req, Res]) = {
     TraceInfo.setClientRequestHeaders(request)
     service(request)
   }
@@ -311,8 +317,8 @@ private[finagle] class HttpClientTracingFilter[Req <: HttpRequest, Res](serviceN
 private[finagle] class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String)
   extends SimpleFilter[Req, Res]
 {
-  def apply(request: Req, service: Service[Req, Res]) = Trace.unwind {
-    TraceInfo.setTraceIdFromRequestHeaders(request)
+  def apply(request: Req, service: Service[Req, Res]) = 
+    TraceInfo.letTraceIdFromRequestHeaders(request) {
     service(request)
   }
 }

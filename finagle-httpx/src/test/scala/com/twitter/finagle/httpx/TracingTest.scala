@@ -15,8 +15,7 @@ class TracingTest extends FunSuite {
   lazy val traceId = TraceId(Some(SpanId(1)), None, SpanId(2), Some(true), flags)
 
   test("set header") {
-    Trace.unwind {
-      Trace.setId(traceId)
+    Trace.letId(traceId) {
 
       val dummyService = new Service[Request, Response] {
         def apply(request: Request) = {

@@ -1,6 +1,8 @@
 package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
+import com.twitter.finagle.Service
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
 import com.twitter.finagle.tracing._
@@ -8,9 +10,9 @@ import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing.{BufferingTracer, Flags, Trace}
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.finagle.{Path, Service, ContextHandler}
+import com.twitter.finagle.{Path, Service}
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
+import com.twitter.util.{Await, Future, Promise, Return, Throw, Time, TimeControl}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
@@ -19,29 +21,22 @@ import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.{OneInstancePerTest, FunSuite, Tag}
 
-object MuxContext {
-  var handled = Seq[Buf]()
-  var buf: Buf = Buf.Empty
-}
-
-class MuxContext extends ContextHandler {
-  import MuxContext._
-
-  val key = Buf.Utf8("com.twitter.finagle.mux.MuxContext")
-
-  def handle(body: Buf) {
-    handled :+= body
+private object TestContext {
+  val testContext = new Contexts.broadcast.Key[Buf] {
+    val marshalId = Buf.Utf8("com.twitter.finagle.mux.MuxContext")
+    def marshal(buf: Buf) = buf
+    def tryUnmarshal(buf: Buf) = Return(buf)
   }
-  def emit(): Option[Buf] = Some(MuxContext.buf)
 }
 
 private[mux] class ClientServerTest(canDispatch: Boolean)
-  extends FunSuite with OneInstancePerTest with MockitoSugar with AssertionsForJUnit
-{
+  extends FunSuite with OneInstancePerTest with MockitoSugar with AssertionsForJUnit {
+  import TestContext._
+
   val tracer = new BufferingTracer
-  Trace.pushTracer(tracer)  /* For the client */
+
   val clientToServer = new AsyncQueue[ChannelBuffer]
   val serverToClient = new AsyncQueue[ChannelBuffer]
   val serverTransport =
@@ -50,15 +45,16 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     new QueueTransport(writeq=clientToServer, readq=serverToClient)
   val service = mock[Service[Request, Response]]
   val client = new ClientDispatcher("test", clientTransport, NullStatsReceiver)
-  val server = new ServerDispatcher(serverTransport, service, canDispatch, Lessor.nil, NullTracer) {
-    private val saveReceive = receive
-    receive = { msg =>
-      Trace.unwind {
-        Trace.pushTracer(tracer)
-        saveReceive(msg)
+  val server = new ServerDispatcher(
+    serverTransport, service, canDispatch, 
+    Lessor.nil, tracer)
+  
+  // Push a tracer for the client.
+  override def test(testName: String, testTags: Tag*)(f: => Unit) {
+    super.test(testName, testTags:_*) {
+      Trace.letTracer(tracer)(f)      
       }
     }
-  }
 
   def buf(b: Byte*) = Buf.ByteArray(b:_*)
 
@@ -148,8 +144,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     )
 
     val id = Trace.nextId
-    val resp = Trace.unwind {
-      Trace.setId(id)
+    val resp = Trace.letId(id) {
       client(Request(Path.empty, buf(1)))
     }
     assert(resp.poll.isDefined)
@@ -170,8 +165,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
 
     val flags = Flags().setDebug
     val id = Trace.nextId.copy(flags=flags)
-    val resp = Trace.unwind {
-      Trace.setId(id)
+    val resp = Trace.letId(id) {
       val p = client(Request(Path.empty, buf(1)))
       p
     }
@@ -197,26 +191,29 @@ class ClientServerTestNoDispatch extends ClientServerTest(false) {
 
 @RunWith(classOf[JUnitRunner])
 class ClientServerTestDispatch extends ClientServerTest(true) {
+  import TestContext._
+
   // Note: We test trace propagation here, too,
   // since it's a default request context.
 
   test("Transmits request contexts") {
-    when(service(any[Request])).thenReturn(Future.value(Response.empty))
+    when(service(any[Request])).thenAnswer(
+      new Answer[Future[Response]] {
+        def answer(invocation: InvocationOnMock) =
+          Future.value(Response(
+            Contexts.broadcast.get(testContext)
+            .getOrElse(Buf.Empty)))
+      }
+    )
 
-    MuxContext.handled = Seq.empty
-    MuxContext.buf = Buf.ByteArray(1,2,3,4)
-    var f = client(Request.empty)
-    assert(f.isDefined)
-    Await.result(f)
-    assert(MuxContext.handled === Seq(Buf.ByteArray(1,2,3,4)))
+    // No context set
+    assert(Await.result(client(Request(Path.empty, Buf.Empty))).body.isEmpty)
 
-    MuxContext.buf = Buf.ByteArray(9,8,7,6)
-    f = client(Request.empty)
-    assert(f.isDefined)
-    Await.result(f)
+    val f = Contexts.broadcast.let(testContext, Buf.Utf8("My context!")) {
+      client(Request.empty)
+    }
 
-    assert(MuxContext.handled === Seq(
-      Buf.ByteArray(1,2,3,4), Buf.ByteArray(9,8,7,6)))
+    assert(Await.result(f).body === Buf.Utf8("My context!"))
   }
 
   test("dispatches destinations") {

@@ -1,8 +1,9 @@
 package com.twitter.finagle.thrift
 
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.util.ByteArrays
-import com.twitter.finagle.{Service, SimpleFilter, Context, Dtab, Dentry}
+import com.twitter.finagle.{Service, SimpleFilter, Dtab, Dentry}
 import com.twitter.io.Buf
 import com.twitter.util.Future
 import java.util.ArrayList
@@ -39,7 +40,6 @@ private[thrift] class TTwitterClientFilter(
     clientId match {
       case Some(clientId) =>
         header.setClient_id(clientId.toThrift)
-
       case None =>
     }
 
@@ -53,10 +53,9 @@ private[thrift] class TTwitterClientFilter(
       case None => header.unsetSampled()
     }
 
-    val contexts = Context.emit().iterator
+    val contexts = Contexts.broadcast.marshal().iterator
+    val ctxs = new ArrayList[thrift.RequestContext]()
     if (contexts.hasNext) {
-      val ctxs = new ArrayList[thrift.RequestContext]()
-      var i = 0
       while (contexts.hasNext) {
         val (k, buf) = contexts.next()
 
@@ -65,25 +64,25 @@ private[thrift] class TTwitterClientFilter(
         // calls into here. This should never happen in practice;
         // however if the ClientIdContext handler failed to load for
         // some reason, a pass-through context would be used instead.
-        if (k != ClientIdContext.Key) {
-          val kbb = Buf.ByteBuffer.Owned.extract(k)
-          val vbb = Buf.ByteBuffer.Owned.extract(buf)
-          ctxs.add(i, new thrift.RequestContext(kbb, vbb))
-          i += 1
+        if (k != ClientId.clientIdCtx.marshalId) {
+          val c = new thrift.RequestContext(
+            Buf.ByteBuffer.Owned.extract(k), Buf.ByteBuffer.Owned.extract(buf))
+          ctxs.add(c)
         }
       }
-
-      clientIdBuf match {
-        case Some(buf) =>
-          val kbb = Buf.ByteBuffer.Owned.extract(ClientIdContext.Key)
-          val vbb = Buf.ByteBuffer.Owned.extract(buf)
-          ctxs.add(i, new thrift.RequestContext(kbb, vbb))
-
-        case None => // skip
-      }
-
-      header.setContexts(ctxs)
     }
+    clientIdBuf match {
+
+      case Some(buf) =>
+        val ctx = new thrift.RequestContext(
+          Buf.toByteBuffer(ClientId.clientIdCtx.marshalId), 
+          Buf.toByteBuffer(buf))
+        ctxs.add(ctx)
+      case None => // skip
+    }
+    
+    if (!ctxs.isEmpty)
+      header.setContexts(ctxs)
 
     val dtab = Dtab.local
     if (dtab.nonEmpty) {

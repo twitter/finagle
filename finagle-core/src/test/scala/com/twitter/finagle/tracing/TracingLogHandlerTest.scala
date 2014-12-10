@@ -8,19 +8,17 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class TracingLogHandlerTest extends FunSuite with BeforeAndAfter {
-  before { Trace.clear() }
-
   test("TracingLogHandler: send messages to Tracer") {
     val tracer = new BufferingTracer()
-    Trace.pushTracer(tracer)
-
-    val handler = new TracingLogHandler
-    val msg1 = "hello"
-    handler.publish(new LogRecord(Level.DEBUG, msg1))
-
-    tracer.iterator.next().annotation match {
-      case Message(s) => assert(s.trim === msg1)
-      case _ => fail("Message does not match")
+    Trace.letTracer(tracer) {
+      val handler = new TracingLogHandler
+      val msg1 = "hello"
+      handler.publish(new LogRecord(Level.DEBUG, msg1))
+  
+      tracer.iterator.next().annotation match {
+        case Message(s) => assert(s.trim === msg1)
+        case _ => fail("Message does not match")
+      }
     }
   }
 }

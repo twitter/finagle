@@ -59,7 +59,7 @@ class Redis(stats: StatsReceiver) extends CodecFactory[Command, Reply] {
 }
 
 private class RedisTracingFilter extends SimpleFilter[Command, Reply] {
-  override def apply(command: Command, service: Service[Command, Reply]) = Trace.unwind {
+  override def apply(command: Command, service: Service[Command, Reply]) = {
     if (Trace.isActivelyTracing) {
       Trace.recordServiceName("redis")
       Trace.recordRpc(command.command)

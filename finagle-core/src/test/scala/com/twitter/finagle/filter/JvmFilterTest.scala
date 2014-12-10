@@ -28,10 +28,9 @@ class JvmFilterTest extends FunSuite with MockitoSugar {
     when(service(any[String])) thenReturn p
     val filtered = filter andThen service
 
-    def traced(f: => Unit): Seq[Record] = Trace.unwind {
+    def traced(f: => Unit): Seq[Record] = {
       val b = new BufferingTracer
-      Trace.pushTracer(b)
-      f
+      Trace.letTracer(b)(f)
       b.toSeq
     }
   }

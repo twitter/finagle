@@ -227,9 +227,8 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   }
 
   testThrift("end-to-end tracing potpourri") { (client, tracer) =>
-    Trace.unwind {
-      val id = Trace.nextId
-      Trace.setId(id)  // set an ID so we don't use the default one
+    val id = Trace.nextId
+    Trace.letId(id) {
       assert(Await.result(client.multiply(10, 30)) === 300)
 
       assert(!tracer.isEmpty)

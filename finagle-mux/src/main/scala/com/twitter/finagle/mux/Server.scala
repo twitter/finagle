@@ -2,12 +2,13 @@ package com.twitter.finagle.mux
 
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.mux.lease.exp.{Lessor, Lessee, nackOnExpiredLease}
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import com.twitter.finagle.tracing.{NullTracer, Trace, Tracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
-import com.twitter.finagle.{Path, CancelledRequestException, Context, Dtab, Service}
+import com.twitter.finagle.{CancelledRequestException, Dtab, Service, Path}
 import com.twitter.util._
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
@@ -67,10 +68,10 @@ private[finagle] class ServerDispatcher private[finagle](
         val msg = Rerr(tag, "Tdispatch not enabled")
         trans.write(encode(msg))
       } else {
-        Trace.unwind {
-          Trace.pushTracer(tracer)
-          for ((k, v) <- contexts)
-            Context.handle(ChannelBufferBuf.Owned(k), ChannelBufferBuf.Owned(v))
+        val contextBufs = contexts map { case (k, v) =>
+          ChannelBufferBuf(k) -> ChannelBufferBuf(v)
+        }
+        Contexts.broadcast.letUnmarshal(contextBufs) {
           if (dtab.length > 0)
             Dtab.local ++= dtab
           val elapsed = Stopwatch.start()
@@ -94,11 +95,7 @@ private[finagle] class ServerDispatcher private[finagle](
   private[this] def dispatchTreq(treq: Treq): Unit = {
     val Treq(tag, traceId, bytes) = treq
     lessor.observeArrival()
-    Trace.unwind {
-      Trace.pushTracer(tracer)
-      for (traceId <- traceId)
-        Trace.setId(traceId)
-
+    Trace.letIdOption(traceId) {
       val elapsed = Stopwatch.start()
       val f = service(Request(Path.empty, ChannelBufferBuf.Owned(bytes)))
       pending.put(tag, f)
@@ -183,7 +180,9 @@ private[finagle] class ServerDispatcher private[finagle](
       loop()
     }
 
-  Local.letClear { loop() } onFailure { case cause =>
+  Local.letClear { 
+    Trace.letTracer(tracer) { loop() }
+  } onFailure { case cause =>
     // We know that if we have a failure, we cannot from this point forward
     // insert new entries in the pending map.
     val exc = new CancelledRequestException(cause)

@@ -23,8 +23,6 @@ class TTwitterClientFilterTest extends FunSuite with MockitoSugar {
     //tracer.sampleTrace(any(classManifest[TraceId])) returns Some(true)
     when(tracer.sampleTrace(any(classOf[TraceId]))).thenReturn(Some(true))
 
-    Trace.clear()
-
     val filter = new TTwitterClientFilter("service", true, None, protocolFactory)
     val buffer = new OutputBuffer(protocolFactory)
     buffer().writeMessageBegin(
@@ -48,9 +46,8 @@ class TTwitterClientFilterTest extends FunSuite with MockitoSugar {
   }
 
   test("TTwitterClientFilter should create header correctly") {
-    Trace.unwind {
-      val traceId = TraceId(Some(SpanId(1L)), None, SpanId(2L), Some(true), Flags().setDebug)
-      Trace.setId(traceId)
+    val traceId = TraceId(Some(SpanId(1L)), None, SpanId(2L), Some(true), Flags().setDebug)
+    Trace.letId(traceId) {
 
       val filter = new TTwitterClientFilter("service", true, None, protocolFactory)
       val buffer = new OutputBuffer(protocolFactory)
@@ -96,9 +93,10 @@ class TTwitterClientFilterTest extends FunSuite with MockitoSugar {
 
     val header = new thrift.RequestHeader
     InputBuffer.peelMessage(_request.getValue.message, header, protocolFactory)
-
+    
+    assert(header.getContexts != null)
     val clientIdContextWasSet = header.getContexts.asScala exists { c =>
-      (Buf.ByteArray(c.getKey()) == ClientIdContext.Key) &&
+      (Buf.ByteArray(c.getKey()) == ClientId.clientIdCtx.marshalId) &&
         (Buf.ByteArray(c.getValue()) == Buf.Utf8(clientId.name))
     }
 
@@ -129,7 +127,7 @@ class TTwitterClientFilterTest extends FunSuite with MockitoSugar {
     InputBuffer.peelMessage(_request.getValue.message, header, protocolFactory)
 
     val clientIdContextWasSet = header.getContexts.asScala exists { c =>
-      (Buf.ByteArray(c.getKey()) == ClientIdContext.Key) &&
+      (Buf.ByteArray(c.getKey()) == ClientId.clientIdCtx.marshalId) &&
         (Buf.ByteArray(c.getValue()) == Buf.Utf8(clientId.name))
     }
 
