@@ -18,7 +18,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
   var saveBase: Dtab = Dtab.empty
   before {
     saveBase = Dtab.base
-    Dtab.base = Dtab.read("""
+    Dtab.base ++= Dtab.read("""
       /test1010=>/$/inet/0/1010
     """)
   }
@@ -404,7 +404,7 @@ class NameTreeFactoryTest extends FunSuite {
           intIdx += 1
           i
         }
-        
+
         def nextInt() = ???
         def nextLong(n: Long) = ???
       }

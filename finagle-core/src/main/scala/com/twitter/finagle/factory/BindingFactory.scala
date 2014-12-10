@@ -314,10 +314,8 @@ private[finagle] class BindingFactory[Req, Rep](
 
   private[this] val dtabCache = {
     val newFactory: Dtab => ServiceFactory[Req, Rep] = { dtab =>
-      val namer = dtab orElse Namer.global
-
       new DynNameFactory(
-        namer.bind(tree),
+        dtab.bind(tree),
         nameTreeCache.apply,
         exc => NamerTracingFilter.trace(path, baseDtab(), Throw(exc)))
     }

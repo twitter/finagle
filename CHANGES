@@ -11,6 +11,9 @@ Breaking API Changes
   * finagle-core: Remove `c.t.f.client.StackClient.Role.loadBalancer`, which
     was unused and duplicated by `c.t.f.loadbalancer.LoadBalancerFactory.role`.
 
+  * finagle-core: `c.t.f.Namer.orElse` was removed; composing Namers
+    may be accomplished by constructing an appropriate Dtab.
+
   * finagle-http: Remove `c.t.f.http.CheckRequestFilter` along with
     `c.t.f.http.CheckHttpRequestFilter`. The functionality has been
     added to `c.t.f.http.codec.HttpServerDispatcher`. In addition,
