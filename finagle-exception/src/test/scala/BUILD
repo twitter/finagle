@@ -1,6 +1,6 @@
 junit_tests(name='scala',
   dependencies=[
-    '3rdparty:jackson-databind',
+    '3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind',
     '3rdparty:junit',
     '3rdparty:mockito-all',
     '3rdparty:scalatest',
