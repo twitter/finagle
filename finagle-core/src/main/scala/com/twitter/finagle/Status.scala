@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.util.Future
+import com.twitter.util.{Await, Future}
 import scala.math.Ordering
 
 /**
@@ -23,6 +23,8 @@ sealed trait Status
  * (An [[scala.math.Ordering]] is defined in these terms.)
  */
 object Status {
+  class ClosedException extends Exception("Status was Closed; expected Open")
+
   implicit val StatusOrdering: Ordering[Status] = Ordering.by({
     case Open => 3
     case Busy(_) => 2
@@ -60,6 +62,30 @@ object Status {
    */
   def bestOf[T](ts: Iterable[T], status: T => Status): Status =
     ts.foldLeft(Closed: Status)((a, e) => best(a, status(e)))
+
+  /**
+   * Open returns a [[com.twitter.util.Future]] that is satisfied
+   * when the status returned by `get` is [[Open]]. It returns
+   * an exceptional [[com.twitter.util.Future]] should it be
+   * [[Closed]].
+   */
+  def whenOpen(get: => Status): Future[Unit] = 
+    get match {
+      case Open => Future.Done
+      case Busy(p) => p before whenOpen(get)
+      case Closed => Future.exception(new ClosedException)
+    }
+  
+  /**
+   * A blocking version of [[whenOpen]]; this method returns 
+   * when the status has become [[Open]]. This call
+   * blocks and should only be used outside of Finagle
+   * threads to halt progress until the status is [[Open]].
+   *
+   * @throws [[ClosedException]] if the status becomes [[Closed]].
+   */
+  def awaitOpen(get: => Status): Unit =
+    Await.result(whenOpen(get))
 
   /**
    * An open [[Service]] or [[ServiceFactory]] is ready to be used.
