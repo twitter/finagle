@@ -1,8 +1,11 @@
 package com.twitter.finagle
 
-import collection.immutable
+import java.util.{List => JList, Collection => JCollection}
 import java.net.SocketAddress
+
+import scala.annotation.varargs
 import scala.collection.JavaConverters._
+import scala.collection.immutable
 
 /**
  * An address identifies the location of an object--it is a bound
@@ -12,6 +15,9 @@ import scala.collection.JavaConverters._
  */
 sealed trait Addr
 
+/**
+ * Note: There is a Java-friendly API for this object: [[com.twitter.finagle.Addrs]].
+ */
 object Addr {
   /**
    * A bound name. The object is replicated
@@ -45,17 +51,55 @@ object Addr {
   }
 
   object Bound {
+    @varargs
     def apply(addrs: SocketAddress*): Addr =
       Bound(Set(addrs:_*))
 
     /**
      * Provided for Java compatibility.
      */
-    def apply(addrs: java.util.List[SocketAddress]): Addr =
-      apply(addrs.asScala: _*)
+    def apply(addrs: JList[SocketAddress]): Addr = Addrs.newBoundAddr(addrs)
   }
 
   object Failed {
     def apply(why: String): Addr = Failed(new Exception(why))
   }
+}
+
+/**
+ * A Java adaptation of the [[com.twitter.finagle.Addr]] companion object.
+ */
+object Addrs {
+
+  /**
+   * @see com.twitter.finagle.Addr.Bound
+   */
+  @varargs
+  def newBoundAddr(addrs: SocketAddress*): Addr = Addr.Bound(addrs: _*)
+
+  /**
+   * @see com.twitter.finagle.Addr.Bound
+   */
+  def newBoundAddr(addrs: JCollection[SocketAddress]): Addr =
+    Addr.Bound(addrs.asScala.toSet)
+
+  /**
+   * @see com.twitter.finagle.Addr.Failed
+   */
+  def newFailedAddr(cause: Throwable): Addr = Addr.Failed(cause)
+
+  /**
+   * @see com.twitter.finagle.Addr.Failed
+   */
+  def newFailedAddr(why: String): Addr = Addr.Failed(why)
+
+  /**
+   * @see com.twitter.finagle.Addr.Pending
+   */
+  val pendingAddr: Addr = Addr.Pending
+
+  /**
+   * @see com.twitter.finagle.Addr.Neg
+   */
+  val negAddr: Addr = Addr.Neg
 }
