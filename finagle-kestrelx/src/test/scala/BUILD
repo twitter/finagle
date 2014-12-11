@@ -1,6 +1,6 @@
 junit_tests(name='scala',
   dependencies=[
-    '3rdparty:guava',
+    '3rdparty/jvm/com/google/guava',
     '3rdparty:junit',
     '3rdparty:mockito-all',
     '3rdparty:netty',

@@ -5,7 +5,7 @@ scala_library(name='scala',
     repo = artifactory,
   ),
   dependencies=[
-    '3rdparty:guava',
+    '3rdparty/jvm/com/google/guava',
     '3rdparty:netty',
     'finagle/finagle-core',
     'finagle/finagle-memcachedx',
