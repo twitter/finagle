@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Future, Promise}
+import com.twitter.util.{Await, Future, Promise}
 import org.junit.runner.RunWith
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
@@ -46,6 +46,23 @@ class StatusTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenPr
     assert(!p3.isDefined)
     p1.setDone()
     assert(p3.isDefined)
+  }
+  
+  test("Status.whenOpen") {
+    val p1, p2 = new Promise[Unit]
+    var status = Seq(Status.Busy(p1), Status.Busy(p2), Status.Open)
+    val open = Status.whenOpen {
+      val Seq(hd, rest@_*) = status
+      status = rest
+      hd
+    }
+    
+    assert(!open.isDefined)
+    p1.setDone()
+    assert(!open.isDefined)
+    p2.setDone()
+    assert(open.isDefined)
+    Await.result(open)  // no exceptions
   }
   
   test("Ordering spot check") {
