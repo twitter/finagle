@@ -6,10 +6,10 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
-  val libVersion = "6.22.2"
+  val libVersion = "6.24.0"
   val zkVersion = "3.3.4"
-  val utilVersion = "6.22.2"
-  val ostrichVersion = "9.6.3"
+  val utilVersion = "6.23.0"
+  val ostrichVersion = "9.7.0"
   val nettyLib = "io.netty" % "netty" % "3.9.4.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   // The following won't be necessary once we've upgraded internally to 2.4.

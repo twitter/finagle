@@ -3,7 +3,23 @@
   as it is included in Finagle's user's guide.
 
 6.x
------
+---
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Deprecations
+~~~~~~~~~~~~
+
+New Features
+~~~~~~~~~~~~
+
+
+6.24.0
+------
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
@@ -44,23 +60,23 @@ Breaking API Changes
 
 
   * Traces (``com.twitter.finagle.tracing.Trace``) lose their local-state mutating methods:
-    ``Trace.clear``, ``Trace.pushId``, ``Trace.setId``, ``Trace.setTerminalId``, ``Trace.pushTracer``, 
-    ``Trace.pushTracerAndSetNextId``, 
-    ``Trace.state_=``, and ``Trace.unwind``. 
+    ``Trace.clear``, ``Trace.pushId``, ``Trace.setId``, ``Trace.setTerminalId``, ``Trace.pushTracer``,
+    ``Trace.pushTracerAndSetNextId``,
+    ``Trace.state_=``, and ``Trace.unwind``.
     Let-bound versions of these are introduced in their stead.
     This makes it simple to ensure that state changes are properly delimited;
     further, these are always guaranteed to be delimited properly by Finagle.
-  
+
     ::
-    
+
       Trace.setTracer(tracer)
       codeThatUsesTracer()
-      
+
       // Let-bound version:
       Tracer.letTracer(tracer) {
         codeThatUsesTracer()
       }
-  
+
   * Context handlers (``com.twitter.finagle.Context``) are removed.
     They are replaced by the use of marshalled request contexts
     (``com.twitter.finagle.context.Contexts.broadcast``).
@@ -69,33 +85,33 @@ Breaking API Changes
     We show Finagle's trace context:
     the first version uses the old context handler mechanism;
     the second uses ``Contexts.broadcast``.
-  
+
     ::
-    
+
       // The old context handler for Finagle's tracing context. Note that this
       // also required the file
       // finagle-core/src/main/resources/META-INF/services/com.twitter.finagle.ContextHandler
       // to contain the fully qualifed class path of the below object.
       class TraceContext extends ContextHandler {
         val key = Buf.Utf8("com.twitter.finagle.tracing.TraceContext")
-      
+
         def handle(body: Buf) {
           // Parse 'body' and mutate the trace state accordingly.
         }
-      
+
         def emit(): Option[Buf] = {
           // Read the trace state and marshal to a Buf.
         }
       }
-      
+
       // New definition. No service loading required.
       private[finagle] val idCtx = new Contexts.broadcast.Key[TraceId] {
         val marshalId = Buf.Utf8("com.twitter.finagle.tracing.TraceContext")
-      
+
         def marshal(id: TraceId): Buf = {
           // Marshal the given trace Id
         }
-      
+
         def tryUnmarshal(body: Buf): Try[TraceId] = {
           // Try to marshal 'body' into a trace id.
         }
@@ -133,27 +149,27 @@ New Features
 
   * finagle-mux: Drain mux servers properly, so that shutdowns can be
     graceful.
-    
+
   * finagle-core: Introduce `Service.status` which supersedes
     `Service.isAvailable`. `Service.status` is a fine-grained
-    health indicator. The default definition of 
-    `Service.isAvailable` is now defined in terms of 
+    health indicator. The default definition of
+    `Service.isAvailable` is now defined in terms of
     `Service.status`; this definition will soon be made
     final.
 
   * finagle-mux: Inject bound residual paths into mux requests.
 
   * *Request contexts.* Request contexts replace the direct use of
-    com.twitter.util.Local and of com.twitter.finagle.Context. 
+    com.twitter.util.Local and of com.twitter.finagle.Context.
     Request contexts are environments of request-local bindings;
-    they are guaranteed to be delimited by Finagle, 
-    and their API admits only properly delimited binding. 
-    They come in two flavors: 
-    Contexts.local are always local to handling a single request; 
+    they are guaranteed to be delimited by Finagle,
+    and their API admits only properly delimited binding.
+    They come in two flavors:
+    Contexts.local are always local to handling a single request;
     bindings in Contexts.broadcast may be marshalled and transmitted across process
-    boundaries where there is protocol support. 
-    Currently, both Thrift and Mux (and thus also ThriftMux) 
-    support marshalled contexts. 
+    boundaries where there is protocol support.
+    Currently, both Thrift and Mux (and thus also ThriftMux)
+    support marshalled contexts.
     See `com.twitter.finagle.contexts.Context` for more details.
 
 
