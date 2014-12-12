@@ -123,13 +123,6 @@ object RequestBuilder {
     builder.buildPut(content)(RequestEvidence.FullyConfigured)
 
   /**
-   * Provides a typesafe `buildPut` for Java.
-   */
-  @deprecated("Typo, use safeBuildPut instead", "5.3.7")
-  def safeBuidlPut(builder: Complete, content: Buf): Request =
-    safeBuildPut(builder, content)
-
-  /**
    * Provides a typesafe `buildPost` for Java.
    */
   def safeBuildPost(builder: Complete, content: Buf): Request =

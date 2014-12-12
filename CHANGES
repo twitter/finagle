@@ -39,6 +39,9 @@ Breaking API Changes
     the codecError in `c.t.f.http.BadHttpRequest` has been replaced
     with the exception thrown by the HttpServerCodec.
 
+  * finagle-httpx: Remove deprecated code, limited scope of access on internal
+    classes.
+
   * finagle-mux: `c.t.f.mux.lease.exp.WindowedByteCounter` no longer
     calls `Thread.start()` in its constructor. This should be now be
     done by the caller.
@@ -116,7 +119,6 @@ Breaking API Changes
           // Try to marshal 'body' into a trace id.
         }
       }
-
 
 
 Runtime Behavior Changes

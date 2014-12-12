@@ -425,12 +425,6 @@ abstract class Message extends HttpMessageProxy {
 
 object Message {
   private[httpx] val Utf8          = Charset.forName("UTF-8")
-  @deprecated("Use MediaType.Json", "6.1.5")
-  val MediaTypeJson         = "application/json"
-  @deprecated("Use MediaType.Javascript", "6.1.5")
-  val MediaTypeJavascript   = "application/javascript"
-  @deprecated("Use MediaType.WwwForm", "6.1.5")
-  val MediaTypeWwwForm      = "application/x-www-form-urlencoded"
   val CharsetUtf8           = "charset=utf-8"
   val ContentTypeJson       = MediaType.Json + ";" + CharsetUtf8
   val ContentTypeJavascript = MediaType.Javascript + ";" + CharsetUtf8
