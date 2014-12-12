@@ -2,7 +2,7 @@ package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
-import com.twitter.util.{Await, Future}
+import com.twitter.util.{Await, Future, Duration}
 import org.jboss.netty.handler.codec.http.HttpMethod
 import org.junit.runner.RunWith
 import org.scalatest.FlatSpec
@@ -30,7 +30,9 @@ class CorsTest extends FlatSpec with MustMatchers {
     allowsMethods = { method  => Some(method :: "TRAP" :: Nil) },
     allowsHeaders = { headers => Some(headers) },
     exposedHeaders = "Icey" :: Nil,
-    supportsCredentials = true)
+    supportsCredentials = true,
+    maxAge = Some(Duration.Top)
+  )
 
   val corsFilter = new Cors.HttpFilter(policy)
   val service = corsFilter andThen underlying
@@ -46,6 +48,8 @@ class CorsTest extends FlatSpec with MustMatchers {
     response.headerMap.get("Access-Control-Allow-Credentials") must be(Some("true"))
     response.headerMap.get("Access-Control-Allow-Methods") must be(Some("BRR, TRAP"))
     response.headerMap.get("Vary") must be(Some("Origin"))
+    response.headerMap.get("Access-Control-Max-Age") must be(
+      Some(Duration.Top.inSeconds.toString))
     response.contentString must be("")
   }
 

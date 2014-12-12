@@ -25,6 +25,16 @@ class HttpServerDispatcherTest extends FunSuite {
     assert(c.getContent === chunk.getContent)
   }
 
+  test("invalid message") {
+    val (in, out) = mkPair[Any, Any]
+    val service = Service.mk { req: Request => Future.value(Response()) }
+    val disp = new HttpServerDispatcher[Request](out, service)
+
+    in.write("invalid")
+    Await.ready(out.onClose)
+    assert(out.status === Status.Closed)
+  }
+
   test("bad request") {
     val (in, out) = mkPair[Any, Any]
     val service = Service.mk { req: Request => Future.value(Response()) }
