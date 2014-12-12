@@ -20,9 +20,11 @@ import org.jboss.netty.channel._
 import scala.collection.mutable.ArrayBuffer
 
 /**
- * A [[org.jboss.netty.channel.ChannelPipelineFactory]] that records the number
- * of open ThriftMux and non-Mux downgraded connections in a pair of
- * [[java.util.concurrent.atomic.AtomicInteger AtomicIntegers]].
+ * A [[org.jboss.netty.channel.ChannelPipelineFactory]] that manages the downgrading
+ * of mux server sessions to plain thrift or twitter thrift. Because this is used in the
+ * context of the mux server dispatcher it's important that when we downgrade, we faithfully
+ * emulate the mux protocol. Additionally, the pipeline records the number of open ThriftMux
+ * and non-Mux downgraded sessions in a pair of [[java.util.concurrent.atomic.AtomicInteger AtomicIntegers]].
  */
 // Note: this lives in a file that doesn't match the class name in order
 // to decouple Netty from finagle and isolate everything related to Netty3 into a single file.
@@ -65,11 +67,11 @@ private[finagle] class PipelineFactory(
       val contextBuf = ArrayBuffer.empty[(ChannelBuffer, ChannelBuffer)]
 
       contextBuf += (
-        BufChannelBuffer(Trace.idCtx.marshalId) -> 
+        BufChannelBuffer(Trace.idCtx.marshalId) ->
         BufChannelBuffer(Trace.idCtx.marshal(traceId)))
 
       if (header.client_id != null) {
-        val clientIdBuf = 
+        val clientIdBuf =
           ClientId.clientIdCtx.marshal(Some(ClientId(header.client_id.name)))
         contextBuf += (
           BufChannelBuffer(ClientId.clientIdCtx.marshalId) ->
@@ -105,10 +107,16 @@ private[finagle] class PipelineFactory(
           // clients is to tear down the connection.
           Channels.close(e.getChannel)
 
-        case Message.Tdrain(_) =>
-          // Ignore Tdrains because they are advisory and non-Mux clients
-          // cannot handle them.
+        case Message.Tdrain(tag) =>
+          // Terminate the write here with a "success" and synthesize a Rdrain response.
+          // Although downgraded connections don't understand Tdrains, we synthesize a Rdrain
+          // so the server dispatcher enters draining mode.
           e.getFuture.setSuccess()
+          super.messageReceived(ctx,
+            new UpstreamMessageEvent(
+              e.getChannel,
+              Message.encode(Message.Rdrain(tag)),
+              e.getRemoteAddress))
 
         case Message.Tping(tag) =>
           e.getFuture.setSuccess()
@@ -161,10 +169,16 @@ private[finagle] class PipelineFactory(
           // clients is to tear down the connection.
           Channels.close(e.getChannel)
 
-        case Message.Tdrain(_) =>
-          // Ignore Tdrains because they are advisory and non-Mux clients
-          // cannot handle them.
+        case Message.Tdrain(tag) =>
+          // Terminate the write here with a "success" and synthesize a Rdrain response.
+          // Although downgraded connections don't understand Tdrains, we synthesize a Rdrain
+          // so the server dispatcher enters draining mode.
           e.getFuture.setSuccess()
+          super.messageReceived(ctx,
+            new UpstreamMessageEvent(
+              e.getChannel,
+              Message.encode(Message.Rdrain(tag)),
+              e.getRemoteAddress))
 
         // Non-mux clients can't handle T-type control messages, so we
         // simulate responses.

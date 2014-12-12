@@ -27,7 +27,8 @@ object ServerDispatcher {
   val Epsilon = 1.second // TODO decide whether this should be hard coded or not
 }
 
-object gracefulShutdownEnabled extends GlobalFlag(true, "Graceful shutdown enabled.  Temporary measure to allow servers to deploy without hurting clients.")
+object gracefulShutdownEnabled extends GlobalFlag(true, "Graceful shutdown enabled. " +
+  "Temporary measure to allow servers to deploy without hurting clients.")
 
 /**
  * A ServerDispatcher for the mux protocol.
@@ -46,6 +47,10 @@ private[finagle] class ServerDispatcher private[finagle](
 
   @volatile private[this] var lease = Tlease.MaxLease
   @volatile private[this] var curElapsed = NilStopwatch.start()
+
+  private[this] val closing = new AtomicBoolean(false)
+  @volatile private[this] var draining = false
+  private[this] val closep = new Promise[Unit]
 
   // Used to buffer requests with in-progress local service invocation.
   private[this] val pending = new ConcurrentHashMap[Int, Future[_]]
@@ -77,15 +82,17 @@ private[finagle] class ServerDispatcher private[finagle](
           val elapsed = Stopwatch.start()
           val f = service(Request(dst, ChannelBufferBuf.Owned(bytes)))
           pending.put(tag, f)
-          f respond { tr =>
+          f transform {
+            case Return(rep) =>
+              lessor.observe(elapsed())
+              trans.write(encode(RdispatchOk(tag, Seq.empty, BufChannelBuffer(rep.body))))
+
+            case Throw(exc) =>
+              trans.write(encode(RdispatchError(tag, Seq.empty, exc.toString)))
+          } ensure {
+            // We remove the tag only after we write in order
+            // to avoid closing the transport prematurely.
             removeTag(tag)
-            tr match {
-              case Return(rep) =>
-                lessor.observe(elapsed())
-                trans.write(encode(RdispatchOk(tag, Seq.empty, BufChannelBuffer(rep.body))))
-              case Throw(exc) =>
-                trans.write(encode(RdispatchError(tag, Seq.empty, exc.toString)))
-            }
           }
         }
       }
@@ -99,15 +106,15 @@ private[finagle] class ServerDispatcher private[finagle](
       val elapsed = Stopwatch.start()
       val f = service(Request(Path.empty, ChannelBufferBuf.Owned(bytes)))
       pending.put(tag, f)
-      f respond { tr =>
+      f transform {
+        case Return(rep) =>
+          lessor.observe(elapsed())
+          trans.write(encode(RreqOk(tag, BufChannelBuffer(rep.body))))
+
+        case Throw(exc) =>
+          trans.write(encode(RreqError(tag, exc.toString)))
+      } ensure {
         removeTag(tag)
-        tr match {
-          case Return(rep) =>
-            lessor.observe(elapsed())
-            trans.write(encode(RreqOk(tag, BufChannelBuffer(rep.body))))
-          case Throw(exc) =>
-            trans.write(encode(RreqError(tag, exc.toString)))
-        }
       }
     }
   }
@@ -180,7 +187,7 @@ private[finagle] class ServerDispatcher private[finagle](
       loop()
     }
 
-  Local.letClear { 
+  Local.letClear {
     Trace.letTracer(tracer) { loop() }
   } onFailure { case cause =>
     // We know that if we have a failure, we cannot from this point forward
@@ -198,10 +205,6 @@ private[finagle] class ServerDispatcher private[finagle](
   trans.onClose ensure {
     service.close()
   }
-
-  private[this] val closing = new AtomicBoolean(false)
-  @volatile private[this] var draining = false
-  private[this] val closep = new Promise[Unit]
 
   /**
    * Close the mux Server. Any further messages received will be either ignored
@@ -227,7 +230,7 @@ private[finagle] class ServerDispatcher private[finagle](
           }
         }
       } else {
-        closep.setDone
+        closep.setDone()
         lessor.unregister(this)
         trans.close()
       }

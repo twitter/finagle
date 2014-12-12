@@ -39,7 +39,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     val server = ThriftMux.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.FutureIface {
-        def query(x: String) = 
+        def query(x: String) =
           Contexts.broadcast.get(testContext) match {
             case None => Future.value(x+x)
             case Some(TestContext(buf)) =>
@@ -61,7 +61,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       val client = ThriftMux.newIface[TestService.FutureIface](server)
 
       assert(Await.result(client.query("ok")) === "okok")
-      
+
       Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
         assert(Await.result(client.query("ok")) === "hello context world")
       }
@@ -179,9 +179,9 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
   test("thriftmux server + Finagle thrift client: propagate Contexts") {
     new ThriftMuxTestServer {
       val client = Thrift.newIface[TestService.FutureIface](server)
-      
+
       assert(Await.result(client.query("ok")) === "okok")
-      
+
       Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
         assert(Await.result(client.query("ok")) === "hello context world")
       }
@@ -511,5 +511,26 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
         Await.result(tbinaryClient.query("ok"))
       }
     }
+  }
+
+  test("drain downgraded connections") {
+    val response = Promise[String]
+    val iface = new TestService.FutureIface {
+      def query(x: String): Future[String] = response
+    }
+
+    val inet = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
+    val server = ThriftMux.server.serveIface(inet, iface)
+    val client = Thrift.client.newIface[TestService.FutureIface](server)
+
+    val f = client.query("ok")
+    intercept[Exception] { Await.result(f, 1.second) }
+
+    val close = server.close(1.minute) // up to a minute
+    intercept[Exception] { Await.result(close, 1.second) }
+
+    response.setValue("done")
+    assert(Await.result(close, 1.second) === ())
+    assert(Await.result(f, 1.second) === "done")
   }
 }

@@ -2,18 +2,20 @@ package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
-import com.twitter.finagle.mux.Message.Treq
 import com.twitter.finagle.mux.lease.exp.{Lessor, nackOnExpiredLease}
+import com.twitter.finagle.mux.Message.Treq
 import com.twitter.finagle.stats.{StatsReceiver, InMemoryStatsReceiver}
 import com.twitter.finagle.tracing.NullTracer
 import com.twitter.finagle.transport.{Transport, QueueTransport}
 import com.twitter.finagle.{Path, Dtab, Service}
 import com.twitter.io.{Buf, Charsets}
 import com.twitter.logging.{Logger, BareFormatter, StringHandler, Level}
+import com.twitter.util.Throw
 import com.twitter.util.{Return, Future, Time, Duration, Promise}
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.junit.runner.RunWith
 import org.mockito.Mockito.{never, verify, when}
+import org.mockito.Matchers.any
 import org.scalatest.FunSuite
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.mock.MockitoSugar
@@ -135,16 +137,21 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
       Treq(tag = 9, traceId = None, ChannelBuffers.EMPTY_BUFFER))
 
     val trans = mock[Transport[ChannelBuffer, ChannelBuffer]]
-    when(trans.onClose).thenReturn(new Promise[Throwable])
+
+    when(trans.onClose)
+      .thenReturn(new Promise[Throwable])
+
     when(trans.read())
       .thenReturn(Future.value(encodedMsg))
       .thenReturn(Future.never)
 
+    when(trans.write(any[ChannelBuffer]))
+      .thenReturn(Future.Done)
+
     val dispatcher = new ServerDispatcher(trans, svc, true, lessor, NullTracer)
     assert(dispatcher.npending() === 1)
 
-    // fulfill the promise with a failure
-    p.setException(new RuntimeException("welp"))
+    p.updateIfEmpty(Throw(new RuntimeException("welp")))
 
     assert(dispatcher.npending() === 0)
   }
