@@ -1,6 +1,5 @@
 package com.twitter.finagle.zipkin.thrift
 
-import com.twitter.finagle.core.util.InetAddressUtil
 import com.twitter.finagle.thrift.thrift
 import com.twitter.util.NonFatal
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
@@ -37,7 +36,7 @@ object Endpoint {
 
   val Local = {
     try {
-      val ipv4 = Endpoint.toIpv4(InetAddressUtil.Loopback)
+      val ipv4 = Endpoint.toIpv4(InetAddress.getLoopbackAddress)
       Endpoint(ipv4,0)
     } catch {
       case NonFatal(_) => Endpoint.Unknown
