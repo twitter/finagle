@@ -39,7 +39,11 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <span class="extype" name="org.jboss.netty.channel.ChannelHandler">org.jboss.netty.channel.ChannelHandler</span> that tracks channel/connection
+statistics. The handler is meant to be shared by all
+<span class="extype" name="org.jboss.netty.channel.Channel">Channels</span> within a Finagle client or
+server in order to consolidate statistics across a number of channels.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.channel.ConnectionLifecycleHandler">ConnectionLifecycleHandler</span>, <span class="extype" name="org.jboss.netty.channel.LifeCycleAwareChannelHandler">LifeCycleAwareChannelHandler</span>, <span class="extype" name="org.jboss.netty.channel.SimpleChannelHandler">SimpleChannelHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelDownstreamHandler">ChannelDownstreamHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelUpstreamHandler">ChannelUpstreamHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelHandler">ChannelHandler</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -88,7 +92,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ChannelStatsHandler</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span>
+        <span class="name">ChannelStatsHandler</span><span class="params">(<span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span>
       </span>
       </h4>
       

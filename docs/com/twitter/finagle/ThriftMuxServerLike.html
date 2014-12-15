@@ -309,6 +309,19 @@ parameters used to configure the <code>muxer</code>.</p>
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.ThriftMuxServerLike#get" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="get():com.twitter.finagle.ThriftMuxServerLike"></a>
+      <a id="get():ThriftMuxServerLike"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get</span><span class="params">()</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMuxServerLike">ThriftMuxServerLike</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Used for Java access.</p>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -579,15 +592,15 @@ into <code>serveIface</code>:</p><pre>ThriftMuxRichServer.serveIface(<span class
 })</pre><p>Note that this interface is discovered by reflection. Passing an
 invalid interface implementation will result in a runtime error.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMuxServerLike#stack" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]]"></a>
-      <a id="stack:Stack[ServiceFactory[ChannelBuffer,ChannelBuffer]]"></a>
+      <a id="stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]]"></a>
+      <a id="stack:Stack[ServiceFactory[Request,Response]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">stack</span><span class="result">: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
+        <span class="name">stack</span><span class="result">: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">The <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> stack that requests

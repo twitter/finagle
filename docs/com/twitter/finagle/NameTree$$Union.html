@@ -35,14 +35,17 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Union</span><span class="tparams">[<span name="T">+T</span>]</span><span class="params">(<span name="trees">trees: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Union.T">T</span>]*</span>)</span><span class="result"> extends <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Union.T">T</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">Union</span><span class="tparams">[<span name="T">+T</span>]</span><span class="params">(<span name="trees">trees: <a href="NameTree$$Weighted.html" class="extype" name="com.twitter.finagle.NameTree.Weighted">Weighted</a>[<span class="extype" name="com.twitter.finagle.NameTree.Union.T">T</span>]*</span>)</span><span class="result"> extends <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Union.T">T</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a> representing a union
-of trees. It is evaluated by returning the union of atoms of its
-(recursively evaluated) children. When all children are negative,
-the Union itself evaluates negative.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a> representing a
+weighted union of trees. It is evaluated by returning the union
+of its (recursively evaluated) children, leaving corresponding
+weights unchanged. When all children are negative, the Union
+itself evaluates negative.</p><p>NameTree gives no semantics to weights (they are interpreted
+higher in the stack) except to simplify away single-child Unions
+regardless of weight.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Union.T">T</span>], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
@@ -84,7 +87,7 @@ the Union itself evaluates negative.
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.NameTree.Union#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(trees:com.twitter.finagle.NameTree[T]*):com.twitter.finagle.NameTree.Union[T]"></a>
+      <a id="&lt;init&gt;(trees:com.twitter.finagle.NameTree.Weighted[T]*):com.twitter.finagle.NameTree.Union[T]"></a>
       <a id="&lt;init&gt;:Union[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -92,7 +95,7 @@ the Union itself evaluates negative.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Union</span><span class="params">(<span name="trees">trees: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Union.T">T</span>]*</span>)</span>
+        <span class="name">Union</span><span class="params">(<span name="trees">trees: <a href="NameTree$$Weighted.html" class="extype" name="com.twitter.finagle.NameTree.Weighted">Weighted</a>[<span class="extype" name="com.twitter.finagle.NameTree.Union.T">T</span>]*</span>)</span>
       </span>
       </h4>
       
@@ -392,15 +395,15 @@ name also represents a fixpoint; in other words:</p><pre>tree.simplified == tree
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.NameTree.Union">Union</a> → AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.NameTree.Union#trees" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="trees:com.twitter.finagle.NameTree[T]*"></a>
-      <a id="trees:NameTree[T]*"></a>
+      <a id="trees:com.twitter.finagle.NameTree.Weighted[T]*"></a>
+      <a id="trees:Weighted[T]*"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">trees</span><span class="result">: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Union.T">T</span>]*</span>
+        <span class="name">trees</span><span class="result">: <a href="NameTree$$Weighted.html" class="extype" name="com.twitter.finagle.NameTree.Weighted">Weighted</a>[<span class="extype" name="com.twitter.finagle.NameTree.Union.T">T</span>]*</span>
       </span>
       </h4>
       

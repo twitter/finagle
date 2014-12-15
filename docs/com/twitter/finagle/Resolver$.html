@@ -35,13 +35,13 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Resolver</span>
+        <span class="name">Resolver</span><span class="result"> extends <span class="extype" name="com.twitter.finagle.BaseResolver">BaseResolver</span></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.BaseResolver">BaseResolver</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -59,7 +59,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.Resolver"><span>Resolver</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.Resolver"><span>Resolver</span></li><li class="in" name="com.twitter.finagle.BaseResolver"><span>BaseResolver</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -208,7 +208,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.Resolver#eval" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.BaseResolver#eval" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eval(name:String):com.twitter.finagle.Name"></a>
       <a id="eval(String):Name"></a>
       <h4 class="signature">
@@ -230,7 +230,7 @@ a logical name whose interpetation is subject to a
 <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>.</p><p>Eval throws exceptions upon failure to parse the name, or
 on failure to scheme lookup. Since names are late bound,
 binding failures are deferred.
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BaseResolver</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -250,7 +250,7 @@ binding failures are deferred.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.Resolver#get" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.BaseResolver#get" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="get[T&lt;:com.twitter.finagle.Resolver](clazz:Class[T]):Option[T]"></a>
       <a id="get[T&lt;:Resolver](Class[T]):Option[T]"></a>
       <h4 class="signature">
@@ -259,10 +259,10 @@ binding failures are deferred.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="tparams">[<span name="T">T &lt;: <a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></span>]</span><span class="params">(<span name="clazz">clazz: <span class="extype" name="scala.Predef.Class">Class</span>[<span class="extype" name="com.twitter.finagle.Resolver.get.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.finagle.Resolver.get.T">T</span>]</span>
+        <span class="name">get</span><span class="tparams">[<span name="T">T &lt;: <a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></span>]</span><span class="params">(<span name="clazz">clazz: <span class="extype" name="scala.Predef.Class">Class</span>[<span class="extype" name="com.twitter.finagle.BaseResolver.get.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.finagle.BaseResolver.get.T">T</span>]</span>
       </span>
       </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>BaseResolver</dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -431,7 +431,7 @@ binding failures are deferred.
 
         <div id="values" class="values members">
               <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.Resolver#resolve" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.BaseResolver#resolve" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="resolve(addr:String):com.twitter.util.Try[com.twitter.finagle.Group[java.net.SocketAddress]]"></a>
       <a id="resolve(String):Try[Group[SocketAddress]]"></a>
       <h4 class="signature">
@@ -458,7 +458,7 @@ a name separated by an equals sign from the rest of the addr.
 For example, the addr &quot;www=inet!google.com:80&quot; resolves
 &quot;google.com:80&quot; with the inet resolver, but the returned group's
 <a href="LabelledGroup.html" class="extype" name="com.twitter.finagle.LabelledGroup">com.twitter.finagle.LabelledGroup</a> name is &quot;www&quot;.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BaseResolver</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use Resolver.eval</p></dd></dl></div>
@@ -467,7 +467,9 @@ For example, the addr &quot;www=inet!google.com:80&quot; resolves
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="com.twitter.finagle.BaseResolver">
+              <h3>Inherited from <span class="extype" name="com.twitter.finagle.BaseResolver">BaseResolver</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>

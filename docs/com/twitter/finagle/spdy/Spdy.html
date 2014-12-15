@@ -35,7 +35,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Spdy</span><span class="params">(<span name="_version">_version: <span class="extype" name="org.jboss.netty.handler.codec.spdy.SpdyVersion">SpdyVersion</span> = <span class="defval" name="org.jboss.netty.handler.codec.spdy.SpdyVersion.SPDY_3_1">...</span></span>, <span name="_compressionLevel">_compressionLevel: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">6</span></span>, <span name="_maxHeaderSize">_maxHeaderSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(16384).bytes">...</span></span>, <span name="_maxRequestSize">_maxRequestSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes">...</span></span>, <span name="_maxResponseSize">_maxResponseSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes">...</span></span>)</span><span class="result"> extends <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">Spdy</span><span class="params">(<span name="_version">_version: <span class="extype" name="org.jboss.netty.handler.codec.spdy.SpdyVersion">SpdyVersion</span> = <span class="defval" name="org.jboss.netty.handler.codec.spdy.SpdyVersion.SPDY_3_1">...</span></span>, <span name="_enableHeaderCompression">_enableHeaderCompression: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="_maxHeaderSize">_maxHeaderSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(16384).bytes">...</span></span>, <span name="_maxRequestSize">_maxRequestSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes">...</span></span>, <span name="_maxResponseSize">_maxResponseSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes">...</span></span>)</span><span class="result"> extends <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -80,7 +80,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.spdy.Spdy#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(_version:org.jboss.netty.handler.codec.spdy.SpdyVersion,_compressionLevel:Int,_maxHeaderSize:com.twitter.util.StorageUnit,_maxRequestSize:com.twitter.util.StorageUnit,_maxResponseSize:com.twitter.util.StorageUnit):com.twitter.finagle.spdy.Spdy"></a>
+      <a id="&lt;init&gt;(_version:org.jboss.netty.handler.codec.spdy.SpdyVersion,_enableHeaderCompression:Boolean,_maxHeaderSize:com.twitter.util.StorageUnit,_maxRequestSize:com.twitter.util.StorageUnit,_maxResponseSize:com.twitter.util.StorageUnit):com.twitter.finagle.spdy.Spdy"></a>
       <a id="&lt;init&gt;:Spdy"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -88,7 +88,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Spdy</span><span class="params">(<span name="_version">_version: <span class="extype" name="org.jboss.netty.handler.codec.spdy.SpdyVersion">SpdyVersion</span> = <span class="defval" name="org.jboss.netty.handler.codec.spdy.SpdyVersion.SPDY_3_1">...</span></span>, <span name="_compressionLevel">_compressionLevel: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">6</span></span>, <span name="_maxHeaderSize">_maxHeaderSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(16384).bytes">...</span></span>, <span name="_maxRequestSize">_maxRequestSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes">...</span></span>, <span name="_maxResponseSize">_maxResponseSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes">...</span></span>)</span>
+        <span class="name">Spdy</span><span class="params">(<span name="_version">_version: <span class="extype" name="org.jboss.netty.handler.codec.spdy.SpdyVersion">SpdyVersion</span> = <span class="defval" name="org.jboss.netty.handler.codec.spdy.SpdyVersion.SPDY_3_1">...</span></span>, <span name="_enableHeaderCompression">_enableHeaderCompression: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="_maxHeaderSize">_maxHeaderSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(16384).bytes">...</span></span>, <span name="_maxRequestSize">_maxRequestSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes">...</span></span>, <span name="_maxResponseSize">_maxResponseSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes">...</span></span>)</span>
       </span>
       </h4>
       
@@ -195,16 +195,16 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.spdy.Spdy#_compressionLevel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="_compressionLevel:Int"></a>
-      <a id="_compressionLevel:Int"></a>
+    </li><li name="com.twitter.finagle.spdy.Spdy#_enableHeaderCompression" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="_enableHeaderCompression:Boolean"></a>
+      <a id="_enableHeaderCompression:Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">_compressionLevel</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="name">_enableHeaderCompression</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       
@@ -305,16 +305,16 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.spdy.Spdy#compressionLevel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="compressionLevel(level:Int):com.twitter.finagle.spdy.Spdy"></a>
-      <a id="compressionLevel(Int):Spdy"></a>
+    </li><li name="com.twitter.finagle.spdy.Spdy#enableHeaderCompression" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="enableHeaderCompression(enable:Boolean):com.twitter.finagle.spdy.Spdy"></a>
+      <a id="enableHeaderCompression(Boolean):Spdy"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">compressionLevel</span><span class="params">(<span name="level">level: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.spdy.Spdy">Spdy</a></span>
+        <span class="name">enableHeaderCompression</span><span class="params">(<span name="enable">enable: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.spdy.Spdy">Spdy</a></span>
       </span>
       </h4>
       

@@ -269,7 +269,7 @@ http://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6
       <p class="shortcomment cmt">The base <a href="../Dtab.html" class="extype" name="com.twitter.finagle.Dtab">com.twitter.finagle.Dtab</a> used to interpret logical
 destinations for this client.</p><div class="fullcomment"><div class="comment cmt"><p>The base <a href="../Dtab.html" class="extype" name="com.twitter.finagle.Dtab">com.twitter.finagle.Dtab</a> used to interpret logical
 destinations for this client. (This is given as a function to
-permit late initialization of <a href="../Dtab$.html#base:com.twitter.finagle.Dtab" class="extmbr" name="com.twitter.finagle.Dtab#base">Dtab.base</a>.)
+permit late initialization of <a href="../Dtab$.html#base:com.twitter.finagle.Dtab" class="extmbr" name="com.twitter.finagle.Dtab#base">com.twitter.finagle.Dtab.base</a>.)
 </p></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#build" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="build()(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:com.twitter.finagle.builder.ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]):com.twitter.finagle.Service[Req,Rep]"></a>
@@ -314,8 +314,8 @@ permit late initialization of <a href="../Dtab$.html#base:com.twitter.finagle.Dt
       <p class="shortcomment cmt">Use the given channel factory instead of the default.</p><div class="fullcomment"><div class="comment cmt"><p>Use the given channel factory instead of the default. Note that
 when using a non-default ChannelFactory, finagle can't
 meaningfully reference count factory usage, and so the caller is
-responsible for calling <code><code>releaseExternalResources()<i>.
-</i></code></code></p></div></div>
+responsible for calling <code>releaseExternalResources()</code>.
+</p></div></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -553,32 +553,6 @@ until we succesfully connect. Intermediate connection attempts
 *are* respected, but host availability is turned off during the
 reconnection period.
 </p></div></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#failureAccrual" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="failureAccrual(failureAccrual:com.twitter.finagle.ServiceFactoryWrapper):ClientBuilder.this.This"></a>
-      <a id="failureAccrual(ServiceFactoryWrapper):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">failureAccrual</span><span class="params">(<span name="failureAccrual">failureAccrual: <a href="../ServiceFactoryWrapper.html" class="extype" name="com.twitter.finagle.ServiceFactoryWrapper">ServiceFactoryWrapper</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#failureAccrualFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="failureAccrualFactory(factory:com.twitter.util.Timer=&gt;com.twitter.finagle.ServiceFactoryWrapper):ClientBuilder.this.This"></a>
-      <a id="failureAccrualFactory((Timer)⇒ServiceFactoryWrapper):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">failureAccrualFactory</span><span class="params">(<span name="factory">factory: (<span class="extype" name="com.twitter.util.Timer">Timer</span>) ⇒ <a href="../ServiceFactoryWrapper.html" class="extype" name="com.twitter.finagle.ServiceFactoryWrapper">ServiceFactoryWrapper</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4>
-      
     </li><li name="com.twitter.finagle.builder.ClientBuilder#failureAccrualParams" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="failureAccrualParams(pair:(Int,com.twitter.util.Duration)):ClientBuilder.this.This"></a>
       <a id="failureAccrualParams((Int,Duration)):This"></a>
@@ -781,7 +755,9 @@ connections than this limit.
 will be load balanced across these.  This is a shorthand form for
 specifying a cluster.</p><p>One of the {{hosts}} variations or direct specification of the
 cluster (via {{cluster}}) is required.
-</p></div></div>
+</p></div><dl class="paramcmts block"><dt class="param">hostnamePortCombinations</dt><dd class="cmt"><p>comma-separated &quot;host:port&quot;
+string.
+</p></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#httpProxy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="httpProxy(httpProxy:java.net.SocketAddress):ClientBuilder.this.This"></a>
       <a id="httpProxy(SocketAddress):This"></a>
@@ -930,6 +906,19 @@ a strategy for choosing one from a set of hosts to service a request
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#params" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="params:com.twitter.finagle.Stack.Params"></a>
+      <a id="params:Params"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">params</span><span class="result">: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.builder.ClientBuilder#readerIdleTimeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="readerIdleTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
       <a id="readerIdleTimeout(Duration):This"></a>
@@ -965,7 +954,7 @@ a strategy for choosing one from a set of hosts to service a request
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">reportHostStats</span><span class="params">(<span name="receiver">receiver: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">reportHostStats</span><span class="params">(<span name="receiver">receiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Report per host stats to the given {{StatsReceiver}}.</p><div class="fullcomment"><div class="comment cmt"><p>Report per host stats to the given {{StatsReceiver}}.
@@ -981,7 +970,7 @@ client/connect_latency_ms_max/0.0.0.0:64754
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">reportTo</span><span class="params">(<span name="receiver">receiver: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">reportTo</span><span class="params">(<span name="receiver">receiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Report stats to the given {{StatsReceiver}}.</p><div class="fullcomment"><div class="comment cmt"><p>Report stats to the given {{StatsReceiver}}.  This will report
@@ -1049,15 +1038,15 @@ the request and the receipt of the response.
       </h4>
       <p class="shortcomment cmt">Sets the TCP send buffer size.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#socksProxy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="socksProxy(socksProxy:java.net.SocketAddress):ClientBuilder.this.This"></a>
-      <a id="socksProxy(SocketAddress):This"></a>
+      <a id="socksProxy(socksProxy:Option[java.net.SocketAddress]):ClientBuilder.this.This"></a>
+      <a id="socksProxy(Option[SocketAddress]):This"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">socksProxy</span><span class="params">(<span name="socksProxy">socksProxy: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">socksProxy</span><span class="params">(<span name="socksProxy">socksProxy: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Make connections via the given SOCKS proxy.</p><div class="fullcomment"><div class="comment cmt"><p>Make connections via the given SOCKS proxy.
@@ -1078,7 +1067,7 @@ If this is defined concurrently with httpProxy, the order in which they are appl
       <p class="shortcomment cmt">For the socks proxy use this username for authentication.</p><div class="fullcomment"><div class="comment cmt"><p>For the socks proxy use this username for authentication.
 socksPassword and socksProxy must be set as well
 </p></div></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#stack" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#stack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stack[Req1,Rep1](client:com.twitter.finagle.Stack.Parameterized[com.twitter.finagle.Client[Req1,Rep1]]):com.twitter.finagle.builder.ClientBuilder[Req1,Rep1,HasCluster,com.twitter.finagle.builder.ClientConfig.Yes,com.twitter.finagle.builder.ClientConfig.Yes]"></a>
       <a id="stack[Req1,Rep1](Parameterized[Client[Req1,Rep1]]):ClientBuilder[Req1,Rep1,HasCluster,Yes,Yes]"></a>
       <h4 class="signature">
@@ -1090,7 +1079,19 @@ socksPassword and socksProxy must be set as well
         <span class="name">stack</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="client">client: <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.stack.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.stack.Rep1">Rep1</span>]]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.stack.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.stack.Rep1">Rep1</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCluster">HasCluster</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Overrides the stack and <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> that will be used
+by this builder.</p><div class="fullcomment"><div class="comment cmt"><p>Overrides the stack and <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> that will be used
+by this builder.
+</p></div><dl class="paramcmts block"><dt class="param">client</dt><dd class="cmt"><p>A <code>Parameterized</code> representation of a
+<a href="../Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a>. <code>client</code> is materialized with the state of
+configuration when <code>build</code> is called. There is no guarantee that all
+builder parameters will be used by the resultant <code>Client</code>; it is up to the
+discretion of <code>client</code> itself and the protocol implementation. For example,
+the Mux protocol has no use for most connection pool parameters (e.g.
+<code>hostConnectionLimit</code>). Thus when configuring
+<a href="../ThriftMux$.html" class="extype" name="com.twitter.finagle.ThriftMux">com.twitter.finagle.ThriftMux</a> clients (via <span class="extype" name="stack(ThriftMux.client)">stack(ThriftMux.client)</span>),
+such connection pool parameters will not be applied.
+</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -1392,6 +1393,54 @@ completeness.</p>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.3.10)</i></p></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#failureAccrual" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="failureAccrual(failureAccrual:com.twitter.finagle.ServiceFactoryWrapper):ClientBuilder.this.This"></a>
+      <a id="failureAccrual(ServiceFactoryWrapper):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.22.1) Use failureAccrualParams">failureAccrual</span><span class="params">(<span name="failureAccrual">failureAccrual: <a href="../ServiceFactoryWrapper.html" class="extype" name="com.twitter.finagle.ServiceFactoryWrapper">ServiceFactoryWrapper</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.22.1)</i> Use failureAccrualParams</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#failureAccrualFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="failureAccrualFactory(factory:com.twitter.util.Timer=&gt;com.twitter.finagle.ServiceFactoryWrapper):ClientBuilder.this.This"></a>
+      <a id="failureAccrualFactory((Timer)⇒ServiceFactoryWrapper):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.22.1) Use failureAccrualParams">failureAccrualFactory</span><span class="params">(<span name="factory">factory: (<span class="extype" name="com.twitter.util.Timer">Timer</span>) ⇒ <a href="../ServiceFactoryWrapper.html" class="extype" name="com.twitter.finagle.ServiceFactoryWrapper">ServiceFactoryWrapper</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.22.1)</i> Use failureAccrualParams</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#socksProxy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="socksProxy(socksProxy:java.net.SocketAddress):ClientBuilder.this.This"></a>
+      <a id="socksProxy(SocketAddress):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2014-12-02) Use socksProxy(socksProxy: Option[SocketAddress])">socksProxy</span><span class="params">(<span name="socksProxy">socksProxy: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2014-12-02)</i> Use socksProxy(socksProxy: Option[SocketAddress])</p></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#stack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stack[Req1,Rep1](mk:com.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.Client[Req1,Rep1]):com.twitter.finagle.builder.ClientBuilder[Req1,Rep1,HasCluster,com.twitter.finagle.builder.ClientConfig.Yes,com.twitter.finagle.builder.ClientConfig.Yes]"></a>
       <a id="stack[Req1,Rep1]((Params)⇒Client[Req1,Rep1]):ClientBuilder[Req1,Rep1,HasCluster,Yes,Yes]"></a>
@@ -1406,14 +1455,17 @@ completeness.</p>
       </h4>
       <p class="shortcomment cmt">Overrides the stack and <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> that will be used
 by this builder.</p><div class="fullcomment"><div class="comment cmt"><p>Overrides the stack and <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> that will be used
-by this builder. The <code>mk</code> function is passed the state of configuration
-when <code>build</code> is called. There is no guarantee that all the builder parameters
-may be used by the client created by <code>mk</code>, it is up to the discretion of
-the client and protocol implementation. For example, most of connection pool
-parameters (hostConnectionLimit, etc) don't apply to <a href="../ThriftMux$.html" class="extype" name="com.twitter.finagle.ThriftMux">com.twitter.finagle.ThriftMux</a>.
-For this reason, the builder assumes that hostConnectionLimit is irrelevant
-when using <code>stack</code>.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+by this builder.
+</p></div><dl class="paramcmts block"><dt class="param">mk</dt><dd class="cmt"><p>A function that materializes a <code>Client</code> from a set of <code>Params</code>.
+<code>mk</code> is passed the state of configuration when <code>build</code> is called. There is
+no guarantee that all the builder parameters will be used by the client
+created by <code>mk</code>; it is up to the discretion of the client and protocol
+implementation. For example, the Mux protocol has no use for most
+connection pool parameters (e.g. <code>hostConnectionLimit</code>). Thus when
+configuring <a href="../ThriftMux$.html" class="extype" name="com.twitter.finagle.ThriftMux">com.twitter.finagle.ThriftMux</a> clients (via
+<code>.stack(ThriftMuxClient)</code>), such connection pool parameters will not be
+applied.
+</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use stack(client: Stack.Parameterized)</p></dd></dl></div>

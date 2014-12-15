@@ -88,7 +88,7 @@ item).
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.util.ConcurrentRingBuffer#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(size:Int)(implicitevidence$1:ClassManifest[T]):com.twitter.finagle.util.ConcurrentRingBuffer[T]"></a>
+      <a id="&lt;init&gt;(capacity:Int)(implicitevidence$1:scala.reflect.ClassTag[T]):com.twitter.finagle.util.ConcurrentRingBuffer[T]"></a>
       <a id="&lt;init&gt;:ConcurrentRingBuffer[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -96,7 +96,7 @@ item).
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ConcurrentRingBuffer</span><span class="params">(<span name="size">size: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.ClassManifest">ClassManifest</span>[<span class="extype" name="com.twitter.finagle.util.ConcurrentRingBuffer.T">T</span>]</span>)</span>
+        <span class="name">ConcurrentRingBuffer</span><span class="params">(<span name="capacity">capacity: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.reflect.ClassTag">ClassTag</span>[<span class="extype" name="com.twitter.finagle.util.ConcurrentRingBuffer.T">T</span>]</span>)</span>
       </span>
       </h4>
       
@@ -329,6 +329,21 @@ item).
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.util.ConcurrentRingBuffer#size" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="size:Int"></a>
+      <a id="size:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">size</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Current size of the buffer.</p><div class="fullcomment"><div class="comment cmt"><p>Current size of the buffer.</p><p>The returned value is only quiescently consistent; treat it
+as a fast approximation.
+</p></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -373,6 +388,21 @@ when the buffer is empty.
                 <span class="name">@tailrec</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.util.ConcurrentRingBuffer#tryPeek" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tryPeek:Option[T]"></a>
+      <a id="tryPeek:Option[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tryPeek</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.finagle.util.ConcurrentRingBuffer.T">T</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns the next element without changing the read position.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the next element without changing the read position.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the next element or None if buffer is empty
+</p></dd></dl></div>
     </li><li name="com.twitter.finagle.util.ConcurrentRingBuffer#tryPut" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tryPut(el:T):Boolean"></a>
       <a id="tryPut(T):Boolean"></a>

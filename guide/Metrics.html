@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.22.0 documentation</title>
+    <title>Metrics &mdash; Finagle 6.24.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.22.0',
+        VERSION:     '6.24.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.22.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.24.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -162,46 +162,168 @@ primarily to decide whether a host is available to make new connections to in th
 </dl>
 </div>
 </div>
-<div class="section" id="load-balancing">
-<h2>Load Balancing<a class="headerlink" href="#load-balancing" title="Permalink to this headline">¶</a></h2>
-<p id="loadbalancer-stats">These client stats expose the innards of what&#8217;s going on with load balancing, and the management
-of equivalent groups of hosts.</p>
-<div class="section" id="minimumsetcluster">
-<h3>MinimumSetCluster<a class="headerlink" href="#minimumsetcluster" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="service-discovery">
+<h2>Service Discovery<a class="headerlink" href="#service-discovery" title="Permalink to this headline">¶</a></h2>
+<p id="id1">These metrics track the state of name resolution and service discovery.</p>
+<div class="section" id="name-resolution">
+<h3>Name Resolution<a class="headerlink" href="#name-resolution" title="Permalink to this headline">¶</a></h3>
+<p>Finagle clients resolve <a class="reference internal" href="Names.html"><em>names</em></a> into sets of network
+addresses to which sockets can be opened. A number of the moving parts
+involved in this process are cached (i.e. <cite>Dtab</cite>s, <cite>Name</cite>s, and
+<cite>NameTree</cite>s). The following stats are recorded under the
+<cite>interpreter/{dtabcache,namecache,nametreecache}</cite> scopes to provide
+visibility into this caching.</p>
 <dl class="docutils">
-<dt><strong>censored_add</strong></dt>
-<dd>a counter of the number of times there is an attempt to add a server that is already in the
-minimum set to the cluster</dd>
-<dt><strong>censored_rem</strong></dt>
-<dd>a counter of the number of times there is an attempt to remove a server that is guaranteed to be
-in the minimum set to the cluster</dd>
-<dt><strong>missing</strong></dt>
-<dd>a gauge of the number of servers in the bag-difference between the supplementary cluster and the minimum set.
-this should be the number of servers that would be missing if we only used the supplementary cluster</dd>
-<dt><strong>additional</strong></dt>
-<dd>a gauge of the number of servers in the bag-difference between the minimum set and the supplementary cluster.
-this should be the number of servers that would be missing if we only used the minimum set</dd>
+<dt><strong>misses</strong></dt>
+<dd>A counter of the number of cache misses</dd>
+<dt><strong>misstime_ms</strong></dt>
+<dd>A histogram of the latency, in milliseconds, of invocation of
+<cite>Service</cite>s created on misses</dd>
+<dt><strong>evicts</strong></dt>
+<dd>A counter of the number of cache evictions</dd>
+<dt><strong>idle</strong></dt>
+<dd>A gauge of the number of cached idle <cite>ServiceFactory</cite>s</dd>
+<dt><strong>oneshots</strong></dt>
+<dd>A counter of the number of &#8220;one-off&#8221; <cite>ServiceFactory</cite>s that are
+created in the event that no idle <cite>ServiceFactory</cite>s are cached</dd>
 </dl>
 </div>
-<div class="section" id="heapbalancer">
-<h3>HeapBalancer<a class="headerlink" href="#heapbalancer" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="address-stabilization">
+<h3>Address Stabilization<a class="headerlink" href="#address-stabilization" title="Permalink to this headline">¶</a></h3>
+<p>Resolved addresses (represented as an instance of
+<cite>com.twitter.finagle.Addr</cite>) are stabilized in two ways:</p>
+<ol class="arabic simple">
+<li>ZooKeeper failures will not cause a previously bound address to fail.</li>
+<li>When a member leaves a cluster, its removal is delayed.</li>
+</ol>
+<p>Note that hosts added to a cluster are reflected immediately.</p>
+<p>The following metrics are scoped under the concatenation of <cite>zk2/</cite> and
+the ServerSet&#8217;s ZooKeeper path.</p>
+<dl class="docutils">
+<dt><strong>limbo</strong></dt>
+<dd>A gauge tracking the number of endpoints that are in &#8220;limbo&#8221;. When a
+member leaves a cluster, it is placed in limbo. Hosts in limbo are
+still presented to the load balancer as belonging to the cluster,
+but are staged for removal. They are removed if they do not recover
+within an interval bound by the ZooKeeper session timeout.</dd>
+<dt><strong>size</strong></dt>
+<dd>A gauge tracking the total size of the live cluster, not including
+members in limbo.</dd>
+<dt><strong>observed_serversets</strong></dt>
+<dd>A gauge tracking the number of clusters whose membership status is
+<em>currently</em> been tracked within the process. This metric differs from
+<cite>session_cache_size</cite> below in that it tracks live clusters rather
+than the total number of cached sessions.</dd>
+</dl>
+</div>
+<div class="section" id="zookeeper-diagnostics">
+<h3>ZooKeeper Diagnostics<a class="headerlink" href="#zookeeper-diagnostics" title="Permalink to this headline">¶</a></h3>
+<p>The following stats reflect diagnostic information about the ZooKeeper
+sessions opened for the purposes of service discovery.</p>
+<div class="section" id="under-the-zk2-scope">
+<h4>Under the `zk2` scope<a class="headerlink" href="#under-the-zk2-scope" title="Permalink to this headline">¶</a></h4>
+<dl class="docutils">
+<dt><strong>session_cache_size</strong></dt>
+<dd>A gauge tracking the number of distinct logical clusters whose
+membership status has been tracked within the process.</dd>
+<dt><strong>entries/read_ms</strong></dt>
+<dd>A histogram of the latency, in milliseconds, of reading entry znodes</dd>
+<dt><strong>entries/parse_ms</strong></dt>
+<dd>A histogram of the latency, in milliseconds, of parsing the data
+within entry znodes</dd>
+<dt><strong>vectors/read_ms</strong></dt>
+<dd>A histogram of the latency, in milliseconds, of reading vector znodes</dd>
+<dt><strong>vectors/parse_ms</strong></dt>
+<dd>A histogram of the latency, in milliseconds, of parsing the data
+within vector znodes</dd>
+</dl>
+</div>
+<div class="section" id="under-the-zkclient-scope">
+<h4>Under the `zkclient` scope<a class="headerlink" href="#under-the-zkclient-scope" title="Permalink to this headline">¶</a></h4>
+<dl class="docutils">
+<dt><strong>ephemeral_successes</strong></dt>
+<dd>A counter of the number successful ephemeral node creations</dd>
+<dt><strong>ephemeral_failures</strong></dt>
+<dd>A counter of the number failed ephemeral node creations</dd>
+<dt><strong>ephemeral_latency_ms</strong></dt>
+<dd>A histogram of the latency, in milliseconds, of ephemeral node creation</dd>
+<dt><strong>watch_successes</strong></dt>
+<dd>A counter of the number successful watch-related operations
+(i.e. &#8220;watch exists&#8221;, &#8220;get watch data&#8221;, and &#8220;get child watches&#8221;
+operations)</dd>
+<dt><strong>watch_failures</strong></dt>
+<dd>A counter of the number failed watch-related operations</dd>
+<dt><strong>watch_latency_ms</strong></dt>
+<dd>A histogram of the latency, in milliseconds, of watch-related operations</dd>
+<dt><strong>read_successes</strong></dt>
+<dd>A counter of the number successful ZooKeeper reads</dd>
+<dt><strong>read_failures</strong></dt>
+<dd>A counter of the number failed ZooKeeper reads</dd>
+<dt><strong>read_latency_ms</strong></dt>
+<dd>A histogram of the latency, in milliseconds, of ZooKeeper reads</dd>
+<dt><strong>write_successes</strong></dt>
+<dd>A counter of the number successful ZooKeeper writes</dd>
+<dt><strong>write_failures</strong></dt>
+<dd>A counter of the number failed ZooKeeper writes</dd>
+<dt><strong>write_latency_ms</strong></dt>
+<dd>A histogram of the latency, in milliseconds, of ZooKeeper writes</dd>
+<dt><strong>multi_successes</strong></dt>
+<dd>A counter of the number successful transactional operations</dd>
+<dt><strong>multi_failures</strong></dt>
+<dd>A counter of the number failed transactional operations</dd>
+<dt><strong>multi_latency_ms</strong></dt>
+<dd>A histogram of the latency, in milliseconds, of transactional operations</dd>
+<dt><strong>session_connects</strong></dt>
+<dd>A counter of the number of successful session connection operations</dd>
+<dt><strong>session_connects_readonly</strong></dt>
+<dd>A counter of the number of successful read-only session connection operations</dd>
+<dt><strong>session_auth_failures</strong></dt>
+<dd>A counter of the number of session authentication failures</dd>
+<dt><strong>session_disconnects</strong></dt>
+<dd>A counter of the number of session disconnections</dd>
+<dt><strong>session_expirations</strong></dt>
+<dd>A counter of the number of session expirations</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="section" id="load-balancing">
+<h2>Load Balancing<a class="headerlink" href="#load-balancing" title="Permalink to this headline">¶</a></h2>
+<p id="loadbalancer-stats">The client stats under the <cite>loadbalancer</cite> scope expose the innards of
+what&#8217;s going on with load balancing, and the management of equivalent
+groups of hosts.</p>
+<div class="section" id="all-balancers">
+<h3>All Balancers<a class="headerlink" href="#all-balancers" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>size</strong></dt>
-<dd>a gauge of the number of nodes in the heap</dd>
-<dt><strong>adds</strong></dt>
-<dd>a counter of the number of adds to the heap</dd>
-<dt><strong>removes</strong></dt>
-<dd>a counter of the number of removes to the heap</dd>
+<dd>A gauge of the number of nodes being balanced across</dd>
 <dt><strong>available</strong></dt>
-<dd>a gauge of the number of available nodes in the heap</dd>
+<dd>A gauge of the number of <em>available</em> nodes being balanced across</dd>
 <dt><strong>load</strong></dt>
-<dd>a gauge of the total load over all nodes in the heap</dd>
+<dd>A gauge of the total load over all nodes being balanced across</dd>
+<dt><strong>meanweight</strong></dt>
+<dd>A gauge tracking the arithmetic mean of the weights of the endpoints
+being load-balanced across. Does not apply to
+<cite>com.twitter.finagle.loadbalancer.HeapBalancer</cite>.</dd>
+<dt><strong>adds</strong></dt>
+<dd>A counter of the number of hosts added to the loadbalancer</dd>
+<dt><strong>removes</strong></dt>
+<dd>A counter of the number of hosts removed from the loadbalancer</dd>
+</dl>
+</div>
+<div class="section" id="apertureloadbandbalancer">
+<h3>ApertureLoadBandBalancer<a class="headerlink" href="#apertureloadbandbalancer" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>aperture</strong></dt>
+<dd>A gauge of the width of the window over which endpoints are
+load-balanced</dd>
 </dl>
 </div>
 </div>
 <div class="section" id="fail-fast">
 <h2>Fail Fast<a class="headerlink" href="#fail-fast" title="Permalink to this headline">¶</a></h2>
-<p id="fail-fast-stats">These client stats give insight into how finagle handles services where it can&#8217;t make a connection.</p>
+<p id="fail-fast-stats">The client stats under the <cite>failfast</cite> scope give insight into how
+finagle handles services where it can&#8217;t make a connection.</p>
 <div class="section" id="failfastfactory">
 <h3>FailFastFactory<a class="headerlink" href="#failfastfactory" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
@@ -216,8 +338,8 @@ this should be the number of servers that would be missing if we only used the m
 </div>
 <div class="section" id="idle-apoptosis">
 <h2>Idle Apoptosis<a class="headerlink" href="#idle-apoptosis" title="Permalink to this headline">¶</a></h2>
-<p id="idle-apoptosis-stats">These client stats keep track of how frequently services&#8211;thin wrappers around connections&#8211;
-die from being idle for too long.</p>
+<p id="idle-apoptosis-stats">These client stats keep track of how frequently
+<a class="reference internal" href="ServicesAndFilters.html"><em>Services</em></a> are closed due to prolonged idleness.</p>
 <div class="section" id="expiringservice">
 <h3>ExpiringService<a class="headerlink" href="#expiringservice" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
@@ -337,6 +459,8 @@ this should be the number of timeouts when writing</dd>
 <dd>a gauge of the length of time the socket has been unwritable in the channel</dd>
 <dt><strong>connections</strong></dt>
 <dd>a gauge of the total number of connections that are currently open in the channel</dd>
+<dt><strong>exn/&lt;exception_name&gt;+</strong></dt>
+<dd>a counter of the number of times a specific exception has been thrown within a Netty pipeline</dd>
 </dl>
 </div>
 <div class="section" id="idlechannelhandler">
@@ -357,26 +481,6 @@ watermark of connections full and no connections are idle.</dd>
 <dt><strong>closed</strong></dt>
 <dd>a counter of the number of connections that have been closed for being idle</dd>
 </dl>
-</div>
-</div>
-<div class="section" id="serversets">
-<h2>ServerSets<a class="headerlink" href="#serversets" title="Permalink to this headline">¶</a></h2>
-<p id="serverset-stats">These metrics track the current state of ServerSets if you are using them for name resolution. They are scoped under &#8220;zk2&#8221;.</p>
-<div class="section" id="stabilizing-serversets">
-<h3>Stabilizing ServerSets<a class="headerlink" href="#stabilizing-serversets" title="Permalink to this headline">¶</a></h3>
-<p>Addresses that are resolved through ServerSets are stabilized in two ways:</p>
-<ol class="arabic simple">
-<li>ZooKeeper failures will not cause a previously bound address to fail.</li>
-<li>When a member leaves a ServerSet, its removal is delayed.</li>
-</ol>
-<p>Note that additions to a ServerSet are reflected immediately.</p>
-<p>These metrics are scoped under the ServerSet&#8217;s ZooKeeper path.</p>
-<p><strong>limbo</strong></p>
-<p>When a member leaves a ServerSet, it is placed in limbo. Hosts in limbo are still presented
-as belonging to the ServerSet, but are being staged for removal, within an interval bound by
-the ZooKeeper session timeout.</p>
-<p><strong>size</strong></p>
-<p>The current size of the live ServerSet, not including members in limbo.</p>
 </div>
 </div>
 </div>
@@ -413,9 +517,19 @@ the ZooKeeper session timeout.</p>
 <li><a class="reference internal" href="#statsservicefactory">StatsServiceFactory</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#service-discovery">Service Discovery</a><ul>
+<li><a class="reference internal" href="#name-resolution">Name Resolution</a></li>
+<li><a class="reference internal" href="#address-stabilization">Address Stabilization</a></li>
+<li><a class="reference internal" href="#zookeeper-diagnostics">ZooKeeper Diagnostics</a><ul>
+<li><a class="reference internal" href="#under-the-zk2-scope">Under the `zk2` scope</a></li>
+<li><a class="reference internal" href="#under-the-zkclient-scope">Under the `zkclient` scope</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><a class="reference internal" href="#load-balancing">Load Balancing</a><ul>
-<li><a class="reference internal" href="#minimumsetcluster">MinimumSetCluster</a></li>
-<li><a class="reference internal" href="#heapbalancer">HeapBalancer</a></li>
+<li><a class="reference internal" href="#all-balancers">All Balancers</a></li>
+<li><a class="reference internal" href="#apertureloadbandbalancer">ApertureLoadBandBalancer</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#fail-fast">Fail Fast</a><ul>
@@ -444,10 +558,6 @@ the ZooKeeper session timeout.</p>
 <li><a class="reference internal" href="#channelstatshandler">ChannelStatsHandler</a></li>
 <li><a class="reference internal" href="#idlechannelhandler">IdleChannelHandler</a></li>
 <li><a class="reference internal" href="#idleconnectionfilter">IdleConnectionFilter</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#serversets">ServerSets</a><ul>
-<li><a class="reference internal" href="#stabilizing-serversets">Stabilizing ServerSets</a></li>
 </ul>
 </li>
 </ul>

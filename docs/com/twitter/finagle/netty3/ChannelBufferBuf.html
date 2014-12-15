@@ -24,32 +24,30 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../../../../lib/class_big.png" />
+        <a href="ChannelBufferBuf$.html" title="Go to companion"><img src="../../../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.netty3">netty3</a></p>
-        <h1>ChannelBufferBuf</h1>
+        <h1><a href="ChannelBufferBuf$.html" title="Go to companion">ChannelBufferBuf</a></h1>
       </div>
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ChannelBufferBuf</span><span class="params">(<span name="buf">buf: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <span class="extype" name="com.twitter.io.Buf">Buf</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">ChannelBufferBuf</span><span class="result"> extends <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <span class="extype" name="com.twitter.io.Buf">com.twitter.io.Buf</span> wrapper for
 Netty <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffers</span>.
-</p></div><dl class="paramcmts block"><dt class="param">buf</dt><dd class="cmt"><p>The <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">org.jboss.netty.buffer.ChannelBuffer</span> to be wrapped in a
-<span class="extype" name="com.twitter.io.Buf">com.twitter.io.Buf</span> interface.
-</p></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Since <code>ChannelBuffer</code>s are mutable, modifying the wrapped buffer
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Since <code>ChannelBuffer</code>s are mutable, modifying the wrapped buffer
 within <code>slice</code>s of a <code>ChannelBufferBuf</code> will modify the original wrapped
 <code>ChannelBuffer</code>. Similarly, modifications to the original buffer will be
 reflected in slices.
 </p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -67,7 +65,7 @@ reflected in slices.
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.netty3.ChannelBufferBuf"><span>ChannelBufferBuf</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.twitter.io.Buf"><span>Buf</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.netty3.ChannelBufferBuf"><span>ChannelBufferBuf</span></li><li class="in" name="com.twitter.io.Buf"><span>Buf</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -88,7 +86,7 @@ reflected in slices.
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.netty3.ChannelBufferBuf#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(buf:org.jboss.netty.buffer.ChannelBuffer):com.twitter.finagle.netty3.ChannelBufferBuf"></a>
+      <a id="&lt;init&gt;(underlying:org.jboss.netty.buffer.ChannelBuffer):com.twitter.finagle.netty3.ChannelBufferBuf"></a>
       <a id="&lt;init&gt;:ChannelBufferBuf"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -96,10 +94,10 @@ reflected in slices.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ChannelBufferBuf</span><span class="params">(<span name="buf">buf: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span>
+        <span class="name">ChannelBufferBuf</span><span class="params">(<span name="underlying">underlying: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span>
       </span>
       </h4>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">buf</dt><dd class="cmt"><p>The <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">org.jboss.netty.buffer.ChannelBuffer</span> to be wrapped in a
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">underlying</dt><dd class="cmt"><p>The <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">org.jboss.netty.buffer.ChannelBuffer</span> to be wrapped in a
 <span class="extype" name="com.twitter.io.Buf">com.twitter.io.Buf</span> interface.
 </p></dd></dl></div>
     </li></ol>
@@ -189,20 +187,6 @@ reflected in slices.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.ChannelBufferBuf#buf" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="buf:org.jboss.netty.buffer.ChannelBuffer"></a>
-      <a id="buf:ChannelBuffer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">buf</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">The <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">org.jboss.netty.buffer.ChannelBuffer</span> to be wrapped in a
-<span class="extype" name="com.twitter.io.Buf">com.twitter.io.Buf</span> interface.</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -223,7 +207,7 @@ reflected in slices.
               
         </dd></dl></div>
     </li><li name="com.twitter.io.Buf#concat" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="concat(right:&lt;?&gt;):com.twitter.io.Buf"></a>
+      <a id="concat(right:com.twitter.io.Buf):com.twitter.io.Buf"></a>
       <a id="concat(Buf):Buf"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -235,6 +219,19 @@ reflected in slices.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Buf</dd></dl></div>
+    </li><li name="com.twitter.io.Buf#copiedByteArray" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="copiedByteArray:Array[Byte]"></a>
+      <a id="copiedByteArray:Array[Byte]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">copiedByteArray</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Buf</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -410,6 +407,61 @@ reflected in slices.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.netty3.ChannelBufferBuf#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.ChannelBufferBuf">ChannelBufferBuf</a> → AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.netty3.ChannelBufferBuf#underlying" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="underlying:org.jboss.netty.buffer.ChannelBuffer"></a>
+      <a id="underlying:ChannelBuffer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">underlying</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">org.jboss.netty.buffer.ChannelBuffer</span> to be wrapped in a
+<span class="extype" name="com.twitter.io.Buf">com.twitter.io.Buf</span> interface.</p><div class="fullcomment"><div class="comment cmt"><p>The <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">org.jboss.netty.buffer.ChannelBuffer</span> to be wrapped in a
+<span class="extype" name="com.twitter.io.Buf">com.twitter.io.Buf</span> interface.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li name="com.twitter.io.Buf#unsafeByteArray" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="unsafeByteArray:Array[Byte]"></a>
+      <a id="unsafeByteArray:Array[Byte]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unsafeByteArray</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Buf</dd></dl></div>
+    </li><li name="com.twitter.finagle.netty3.ChannelBufferBuf#unsafeByteArrayBuf" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="unsafeByteArrayBuf:Option[com.twitter.io.Buf.ByteArray]"></a>
+      <a id="unsafeByteArrayBuf:Option[ByteArray]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unsafeByteArrayBuf</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.io.Buf.ByteArray">ByteArray</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.ChannelBufferBuf">ChannelBufferBuf</a> → Buf</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -489,15 +541,7 @@ reflected in slices.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.Serializable">
-              <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
-            </div><div class="parent" name="java.io.Serializable">
-              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
-            </div><div class="parent" name="scala.Product">
-              <h3>Inherited from <span class="extype" name="scala.Product">Product</span></h3>
-            </div><div class="parent" name="scala.Equals">
-              <h3>Inherited from <span class="extype" name="scala.Equals">Equals</span></h3>
-            </div><div class="parent" name="com.twitter.io.Buf">
+        <div class="parent" name="com.twitter.io.Buf">
               <h3>Inherited from <span class="extype" name="com.twitter.io.Buf">Buf</span></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>

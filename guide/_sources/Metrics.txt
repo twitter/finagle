@@ -33,13 +33,23 @@ having trouble making services.
 
 .. include:: metrics/Construction.rst
 
+Service Discovery
+-----------------
+
+.. _service_discovery:
+
+These metrics track the state of name resolution and service discovery.
+
+.. include:: metrics/ServiceDiscovery.rst
+
 Load Balancing
 --------------
 
 .. _loadbalancer_stats:
 
-These client stats expose the innards of what's going on with load balancing, and the management
-of equivalent groups of hosts.
+The client stats under the `loadbalancer` scope expose the innards of
+what's going on with load balancing, and the management of equivalent
+groups of hosts.
 
 .. include:: metrics/LoadBalancing.rst
 
@@ -48,7 +58,8 @@ Fail Fast
 
 .. _fail_fast_stats:
 
-These client stats give insight into how finagle handles services where it can't make a connection.
+The client stats under the `failfast` scope give insight into how
+finagle handles services where it can't make a connection.
 
 .. include:: metrics/FailFast.rst
 
@@ -57,8 +68,8 @@ Idle Apoptosis
 
 .. _idle_apoptosis_stats:
 
-These client stats keep track of how frequently services--thin wrappers around connections--
-die from being idle for too long.
+These client stats keep track of how frequently
+:doc:`Services <ServicesAndFilters>` are closed due to prolonged idleness.
 
 .. include:: metrics/IdleApoptosis.rst
 
@@ -90,12 +101,3 @@ Understanding these stats often requires deep knowledge of the protocol, or indi
 (e.g. Netty) internals.
 
 .. include:: metrics/Transport.rst
-
-ServerSets
-----------
-
-.. _serverset_stats:
-
-These metrics track the current state of ServerSets if you are using them for name resolution. They are scoped under "zk2".
-
-.. include:: metrics/ServerSets.rst

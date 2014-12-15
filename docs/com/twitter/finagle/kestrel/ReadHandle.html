@@ -45,7 +45,7 @@ readHandle.messages foreach { msg <span class="kw">=&gt;</span>
   <span class="kw">try</span> {
     System.out.println(msg.bytes.toString(<span class="lit">"UTF-8"</span>))
   } <span class="kw">finally</span> {
-    msg.ack() <span class="cmt">// if we don't do this, no more msgs will come to us</span>
+    msg.ack() <span class="cmt">// if we don't do this, no more messages will come to us</span>
   }
 }
 readHandle.error foreach { System.error.println(<span class="lit">"zomg! got an error "</span> + _.getMessage) }</pre></div><div class="toggleContainer block">

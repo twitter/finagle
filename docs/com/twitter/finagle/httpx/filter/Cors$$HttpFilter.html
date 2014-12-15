@@ -1,0 +1,756 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>HttpFilter - com.twitter.finagle.httpx.filter.Cors.HttpFilter</title>
+          <meta name="description" content="HttpFilter - com.twitter.finagle.httpx.filter.Cors.HttpFilter" />
+          <meta name="keywords" content="HttpFilter com.twitter.finagle.httpx.filter.Cors.HttpFilter" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../index.html';
+            var hash = 'com.twitter.finagle.httpx.filter.Cors$$HttpFilter';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="type">
+      <div id="definition">
+        <img src="../../../../../lib/class_big.png" />
+        <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.httpx">httpx</a>.<a href="package.html" class="extype" name="com.twitter.finagle.httpx.filter">filter</a>.<a href="Cors$.html" class="extype" name="com.twitter.finagle.httpx.filter.Cors">Cors</a></p>
+        <h1>HttpFilter</h1>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">HttpFilter</span><span class="result"> extends <a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>, <a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>An HTTP filter that handles preflight (OPTIONS) requests and sets CORS response headers
+as described in the W3C CORS spec.
+</p></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>, <a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>], (<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="com.twitter.finagle.httpx.filter.Cors.HttpFilter"><span>HttpFilter</span></li><li class="in" name="com.twitter.finagle.Filter"><span>Filter</span></li><li class="in" name="scala.Function2"><span>Function2</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="com.twitter.finagle.httpx.filter.Cors.HttpFilter#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(policy:com.twitter.finagle.httpx.filter.Cors.Policy):com.twitter.finagle.httpx.filter.Cors.HttpFilter"></a>
+      <a id="&lt;init&gt;:HttpFilter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">HttpFilter</span><span class="params">(<span name="policy">policy: <a href="Cors$$Policy.html" class="extype" name="com.twitter.finagle.httpx.filter.Cors.Policy">Policy</a></span>)</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:AnyRef):Boolean"></a>
+      <a id="!=(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:AnyRef):Boolean"></a>
+      <a id="==(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.httpx.filter.Cors.HttpFilter.Preflight" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Preflight"></a>
+      <a id="Preflight:Preflight"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Cors$$HttpFilter$Preflight$.html"><span class="name">Preflight</span></a>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
+    </li><li name="com.twitter.finagle.httpx.filter.Cors.HttpFilter#addExposedHeaders" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addExposedHeaders(response:com.twitter.finagle.httpx.Response):com.twitter.finagle.httpx.Response"></a>
+      <a id="addExposedHeaders(Response):Response"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addExposedHeaders</span><span class="params">(<span name="response">response: <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a></span>)</span><span class="result">: <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">If the list of exposed headers is not empty add one or more Access-Control-Expose-
+Headers headers, with as values the header field names given in the list of exposed
+headers.</p><div class="fullcomment"><div class="comment cmt"><p>If the list of exposed headers is not empty add one or more Access-Control-Expose-
+Headers headers, with as values the header field names given in the list of exposed
+headers.</p><p>By not adding the appropriate headers resource can also clear the preflight result
+cache of all entries where origin is a case-sensitive match for the value of the
+Origin header and url is a case-sensitive match for the URL of the resource.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
+    </li><li name="com.twitter.finagle.Filter#andThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="andThen(factory:com.twitter.finagle.ServiceFactory[ReqOut,RepIn]):com.twitter.finagle.ServiceFactory[ReqIn,RepOut]"></a>
+      <a id="andThen(ServiceFactory[Request,Response]):ServiceFactory[Request,Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">andThen</span><span class="params">(<span name="factory">factory: <a href="../../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>)</span><span class="result">: <a href="../../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Filter#andThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="andThen(f:ReqOut=&gt;com.twitter.util.Future[RepIn]):ReqIn=&gt;com.twitter.util.Future[RepOut]"></a>
+      <a id="andThen((Request)⇒Future[Response]):(Request)⇒Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">andThen</span><span class="params">(<span name="f">f: (<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>)</span><span class="result">: (<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Filter#andThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="andThen(service:com.twitter.finagle.Service[ReqOut,RepIn]):com.twitter.finagle.Service[ReqIn,RepOut]"></a>
+      <a id="andThen(Service[Request,Response]):Service[Request,Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">andThen</span><span class="params">(<span name="service">service: <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>)</span><span class="result">: <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Terminates a filter chain in a service.</p><div class="fullcomment"><div class="comment cmt"><p>Terminates a filter chain in a service. For example,</p><p>    myFilter.andThen(myService)
+</p></div><dl class="paramcmts block"><dt class="param">service</dt><dd class="cmt"><p>a service that takes the output request type and the input response type.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Filter#andThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="andThen[Req2,Rep2](next:com.twitter.finagle.Filter[ReqOut,RepIn,Req2,Rep2]):com.twitter.finagle.Filter[ReqIn,RepOut,Req2,Rep2]"></a>
+      <a id="andThen[Req2,Rep2](Filter[Request,Response,Req2,Rep2]):Filter[Request,Response,Req2,Rep2]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">andThen</span><span class="tparams">[<span name="Req2">Req2</span>, <span name="Rep2">Rep2</span>]</span><span class="params">(<span name="next">next: <a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Rep2">Rep2</span>]</span>)</span><span class="result">: <a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Rep2">Rep2</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Chains a series of filters together:</p><div class="fullcomment"><div class="comment cmt"><p>Chains a series of filters together:</p><p>   myModularService = handleExceptions.andThen(thrift2Pojo.andThen(parseString))</p><p><b>Note:</b> synchronously thrown exceptions in the underlying service are automatically
+lifted into Future.exception.
+</p></div><dl class="paramcmts block"><dt class="param">next</dt><dd class="cmt"><p>another filter to follow after this one</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Filter#andThenIf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="andThenIf[Req2&gt;:ReqOut,Rep2&lt;:RepIn](condAndFilter:(Boolean,com.twitter.finagle.Filter[ReqOut,RepIn,Req2,Rep2])):com.twitter.finagle.Filter[ReqIn,RepOut,Req2,Rep2]"></a>
+      <a id="andThenIf[Req2&gt;:Request,Rep2&lt;:Response]((Boolean,Filter[Request,Response,Req2,Rep2])):Filter[Request,Response,Req2,Rep2]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">andThenIf</span><span class="tparams">[<span name="Req2">Req2 &gt;: <a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a></span>, <span name="Rep2">Rep2 &lt;: <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a></span>]</span><span class="params">(<span name="condAndFilter">condAndFilter: (<span class="extype" name="scala.Boolean">Boolean</span>, <a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>, <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Rep2">Rep2</span>])</span>)</span><span class="result">: <a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>, <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Rep2">Rep2</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Conditionally propagates requests down the filter chain.</p><div class="fullcomment"><div class="comment cmt"><p>Conditionally propagates requests down the filter chain. This may
+useful if you are statically wiring together filter chains based
+on a configuration file, for instance.
+</p></div><dl class="paramcmts block"><dt class="param">condAndFilter</dt><dd class="cmt"><p>a tuple of boolean and filter.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.httpx.filter.Cors.HttpFilter#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apply(request:com.twitter.finagle.httpx.Request,service:com.twitter.finagle.Service[com.twitter.finagle.httpx.Request,com.twitter.finagle.httpx.Response]):com.twitter.util.Future[com.twitter.finagle.httpx.Response]"></a>
+      <a id="apply(Request,Service[Request,Response]):Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="request">request: <a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a></span>, <span name="service">service: <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Fully handle preflight requests.</p><div class="fullcomment"><div class="comment cmt"><p>Fully handle preflight requests.  If a preflight request is deemed to be unacceptable,
+a 200 OK response is served without CORS headers.</p><p>Adds CORS response headers onto all non-preflight requests that have the 'Origin' header
+set to a value that is allowed by the Policy.</p></div><dl class="paramcmts block"><dt class="param">request</dt><dd class="cmt"><p>the input request type
+</p></dd><dt class="param">service</dt><dd class="cmt"><p>a service that takes the output request type and the input response type
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.httpx.filter.Cors.HttpFilter">HttpFilter</a> → <a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a> → Function2</dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.Function2#curried" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="curried:T1=&gt;(T2=&gt;R)"></a>
+      <a id="curried:(Request)⇒(Service[Request,Response])⇒Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">curried</span><span class="result">: (<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>) ⇒ (<a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2</dd><dt>Annotations</dt><dd>
+                <span class="name">@unspecialized</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.httpx.filter.Cors.HttpFilter#getHeaders" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getHeaders(request:com.twitter.finagle.httpx.Request):Seq[String]"></a>
+      <a id="getHeaders(Request):Seq[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getHeaders</span><span class="params">(<span name="request">request: <a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a></span>)</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Let header field-names be the values as result of parsing the
+Access-Control-Request-Headers headers.</p><div class="fullcomment"><div class="comment cmt"><p>Let header field-names be the values as result of parsing the
+Access-Control-Request-Headers headers. If there are no Access-Control-Request-Headers
+headers let header field-names be the empty list.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
+    </li><li name="com.twitter.finagle.httpx.filter.Cors.HttpFilter#getMethod" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getMethod(request:com.twitter.finagle.httpx.Request):Option[String]"></a>
+      <a id="getMethod(Request):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getMethod</span><span class="params">(<span name="request">request: <a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Let method be the value as result of parsing the Access-Control-Request-Method header.</p><div class="fullcomment"><div class="comment cmt"><p>Let method be the value as result of parsing the Access-Control-Request-Method header.</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
+    </li><li name="com.twitter.finagle.httpx.filter.Cors.HttpFilter#getOrigin" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getOrigin(request:com.twitter.finagle.httpx.Request):Option[String]"></a>
+      <a id="getOrigin(Request):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getOrigin</span><span class="params">(<span name="request">request: <a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
+    </li><li name="com.twitter.finagle.httpx.filter.Cors.HttpFilter#handlePreflight" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="handlePreflight(request:com.twitter.finagle.httpx.Request):Option[com.twitter.finagle.httpx.Response]"></a>
+      <a id="handlePreflight(Request):Option[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">handlePreflight</span><span class="params">(<span name="request">request: <a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">http://www.</p><div class="fullcomment"><div class="comment cmt"><p>http://www.w3.org/TR/cors/#resource-preflight-requests</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
+    </li><li name="com.twitter.finagle.httpx.filter.Cors.HttpFilter#handleSimple" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="handleSimple(request:com.twitter.finagle.httpx.Request,response:com.twitter.finagle.httpx.Response):com.twitter.finagle.httpx.Response"></a>
+      <a id="handleSimple(Request,Response):Response"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">handleSimple</span><span class="params">(<span name="request">request: <a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a></span>, <span name="response">response: <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a></span>)</span><span class="result">: <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">http://www.</p><div class="fullcomment"><div class="comment cmt"><p>http://www.w3.org/TR/cors/#resource-requests</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.httpx.filter.Cors.HttpFilter#setHeaders" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setHeaders(response:com.twitter.finagle.httpx.Response,headers:Seq[String]):com.twitter.finagle.httpx.Response"></a>
+      <a id="setHeaders(Response,Seq[String]):Response"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setHeaders</span><span class="params">(<span name="response">response: <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a></span>, <span name="headers">headers: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">If each of the header field-names is a simple header and none is Content-Type, than this step
+may be skipped.</p><div class="fullcomment"><div class="comment cmt"><p>If each of the header field-names is a simple header and none is Content-Type, than this step
+may be skipped.</p><p>Add one or more Access-Control-Allow-Headers headers consisting of (a subset of) the list of
+headers.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
+    </li><li name="com.twitter.finagle.httpx.filter.Cors.HttpFilter#setMaxAge" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setMaxAge(response:com.twitter.finagle.httpx.Response):com.twitter.finagle.httpx.Response"></a>
+      <a id="setMaxAge(Response):Response"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setMaxAge</span><span class="params">(<span name="response">response: <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a></span>)</span><span class="result">: <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Optionally add a single Access-Control-Max-Age header with as value the amount of seconds
+the user agent is allowed to cache the result of the request.</p><div class="fullcomment"><div class="comment cmt"><p>Optionally add a single Access-Control-Max-Age header with as value the amount of seconds
+the user agent is allowed to cache the result of the request.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
+    </li><li name="com.twitter.finagle.httpx.filter.Cors.HttpFilter#setMethod" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setMethod(response:com.twitter.finagle.httpx.Response,methods:Seq[String]):com.twitter.finagle.httpx.Response"></a>
+      <a id="setMethod(Response,Seq[String]):Response"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setMethod</span><span class="params">(<span name="response">response: <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a></span>, <span name="methods">methods: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">If method is a simple method this step may be skipped.</p><div class="fullcomment"><div class="comment cmt"><p>If method is a simple method this step may be skipped.</p><p>Add one or more Access-Control-Allow-Methods headers consisting of (a subset of) the list of
+methods.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
+    </li><li name="com.twitter.finagle.httpx.filter.Cors.HttpFilter#setOriginAndCredentials" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setOriginAndCredentials(response:com.twitter.finagle.httpx.Response,origin:String):com.twitter.finagle.httpx.Response"></a>
+      <a id="setOriginAndCredentials(Response,String):Response"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setOriginAndCredentials</span><span class="params">(<span name="response">response: <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a></span>, <span name="origin">origin: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">If the resource supports credentials add a single Access-Control-Allow-Origin
+header, with the value of the Origin header as value, and add a single
+Access-Control-Allow-Credentials header with the case-sensitive string &quot;true&quot; as
+value.</p><div class="fullcomment"><div class="comment cmt"><p>If the resource supports credentials add a single Access-Control-Allow-Origin
+header, with the value of the Origin header as value, and add a single
+Access-Control-Allow-Credentials header with the case-sensitive string &quot;true&quot; as
+value.</p><p>Otherwise, add a single Access-Control-Allow-Origin header, with either the value
+of the Origin header or the string &quot;*&quot; as value.</p><p>n.b. The string &quot;*&quot; cannot be used for a resource that supports credentials.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
+    </li><li name="com.twitter.finagle.httpx.filter.Cors.HttpFilter#setVary" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setVary(response:com.twitter.finagle.httpx.Response):com.twitter.finagle.httpx.Response"></a>
+      <a id="setVary(Response):Response"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setVary</span><span class="params">(<span name="response">response: <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a></span>)</span><span class="result">: <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Resources that wish to enable themselves to be shared with multiple Origins but do not
+respond uniformly with &quot;*&quot; must in practice generate the Access-Control-Allow-Origin header
+dynamically in response to every request they wish to allow.</p><div class="fullcomment"><div class="comment cmt"><p>Resources that wish to enable themselves to be shared with multiple Origins but do not
+respond uniformly with &quot;*&quot; must in practice generate the Access-Control-Allow-Origin header
+dynamically in response to every request they wish to allow. As a consequence, authors of
+such resources should send a Vary: Origin HTTP header or provide other appropriate control
+directives to prevent caching of such responses, which may be inaccurate if re-used across-
+origins.
+</p></div></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.Function2#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2 → AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Function2#tupled" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tupled:((T1,T2))=&gt;R"></a>
+      <a id="tupled:((Request,Service[Request,Response]))⇒Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tupled</span><span class="result">: ((<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>])) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2</dd><dt>Annotations</dt><dd>
+                <span class="name">@unspecialized</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="com.twitter.finagle.Filter">
+              <h3>Inherited from <a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>, <a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</h3>
+            </div><div class="parent" name="scala.Function2">
+              <h3>Inherited from (<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../lib/template.js"></script>
+    </body>
+      </html>

@@ -35,13 +35,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">BufferingPool</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.pool.BufferingPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.BufferingPool.Rep">Rep</span>]</span>
+        <span class="name">BufferingPool</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a>[<span class="extype" name="com.twitter.finagle.pool.BufferingPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.BufferingPool.Rep">Rep</span>]</span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.pool.BufferingPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.BufferingPool.Rep">Rep</span>], <span class="extype" name="com.twitter.util.Closable">Closable</span>, (<a href="../ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.pool.BufferingPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.BufferingPool.Rep">Rep</span>]], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="../ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a>[<span class="extype" name="com.twitter.finagle.pool.BufferingPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.BufferingPool.Rep">Rep</span>], <a href="../ProxyServiceFactory.html" class="extype" name="com.twitter.finagle.ProxyServiceFactory">ProxyServiceFactory</a>[<span class="extype" name="com.twitter.finagle.pool.BufferingPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.BufferingPool.Rep">Rep</span>], <span class="extype" name="scala.Proxy">Proxy</span>, <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.pool.BufferingPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.BufferingPool.Rep">Rep</span>], <span class="extype" name="com.twitter.util.Closable">Closable</span>, (<a href="../ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.pool.BufferingPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.BufferingPool.Rep">Rep</span>]], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -59,7 +59,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.pool.BufferingPool"><span>BufferingPool</span></li><li class="in" name="com.twitter.finagle.ServiceFactory"><span>ServiceFactory</span></li><li class="in" name="com.twitter.util.Closable"><span>Closable</span></li><li class="in" name="scala.Function1"><span>Function1</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.pool.BufferingPool"><span>BufferingPool</span></li><li class="in" name="com.twitter.finagle.ServiceFactoryProxy"><span>ServiceFactoryProxy</span></li><li class="in" name="com.twitter.finagle.ProxyServiceFactory"><span>ProxyServiceFactory</span></li><li class="in" name="scala.Proxy"><span>Proxy</span></li><li class="in" name="com.twitter.finagle.ServiceFactory"><span>ServiceFactory</span></li><li class="in" name="com.twitter.util.Closable"><span>Closable</span></li><li class="in" name="scala.Function1"><span>Function1</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -198,7 +198,7 @@
 underlying channel and the returned service has exclusive use of
 its underlying connection. To relinquish the use of the reserved
 Service, the user must call Service.close().
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.pool.BufferingPool">BufferingPool</a> → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> → Function1</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.pool.BufferingPool">BufferingPool</a> → <a href="../ProxyServiceFactory.html" class="extype" name="com.twitter.finagle.ProxyServiceFactory">ProxyServiceFactory</a> → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> → Function1</dd></dl></div>
     </li><li name="com.twitter.finagle.ServiceFactory#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply():com.twitter.util.Future[com.twitter.finagle.Service[Req,Rep]]"></a>
       <a id="apply():Future[Service[Req,Rep]]"></a>
@@ -256,7 +256,7 @@ Service, the user must call Service.close().
         <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.pool.BufferingPool">BufferingPool</a> → Closable</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.pool.BufferingPool">BufferingPool</a> → <a href="../ProxyServiceFactory.html" class="extype" name="com.twitter.finagle.ProxyServiceFactory">ProxyServiceFactory</a> → Closable</dd></dl></div>
     </li><li name="com.twitter.util.Closable#close" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="close(after:com.twitter.util.Duration):com.twitter.util.Future[Unit]"></a>
       <a id="close(Duration):Future[Unit]"></a>
@@ -312,8 +312,8 @@ Service, the user must call Service.close().
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="equals(x$1:Any):Boolean"></a>
+    </li><li name="scala.Proxy#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(that:Any):Boolean"></a>
       <a id="equals(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -321,10 +321,10 @@ Service, the user must call Service.close().
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">equals</span><span class="params">(<span name="that">that: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Proxy → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -374,7 +374,7 @@ only need to modify or operate on the underlying service.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="scala.Proxy#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
       <h4 class="signature">
@@ -386,8 +386,8 @@ only need to modify or operate on the underlying service.
         <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.pool.BufferingPool#isAvailable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Proxy → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.ProxyServiceFactory#isAvailable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isAvailable:Boolean"></a>
       <a id="isAvailable:Boolean"></a>
       <h4 class="signature">
@@ -399,7 +399,9 @@ only need to modify or operate on the underlying service.
         <span class="name">isAvailable</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.pool.BufferingPool">BufferingPool</a> → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
+      <p class="shortcomment cmt">&lt;invalid inheritdoc annotation&gt;</p><div class="fullcomment"><div class="comment cmt"><p>&lt;invalid inheritdoc annotation&gt;</p><p><a href="../ServiceFactoryProxy.html#status:com.twitter.finagle.Status" class="extmbr" name="com.twitter.finagle.ServiceFactoryProxy#status">ServiceFactoryProxy.status</a> and <a href="../ServiceFactoryProxy.html#isAvailable:Boolean" class="extmbr" name="com.twitter.finagle.ServiceFactoryProxy#isAvailable">ServiceFactoryProxy.isAvailable</a> must
+be overridden together, pending CSL-1336.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ProxyServiceFactory.html" class="extype" name="com.twitter.finagle.ProxyServiceFactory">ProxyServiceFactory</a> → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -467,6 +469,34 @@ styles of factory wrappers.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.ServiceFactoryProxy#self" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="self:com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
+      <a id="self:ServiceFactory[Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">self</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.pool.BufferingPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.BufferingPool.Rep">Rep</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a> → <a href="../ProxyServiceFactory.html" class="extype" name="com.twitter.finagle.ProxyServiceFactory">ProxyServiceFactory</a> → Proxy</dd></dl></div>
+    </li><li name="com.twitter.finagle.ProxyServiceFactory#status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="status:com.twitter.finagle.Status"></a>
+      <a id="status:Status"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">status</span><span class="result">: <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this ServiceFactory</p><div class="fullcomment"><div class="comment cmt"><p>The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this ServiceFactory</p><p><a href="../ServiceFactoryProxy.html#status:com.twitter.finagle.Status" class="extmbr" name="com.twitter.finagle.ServiceFactoryProxy#status">ServiceFactoryProxy.status</a> and <a href="../ServiceFactoryProxy.html#isAvailable:Boolean" class="extmbr" name="com.twitter.finagle.ServiceFactoryProxy#isAvailable">ServiceFactoryProxy.isAvailable</a> must
+be overridden together, pending CSL-1336.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ProxyServiceFactory.html" class="extype" name="com.twitter.finagle.ProxyServiceFactory">ProxyServiceFactory</a> → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -508,7 +538,7 @@ releases the service.
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.pool.BufferingPool">BufferingPool</a> → Function1 → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.pool.BufferingPool">BufferingPool</a> → Proxy → Function1 → AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -594,7 +624,13 @@ releases the service.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.finagle.ServiceFactory">
+        <div class="parent" name="com.twitter.finagle.ServiceFactoryProxy">
+              <h3>Inherited from <a href="../ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a>[<span class="extype" name="com.twitter.finagle.pool.BufferingPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.BufferingPool.Rep">Rep</span>]</h3>
+            </div><div class="parent" name="com.twitter.finagle.ProxyServiceFactory">
+              <h3>Inherited from <a href="../ProxyServiceFactory.html" class="extype" name="com.twitter.finagle.ProxyServiceFactory">ProxyServiceFactory</a>[<span class="extype" name="com.twitter.finagle.pool.BufferingPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.BufferingPool.Rep">Rep</span>]</h3>
+            </div><div class="parent" name="scala.Proxy">
+              <h3>Inherited from <span class="extype" name="scala.Proxy">Proxy</span></h3>
+            </div><div class="parent" name="com.twitter.finagle.ServiceFactory">
               <h3>Inherited from <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.pool.BufferingPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.BufferingPool.Rep">Rep</span>]</h3>
             </div><div class="parent" name="com.twitter.util.Closable">
               <h3>Inherited from <span class="extype" name="com.twitter.util.Closable">Closable</span></h3>

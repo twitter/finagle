@@ -24,7 +24,7 @@
         </head>
         <body class="type">
       <div id="definition">
-        <a href="InetResolver$.html" title="Go to companion"><img src="../../../lib/class_to_object_big.png" /></a>
+        <a href="InetResolver$.html" title="Go to companion"><img src="../../../lib/trait_to_object_big.png" /></a>
         <p id="owner"><a href="../../package.html" class="extype" name="com">com</a>.<a href="../package.html" class="extype" name="com.twitter">twitter</a>.<a href="package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
         <h1><a href="InetResolver$.html" title="Go to companion">InetResolver</a></h1>
       </div>
@@ -32,14 +32,15 @@
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
         <span class="name">InetResolver</span><span class="result"> extends <a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A resolver for Inet addresses.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -77,30 +78,43 @@
 
       <div id="template">
         <div id="allMembers">
-        <div id="constructors" class="members">
-              <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.InetResolver#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.InetResolver"></a>
-      <a id="&lt;init&gt;:InetResolver"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">InetResolver</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span>
-      </span>
-      </h4>
-      
-    </li></ol>
-            </div>
-
         
 
         
 
         <div id="values" class="values members">
-              <h3>Value Members</h3>
+              <h3>Abstract Value Members</h3>
+              <ol><li name="com.twitter.finagle.Resolver#bind" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="bind(arg:String):com.twitter.util.Var[com.twitter.finagle.Addr]"></a>
+      <a id="bind(String):Var[Addr]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bind</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Var">Var</span>[<a href="Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Resolver#scheme" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="scheme:String"></a>
+      <a id="scheme:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">scheme</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></dd></dl></div>
+    </li></ol>
+            </div>
+
+        <div id="values" class="values members">
+              <h3>Concrete Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:AnyRef):Boolean"></a>
       <a id="!=(AnyRef):Boolean"></a>
@@ -179,20 +193,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.InetResolver#bind" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="bind(hosts:String):com.twitter.util.Var[com.twitter.finagle.Addr]"></a>
-      <a id="bind(String):Var[Addr]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">bind</span><span class="params">(<span name="hosts">hosts: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Var">Var</span>[<a href="Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Binds to the specified hostnames, and refreshes the DNS information periodically.</p><div class="fullcomment"><div class="comment cmt"><p>Binds to the specified hostnames, and refreshes the DNS information periodically.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.InetResolver">InetResolver</a> → <a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -335,19 +335,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.InetResolver#scheme" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="scheme:String"></a>
-      <a id="scheme:String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">scheme</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.InetResolver">InetResolver</a> → <a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

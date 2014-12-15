@@ -84,19 +84,6 @@
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.loadbalancer.P2CBalancer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="P2CBalancer[Req,Rep]extendsServiceFactory[Req,Rep]withOnReady"></a>
-      <a id="P2CBalancer[Req,Rep]:P2CBalancer[Req,Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="P2CBalancer.html"><span class="name">P2CBalancer</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.P2CBalancer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.P2CBalancer.Rep">Rep</span>] with <a href="../util/OnReady.html" class="extype" name="com.twitter.finagle.util.OnReady">OnReady</a></span>
-      </span>
-      </h4>
-      <p class="comment cmt">An O(1), concurrent, weighted fair load balancer.</p>
     </li><li name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="WeightedLoadBalancerFactoryextendsAnyRef"></a>
       <a id="WeightedLoadBalancerFactory:WeightedLoadBalancerFactory"></a>
@@ -117,7 +104,46 @@
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="com.twitter.finagle.loadbalancer.Benchmark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.loadbalancer.Aperture" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Aperture"></a>
+      <a id="Aperture:Aperture"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Aperture$.html"><span class="name">Aperture</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.loadbalancer.ApertureBalancerFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ApertureBalancerFactory"></a>
+      <a id="ApertureBalancerFactory:ApertureBalancerFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ApertureBalancerFactory$.html"><span class="name">ApertureBalancerFactory</span></a><span class="result"> extends <a href="WeightedLoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory">WeightedLoadBalancerFactory</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.loadbalancer.Balancers" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Balancers"></a>
+      <a id="Balancers:Balancers"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Balancers$.html"><span class="name">Balancers</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Constructors for various load balancers.</p>
+    </li><li name="com.twitter.finagle.loadbalancer.Benchmark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Benchmark"></a>
       <a id="Benchmark:Benchmark"></a>
       <h4 class="signature">
@@ -166,6 +192,19 @@
       </span>
       <span class="symbol">
         <a href="HeapBalancerFactory$.html"><span class="name">HeapBalancerFactory</span></a><span class="result"> extends <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a> with <a href="WeightedLoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory">WeightedLoadBalancerFactory</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LoadBalancerFactory"></a>
+      <a id="LoadBalancerFactory:LoadBalancerFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="LoadBalancerFactory$.html"><span class="name">LoadBalancerFactory</span></a>
       </span>
       </h4>
       

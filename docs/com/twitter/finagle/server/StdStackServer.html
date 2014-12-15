@@ -46,7 +46,7 @@
           <div class="superTypes hiddenContent"><a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>], <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>]], <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a href="../Mux$$Server.html" class="extype" name="com.twitter.finagle.Mux.Server">Server</a>, <a href="../Thrift$$Server.html" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a>, <a href="../Http$$Server.html" class="extype" name="com.twitter.finagle.Http.Server">Server</a>, <a href="../ThriftMux$$ServerMuxer.html" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a></div>
+          <div class="subClasses hiddenContent"><a href="../Mux$$Server.html" class="extype" name="com.twitter.finagle.Mux.Server">Server</a>, <a href="../Httpx$$Server.html" class="extype" name="com.twitter.finagle.Httpx.Server">Server</a>, <a href="../Thrift$$Server.html" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a>, <a href="../Http$$Server.html" class="extype" name="com.twitter.finagle.Http.Server">Server</a>, <a href="../ThriftMux$$ServerMuxer.html" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a></div>
         </div></div>
         
 
@@ -642,9 +642,7 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
         <span class="name">withParams</span><span class="params">(<span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Creates a new StackServer with <code>p</code> added to the <code>params</code>
-used to configure this StackServer's <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackServer with <code>p</code> added to the <code>params</code>
-used to configure this StackServer's <code>stack</code>.
+      <p class="shortcomment cmt">Creates a new StackServer with <code>params</code> used to configure this StackServer's <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackServer with <code>params</code> used to configure this StackServer's <code>stack</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a> → <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.server.StdStackServer#withStack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):This"></a>

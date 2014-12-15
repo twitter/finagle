@@ -39,13 +39,36 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"></div>
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
         
 
       <div id="mbrsel">
         <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
-        
-        
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="com.twitter.finagle.stats"><span>stats</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
             <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
@@ -67,49 +90,24 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="CommonsStatsReceiver.html"><span class="name">CommonsStatsReceiver</span></a><span class="result"> extends <a href="StatsReceiverWithCumulativeGauges.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</a></span>
+        <a href="CommonsStatsReceiver.html"><span class="name">CommonsStatsReceiver</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</span></span>
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.stats.Counter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="CounterextendsAnyRef"></a>
-      <a id="Counter:Counter"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="Counter.html"><span class="name">Counter</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      </h4>
-      <p class="comment cmt">A writeable Counter.</p>
-    </li><li name="com.twitter.finagle.stats.Gauge" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="GaugeextendsAnyRef"></a>
-      <a id="Gauge:Gauge"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="Gauge.html"><span class="name">Gauge</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      </h4>
-      <p class="comment cmt">Exposes the value of a function.</p>
-    </li><li name="com.twitter.finagle.stats.InMemoryStatsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="InMemoryStatsReceiverextendsStatsReceiver"></a>
-      <a id="InMemoryStatsReceiver:InMemoryStatsReceiver"></a>
+    </li><li name="com.twitter.finagle.stats.ImmediateMetricsStatsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ImmediateMetricsStatsReceiverextendsMetricsStatsReceiver"></a>
+      <a id="ImmediateMetricsStatsReceiver:ImmediateMetricsStatsReceiver"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="InMemoryStatsReceiver.html"><span class="name">InMemoryStatsReceiver</span></a><span class="result"> extends <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>
+        <a href="ImmediateMetricsStatsReceiver.html"><span class="name">ImmediateMetricsStatsReceiver</span></a><span class="result"> extends <a href="MetricsStatsReceiver.html" class="extype" name="com.twitter.finagle.stats.MetricsStatsReceiver">MetricsStatsReceiver</a></span>
       </span>
       </h4>
-      <p class="comment cmt">In-memory stats receiver for testing.</p>
+      <p class="comment cmt">This implementation of MetricsStatsReceiver that doesn't use WindowedApproximateHistogram
+but ApproximateHistogram.</p>
     </li><li name="com.twitter.finagle.stats.JavaLoggerStatsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="JavaLoggerStatsReceiverextendsStatsReceiverWithCumulativeGauges"></a>
       <a id="JavaLoggerStatsReceiver:JavaLoggerStatsReceiver"></a>
@@ -119,7 +117,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="JavaLoggerStatsReceiver.html"><span class="name">JavaLoggerStatsReceiver</span></a><span class="result"> extends <a href="StatsReceiverWithCumulativeGauges.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</a></span>
+        <a href="JavaLoggerStatsReceiver.html"><span class="name">JavaLoggerStatsReceiver</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</span></span>
       </span>
       </h4>
       
@@ -158,155 +156,11 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="MetricsStatsReceiver.html"><span class="name">MetricsStatsReceiver</span></a><span class="result"> extends <a href="StatsReceiverWithCumulativeGauges.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</a></span>
+        <a href="MetricsStatsReceiver.html"><span class="name">MetricsStatsReceiver</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</span></span>
       </span>
       </h4>
-      
-    </li><li name="com.twitter.finagle.stats.NameTranslatingStatsReceiver" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="NameTranslatingStatsReceiverextendsStatsReceiver"></a>
-      <a id="NameTranslatingStatsReceiver:NameTranslatingStatsReceiver"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="NameTranslatingStatsReceiver.html"><span class="name">NameTranslatingStatsReceiver</span></a><span class="result"> extends <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>
-      </span>
-      </h4>
-      <p class="comment cmt">A StatsReceiver receiver proxy that translates all counter, stat, and gauge
-names according to a <code>translate</code> function.</p>
-    </li><li name="com.twitter.finagle.stats.NullStatsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="NullStatsReceiverextendsStatsReceiverwithJavaSingleton"></a>
-      <a id="NullStatsReceiver:NullStatsReceiver"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="NullStatsReceiver.html"><span class="name">NullStatsReceiver</span></a><span class="result"> extends <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> with <span class="extype" name="com.twitter.util.JavaSingleton">JavaSingleton</span></span>
-      </span>
-      </h4>
-      <p class="comment cmt">A noop StatsReceiver.</p>
-    </li><li name="com.twitter.finagle.stats.OstrichExporter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="OstrichExporterextendsService[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]withHttpMuxHandler"></a>
-      <a id="OstrichExporter:OstrichExporter"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="OstrichExporter.html"><span class="name">OstrichExporter</span></a><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>] with <a href="../http/HttpMuxHandler.html" class="extype" name="com.twitter.finagle.http.HttpMuxHandler">HttpMuxHandler</a></span>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.stats.OstrichStatsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="OstrichStatsReceiverextendsStatsReceiverWithCumulativeGauges"></a>
-      <a id="OstrichStatsReceiver:OstrichStatsReceiver"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="OstrichStatsReceiver.html"><span class="name">OstrichStatsReceiver</span></a><span class="result"> extends <a href="StatsReceiverWithCumulativeGauges.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</a></span>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.stats.ReadableCounter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="ReadableCounterextendsCounter"></a>
-      <a id="ReadableCounter:ReadableCounter"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="ReadableCounter.html"><span class="name">ReadableCounter</span></a><span class="result"> extends <a href="Counter.html" class="extype" name="com.twitter.finagle.stats.Counter">Counter</a></span>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.stats.ReadableStat" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="ReadableStatextendsStat"></a>
-      <a id="ReadableStat:ReadableStat"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="ReadableStat.html"><span class="name">ReadableStat</span></a><span class="result"> extends <a href="Stat.html" class="extype" name="com.twitter.finagle.stats.Stat">Stat</a></span>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.stats.RollupStatsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="RollupStatsReceiverextendsStatsReceiverwithProxy"></a>
-      <a id="RollupStatsReceiver:RollupStatsReceiver"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="RollupStatsReceiver.html"><span class="name">RollupStatsReceiver</span></a><span class="result"> extends <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> with <span class="extype" name="scala.Proxy">Proxy</span></span>
-      </span>
-      </h4>
-      <p class="comment cmt">A RollupStatsReceiver reports stats on multiple Counter/Stat/Gauge based on the sequence of
-names you pass.</p>
-    </li><li name="com.twitter.finagle.stats.Stat" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="StatextendsAnyRef"></a>
-      <a id="Stat:Stat"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="Stat.html"><span class="name">Stat</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      </h4>
-      <p class="comment cmt">An append-only collection of time-series data.</p>
-    </li><li name="com.twitter.finagle.stats.StatsReceiver" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="StatsReceiverextendsAnyRef"></a>
-      <a id="StatsReceiver:StatsReceiver"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="StatsReceiver.html"><span class="name">StatsReceiver</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      </h4>
-      <p class="comment cmt">An interface for recording metrics.</p>
-    </li><li name="com.twitter.finagle.stats.StatsReceiverProxy" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="StatsReceiverProxyextendsStatsReceiver"></a>
-      <a id="StatsReceiverProxy:StatsReceiverProxy"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="StatsReceiverProxy.html"><span class="name">StatsReceiverProxy</span></a><span class="result"> extends <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="StatsReceiverWithCumulativeGaugesextendsStatsReceiver"></a>
-      <a id="StatsReceiverWithCumulativeGauges:StatsReceiverWithCumulativeGauges"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="StatsReceiverWithCumulativeGauges.html"><span class="name">StatsReceiverWithCumulativeGauges</span></a><span class="result"> extends <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>
-      </span>
-      </h4>
-      
+      <p class="comment cmt">This implementation of StatsReceiver uses the <span class="extype" name="com.twitter.common.metrics">com.twitter.common.metrics</span> library under
+the hood.</p>
     </li><li name="com.twitter.finagle.stats.SummarizingStatsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SummarizingStatsReceiverextendsStatsReceiverWithCumulativeGauges"></a>
       <a id="SummarizingStatsReceiver:SummarizingStatsReceiver"></a>
@@ -316,7 +170,7 @@ names you pass.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SummarizingStatsReceiver.html"><span class="name">SummarizingStatsReceiver</span></a><span class="result"> extends <a href="StatsReceiverWithCumulativeGauges.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</a></span>
+        <a href="SummarizingStatsReceiver.html"><span class="name">SummarizingStatsReceiver</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</span></span>
       </span>
       </h4>
       
@@ -327,49 +181,7 @@ names you pass.</p>
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="com.twitter.finagle.stats.BroadcastCounter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="BroadcastCounter"></a>
-      <a id="BroadcastCounter:BroadcastCounter"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="BroadcastCounter$.html"><span class="name">BroadcastCounter</span></a>
-      </span>
-      </h4>
-      <p class="comment cmt">BroadcastCounter is a helper object that create a Counter wrapper around multiple
-Counters (n).</p>
-    </li><li name="com.twitter.finagle.stats.BroadcastStat" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="BroadcastStat"></a>
-      <a id="BroadcastStat:BroadcastStat"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="BroadcastStat$.html"><span class="name">BroadcastStat</span></a>
-      </span>
-      </h4>
-      <p class="comment cmt">BroadcastStat is a helper object that create a Counter wrapper around multiple
-Stats (n).</p>
-    </li><li name="com.twitter.finagle.stats.BroadcastStatsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="BroadcastStatsReceiver"></a>
-      <a id="BroadcastStatsReceiver:BroadcastStatsReceiver"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="BroadcastStatsReceiver$.html"><span class="name">BroadcastStatsReceiver</span></a>
-      </span>
-      </h4>
-      <p class="comment cmt">BroadcastStatsReceiver is a helper object that create a StatsReceiver wrapper around multiple
-StatsReceivers (n).</p>
-    </li><li name="com.twitter.finagle.stats.ClientStatsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.stats.ClientStatsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ClientStatsReceiver"></a>
       <a id="ClientStatsReceiver:ClientStatsReceiver"></a>
       <h4 class="signature">
@@ -378,7 +190,7 @@ StatsReceivers (n).</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ClientStatsReceiver$.html"><span class="name">ClientStatsReceiver</span></a><span class="result"> extends <a href="StatsReceiverProxy.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverProxy">StatsReceiverProxy</a></span>
+        <a href="ClientStatsReceiver$.html"><span class="name">ClientStatsReceiver</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.stats.StatsReceiverProxy">StatsReceiverProxy</span></span>
       </span>
       </h4>
       <p class="comment cmt">A client-specific StatsReceiver.</p>
@@ -391,11 +203,24 @@ StatsReceivers (n).</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="DefaultStatsReceiver$.html"><span class="name">DefaultStatsReceiver</span></a><span class="result"> extends <a href="StatsReceiverProxy.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverProxy">StatsReceiverProxy</a></span>
+        <a href="DefaultStatsReceiver$.html"><span class="name">DefaultStatsReceiver</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.stats.StatsReceiverProxy">StatsReceiverProxy</span></span>
       </span>
       </h4>
       <p class="comment cmt">A &quot;default&quot; StatsReceiver loaded by Finagle's
 <a href="../util/LoadService$.html" class="extype" name="com.twitter.finagle.util.LoadService">com.twitter.finagle.util.LoadService</a> mechanism.</p>
+    </li><li name="com.twitter.finagle.stats.ImmediateMetricsStatsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ImmediateMetricsStatsReceiver"></a>
+      <a id="ImmediateMetricsStatsReceiver:ImmediateMetricsStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ImmediateMetricsStatsReceiver$.html"><span class="name">ImmediateMetricsStatsReceiver</span></a>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.stats.JavaLoggerStatsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="JavaLoggerStatsReceiver"></a>
       <a id="JavaLoggerStatsReceiver:JavaLoggerStatsReceiver"></a>
@@ -418,10 +243,10 @@ StatsReceivers (n).</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="LoadedStatsReceiver$.html"><span class="name">LoadedStatsReceiver</span></a><span class="result"> extends <a href="StatsReceiverProxy.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverProxy">StatsReceiverProxy</a></span>
+        <a href="LoadedStatsReceiver$.html"><span class="name">LoadedStatsReceiver</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.stats.StatsReceiverProxy">StatsReceiverProxy</span></span>
       </span>
       </h4>
-      <p class="comment cmt">A <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">com.twitter.finagle.stats.StatsReceiver</a> that loads
+      <p class="comment cmt">A <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">com.twitter.finagle.stats.StatsReceiver</span> that loads
 all service-loadable receivers and broadcasts stats to them.</p>
     </li><li name="com.twitter.finagle.stats.MetricsStatsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MetricsStatsReceiver"></a>
@@ -436,19 +261,6 @@ all service-loadable receivers and broadcasts stats to them.</p>
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.stats.NullStatsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="NullStatsReceiver"></a>
-      <a id="NullStatsReceiver:NullStatsReceiver"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="NullStatsReceiver$.html"><span class="name">NullStatsReceiver</span></a><span class="result"> extends <a href="NullStatsReceiver.html" class="extype" name="com.twitter.finagle.stats.NullStatsReceiver">NullStatsReceiver</a></span>
-      </span>
-      </h4>
-      
     </li><li name="com.twitter.finagle.stats.ServerStatsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ServerStatsReceiver"></a>
       <a id="ServerStatsReceiver:ServerStatsReceiver"></a>
@@ -458,36 +270,10 @@ all service-loadable receivers and broadcasts stats to them.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ServerStatsReceiver$.html"><span class="name">ServerStatsReceiver</span></a><span class="result"> extends <a href="StatsReceiverProxy.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverProxy">StatsReceiverProxy</a></span>
+        <a href="ServerStatsReceiver$.html"><span class="name">ServerStatsReceiver</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.stats.StatsReceiverProxy">StatsReceiverProxy</span></span>
       </span>
       </h4>
       <p class="comment cmt">A server-specific StatsReceiver.</p>
-    </li><li name="com.twitter.finagle.stats.StatsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="StatsReceiver"></a>
-      <a id="StatsReceiver:StatsReceiver"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="StatsReceiver$.html"><span class="name">StatsReceiver</span></a>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.stats.ostrichFilterRegex" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ostrichFilterRegex"></a>
-      <a id="ostrichFilterRegex:ostrichFilterRegex"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="ostrichFilterRegex$.html"><span class="name">ostrichFilterRegex</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="scala.collection.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
-      </span>
-      </h4>
-      
     </li><li name="com.twitter.finagle.stats.statsFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="statsFilter"></a>
       <a id="statsFilter:statsFilter"></a>
@@ -510,7 +296,11 @@ all service-loadable receivers and broadcasts stats to them.</p>
         </div>
 
         <div id="inheritedMembers">
-        
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
         
         </div>
 

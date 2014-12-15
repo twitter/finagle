@@ -189,7 +189,7 @@
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.service.RetryPolicy#WriteExceptionsOnly" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.service.RetryPolicy#WriteExceptionsOnly" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="WriteExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]"></a>
       <a id="WriteExceptionsOnly:PartialFunction[Try[Nothing],Boolean]"></a>
       <h4 class="signature">
@@ -201,7 +201,11 @@
         <span class="name">WriteExceptionsOnly</span><span class="result">: <span class="extype" name="scala.PartialFunction">PartialFunction</span>[<span class="extype" name="com.twitter.util.Try">Try</span>[<span class="extype" name="scala.Nothing">Nothing</span>], <span class="extype" name="scala.Boolean">Boolean</span>]</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Failures that are generally retryable because the request failed
+before it finished being written to the remote service.</p><div class="fullcomment"><div class="comment cmt"><p>Failures that are generally retryable because the request failed
+before it finished being written to the remote service.
+See <a href="../WriteException.html" class="extype" name="com.twitter.finagle.WriteException">com.twitter.finagle.WriteException</a>.
+</p></div></div>
     </li><li name="com.twitter.finagle.service.RetryPolicy#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="apply[A](f:A=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]):com.twitter.finagle.service.RetryPolicy[A]"></a>
       <a id="apply[A]((A)⇒Option[(Duration,RetryPolicy[A])]):RetryPolicy[A]"></a>
@@ -214,7 +218,7 @@
         <span class="name">apply</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="com.twitter.finagle.service.RetryPolicy.apply.A">A</span>) ⇒ <span class="extype" name="scala.Option">Option</span>[(<span class="extype" name="com.twitter.util.Duration">Duration</span>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.apply.A">A</span>])]</span>)</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.apply.A">A</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Lifts a function of type A =&gt; Option[(Duration, RetryPolicy[A])] in the <code>RetryPolicy</code> type.</p>
+      <p class="shortcomment cmt">Lifts a function of type <code>A =&gt; Option[(Duration, RetryPolicy[A])]</code> in the  <code>RetryPolicy</code> type.</p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -467,7 +471,7 @@ policy with a smaller cap.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.service.RetryPolicy#tries" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.service.RetryPolicy#tries" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tries(numTries:Int):com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]"></a>
       <a id="tries(Int):RetryPolicy[Try[Nothing]]"></a>
       <h4 class="signature">
@@ -479,7 +483,14 @@ policy with a smaller cap.
         <span class="name">tries</span><span class="params">(<span name="numTries">numTries: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.util.Try">Try</span>[<span class="extype" name="scala.Nothing">Nothing</span>]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Retry a specific number of times on WriteExceptions.</p>
+      <p class="shortcomment cmt">Try up to a specific number of times of times on failures that are
+<a href="#WriteExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#WriteExceptionsOnly">com.twitter.finagle.service.RetryPolicy.WriteExceptionsOnly</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Try up to a specific number of times of times on failures that are
+<a href="#WriteExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#WriteExceptionsOnly">com.twitter.finagle.service.RetryPolicy.WriteExceptionsOnly</a>.
+</p></div><dl class="paramcmts block"><dt class="param">numTries</dt><dd class="cmt"><p>the maximum number of attempts (including retries) that can be made.
+  A value of <code>1</code> means one attempt and no retries on failure.
+  A value of <code>2</code> means one attempt and then a single retry if the failure meets the
+  criteria of <a href="#WriteExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#WriteExceptionsOnly">com.twitter.finagle.service.RetryPolicy.WriteExceptionsOnly</a>.
+</p></dd></dl></div>
     </li><li name="com.twitter.finagle.service.RetryPolicy#tries" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tries[A](numTries:Int,shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]"></a>
       <a id="tries[A](Int,PartialFunction[A,Boolean]):RetryPolicy[A]"></a>
@@ -492,9 +503,14 @@ policy with a smaller cap.
         <span class="name">tries</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="numTries">numTries: <span class="extype" name="scala.Int">Int</span></span>, <span name="shouldRetry">shouldRetry: <span class="extype" name="scala.PartialFunction">PartialFunction</span>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.tries.A">A</span>, <span class="extype" name="scala.Boolean">Boolean</span>]</span>)</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.tries.A">A</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Retry a specific number of times.</p><div class="fullcomment"><div class="comment cmt"><p>Retry a specific number of times. A <code>PartialFunction</code> argument determines
-which request types are retryable.
-</p></div></div>
+      <p class="shortcomment cmt">Try up to a specific number of times, based on the supplied <code>PartialFunction[A, Boolean]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Try up to a specific number of times, based on the supplied <code>PartialFunction[A, Boolean]</code>.
+A value of type <code>A</code> is considered retryable if and only if the PartialFunction
+is defined at and returns true for that value.
+</p></div><dl class="paramcmts block"><dt class="param">numTries</dt><dd class="cmt"><p>the maximum number of attempts (including retries) that can be made.
+  A value of <code>1</code> means one attempt and no retries on failure.
+  A value of <code>2</code> means one attempt and then a single retry if the failure meets the
+  criteria of <code>shouldRetry</code>.</p></dd><dt class="param">shouldRetry</dt><dd class="cmt"><p>which <code>A</code>-typed values are considered retryable.
+</p></dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>

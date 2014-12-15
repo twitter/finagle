@@ -195,6 +195,19 @@
                 <span class="name">@unspecialized</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.stats.MetricsRegistry#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apply():Map[String,com.twitter.finagle.stats.StatEntry]"></a>
+      <a id="apply():Map[String,StatEntry]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="com.twitter.finagle.stats.StatEntry">StatEntry</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MetricsRegistry → StatsRegistry</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.JsonExporter#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply(request:org.jboss.netty.handler.codec.http.HttpRequest):com.twitter.util.Future[org.jboss.netty.handler.codec.http.HttpResponse]"></a>
       <a id="apply(HttpRequest):Future[HttpResponse]"></a>
@@ -367,19 +380,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.stats.MetricsRegistry#getStats" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getStats():Map[String,com.twitter.finagle.stats.StatEntry]"></a>
-      <a id="getStats():Map[String,StatEntry]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">getStats</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="com.twitter.finagle.stats.StatEntry">StatEntry</span>]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MetricsRegistry → StatsRegistry</dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
@@ -407,7 +407,7 @@
       </h4>
       <p class="shortcomment cmt">Determines whether this service is available (can accept requests
 with a reasonable likelihood of success).</p><div class="fullcomment"><div class="comment cmt"><p>Determines whether this service is available (can accept requests
-with a reasonable likelihood of success).
+with a reasonable likelihood of success).</p><p>TODO(CSL-1336): Finalize isAvailable
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -525,7 +525,9 @@ with a reasonable likelihood of success).
         <span class="name">registry</span><span class="result">: <span class="extype" name="com.twitter.common.metrics.Metrics">Metrics</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.MetricsExporter">MetricsExporter</a> → MetricsRegistry</dd></dl></div>
+      <p class="shortcomment cmt">A reference to the underlying Metrics representation.</p><div class="fullcomment"><div class="comment cmt"><p>A reference to the underlying Metrics representation.
+Note, this may be null.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.MetricsExporter">MetricsExporter</a> → MetricsRegistry</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.JsonExporter#statsFilterRegex" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="statsFilterRegex:Option[scala.util.matching.Regex]"></a>
       <a id="statsFilterRegex:Option[Regex]"></a>
@@ -539,6 +541,20 @@ with a reasonable likelihood of success).
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="JsonExporter.html" class="extype" name="com.twitter.finagle.stats.JsonExporter">JsonExporter</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Service#status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="status:com.twitter.finagle.Status"></a>
+      <a id="status:Status"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">status</span><span class="result">: <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this Service.</p><div class="fullcomment"><div class="comment cmt"><p>The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this Service.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

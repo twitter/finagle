@@ -440,19 +440,6 @@ factories in one (when available).</p>
       </span>
       </h4>
       <p class="comment cmt">Indicates that connecting to a given <code>remoteAddress</code> was refused.</p>
-    </li><li name="com.twitter.finagle.ContextHandler" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="ContextHandlerextendsAnyRef"></a>
-      <a id="ContextHandler:ContextHandler"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="ContextHandler.html"><span class="name">ContextHandler</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      </h4>
-      <p class="comment cmt">A ContextHandler is responsible for maintaining a context.</p>
     </li><li name="com.twitter.finagle.Dentry" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DentryextendsProductwithSerializable"></a>
       <a id="Dentry:Dentry"></a>
@@ -576,6 +563,19 @@ from the perspective of the application.</p>
       </span>
       </h4>
       <p class="comment cmt">A rich client with a *very* basic URL fetcher.</p>
+    </li><li name="com.twitter.finagle.HttpxRichClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="HttpxRichClientextendsAnyRef"></a>
+      <a id="HttpxRichClient:HttpxRichClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpxRichClient.html"><span class="name">HttpxRichClient</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">A rich client with a *very* basic URL fetcher.</p>
     </li><li name="com.twitter.finagle.InconsistentStateException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="InconsistentStateExceptionextendsChannelException"></a>
       <a id="InconsistentStateException:InconsistentStateException"></a>
@@ -603,19 +603,19 @@ some server.</p>
       </span>
       </h4>
       <p class="comment cmt">Indicates that a single Finagle-level request timed out.</p>
-    </li><li name="com.twitter.finagle.InetResolver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.InetResolver" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="InetResolverextendsResolver"></a>
       <a id="InetResolver:InetResolver"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
         <a href="InetResolver.html"><span class="name">InetResolver</span></a><span class="result"> extends <a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A resolver for Inet addresses.</p>
     </li><li name="com.twitter.finagle.LabelledGroup" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="LabelledGroup[T]extendsGroup[T]withProductwithSerializable"></a>
       <a id="LabelledGroup[T]:LabelledGroup[T]"></a>
@@ -666,6 +666,32 @@ server.</p>
       </span>
       <span class="symbol">
         <a href="MemcachedRichClient.html"><span class="name">MemcachedRichClient</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.MemcachedxKetamaClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="MemcachedxKetamaClientextendsAnyRef"></a>
+      <a id="MemcachedxKetamaClient:MemcachedxKetamaClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="MemcachedxKetamaClient.html"><span class="name">MemcachedxKetamaClient</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.MemcachedxRichClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="MemcachedxRichClientextendsAnyRef"></a>
+      <a id="MemcachedxRichClient:MemcachedxRichClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="MemcachedxRichClient.html"><span class="name">MemcachedxRichClient</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
@@ -842,19 +868,6 @@ hierarchically-addressed object.</p>
       </span>
       <span class="symbol">
         <a href="ProxyAnnouncement.html"><span class="name">ProxyAnnouncement</span></a><span class="result"> extends <a href="Announcement.html" class="extype" name="com.twitter.finagle.Announcement">Announcement</a> with <span class="extype" name="scala.Proxy">Proxy</span></span>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.RedisRichClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="RedisRichClientextendsAnyRef"></a>
-      <a id="RedisRichClient:RedisRichClient"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="RedisRichClient.html"><span class="name">RedisRichClient</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
@@ -1193,6 +1206,19 @@ with a server at a given <code>remoteAddress</code>.</p>
       </span>
       </h4>
       <p class="comment cmt">Produce a stack from a <code>T</code>-typed element.</p>
+    </li><li name="com.twitter.finagle.Status" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="StatusextendsAnyRef"></a>
+      <a id="Status:Status"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Status.html"><span class="name">Status</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Status tells the condition of a networked endpoint.</p>
     </li><li name="com.twitter.finagle.SunkChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SunkChannelextendsAbstractChannel"></a>
       <a id="SunkChannel:SunkChannel"></a>
@@ -1328,8 +1354,7 @@ become available from a client's connection pool.</p>
       </span>
       </h4>
       <p class="comment cmt">A catch-all exception class for uncategorized
-<span class="extype" name="com.twitter.finagle.ChannelExceptions].
-"></span></p>
+<a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelExceptions</a>.</p>
     </li><li name="com.twitter.finagle.WriteException" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="WriteExceptionextendsExceptionwithSourcedException"></a>
       <a id="WriteException:WriteException"></a>
@@ -1429,7 +1454,7 @@ become available from a client's connection pool.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Group.html"><span class="name deprecated" title="Deprecated: (Since version 6.7.x) Var[Addr], Name">Group</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Group.html"><span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use com.twitter.finagle.Name to represent clusters instead">Group</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       <p class="comment cmt">A group is a dynamic set of <code>T</code>-typed values.</p>
@@ -1559,7 +1584,20 @@ become available from a client's connection pool.</p>
         <a href="Addr$.html"><span class="name">Addr</span></a>
       </span>
       </h4>
-      
+      <p class="comment cmt">Note: There is a Java-friendly API for this object: <a href="Addrs$.html" class="extype" name="com.twitter.finagle.Addrs">com.twitter.finagle.Addrs</a>.</p>
+    </li><li name="com.twitter.finagle.Addrs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Addrs"></a>
+      <a id="Addrs:Addrs"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Addrs$.html"><span class="name">Addrs</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">A Java adaptation of the <a href="Addr.html" class="extype" name="com.twitter.finagle.Addr">com.twitter.finagle.Addr</a> companion object.</p>
     </li><li name="com.twitter.finagle.Announcer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Announcer"></a>
       <a id="Announcer:Announcer"></a>
@@ -1639,20 +1677,6 @@ their corresponding initial requests succeeded in time.</p>
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.Context" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Context"></a>
-      <a id="Context:Context"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Context$.html"><span class="name">Context</span></a>
-      </span>
-      </h4>
-      <p class="comment cmt">A context is a piece of serializable metadata managed by a
-registered handler.</p>
     </li><li name="com.twitter.finagle.Dentry" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Dentry"></a>
       <a id="Dentry:Dentry"></a>
@@ -1757,6 +1781,19 @@ registered handler.</p>
       </span>
       </h4>
       <p class="comment cmt">Http protocol support, including client and server.</p>
+    </li><li name="com.twitter.finagle.Httpx" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Httpx"></a>
+      <a id="Httpx:Httpx"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Httpx$.html"><span class="name">Httpx</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="httpx/Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="httpx/Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>] with <a href="HttpxRichClient.html" class="extype" name="com.twitter.finagle.HttpxRichClient">HttpxRichClient</a> with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="httpx/Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="httpx/Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Http protocol support, including client and server.</p>
     </li><li name="com.twitter.finagle.InetResolver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="InetResolver"></a>
       <a id="InetResolver:InetResolver"></a>
@@ -1835,6 +1872,71 @@ registered handler.</p>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.Memcachedx" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Memcachedx"></a>
+      <a id="Memcachedx:Memcachedx"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Memcachedx$.html"><span class="name">Memcachedx</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="memcachedx/protocol/Command.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.Command">Command</a>, <a href="memcachedx/protocol/Response.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.Response">Response</a>] with <a href="MemcachedxRichClient.html" class="extype" name="com.twitter.finagle.MemcachedxRichClient">MemcachedxRichClient</a> with <a href="MemcachedxKetamaClient.html" class="extype" name="com.twitter.finagle.MemcachedxKetamaClient">MemcachedxKetamaClient</a> with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="memcachedx/protocol/Command.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.Command">Command</a>, <a href="memcachedx/protocol/Response.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.Response">Response</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.MemcachedxClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MemcachedxClient"></a>
+      <a id="MemcachedxClient:MemcachedxClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MemcachedxClient$.html"><span class="name">MemcachedxClient</span></a><span class="result"> extends <a href="client/DefaultClient.html" class="extype" name="com.twitter.finagle.client.DefaultClient">DefaultClient</a>[<a href="memcachedx/protocol/Command.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.Command">Command</a>, <a href="memcachedx/protocol/Response.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.Response">Response</a>] with <a href="MemcachedxRichClient.html" class="extype" name="com.twitter.finagle.MemcachedxRichClient">MemcachedxRichClient</a> with <a href="MemcachedxKetamaClient.html" class="extype" name="com.twitter.finagle.MemcachedxKetamaClient">MemcachedxKetamaClient</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.MemcachedxListener" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MemcachedxListener"></a>
+      <a id="MemcachedxListener:MemcachedxListener"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MemcachedxListener$.html"><span class="name">MemcachedxListener</span></a><span class="result"> extends <a href="netty3/Netty3Listener.html" class="extype" name="com.twitter.finagle.netty3.Netty3Listener">Netty3Listener</a>[<a href="memcachedx/protocol/Response.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.Response">Response</a>, <a href="memcachedx/protocol/Command.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.Command">Command</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.MemcachedxServer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MemcachedxServer"></a>
+      <a id="MemcachedxServer:MemcachedxServer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MemcachedxServer$.html"><span class="name">MemcachedxServer</span></a><span class="result"> extends <a href="server/DefaultServer.html" class="extype" name="com.twitter.finagle.server.DefaultServer">DefaultServer</a>[<a href="memcachedx/protocol/Command.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.Command">Command</a>, <a href="memcachedx/protocol/Response.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.Response">Response</a>, <a href="memcachedx/protocol/Response.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.Response">Response</a>, <a href="memcachedx/protocol/Command.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.Command">Command</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.MemcachedxTransporter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MemcachedxTransporter"></a>
+      <a id="MemcachedxTransporter:MemcachedxTransporter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MemcachedxTransporter$.html"><span class="name">MemcachedxTransporter</span></a><span class="result"> extends <a href="netty3/Netty3Transporter.html" class="extype" name="com.twitter.finagle.netty3.Netty3Transporter">Netty3Transporter</a>[<a href="memcachedx/protocol/Command.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.Command">Command</a>, <a href="memcachedx/protocol/Response.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.Response">Response</a>]</span>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.Mux" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Mux"></a>
       <a id="Mux:Mux"></a>
@@ -1844,7 +1946,7 @@ registered handler.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Mux$.html"><span class="name">Mux</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>] with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>
+        <a href="Mux$.html"><span class="name">Mux</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>] with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
       </span>
       </h4>
       <p class="comment cmt">A client and server for the mux protocol described in <a href="mux/package.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p>
@@ -1954,45 +2056,6 @@ as binding and evaluation routines.</p>
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.Redis" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Redis"></a>
-      <a id="Redis:Redis"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Redis$.html"><span class="name">Redis</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="redis/protocol/Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="redis/protocol/Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a>] with <a href="RedisRichClient.html" class="extype" name="com.twitter.finagle.RedisRichClient">RedisRichClient</a></span>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.RedisClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="RedisClient"></a>
-      <a id="RedisClient:RedisClient"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="RedisClient$.html"><span class="name">RedisClient</span></a><span class="result"> extends <a href="client/DefaultClient.html" class="extype" name="com.twitter.finagle.client.DefaultClient">DefaultClient</a>[<a href="redis/protocol/Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="redis/protocol/Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a>] with <a href="RedisRichClient.html" class="extype" name="com.twitter.finagle.RedisRichClient">RedisRichClient</a></span>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.RedisTransporter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="RedisTransporter"></a>
-      <a id="RedisTransporter:RedisTransporter"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="RedisTransporter$.html"><span class="name">RedisTransporter</span></a><span class="result"> extends <a href="netty3/Netty3Transporter.html" class="extype" name="com.twitter.finagle.netty3.Netty3Transporter">Netty3Transporter</a>[<a href="redis/protocol/Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="redis/protocol/Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a>]</span>
-      </span>
-      </h4>
-      
     </li><li name="com.twitter.finagle.Resolver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Resolver"></a>
       <a id="Resolver:Resolver"></a>
@@ -2002,7 +2065,7 @@ as binding and evaluation routines.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Resolver$.html"><span class="name">Resolver</span></a>
+        <a href="Resolver$.html"><span class="name">Resolver</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.BaseResolver">BaseResolver</span></span>
       </span>
       </h4>
       
@@ -2045,6 +2108,19 @@ as binding and evaluation routines.</p>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.SourcedException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SourcedException"></a>
+      <a id="SourcedException:SourcedException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SourcedException$.html"><span class="name">SourcedException</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.Stack" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Stack"></a>
       <a id="Stack:Stack"></a>
@@ -2058,6 +2134,19 @@ as binding and evaluation routines.</p>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.Status" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Status"></a>
+      <a id="Status:Status"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Status$.html"><span class="name">Status</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Define valid <a href="Status.html" class="extype" name="com.twitter.finagle.Status">Status!</a> values.</p>
     </li><li name="com.twitter.finagle.SunkChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SunkChannel"></a>
       <a id="SunkChannel:SunkChannel"></a>
@@ -2138,6 +2227,19 @@ as binding and evaluation routines.</p>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.asyncDns" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="asyncDns"></a>
+      <a id="asyncDns:asyncDns"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="asyncDns$.html"><span class="name">asyncDns</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.benchmark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="benchmark"></a>
       <a id="benchmark:benchmark"></a>
@@ -2190,6 +2292,19 @@ as binding and evaluation routines.</p>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.context" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="context"></a>
+      <a id="context:context"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="context/package.html"><span class="name">context</span></a>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.core" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="core"></a>
       <a id="core:core"></a>
@@ -2200,19 +2315,6 @@ as binding and evaluation routines.</p>
       </span>
       <span class="symbol">
         <a href="core/package.html"><span class="name">core</span></a>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.demo" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="demo"></a>
-      <a id="demo:demo"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a href="demo/package.html"><span class="name">demo</span></a>
       </span>
       </h4>
       
@@ -2333,6 +2435,19 @@ as binding and evaluation routines.</p>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.httpx" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="httpx"></a>
+      <a id="httpx:httpx"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="httpx/package.html"><span class="name">httpx</span></a>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.jsr166y" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="jsr166y"></a>
       <a id="jsr166y:jsr166y"></a>
@@ -2411,6 +2526,19 @@ as binding and evaluation routines.</p>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.memcachedx" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="memcachedx"></a>
+      <a id="memcachedx:memcachedx"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="memcachedx/package.html"><span class="name">memcachedx</span></a>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.mux" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="mux"></a>
       <a id="mux:mux"></a>
@@ -2424,6 +2552,19 @@ as binding and evaluation routines.</p>
       </span>
       </h4>
       <p class="comment cmt">Package mux implements a generic RPC multiplexer with a rich protocol.</p>
+    </li><li name="com.twitter.finagle.namer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="namer"></a>
+      <a id="namer:namer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="namer/package.html"><span class="name">namer</span></a>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.netty3" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="netty3"></a>
       <a id="netty3:netty3"></a>
@@ -2462,19 +2603,6 @@ finagle clients and servers.</p>
       </span>
       <span class="symbol">
         <a href="pool/package.html"><span class="name">pool</span></a>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.redis" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="redis"></a>
-      <a id="redis:redis"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a href="redis/package.html"><span class="name">redis</span></a>
       </span>
       </h4>
       
@@ -2596,19 +2724,6 @@ finagle clients and servers.</p>
       </h4>
       <p class="comment cmt">Finagle-stream implements a rather peculiar protocol: it streams
 discrete messages delineated by HTTP chunks.</p>
-    </li><li name="com.twitter.finagle.stress" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="stress"></a>
-      <a id="stress:stress"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a href="stress/package.html"><span class="name">stress</span></a>
-      </span>
-      </h4>
-      
     </li><li name="com.twitter.finagle.thrift" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="thrift"></a>
       <a id="thrift:thrift"></a>
@@ -2623,19 +2738,6 @@ discrete messages delineated by HTTP chunks.</p>
       </h4>
       <p class="comment cmt">Please use the new interface, <a href="Thrift$.html" class="extype" name="com.twitter.finagle.Thrift">com.twitter.finagle.Thrift</a>,
 for constructing thrift clients and servers.</p>
-    </li><li name="com.twitter.finagle.topo" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="topo"></a>
-      <a id="topo:topo"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a href="topo/package.html"><span class="name">topo</span></a>
-      </span>
-      </h4>
-      
     </li><li name="com.twitter.finagle.tracing" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="tracing"></a>
       <a id="tracing:tracing"></a>

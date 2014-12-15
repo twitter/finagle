@@ -136,7 +136,7 @@ the types to be decoded by the ThriftServerCodec with this singleton.</p><p>Serv
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>MapLike</dd></dl></div>
     </li><li name="scala.collection.MapLike.MappedValues" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="MappedValues[C&lt;:&lt;?&gt;]extendsAbstractMap[A,C]withDefaultMap[A,C]"></a>
+      <a id="MappedValues[C]extendsAbstractMap[A,C]withDefaultMap[A,C]"></a>
       <a id="MappedValues[C]:MappedValues[C]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1590,7 +1590,7 @@ the types to be decoded by the ThriftServerCodec with this singleton.</p><p>Serv
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike → FilterMonadic</dd></dl></div>
     </li><li name="scala.collection.mutable.Builder#mapResult" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mapResult[NewTo&lt;:&lt;?&gt;](f:&lt;?&gt;):scala.collection.mutable.Builder[Elem,NewTo]"></a>
+      <a id="mapResult[NewTo](f:To=&gt;NewTo):scala.collection.mutable.Builder[Elem,NewTo]"></a>
       <a id="mapResult[NewTo]((HashMap[String,ThriftCallFactory[_,_]])⇒NewTo):Builder[(String,ThriftCallFactory[_,_]),NewTo]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -2191,7 +2191,7 @@ the types to be decoded by the ThriftServerCodec with this singleton.</p><p>Serv
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Builder</dd></dl></div>
     </li><li name="scala.collection.mutable.Builder#sizeHintBounded" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="sizeHintBounded(size:&lt;?&gt;,boundingColl:&lt;?&gt;):Unit"></a>
+      <a id="sizeHintBounded(size:Int,boundingColl:scala.collection.TraversableLike[_,_]):Unit"></a>
       <a id="sizeHintBounded(Int,TraversableLike[_,_]):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -2711,7 +2711,7 @@ the types to be decoded by the ThriftServerCodec with this singleton.</p><p>Serv
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce → GenTraversableOnce</dd></dl></div>
     </li><li name="scala.collection.mutable.MapLike#transform" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="transform(f:&lt;?&gt;):MapLike.this.type"></a>
+      <a id="transform(f:(A,B)=&gt;B):MapLike.this.type"></a>
       <a id="transform((String,ThriftCallFactory[_,_])⇒ThriftCallFactory[_,_]):ThriftTypes.this.type"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -2914,7 +2914,7 @@ the types to be decoded by the ThriftServerCodec with this singleton.</p><p>Serv
               
         </dd></dl></div>
     </li><li name="scala.collection.mutable.Map#withDefault" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="withDefault(d:&lt;?&gt;):scala.collection.mutable.Map[A,B]"></a>
+      <a id="withDefault(d:A=&gt;B):scala.collection.mutable.Map[A,B]"></a>
       <a id="withDefault((String)⇒ThriftCallFactory[_,_]):Map[String,ThriftCallFactory[_,_]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -2927,7 +2927,7 @@ the types to be decoded by the ThriftServerCodec with this singleton.</p><p>Serv
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Map</dd></dl></div>
     </li><li name="scala.collection.mutable.Map#withDefaultValue" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="withDefaultValue(d:&lt;?&gt;):scala.collection.mutable.Map[A,B]"></a>
+      <a id="withDefaultValue(d:B):scala.collection.mutable.Map[A,B]"></a>
       <a id="withDefaultValue(ThriftCallFactory[_,_]):Map[String,ThriftCallFactory[_,_]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">

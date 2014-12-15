@@ -89,7 +89,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">HeapBalancer</span><span class="params">(<span name="factories">factories: <span class="extype" name="com.twitter.util.Activity">Activity</span>[<span class="extype" name="scala.Predef.Set">Set</span>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancer.Rep">Rep</span>]]]</span>, <span name="statsReceiver">statsReceiver: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>, <span name="emptyException">emptyException: <span class="extype" name="scala.Throwable">Throwable</span> = <span class="defval" name="new com.twitter.finagle.NoBrokersAvailableException(finagle.this.NoBrokersAvailableException.&lt;init&gt;$default$1)">...</span></span>, <span name="rng">rng: <span class="extype" name="scala.util.Random">Random</span> = <span class="symbol">new scala.util.Random()</span></span>)</span>
+        <span class="name">HeapBalancer</span><span class="params">(<span name="factories">factories: <span class="extype" name="com.twitter.util.Activity">Activity</span>[<span class="extype" name="scala.Predef.Set">Set</span>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancer.Rep">Rep</span>]]]</span>, <span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>, <span name="emptyException">emptyException: <span class="extype" name="scala.Throwable">Throwable</span> = <span class="defval" name="new com.twitter.finagle.NoBrokersAvailableException(finagle.this.NoBrokersAvailableException.&lt;init&gt;$default$1)">...</span></span>, <span name="rng">rng: <span class="extype" name="scala.util.Random">Random</span> = <span class="symbol">new scala.util.Random()</span></span>)</span>
       </span>
       </h4>
       
@@ -404,7 +404,7 @@ only need to modify or operate on the underlying service.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.loadbalancer.HeapBalancer#isAvailable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.ServiceFactory#isAvailable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isAvailable:Boolean"></a>
       <a id="isAvailable:Boolean"></a>
       <h4 class="signature">
@@ -416,7 +416,7 @@ only need to modify or operate on the underlying service.
         <span class="name">isAvailable</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancer">HeapBalancer</a> → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -497,6 +497,21 @@ styles of factory wrappers.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancer">HeapBalancer</a> → <a href="../util/OnReady.html" class="extype" name="com.twitter.finagle.util.OnReady">OnReady</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.HeapBalancer#status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="status:com.twitter.finagle.Status"></a>
+      <a id="status:Status"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">status</span><span class="result">: <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this ServiceFactory
+</p><div class="fullcomment"><div class="comment cmt"><p>The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this ServiceFactory
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancer">HeapBalancer</a> → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

@@ -362,7 +362,10 @@ For example,</p><p>    InetSocketAddressUtil.parseHostPorts(&quot;127.0.0.1:1121
       </span>
       </h4>
       <p class="shortcomment cmt">Parses a comma or space-delimited string of hostname and port pairs.</p><div class="fullcomment"><div class="comment cmt"><p>Parses a comma or space-delimited string of hostname and port pairs. For example,</p><p>    InetSocketAddressUtil.parseHosts(&quot;127.0.0.1:11211&quot;) =&gt; Seq(new InetSocketAddress(&quot;127.0.0.1&quot;, 11211))
-</p></div><dl class="paramcmts block"><dt class="param">hosts</dt><dd class="cmt"><p>a comma or space-delimited string of hostname and port pairs.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt">IllegalArgumentException<p>if host and port are not both present</p></span></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">hosts</dt><dd class="cmt"><p>a comma or space-delimited string of hostname and port pairs. Or, if it is
+         &quot;:*&quot; then an a single InetSocketAddress using an ephemeral port will be returned.
+</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt">IllegalArgumentException<p>if host and port are not both present
+</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.util.InetSocketAddressUtil#resolveHostPorts" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="resolveHostPorts(hostPorts:Seq[(String,Int)]):Set[java.net.SocketAddress]"></a>
       <a id="resolveHostPorts(Seq[(String,Int)]):Set[SocketAddress]"></a>

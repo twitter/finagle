@@ -47,7 +47,7 @@
           <div class="superTypes hiddenContent"><span class="extype" name="scala.Proxy">Proxy</span>, <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.ProxyServiceFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ProxyServiceFactory.Rep">Rep</span>], <span class="extype" name="com.twitter.util.Closable">Closable</span>, (<a href="ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.ProxyServiceFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ProxyServiceFactory.Rep">Rep</span>]], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a href="channel/IdleConnectionFilter.html" class="extype" name="com.twitter.finagle.channel.IdleConnectionFilter">IdleConnectionFilter</a>, <a href="tracing/ServerDestTracingProxy.html" class="extype" name="com.twitter.finagle.tracing.ServerDestTracingProxy">ServerDestTracingProxy</a>, <a href="ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a>, <a href="factory/StatsFactoryWrapper.html" class="extype" name="com.twitter.finagle.factory.StatsFactoryWrapper">StatsFactoryWrapper</a>, <a href="service/StatsServiceFactory.html" class="extype" name="com.twitter.finagle.service.StatsServiceFactory">StatsServiceFactory</a>, <a href="factory/TimeoutFactory.html" class="extype" name="com.twitter.finagle.factory.TimeoutFactory">TimeoutFactory</a></div>
+          <div class="subClasses hiddenContent"><a href="pool/BufferingPool.html" class="extype" name="com.twitter.finagle.pool.BufferingPool">BufferingPool</a>, <a href="channel/IdleConnectionFilter.html" class="extype" name="com.twitter.finagle.channel.IdleConnectionFilter">IdleConnectionFilter</a>, <a href="tracing/ServerDestTracingProxy.html" class="extype" name="com.twitter.finagle.tracing.ServerDestTracingProxy">ServerDestTracingProxy</a>, <a href="ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a>, <a href="factory/StatsFactoryWrapper.html" class="extype" name="com.twitter.finagle.factory.StatsFactoryWrapper">StatsFactoryWrapper</a>, <a href="service/StatsServiceFactory.html" class="extype" name="com.twitter.finagle.service.StatsServiceFactory">StatsServiceFactory</a>, <a href="factory/TimeoutFactory.html" class="extype" name="com.twitter.finagle.factory.TimeoutFactory">TimeoutFactory</a></div>
         </div></div>
         
 
@@ -405,7 +405,9 @@ only need to modify or operate on the underlying service.
         <span class="name">isAvailable</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ProxyServiceFactory">ProxyServiceFactory</a> → <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
+      <p class="shortcomment cmt">&lt;invalid inheritdoc annotation&gt;</p><div class="fullcomment"><div class="comment cmt"><p>&lt;invalid inheritdoc annotation&gt;</p><p><a href="ServiceFactoryProxy.html#status:com.twitter.finagle.Status" class="extmbr" name="com.twitter.finagle.ServiceFactoryProxy#status">ServiceFactoryProxy.status</a> and <a href="ServiceFactoryProxy.html#isAvailable:Boolean" class="extmbr" name="com.twitter.finagle.ServiceFactoryProxy#isAvailable">ServiceFactoryProxy.isAvailable</a> must
+be overridden together, pending CSL-1336.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ProxyServiceFactory">ProxyServiceFactory</a> → <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -473,6 +475,21 @@ styles of factory wrappers.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.ProxyServiceFactory#status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="status:com.twitter.finagle.Status"></a>
+      <a id="status:Status"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">status</span><span class="result">: <a href="Status.html" class="extype" name="com.twitter.finagle.Status">Status</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The current availability <a href="Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this ServiceFactory</p><div class="fullcomment"><div class="comment cmt"><p>The current availability <a href="Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this ServiceFactory</p><p><a href="ServiceFactoryProxy.html#status:com.twitter.finagle.Status" class="extmbr" name="com.twitter.finagle.ServiceFactoryProxy#status">ServiceFactoryProxy.status</a> and <a href="ServiceFactoryProxy.html#isAvailable:Boolean" class="extmbr" name="com.twitter.finagle.ServiceFactoryProxy#isAvailable">ServiceFactoryProxy.isAvailable</a> must
+be overridden together, pending CSL-1336.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ProxyServiceFactory">ProxyServiceFactory</a> → <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

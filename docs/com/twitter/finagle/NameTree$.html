@@ -121,11 +121,24 @@ fallback; it is evaluated by picking the first nonnegative
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="NameTree$$Union.html"><span class="name">Union</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="params">(<span name="trees">trees: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Union.T">T</span>]*</span>)</span><span class="result"> extends <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Union.T">T</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="NameTree$$Union.html"><span class="name">Union</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="params">(<span name="trees">trees: <a href="NameTree$$Weighted.html" class="extype" name="com.twitter.finagle.NameTree.Weighted">Weighted</a>[<span class="extype" name="com.twitter.finagle.NameTree.Union.T">T</span>]*</span>)</span><span class="result"> extends <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Union.T">T</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
-      <p class="comment cmt">A <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a> representing a union
-of trees.</p>
+      <p class="comment cmt">A <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a> representing a
+weighted union of trees.</p>
+    </li><li name="com.twitter.finagle.NameTree.Weighted" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Weighted[+T]extendsProductwithSerializable"></a>
+      <a id="Weighted[+T]:Weighted[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="NameTree$$Weighted.html"><span class="name">Weighted</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="params">(<span name="weight">weight: <span class="extype" name="scala.Double">Double</span></span>, <span name="tree">tree: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Weighted.T">T</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
     </li></ol>
             </div>
 
@@ -260,6 +273,19 @@ of trees.</p>
       </span>
       <span class="symbol">
         <a href="NameTree$$Union$.html"><span class="name">Union</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.NameTree.Weighted" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Weighted"></a>
+      <a id="Weighted:Weighted"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="NameTree$$Weighted$.html"><span class="name">Weighted</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       

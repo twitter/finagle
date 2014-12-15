@@ -164,6 +164,34 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.ssl.Ssl#client" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="client(sslContext:javax.net.ssl.SSLContext,peerHost:String,peerPort:Int):com.twitter.finagle.ssl.Engine"></a>
+      <a id="client(SSLContext,String,Int):Engine"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">client</span><span class="params">(<span name="sslContext">sslContext: <span class="extype" name="javax.net.ssl.SSLContext">SSLContext</span></span>, <span name="peerHost">peerHost: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="peerPort">peerPort: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Get a client engine from the given context
+</p>
+    </li><li name="com.twitter.finagle.ssl.Ssl#client" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="client(peerHost:String,peerPort:Int):com.twitter.finagle.ssl.Engine"></a>
+      <a id="client(String,Int):Engine"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">client</span><span class="params">(<span name="peerHost">peerHost: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="peerPort">peerPort: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Get a client engine
+</p>
+    </li><li name="com.twitter.finagle.ssl.Ssl#client" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="client(sslContext:javax.net.ssl.SSLContext):com.twitter.finagle.ssl.Engine"></a>
       <a id="client(SSLContext):Engine"></a>
       <h4 class="signature">
@@ -175,7 +203,7 @@
         <span class="name">client</span><span class="params">(<span name="sslContext">sslContext: <span class="extype" name="javax.net.ssl.SSLContext">SSLContext</span></span>)</span><span class="result">: <a href="Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Get a client engine, from the given context
+      <p class="shortcomment cmt">Get a client engine from the given context
 </p>
     </li><li name="com.twitter.finagle.ssl.Ssl#client" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="client():com.twitter.finagle.ssl.Engine"></a>
@@ -191,6 +219,20 @@
       </h4>
       <p class="shortcomment cmt">Get a client engine
 </p>
+    </li><li name="com.twitter.finagle.ssl.Ssl#clientWithoutCertificateValidation" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clientWithoutCertificateValidation(peerHost:String,peerPort:Int):com.twitter.finagle.ssl.Engine"></a>
+      <a id="clientWithoutCertificateValidation(String,Int):Engine"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clientWithoutCertificateValidation</span><span class="params">(<span name="peerHost">peerHost: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="peerPort">peerPort: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Get a client engine that doesn't check the validity of certificates</p><div class="fullcomment"><div class="comment cmt"><p>Get a client engine that doesn't check the validity of certificates</p><p>N.B.: This is probably a bad idea for anything but testing!
+</p></div></div>
     </li><li name="com.twitter.finagle.ssl.Ssl#clientWithoutCertificateValidation" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clientWithoutCertificateValidation():com.twitter.finagle.ssl.Engine"></a>
       <a id="clientWithoutCertificateValidation():Engine"></a>

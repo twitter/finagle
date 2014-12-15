@@ -85,23 +85,7 @@ When reporting, we report to all tracers in the list of <code>Tracer</code>s.
         <div id="allMembers">
         
 
-        <div id="types" class="types members">
-              <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.tracing.Trace.TraceState" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="TraceStateextendsAnyRef"></a>
-      <a id="TraceState:TraceState"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">sealed </span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="Trace$$TraceState.html"><span class="name">TraceState</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      </h4>
-      
-    </li></ol>
-            </div>
+        
 
         
 
@@ -185,19 +169,6 @@ When reporting, we report to all tracers in the list of <code>Tracer</code>s.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.tracing.Trace#clear" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="clear():Unit"></a>
-      <a id="clear():Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">clear</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Completely clear the trace stack.</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -384,6 +355,100 @@ trace is sampled
       </h4>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the current trace id is terminal
 </p></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Trace#letClear" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="letClear[R](f:=&gt;R):R"></a>
+      <a id="letClear[R](⇒R):R"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">letClear</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.tracing.Trace.letClear.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.tracing.Trace.letClear.R">R</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Run computation <code>f</code> with all tracing state (tracers, trace id)
+cleared.</p>
+    </li><li name="com.twitter.finagle.tracing.Trace#letId" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="letId[R](traceId:com.twitter.finagle.tracing.TraceId,terminal:Boolean)(f:=&gt;R):R"></a>
+      <a id="letId[R](TraceId,Boolean)(⇒R):R"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">letId</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="traceId">traceId: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>, <span name="terminal">terminal: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.tracing.Trace.letId.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.tracing.Trace.letId.R">R</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Run computation <code>f</code> with the given traceId.</p><div class="fullcomment"><div class="comment cmt"><p>Run computation <code>f</code> with the given traceId.
+</p></div><dl class="paramcmts block"><dt class="param">traceId</dt><dd class="cmt"><p>the TraceId to set as the current trace id</p></dd><dt class="param">terminal</dt><dd class="cmt"><p>true if traceId is a terminal id. Future calls to set() after a terminal
+                id is set will not set the traceId
+</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Trace#letIdOption" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="letIdOption[R](traceIdOpt:Option[com.twitter.finagle.tracing.TraceId])(f:=&gt;R):R"></a>
+      <a id="letIdOption[R](Option[TraceId])(⇒R):R"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">letIdOption</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="traceIdOpt">traceIdOpt: <span class="extype" name="scala.Option">Option</span>[<a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a>]</span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.tracing.Trace.letIdOption.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.tracing.Trace.letIdOption.R">R</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">A version of [com.</p><div class="fullcomment"><div class="comment cmt"><p>A version of [com.twitter.finagle.tracing.Trace.letId] providing an
+optional ID. If the argument is None, the computation <code>f</code> is run without
+altering the trace environment.
+</p></div></div>
+    </li><li name="com.twitter.finagle.tracing.Trace#letTracer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="letTracer[R](tracer:com.twitter.finagle.tracing.Tracer)(f:=&gt;R):R"></a>
+      <a id="letTracer[R](Tracer)(⇒R):R"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">letTracer</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="tracer">tracer: <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.tracing.Trace.letTracer.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.tracing.Trace.letTracer.R">R</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Run computation <code>f</code> with <code>tracer</code> added onto the tracer stack.</p>
+    </li><li name="com.twitter.finagle.tracing.Trace#letTracerAndId" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="letTracerAndId[R](tracer:com.twitter.finagle.tracing.Tracer,id:com.twitter.finagle.tracing.TraceId,terminal:Boolean)(f:=&gt;R):R"></a>
+      <a id="letTracerAndId[R](Tracer,TraceId,Boolean)(⇒R):R"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">letTracerAndId</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="tracer">tracer: <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>, <span name="id">id: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>, <span name="terminal">terminal: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.tracing.Trace.letTracerAndId.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.tracing.Trace.letTracerAndId.R">R</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Run computation <code>f</code> with the given tracer and trace id.</p><div class="fullcomment"><div class="comment cmt"><p>Run computation <code>f</code> with the given tracer and trace id.
+</p></div><dl class="paramcmts block"><dt class="param">terminal</dt><dd class="cmt"><p>true if the next traceId is a terminal id. Future
+                attempts to set nextId will be ignored.
+</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Trace#letTracerAndNextId" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="letTracerAndNextId[R](tracer:com.twitter.finagle.tracing.Tracer,terminal:Boolean)(f:=&gt;R):R"></a>
+      <a id="letTracerAndNextId[R](Tracer,Boolean)(⇒R):R"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">letTracerAndNextId</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="tracer">tracer: <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>, <span name="terminal">terminal: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.tracing.Trace.letTracerAndNextId.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.tracing.Trace.letTracerAndNextId.R">R</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Run computation <code>f</code> with the given tracer, and a derivative TraceId.</p><div class="fullcomment"><div class="comment cmt"><p>Run computation <code>f</code> with the given tracer, and a derivative TraceId.
+The implementation of this function is more efficient than calling
+letTracer, nextId and letId sequentially as it minimizes the number
+of request context changes.
+</p></div><dl class="paramcmts block"><dt class="param">tracer</dt><dd class="cmt"><p>the tracer to be pushed</p></dd><dt class="param">terminal</dt><dd class="cmt"><p>true if the next traceId is a terminal id. Future
+                attempts to set nextId will be ignored.
+</p></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -397,7 +462,7 @@ trace is sampled
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.tracing.Trace#nextId" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.tracing.Trace#nextId" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="nextId:com.twitter.finagle.tracing.TraceId"></a>
       <a id="nextId:TraceId"></a>
       <h4 class="signature">
@@ -409,9 +474,7 @@ trace is sampled
         <span class="name">nextId</span><span class="result">: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a derivative TraceId.</p><div class="fullcomment"><div class="comment cmt"><p>Create a derivative TraceId. If there isn't a
-current ID, this becomes the root id.
-</p></div></div>
+      <p class="shortcomment cmt">Create a derived id from the current TraceId.</p>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <a id="notify():Unit"></a>
@@ -438,40 +501,6 @@ current ID, this becomes the root id.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.tracing.Trace#pushTracer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="pushTracer(tracer:com.twitter.finagle.tracing.Tracer):Unit"></a>
-      <a id="pushTracer(Tracer):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">pushTracer</span><span class="params">(<span name="tracer">tracer: <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Push the given tracer.</p>
-    </li><li name="com.twitter.finagle.tracing.Trace#pushTracerAndSetNextId" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="pushTracerAndSetNextId(tracer:com.twitter.finagle.tracing.Tracer,terminal:Boolean):Unit"></a>
-      <a id="pushTracerAndSetNextId(Tracer,Boolean):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">pushTracerAndSetNextId</span><span class="params">(<span name="tracer">tracer: <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>, <span name="terminal">terminal: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Push the given tracer, create a derivative TraceId and set it to be
-the current trace id.</p><div class="fullcomment"><div class="comment cmt"><p>Push the given tracer, create a derivative TraceId and set it to be
-the current trace id.
-The implementation of this function is more efficient than calling
-pushTracer, nextId and setId sequentially as it minimizes the number
-of reads and writes to <code>local</code>.
-</p></div><dl class="paramcmts block"><dt class="param">tracer</dt><dd class="cmt"><p>the tracer to be pushed</p></dd><dt class="param">terminal</dt><dd class="cmt"><p>true if the next traceId is a terminal id. Future
-                attempts to set nextId will be ignored.
-</p></dd></dl></div>
     </li><li name="com.twitter.finagle.tracing.Trace#record" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="record(message:String,duration:com.twitter.util.Duration):Unit"></a>
       <a id="record(String,Duration):Unit"></a>
@@ -630,63 +659,6 @@ tracers in the stack.
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.tracing.Trace#setId" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setId(traceId:com.twitter.finagle.tracing.TraceId,terminal:Boolean):com.twitter.finagle.tracing.TraceId"></a>
-      <a id="setId(TraceId,Boolean):TraceId"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">setId</span><span class="params">(<span name="traceId">traceId: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>, <span name="terminal">terminal: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Set the current trace id
-Should be used with Trace.</p><div class="fullcomment"><div class="comment cmt"><p>Set the current trace id
-Should be used with Trace.unwind for stack-like properties
-</p></div><dl class="paramcmts block"><dt class="param">traceId</dt><dd class="cmt"><p>the TraceId to set as the current trace id</p></dd><dt class="param">terminal</dt><dd class="cmt"><p>true if traceId is a terminal id. Future calls to set() after a terminal
-                id is set will not set the traceId
-</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.tracing.Trace#setTerminalId" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="setTerminalId(traceId:com.twitter.finagle.tracing.TraceId):com.twitter.finagle.tracing.TraceId"></a>
-      <a id="setTerminalId(TraceId):TraceId"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">setTerminalId</span><span class="params">(<span name="traceId">traceId: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>)</span><span class="result">: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.tracing.Trace#state" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="state:com.twitter.finagle.tracing.Trace.TraceState"></a>
-      <a id="state:TraceState"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">state</span><span class="result">: <a href="Trace$$TraceState.html" class="extype" name="com.twitter.finagle.tracing.Trace.TraceState">TraceState</a></span>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.tracing.Trace#state_=" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="state_=(state:com.twitter.finagle.tracing.Trace.TraceState):Unit"></a>
-      <a id="state_=(TraceState):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: state_$eq" class="name">state_=</span><span class="params">(<span name="state">state: <a href="Trace$$TraceState.html" class="extype" name="com.twitter.finagle.tracing.Trace.TraceState">TraceState</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4>
-      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -752,8 +724,9 @@ Should be used with Trace.unwind for stack-like properties
         <span class="name">traceService</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="service">service: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="rpc">rpc: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="hostOpt">hostOpt: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="java.net.InetSocketAddress">InetSocketAddress</span>] = <span class="symbol">None</span></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.tracing.Trace.traceService.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.tracing.Trace.traceService.T">T</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Convenience method for event loops in services.</p><div class="fullcomment"><div class="comment cmt"><p>Convenience method for event loops in services.  Put your service handling
-code inside this to get proper tracing with all the correct fields filled in.
+      <p class="shortcomment cmt">Convenience method for event loops in services.</p><div class="fullcomment"><div class="comment cmt"><p>Convenience method for event loops in services.  Put your
+service handling code inside this to get proper tracing with all
+the correct fields filled in.
 </p></div></div>
     </li><li name="com.twitter.finagle.tracing.Trace#tracers" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tracers:List[com.twitter.finagle.tracing.Tracer]"></a>
@@ -769,19 +742,6 @@ code inside this to get proper tracing with all the correct fields filled in.
       </h4>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the current list of tracers
 </p></dd></dl></div>
-    </li><li name="com.twitter.finagle.tracing.Trace#unwind" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="unwind[T](f:=&gt;T):T"></a>
-      <a id="unwind[T](⇒T):T"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">unwind</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.tracing.Trace.unwind.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.tracing.Trace.unwind.T">T</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Invoke <code>f</code> and then unwind the stack to the starting point.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -846,39 +806,7 @@ code inside this to get proper tracing with all the correct fields filled in.
 
         <div id="values" class="values members">
               <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.tracing.Trace#pushId" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="pushId(traceId:com.twitter.finagle.tracing.TraceId):com.twitter.finagle.tracing.TraceId"></a>
-      <a id="pushId(TraceId):TraceId"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) use setId() instead">pushId</span><span class="params">(<span name="traceId">traceId: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>)</span><span class="result">: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> use setId() instead</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.tracing.Trace#pushId" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="pushId():com.twitter.finagle.tracing.TraceId"></a>
-      <a id="pushId():TraceId"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) use setId() instead">pushId</span><span class="params">()</span><span class="result">: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> use setId() instead</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.tracing.Trace#recordRpcname" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.tracing.Trace#recordRpcname" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="recordRpcname(service:String,rpc:String):Unit"></a>
       <a id="recordRpcname(String,String):Unit"></a>
       <h4 class="signature">

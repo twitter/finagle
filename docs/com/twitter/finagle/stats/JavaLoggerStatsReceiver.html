@@ -35,13 +35,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">JavaLoggerStatsReceiver</span><span class="result"> extends <a href="StatsReceiverWithCumulativeGauges.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</a></span>
+        <span class="name">JavaLoggerStatsReceiver</span><span class="result"> extends <span class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</span></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="StatsReceiverWithCumulativeGauges.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</a>, <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</span>, <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -188,24 +188,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">addGauge</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="scala.Float">Float</span></span>)</span><span class="result">: <a href="Gauge.html" class="extype" name="com.twitter.finagle.stats.Gauge">Gauge</a></span>
+        <span class="name">addGauge</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="scala.Float">Float</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.Gauge">Gauge</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Add the function <code><code>f<i> as a gauge with the given name. The
-returned gauge value is only weakly referenced by the
-StatsReceiver, and if garbage collected will cease to be a part
-of this measurement: thus, it needs to be retained by the
-caller. Immortal measurements are made with <code><code>provideGauge<i>. As
-with <code><code>provideGauge<i>, gauges with equal names are added
-together.
-</i></code></code></i></code></code></i></code></code></p><div class="fullcomment"><div class="comment cmt"><p>Add the function <code><code>f<i> as a gauge with the given name. The
-returned gauge value is only weakly referenced by the
-StatsReceiver, and if garbage collected will cease to be a part
-of this measurement: thus, it needs to be retained by the
-caller. Immortal measurements are made with <code><code>provideGauge<i>. As
-with <code><code>provideGauge<i>, gauges with equal names are added
-together.
-</i></code></code></i></code></code></i></code></code></p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StatsReceiverWithCumulativeGauges.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</a> → <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiverWithCumulativeGauges → StatsReceiver</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -247,12 +233,10 @@ together.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">counter</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="Counter.html" class="extype" name="com.twitter.finagle.stats.Counter">Counter</a></span>
+        <span class="name">counter</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.Counter">Counter</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Get a Counter with the description
-</p><div class="fullcomment"><div class="comment cmt"><p>Get a Counter with the description
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver">JavaLoggerStatsReceiver</a> → <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver">JavaLoggerStatsReceiver</a> → StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#counter0" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="counter0(name:String):com.twitter.finagle.stats.Counter"></a>
       <a id="counter0(String):Counter"></a>
@@ -262,11 +246,10 @@ together.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">counter0</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Counter.html" class="extype" name="com.twitter.finagle.stats.Counter">Counter</a></span>
+        <span class="name">counter0</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.Counter">Counter</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Get a Counter with the description.</p><div class="fullcomment"><div class="comment cmt"><p>Get a Counter with the description. This method is a convenience for Java program.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.JavaLoggerStatsReceiver#deregisterGauge" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="deregisterGauge(name:Seq[String]):Unit"></a>
       <a id="deregisterGauge(Seq[String]):Unit"></a>
@@ -279,7 +262,7 @@ together.
         <span class="name">deregisterGauge</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver">JavaLoggerStatsReceiver</a> → <a href="StatsReceiverWithCumulativeGauges.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver">JavaLoggerStatsReceiver</a> → StatsReceiverWithCumulativeGauges</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -376,10 +359,7 @@ together.
         <span class="name">isNull</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Accurately indicates if this is a NullStatsReceiver.</p><div class="fullcomment"><div class="comment cmt"><p>Accurately indicates if this is a NullStatsReceiver.
-Because equality is not forwarded via scala.Proxy, this
-is helpful to check for a NullStatsReceiver.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -431,10 +411,7 @@ is helpful to check for a NullStatsReceiver.
         <span class="name">provideGauge</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="scala.Float">Float</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Register a function to be periodically measured.</p><div class="fullcomment"><div class="comment cmt"><p>Register a function to be periodically measured. This measurement
-exists in perpetuity. Measurements under the same name are added
-together.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.JavaLoggerStatsReceiver#registerGauge" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="registerGauge(name:Seq[String],f:=&gt;Float):Unit"></a>
       <a id="registerGauge(Seq[String],⇒Float):Unit"></a>
@@ -447,9 +424,7 @@ together.
         <span class="name">registerGauge</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="f">f: ⇒ <span class="extype" name="scala.Float">Float</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">The StatsReceiver implements these.</p><div class="fullcomment"><div class="comment cmt"><p>The StatsReceiver implements these. They provide the cumulated
-gauges.
-</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver">JavaLoggerStatsReceiver</a> → <a href="StatsReceiverWithCumulativeGauges.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver">JavaLoggerStatsReceiver</a> → StatsReceiverWithCumulativeGauges</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.JavaLoggerStatsReceiver#repr" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="repr:java.util.logging.Logger"></a>
       <a id="repr:Logger"></a>
@@ -462,10 +437,7 @@ gauges.
         <span class="name">repr</span><span class="result">: <span class="extype" name="java.util.logging.Logger">Logger</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Specifies the representative receiver.</p><div class="fullcomment"><div class="comment cmt"><p>Specifies the representative receiver.  This is in order to
-expose an object we can use for comparison so that global stats
-are only reported once per receiver.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver">JavaLoggerStatsReceiver</a> → <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver">JavaLoggerStatsReceiver</a> → StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#scope" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="scope(namespace:String):com.twitter.finagle.stats.StatsReceiver"></a>
       <a id="scope(String):StatsReceiver"></a>
@@ -475,12 +447,10 @@ are only reported once per receiver.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">scope</span><span class="params">(<span name="namespace">namespace: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>
+        <span class="name">scope</span><span class="params">(<span name="namespace">namespace: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Prepend <code><code>namespace<i> to the names of this receiver.
-</i></code></code></p><div class="fullcomment"><div class="comment cmt"><p>Prepend <code><code>namespace<i> to the names of this receiver.
-</i></code></code></p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#scopeSuffix" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="scopeSuffix(suffix:String):com.twitter.finagle.stats.StatsReceiver"></a>
       <a id="scopeSuffix(String):StatsReceiver"></a>
@@ -490,13 +460,10 @@ are only reported once per receiver.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">scopeSuffix</span><span class="params">(<span name="suffix">suffix: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>
+        <span class="name">scopeSuffix</span><span class="params">(<span name="suffix">suffix: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Prepend a suffix value to the next scope.</p><div class="fullcomment"><div class="comment cmt"><p>Prepend a suffix value to the next scope.
-stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds&quot;) will generate
-/client/toto/adds
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.JavaLoggerStatsReceiver#stat" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stat(name:String*):com.twitter.finagle.stats.Stat"></a>
       <a id="stat(String*):Stat"></a>
@@ -506,12 +473,10 @@ stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">stat</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="Stat.html" class="extype" name="com.twitter.finagle.stats.Stat">Stat</a></span>
+        <span class="name">stat</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.Stat">Stat</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Get a Stat with the description
-</p><div class="fullcomment"><div class="comment cmt"><p>Get a Stat with the description
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver">JavaLoggerStatsReceiver</a> → <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver">JavaLoggerStatsReceiver</a> → StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#stat0" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stat0(name:String):com.twitter.finagle.stats.Stat"></a>
       <a id="stat0(String):Stat"></a>
@@ -521,11 +486,10 @@ stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">stat0</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Stat.html" class="extype" name="com.twitter.finagle.stats.Stat">Stat</a></span>
+        <span class="name">stat0</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.Stat">Stat</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Get a Stat with the description.</p><div class="fullcomment"><div class="comment cmt"><p>Get a Stat with the description. This method is a convenience for Java programs.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -551,9 +515,7 @@ stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds
         <span class="name">time</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Time a given function in milliseconds
-</p><div class="fullcomment"><div class="comment cmt"><p>Time a given function in milliseconds
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#time" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="time[T](unit:java.util.concurrent.TimeUnit,name:String*)(f:=&gt;T):T"></a>
       <a id="time[T](TimeUnit,String*)(⇒T):T"></a>
@@ -566,9 +528,7 @@ stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds
         <span class="name">time</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="unit">unit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Time a given function using the given TimeUnit
-</p><div class="fullcomment"><div class="comment cmt"><p>Time a given function using the given TimeUnit
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#time" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="time[T](unit:java.util.concurrent.TimeUnit,stat:com.twitter.finagle.stats.Stat)(f:=&gt;T):T"></a>
       <a id="time[T](TimeUnit,Stat)(⇒T):T"></a>
@@ -578,12 +538,10 @@ stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">time</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="unit">unit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>, <span name="stat">stat: <a href="Stat.html" class="extype" name="com.twitter.finagle.stats.Stat">Stat</a></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>
+        <span class="name">time</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="unit">unit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>, <span name="stat">stat: <span class="extype" name="com.twitter.finagle.stats.Stat">Stat</span></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Time a given function using the given TimeUnit
-</p><div class="fullcomment"><div class="comment cmt"><p>Time a given function using the given TimeUnit
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#timeFuture" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="timeFuture[T](name:String*)(f:=&gt;com.twitter.util.Future[T]):com.twitter.util.Future[T]"></a>
       <a id="timeFuture[T](String*)(⇒Future[T]):Future[T]"></a>
@@ -596,9 +554,7 @@ stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds
         <span class="name">timeFuture</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Time a given future in milliseconds
-</p><div class="fullcomment"><div class="comment cmt"><p>Time a given future in milliseconds
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#timeFuture" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="timeFuture[T](unit:java.util.concurrent.TimeUnit,name:String*)(f:=&gt;com.twitter.util.Future[T]):com.twitter.util.Future[T]"></a>
       <a id="timeFuture[T](TimeUnit,String*)(⇒Future[T]):Future[T]"></a>
@@ -611,9 +567,7 @@ stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds
         <span class="name">timeFuture</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="unit">unit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Time a given future using the given TimeUnit
-</p><div class="fullcomment"><div class="comment cmt"><p>Time a given future using the given TimeUnit
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#timeFuture" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="timeFuture[T](unit:java.util.concurrent.TimeUnit,stat:com.twitter.finagle.stats.Stat)(f:=&gt;com.twitter.util.Future[T]):com.twitter.util.Future[T]"></a>
       <a id="timeFuture[T](TimeUnit,Stat)(⇒Future[T]):Future[T]"></a>
@@ -623,12 +577,10 @@ stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">timeFuture</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="unit">unit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>, <span name="stat">stat: <a href="Stat.html" class="extype" name="com.twitter.finagle.stats.Stat">Stat</a></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>
+        <span class="name">timeFuture</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="unit">unit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>, <span name="stat">stat: <span class="extype" name="com.twitter.finagle.stats.Stat">Stat</span></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Time a given future using the given TimeUnit
-</p><div class="fullcomment"><div class="comment cmt"><p>Time a given future using the given TimeUnit
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.JavaLoggerStatsReceiver#timerTasks" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="timerTasks:scala.collection.mutable.HashMap[Seq[String],com.twitter.util.TimerTask]"></a>
       <a id="timerTasks:HashMap[Seq[String],TimerTask]"></a>
@@ -722,9 +674,9 @@ stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds
 
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">
-              <h3>Inherited from <a href="StatsReceiverWithCumulativeGauges.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</a></h3>
+              <h3>Inherited from <span class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</span></h3>
             </div><div class="parent" name="com.twitter.finagle.stats.StatsReceiver">
-              <h3>Inherited from <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></h3>
+              <h3>Inherited from <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">

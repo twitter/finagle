@@ -354,7 +354,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.spdy.SpdyClientDispatcher#isAvailable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Service#isAvailable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isAvailable:Boolean"></a>
       <a id="isAvailable:Boolean"></a>
       <h4 class="signature">
@@ -368,8 +368,8 @@
       </h4>
       <p class="shortcomment cmt">Determines whether this service is available (can accept requests
 with a reasonable likelihood of success).</p><div class="fullcomment"><div class="comment cmt"><p>Determines whether this service is available (can accept requests
-with a reasonable likelihood of success).
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.spdy.SpdyClientDispatcher">SpdyClientDispatcher</a> → <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd></dl></div>
+with a reasonable likelihood of success).</p><p>TODO(CSL-1336): Finalize isAvailable
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -435,6 +435,20 @@ with a reasonable likelihood of success).
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.spdy.SpdyClientDispatcher#status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="status:com.twitter.finagle.Status"></a>
+      <a id="status:Status"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">status</span><span class="result">: <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this Service.</p><div class="fullcomment"><div class="comment cmt"><p>The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this Service.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.spdy.SpdyClientDispatcher">SpdyClientDispatcher</a> → <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

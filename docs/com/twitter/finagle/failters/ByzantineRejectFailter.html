@@ -35,7 +35,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">ByzantineRejectFailter</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="probability">probability: <span class="extype" name="com.twitter.util.Var">Var</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="rejectWith">rejectWith: () ⇒ <span class="extype" name="scala.Throwable">Throwable</span> = <span class="defval" name="(() =&gt; new java.util.concurrent.RejectedExecutionException())">...</span></span>, <span name="seed">seed: <span class="extype" name="scala.Long">Long</span> = <span class="symbol">Failter.DefaultSeed</span></span>, <span name="stats">stats: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>)</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.failters.ByzantineRejectFailter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.failters.ByzantineRejectFailter.Rep">Rep</span>] with <a href="Failter.html" class="extype" name="com.twitter.finagle.failters.Failter">Failter</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">ByzantineRejectFailter</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="probability">probability: <span class="extype" name="com.twitter.util.Var">Var</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="rejectWith">rejectWith: () ⇒ <span class="extype" name="scala.Throwable">Throwable</span> = <span class="defval" name="(() =&gt; new java.util.concurrent.RejectedExecutionException())">...</span></span>, <span name="seed">seed: <span class="extype" name="scala.Long">Long</span> = <span class="symbol">Failter.DefaultSeed</span></span>, <span name="stats">stats: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>)</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.failters.ByzantineRejectFailter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.failters.ByzantineRejectFailter.Rep">Rep</span>] with <a href="Failter.html" class="extype" name="com.twitter.finagle.failters.Failter">Failter</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -89,7 +89,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ByzantineRejectFailter</span><span class="params">(<span name="probability">probability: <span class="extype" name="com.twitter.util.Var">Var</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="rejectWith">rejectWith: () ⇒ <span class="extype" name="scala.Throwable">Throwable</span> = <span class="defval" name="(() =&gt; new java.util.concurrent.RejectedExecutionException())">...</span></span>, <span name="seed">seed: <span class="extype" name="scala.Long">Long</span> = <span class="symbol">Failter.DefaultSeed</span></span>, <span name="stats">stats: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>)</span>
+        <span class="name">ByzantineRejectFailter</span><span class="params">(<span name="probability">probability: <span class="extype" name="com.twitter.util.Var">Var</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="rejectWith">rejectWith: () ⇒ <span class="extype" name="scala.Throwable">Throwable</span> = <span class="defval" name="(() =&gt; new java.util.concurrent.RejectedExecutionException())">...</span></span>, <span name="seed">seed: <span class="extype" name="scala.Long">Long</span> = <span class="symbol">Failter.DefaultSeed</span></span>, <span name="stats">stats: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>)</span>
       </span>
       </h4>
       
@@ -406,7 +406,7 @@ on a configuration file, for instance.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">passedStat</span><span class="result">: <a href="../stats/Counter.html" class="extype" name="com.twitter.finagle.stats.Counter">Counter</a></span>
+        <span class="name">passedStat</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.Counter">Counter</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="Failter.html" class="extype" name="com.twitter.finagle.failters.Failter">Failter</a></dd></dl></div>
@@ -484,7 +484,7 @@ on a configuration file, for instance.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">rejectedStat</span><span class="result">: <a href="../stats/Counter.html" class="extype" name="com.twitter.finagle.stats.Counter">Counter</a></span>
+        <span class="name">rejectedStat</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.Counter">Counter</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="Failter.html" class="extype" name="com.twitter.finagle.failters.Failter">Failter</a></dd></dl></div>
@@ -510,7 +510,7 @@ on a configuration file, for instance.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">stats</span><span class="result">: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>
+        <span class="name">stats</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.failters.ByzantineRejectFailter">ByzantineRejectFailter</a> → <a href="Failter.html" class="extype" name="com.twitter.finagle.failters.Failter">Failter</a></dd></dl></div>

@@ -24,9 +24,9 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../../../lib/class_big.png" />
+        <a href="ThriftMux$$Server$.html" title="Go to companion"><img src="../../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../../package.html" class="extype" name="com">com</a>.<a href="../package.html" class="extype" name="com.twitter">twitter</a>.<a href="package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="ThriftMux$.html" class="extype" name="com.twitter.finagle.ThriftMux">ThriftMux</a></p>
-        <h1>Server</h1>
+        <h1><a href="ThriftMux$$Server$.html" title="Go to companion">Server</a></h1>
       </div>
 
       <h4 id="signature" class="signature">
@@ -35,7 +35,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Server</span><span class="params">(<span name="muxer">muxer: <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>] = <span class="symbol">ThriftMux.this.serverMuxer</span></span>, <span name="protocolFactory">protocolFactory: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span> = <span class="defval" name="com.twitter.finagle.thrift.Protocols.binaryFactory(com.twitter.finagle.thrift.Protocols.binaryFactory$default$1, com.twitter.finagle.thrift.Protocols.binaryFactory$default$2, com.twitter.finagle.thrift.Protocols.binaryFactory$default$3, com.twitter.finagle.thrift.Protocols.binaryFactory$default$4)">...</span></span>)</span><span class="result"> extends <a href="Server.html" class="extype" name="com.twitter.finagle.Server">finagle.Server</a>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>], <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]] with <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a> with <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">Server</span><span class="params">(<span name="muxer">muxer: <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>] = <span class="symbol">ThriftMux.this.serverMuxer</span></span>)</span><span class="result"> extends <a href="Server.html" class="extype" name="com.twitter.finagle.Server">finagle.Server</a>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>], <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]] with <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a> with <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -80,7 +80,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.ThriftMux.Server#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(muxer:com.twitter.finagle.server.StackServer[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer],protocolFactory:org.apache.thrift.protocol.TProtocolFactory):com.twitter.finagle.ThriftMux.Server"></a>
+      <a id="&lt;init&gt;(muxer:com.twitter.finagle.server.StackServer[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]):com.twitter.finagle.ThriftMux.Server"></a>
       <a id="&lt;init&gt;:Server"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -88,7 +88,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Server</span><span class="params">(<span name="muxer">muxer: <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>] = <span class="symbol">ThriftMux.this.serverMuxer</span></span>, <span name="protocolFactory">protocolFactory: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span> = <span class="defval" name="com.twitter.finagle.thrift.Protocols.binaryFactory(com.twitter.finagle.thrift.Protocols.binaryFactory$default$1, com.twitter.finagle.thrift.Protocols.binaryFactory$default$2, com.twitter.finagle.thrift.Protocols.binaryFactory$default$3, com.twitter.finagle.thrift.Protocols.binaryFactory$default$4)">...</span></span>)</span>
+        <span class="name">Server</span><span class="params">(<span name="muxer">muxer: <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>] = <span class="symbol">ThriftMux.this.serverMuxer</span></span>)</span>
       </span>
       </h4>
       
@@ -270,15 +270,15 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.Server#muxer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="muxer:com.twitter.finagle.server.StackServer[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]"></a>
-      <a id="muxer:StackServer[ChannelBuffer,ChannelBuffer]"></a>
+      <a id="muxer:com.twitter.finagle.server.StackServer[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]"></a>
+      <a id="muxer:StackServer[Request,Response]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">muxer</span><span class="result">: <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>
+        <span class="name">muxer</span><span class="result">: <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
       </span>
       </h4>
       
@@ -334,7 +334,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.ThriftMux.Server#protocolFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.ThriftMux.Server#protocolFactory" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="protocolFactory:org.apache.thrift.protocol.TProtocolFactory"></a>
       <a id="protocolFactory:TProtocolFactory"></a>
       <h4 class="signature">
@@ -346,7 +346,7 @@
         <span class="name">protocolFactory</span><span class="result">: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a> → <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a> → <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.Server#serve" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serve(addr:java.net.SocketAddress,factory:com.twitter.finagle.ServiceFactory[Array[Byte],Array[Byte]]):com.twitter.finagle.ListeningServer"></a>
       <a id="serve(SocketAddress,ServiceFactory[Array[Byte],Array[Byte]]):ListeningServer"></a>
@@ -512,15 +512,15 @@ into <code>serveIface</code>:</p><pre>ThriftMuxRichServer.serveIface(<span class
 })</pre><p>Note that this interface is discovered by reflection. Passing an
 invalid interface implementation will result in a runtime error.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.Server#stack" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]]"></a>
-      <a id="stack:Stack[ServiceFactory[ChannelBuffer,ChannelBuffer]]"></a>
+      <a id="stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]]"></a>
+      <a id="stack:Stack[ServiceFactory[Request,Response]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">stack</span><span class="result">: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
+        <span class="name">stack</span><span class="result">: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]]</span>
       </span>
       </h4>
       
@@ -619,8 +619,8 @@ invalid interface implementation will result in a runtime error.</p></div><dl cl
         <span class="name">withProtocolFactory</span><span class="params">(<span name="pf">pf: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Produce a <a href="ThriftMuxServerLike.html" class="extype" name="com.twitter.finagle.ThriftMuxServerLike">com.twitter.finagle.ThriftMuxServerLike</a> using the provided
-protocolFactory.</p>
+      <p class="shortcomment cmt">Produce a <a href="Thrift$$Server.html" class="extype" name="com.twitter.finagle.Thrift.Server">com.twitter.finagle.Thrift.Server</a> using the provided
+<code>TProtocolFactory</code>.</p>
     </li></ol>
             </div>
 

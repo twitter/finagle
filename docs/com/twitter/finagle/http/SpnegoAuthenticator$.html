@@ -24,9 +24,9 @@
         </head>
         <body class="value">
       <div id="definition">
-        <a href="SpnegoAuthenticator.html" title="Go to companion"><img src="../../../../lib/object_to_class_big.png" /></a>
+        <img src="../../../../lib/object_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.http">http</a></p>
-        <h1><a href="SpnegoAuthenticator.html" title="Go to companion">SpnegoAuthenticator</a></h1>
+        <h1>SpnegoAuthenticator</h1>
       </div>
 
       <h4 id="signature" class="signature">
@@ -39,7 +39,9 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A SPNEGO HTTP authenticator as defined in https://tools.ietf.org/html/rfc4559, which gets
+its credentials from a provided CredentialSource... usually JAAS.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -94,29 +96,133 @@
       </span>
       </h4>
       <p class="comment cmt">An authenticated HTTP request, with its GSS context.</p>
-    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.HttpFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="HttpFilterextendsSpnegoAuthenticator[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]"></a>
-      <a id="HttpFilter:HttpFilter"></a>
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.Client" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="Client[Req,Rsp]extendsFilter[Req,Rsp,Req,Rsp]"></a>
+      <a id="Client[Req,Rsp]:Client[Req,Rsp]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">sealed abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SpnegoAuthenticator$$HttpFilter.html"><span class="name">HttpFilter</span></a><span class="result"> extends <a href="SpnegoAuthenticator.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator">SpnegoAuthenticator</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
+        <a href="SpnegoAuthenticator$$Client.html"><span class="name">Client</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rsp">Rsp</span>]</span><span class="result"> extends <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Client.Req">Req</span>, <span class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Client.Rsp">Rsp</span>, <span class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Client.Req">Req</span>, <span class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Client.Rsp">Rsp</span>]</span>
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.RichHttpFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="RichHttpFilterextendsSpnegoAuthenticator[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]"></a>
-      <a id="RichHttpFilter:RichHttpFilter"></a>
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.ClientFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientFilterextendsSpnegoAuthenticator.Client[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]withProductwithSerializable"></a>
+      <a id="ClientFilter:ClientFilter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SpnegoAuthenticator$$ClientFilter.html"><span class="name">ClientFilter</span></a><span class="params">(<span name="credSrc">credSrc: <a href="SpnegoAuthenticator$$Credentials$$ClientSource.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Credentials.ClientSource">ClientSource</a></span>)</span><span class="result"> extends <a href="SpnegoAuthenticator$$Client.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Client">Client</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.Negotiated" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NegotiatedextendsProductwithSerializable"></a>
+      <a id="Negotiated:Negotiated"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SpnegoAuthenticator$$Negotiated.html"><span class="name">Negotiated</span></a><span class="params">(<span name="established">established: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.ietf.jgss.GSSContext">GSSContext</span>]</span>, <span name="wwwAuthenticate">wwwAuthenticate: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.ReqSupport" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ReqSupport[Req]extendsAnyRef"></a>
+      <a id="ReqSupport[Req]:ReqSupport[Req]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="SpnegoAuthenticator$$ReqSupport.html"><span class="name">ReqSupport</span></a><span class="tparams">[<span name="Req">Req</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">A typeclass to get/set fields of http requests of type Req.</p>
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.RichClientFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RichClientFilterextendsSpnegoAuthenticator.Client[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]withProductwithSerializable"></a>
+      <a id="RichClientFilter:RichClientFilter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SpnegoAuthenticator$$RichClientFilter.html"><span class="name">RichClientFilter</span></a><span class="params">(<span name="credSrc">credSrc: <a href="SpnegoAuthenticator$$Credentials$$ClientSource.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Credentials.ClientSource">ClientSource</a></span>)</span><span class="result"> extends <a href="SpnegoAuthenticator$$Client.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Client">Client</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.RichServerFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RichServerFilterextendsSpnegoAuthenticator.Server[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]withProductwithSerializable"></a>
+      <a id="RichServerFilter:RichServerFilter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SpnegoAuthenticator$$RichServerFilter.html"><span class="name">RichServerFilter</span></a><span class="params">(<span name="credSrc">credSrc: <a href="SpnegoAuthenticator$$Credentials$$ServerSource.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Credentials.ServerSource">ServerSource</a></span>)</span><span class="result"> extends <a href="SpnegoAuthenticator$$Server.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Server">Server</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.RspSupport" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RspSupport[Rsp]extendsAnyRef"></a>
+      <a id="RspSupport[Rsp]:RspSupport[Rsp]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="SpnegoAuthenticator$$RspSupport.html"><span class="name">RspSupport</span></a><span class="tparams">[<span name="Rsp">Rsp</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">A typeclass to get/set fields of http responses of type Rsp.</p>
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.Server" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="Server[Req,Rsp]extendsFilter[Req,Rsp,com.twitter.finagle.http.SpnegoAuthenticator.Authenticated[Req],Rsp]"></a>
+      <a id="Server[Req,Rsp]:Server[Req,Rsp]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SpnegoAuthenticator$$RichHttpFilter.html"><span class="name">RichHttpFilter</span></a><span class="result"> extends <a href="SpnegoAuthenticator.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator">SpnegoAuthenticator</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
+        <a href="SpnegoAuthenticator$$Server.html"><span class="name">Server</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rsp">Rsp</span>]</span><span class="result"> extends <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Server.Req">Req</span>, <span class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Server.Rsp">Rsp</span>, <a href="SpnegoAuthenticator$$Authenticated.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated">Authenticated</a>[<span class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Server.Req">Req</span>], <span class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Server.Rsp">Rsp</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.ServerFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerFilterextendsSpnegoAuthenticator.Server[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]withProductwithSerializable"></a>
+      <a id="ServerFilter:ServerFilter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SpnegoAuthenticator$$ServerFilter.html"><span class="name">ServerFilter</span></a><span class="params">(<span name="credSrc">credSrc: <a href="SpnegoAuthenticator$$Credentials$$ServerSource.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Credentials.ServerSource">ServerSource</a></span>)</span><span class="result"> extends <a href="SpnegoAuthenticator$$Server.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Server">Server</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.Token" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Token=Array[Byte]"></a>
+      <a id="Token:Token"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Token</span><span class="result"> = <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>
       </span>
       </h4>
       
@@ -192,19 +298,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.AuthHeader" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="AuthHeader"></a>
-      <a id="AuthHeader:AuthHeader"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="SpnegoAuthenticator$$AuthHeader$.html"><span class="name">AuthHeader</span></a>
-      </span>
-      </h4>
-      
     </li><li name="com.twitter.finagle.http.SpnegoAuthenticator#AuthScheme" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="AuthScheme:String"></a>
       <a id="AuthScheme:String"></a>
@@ -228,6 +321,32 @@
       </span>
       <span class="symbol">
         <a href="SpnegoAuthenticator$$Authenticated$.html"><span class="name">Authenticated</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.Credentials" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Credentials"></a>
+      <a id="Credentials:Credentials"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SpnegoAuthenticator$$Credentials$.html"><span class="name">Credentials</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator.Token" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Token"></a>
+      <a id="Token:Token"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SpnegoAuthenticator$$Token$.html"><span class="name">Token</span></a>
       </span>
       </h4>
       
@@ -334,6 +453,58 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator#httpRequestSupport" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="httpRequestSupport:com.twitter.finagle.http.SpnegoAuthenticator.ReqSupport[org.jboss.netty.handler.codec.http.HttpRequest]{defauthenticated(req:org.jboss.netty.handler.codec.http.HttpRequest,context:org.ietf.jgss.GSSContext):com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http}"></a>
+      <a id="httpRequestSupport:ReqSupport[HttpRequest]{defauthenticated(req:org.jboss.netty.handler.codec.http.HttpRequest,context:org.ietf.jgss.GSSContext):com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http}"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">httpRequestSupport</span><span class="result">: <a href="SpnegoAuthenticator$$ReqSupport.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.ReqSupport">ReqSupport</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>] { def authenticated(req: org.jboss.netty.handler.codec.http.HttpRequest,context: org.ietf.jgss.GSSContext): com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.Http }</span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator#httpResponseSupport" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="httpResponseSupport:com.twitter.finagle.http.SpnegoAuthenticator.RspSupport[org.jboss.netty.handler.codec.http.HttpResponse]{defunauthorized(version:org.jboss.netty.handler.codec.http.HttpVersion):org.jboss.netty.handler.codec.http.DefaultHttpResponse}"></a>
+      <a id="httpResponseSupport:RspSupport[HttpResponse]{defunauthorized(version:org.jboss.netty.handler.codec.http.HttpVersion):org.jboss.netty.handler.codec.http.DefaultHttpResponse}"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">httpResponseSupport</span><span class="result">: <a href="SpnegoAuthenticator$$RspSupport.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.RspSupport">RspSupport</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>] { def unauthorized(version: org.jboss.netty.handler.codec.http.HttpVersion): org.jboss.netty.handler.codec.http.DefaultHttpResponse }</span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator#httpRichRequestSupport" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="httpRichRequestSupport:com.twitter.finagle.http.SpnegoAuthenticator.ReqSupport[com.twitter.finagle.http.Request]{defauthenticated(req:com.twitter.finagle.http.Request,context:org.ietf.jgss.GSSContext):com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.RichHttp}"></a>
+      <a id="httpRichRequestSupport:ReqSupport[Request]{defauthenticated(req:com.twitter.finagle.http.Request,context:org.ietf.jgss.GSSContext):com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.RichHttp}"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">httpRichRequestSupport</span><span class="result">: <a href="SpnegoAuthenticator$$ReqSupport.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.ReqSupport">ReqSupport</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>] { def authenticated(req: com.twitter.finagle.http.Request,context: org.ietf.jgss.GSSContext): com.twitter.finagle.http.SpnegoAuthenticator.Authenticated.RichHttp }</span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator#httpRichResponseSupport" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="httpRichResponseSupport:com.twitter.finagle.http.SpnegoAuthenticator.RspSupport[com.twitter.finagle.http.Response]"></a>
+      <a id="httpRichResponseSupport:RspSupport[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">httpRichResponseSupport</span><span class="result">: <a href="SpnegoAuthenticator$$RspSupport.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.RspSupport">RspSupport</a>[<a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
+      </span>
+      </h4>
+      
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>

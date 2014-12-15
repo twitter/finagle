@@ -24,9 +24,9 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../../../../lib/class_big.png" />
+        <a href="FailureAccrualFactory$.html" title="Go to companion"><img src="../../../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.service">service</a></p>
-        <h1>FailureAccrualFactory</h1>
+        <h1><a href="FailureAccrualFactory$.html" title="Go to companion">FailureAccrualFactory</a></h1>
       </div>
 
       <h4 id="signature" class="signature">
@@ -47,7 +47,7 @@ vs. not), enable different backoff strategies.
           <div class="superTypes hiddenContent"><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Rep">Rep</span>], <span class="extype" name="com.twitter.util.Closable">Closable</span>, (<a href="../ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Rep">Rep</span>]], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a href="../memcached/KetamaFailureAccrualFactory.html" class="extype" name="com.twitter.finagle.memcached.KetamaFailureAccrualFactory">KetamaFailureAccrualFactory</a></div>
+          <div class="subClasses hiddenContent"><a href="../memcachedx/KetamaFailureAccrualFactory.html" class="extype" name="com.twitter.finagle.memcachedx.KetamaFailureAccrualFactory">KetamaFailureAccrualFactory</a>, <a href="../memcached/KetamaFailureAccrualFactory.html" class="extype" name="com.twitter.finagle.memcached.KetamaFailureAccrualFactory">KetamaFailureAccrualFactory</a></div>
         </div></div>
         
 
@@ -86,6 +86,19 @@ vs. not), enable different backoff strategies.
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.service.FailureAccrualFactory#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(underlying:com.twitter.finagle.ServiceFactory[Req,Rep],numFailures:Int,markDeadFor:com.twitter.util.Duration,timer:com.twitter.util.Timer,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.service.FailureAccrualFactory[Req,Rep]"></a>
+      <a id="&lt;init&gt;:FailureAccrualFactory[Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">FailureAccrualFactory</span><span class="params">(<span name="underlying">underlying: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Rep">Rep</span>]</span>, <span name="numFailures">numFailures: <span class="extype" name="scala.Int">Int</span></span>, <span name="markDeadFor">markDeadFor: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span></span>, <span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.service.FailureAccrualFactory#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="&lt;init&gt;(underlying:com.twitter.finagle.ServiceFactory[Req,Rep],numFailures:Int,markDeadFor:com.twitter.util.Duration,timer:com.twitter.util.Timer):com.twitter.finagle.service.FailureAccrualFactory[Req,Rep]"></a>
       <a id="&lt;init&gt;:FailureAccrualFactory[Req,Rep]"></a>
       <h4 class="signature">
@@ -94,10 +107,13 @@ vs. not), enable different backoff strategies.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">FailureAccrualFactory</span><span class="params">(<span name="underlying">underlying: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Rep">Rep</span>]</span>, <span name="numFailures">numFailures: <span class="extype" name="scala.Int">Int</span></span>, <span name="markDeadFor">markDeadFor: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span></span>)</span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.22.1) Please call the FailureAccrualFactory constructor that supplies a StatsReceiver">FailureAccrualFactory</span><span class="params">(<span name="underlying">underlying: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Rep">Rep</span>]</span>, <span name="numFailures">numFailures: <span class="extype" name="scala.Int">Int</span></span>, <span name="markDeadFor">markDeadFor: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span></span>)</span>
       </span>
       </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.22.1)</i> Please call the FailureAccrualFactory constructor that supplies a StatsReceiver</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -393,7 +409,7 @@ only need to modify or operate on the underlying service.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.service.FailureAccrualFactory#isAvailable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.ServiceFactory#isAvailable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isAvailable:Boolean"></a>
       <a id="isAvailable:Boolean"></a>
       <h4 class="signature">
@@ -405,7 +421,7 @@ only need to modify or operate on the underlying service.
         <span class="name">isAvailable</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.service.FailureAccrualFactory">FailureAccrualFactory</a> → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -512,6 +528,21 @@ styles of factory wrappers.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li name="com.twitter.finagle.service.FailureAccrualFactory#status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="status:com.twitter.finagle.Status"></a>
+      <a id="status:Status"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">status</span><span class="result">: <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this ServiceFactory
+</p><div class="fullcomment"><div class="comment cmt"><p>The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this ServiceFactory
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.service.FailureAccrualFactory">FailureAccrualFactory</a> → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

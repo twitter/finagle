@@ -78,7 +78,7 @@ messages by tag, and the reply concludes the exchange and frees the
 tag for future use. Implementations should reuse small tag numbers.</p><h3>Messages</h3><p><i>size:4 Tinit:1 tag:3 version:2 (key~4 value~4)*</i> reinitializes a
 session. Clients typically send this at the beginning of the session.
 When doing so, the sender may issue no more T messages until the
-corresponding <i>size:4 Rinit:1 version:2 (key~4 value~4)*</i> has been
+corresponding <i>size:4 Rinit:1 tag:3 version:2 (key~4 value~4)*</i> has been
 received. After the Rinit was received, all connection state has been
 reset (outstanding tags are invalidated) and the stream is resumed
 according to the newly negotiated parameters. Prior to the first
@@ -113,7 +113,7 @@ client. This can be used as a hint for early termination. Why is a
 string describing why the request was discarded. Note that it does
 *not* free the server from the obligation of replying to the original
 Treq.</p><p><i>size:4 Tlease:1 tag:3 unit:1 howmuch:8</i> is a marker message indicating that a
-lease has been issued for <i>howmuch</i> unit. Unit '1' is reserved for duration in
+lease has been issued for <i>howmuch</i> unit. Unit '0' is reserved for duration in
 milliseconds. Whenever a lease has not been issued, a client can assume it holds
 an indefinite lease. Adhering to the lease is optional, but the server may
 reject requests or provide degraded service should the lease expire. This is
@@ -185,6 +185,32 @@ used by servers to implement features like garbage collection avoidance.</p></di
       </span>
       </h4>
       <p class="comment cmt">Indicates that a client requested that a given request be discarded.</p>
+    </li><li name="com.twitter.finagle.mux.Request" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RequestextendsAnyRef"></a>
+      <a id="Request:Request"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Request.html"><span class="name">Request</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">A mux request.</p>
+    </li><li name="com.twitter.finagle.mux.Response" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ResponseextendsAnyRef"></a>
+      <a id="Response:Response"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Response.html"><span class="name">Response</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">A mux response containing an immutable byte buffer.</p>
     </li><li name="com.twitter.finagle.mux.ServerApplicationError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ServerApplicationErrorextendsExceptionwithNoStacktracewithProductwithSerializable"></a>
       <a id="ServerApplicationError:ServerApplicationError"></a>
@@ -219,16 +245,16 @@ request.</p>
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="com.twitter.finagle.mux.ClientDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ClientDispatcher"></a>
-      <a id="ClientDispatcher:ClientDispatcher"></a>
+              <ol><li name="com.twitter.finagle.mux.Request" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Request"></a>
+      <a id="Request:Request"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ClientDispatcher$.html"><span class="name">ClientDispatcher</span></a>
+        <a href="Request$.html"><span class="name">Request</span></a>
       </span>
       </h4>
       
@@ -245,6 +271,45 @@ request.</p>
       </span>
       </h4>
       <p class="comment cmt">Indicates that a client request was denied by the server.</p>
+    </li><li name="com.twitter.finagle.mux.Requests" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Requests"></a>
+      <a id="Requests:Requests"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Requests$.html"><span class="name">Requests</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">For java compatibility</p>
+    </li><li name="com.twitter.finagle.mux.Response" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Response"></a>
+      <a id="Response:Response"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Response$.html"><span class="name">Response</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.mux.Responses" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Responses"></a>
+      <a id="Responses:Responses"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Responses$.html"><span class="name">Responses</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">For java compatibility</p>
     </li><li name="com.twitter.finagle.mux.ServerDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ServerDispatcher"></a>
       <a id="ServerDispatcher:ServerDispatcher"></a>
@@ -258,16 +323,16 @@ request.</p>
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.mux.exp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="exp"></a>
-      <a id="exp:exp"></a>
+    </li><li name="com.twitter.finagle.mux.gracefulShutdownEnabled" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="gracefulShutdownEnabled"></a>
+      <a id="gracefulShutdownEnabled:gracefulShutdownEnabled"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">package</span>
+        <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="exp/package.html"><span class="name">exp</span></a>
+        <a href="gracefulShutdownEnabled$.html"><span class="name">gracefulShutdownEnabled</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>
       </span>
       </h4>
       

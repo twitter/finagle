@@ -24,9 +24,9 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../../../../lib/class_big.png" />
+        <a href="ExpiringService$.html" title="Go to companion"><img src="../../../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.service">service</a></p>
-        <h1>ExpiringService</h1>
+        <h1><a href="ExpiringService$.html" title="Go to companion">ExpiringService</a></h1>
       </div>
 
       <h4 id="signature" class="signature">
@@ -92,7 +92,7 @@ customizable.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ExpiringService</span><span class="params">(<span name="self">self: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.ExpiringService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.ExpiringService.Rep">Rep</span>]</span>, <span name="maxIdleTime">maxIdleTime: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>, <span name="maxLifeTime">maxLifeTime: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span></span>, <span name="stats">stats: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span>
+        <span class="name">ExpiringService</span><span class="params">(<span name="self">self: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.ExpiringService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.ExpiringService.Rep">Rep</span>]</span>, <span name="maxIdleTime">maxIdleTime: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>, <span name="maxLifeTime">maxLifeTime: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span></span>, <span name="stats">stats: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span>
       </span>
       </h4>
       
@@ -388,7 +388,8 @@ customizable.
       </h4>
       <p class="shortcomment cmt">Determines whether this service is available (can accept requests
 with a reasonable likelihood of success).</p><div class="fullcomment"><div class="comment cmt"><p>Determines whether this service is available (can accept requests
-with a reasonable likelihood of success).
+with a reasonable likelihood of success).</p><p>TODO(CSL-1336): Finalize isAvailable</p><p><a href="../ServiceProxy.html#status:com.twitter.finagle.Status" class="extmbr" name="com.twitter.finagle.ServiceProxy#status">ServiceProxy.status</a> and <a href="../ServiceProxy.html#isAvailable:Boolean" class="extmbr" name="com.twitter.finagle.ServiceProxy#isAvailable">ServiceProxy.isAvailable</a> must be
+overridden together, pending CSL-1336.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceProxy.html" class="extype" name="com.twitter.finagle.ServiceProxy">ServiceProxy</a> → <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -455,6 +456,21 @@ with a reasonable likelihood of success).
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.ServiceProxy#status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="status:com.twitter.finagle.Status"></a>
+      <a id="status:Status"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">status</span><span class="result">: <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this Service.</p><div class="fullcomment"><div class="comment cmt"><p>The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this Service.</p><p><a href="../ServiceProxy.html#status:com.twitter.finagle.Status" class="extmbr" name="com.twitter.finagle.ServiceProxy#status">ServiceProxy.status</a> and <a href="../ServiceProxy.html#isAvailable:Boolean" class="extmbr" name="com.twitter.finagle.ServiceProxy#isAvailable">ServiceProxy.isAvailable</a> must be
+overridden together, pending CSL-1336.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceProxy.html" class="extype" name="com.twitter.finagle.ServiceProxy">ServiceProxy</a> → <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

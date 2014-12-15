@@ -92,7 +92,7 @@ update will be triggered whenever cache config data change event happens.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ZookeeperCacheNodeGroup</span><span class="params">(<span name="zkPath">zkPath: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="zkClient">zkClient: <span class="extype" name="com.twitter.common.zookeeper.ZooKeeperClient">ZooKeeperClient</span></span>, <span name="statsReceiver">statsReceiver: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>)</span>
+        <span class="name">ZookeeperCacheNodeGroup</span><span class="params">(<span name="zkPath">zkPath: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="zkClient">zkClient: <span class="extype" name="com.twitter.common.zookeeper.ZooKeeperClient">ZooKeeperClient</span></span>, <span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>)</span>
       </span>
       </h4>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">zkPath</dt><dd class="cmt"><p>the zookeeper path representing the cache pool</p></dd><dt class="param">zkClient</dt><dd class="cmt"><p>zookeeper client talking to the zookeeper, it will only be used to read zookeeper</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>Optional, the destination to report the stats to
@@ -527,7 +527,7 @@ node data watcher previously registered got dropped, hence re-attache the data w
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">statsReceiver</span><span class="result">: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>
+        <span class="name">statsReceiver</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Optional, the destination to report the stats to

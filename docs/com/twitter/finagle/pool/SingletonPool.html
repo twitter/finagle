@@ -92,7 +92,7 @@ fails or the current service has become unavailable.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">SingletonPool</span><span class="params">(<span name="underlying">underlying: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.pool.SingletonPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.SingletonPool.Rep">Rep</span>]</span>, <span name="statsReceiver">statsReceiver: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span>
+        <span class="name">SingletonPool</span><span class="params">(<span name="underlying">underlying: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.pool.SingletonPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.SingletonPool.Rep">Rep</span>]</span>, <span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span>
       </span>
       </h4>
       
@@ -265,10 +265,7 @@ Service, the user must call Service.close().
       </h4>
       <p class="shortcomment cmt">&lt;invalid inheritdoc annotation&gt;</p><div class="fullcomment"><div class="comment cmt"><p>&lt;invalid inheritdoc annotation&gt;</p><p>SingletonPool closes asynchronously; the underlying connection is
 closed once all references are returned.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.pool.SingletonPool">SingletonPool</a> → Closable</dd><dt>Annotations</dt><dd>
-                <span class="name">@tailrec</span><span class="args">()</span>
-              
-        </dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.pool.SingletonPool">SingletonPool</a> → Closable</dd></dl></div>
     </li><li name="com.twitter.util.Closable#close" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="close(after:com.twitter.util.Duration):com.twitter.util.Future[Unit]"></a>
       <a id="close(Duration):Future[Unit]"></a>
@@ -399,7 +396,7 @@ only need to modify or operate on the underlying service.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.pool.SingletonPool#isAvailable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.ServiceFactory#isAvailable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isAvailable:Boolean"></a>
       <a id="isAvailable:Boolean"></a>
       <h4 class="signature">
@@ -411,9 +408,7 @@ only need to modify or operate on the underlying service.
         <span class="name">isAvailable</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">&lt;invalid inheritdoc annotation&gt;</p><div class="fullcomment"><div class="comment cmt"><p>&lt;invalid inheritdoc annotation&gt;</p><p>A SingletonPool is available when it is not closed and the underlying
-factory is also available.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.pool.SingletonPool">SingletonPool</a> → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -481,6 +476,21 @@ styles of factory wrappers.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.pool.SingletonPool#status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="status:com.twitter.finagle.Status"></a>
+      <a id="status:Status"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">status</span><span class="result">: <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this ServiceFactory</p><div class="fullcomment"><div class="comment cmt"><p>The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this ServiceFactory</p><p>A SingletonPool is available when it is not closed and the underlying
+factory is also available.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.pool.SingletonPool">SingletonPool</a> → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

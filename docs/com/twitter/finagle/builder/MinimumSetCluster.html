@@ -35,14 +35,17 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">MinimumSetCluster</span><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.MinimumSetCluster.T">T</span>]</span>
+        <span class="name deprecated" title="Deprecated: (Since version 2014-11-21) Use com.twitter.finagle.Name to represent clusters instead">MinimumSetCluster</span><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.MinimumSetCluster.T">T</span>]</span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A Cluster implementation that guarantees a minimum set while allowing you
 to specify a Cluster to supplement the initial static set. All operations
 that would remove entries in the minimum set are censored and counted.
-</p></div><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2014-11-21)</i> Use <code>com.twitter.finagle.Name</code> to represent clusters instead</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.MinimumSetCluster.T">T</span>], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -91,7 +94,7 @@ that would remove entries in the minimum set are censored and counted.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">MinimumSetCluster</span><span class="params">(<span name="minimum">minimum: <span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="com.twitter.finagle.builder.MinimumSetCluster.T">T</span>]</span>, <span name="supplementary">supplementary: <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.MinimumSetCluster.T">T</span>]</span>, <span name="statsReceiver">statsReceiver: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>)</span>
+        <span class="name">MinimumSetCluster</span><span class="params">(<span name="minimum">minimum: <span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="com.twitter.finagle.builder.MinimumSetCluster.T">T</span>]</span>, <span name="supplementary">supplementary: <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.MinimumSetCluster.T">T</span>]</span>, <span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>)</span>
       </span>
       </h4>
       

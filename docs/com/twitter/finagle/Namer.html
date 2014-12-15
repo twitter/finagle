@@ -52,7 +52,7 @@ and thus lookup results are represented by a <span class="extype" name="com.twit
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>, <a href="../serverset.html" class="extype" name="com.twitter.serverset">serverset</a></div>
+          <div class="subClasses hiddenContent"><a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>, <a href="namer/global.html" class="extype" name="com.twitter.finagle.namer.global">global</a>, <a href="../serverset.html" class="extype" name="com.twitter.serverset">serverset</a></div>
         </div></div>
         
 
@@ -94,20 +94,7 @@ and thus lookup results are represented by a <span class="extype" name="com.twit
 
         <div id="values" class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li name="com.twitter.finagle.Namer#enum" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="enum(prefix:com.twitter.finagle.Path):com.twitter.util.Activity[com.twitter.finagle.Dtab]"></a>
-      <a id="enum(Path):Activity[Dtab]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">enum</span><span class="params">(<span name="prefix">prefix: <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Activity">Activity</span>[<a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Enumerate entries in this namer by prefix.</p>
-    </li><li name="com.twitter.finagle.Namer#lookup" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.Namer#lookup" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="lookup(path:com.twitter.finagle.Path):com.twitter.util.Activity[com.twitter.finagle.NameTree[com.twitter.finagle.Name]]"></a>
       <a id="lookup(Path):Activity[NameTree[Name]]"></a>
       <h4 class="signature">
@@ -280,24 +267,6 @@ is translated into a Var[Addr].
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.Namer#expand" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="expand(prefix:com.twitter.finagle.Path):com.twitter.util.Activity[com.twitter.finagle.Dtab]"></a>
-      <a id="expand(Path):Activity[Dtab]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">expand</span><span class="params">(<span name="prefix">prefix: <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Activity">Activity</span>[<a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Expand a prefix of this Namer, producing a Dtab reflecting the
-this prefixed namespace.</p><div class="fullcomment"><div class="comment cmt"><p>Expand a prefix of this Namer, producing a Dtab reflecting the
-this prefixed namespace. The returned Dtab does not contain any
-root entries (/=&gt;...), and thus represents valid suffixes of the
-given prefix.
-</p></div></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -395,24 +364,6 @@ given prefix.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.Namer#orElse" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="orElse(next:com.twitter.finagle.Namer):com.twitter.finagle.Namer"></a>
-      <a id="orElse(Namer):Namer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">orElse</span><span class="params">(<span name="next">next: <a href="" class="extype" name="com.twitter.finagle.Namer">Namer</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Namer">Namer</a></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Compose this <a href="" class="extype" name="com.twitter.finagle.Namer">Namer</a> with <code>next</code>;
-the returned <a href="" class="extype" name="com.twitter.finagle.Namer">Namer</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Compose this <a href="" class="extype" name="com.twitter.finagle.Namer">Namer</a> with <code>next</code>;
-the returned <a href="" class="extype" name="com.twitter.finagle.Namer">Namer</a>. The result is
-the <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">Alt</a>-tree of both lookups,
-with this namer's result first.
-</p></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

@@ -35,7 +35,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">ServerMuxer</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]] = <span class="defval" name="{<br/>&amp;nbsp;&amp;nbsp;  &lt;synthetic&gt; val x$2: com.twitter.finagle.Stack.Simple[com.twitter.finagle.ServiceFactory[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]] = ThriftMuxUtil.protocolRecorder;<br/>&amp;nbsp;&amp;nbsp;  Mux.server.stack.+:(x$2)<br/>&amp;nbsp;&amp;nbsp;}">...</span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol">Mux.server.params</span></span>)</span><span class="result"> extends <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <a href="" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">ServerMuxer</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol">ThriftMux.this.BaseServerStack</span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol">Mux.server.params</span></span>)</span><span class="result"> extends <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -50,11 +50,10 @@ an invalid Mux message type) and the server can reliably detect the non-Mux
 Thrift client and switch to the backwards-compatible mode.</p><p>Note that the server is also compatible with non-Mux finagle-thrift clients.
 It correctly responds to the protocol up-negotiation request and passes the
 tracing information embedded in the thrift requests to Mux (which has native
-tracing support).</p><p>This class can't be instantiated. For a default instance of ThriftMuxServerLike,
-see <a href="ThriftMuxServer$.html" class="extype" name="com.twitter.finagle.ThriftMuxServer">com.twitter.finagle.ThriftMuxServer</a>
+tracing support).
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <a href="" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a>], <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>], <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]], <a href="Server.html" class="extype" name="com.twitter.finagle.Server">finagle.Server</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a>], <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>], <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]], <a href="Server.html" class="extype" name="com.twitter.finagle.Server">finagle.Server</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -93,7 +92,7 @@ see <a href="ThriftMuxServer$.html" class="extype" name="com.twitter.finagle.Thr
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.ThriftMux.ServerMuxer#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.ThriftMux.ServerMuxer"></a>
+      <a id="&lt;init&gt;(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.ThriftMux.ServerMuxer"></a>
       <a id="&lt;init&gt;:ServerMuxer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -101,7 +100,7 @@ see <a href="ThriftMuxServer$.html" class="extype" name="com.twitter.finagle.Thr
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ServerMuxer</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]] = <span class="defval" name="{<br/>&amp;nbsp;&amp;nbsp;  &lt;synthetic&gt; val x$2: com.twitter.finagle.Stack.Simple[com.twitter.finagle.ServiceFactory[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]] = ThriftMuxUtil.protocolRecorder;<br/>&amp;nbsp;&amp;nbsp;  Mux.server.stack.+:(x$2)<br/>&amp;nbsp;&amp;nbsp;}">...</span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol">Mux.server.params</span></span>)</span>
+        <span class="name">ServerMuxer</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol">ThriftMux.this.BaseServerStack</span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol">Mux.server.params</span></span>)</span>
       </span>
       </h4>
       
@@ -254,15 +253,15 @@ see <a href="ThriftMuxServer$.html" class="extype" name="com.twitter.finagle.Thr
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.ServerMuxer#copy1" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="copy1(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.ThriftMux.ServerMuxer"></a>
-      <a id="copy1(Stack[ServiceFactory[ChannelBuffer,ChannelBuffer]],Params):ServerMuxer"></a>
+      <a id="copy1(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.ThriftMux.ServerMuxer"></a>
+      <a id="copy1(Stack[ServiceFactory[Request,Response]],Params):ServerMuxer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">copy1</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]] = <span class="symbol"><span class="name"><a href="#stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]]">this.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="#params:com.twitter.finagle.Stack.Params">this.params</a></span></span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a></span>
+        <span class="name">copy1</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="#stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]]">this.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="#params:com.twitter.finagle.Stack.Params">this.params</a></span></span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">A copy constructor in lieu of defining StackServer as a
@@ -341,15 +340,15 @@ case class.
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.ServerMuxer#newDispatcher" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newDispatcher(transport:com.twitter.finagle.transport.Transport[ServerMuxer.this.In,ServerMuxer.this.Out],service:com.twitter.finagle.Service[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]):com.twitter.finagle.mux.ServerDispatcher"></a>
-      <a id="newDispatcher(Transport[In,Out],Service[ChannelBuffer,ChannelBuffer]):ServerDispatcher"></a>
+      <a id="newDispatcher(transport:com.twitter.finagle.transport.Transport[ServerMuxer.this.In,ServerMuxer.this.Out],service:com.twitter.finagle.Service[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]):com.twitter.finagle.mux.ServerDispatcher"></a>
+      <a id="newDispatcher(Transport[In,Out],Service[Request,Response]):ServerDispatcher"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="#In=org.jboss.netty.buffer.ChannelBuffer" class="extmbr" name="com.twitter.finagle.ThriftMux.ServerMuxer.In">In</a>, <a href="#Out=org.jboss.netty.buffer.ChannelBuffer" class="extmbr" name="com.twitter.finagle.ThriftMux.ServerMuxer.Out">Out</a>]</span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.mux.ServerDispatcher">ServerDispatcher</span></span>
+        <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="#In=org.jboss.netty.buffer.ChannelBuffer" class="extmbr" name="com.twitter.finagle.ThriftMux.ServerMuxer.In">In</a>, <a href="#Out=org.jboss.netty.buffer.ChannelBuffer" class="extmbr" name="com.twitter.finagle.ThriftMux.ServerMuxer.Out">Out</a>]</span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.mux.ServerDispatcher">ServerDispatcher</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Defines a dispatcher, a function which binds a transport to a
@@ -415,14 +414,14 @@ Concrete StackServer implementations are expected to specify this.
       <p class="shortcomment cmt">The current parameter map used in this StackServer</p><div class="fullcomment"><div class="comment cmt"><p>The current parameter map used in this StackServer</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.server.StdStackServer#serve" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serve(addr:java.net.SocketAddress,factory:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ListeningServer"></a>
-      <a id="serve(SocketAddress,ServiceFactory[ChannelBuffer,ChannelBuffer]):ListeningServer"></a>
+      <a id="serve(SocketAddress,ServiceFactory[Request,Response]):ListeningServer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serve</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="factory">factory: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+        <span class="name">serve</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="factory">factory: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code>
@@ -430,14 +429,14 @@ Concrete StackServer implementations are expected to specify this.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a> → <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Server#serve" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serve(addr:String,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.ListeningServer"></a>
-      <a id="serve(String,Service[ChannelBuffer,ChannelBuffer]):ListeningServer"></a>
+      <a id="serve(String,Service[Request,Response]):ListeningServer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serve</span><span class="params">(<span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+        <span class="name">serve</span><span class="params">(<span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code>
@@ -445,14 +444,14 @@ Concrete StackServer implementations are expected to specify this.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Server#serve" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serve(addr:String,service:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ListeningServer"></a>
-      <a id="serve(String,ServiceFactory[ChannelBuffer,ChannelBuffer]):ListeningServer"></a>
+      <a id="serve(String,ServiceFactory[Request,Response]):ListeningServer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serve</span><span class="params">(<span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+        <span class="name">serve</span><span class="params">(<span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code>
@@ -460,14 +459,14 @@ Concrete StackServer implementations are expected to specify this.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Server#serve" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serve(addr:java.net.SocketAddress,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.ListeningServer"></a>
-      <a id="serve(SocketAddress,Service[ChannelBuffer,ChannelBuffer]):ListeningServer"></a>
+      <a id="serve(SocketAddress,Service[Request,Response]):ListeningServer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serve</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+        <span class="name">serve</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code>
@@ -475,70 +474,70 @@ Concrete StackServer implementations are expected to specify this.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Server#serveAndAnnounce" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serveAndAnnounce(name:String,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.ListeningServer"></a>
-      <a id="serveAndAnnounce(String,Service[ChannelBuffer,ChannelBuffer]):ListeningServer"></a>
+      <a id="serveAndAnnounce(String,Service[Request,Response]):ListeningServer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+        <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
 when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Server#serveAndAnnounce" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serveAndAnnounce(name:String,service:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ListeningServer"></a>
-      <a id="serveAndAnnounce(String,ServiceFactory[ChannelBuffer,ChannelBuffer]):ListeningServer"></a>
+      <a id="serveAndAnnounce(String,ServiceFactory[Request,Response]):ListeningServer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+        <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
 when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Server#serveAndAnnounce" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serveAndAnnounce(name:String,addr:String,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.ListeningServer"></a>
-      <a id="serveAndAnnounce(String,String,Service[ChannelBuffer,ChannelBuffer]):ListeningServer"></a>
+      <a id="serveAndAnnounce(String,String,Service[Request,Response]):ListeningServer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+        <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
 when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Server#serveAndAnnounce" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serveAndAnnounce(forum:String,addr:String,service:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ListeningServer"></a>
-      <a id="serveAndAnnounce(String,String,ServiceFactory[ChannelBuffer,ChannelBuffer]):ListeningServer"></a>
+      <a id="serveAndAnnounce(String,String,ServiceFactory[Request,Response]):ListeningServer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serveAndAnnounce</span><span class="params">(<span name="forum">forum: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+        <span class="name">serveAndAnnounce</span><span class="params">(<span name="forum">forum: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
 when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.ServerMuxer#stack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]]"></a>
-      <a id="stack:Stack[ServiceFactory[ChannelBuffer,ChannelBuffer]]"></a>
+      <a id="stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]]"></a>
+      <a id="stack:Stack[ServiceFactory[Request,Response]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">stack</span><span class="result">: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
+        <span class="name">stack</span><span class="result">: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">The current stack used in this StackServer.</p><div class="fullcomment"><div class="comment cmt"><p>The current stack used in this StackServer.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a></dd></dl></div>
@@ -624,20 +623,18 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
         <span class="name">withParams</span><span class="params">(<span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Creates a new StackServer with <code>p</code> added to the <code>params</code>
-used to configure this StackServer's <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackServer with <code>p</code> added to the <code>params</code>
-used to configure this StackServer's <code>stack</code>.
+      <p class="shortcomment cmt">Creates a new StackServer with <code>params</code> used to configure this StackServer's <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackServer with <code>params</code> used to configure this StackServer's <code>stack</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.server.StdStackServer#withStack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):This"></a>
-      <a id="withStack(Stack[ServiceFactory[ChannelBuffer,ChannelBuffer]]):ServerMuxer"></a>
+      <a id="withStack(Stack[ServiceFactory[Request,Response]]):ServerMuxer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withStack</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a></span>
+        <span class="name">withStack</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">A new StackServer with the provided Stack.</p><div class="fullcomment"><div class="comment cmt"><p>A new StackServer with the provided Stack.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a></dd></dl></div>
@@ -659,13 +656,13 @@ used to configure this StackServer's <code>stack</code>.
             </div><div class="parent" name="scala.Equals">
               <h3>Inherited from <span class="extype" name="scala.Equals">Equals</span></h3>
             </div><div class="parent" name="com.twitter.finagle.server.StdStackServer">
-              <h3>Inherited from <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <a href="" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a>]</h3>
+              <h3>Inherited from <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a>]</h3>
             </div><div class="parent" name="com.twitter.finagle.server.StackServer">
-              <h3>Inherited from <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</h3>
+              <h3>Inherited from <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</h3>
             </div><div class="parent" name="com.twitter.finagle.Stack.Parameterized">
-              <h3>Inherited from <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</h3>
+              <h3>Inherited from <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]]</h3>
             </div><div class="parent" name="com.twitter.finagle.Server">
-              <h3>Inherited from <a href="Server.html" class="extype" name="com.twitter.finagle.Server">finagle.Server</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</h3>
+              <h3>Inherited from <a href="Server.html" class="extype" name="com.twitter.finagle.Server">finagle.Server</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">

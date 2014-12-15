@@ -71,19 +71,6 @@
       </span>
       </h4>
       <p class="comment cmt">A builder of Finagle <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Clients</a>.</p>
-    </li><li name="com.twitter.finagle.builder.Cluster" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="Cluster[T]extendsAnyRef"></a>
-      <a id="Cluster[T]:Cluster[T]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="Cluster.html"><span class="name">Cluster</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      </h4>
-      <p class="comment cmt">Cluster is a collection of servers.</p>
     </li><li name="com.twitter.finagle.builder.IncompleteSpecification" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="IncompleteSpecificationextendsException"></a>
       <a id="IncompleteSpecification:IncompleteSpecification"></a>
@@ -97,33 +84,6 @@
       </span>
       </h4>
       <p class="comment cmt">Used by builder to throw exceptions if the specification is incomplete.</p>
-    </li><li name="com.twitter.finagle.builder.MinimumSetCluster" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MinimumSetCluster[T]extendsCluster[T]"></a>
-      <a id="MinimumSetCluster[T]:MinimumSetCluster[T]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="MinimumSetCluster.html"><span class="name">MinimumSetCluster</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.MinimumSetCluster.T">T</span>]</span>
-      </span>
-      </h4>
-      <p class="comment cmt">A Cluster implementation that guarantees a minimum set while allowing you
-to specify a Cluster to supplement the initial static set.</p>
-    </li><li name="com.twitter.finagle.builder.NonShrinkingCluster" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="NonShrinkingCluster[T]extendsCluster[T]"></a>
-      <a id="NonShrinkingCluster[T]:NonShrinkingCluster[T]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="NonShrinkingCluster.html"><span class="name">NonShrinkingCluster</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.NonShrinkingCluster.T">T</span>]</span>
-      </span>
-      </h4>
-      <p class="comment cmt">Dynamic clusters, such as serversets, can be volatile and untrustworthy.</p>
     </li><li name="com.twitter.finagle.builder.Server" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ServerextendsClosable"></a>
       <a id="Server:Server"></a>
@@ -150,19 +110,6 @@ to specify a Cluster to supplement the initial static set.</p>
       </span>
       </h4>
       <p class="comment cmt">A handy Builder for constructing Servers (i.</p>
-    </li><li name="com.twitter.finagle.builder.ServerBuildertoTwitterService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ServerBuildertoTwitterService[Req,Rep]extendsService"></a>
-      <a id="ServerBuildertoTwitterService[Req,Rep]:ServerBuildertoTwitterService[Req,Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ServerBuildertoTwitterService.html"><span class="name">ServerBuildertoTwitterService</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <span class="extype" name="com.twitter.ostrich.admin.Service">ostrich.admin.Service</span></span>
-      </span>
-      </h4>
-      
     </li><li name="com.twitter.finagle.builder.ServerConfigEvidence" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ServerConfigEvidence[HasCodec,HasBindTo,HasName]extendsAnyRef"></a>
       <a id="ServerConfigEvidence[HasCodec,HasBindTo,HasName]:ServerConfigEvidence[HasCodec,HasBindTo,HasName]"></a>
@@ -195,6 +142,46 @@ to specify a Cluster to supplement the initial static set.</p>
       </span>
       </h4>
       <p class="comment cmt">A monitor that unrolls the exception causes to report source information if any</p>
+    </li><li name="com.twitter.finagle.builder.Cluster" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="Cluster[T]extendsAnyRef"></a>
+      <a id="Cluster[T]:Cluster[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Cluster.html"><span class="name deprecated" title="Deprecated: (Since version 2014-11-21) Use com.twitter.finagle.Name to represent clusters instead">Cluster</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Cluster is a collection of servers.</p>
+    </li><li name="com.twitter.finagle.builder.MinimumSetCluster" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MinimumSetCluster[T]extendsCluster[T]"></a>
+      <a id="MinimumSetCluster[T]:MinimumSetCluster[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MinimumSetCluster.html"><span class="name deprecated" title="Deprecated: (Since version 2014-11-21) Use com.twitter.finagle.Name to represent clusters instead">MinimumSetCluster</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.MinimumSetCluster.T">T</span>]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A Cluster implementation that guarantees a minimum set while allowing you
+to specify a Cluster to supplement the initial static set.</p>
+    </li><li name="com.twitter.finagle.builder.NonShrinkingCluster" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NonShrinkingCluster[T]extendsCluster[T]"></a>
+      <a id="NonShrinkingCluster[T]:NonShrinkingCluster[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="NonShrinkingCluster.html"><span class="name deprecated" title="Deprecated: (Since version 2014-11-21) Use com.twitter.finagle.Name to represent clusters instead">NonShrinkingCluster</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.NonShrinkingCluster.T">T</span>]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Dynamic clusters, such as serversets, can be volatile and untrustworthy.</p>
     </li><li name="com.twitter.finagle.builder.StaticCluster" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StaticCluster[T]extendsCluster[T]withProductwithSerializable"></a>
       <a id="StaticCluster[T]:StaticCluster[T]"></a>
@@ -204,7 +191,7 @@ to specify a Cluster to supplement the initial static set.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="StaticCluster.html"><span class="name">StaticCluster</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.finagle.builder.StaticCluster.T">T</span>]</span>)</span><span class="result"> extends <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.StaticCluster.T">T</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="StaticCluster.html"><span class="name deprecated" title="Deprecated: (Since version 2014-11-21) Use com.twitter.finagle.Name to represent clusters instead">StaticCluster</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.finagle.builder.StaticCluster.T">T</span>]</span>)</span><span class="result"> extends <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.StaticCluster.T">T</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       <p class="comment cmt">A simple static cluster implementation.</p>

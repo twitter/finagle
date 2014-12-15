@@ -151,19 +151,6 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.BufChannelBuffer#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="apply(buf:com.twitter.io.Buf,endianness:java.nio.ByteOrder):org.jboss.netty.buffer.ChannelBuffer"></a>
-      <a id="apply(Buf,ByteOrder):ChannelBuffer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="buf">buf: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="endianness">endianness: <span class="extype" name="java.nio.ByteOrder">ByteOrder</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Creates a read-only ChannelBuffer from <code>buf</code> with <code>endianness</code> ByteOrder.</p>
-    </li><li name="com.twitter.finagle.netty3.BufChannelBuffer#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="apply(buf:com.twitter.io.Buf):org.jboss.netty.buffer.ChannelBuffer"></a>
       <a id="apply(Buf):ChannelBuffer"></a>
       <h4 class="signature">
@@ -175,7 +162,21 @@
         <span class="name">apply</span><span class="params">(<span name="buf">buf: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Creates a read-only ChannelBuffer from <code>buf</code> with big-endian ByteOrder.</p>
+      <p class="shortcomment cmt">Creates a ChannelBuffer from <code>buf</code> with big-endian ByteOrder.</p>
+    </li><li name="com.twitter.finagle.netty3.BufChannelBuffer#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apply(buf:com.twitter.io.Buf,endianness:java.nio.ByteOrder):org.jboss.netty.buffer.ChannelBuffer"></a>
+      <a id="apply(Buf,ByteOrder):ChannelBuffer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="buf">buf: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="endianness">endianness: <span class="extype" name="java.nio.ByteOrder">ByteOrder</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Creates a ChannelBuffer from <code>buf</code> with <code>endianness</code> ByteOrder.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a ChannelBuffer from <code>buf</code> with <code>endianness</code> ByteOrder.</p><p>The returned ChannelBuffer should not be mutated.
+</p></div></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -357,6 +358,19 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.netty3.BufChannelBuffer#unapply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="unapply(bcb:com.twitter.finagle.netty3.BufChannelBuffer):Option[com.twitter.io.Buf]"></a>
+      <a id="unapply(BufChannelBuffer):Option[Buf]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unapply</span><span class="params">(<span name="bcb">bcb: <span class="extype" name="com.twitter.finagle.netty3.BufChannelBuffer">BufChannelBuffer</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Extract a Buf from a BufChannelBuffer.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>

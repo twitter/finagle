@@ -45,7 +45,7 @@
           <div class="superTypes hiddenContent"><a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">Head</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a href="Stack$$Module.html" class="extype" name="com.twitter.finagle.Stack.Module">Module</a>, <a href="Stack$$Simple.html" class="extype" name="com.twitter.finagle.Stack.Simple">Simple</a>, <a href="exp/MySqlClientTracingFilter$$Stackable$.html" class="extype" name="com.twitter.finagle.exp.MySqlClientTracingFilter.Stackable">Stackable</a></div>
+          <div class="subClasses hiddenContent"><a href="Stack$$Module.html" class="extype" name="com.twitter.finagle.Stack.Module">Module</a>, <a href="Stack$$Module0.html" class="extype" name="com.twitter.finagle.Stack.Module0">Module0</a>, <a href="Stack$$Module1.html" class="extype" name="com.twitter.finagle.Stack.Module1">Module1</a>, <a href="Stack$$Module2.html" class="extype" name="com.twitter.finagle.Stack.Module2">Module2</a>, <a href="Stack$$Module3.html" class="extype" name="com.twitter.finagle.Stack.Module3">Module3</a>, <a href="Stack$$Module4.html" class="extype" name="com.twitter.finagle.Stack.Module4">Module4</a>, <a href="exp/MySqlClientTracingFilter$$Stackable$.html" class="extype" name="com.twitter.finagle.exp.MySqlClientTracingFilter.Stackable">Stackable</a></div>
         </div></div>
         
 
@@ -93,14 +93,29 @@
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">description</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">The description of the functionality of the element
-</p><div class="fullcomment"><div class="comment cmt"><p>The description of the functionality of the element
+      <p class="shortcomment cmt">The description of the functionality of the element.</p><div class="fullcomment"><div class="comment cmt"><p>The description of the functionality of the element.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">Head</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Stack.Head#parameters" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="parameters:Seq[com.twitter.finagle.Stack.Param[_]]"></a>
+      <a id="parameters:Seq[Param[_]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">parameters</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[_]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Params</a> that the element
+is interested in.</p><div class="fullcomment"><div class="comment cmt"><p>The <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Params</a> that the element
+is interested in.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">Head</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Stack.Head#role" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="role:com.twitter.finagle.Stack.Role"></a>
@@ -108,14 +123,13 @@
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">role</span><span class="result">: <a href="Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">The <a href="Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a> that the element can serve
-</p><div class="fullcomment"><div class="comment cmt"><p>The <a href="Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a> that the element can serve
+      <p class="shortcomment cmt">The <a href="Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a> that the element can serve.</p><div class="fullcomment"><div class="comment cmt"><p>The <a href="Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a> that the element can serve.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">Head</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Stackable#toStack" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="toStack(next:com.twitter.finagle.Stack[T]):com.twitter.finagle.Stack[T]"></a>
@@ -277,19 +291,6 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.Stackable#get" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="get[P&lt;:Product](implicitparam:com.twitter.finagle.Stack.Param[P],implicitparams:com.twitter.finagle.Stack.Params):P"></a>
-      <a id="get[P&lt;:Product](Param[P],Params):P"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">get</span><span class="tparams">[<span name="P">P &lt;: <span class="extype" name="scala.Product">Product</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="param">param: <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<span class="extype" name="com.twitter.finagle.Stackable.get.P">P</span>]</span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.Stackable.get.P">P</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -368,21 +369,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.Stackable#params" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="params:scala.collection.immutable.Map[String,String]"></a>
-      <a id="params:Map[String,String]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">params</span><span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">The <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Params</a> used to configure the element
-</p><div class="fullcomment"><div class="comment cmt"><p>The <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Params</a> used to configure the element
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Stackable">Stackable</a> → <a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">Head</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

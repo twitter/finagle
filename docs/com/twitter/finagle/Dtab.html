@@ -387,22 +387,6 @@ entry appended.</p>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce → GenTraversableOnce</dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#alt" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="alt(other:com.twitter.finagle.Dtab):com.twitter.finagle.Dtab"></a>
-      <a id="alt(Dtab):Dtab"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">alt</span><span class="params">(<span name="other">other: <a href="" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Construct a Dtab representing the alternative composition of
-<code><code>this</code></code> with its argument, under evaluation; that is</p><div class="fullcomment"><div class="comment cmt"><p>Construct a Dtab representing the alternative composition of
-<code><code>this</code></code> with its argument, under evaluation; that is</p><pre><span class="kw">val</span> a, b: Dtab = ..
-a.alt(b).lookup(path).eval == NameTree.Alt(a.lookup(path), b.lookup(path)).eval</pre></div></div>
     </li><li name="scala.PartialFunction#andThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="andThen[C](k:B=&gt;C):PartialFunction[A,C]"></a>
       <a id="andThen[C]((Dentry)⇒C):PartialFunction[Int,C]"></a>
@@ -559,7 +543,7 @@ is translated into a Var[Addr].
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce</dd></dl></div>
     </li><li name="scala.collection.SeqLike#combinations" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="combinations(n:Int):Iterator[Repr]"></a>
+      <a id="combinations(n:&lt;?&gt;):Iterator[Repr]"></a>
       <a id="combinations(Int):Iterator[IndexedSeq[Dentry]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -628,7 +612,7 @@ is translated into a Var[Addr].
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SeqLike</dd></dl></div>
     </li><li name="scala.collection.SeqLike#containsSlice" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="containsSlice[B](that:scala.collection.GenSeq[B]):Boolean"></a>
+      <a id="containsSlice[B&lt;:&lt;?&gt;](that:&lt;?&gt;):Boolean"></a>
       <a id="containsSlice[B](GenSeq[B]):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -809,20 +793,6 @@ is translated into a Var[Addr].
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SeqLike → GenSeqLike</dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#enum" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="enum(prefix:com.twitter.finagle.Path):com.twitter.util.Activity[com.twitter.finagle.Dtab]"></a>
-      <a id="enum(Path):Activity[Dtab]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">enum</span><span class="params">(<span name="prefix">prefix: <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Activity">Activity</span>[<a href="" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Enumerate entries in this namer by prefix.</p><div class="fullcomment"><div class="comment cmt"><p>Enumerate entries in this namer by prefix.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Dtab">Dtab</a> → <a href="Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -862,24 +832,6 @@ is translated into a Var[Addr].
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → TraversableOnce → GenTraversableOnce</dd></dl></div>
-    </li><li name="com.twitter.finagle.Namer#expand" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="expand(prefix:com.twitter.finagle.Path):com.twitter.util.Activity[com.twitter.finagle.Dtab]"></a>
-      <a id="expand(Path):Activity[Dtab]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">expand</span><span class="params">(<span name="prefix">prefix: <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Activity">Activity</span>[<a href="" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Expand a prefix of this Namer, producing a Dtab reflecting the
-this prefixed namespace.</p><div class="fullcomment"><div class="comment cmt"><p>Expand a prefix of this Namer, producing a Dtab reflecting the
-this prefixed namespace. The returned Dtab does not contain any
-root entries (/=&gt;...), and thus represents valid suffixes of the
-given prefix.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a></dd></dl></div>
     </li><li name="scala.collection.TraversableLike#filter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="filter(p:A=&gt;Boolean):Repr"></a>
       <a id="filter((Dentry)⇒Boolean):IndexedSeq[Dentry]"></a>
@@ -1446,7 +1398,7 @@ given prefix.
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Dtab">Dtab</a> → SeqLike → GenSeqLike</dd></dl></div>
     </li><li name="scala.collection.SeqLike#lengthCompare" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="lengthCompare(len:Int):Int"></a>
+      <a id="lengthCompare(len:&lt;?&gt;):Int"></a>
       <a id="lengthCompare(Int):Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1656,24 +1608,6 @@ given prefix.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.Namer#orElse" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="orElse(next:com.twitter.finagle.Namer):com.twitter.finagle.Namer"></a>
-      <a id="orElse(Namer):Namer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">orElse</span><span class="params">(<span name="next">next: <a href="Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a></span>)</span><span class="result">: <a href="Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Compose this <a href="Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a> with <code>next</code>;
-the returned <a href="Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Compose this <a href="Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a> with <code>next</code>;
-the returned <a href="Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a>. The result is
-the <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">Alt</a>-tree of both lookups,
-with this namer's result first.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a></dd></dl></div>
     </li><li name="scala.PartialFunction#orElse" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="orElse[A1&lt;:A,B1&gt;:B](that:PartialFunction[A1,B1]):PartialFunction[A1,B1]"></a>
       <a id="orElse[A1&lt;:Int,B1&gt;:Dentry](PartialFunction[A1,B1]):PartialFunction[A1,B1]"></a>
@@ -1766,7 +1700,7 @@ with this namer's result first.
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SeqLike</dd></dl></div>
     </li><li name="scala.collection.GenSeqLike#prefixLength" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="prefixLength(p:A=&gt;Boolean):Int"></a>
+      <a id="prefixLength(p:&lt;?&gt;):Int"></a>
       <a id="prefixLength((Dentry)⇒Boolean):Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -2137,7 +2071,7 @@ Dtab is equivalent with respect to evaluation.
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SeqLike</dd></dl></div>
     </li><li name="scala.collection.SeqLike#sortWith" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="sortWith(lt:(A,A)=&gt;Boolean):Repr"></a>
+      <a id="sortWith(lt:&lt;?&gt;):Repr"></a>
       <a id="sortWith((Dentry,Dentry)⇒Boolean):IndexedSeq[Dentry]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -2555,22 +2489,6 @@ Dtab is equivalent with respect to evaluation.
                 <span class="name">@migration</span>
               
         </dd><dt>Migration</dt><dd class="cmt"><p><i>(Changed in version 2.9.0)</i> <code>transpose</code> throws an <code>IllegalArgumentException</code> if collections are not uniformly sized.</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#union" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="union(other:com.twitter.finagle.Dtab):com.twitter.finagle.Dtab"></a>
-      <a id="union(Dtab):Dtab"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">union</span><span class="params">(<span name="other">other: <a href="" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Construct a Dtab representing the union composition of <code><code>this</code></code>
-with its argument, under evaluation; that is</p><div class="fullcomment"><div class="comment cmt"><p>Construct a Dtab representing the union composition of <code><code>this</code></code>
-with its argument, under evaluation; that is</p><pre><span class="kw">val</span> a, b: Dtab = ..
-a.union(b).lookup(path).eval == NameTree.Union(a.lookup(path), b.lookup(path)).eval</pre></div></div>
     </li><li name="scala.collection.SeqLike#union" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="union[B&gt;:A,That](that:scala.collection.GenSeq[B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a>
       <a id="union[B&gt;:Dentry,That](GenSeq[B])(CanBuildFrom[IndexedSeq[Dentry],B,That]):That"></a>

@@ -39,8 +39,7 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Http codec for rich Request/Response objects. Note the
-CheckHttpRequestFilter isn't baked in, as in the Http Codec.</p><p>Ed. note: I'm not sure how parameterizing on REQUEST &lt;: Request
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Ed. note: I'm not sure how parameterizing on REQUEST &lt;: Request
 works safely, ever. This is a big typesafety bug: the codec is
 blindly casting Requests to REQUEST.</p><p>Setting aggregateChunks to false disables the aggregator, and consequently
 lifts the restriction on request size.

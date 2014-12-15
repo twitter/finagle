@@ -42,7 +42,8 @@
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Bound names comprise a changeable <span class="extype" name="com.twitter.finagle.Addr
 Addr">com.twitter.finagle.Addr
 Addr</span> which carries a host list of internet addresses.</p><p>Equality of two Names is delegated to <code>id</code>. Two Bound instances
-are equal whenever their <code>id</code>s are.
+are equal whenever their <code>id</code>s are. <code>id</code> identifies the <code>addr</code>
+and not the <code>path</code>.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.Proxy">Proxy</span>, <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
@@ -348,6 +349,19 @@ are equal whenever their <code>id</code>s are.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.Name.Bound#path" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="path:com.twitter.finagle.Path"></a>
+      <a id="path:finagle.Path"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">path</span><span class="result">: <a href="Path.html" class="extype" name="com.twitter.finagle.Path">finagle.Path</a></span>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.Name.Bound#self" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="self:Any"></a>
       <a id="self:Any"></a>

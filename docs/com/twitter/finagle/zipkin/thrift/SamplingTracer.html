@@ -39,7 +39,7 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Tracer that supports sampling. Will pass through a small subset of the records.</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Tracer that supports sampling. Will pass through a subset of the records.</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
@@ -82,7 +82,7 @@
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.zipkin.thrift.SamplingTracer#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.zipkin.thrift.SamplingTracer#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="&lt;init&gt;():com.twitter.finagle.zipkin.thrift.SamplingTracer"></a>
       <a id="&lt;init&gt;:SamplingTracer"></a>
       <h4 class="signature">
@@ -94,7 +94,8 @@
         <span class="name">SamplingTracer</span><span class="params">()</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Tracer that supports sampling.</p><div class="fullcomment"><div class="comment cmt"><p>Tracer that supports sampling. Will pass through a subset of the records.
+</p></div></div>
     </li><li name="com.twitter.finagle.zipkin.thrift.SamplingTracer#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="&lt;init&gt;(underlyingTracer:com.twitter.finagle.tracing.Tracer,initialSampleRate:Float):com.twitter.finagle.zipkin.thrift.SamplingTracer"></a>
       <a id="&lt;init&gt;:SamplingTracer"></a>
@@ -107,7 +108,23 @@
         <span class="name">SamplingTracer</span><span class="params">(<span name="underlyingTracer">underlyingTracer: <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>, <span name="initialSampleRate">initialSampleRate: <span class="extype" name="scala.Float">Float</span></span>)</span>
       </span>
       </h4>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">underlyingTracer</dt><dd class="cmt"><p>Underlying tracer that accumulates the traces and sends off to the collector.</p></dd><dt class="param">initialSampleRate</dt><dd class="cmt"><p>Start off with this sample rate. Can be changed later.
+      <p class="shortcomment cmt">Tracer that supports sampling.</p><div class="fullcomment"><div class="comment cmt"><p>Tracer that supports sampling. Will pass through a subset of the records.</p></div><dl class="paramcmts block"><dt class="param">underlyingTracer</dt><dd class="cmt"><p>Underlying tracer that accumulates the traces and sends off
+         to the collector.</p></dd><dt class="param">initialSampleRate</dt><dd class="cmt"><p>Start off with this sample rate. Can be changed later.
+</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.zipkin.thrift.SamplingTracer#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="&lt;init&gt;(underlyingTracer:com.twitter.finagle.tracing.Tracer,initialSampleRate:Float,sink:com.twitter.util.events.Sink):com.twitter.finagle.zipkin.thrift.SamplingTracer"></a>
+      <a id="&lt;init&gt;:SamplingTracer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">SamplingTracer</span><span class="params">(<span name="underlyingTracer">underlyingTracer: <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>, <span name="initialSampleRate">initialSampleRate: <span class="extype" name="scala.Float">Float</span></span>, <span name="sink">sink: <span class="extype" name="com.twitter.util.events.Sink">Sink</span></span>)</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">underlyingTracer</dt><dd class="cmt"><p>Underlying tracer that accumulates the traces and sends off
+         to the collector.</p></dd><dt class="param">initialSampleRate</dt><dd class="cmt"><p>Start off with this sample rate. Can be changed later.</p></dd><dt class="param">sink</dt><dd class="cmt"><p>where to send sampled trace events to.
 </p></dd></dl></div>
     </li></ol>
             </div>

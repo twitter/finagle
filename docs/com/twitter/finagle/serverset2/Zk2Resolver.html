@@ -39,8 +39,8 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>The actual, public zk2 resolver. Provides Addrs from serverset
-paths.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <a href="../Resolver.html" class="extype" name="com.twitter.finagle.Resolver">com.twitter.finagle.Resolver</a> for the &quot;zk2&quot; service discovery scheme.</p><p>Resolution is achieved by looking up registered ServerSet paths within a
+service discovery ZooKeeper cluster. See <code>Zk2Resolver.bind</code> for details.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="../Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
@@ -103,7 +103,7 @@ paths.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Zk2Resolver</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span>
+        <span class="name">Zk2Resolver</span><span class="params">(<span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span>
       </span>
       </h4>
       
@@ -181,19 +181,6 @@ paths.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.serverset2.Zk2Resolver#addrOf" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="addrOf(hosts:String,path:String,endpoint:Option[String]):com.twitter.util.Var[com.twitter.finagle.Addr]"></a>
-      <a id="addrOf(String,String,Option[String]):Var[Addr]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">addrOf</span><span class="params">(<span name="hosts">hosts: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="endpoint">endpoint: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Var">Var</span>[<a href="../Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a>]</span>
-      </span>
-      </h4>
-      
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -219,7 +206,11 @@ paths.
         <span class="name">bind</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Var">Var</span>[<a href="../Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.serverset2.Zk2Resolver">Zk2Resolver</a> → <a href="../Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></dd></dl></div>
+      <p class="shortcomment cmt">Bind a string into a variable address using the zk2 scheme.</p><div class="fullcomment"><div class="comment cmt"><p>Bind a string into a variable address using the zk2 scheme.</p><p>Argument strings must adhere to either of the following formats:</p><p>    zk2!&lt;hosts&gt;:2181!&lt;path&gt;
+    zk2!&lt;hosts&gt;:2181!&lt;path&gt;!&lt;endpoint&gt;</p><p>where</p><p>- &lt;hosts&gt;: The hostname(s) of service discovery ZooKeeper cluster
+- &lt;path&gt;: A ServerSet path (e.g. /twitter/service/userservice/prod/server)
+- &lt;endpoint&gt;: An endpoint name (optional)
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.serverset2.Zk2Resolver">Zk2Resolver</a> → <a href="../Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>

@@ -35,7 +35,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Netty3TransporterTLSConfig</span><span class="params">(<span name="newEngine">newEngine: () ⇒ <a href="../ssl/Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a></span>, <span name="verifyHost">verifyHost: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">Netty3TransporterTLSConfig</span><span class="params">(<span name="newEngine">newEngine: (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="../ssl/Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a></span>, <span name="verifyHost">verifyHost: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -84,7 +84,7 @@ against the given value.
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.netty3.Netty3TransporterTLSConfig#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(newEngine:()=&gt;com.twitter.finagle.ssl.Engine,verifyHost:Option[String]):com.twitter.finagle.netty3.Netty3TransporterTLSConfig"></a>
+      <a id="&lt;init&gt;(newEngine:java.net.SocketAddress=&gt;com.twitter.finagle.ssl.Engine,verifyHost:Option[String]):com.twitter.finagle.netty3.Netty3TransporterTLSConfig"></a>
       <a id="&lt;init&gt;:Netty3TransporterTLSConfig"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -92,7 +92,7 @@ against the given value.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Netty3TransporterTLSConfig</span><span class="params">(<span name="newEngine">newEngine: () ⇒ <a href="../ssl/Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a></span>, <span name="verifyHost">verifyHost: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span>
+        <span class="name">Netty3TransporterTLSConfig</span><span class="params">(<span name="newEngine">newEngine: (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="../ssl/Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a></span>, <span name="verifyHost">verifyHost: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span>
       </span>
       </h4>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">newEngine</dt><dd class="cmt"><p>Creates a new SSL Engine
@@ -277,15 +277,15 @@ against the given value.
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.Netty3TransporterTLSConfig#newEngine" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="newEngine:()=&gt;com.twitter.finagle.ssl.Engine"></a>
-      <a id="newEngine:()⇒Engine"></a>
+      <a id="newEngine:java.net.SocketAddress=&gt;com.twitter.finagle.ssl.Engine"></a>
+      <a id="newEngine:(SocketAddress)⇒Engine"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">newEngine</span><span class="result">: () ⇒ <a href="../ssl/Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a></span>
+        <span class="name">newEngine</span><span class="result">: (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="../ssl/Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Creates a new SSL Engine

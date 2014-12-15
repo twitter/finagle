@@ -67,20 +67,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BadHttpRequest.html"><span class="name">BadHttpRequest</span></a><span class="params">(<span name="httpVersion">httpVersion: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpVersion">HttpVersion</span></span>, <span name="method">method: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMethod">HttpMethod</span></span>, <span name="uri">uri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="codecError">codecError: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.codec.http.DefaultHttpRequest">DefaultHttpRequest</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.http.CheckRequestFilter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="CheckRequestFilter[Req]extendsSimpleFilter[Req,org.jboss.netty.handler.codec.http.HttpResponse]"></a>
-      <a id="CheckRequestFilter[Req]:CheckRequestFilter[Req]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="CheckRequestFilter.html"><span class="name">CheckRequestFilter</span></a><span class="tparams">[<span name="Req">Req</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.http.CheckRequestFilter.Req">Req</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
+        <a href="BadHttpRequest.html"><span class="name">BadHttpRequest</span></a><span class="params">(<span name="httpVersion">httpVersion: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpVersion">HttpVersion</span></span>, <span name="method">method: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMethod">HttpMethod</span></span>, <span name="uri">uri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="exception">exception: <span class="extype" name="scala.Exception">Exception</span></span>)</span><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.codec.http.DefaultHttpRequest">DefaultHttpRequest</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -371,7 +358,7 @@ their name.</p>
         <a href="RichHttp.html"><span class="name">RichHttp</span></a><span class="tparams">[<span name="REQUEST">REQUEST &lt;: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>]</span><span class="params">(<span name="httpFactory">httpFactory: <a href="Http.html" class="extype" name="com.twitter.finagle.http.Http">Http</a></span>, <span name="aggregateChunks">aggregateChunks: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>)</span><span class="result"> extends <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="com.twitter.finagle.http.RichHttp.REQUEST">REQUEST</span>, <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
-      <p class="comment cmt">Http codec for rich Request/Response objects.</p>
+      <p class="comment cmt">Ed.</p>
     </li><li name="com.twitter.finagle.http.SafeHttpServerCodec" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SafeHttpServerCodecextendsHttpServerCodec"></a>
       <a id="SafeHttpServerCodec:SafeHttpServerCodec"></a>
@@ -398,19 +385,6 @@ their name.</p>
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.http.SpnegoAuthenticator" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="SpnegoAuthenticator[Req,Rsp]extendsFilter[Req,Rsp,com.twitter.finagle.http.SpnegoAuthenticator.Authenticated[Req],Rsp]"></a>
-      <a id="SpnegoAuthenticator[Req,Rsp]:SpnegoAuthenticator[Req,Rsp]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="SpnegoAuthenticator.html"><span class="name">SpnegoAuthenticator</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rsp">Rsp</span>]</span><span class="result"> extends <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Req">Req</span>, <span class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Rsp">Rsp</span>, <a href="SpnegoAuthenticator$$Authenticated.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Authenticated">Authenticated</a>[<span class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Req">Req</span>], <span class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Rsp">Rsp</span>]</span>
-      </span>
-      </h4>
-      <p class="comment cmt">A SPNEGO HTTP authenticator as defined in https://tools.</p>
     </li><li name="com.twitter.finagle.http.TlsFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TlsFilterextendsSimpleFilter[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]"></a>
       <a id="TlsFilter:TlsFilter"></a>
@@ -667,7 +641,7 @@ their name.</p>
         <a href="SpnegoAuthenticator$.html"><span class="name">SpnegoAuthenticator</span></a>
       </span>
       </h4>
-      
+      <p class="comment cmt">A SPNEGO HTTP authenticator as defined in https://tools.</p>
     </li><li name="com.twitter.finagle.http.Status" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Status"></a>
       <a id="Status:Status"></a>

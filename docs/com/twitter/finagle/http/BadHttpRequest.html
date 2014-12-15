@@ -35,7 +35,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">BadHttpRequest</span><span class="params">(<span name="httpVersion">httpVersion: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpVersion">HttpVersion</span></span>, <span name="method">method: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMethod">HttpMethod</span></span>, <span name="uri">uri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="codecError">codecError: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.codec.http.DefaultHttpRequest">DefaultHttpRequest</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">BadHttpRequest</span><span class="params">(<span name="httpVersion">httpVersion: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpVersion">HttpVersion</span></span>, <span name="method">method: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMethod">HttpMethod</span></span>, <span name="uri">uri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="exception">exception: <span class="extype" name="scala.Exception">Exception</span></span>)</span><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.codec.http.DefaultHttpRequest">DefaultHttpRequest</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -80,7 +80,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.http.BadHttpRequest#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(httpVersion:org.jboss.netty.handler.codec.http.HttpVersion,method:org.jboss.netty.handler.codec.http.HttpMethod,uri:String,codecError:String):com.twitter.finagle.http.BadHttpRequest"></a>
+      <a id="&lt;init&gt;(httpVersion:org.jboss.netty.handler.codec.http.HttpVersion,method:org.jboss.netty.handler.codec.http.HttpMethod,uri:String,exception:Exception):com.twitter.finagle.http.BadHttpRequest"></a>
       <a id="&lt;init&gt;:BadHttpRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -88,7 +88,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">BadHttpRequest</span><span class="params">(<span name="httpVersion">httpVersion: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpVersion">HttpVersion</span></span>, <span name="method">method: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMethod">HttpMethod</span></span>, <span name="uri">uri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="codecError">codecError: <span class="extype" name="scala.Predef.String">String</span></span>)</span>
+        <span class="name">BadHttpRequest</span><span class="params">(<span name="httpVersion">httpVersion: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpVersion">HttpVersion</span></span>, <span name="method">method: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMethod">HttpMethod</span></span>, <span name="uri">uri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="exception">exception: <span class="extype" name="scala.Exception">Exception</span></span>)</span>
       </span>
       </h4>
       
@@ -198,19 +198,6 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.http.BadHttpRequest#codecError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="codecError:String"></a>
-      <a id="codecError:String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">codecError</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
-      </span>
-      </h4>
-      
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -224,6 +211,19 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.BadHttpRequest#exception" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="exception:Exception"></a>
+      <a id="exception:Exception"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">exception</span><span class="result">: <span class="extype" name="scala.Exception">Exception</span></span>
+      </span>
+      </h4>
+      
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>

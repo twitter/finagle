@@ -35,7 +35,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Reporter</span><span class="params">(<span name="client">client: <a href="thriftscala/Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a>[<span class="extype" name="com.twitter.util.Future">Future</span>]</span>, <span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="statsReceiver">statsReceiver: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>, <span name="sourceAddress">sourceAddress: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="defval" name="scala.Some.apply[String](com.twitter.finagle.core.util.InetAddressUtil.Loopback.getHostName())">...</span></span>, <span name="clientAddress">clientAddress: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <span class="extype" name="com.twitter.util.Monitor">Monitor</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">Reporter</span><span class="params">(<span name="client">client: <a href="thriftscala/Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a>[<span class="extype" name="com.twitter.util.Future">Future</span>]</span>, <span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>, <span name="sourceAddress">sourceAddress: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="defval" name="scala.Some.apply[String](java.net.InetAddress.getLoopbackAddress().getHostName())">...</span></span>, <span name="clientAddress">clientAddress: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <span class="extype" name="com.twitter.util.Monitor">Monitor</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -93,7 +93,7 @@ is very wrong!
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Reporter</span><span class="params">(<span name="client">client: <a href="thriftscala/Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a>[<span class="extype" name="com.twitter.util.Future">Future</span>]</span>, <span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="statsReceiver">statsReceiver: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>, <span name="sourceAddress">sourceAddress: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="defval" name="scala.Some.apply[String](com.twitter.finagle.core.util.InetAddressUtil.Loopback.getHostName())">...</span></span>, <span name="clientAddress">clientAddress: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>)</span>
+        <span class="name">Reporter</span><span class="params">(<span name="client">client: <a href="thriftscala/Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a>[<span class="extype" name="com.twitter.util.Future">Future</span>]</span>, <span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>, <span name="sourceAddress">sourceAddress: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="defval" name="scala.Some.apply[String](java.net.InetAddress.getLoopbackAddress().getHostName())">...</span></span>, <span name="clientAddress">clientAddress: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>)</span>
       </span>
       </h4>
       
@@ -404,7 +404,7 @@ implications.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">statsReceiver</span><span class="result">: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>
+        <span class="name">statsReceiver</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>
       </span>
       </h4>
       
@@ -500,7 +500,7 @@ implications.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withClient</span><span class="params">(<span name="address">address: <span class="extype" name="java.net.InetAddress">InetAddress</span> = <span class="symbol"><span class="name"><a href="../../../package.html">InetAddressUtil.Loopback</a></span></span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exception.Reporter">Reporter</a></span>
+        <span class="name">withClient</span><span class="params">(<span name="address">address: <span class="extype" name="java.net.InetAddress">InetAddress</span> = <span class="symbol">InetAddress.getLoopbackAddress</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exception.Reporter">Reporter</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Add a modifier to append a client address (i.</p><div class="fullcomment"><div class="comment cmt"><p>Add a modifier to append a client address (i.e. endpoint) to a generated ServiceException.</p><p>The endpoint string is the ip address of the host (e.g. &quot;127.0.0.1&quot;).

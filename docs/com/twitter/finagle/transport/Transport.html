@@ -24,9 +24,9 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../../../../lib/trait_big.png" />
+        <a href="Transport$.html" title="Go to companion"><img src="../../../../lib/trait_to_object_big.png" /></a>
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.transport">transport</a></p>
-        <h1>Transport</h1>
+        <h1><a href="Transport$.html" title="Go to companion">Transport</a></h1>
       </div>
 
       <h4 id="signature" class="signature">
@@ -48,7 +48,7 @@ encoding and decoding.
           <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.util.Closable">Closable</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a href="ChannelTransport.html" class="extype" name="com.twitter.finagle.transport.ChannelTransport">ChannelTransport</a>, <a href="../http/HttpTransport.html" class="extype" name="com.twitter.finagle.http.HttpTransport">HttpTransport</a>, <a href="QueueTransport.html" class="extype" name="com.twitter.finagle.transport.QueueTransport">QueueTransport</a></div>
+          <div class="subClasses hiddenContent"><a href="ChannelTransport.html" class="extype" name="com.twitter.finagle.transport.ChannelTransport">ChannelTransport</a>, <a href="../httpx/HttpTransport.html" class="extype" name="com.twitter.finagle.httpx.HttpTransport">HttpTransport</a>, <a href="../http/HttpTransport.html" class="extype" name="com.twitter.finagle.http.HttpTransport">HttpTransport</a>, <a href="QueueTransport.html" class="extype" name="com.twitter.finagle.transport.QueueTransport">QueueTransport</a></div>
         </div></div>
         
 
@@ -103,19 +103,6 @@ encoding and decoding.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
-    </li><li name="com.twitter.finagle.transport.Transport#isOpen" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="isOpen:Boolean"></a>
-      <a id="isOpen:Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">isOpen</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
-      </span>
-      </h4>
-      
     </li><li name="com.twitter.finagle.transport.Transport#localAddress" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="localAddress:java.net.SocketAddress"></a>
       <a id="localAddress:SocketAddress"></a>
@@ -172,6 +159,20 @@ close events.
       </span>
       </h4>
       <p class="shortcomment cmt">The remote address to which the transport is connected.</p>
+    </li><li name="com.twitter.finagle.transport.Transport#status" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="status:com.twitter.finagle.Status"></a>
+      <a id="status:Status"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">status</span><span class="result">: <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The status of this transport; see <a href="../Status$.html" class="extype" name="com.twitter.finagle.Status">com.twitter.finagle.Status$</a> for
+status definitions.</p>
     </li><li name="com.twitter.finagle.transport.Transport#write" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="write(req:In):com.twitter.util.Future[Unit]"></a>
       <a id="write(In):Future[Unit]"></a>

@@ -150,6 +150,19 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.zipkin.thrift.ZipkinTracer#Trace" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Trace:com.twitter.util.events.Event.Type"></a>
+      <a id="Trace:Type"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Trace</span><span class="result">: <span class="extype" name="com.twitter.util.events.Event.Type">Type</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The <span class="extype" name="com.twitter.util.events.Event.Type">Event.Type</span> for trace events.</p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -279,7 +292,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.zipkin.thrift.ZipkinTracer#mk" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.zipkin.thrift.ZipkinTracer#mk" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mk(statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.tracing.Tracer"></a>
       <a id="mk(StatsReceiver):Tracer"></a>
       <h4 class="signature">
@@ -288,10 +301,11 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">mk</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="../../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span><span class="result">: <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>
+        <span class="name">mk</span><span class="params">(<span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span><span class="result">: <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Util method since named parameters can't be called from Java</p>
+      <p class="shortcomment cmt">Util method since named parameters can't be called from Java</p><div class="fullcomment"><div class="comment cmt"><p>Util method since named parameters can't be called from Java</p></div><dl class="paramcmts block"><dt class="param">statsReceiver</dt><dd class="cmt"><p>stats receiver to send successes/failures to
+</p></dd></dl></div>
     </li><li name="com.twitter.finagle.zipkin.thrift.ZipkinTracer#mk" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mk(host:String,port:Int,statsReceiver:com.twitter.finagle.stats.StatsReceiver,sampleRate:Float):com.twitter.finagle.tracing.Tracer"></a>
       <a id="mk(String,Int,StatsReceiver,Float):Tracer"></a>
@@ -301,7 +315,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">mk</span><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol"><span class="name"><a href="../../../../package.html">Host().getHostName</a></span></span></span>, <span name="port">port: <span class="extype" name="scala.Int">Int</span> = <span class="symbol"><span class="name"><a href="../../../../package.html">Host().getPort</a></span></span></span>, <span name="statsReceiver">statsReceiver: <a href="../../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../../package.html">NullStatsReceiver</a></span></span></span>, <span name="sampleRate">sampleRate: <span class="extype" name="scala.Float">Float</span> = <span class="symbol"><span class="name"><a href="Sampler$.html">Sampler.DefaultSampleRate</a></span></span></span>)</span><span class="result">: <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>
+        <span class="name">mk</span><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol"><span class="name"><a href="../../../../package.html">Host().getHostName</a></span></span></span>, <span name="port">port: <span class="extype" name="scala.Int">Int</span> = <span class="symbol"><span class="name"><a href="../../../../package.html">Host().getPort</a></span></span></span>, <span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span> = <span class="symbol"><span class="name"><a href="../../../../package.html">NullStatsReceiver</a></span></span></span>, <span name="sampleRate">sampleRate: <span class="extype" name="scala.Float">Float</span> = <span class="symbol"><span class="name"><a href="Sampler$.html">Sampler.DefaultSampleRate</a></span></span></span>)</span><span class="result">: <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">host</dt><dd class="cmt"><p>Host to send trace data to</p></dd><dt class="param">port</dt><dd class="cmt"><p>Port to send trace data to</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>Where to log information about tracing success/failures</p></dd><dt class="param">sampleRate</dt><dd class="cmt"><p>How much data to collect. Default sample rate 0.1%. Max is 1, min 0.
@@ -444,7 +458,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.1.0) Use mk() instead">apply</span><span class="params">(<span name="sr">sr: <a href="../../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span><span class="result">: () ⇒ <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.1.0) Use mk() instead">apply</span><span class="params">(<span name="sr">sr: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span><span class="result">: () ⇒ <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Util method since named parameters can't be called from Java</p><div class="fullcomment"><div class="comment cmt"><p>Util method since named parameters can't be called from Java</p></div><dl class="paramcmts block"><dt class="param">sr</dt><dd class="cmt"><p>stats receiver to send successes/failures to
@@ -461,7 +475,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.1.0) Use mk() instead">apply</span><span class="params">(<span name="scribeHost">scribeHost: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol"><span class="name"><a href="../../../../package.html">Host().getHostName</a></span></span></span>, <span name="scribePort">scribePort: <span class="extype" name="scala.Int">Int</span> = <span class="symbol"><span class="name"><a href="../../../../package.html">Host().getPort</a></span></span></span>, <span name="statsReceiver">statsReceiver: <a href="../../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../../package.html">NullStatsReceiver</a></span></span></span>, <span name="sampleRate">sampleRate: <span class="extype" name="scala.Float">Float</span> = <span class="symbol"><span class="name"><a href="Sampler$.html">Sampler.DefaultSampleRate</a></span></span></span>)</span><span class="result">: () ⇒ <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.1.0) Use mk() instead">apply</span><span class="params">(<span name="scribeHost">scribeHost: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol"><span class="name"><a href="../../../../package.html">Host().getHostName</a></span></span></span>, <span name="scribePort">scribePort: <span class="extype" name="scala.Int">Int</span> = <span class="symbol"><span class="name"><a href="../../../../package.html">Host().getPort</a></span></span></span>, <span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span> = <span class="symbol"><span class="name"><a href="../../../../package.html">NullStatsReceiver</a></span></span></span>, <span name="sampleRate">sampleRate: <span class="extype" name="scala.Float">Float</span> = <span class="symbol"><span class="name"><a href="Sampler$.html">Sampler.DefaultSampleRate</a></span></span></span>)</span><span class="result">: () ⇒ <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">scribeHost</dt><dd class="cmt"><p>Host to send trace data to</p></dd><dt class="param">scribePort</dt><dd class="cmt"><p>Port to send trace data to</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>Where to log information about tracing success/failures</p></dd><dt class="param">sampleRate</dt><dd class="cmt"><p>How much data to collect. Default sample rate 0.1%. Max is 1, min 0.

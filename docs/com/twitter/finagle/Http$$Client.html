@@ -258,15 +258,15 @@ case class.</p><div class="fullcomment"><div class="comment cmt"><p>A copy const
 case class.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Http.Client">Client</a> → <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.client.StdStackClient#endpointer" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="endpointer:com.twitter.finagle.Stack.Simple[com.twitter.finagle.ServiceFactory[Req,Rep]]{valrole:com.twitter.finagle.stack.Endpoint.type}"></a>
-      <a id="endpointer:Simple[ServiceFactory[HttpRequest,HttpResponse]]{valrole:com.twitter.finagle.stack.Endpoint.type}"></a>
+      <a id="endpointer:com.twitter.finagle.Stackable[com.twitter.finagle.ServiceFactory[Req,Rep]]"></a>
+      <a id="endpointer:Stackable[ServiceFactory[HttpRequest,HttpResponse]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">endpointer</span><span class="result">: <a href="Stack$$Simple.html" class="extype" name="com.twitter.finagle.Stack.Simple">Simple</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]] { val role: com.twitter.finagle.stack.Endpoint.type }</span>
+        <span class="name">endpointer</span><span class="result">: <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">A stackable module that creates new <code>Transports</code> (via transporter)
@@ -622,9 +622,7 @@ Concrete StackClient implementations are expected to specify this.
         <span class="name">withParams</span><span class="params">(<span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Client">Client</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Creates a new StackClient with <code>p</code> added to the <code>params</code>
-used to configure this StackClient's <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackClient with <code>p</code> added to the <code>params</code>
-used to configure this StackClient's <code>stack</code>.
+      <p class="shortcomment cmt">Creates a new StackClient with <code>params</code> used to configure this StackClient's <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackClient with <code>params</code> used to configure this StackClient's <code>stack</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.client.StdStackClient#withStack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):This"></a>

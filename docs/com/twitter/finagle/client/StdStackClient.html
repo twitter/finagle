@@ -45,7 +45,7 @@
           <div class="superTypes hiddenContent"><a href="StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.Rep">Rep</span>], <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.Rep">Rep</span>]], <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.Rep">Rep</span>], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a href="../exp/Mysql$$Client.html" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>, <a href="../Mux$$Client.html" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>, <a href="../Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>, <a href="../Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Client</a></div>
+          <div class="subClasses hiddenContent"><a href="../exp/Mysql$$Client.html" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>, <a href="../Mux$$Client.html" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>, <a href="../Httpx$$Client.html" class="extype" name="com.twitter.finagle.Httpx.Client">Client</a>, <a href="../Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>, <a href="../Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Client</a></div>
         </div></div>
         
 
@@ -309,15 +309,15 @@ Concrete StackClient implementations are expected to specify this.
       <p class="shortcomment cmt">Creates a new StackClient with parameter <code>p</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackClient with parameter <code>p</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.client.StdStackClient#endpointer" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="endpointer:com.twitter.finagle.Stack.Simple[com.twitter.finagle.ServiceFactory[Req,Rep]]{valrole:com.twitter.finagle.stack.Endpoint.type}"></a>
-      <a id="endpointer:Simple[ServiceFactory[Req,Rep]]{valrole:com.twitter.finagle.stack.Endpoint.type}"></a>
+      <a id="endpointer:com.twitter.finagle.Stackable[com.twitter.finagle.ServiceFactory[Req,Rep]]"></a>
+      <a id="endpointer:Stackable[ServiceFactory[Req,Rep]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">endpointer</span><span class="result">: <a href="../Stack$$Simple.html" class="extype" name="com.twitter.finagle.Stack.Simple">Simple</a>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.Rep">Rep</span>]] { val role: com.twitter.finagle.stack.Endpoint.type }</span>
+        <span class="name">endpointer</span><span class="result">: <a href="../Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.Rep">Rep</span>]]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">A stackable module that creates new <code>Transports</code> (via transporter)
@@ -626,9 +626,7 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <span class="name">withParams</span><span class="params">(<span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.StdStackClient.This">This</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Creates a new StackClient with <code>p</code> added to the <code>params</code>
-used to configure this StackClient's <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackClient with <code>p</code> added to the <code>params</code>
-used to configure this StackClient's <code>stack</code>.
+      <p class="shortcomment cmt">Creates a new StackClient with <code>params</code> used to configure this StackClient's <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackClient with <code>params</code> used to configure this StackClient's <code>stack</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.client.StdStackClient#withStack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):This"></a>

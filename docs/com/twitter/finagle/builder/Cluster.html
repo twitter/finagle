@@ -35,7 +35,7 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">Cluster</span><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <span class="name deprecated" title="Deprecated: (Since version 2014-11-21) Use com.twitter.finagle.Name to represent clusters instead">Cluster</span><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
@@ -43,12 +43,15 @@
 to express membership in a cluster of servers that provide a
 specific service.</p><p>Note that a Cluster can be elastic: members can join or leave at
 any time.
-</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.Cluster.T">T</span>]</dd></dl><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.Cluster.T">T</span>]</dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2014-11-21)</i> Use <code>com.twitter.finagle.Name</code> to represent clusters instead</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a href="../memcached/CachePoolCluster.html" class="extype" name="com.twitter.finagle.memcached.CachePoolCluster">CachePoolCluster</a>, <a href="MinimumSetCluster.html" class="extype" name="com.twitter.finagle.builder.MinimumSetCluster">MinimumSetCluster</a>, <a href="NonShrinkingCluster.html" class="extype" name="com.twitter.finagle.builder.NonShrinkingCluster">NonShrinkingCluster</a>, <a href="../memcached/StaticCachePoolCluster.html" class="extype" name="com.twitter.finagle.memcached.StaticCachePoolCluster">StaticCachePoolCluster</a>, <a href="StaticCluster.html" class="extype" name="com.twitter.finagle.builder.StaticCluster">StaticCluster</a>, <a href="../memcached/ZookeeperCachePoolCluster.html" class="extype" name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster">ZookeeperCachePoolCluster</a>, <a href="../zookeeper/ZookeeperServerSetCluster.html" class="extype" name="com.twitter.finagle.zookeeper.ZookeeperServerSetCluster">ZookeeperServerSetCluster</a></div>
+          <div class="subClasses hiddenContent"><a href="../memcachedx/CachePoolCluster.html" class="extype" name="com.twitter.finagle.memcachedx.CachePoolCluster">CachePoolCluster</a>, <a href="../memcached/CachePoolCluster.html" class="extype" name="com.twitter.finagle.memcached.CachePoolCluster">CachePoolCluster</a>, <a href="MinimumSetCluster.html" class="extype" name="com.twitter.finagle.builder.MinimumSetCluster">MinimumSetCluster</a>, <a href="NonShrinkingCluster.html" class="extype" name="com.twitter.finagle.builder.NonShrinkingCluster">NonShrinkingCluster</a>, <a href="../memcachedx/StaticCachePoolCluster.html" class="extype" name="com.twitter.finagle.memcachedx.StaticCachePoolCluster">StaticCachePoolCluster</a>, <a href="../memcached/StaticCachePoolCluster.html" class="extype" name="com.twitter.finagle.memcached.StaticCachePoolCluster">StaticCachePoolCluster</a>, <a href="StaticCluster.html" class="extype" name="com.twitter.finagle.builder.StaticCluster">StaticCluster</a>, <a href="../memcachedx/ZookeeperCachePoolCluster.html" class="extype" name="com.twitter.finagle.memcachedx.ZookeeperCachePoolCluster">ZookeeperCachePoolCluster</a>, <a href="../memcached/ZookeeperCachePoolCluster.html" class="extype" name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster">ZookeeperCachePoolCluster</a>, <a href="../zookeeper/ZookeeperServerSetCluster.html" class="extype" name="com.twitter.finagle.zookeeper.ZookeeperServerSetCluster">ZookeeperServerSetCluster</a></div>
         </div></div>
         
 

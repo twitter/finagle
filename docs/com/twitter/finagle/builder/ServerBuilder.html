@@ -685,6 +685,19 @@ False by default.
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.builder.ServerBuilder#params" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="params:com.twitter.finagle.Stack.Params"></a>
+      <a id="params:Params"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">params</span><span class="result">: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.builder.ServerBuilder#readTimeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="readTimeout(howlong:com.twitter.util.Duration):ServerBuilder.this.This"></a>
       <a id="readTimeout(Duration):This"></a>
@@ -720,7 +733,7 @@ False by default.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">reportTo</span><span class="params">(<span name="receiver">receiver: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+        <span class="name">reportTo</span><span class="params">(<span name="receiver">receiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       </h4>
       
@@ -750,7 +763,7 @@ False by default.
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.builder.ServerBuilder#stack" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.builder.ServerBuilder#stack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stack[Req1,Rep1](server:com.twitter.finagle.Stack.Parameterized[com.twitter.finagle.Server[Req1,Rep1]]):com.twitter.finagle.builder.ServerBuilder[Req1,Rep1,com.twitter.finagle.builder.ServerConfig.Yes,HasBindTo,HasName]"></a>
       <a id="stack[Req1,Rep1](Parameterized[finagle.Server[Req1,Rep1]]):ServerBuilder[Req1,Rep1,Yes,HasBindTo,HasName]"></a>
       <h4 class="signature">
@@ -762,26 +775,15 @@ False by default.
         <span class="name">stack</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="server">server: <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="../Server.html" class="extype" name="com.twitter.finagle.Server">finagle.Server</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.stack.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.stack.Rep1">Rep1</span>]]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.stack.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.stack.Rep1">Rep1</span>, <a href="ServerConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ServerConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasBindTo">HasBindTo</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasName">HasName</span>]</span>
       </span>
       </h4>
-      
-    </li><li name="com.twitter.finagle.builder.ServerBuilder#stack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="stack[Req1,Rep1](mk:com.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.Server[Req1,Rep1]):com.twitter.finagle.builder.ServerBuilder[Req1,Rep1,com.twitter.finagle.builder.ServerConfig.Yes,HasBindTo,HasName]"></a>
-      <a id="stack[Req1,Rep1]((Params)⇒finagle.Server[Req1,Rep1]):ServerBuilder[Req1,Rep1,Yes,HasBindTo,HasName]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">stack</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="mk">mk: (<a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">finagle.Server</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.stack.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.stack.Rep1">Rep1</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.stack.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.stack.Rep1">Rep1</span>, <a href="ServerConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ServerConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasBindTo">HasBindTo</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasName">HasName</span>]</span>
-      </span>
-      </h4>
       <p class="shortcomment cmt">Overrides the stack and <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> that will be used
 by this builder.</p><div class="fullcomment"><div class="comment cmt"><p>Overrides the stack and <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> that will be used
-by this builder. The <code>mk</code> function is passed the state of configuration
-when <code>build</code> is called. There is no guarantee that all the builder parameters
-may be used by the server created by <code>mk</code>, it is up to the discretion of
-the server and protocol implementation.
-</p></div></div>
+by this builder.
+</p></div><dl class="paramcmts block"><dt class="param">server</dt><dd class="cmt"><p>A <code>Parameterized</code> representation of a
+<a href="../Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a>. <code>server</code> is materialized with the state of
+configuration when <code>build</code> is called. There is no guarantee that all
+builder parameters will be used by the resultant <code>Server</code>; it is up to the
+discretion of <code>server</code> itself and the protocol implementation.
+</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -993,6 +995,30 @@ or supports transactions).
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> Used for ABI compat</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ServerBuilder#stack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stack[Req1,Rep1](mk:com.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.Server[Req1,Rep1]):com.twitter.finagle.builder.ServerBuilder[Req1,Rep1,com.twitter.finagle.builder.ServerConfig.Yes,HasBindTo,HasName]"></a>
+      <a id="stack[Req1,Rep1]((Params)⇒finagle.Server[Req1,Rep1]):ServerBuilder[Req1,Rep1,Yes,HasBindTo,HasName]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use stack(server: Stack.Parameterized)">stack</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="mk">mk: (<a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">finagle.Server</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.stack.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.stack.Rep1">Rep1</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.stack.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.stack.Rep1">Rep1</span>, <a href="ServerConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ServerConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasBindTo">HasBindTo</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasName">HasName</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Overrides the stack and <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> that will be used
+by this builder.</p><div class="fullcomment"><div class="comment cmt"><p>Overrides the stack and <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> that will be used
+by this builder.
+</p></div><dl class="paramcmts block"><dt class="param">mk</dt><dd class="cmt"><p>A function that materializes a <code>Server</code> from a set of <code>Params</code>.
+<code>mk</code> is passed the state of configuration when <code>build</code> is called. There is
+no guarantee that all the builder parameters will be used by the server
+created by <code>mk</code>; it is up to the discretion of the server and protocol
+implementation.
+</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use stack(server: Stack.Parameterized)</p></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#tracerFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tracerFactory(t:com.twitter.finagle.tracing.Tracer):ServerBuilder.this.This"></a>
       <a id="tracerFactory(Tracer):This"></a>
