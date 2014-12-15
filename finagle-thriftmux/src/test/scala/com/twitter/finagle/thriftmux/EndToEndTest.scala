@@ -471,6 +471,24 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     }
   }
 
+  test("downgraded pipelines are properly scoped") {
+    val sr = new InMemoryStatsReceiver
+
+    val server = ThriftMux.server
+      .configured(Stats(sr))
+      .configured(Label("myserver"))
+      .serveIface(
+        new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+        new TestService.FutureIface {
+          def query(x: String) = Future.value(x+x)
+        })
+
+    val thriftClient = Thrift.client.newIface[TestService.FutureIface](server)
+
+    assert(Await.result(thriftClient.query("ok")) === "okok")
+    assert(sr.counters(Seq("myserver", "thriftmux", "downgraded_connects")) === 1)
+  }
+
   test("ThriftMux with TCompactProtocol") {
     // ThriftMux.server API
     {
