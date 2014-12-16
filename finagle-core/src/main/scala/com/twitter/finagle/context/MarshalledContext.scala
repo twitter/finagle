@@ -90,7 +90,7 @@ final class MarshalledContext extends Context {
     val u = new Unmarshaller(env)
     for ((id, marshalled) <- contexts)
       u.put(id, marshalled)
-    letEnv(u.build)(fn)
+    let(u.build)(fn)
   }
   
   /**
