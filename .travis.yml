@@ -2,10 +2,12 @@ language: scala
 
 scala:
   - 2.10.4
+  - 2.11.4
 
 jdk:
   - oraclejdk7
-  - openjdk6
+  # Note: not currently testing on JDK 8 internally
+  - oraclejdk8
   - openjdk7
 
 before_script:

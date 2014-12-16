@@ -161,23 +161,21 @@ object Finagle extends Build {
     finagleCore, finagleTest, finagleStats,
     finagleZipkin, finagleServersets,
     finagleException, finagleCommonsStats,
-    finagleExp, finagleMdns, finagleTesters,
+    finagleExp, finagleMdns, finagleTesters, finagleOstrich4,
 
     // Protocols
     finagleHttp, finagleHttpX, finagleHttpXCompat, finagleStream, finagleNative,
     finagleThrift, finagleMemcached, finagleMemcachedX, finagleKestrel,
     finagleKestrelX, finagleMux, finagleThriftMux, finagleMySQL,
-    finagleSpdy
+    finagleSpdy,
 
     // Use and integration
+    finagleStress
     // removing benchmark because swift can't build outside of twitter for now
     // finagleBenchmark
 
-    // Removing projects that depend on Ostrich
-    // finagleOstrich4, finagleStress, finagleExample
-
-    // Removing projects with specs tests
-    // finagleRedis
+    // Removing projects with specs tests and their dependencies
+    // finagleRedis, finagleExample
   )
 
   lazy val finagleTest = Project(
@@ -208,7 +206,6 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-ostrich4",
-    crossScalaVersions ~= { versions => versions filter (_ != "2.11.4") },
     libraryDependencies ++= Seq(ostrichLib)
   ).dependsOn(finagleCore, finagleHttp)
 
@@ -507,7 +504,6 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-stress",
-    crossScalaVersions ~= { versions => versions filter (_ != "2.11.4") },
     libraryDependencies ++= Seq(ostrichLib, util("logging")) ++ thriftLibs,
     libraryDependencies += "com.google.caliper" % "caliper" % "0.5-rc1"
   ).dependsOn(finagleCore, finagleOstrich4, finagleThrift, finagleHttp, finagleThriftMux)
@@ -549,7 +545,6 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-benchmark",
-    crossScalaVersions ~= { versions => versions filter (_ != "2.11.4") },
     // include again when we can properly depend on finagleSwift
     excludeFilter in Compile := "ThriftDispatch.scala",
     libraryDependencies ++= Seq(
