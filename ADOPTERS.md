@@ -28,6 +28,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Rdio](https://www.rdio.com/)
   * [Thor, a Finagle-based image processor][4]
 * [Reputation.com](https://www.reputation.com/)
+* [Sabre Labs](http://sabrelabs.com)
 * [Sharethrough](https://www.sharethrough.com/)
   * ["Finagle @ Sharethrough: Twitter #Conf Presentation"][5]
 * [SoundCloud](https://soundcloud.com/)
