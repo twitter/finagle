@@ -153,8 +153,11 @@ object Finagle extends Build {
     base = file("."),
     settings = Project.defaultSettings ++
       sharedSettings ++
-      Unidoc.settings ++ Seq(
-        Unidoc.unidocExclude := Seq(finagleExample.id)
+      Unidoc.settings ++ Seq( 
+        // NB: KestrelX defines thrift structs which collide with Kestrel.
+        // We can remove this exception after the -x modules are deleted
+        // post netty4 migration.
+        Unidoc.unidocExclude := Seq(finagleExample.id, finagleKestrelX.id) 
       )
   ) aggregate(
     // Core, support.
