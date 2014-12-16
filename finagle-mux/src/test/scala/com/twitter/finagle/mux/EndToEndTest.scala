@@ -1,16 +1,18 @@
 package com.twitter.finagle.mux
 
+import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.mux.Message._
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
+import com.twitter.finagle.mux.Message._
 import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing._
+import com.twitter.finagle.transport.QueueTransport
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Promise, Duration, Closable, Time}
 import java.io.{PrintWriter, StringWriter}
-import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{IntegrationPatience, Eventually}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
@@ -37,9 +39,14 @@ class EndToEndTest extends FunSuite
       handled = true
     }
 
-    val server = Mux.serve("localhost:*", Service.mk[Request, Response](_ => p))
+    val svc = Service.mk[Request, Response](_ => p)
 
-    val client = Mux.newService(server)
+    val q0, q1 = new AsyncQueue[ChannelBuffer]
+    val clientTrans = new QueueTransport[ChannelBuffer, ChannelBuffer](q0, q1)
+    val serverTrans = new QueueTransport[ChannelBuffer, ChannelBuffer](q1, q0)
+
+    val server = new ServerDispatcher(serverTrans, svc, true, Lessor.nil, NullTracer)
+    val client = new ClientDispatcher("test", clientTrans, NullStatsReceiver)
 
     val f = client(Request(Path.empty, Buf.Empty))
     assert(!f.isDefined)
