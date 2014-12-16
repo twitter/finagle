@@ -1,25 +1,64 @@
 package com.twitter.finagle.httpx.path
 
 import com.twitter.finagle.httpx.{Method, ParamMap}
-import com.twitter.finagle.httpx.path.{Path => FPath} // conflicts with spec's Path
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalacheck.Gen
+import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
-class PathTest extends FunSuite {
+class PathTest extends FunSuite with GeneratorDrivenPropertyChecks {
+
+  def alpha(min: Int, max: Int) = for {
+    len <- Gen.choose(min, max)
+  } yield Random.alphanumeric.take(len).mkString
+
+  val pathParts = Gen.listOf[String](alpha(0, 10))
+
+  test("construct by list") {
+    forAll(pathParts) { (parts: List[String]) =>
+      val p = Path(parts)
+      assert(p.toList.length === parts.length)
+      assert(p.lastOption === util.Try(parts.last).toOption)
+      assert(p.startsWith(util.Try(Path(parts.init)).getOrElse(Root)))
+      if (p != Root) assert(p.toString === parts.mkString("/", "/", ""))
+    }
+  }
+
+  test("path separator extrator") {
+    forAll(pathParts) { (parts: List[String]) =>
+      val p = Path(parts)
+      assert(/:.unapply(p) === util.Try(parts.head -> Path(parts.tail)).toOption)
+    }
+  }
+
+  test("file extension extractor") {
+    forAll(pathParts, alpha(0, 3)) { (parts: List[String], ext: String) =>
+      whenever (parts.length > 0) {
+        if (ext.length == 0) {
+          val p = Path(parts)
+          assert($tilde.unapply(p) === Some(p, ""))
+        } else {
+          val p = Path(parts.init ++ List(parts.last + "." + ext))
+          assert($tilde.unapply(p) === Some(Path(parts), ext))
+        }
+      }
+    }
+  }
 
   test("/foo/bar") {
-    assert(FPath("/foo/bar").toList === List("foo", "bar"))
+    assert(Path("/foo/bar").toList === List("foo", "bar"))
   }
 
   test("foo/bar") {
-    assert(FPath("foo/bar").toList === List("foo", "bar"))
+    assert(Path("foo/bar").toList === List("foo", "bar"))
   }
 
   test(":? extractor") {
     assert {
-      (FPath("/test.json") :? ParamMap()) match {
+      (Path("/test.json") :? ParamMap()) match {
         case Root / "test.json" :? _ => true
         case _                       => false
       }
@@ -31,25 +70,25 @@ class PathTest extends FunSuite {
     object B extends ParamMatcher("b")
 
     assert {
-      (FPath("/test.json") :? ParamMap("a" -> "1", "b" -> "2")) match {
+      (Path("/test.json") :? ParamMap("a" -> "1", "b" -> "2")) match {
         case Root / "test.json" :? A(a) => a == "1"
         case _                          => false
       }
     }
     assert {
-      (FPath("/test.json") :? ParamMap("a" -> "1", "b" -> "2")) match {
+      (Path("/test.json") :? ParamMap("a" -> "1", "b" -> "2")) match {
         case Root / "test.json" :? B(b) => b == "2"
         case _                          => false
       }
     }
     assert {
-      (FPath("/test.json") :? ParamMap("a" -> "1", "b" -> "2")) match {
+      (Path("/test.json") :? ParamMap("a" -> "1", "b" -> "2")) match {
         case Root / "test.json" :? (A(a) :& B(b)) => a == "1" && b == "2"
         case _                                    => false
       }
     }
     assert {
-      (FPath("/test.json") :? ParamMap("a" -> "1", "b" -> "2")) match {
+      (Path("/test.json") :? ParamMap("a" -> "1", "b" -> "2")) match {
         case Root / "test.json" :? (B(b) :& A(a)) => a == "1" && b == "2"
         case _                                    => false
       }
@@ -62,7 +101,7 @@ class PathTest extends FunSuite {
     object D extends DoubleParamMatcher("d")
 
     assert {
-      (FPath("/test.json") :? ParamMap("i" -> "1", "l" -> "2147483648", "d" -> "1.3")) match {
+      (Path("/test.json") :? ParamMap("i" -> "1", "l" -> "2147483648", "d" -> "1.3")) match {
         case Root / "test.json" :? (I(i) :& L(l) :& D(d)) => i == 1 && l == 2147483648L && d == 1.3D
         case _                                            => false
       }
@@ -71,7 +110,7 @@ class PathTest extends FunSuite {
 
   test("~ extractor on Path") {
     assert {
-      FPath("/foo.json") match {
+      Path("/foo.json") match {
         case Root / "foo" ~ "json" => true
         case _                     => false
       }
@@ -98,7 +137,7 @@ class PathTest extends FunSuite {
 
   test("-> extractor") {
     assert {
-      (Method.Get, FPath("/test.json")) match {
+      (Method.Get, Path("/test.json")) match {
         case Method.Get -> Root / "test.json" => true
         case _                                => false
       }
@@ -107,7 +146,7 @@ class PathTest extends FunSuite {
 
   test("Root extractor") {
     assert {
-      FPath("/") match {
+      Path("/") match {
         case Root => true
         case _    => false
       }
@@ -116,7 +155,7 @@ class PathTest extends FunSuite {
 
   test("Root extractor, no partial match") {
     assert {
-      (FPath("/test.json") match {
+      (Path("/test.json") match {
         case Root => true
         case _    => false
       }) === false
@@ -125,7 +164,7 @@ class PathTest extends FunSuite {
 
   test("Root extractor, empty path") {
     assert {
-      FPath("") match {
+      Path("") match {
         case Root => true
         case _    => false
       }
@@ -134,7 +173,7 @@ class PathTest extends FunSuite {
 
   test("/ extractor") {
     assert {
-      FPath("/1/2/3/test.json") match {
+      Path("/1/2/3/test.json") match {
         case Root / "1" / "2" / "3" / "test.json" => true
         case _                                    => false
       }
@@ -143,7 +182,7 @@ class PathTest extends FunSuite {
 
   test("Integer extractor") {
     assert {
-      FPath("/user/123") match {
+      Path("/user/123") match {
         case Root / "user" / Integer(userId) => userId == 123
         case _                               => false
       }
@@ -152,7 +191,7 @@ class PathTest extends FunSuite {
 
   test("Integer extractor, negative int")  {
     assert {
-      FPath("/user/-123") match {
+      Path("/user/-123") match {
         case Root / "user" / Integer(userId) => userId == -123
         case _                               => false
       }
@@ -161,7 +200,7 @@ class PathTest extends FunSuite {
 
   test("Integer extractor, invalid int") {
     assert {
-      (FPath("/user/invalid") match {
+      (Path("/user/invalid") match {
         case Root / "user" / Integer(userId) => true
         case _                               => false
       }) === false
@@ -170,7 +209,7 @@ class PathTest extends FunSuite {
 
   test("Integer extractor, number format error") {
     assert {
-      (FPath("/user/2147483648") match {
+      (Path("/user/2147483648") match {
         case Root / "user" / Integer(userId) => true
         case _                               => false
       }) === false
@@ -179,7 +218,7 @@ class PathTest extends FunSuite {
 
   test("Long extractor") {
     assert {
-      FPath("/user/123") match {
+      Path("/user/123") match {
         case Root / "user" / Long(userId) => userId == 123
         case _                            => false
       }
@@ -188,7 +227,7 @@ class PathTest extends FunSuite {
 
   test("Long extractor, invalid int") {
     assert {
-      (FPath("/user/invalid") match {
+      (Path("/user/invalid") match {
         case Root / "user" / Long(userId) => true
         case _                            => false
       }) === false
@@ -197,7 +236,7 @@ class PathTest extends FunSuite {
 
   test("Long extractor, number format error") {
     assert {
-      (FPath("/user/9223372036854775808") match {
+      (Path("/user/9223372036854775808") match {
         case Root / "user" / Long(userId) => true
         case _                            => false
       }) === false
