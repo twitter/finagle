@@ -531,6 +531,33 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     }
   }
 
+  test("ThriftMux client to Thrift server ") {
+    val iface = new TestService.FutureIface {
+      def query(x: String) = Future.value(x + x)
+    }
+    val mem = new InMemoryStatsReceiver
+    val sr = Stats(mem)
+    val server = Thrift.server
+      .configured(sr)
+      .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
+
+    val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
+    val clientSvc = ThriftMux.client
+      .configured(sr)
+      .configured(Label("client"))
+      .newService(s"localhost:$port")
+    val client = new TestService.FinagledClient(clientSvc)
+
+    // the thrift server doesn't understand the protocol of the request,
+    // so it does its usual thing and closes the connection.
+    intercept[ChannelClosedException] {
+      Await.result(client.query("ethics"))
+    }
+
+    clientSvc.close()
+    server.close()
+  }
+
   test("drain downgraded connections") {
     val response = Promise[String]
     val iface = new TestService.FutureIface {
