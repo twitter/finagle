@@ -88,7 +88,7 @@ private[finagle] class TTwitterServerFilter(
         ClientId.let(extractClientId(header)) {
           Trace.recordBinary("srv/thrift/clientId", ClientId.current.getOrElse("None"))
   
-          Contexts.broadcast.let(env) {
+          Contexts.broadcast.letEnv(env) {
             service(request_) map {
               case response if response.isEmpty => response
               case response =>

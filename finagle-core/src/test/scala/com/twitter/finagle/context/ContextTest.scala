@@ -26,27 +26,18 @@ class ContextTest extends FunSuite with AssertionsForJUnit {
     assert(ran === 1)
   }
 
-  test("Context.let binds, shadows") {
+  test("Context.letEnv binds") {
     val env = ctx.Empty.bound(a, "ok")
     var ran = 0
-    ctx.let(env) {
+    ctx.letEnv(env) {
       ran += 1
       assert(ctx.contains(a))
       assert(ctx.get(a) === Some("ok"))
       assert(ctx(a) === "ok")
       assert(!ctx.contains(b))
-      
-      val env = ctx.Empty.bound(a, "ok1")
-      ctx.let(env) {
-        ran *= 3
-        assert(ctx.contains(a))
-        assert(ctx.get(a) === Some("ok1"))
-        assert(ctx(a) === "ok1")
-        assert(!ctx.contains(b))
-      }
     }
 
-    assert(ran === 3)
+    assert(ran === 1)
   }
 
   test("Shadowing binds") {

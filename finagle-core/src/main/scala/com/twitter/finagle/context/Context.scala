@@ -95,24 +95,6 @@ trait Context {
     override def toString = s"Clear($key) :: $next"
   }
 
-  /**
-   * Concatenate two environments with left-hand side precedence.
-   */
-  case class OrElse(left: Env, right: Env) extends Env {
-    def apply[A](key: Key[A]) =
-      if (left.contains(key)) left.apply(key)
-      else right.apply(key)
-
-    def get[A](key: Key[A])  =
-      if (left.contains(key)) left.get(key)
-      else right.get(key)
-
-    def contains[A](key: Key[A]) =
-      left.contains(key) || right.contains(key)
-
-    override def toString = s"OrElse($left, $right)"
-  }
-
   private[this] val local = new Local[Env]
   
   private[finagle] def env: Env = local() match {
@@ -152,13 +134,7 @@ trait Context {
    */
   def let[A, B, R](key1: Key[A], value1: A, key2: Key[B], value2: B)(fn: => R): R =
     local.let(env.bound(key1, value1).bound(key2, value2))(fn)
-
-  /**
-   * Bind the given environment.
-   */
-  private[finagle] def let[R](env1: Env)(fn: => R): R =
-    local.let(OrElse(env1, env))(fn)
-
+    
   /**
    * Unbind the passed-in keys, in the scope of `fn`.
    */
@@ -168,4 +144,9 @@ trait Context {
     }
     local.let(newEnv)(fn)
   }
+
+  /**
+   * Bind the given environment wholesale.
+   */
+  private[finagle] def letEnv[R](env: Env)(fn: => R): R = local.let(env)(fn)
 }
