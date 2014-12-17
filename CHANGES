@@ -8,6 +8,9 @@
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: `c.t.f.Server.serveAndAnnounce` with a `ServiceFactory` had
+    its first argument renamed to `name` from `forum`.
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -16,6 +19,12 @@ Deprecations
 
 New Features
 ~~~~~~~~~~~~
+
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-core: `c.t.f.Server.serveAndAnnounce` for a `Service` had its usage
+    of `name` and `addr` transposed.
 
 
 6.24.0
