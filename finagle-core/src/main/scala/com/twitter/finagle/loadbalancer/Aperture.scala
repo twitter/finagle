@@ -6,7 +6,7 @@ import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.{Rng, Ring, Ema, DefaultTimer}
 import com.twitter.finagle.{
   ClientConnection, NoBrokersAvailableException, ServiceFactory, ServiceFactoryProxy, 
-  ServiceProxy}
+  ServiceProxy, Status}
 import com.twitter.util.{Activity, Return, Future, Throw, Time, Var, Duration, Timer}
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -112,7 +112,7 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
   protected def rng: Rng
 
   private[this] val nodeUp: Node => Boolean = 
-    { node => node.isAvailable && node.weight > 0 }
+    { node => node.status == Status.Open && node.weight > 0 }
 
   private[this] val gauge = statsReceiver.addGauge("aperture") { aperture }
 
@@ -151,9 +151,12 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
       aperture = math.max(1, math.min(max, aperture+n))
     }
 
-    def rebuild(vector: Vector[Node]) = new Distributor(vector.sortBy(_.token), aperture)
-    def rebuild() = new Distributor(vector, aperture)
-    
+    def rebuild() = 
+      new Distributor(vector, aperture)
+
+    def rebuild(vector: Vector[Node]) = 
+      new Distributor(vector.sortBy(_.token), aperture)
+
     /**
      * The number of available serving units.
      */
@@ -175,7 +178,7 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
       val a = up(i)
       val b = up(j)
 
-      if (!a.isAvailable || !b.isAvailable)
+      if (a.status != Status.Open || b.status != Status.Open)
         sawDown = true
 
       if (a.load/a.weight < b.load/b.weight) a else b

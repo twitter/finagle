@@ -98,6 +98,34 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       assert(!service.isAvailable)
     }
   }
+  
+  test("a failing factory should be busy; done when revived") {
+    Time.withCurrentTimeFrozen { tc =>
+      val h = new Helper
+      import h._
+      
+      assert(factory.status === Status.Open)
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      assert(factory.status === Status.Open)
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      
+      val Status.Busy(until) = factory.status
+      assert(!until.isDone)
+      
+      tc.advance(10.seconds)
+      timer.tick()
+      
+      assert(until.isDone)
+      assert(factory.status === Status.Open)
+    }
+  }
 
   test("a failing service should reset failure counters after an individual success") {
     val h = new Helper
@@ -198,6 +226,11 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
     // This propagates to the service as well.
     assert(!service.isAvailable)
+    
+    val busy = Status.Busy(Future.never)
+    when(underlying.status) thenReturn busy
+
+    assert(service.status === busy)
   }
 
   class BrokenFactoryHelper {

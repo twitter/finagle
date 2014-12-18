@@ -3,8 +3,8 @@ package com.twitter.finagle.mux
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
 import com.twitter.finagle.mux.Message._
+import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
 import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing._
@@ -12,6 +12,7 @@ import com.twitter.finagle.transport.QueueTransport
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Promise, Duration, Closable, Time}
 import java.io.{PrintWriter, StringWriter}
+import java.net.{Socket, InetSocketAddress}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{IntegrationPatience, Eventually}
@@ -128,6 +129,80 @@ class EndToEndTest extends FunSuite
       Annotation.ServerSend(),
       Annotation.ClientRecv()
     ))
+  }
+  
+  private[this] def nextPort(): Int = {
+    val s = new Socket()
+    s.setReuseAddress(true)
+    try {
+      s.bind(new InetSocketAddress(0))
+      s.getLocalPort()
+    } finally {
+      s.close()
+    }
+  }
+
+  // This is marked FLAKY because it allocates a nonephemeral port;
+  // this is unfortunately required for this type of testing (since we're
+  // interested in completely shutting down, and then restarting a 
+  // server on the same port).
+  //
+  // Note also that, in the case of a single endpoint, the loadbalancer's
+  // fallback behavior circumvents status propagation bugs. This is
+  // because, in the event that all endpoints are down, the load balancer
+  // reverts its down list, and attempts to establish a session regardless
+  // of reported status.
+  //
+  // The following script patches up the load balancer to avoid this 
+  // behavior.
+  /*
+ed - ../../../../../../../../finagle-core/src/main/scala/com/twitter/finagle/loadbalancer/HeapBalancer.scala <<EOF
+246a
+      if (n == null)
+        return Future.exception(emptyException)
+.
+216c
+    if (n.load >= 0) null
+    else if (n.factory.status == Status.Open) n 
+    else {
+.
+201c
+      } else if (n.factory.status == Status.Open) {  // revived node
+.
+132c
+    nodes.count(_.factory.status == Status.Open)
+.
+w
+EOF
+  */
+  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined)
+  test("draining and restart") {
+    val echo =
+      new Service[Request, Response] {
+        def apply(req: Request) = Future.value(Response(req.body))
+      }
+    val req = Request(Path.empty, Buf.Utf8("hello, world!"))
+
+    // We need to reserve a port here because we're going to be
+    // rebinding the server.
+    val port = nextPort()
+    val client = Mux.newService(s"localhost:$port")
+    var server = Mux.serve(s"localhost:$port", echo)
+    
+    // Activate the client; this establishes a session.
+    Await.result(client(req))
+    
+    // This will stop listening, drain, and then close the session.
+    Await.result(server.close())
+    
+    // Thus the next request should fail at session establishment.
+    intercept[Throwable/*ChannelWriteException*/] { Await.result(client(req)) }
+
+    // And eventually we recover.
+    server = Mux.serve(s"localhost:$port", echo)
+    eventually { Await.result(client(req)) }
+
+    Await.result(server.close())
   }
 
   test("responds to lease") {

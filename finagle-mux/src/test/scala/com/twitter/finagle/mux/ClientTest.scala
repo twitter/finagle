@@ -16,7 +16,6 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class ClientTest extends FunSuite {
-
   def leaseClient(
     fn: (
       ClientDispatcher,
@@ -40,18 +39,21 @@ class ClientTest extends FunSuite {
     }
   }
 
-
   test("responds to leases") {
     import Message._
 
     leaseClient { (client, transport, issue, ctl) =>
       assert(transport.status == Status.Open)
-      assert(client.isAvailable)
+      assert(client.status === Status.Open)
       issue(1.millisecond)
       ctl.advance(2.milliseconds)
-      assert(!client.isActive && transport.status == Status.Open)
+      assert(Status.isBusy(client.status))
+      val Status.Busy(until) = client.status
+      assert(!until.isDefined)
+      assert(transport.status == Status.Open)
       issue(Tlease.MaxLease)
-      assert(client.isActive)
+      assert(until.poll === Some(Return.Unit))
+      assert(client.status === Status.Open)
     }
   }
 
@@ -83,10 +85,11 @@ class ClientTest extends FunSuite {
       val Some(Return(rdrain)) = drained.poll
       val Rdrain(newTag) = Message.decode(rdrain)
 
-      assert(!client.client.isActive)
+      val Status.Busy(doneBusy) = client.client.status
       assert(newTag === tag + 1)
 
-      client.respond(encode(RdispatchOk(tag, contexts, ChannelBuffers.copiedBuffer(buf.toString("UTF-8").reverse, Charsets.Utf8))))
+      client.respond(encode(RdispatchOk(tag, contexts, 
+        ChannelBuffers.copiedBuffer(buf.toString("UTF-8").reverse, Charsets.Utf8))))
 
       val Some(Return(result)) = f.poll
       assert(result === Response(Buf.Utf8("KO")))
@@ -96,10 +99,13 @@ class ClientTest extends FunSuite {
       assert(nack === RequestNackedException)
 
       assert(client.read().poll === None)
+      
+      // At this point, we're fully drained.
+      assert(client.client.status === Status.Closed)
     }
   }
-
-  test("isAvailable after sending rdrain") {
+  
+  test("Busy after sending rdrain") {
     Time.withCurrentTimeFrozen { ctl =>
       import Message._
       val buf = ChannelBuffers.copiedBuffer("OK", Charsets.Utf8)
@@ -110,6 +116,8 @@ class ClientTest extends FunSuite {
       val f = client(req)
       val Some(Return(treq)) = client.read().poll
       val Tdispatch(tag, _, _, _, _) = decode(treq)
+
+      assert(client.client.status === Status.Open)
       client.respond(encode(Tdrain(tag + 1)))
 
       val drained = client.read()
@@ -118,7 +126,7 @@ class ClientTest extends FunSuite {
       val Rdrain(newTag) = Message.decode(rdrain)
 
       assert(newTag === tag + 1)
-      assert(client.client.isAvailable)
+      assert(Status.isBusy(client.client.status))
     }
   }
 
@@ -157,7 +165,9 @@ class ClientTest extends FunSuite {
       accumulated += started
       assert(handler.get === accumulated)
 
-      client1.respond(encode(RdispatchOk(tag, contexts, ChannelBuffers.copiedBuffer(buf.toString("UTF-8").reverse, Charsets.Utf8))))
+      client1.respond(encode(
+        RdispatchOk(tag, contexts, 
+          ChannelBuffers.copiedBuffer(buf.toString("UTF-8").reverse, Charsets.Utf8))))
       // outstanding finished
 
       accumulated += finished

@@ -32,23 +32,38 @@ object Status {
   })
 
   /**
+   * A predicate indicating whether the given [[Status]]
+   * is [[Busy]].
+   */
+  def isBusy(status: Status) = status match {
+    case Busy(_) => true
+    case Open|Closed => false
+  }
+
+  /**
    * A composite status indicating the least healthy of the two.
    */
   def worst(left: Status, right: Status): Status =
-    (left, right) match {
-      case (Busy(f1), Busy(f2)) => Busy(f1.join(f2).unit)
-      case (left, right) => StatusOrdering.min(left, right)
+    if (isBusy(left) && isBusy(right)) {
+      val Busy(f1) = left
+      val Busy(f2) = right
+      Busy(f1.join(f2).unit)
+    } else {
+      StatusOrdering.min(left, right)
     }
 
   /**
    * A composite status indicating the most healthy of the two.   
    */
   def best(left: Status, right: Status): Status =
-    (left, right) match {
-      case (Busy(f1), Busy(f2)) => Busy(f1.or(f2))
-      case (left, right) => StatusOrdering.max(left, right)
+    if (isBusy(left) && isBusy(right)) {
+      val Busy(f1) = left
+      val Busy(f2) = right
+      Busy(f1.or(f2))
+    } else {
+      StatusOrdering.max(left, right)
     }
-  
+
   /**
    * The status representing the worst of the given statuses
    * extracted by `status` on `ts`.
@@ -98,7 +113,8 @@ object Status {
    * unavailable. A Busy [[Service]] or [[ServiceFactory]] can be
    * used, but may not provide service immediately. Busy carries a
    * [[com.twitter.util.Future]] that is used as a hint for when the
-   * [[Service]] or [[ServiceFactory]] becomes idle again.
+   * [[Service]] or [[ServiceFactory]] changes state. Note that a status
+   * may transition from Busy to Busy.
    */
   case class Busy(until: Future[Unit]) extends Status
 

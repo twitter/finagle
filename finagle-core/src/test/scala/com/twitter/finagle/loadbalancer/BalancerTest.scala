@@ -126,8 +126,6 @@ private class BalancerTest extends FunSuite with Conductors {
     }
 
     thread("updater2") {
-      println(s"updater 2 ${Thread.currentThread.getId}")
-      println(s"2 beat is $beat")
       waitForBeat(1)
       bal._rebuild()
       bal.update(Seq(f1->1))

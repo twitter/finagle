@@ -32,7 +32,7 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
     when(underlying()).thenReturn(p)
     val pp = failfast()
     assert(pp.isDefined === false)
-    assert(failfast.isAvailable === true, s"Failfast status: ${failfast.status}")
+    assert(failfast.isAvailable)
     assert(timer.tasks.isEmpty)
   }
 
@@ -53,7 +53,7 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
 
       p() = Throw(new Exception)
       verify(underlying).apply()
-      assert(failfast.isAvailable === false)
+      assert(!failfast.isAvailable)
       assert(stats.counters.get(Seq("marked_dead")) === Some(1))
     }
   }
@@ -68,7 +68,7 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
       tc.set(timer.tasks(0).when)
       timer.tick()
       verify(underlying, times(2)).apply()
-      assert(failfast.isAvailable === false)
+      assert(!failfast.isAvailable)
     }
   }
 
@@ -86,8 +86,26 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
       assert(timer.tasks.isEmpty)
       q() = Return(service)
       assert(timer.tasks.isEmpty)
-      assert(failfast.isAvailable === true)
+      assert(failfast.isAvailable)
       assert(stats.counters.get(Seq("marked_available")) === Some(1))
+    }
+  }
+  
+  test("is Busy when failing; done when revived") {
+    Time.withCurrentTimeFrozen { tc =>
+      val ctx = newCtx()
+      import ctx._
+      
+      assert(failfast.status === Status.Open)
+      p() = Throw(new Exception)
+      val Status.Busy(done) = failfast.status
+      assert(!done.isDone)
+      
+      tc.set(timer.tasks(0).when)
+      when(underlying()).thenReturn(Future.value(service))
+      timer.tick()
+      assert(done.isDone)
+      assert(failfast.status === Status.Open)
     }
   }
 
@@ -138,7 +156,7 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
       p() = Throw(new Exception)
 
       assert(timer.tasks.size === 1)
-      assert(failfast.isAvailable === false)
+      assert(!failfast.isAvailable)
       verify(underlying, never()).close()
       failfast.close()
       verify(underlying).close()

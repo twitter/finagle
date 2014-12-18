@@ -36,7 +36,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
    * Balancer reports stats here.
    */
   protected def statsReceiver: StatsReceiver
-  
+
   /**
    * The base type of nodes over which load is balanced.
    * Nodes define the load metric that is used; distributors
@@ -149,7 +149,13 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
 
   private[this] val gauges = Seq(
     statsReceiver.addGauge("available") {
-      dist.vector.count(_.isAvailable)
+      dist.vector.count(n => n.status == Status.Open)
+    },
+    statsReceiver.addGauge("busy") {
+      dist.vector.count(n => Status.isBusy(n.status))
+    },
+    statsReceiver.addGauge("closed") {
+      dist.vector.count(n => n.status == Status.Closed)
     },
     statsReceiver.addGauge("load") {
       dist.vector.map(_.pending).sum
@@ -204,7 +210,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
 
         dist = dist.rebuild(newNodes.toVector)
         adds.incr(newList.size - transfer.size)
-  
+
       case Rebuild(_dist) if _dist == dist =>
         dist = dist.rebuild()
  
@@ -237,7 +243,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
       return null.asInstanceOf[Node]
 
     val n = dist.pick()
-    if (n.factory.isAvailable) n
+    if (n.factory.status == Status.Open) n
     else pick(nodes, count-1)
   }
 
@@ -356,7 +362,8 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
    */
   protected def rng: Rng
 
-  private[this] val nodeAvail: Node => Boolean = _.isAvailable
+  private[this] val nodeUp: Node => Boolean =
+    { node => node.status == Status.Open }
 
   protected case class Distributor(vector: Vector[Node]) extends DistributorT {
     type This = Distributor
@@ -367,7 +374,7 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
     private[this] val unavailable = {
       val downbuild = new immutable.VectorBuilder[Node]()
       for (i <- vector.indices) {
-        if (vector(i).factory.isAvailable) {
+        if (vector(i).factory.status == Status.Open) {
           weights(i) = vector(i).weight
         } else {
           weights(i) = 0
@@ -377,13 +384,12 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
 
       downbuild.result()
     }
-    
+
     private[this] val drv = 
       if (weights.isEmpty) Drv(Vector.empty)
       else Drv.fromWeights(weights)
 
-    def needsRebuild = 
-      unavailable.nonEmpty && unavailable.exists(nodeAvail)
+    def needsRebuild = unavailable.nonEmpty && unavailable.exists(nodeUp)
 
     def rebuild() = copy()
     
@@ -392,7 +398,7 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
     def pick(): Node = {
       if (vector.isEmpty)
         return failingNode(emptyException)
-        
+
       if (vector.size == 1)
         return vector(0)
 
@@ -422,3 +428,4 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
   
   protected def initDistributor() = Distributor(Vector.empty)
 }
+
