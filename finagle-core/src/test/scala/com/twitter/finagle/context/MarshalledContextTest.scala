@@ -38,8 +38,25 @@ class MarshalledContextTest extends FunSuite with AssertionsForJUnit {
    assert(ctx.marshal(env).toMap === Map(
      Buf.Utf8("a.key") -> Buf.Utf8("ok"),
      Buf.Utf8("b.key") -> Buf.U32BE(123)))
+
    env = env.bound(b, 321)
    assert(ctx.marshal(env).toMap === Map(
+     Buf.Utf8("a.key") -> Buf.Utf8("ok"),
+     Buf.Utf8("b.key") -> Buf.U32BE(321)))
+
+   assert(ctx.marshal(ctx.OrElse(env, ctx.Empty)).toMap === Map(
+     Buf.Utf8("a.key") -> Buf.Utf8("ok"),
+     Buf.Utf8("b.key") -> Buf.U32BE(321)))
+  }
+
+  test("Only marshal the most recent binding for a given key (OrElse)") {
+   val env1 = ctx.Empty.bound(a, "ok").bound(b, 123)
+   assert(ctx.marshal(env1).toMap === Map(
+     Buf.Utf8("a.key") -> Buf.Utf8("ok"),
+     Buf.Utf8("b.key") -> Buf.U32BE(123)))
+     
+   val env2 = ctx.Empty.bound(b, 321)
+   assert(ctx.marshal(ctx.OrElse(env2, env1)).toMap === Map(
      Buf.Utf8("a.key") -> Buf.Utf8("ok"),
      Buf.Utf8("b.key") -> Buf.U32BE(321)))
   }
@@ -60,6 +77,7 @@ class MarshalledContextTest extends FunSuite with AssertionsForJUnit {
       Buf.Utf8("bleep") -> Buf.Utf8("NOPE")))
   }
   
+
   test("Translucency: convert ok") {
     var env = ctx.Empty: ctx.Env
     
