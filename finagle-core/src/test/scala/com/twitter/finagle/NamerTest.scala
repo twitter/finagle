@@ -126,7 +126,7 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
   def assertLookup(path: String, ias: SocketAddress*) {
     Namer.global.lookup(Path.read(path)).sample() match {
       case NameTree.Leaf(Name.Bound(addr)) => assert(addr.sample() === Addr.Bound(ias.toSet))
-      case _ => assert(false)
+      case _ => fail()
     }
   }
 
@@ -138,8 +138,22 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
       Namer.global.lookup(Path.read("/$/inet")).sample()
     }
 
-    intercept[ClassNotFoundException] {
-      Namer.global.lookup(Path.read("/$/inet/1234/foobar")).sample()
+    Namer.global.lookup(Path.read("/$/inet/127.0.0.1/1234/foobar")).sample() match {
+      case NameTree.Leaf(bound: Name.Bound) =>
+        assert(bound.addr.sample() === Addr.Bound(new InetSocketAddress("127.0.0.1", 1234)))
+        assert(bound.id === Path.Utf8("$", "inet", "127.0.0.1", "1234"))
+        assert(bound.path === Path.Utf8("foobar"))
+
+      case _ => fail()
+    }
+
+    Namer.global.lookup(Path.read("/$/inet/1234/foobar")).sample() match {
+      case NameTree.Leaf(bound: Name.Bound) =>
+        assert(bound.addr.sample() === Addr.Bound(new InetSocketAddress(1234)))
+        assert(bound.id === Path.Utf8("$", "inet", "1234"))
+        assert(bound.path === Path.Utf8("foobar"))
+
+      case _ => fail()
     }
   }
 
