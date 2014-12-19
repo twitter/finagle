@@ -19,9 +19,7 @@ object LoadedStatsReceiver extends {
  */
 object DefaultStatsReceiver extends {
   val self: StatsReceiver = LoadedStatsReceiver
-} with StatsReceiverProxy {
-  val get = this
-}
+} with StatsReceiverProxy
 
 /**
  * A client-specific StatsReceiver. All stats recorded using this receiver
