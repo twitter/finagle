@@ -15,6 +15,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Green Man Gaming](http://www.greenmangaming.com/)
 * [Gutefrage.net](http://www.gutefrage.net/)
   * ["Introducing Gutefrage.net's Service-Oriented Architecture"][2]
+* [JusBrasil](http://www.jusbrasil.com.br)
 * [Magine TV](https://magine.com/)
 * [Nest](https://nest.com/)
 * The [New York Times](http://www.nytimes.com/)
