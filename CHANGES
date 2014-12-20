@@ -8,6 +8,8 @@
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-http: deprecated methods in `c.t.f.http.HttpMessageProxy` have been removed.
+
   * finagle-core: `c.t.f.Server.serveAndAnnounce` with a `ServiceFactory` had
     its first argument renamed to `name` from `forum`.
 

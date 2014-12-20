@@ -9,6 +9,7 @@ import com.twitter.finagle.transport.{Transport, QueueTransport}
 import com.twitter.io.{Buf, Charsets}
 import com.twitter.logging.{Logger, StringHandler, BareFormatter, Level}
 import com.twitter.util.{Return, Throw, Time, TimeControl, Duration, Future}
+import java.nio.charset.Charset
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -88,8 +89,8 @@ class ClientTest extends FunSuite {
       val Status.Busy(doneBusy) = client.client.status
       assert(newTag === tag + 1)
 
-      client.respond(encode(RdispatchOk(tag, contexts, 
-        ChannelBuffers.copiedBuffer(buf.toString("UTF-8").reverse, Charsets.Utf8))))
+      client.respond(encode(RdispatchOk(tag, contexts,
+        ChannelBuffers.copiedBuffer(buf.toString(Charset.forName("UTF-8")).reverse, Charsets.Utf8))))
 
       val Some(Return(result)) = f.poll
       assert(result === Response(Buf.Utf8("KO")))
@@ -166,8 +167,8 @@ class ClientTest extends FunSuite {
       assert(handler.get === accumulated)
 
       client1.respond(encode(
-        RdispatchOk(tag, contexts, 
-          ChannelBuffers.copiedBuffer(buf.toString("UTF-8").reverse, Charsets.Utf8))))
+        RdispatchOk(tag, contexts,
+          ChannelBuffers.copiedBuffer(buf.toString(Charset.forName("UTF-8")).reverse, Charsets.Utf8))))
       // outstanding finished
 
       accumulated += finished

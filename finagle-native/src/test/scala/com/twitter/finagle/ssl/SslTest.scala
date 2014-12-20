@@ -72,15 +72,15 @@ class SslTest extends FunSuite {
 
     val service = new Service[HttpRequest, HttpResponse] {
       def apply(request: HttpRequest) = Future {
-        val requestedBytes = request.getHeader("Requested-Bytes")
+        val requestedBytes = request.headers.get("Requested-Bytes")
           match {
           case s: String => s.toInt
           case _ => 17280
         }
         val response = new DefaultHttpResponse(
           HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-        Option(request.getHeader("X-Transport-Cipher")) foreach
-        { cipher: String => response.setHeader("X-Transport-Cipher",
+        Option(request.headers.get("X-Transport-Cipher")) foreach
+        { cipher: String => response.headers.set("X-Transport-Cipher",
           cipher) }
         response.setContent(makeContent(requestedBytes))
         HttpHeaders.setContentLength(response, requestedBytes)
@@ -119,9 +119,9 @@ class SslTest extends FunSuite {
       }
 
       if (responseSize > 0)
-        request.setHeader("Requested-Bytes", responseSize)
+        request.headers.set("Requested-Bytes", responseSize)
       else
-        request.setHeader("Requested-Bytes", 0)
+        request.headers.set("Requested-Bytes", 0)
 
       val response = Await.result(client(request))
       assert(response.getStatus === HttpResponseStatus.OK)
@@ -134,7 +134,7 @@ class SslTest extends FunSuite {
         assert(content.readByte() === 'Z')
       }
 
-      val cipher = response.getHeader("X-Transport-Cipher")
+      val cipher = response.headers.get("X-Transport-Cipher")
       assert(cipher != "null")
     }
 
@@ -154,16 +154,16 @@ class SslTest extends FunSuite {
             buf.writeByte('Z')
           buf
         }
-        val requestedBytes = request.getHeader("Requested-Bytes")
+        val requestedBytes = request.headers.get("Requested-Bytes")
           match {
           case s: String => s.toInt
           case _ => 17280
         }
         val response = new DefaultHttpResponse(
           HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-        Option(request.getHeader("X-Transport-Cipher")) foreach {
+        Option(request.headers.get("X-Transport-Cipher")) foreach {
           cipher: String =>
-          response.setHeader("X-Transport-Cipher", cipher)
+          response.headers.set("X-Transport-Cipher", cipher)
         }
         response.setContent(makeContent(requestedBytes))
         HttpHeaders.setContentLength(response, requestedBytes)

@@ -10,7 +10,7 @@ object Finagle extends Build {
   val zkVersion = "3.3.4"
   val utilVersion = "6.23.0"
   val ostrichVersion = "9.7.0"
-  val nettyLib = "io.netty" % "netty" % "3.9.4.Final"
+  val nettyLib = "io.netty" % "netty" % "3.10.0.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   // The following won't be necessary once we've upgraded internally to 2.4.
   def jacksonVersion(scalaVersion: String) =
