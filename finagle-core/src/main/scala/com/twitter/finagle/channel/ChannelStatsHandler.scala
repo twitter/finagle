@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 import java.util.logging.{Level, Logger}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{ChannelHandlerContext, ChannelStateEvent,
-  ExceptionEvent, MessageEvent, SimpleChannelHandler}
+  ExceptionEvent, MessageEvent, SimpleChannelHandler, FileRegion}
 
 /**
  * A [[org.jboss.netty.channel.ChannelHandler]] that tracks channel/connection
@@ -65,8 +65,12 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
         val readableBytes = buffer.readableBytes
         channelWriteCount.getAndAdd(readableBytes)
         sentBytes.incr(readableBytes)
+      case region: FileRegion =>
+        val bytesToTransfer = region.getCount.toInt
+        channelWriteCount.getAndAdd(bytesToTransfer)
+        sentBytes.incr(bytesToTransfer)
       case _ =>
-        log.warning("ChannelStatsHandler received non-channelbuffer write")
+        log.warning("ChannelStatsHandler received non-channelbuffer and non-fileregion write")
     }
 
     super.writeRequested(ctx, e)

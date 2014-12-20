@@ -54,6 +54,26 @@ class ChannelStatsHandlerTest extends FunSpec with MockitoSugar {
       connectionsIs(0)
     }
 
+    it("should count bytes to transfer for file region") {
+      var sr = new InMemoryStatsReceiver()
+
+      val handler = new ChannelStatsHandler(sr)
+
+      val ctx = mock[ChannelHandlerContext]
+      val al = new AtomicLong()
+      val obj = (al, al).asInstanceOf[Object]
+      when(ctx.getAttachment()).thenReturn(obj, obj)
+
+      val evt = mock[MessageEvent]
+      val region = mock[FileRegion]
+      when(evt.getMessage()).thenReturn(region, region)
+      when(region.getCount()).thenReturn(42, 42)
+
+      handler.writeRequested(ctx, evt)
+
+      assert(sr.counter("sent_bytes")() === 42)
+    }
+
     it("should check the counters are collected correctly") {
       val time = Time.now
       Time.withTimeFunction(time) { control =>
