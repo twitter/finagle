@@ -170,7 +170,7 @@ object Finagle extends Build {
     finagleHttp, finagleHttpX, finagleHttpXCompat, finagleStream, finagleNative,
     finagleThrift, finagleMemcached, finagleMemcachedX, finagleKestrel,
     finagleKestrelX, finagleMux, finagleThriftMux, finagleMySQL,
-    finagleSpdy,
+    finagleSpdy, finagleRedis,
 
     // Use and integration
     finagleStress
@@ -178,7 +178,7 @@ object Finagle extends Build {
     // finagleBenchmark
 
     // Removing projects with specs tests and their dependencies
-    // finagleRedis, finagleExample
+    // finagleExample
   )
 
   lazy val finagleTest = Project(
@@ -439,17 +439,9 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-redis",
-    crossScalaVersions ~= { versions => versions filter (_ != "2.11.4") },
     libraryDependencies ++= Seq(
-      util("logging"),
-      "org.scala-tools.testing" %% "specs" % "1.6.9" % "test"
-    ),
-    testOptions in Test := Seq(Tests.Filter {
-      case "com.twitter.finagle.redis.integration.ClientSpec" => false
-      case "com.twitter.finagle.redis.integration.BtreeClientSpec" => false
-      case "com.twitter.finagle.redis.integration.ClientServerIntegrationSpec" => false
-      case _ => true
-    })
+      util("logging")
+    )
   ).dependsOn(finagleCore)
 
   lazy val finagleMux = Project(
