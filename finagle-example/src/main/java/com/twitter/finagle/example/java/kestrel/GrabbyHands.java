@@ -1,5 +1,12 @@
 package com.twitter.finagle.example.java.kestrel;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
+import org.jboss.netty.buffer.ChannelBuffers;
+
 import com.twitter.finagle.ServiceFactory;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.kestrel.MultiReader;
@@ -13,56 +20,57 @@ import com.twitter.finagle.service.Backoff;
 import com.twitter.io.Charsets;
 import com.twitter.util.Duration;
 import com.twitter.util.JavaTimer;
-import org.jboss.netty.buffer.ChannelBuffers;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 /**
- * Demonstrates the use of {{com.twitter.finagel.kestrel.MultiReader}}
+ * Demonstrates the use of {@link com.twitter.finagle.kestrel.MultiReader}
  * in Java.
  */
-public class GrabbyHands {
-  public static void main(String args[]) {
+public final class GrabbyHands {
+
+  private GrabbyHands() { }
+
+  /**
+   * Runs the example with given {@code args}.
+   *
+   * @param args the argument list
+   */
+  public static void main(String[] args) {
     if (args.length < 2) {
       System.err.println("usage: java... QUEUE HOST1 [HOST2 HOST3...]");
-      System.exit(1);
-    }
+    } else {
+      String queueName = args[0];
 
-    String queueName = args[0];
+      JavaTimer timer = new JavaTimer();
+      Callable<Iterator<Duration>> backoffs = Backoff.toJava(
+          Backoff.exponential(
+              // 100ms initial backoff
+              Duration.fromTimeUnit(100, TimeUnit.MILLISECONDS),
+              // multiplier
+              2)
+              // fail after 10 tries
+              .take(10));
 
-    JavaTimer timer = new JavaTimer();
-    Callable<Iterator<Duration>> backoffs = Backoff.toJava(
-      Backoff.exponential(
-         // 100ms initial backoff
-        Duration.fromTimeUnit(100, TimeUnit.MILLISECONDS),
-        // multiplier
-        2)
-        // fail after 10 tries
-        .take(10));
+      ArrayList<ReadHandle> handles = new ArrayList<ReadHandle>();
+      for (int i = 1; i < args.length; i++) {
+        ServiceFactory<Command, Response> factory =
+            ClientBuilder.safeBuildFactory(ClientBuilder.get()
+                .codec(Kestrel.get())
+                .hosts(args[i])
+                .hostConnectionLimit(1));
+        System.out.println("k " + args[i]);
 
-    ArrayList<ReadHandle> handles = new ArrayList<ReadHandle>();
-    for (int i = 1; i < args.length; i++) {
-      ServiceFactory<Command, Response> factory =
-        ClientBuilder.safeBuildFactory(ClientBuilder.get()
-          .codec(Kestrel.get())
-          .hosts(args[i])
-          .hostConnectionLimit(1));
-      System.out.println("k " + args[i]);
+        Client client = Client.newInstance(factory);
+        handles.add(client.readReliably(queueName, timer, backoffs));
+      }
 
-      Client client = Client.newInstance(factory);
-      handles.add(client.readReliably(queueName, timer, backoffs));
-    }
+      ReadHandle handle = MultiReader.apply(handles.iterator());
 
-    ReadHandle handle = MultiReader.apply(handles.iterator());
-
-    while (true) {
-      ReadMessage m = handle.messages().syncWait();
-      System.out.println(m.bytes().toString(Charsets.Utf8()));
-      System.out.println(ChannelBuffers.hexDump(m.bytes()));
-      m.ack().sync();
+      while (true) {
+        ReadMessage m = handle.messages().syncWait();
+        System.out.println(m.bytes().toString(Charsets.Utf8()));
+        System.out.println(ChannelBuffers.hexDump(m.bytes()));
+        m.ack().sync();
+      }
     }
   }
 }

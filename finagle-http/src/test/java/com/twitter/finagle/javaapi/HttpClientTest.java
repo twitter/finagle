@@ -9,16 +9,22 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 
-import com.twitter.finagle.Service;
 import com.twitter.finagle.Client;
+import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.http.Http;
 import com.twitter.util.Future;
 import com.twitter.util.FutureEventListener;
 import com.twitter.util.Promise;
 
-public class HttpClientTest {
-  public static void main(String args[]) {
+public final class HttpClientTest {
+
+  private HttpClientTest() { }
+
+  /**
+   * Runs the client with the given {@code args}.
+   */
+  public static void main(String[] args) {
     Service<HttpRequest, HttpResponse> client =
       ClientBuilder.safeBuild(ClientBuilder.get()
         .codec(Http.get())
@@ -32,21 +38,21 @@ public class HttpClientTest {
       new FutureEventListener<HttpResponse>() {
         public void onSuccess(HttpResponse response) {
           System.out.println("received response: " + response);
-          System.exit(0);
+          throw new RuntimeException();
         }
 
         public void onFailure(Throwable cause) {
           System.out.println("failed with cause: " + cause);
-          System.exit(1);
+          throw new RuntimeException();
         }
       });
 
     /* If the following compiles, variance annotations work (maybe!). */
-    Promise<List<Integer>> promise = new Promise();
+    Promise<List<Integer>> promise = new Promise<List<Integer>>();
     promise.addEventListener(
       new FutureEventListener<Collection<Integer>>() {
-        public void onSuccess(Collection<Integer> coll) {}
-        public void onFailure(Throwable cause) {}
+        public void onSuccess(Collection<Integer> coll) { }
+        public void onFailure(Throwable cause) { }
       });
 
     /* The following should *not* compile. Uncomment to test manually. */

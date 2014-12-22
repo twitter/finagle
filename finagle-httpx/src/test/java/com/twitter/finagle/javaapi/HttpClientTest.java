@@ -3,19 +3,26 @@ package com.twitter.finagle.javaapi;
 import java.util.Collection;
 import java.util.List;
 
-import com.twitter.finagle.Service;
 import com.twitter.finagle.Client;
+import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.httpx.Http;
-import com.twitter.finagle.httpx.Response;
 import com.twitter.finagle.httpx.Request;
-
+import com.twitter.finagle.httpx.Response;
 import com.twitter.util.Future;
 import com.twitter.util.FutureEventListener;
 import com.twitter.util.Promise;
 
-public class HttpClientTest {
-  public static void main(String args[]) {
+public final class HttpClientTest {
+
+  private HttpClientTest() { }
+
+  /**
+   * Rns the server with the given {@code args}.
+   *
+   * @param args the arguments array
+   */
+  public static void main(String[] args) {
     Service<Request, Response> client =
       ClientBuilder.safeBuild(ClientBuilder.get()
         .codec(Http.get())
@@ -29,21 +36,21 @@ public class HttpClientTest {
       new FutureEventListener<Response>() {
         public void onSuccess(Response response) {
           System.out.println("received response: " + response);
-          System.exit(0);
+          throw new RuntimeException();
         }
 
         public void onFailure(Throwable cause) {
           System.out.println("failed with cause: " + cause);
-          System.exit(1);
+          throw new RuntimeException();
         }
       });
 
     /* If the following compiles, variance annotations work (maybe!). */
-    Promise<List<Integer>> promise = new Promise();
+    Promise<List<Integer>> promise = new Promise<List<Integer>>();
     promise.addEventListener(
       new FutureEventListener<Collection<Integer>>() {
-        public void onSuccess(Collection<Integer> coll) {}
-        public void onFailure(Throwable cause) {}
+        public void onSuccess(Collection<Integer> coll) { }
+        public void onFailure(Throwable cause) { }
       });
 
     /* The following should *not* compile. Uncomment to test manually. */

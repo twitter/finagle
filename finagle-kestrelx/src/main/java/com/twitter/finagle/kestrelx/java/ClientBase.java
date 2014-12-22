@@ -19,7 +19,8 @@ import com.twitter.util.Time;
 import com.twitter.util.Timer;
 
 public class ClientBase extends com.twitter.finagle.kestrelx.java.Client {
-  com.twitter.finagle.kestrelx.Client underlying;
+
+  protected com.twitter.finagle.kestrelx.Client underlying;
 
   public ClientBase(com.twitter.finagle.kestrelx.Client underlying) {
     this.underlying = underlying;
@@ -127,15 +128,16 @@ public class ClientBase extends com.twitter.finagle.kestrelx.java.Client {
       Callable<Iterator<Duration>> backoffs) {
 
     final Callable<Iterator<Duration>> backoffsFinal = backoffs;
-    Function0<Stream<Duration>> backoffsFunction = new com.twitter.util.Function0<Stream<Duration>>() {
-      public Stream<Duration> apply() {
-        try {
-          return JavaConversions.asScalaIterator(backoffsFinal.call()).toStream();
-        } catch (Exception e) {
-          return (Stream<Duration>) Stream.<Duration>empty();
+    Function0<Stream<Duration>> backoffsFunction =
+      new com.twitter.util.Function0<Stream<Duration>>() {
+        public Stream<Duration> apply() {
+          try {
+            return JavaConversions.asScalaIterator(backoffsFinal.call()).toStream();
+          } catch (Exception e) {
+            return Stream.<Duration>empty();
+          }
         }
-      }
-    };
+      };
 
     return underlying.readReliably(queueName, timer, backoffsFunction);
   }

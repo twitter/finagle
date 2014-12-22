@@ -7,8 +7,13 @@ public class ResultWithCAS {
   public final ChannelBuffer casUnique;
 
   public ResultWithCAS(ChannelBuffer value, ChannelBuffer casUnique) {
-    if (value == null) throw new NullPointerException("value cannot be null");
-    if (casUnique == null) throw new NullPointerException("casUnique cannot be null");
+    if (value == null) {
+      throw new NullPointerException("value cannot be null");
+    }
+
+    if (casUnique == null) {
+      throw new NullPointerException("casUnique cannot be null");
+    }
 
     this.value = value;
     this.casUnique = casUnique;
