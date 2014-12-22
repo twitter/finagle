@@ -23,9 +23,9 @@ private[finagle] class DelayedReleaseService[-Req <: Request](
       }
     }
 
-    new Response {
-      val httpResponse = in.httpResponse
-      override lazy val reader = new Reader {
+    Response(
+      in.httpResponse,
+      new Reader {
         def read(n: Int) = in.reader.read(n) respond {
           case Return(None) => done()
           case Throw(_) => done()
@@ -42,7 +42,7 @@ private[finagle] class DelayedReleaseService[-Req <: Request](
           done()
         }
       }
-    }
+    )
   }
 
   override def apply(request: Req): Future[Response] = {

@@ -303,11 +303,7 @@ object StreamingTest {
   }
 
   def ok(readerIn: Reader) = {
-    val res = new Response {
-      override val reader = readerIn
-      val httpResponse = Response(Version.Http11, Status.Ok).httpResponse
-    }
-    res.setChunked(true)
+    val res = Response(Version.Http11, Status.Ok, readerIn)
     res.headers.set("Connection", "close")
     res
   }

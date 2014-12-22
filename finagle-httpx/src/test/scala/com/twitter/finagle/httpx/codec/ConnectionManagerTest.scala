@@ -29,7 +29,7 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
   when(me.getChannel).thenReturn(c)
 
   def makeRequest(version: Version, headers: (String, String)*) = {
-    val request = Request(Method.Get, "/", version)
+    val request = Request(version, Method.Get, "/")
     headers foreach { case (k, v) =>
       request.headers.set(k, v)
     }

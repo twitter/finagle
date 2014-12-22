@@ -47,13 +47,12 @@ class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
     headers <- Gen.containerOf[Seq, (String, String)](arbHeader)
     body    <- arbitrary[String]
   } yield {
-    val reqIn = Request(method, uri, version)
+    val reqIn = Request(version, method, uri)
     headers foreach { case (k, v) => reqIn.headers.add(k, v) }
-    val req = new Request {
-      val httpRequest = reqIn.httpRequest
-      override val reader = BufReader(Buf.Utf8(body))
-      lazy val remoteSocketAddress = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    }
+    val req = Request(
+      reqIn.httpRequest,
+      BufReader(Buf.Utf8(body)),
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
     if (chunked) {
       req.headers.set(Fields.TransferEncoding, "chunked")
       req.setChunked(chunked)

@@ -19,7 +19,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
   val okDtabs =
     Dtab.empty +: (okDentries.permutations map(ds => Dtab(ds))).toIndexedSeq
 
-  def newMsg(): Message = Request(Method.Get, "/", Version.Http11)
+  def newMsg(): Message = Request(Version.Http11, Method.Get, "/")
 
   test("write(dtab, msg); read(msg) == dtab") {
     for (dtab <- okDtabs) {
