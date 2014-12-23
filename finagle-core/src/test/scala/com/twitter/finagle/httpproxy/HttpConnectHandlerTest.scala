@@ -8,8 +8,7 @@ import org.mockito.Mockito.{times, verify, when, atLeastOnce}
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers._
 import org.jboss.netty.channel._
-import com.twitter.util.RandomSocket
-import java.net.{SocketAddress, InetSocketAddress}
+import java.net.{InetAddress, SocketAddress, InetSocketAddress}
 import org.jboss.netty.handler.codec.http._
 
 @RunWith(classOf[JUnitRunner])
@@ -23,8 +22,8 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar {
     when(channel.getPipeline) thenReturn pipeline
     val closeFuture = Channels.future(channel)
     when(channel.getCloseFuture) thenReturn closeFuture
-    val port = RandomSocket.nextPort()
-    val remoteAddress = new InetSocketAddress("localhost", port)
+    val remoteAddress = new InetSocketAddress(InetAddress.getLoopbackAddress, 80)
+    val port = remoteAddress.getPort
     when(channel.getRemoteAddress) thenReturn remoteAddress
     val proxyAddress = mock[SocketAddress]
     val connectFuture = Channels.future(channel, true)
