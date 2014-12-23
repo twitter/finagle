@@ -253,7 +253,7 @@ class EndToEndTest extends FunSuite {
       .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
       .name("Streams")
       .build(new MyService(serverRes))
-    val address = server.localAddress
+    val address = server.boundAddress
     val factory = ClientBuilder()
       .codec(new Stream)
       .hosts(Seq(address))
@@ -278,7 +278,7 @@ class EndToEndTest extends FunSuite {
 
     val serverClient = ClientBuilder()
       .codec(new Stream)
-      .hosts(Seq(server.localAddress))
+      .hosts(Seq(server.boundAddress))
       .hostConnectionLimit(1)
       .build()
 
@@ -290,7 +290,7 @@ class EndToEndTest extends FunSuite {
 
     val factory = ClientBuilder()
       .codec(new Stream)
-      .hosts(Seq(proxy.localAddress))
+      .hosts(Seq(proxy.boundAddress))
       .hostConnectionLimit(1)
       .buildFactory()
 
@@ -300,7 +300,7 @@ class EndToEndTest extends FunSuite {
         Closable.all(server, serverClient, proxy, factory).close(deadline)
     }
 
-    (client, proxy.localAddress)
+    (client, proxy.boundAddress)
   }
 
   test("Streams: delay release until complete response") {
@@ -318,7 +318,7 @@ class EndToEndTest extends FunSuite {
       })
     val client = ClientBuilder()
       .codec(new Stream)
-      .hosts(Seq(server.localAddress))
+      .hosts(Seq(server.boundAddress))
       .hostConnectionLimit(1)
       .retries(2)
       .build()

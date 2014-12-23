@@ -395,7 +395,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
 
       val client = ClientBuilder()
         .codec(Http().enableTracing(true))
-        .hosts(Seq(server.localAddress))
+        .hosts(Seq(server.boundAddress))
         .hostConnectionLimit(1)
         .name("client")
         .build()
@@ -416,7 +416,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
 
       val client = ClientBuilder()
         .codec(Http())
-        .hosts(Seq(server.localAddress))
+        .hosts(Seq(server.boundAddress))
         .hostConnectionLimit(1)
         .name("client")
         .build()
@@ -449,7 +449,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
 
       val client = ClientBuilder()
         .codec(RichHttp[Request](Http(), aggregateChunks = false))
-        .hosts(Seq(server.localAddress))
+        .hosts(Seq(server.boundAddress))
         .hostConnectionLimit(1)
         .name("client")
         .build()

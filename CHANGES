@@ -9,7 +9,7 @@ Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
   * finagle-http: deprecated methods in `c.t.f.http.HttpMessageProxy` have been removed.
-
+  * finagle-core: `c.t.f.builder.Server` now implements `c.t.f.ListeningServer`.
   * finagle-core: `c.t.f.Server.serveAndAnnounce` with a `ServiceFactory` had
     its first argument renamed to `name` from `forum`.
 
@@ -18,6 +18,9 @@ Runtime Behavior Changes
 
 Deprecations
 ~~~~~~~~~~~~
+
+  * finagle-core: `c.t.f.builder.Server.localAddress` is deprecated in favor of
+    `c.t.f.ListeningServer.boundAddress`.
 
 New Features
 ~~~~~~~~~~~~

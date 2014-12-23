@@ -52,7 +52,7 @@ class StreamingTest extends FunSuite with Eventually {
     val fail = new Promise[Unit]
 
     val server = startServer(echo, identity)
-    val client = connect(server.localAddress, transport => {
+    val client = connect(server.boundAddress, transport => {
       if (!fail.isDefined) fail ensure transport.close()
       transport
     })
@@ -144,8 +144,8 @@ class StreamingTest extends FunSuite with Eventually {
       if (!setFail.getAndSet(true)) fail ensure transport.close()
       transport
     })
-    val client1 = connect(server.localAddress, identity, "client1")
-    val client2 = connect(server.localAddress, identity, "client2")
+    val client1 = connect(server.boundAddress, identity, "client1")
+    val client2 = connect(server.boundAddress, identity, "client2")
 
     val req1 = get("/")
     val req2 = get("abc")
@@ -192,8 +192,8 @@ class StreamingTest extends FunSuite with Eventually {
       if (!setFail.getAndSet(true)) fail ensure transport.close()
       transport
     })
-    val client1 = connect(server.localAddress, identity, "client1")
-    val client2 = connect(server.localAddress, identity, "client2")
+    val client1 = connect(server.boundAddress, identity, "client1")
+    val client2 = connect(server.boundAddress, identity, "client2")
 
     val req1 = get("/")
     val req2 = get("abc")
@@ -234,8 +234,8 @@ class StreamingTest extends FunSuite with Eventually {
     }
 
     val server = startServer(service, identity)
-    val client1 = connect(server.localAddress, identity, "client1")
-    val client2 = connect(server.localAddress, identity, "client2")
+    val client1 = connect(server.boundAddress, identity, "client1")
+    val client2 = connect(server.boundAddress, identity, "client2")
 
     val req1 = get("/")
     val req2 = get("abc")
@@ -273,8 +273,8 @@ class StreamingTest extends FunSuite with Eventually {
     }
 
     val server = startServer(service, identity)
-    val client1 = connect(server.localAddress, identity, "client1")
-    val client2 = connect(server.localAddress, identity, "client2")
+    val client1 = connect(server.boundAddress, identity, "client1")
+    val client2 = connect(server.boundAddress, identity, "client2")
 
     val req1 = get("/")
     val req2 = get("abc")

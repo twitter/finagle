@@ -28,7 +28,7 @@ class EndToEndTest extends FunSuite {
       .bindTo(address)
       .name("FinagleServer")
       .build(service)
-    val cluster = new DynamicCluster[SocketAddress](Seq(server.localAddress))
+    val cluster = new DynamicCluster[SocketAddress](Seq(server.boundAddress))
     val client = ClientBuilder()
       .cluster(cluster)
       .codec(StringCodec)
@@ -39,7 +39,7 @@ class EndToEndTest extends FunSuite {
     //  then verify the request can still finish
     val response = client("123")
     arrivalLatch.await()
-    cluster.del(server.localAddress)
+    cluster.del(server.boundAddress)
     assert(!response.isDefined)
     constRes.setValue("foo")
     assert(Await.result(response) === "foo")
@@ -73,7 +73,7 @@ class EndToEndTest extends FunSuite {
 
     // make cluster available, now queued requests should be processed
     val thread = new Thread {
-      override def run = cluster.add(server.localAddress)
+      override def run = cluster.add(server.boundAddress)
     }
 
     cluster.ready.map { _ =>
@@ -99,7 +99,7 @@ class EndToEndTest extends FunSuite {
     val mem = new InMemoryStatsReceiver
     val client = ClientBuilder()
       .name("client")
-      .hosts(server.localAddress)
+      .hosts(server.boundAddress)
       .codec(StringCodec)
       .requestTimeout(10.millisecond)
       .hostConnectionLimit(1)

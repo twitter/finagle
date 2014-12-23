@@ -103,7 +103,7 @@ class SslTest extends FunSuite {
     def client =
       ClientBuilder()
         .name("http-client")
-        .hosts(server.localAddress)
+        .hosts(server.boundAddress)
         .codec(codec)
         .hostConnectionLimit(1)
         .tlsWithoutValidation()
@@ -184,7 +184,7 @@ class SslTest extends FunSuite {
       .name("SSL server with valid certificate chain")
       .build(service)
 
-    val addr = server.localAddress.asInstanceOf[InetSocketAddress]
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
 
     // ... then connect to that service using openssl and ensure that
     // the chain is correct

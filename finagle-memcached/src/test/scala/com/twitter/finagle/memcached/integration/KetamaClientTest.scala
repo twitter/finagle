@@ -24,9 +24,9 @@ class KetamaClientTest extends FunSuite with BeforeAndAfter {
 
   before {
     server1 = new InProcessMemcached(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-    address1 = server1.start().localAddress.asInstanceOf[InetSocketAddress]
+    address1 = server1.start().boundAddress.asInstanceOf[InetSocketAddress]
     server2 = new InProcessMemcached(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-    address2 = server2.start().localAddress.asInstanceOf[InetSocketAddress]
+    address2 = server2.start().boundAddress.asInstanceOf[InetSocketAddress]
   }
 
   after {

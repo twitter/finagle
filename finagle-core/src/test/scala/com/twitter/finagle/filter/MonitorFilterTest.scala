@@ -90,7 +90,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase 
     // that sits on top of "service". Therefore we need to create a client to initiates the requests.
     val client = ClientBuilder()
       .codec(StringCodec)
-      .hosts(Seq(server.localAddress))
+      .hosts(Seq(server.boundAddress))
       .hostConnectionLimit(1)
       .build()
 

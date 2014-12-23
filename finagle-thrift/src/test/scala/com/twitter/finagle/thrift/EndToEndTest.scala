@@ -81,7 +81,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       socketAddr.asInstanceOf[InetSocketAddress].getPort
 
     Seq(
-      ("ServerBuilder", builder, port(builder.localAddress)),
+      ("ServerBuilder", builder, port(builder.boundAddress)),
       ("Proto", proto, port(proto.boundAddress))
     )
   }
