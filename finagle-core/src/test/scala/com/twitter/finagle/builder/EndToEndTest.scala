@@ -2,7 +2,7 @@ package com.twitter.finagle.builder
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.integration.{DynamicCluster, StringCodec}
-import com.twitter.finagle.{Service, WriteException, IndividualRequestTimeoutException}
+import com.twitter.finagle.{Service, FailedFastException, IndividualRequestTimeoutException}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Future, Await, CountDownLatch, Promise}
 import java.net.{InetAddress, SocketAddress, InetSocketAddress}
@@ -110,14 +110,19 @@ class EndToEndTest extends FunSuite {
     // generate com.twitter.finagle.IndividualRequestTimeoutException
     intercept[IndividualRequestTimeoutException] { Await.result(client("hi")) }
     Await.ready(server.close())
-    // generate com.twitter.finagle.WriteException$$anon$1
-    intercept[WriteException] { Await.result(client("hi")) }
+    // generate com.twitter.finagle.FailedFastException
+    intercept[FailedFastException] { Await.result(client("hi")) }
 
     val requestFailures = mem.counters(Seq("client", "failures"))
     val serviceCreationFailures =
       mem.counters(Seq("client", "service_creation", "failures"))
+    val automaticRetries =
+      mem.stats(Seq("client", "automatic", "retries"))
 
     assert(requestFailures === 1)
-    assert(serviceCreationFailures === 1)
+
+    // write exception, then failedfastexception
+    assert(serviceCreationFailures === 2)
+    assert(automaticRetries === Seq(0.0f, 1.0f))
   }
 }

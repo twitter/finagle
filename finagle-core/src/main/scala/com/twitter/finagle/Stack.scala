@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import scala.annotation.tailrec
 import scala.collection.mutable
 
 /**
@@ -84,13 +85,30 @@ sealed trait Stack[T] {
   /**
    * Traverse the stack, invoking `fn` on each element.
    */
-  def foreach(fn: Stack[T] => Unit) {
+  @tailrec
+  final def foreach(fn: Stack[T] => Unit): Unit = {
     fn(this)
     this match {
       case Node(_, _, next) => next.foreach(fn)
       case Leaf(_, _) =>
     }
   }
+
+  /**
+   * Traverse the stack, until you find that pred has been evaluated to true.
+   * If `pred` finds an element, return true, otherwise, false.
+   */
+  @tailrec
+  final def exists(pred: Stack[T] => Boolean): Boolean = this match {
+    case _ if pred(this) => true
+    case Node(_, _, next) => next.exists(pred)
+    case Leaf(_, _) => false
+  }
+
+  /**
+   * Returns whether the stack contains a given role or not.
+   */
+  def contains(role: Stack.Role): Boolean = exists(_.head.role == role)
 
   /**
    * Enumerate each well-formed stack contained within this stack.
@@ -302,7 +320,7 @@ object Stack {
    * A convenience class to construct stackable modules. This variant
    * operates over stacks and the entire parameter map. The `ModuleN` variants
    * may be more convenient for most definitions as they operate over `T` types
-   * and the paramater extraction is derived from type parameters.
+   * and the parameter extraction is derived from type parameters.
    *
    * {{{
    * def myNode = new Module[Int=>Int]("myelem") {

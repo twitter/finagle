@@ -419,8 +419,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         // disable failFast if the codec requests it or it is
         // disabled via the ClientBuilder paramater.
         val FailFast(failFast) = prms[FailFast]
-        if (!codec.failFastOk || !failFast) newStack.remove(FailFastFactory.role)
-        else newStack
+        if (!codec.failFastOk || !failFast) newStack.remove(FailFastFactory.role) else newStack
       }
 
       case class Client(

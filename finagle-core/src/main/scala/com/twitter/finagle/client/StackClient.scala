@@ -92,6 +92,7 @@ object StackClient {
     stk.push(StatsFactoryWrapper.module)
     stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
     stk.push(FactoryToService.module)
+    stk.push(RequeueingFilter.module)
     stk.push(Role.protoTracing, identity[ServiceFactory[Req, Rep]](_))
     stk.push(ClientTracingFilter.module)
     // The TraceInitializerFilter must be pushed after most other modules so that
@@ -200,6 +201,7 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
   def newClient(dest: Name, label0: String): ServiceFactory[Req, Rep] = {
     val Stats(stats) = params[Stats]
     val Label(label1) = params[Label]
+
     // For historical reasons, we have two sources for identifying
     // a client. The most recently set `label0` takes precedence.
     val clientLabel = (label0, label1) match {
@@ -225,7 +227,9 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
     ClientRegistry.register(clientLabel, Showable.show(dest), clientStack,
       clientParams + LoadBalancerFactory.Dest(va))
 
-    clientStack.make(clientParams)
+    val finalStack = if (!clientStack.contains(FailFastFactory.role)) clientStack.remove(RequeueingFilter.role) else clientStack
+
+    finalStack.make(clientParams)
   }
 
   override def newService(dest: Name, label: String): Service[Req, Rep] = {
