@@ -13,6 +13,9 @@ Breaking API Changes
   * finagle-core: `c.t.f.Server.serveAndAnnounce` with a `ServiceFactory` had
     its first argument renamed to `name` from `forum`.
 
+  * finagle-core: `c.t.f.builder.ClientConfig.FailFast` has moved to
+    `c.t.f.FailFastFactory.FailFast`.
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -24,6 +27,10 @@ Deprecations
 
 New Features
 ~~~~~~~~~~~~
+
+  * finagle-core: `Fail fast <https://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s>`_
+    is now `configurable <https://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6>`_
+    on Stack-based clients via the `com.twitter.finagle.FailFastFactory.FailFast` param.
 
 Bug Fixes
 ~~~~~~~~~

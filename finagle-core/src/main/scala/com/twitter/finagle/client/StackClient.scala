@@ -13,7 +13,6 @@ import com.twitter.finagle.stats.ClientStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.Showable
-import com.twitter.util.{Future, Var}
 
 object StackClient {
   /**

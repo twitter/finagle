@@ -123,11 +123,29 @@ sealed trait Stack[T] {
    * Produce a new stack representing the concatenation of `this`
    * with `right`. Note that this replaces the terminating element of
    * `this`.
+   *
+   * Alias for [[Stack.++]].
+   */
+  def concat(right: Stack[T]): Stack[T] =
+    this ++ right
+
+  /**
+   * Produce a new stack representing the concatenation of `this`
+   * with `right`. Note that this replaces the terminating element of
+   * `this`.
    */
   def ++(right: Stack[T]): Stack[T] = this match {
     case Node(head, mk, left) => Node(head, mk, left++right)
     case Leaf(_, _) => right
   }
+
+  /**
+   * A copy of this Stack with `stk` prepended.
+   *
+   * An alias for [[Stack.+:]].
+   */
+  def prepend(stk: Stackable[T]): Stack[T] =
+    stk +: this
 
   /**
    * A copy of this Stack with `stk` prepended.
@@ -144,6 +162,10 @@ sealed trait Stack[T] {
   }
 }
 
+/**
+ * @see [[stack.nilStack]] for starting construction of an
+ * empty stack for [[ServiceFactory]]s.
+ */
 object Stack {
   /**
    * Base trait for Stack roles. A stack's role is indicative of its
@@ -427,6 +449,9 @@ object CanStackFrom {
  * StackBuilders are imperative-style builders for Stacks. It
  * maintains a stack onto which new elements can be pushed (defining
  * a new stack).
+ *
+ * @see [[stack.nilStack]] for starting construction of an
+ * empty stack for [[ServiceFactory]]s.
  */
 class StackBuilder[T](init: Stack[T]) {
   def this(role: Stack.Role, end: T) = this(Stack.Leaf(role, end))

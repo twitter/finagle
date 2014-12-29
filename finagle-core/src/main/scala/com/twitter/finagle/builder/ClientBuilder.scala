@@ -7,6 +7,7 @@ import com.twitter.finagle.factory.{BindingFactory, TimeoutFactory}
 import com.twitter.finagle.filter.ExceptionSourceFilter
 import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, WeightedLoadBalancerFactory}
 import com.twitter.finagle.netty3.Netty3Transporter
+import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service._
 import com.twitter.finagle.ssl.Ssl
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver, RollupStatsReceiver}
@@ -93,11 +94,6 @@ object ClientConfig {
   @deprecated("Please use `FailureAccrualFactory.Param` instead", "6.22.1")
   implicit object FailureAccrualFac extends Stack.Param[FailureAccrualFac] {
     val default = FailureAccrualFac(Function.const(ServiceFactoryWrapper.identity)_)
-  }
-
-  case class FailFast(onOrOff: Boolean)
-  implicit object FailFast extends Stack.Param[FailFast] {
-    val default = FailFast(true)
   }
 
   case class MonitorFactory(mFactory: String => com.twitter.util.Monitor)
