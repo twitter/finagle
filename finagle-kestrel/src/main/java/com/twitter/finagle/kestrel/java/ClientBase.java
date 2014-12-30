@@ -91,7 +91,7 @@ public class ClientBase extends com.twitter.finagle.kestrel.java.Client {
           try {
             return JavaConversions.asScalaIterator(backoffsFinal.call()).toStream();
           } catch (Exception e) {
-            return Stream.<Duration>empty();
+            return (Stream<Duration>) Stream.<Duration>empty();
           }
         }
     };
