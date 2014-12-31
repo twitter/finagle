@@ -1,7 +1,6 @@
 package com.twitter.finagle.exception
 
 import com.twitter.util._
-import com.twitter.finagle.core.util.InetAddressUtil
 import com.twitter.finagle.util.LoadedReporterFactory
 import java.net.{InetAddress, InetSocketAddress}
 import com.twitter.finagle.exception.thriftscala.{ResultCode, LogEntry, Scribe}
@@ -47,7 +46,7 @@ class ClientReporterTest extends FunSuite with MockitoSugar {
   val reporter = Reporter(logger, "service16").withClient()
 
   val tse = new TestServiceException("service16", "my cool message",
-    clientAddress = Some(InetAddressUtil.Loopback.getHostAddress))
+    clientAddress = Some(InetAddress.getLoopbackAddress.getHostAddress))
 
   test("log entries to a client once upon receive") {
     reporter.handle(tse.throwable)
@@ -75,7 +74,7 @@ class SourceClientReporterTest extends FunSuite with MockitoSugar {
     .withClient()
 
   val tse = new TestServiceException("service16", "my cool message",
-    clientAddress = Some(InetAddressUtil.Loopback.getHostAddress), sourceAddress = Some(socket.getAddress.getHostName))
+    clientAddress = Some(InetAddress.getLoopbackAddress.getHostAddress), sourceAddress = Some(socket.getAddress.getHostName))
 
   test("log entries to a client once upon receive") {
     reporter.handle(tse.throwable)

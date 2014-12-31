@@ -2,7 +2,8 @@ package com.twitter.finagle.httpx.codec
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.{ChannelClosedException, Service, Status}
-import com.twitter.finagle.httpx.{BadHttpRequest, Request, Response}
+import com.twitter.finagle.httpx
+import com.twitter.finagle.httpx.{BadHttpRequest, Request, Response, Version}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.io.{Reader, Buf}
@@ -23,6 +24,16 @@ class HttpServerDispatcherTest extends FunSuite {
     Await.ready(trans.write(chunk))
     val c = Await.result(f).asInstanceOf[HttpChunk]
     assert(c.getContent === chunk.getContent)
+  }
+
+  test("invalid message") {
+    val (in, out) = mkPair[Any, Any]
+    val service = Service.mk { req: Request => Future.value(Response()) }
+    val disp = new HttpServerDispatcher(out, service)
+
+    in.write("invalid")
+    Await.ready(out.onClose)
+    assert(out.status === Status.Closed)
   }
 
   test("bad request") {
@@ -94,12 +105,6 @@ object HttpServerDispatcherTest {
   def buf(msg: String) = ChannelBufferBuf.Owned(wrap(msg))
   def chunk(msg: String) = new DefaultHttpChunk(wrap(msg))
 
-  def ok(readerIn: Reader): Future[Response] = {
-    val res = new Response {
-      final val httpResponse = Response().httpResponse
-      override val reader = readerIn
-    }
-    res.setChunked(true)
-    Future.value(res)
-  }
+  def ok(reader: Reader): Future[Response] =
+    Future.value(Response(Version.Http11, httpx.Status.Ok, reader))
 }

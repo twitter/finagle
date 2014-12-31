@@ -2,7 +2,7 @@ junit_tests(name='scala',
   dependencies=[
     '3rdparty:junit',
     '3rdparty:netty',
-    '3rdparty:specs',
+    '3rdparty:scalatest',
     'finagle/finagle-core',
     'finagle/finagle-redis',
     'util/util-core'

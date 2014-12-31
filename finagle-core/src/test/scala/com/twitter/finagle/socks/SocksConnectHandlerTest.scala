@@ -1,6 +1,5 @@
 package com.twitter.finagle.socks
 
-import com.twitter.util._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
@@ -26,7 +25,7 @@ class SocksConnectHandlerTest extends FunSuite with MockitoSugar {
     when(channel.getPipeline) thenReturn pipeline
     val closeFuture = Channels.future(channel)
     when(channel.getCloseFuture) thenReturn closeFuture
-    val port = RandomSocket.nextPort()
+    val port = 80 // never bound
     val portByte1 = (port >> 8).toByte
     val portByte2 = (port & 0xFF).toByte
 

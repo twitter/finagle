@@ -2,7 +2,6 @@ package com.twitter.finagle
 
 import com.twitter.finagle.client._
 import com.twitter.finagle.factory.BindingFactory
-import com.twitter.finagle.mux.lease.Acting
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.pool.SingletonPool
@@ -51,7 +50,6 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
   object Client {
     val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackClient.newStack
       .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response])
-      .replace(StackClient.Role.prepConn, mux.lease.LeasedFactory.module[mux.Request, mux.Response])
       .replace(StackClient.Role.protoTracing, new ClientProtoTracing)
       .replace(BindingFactory.role, MuxBindingFactory)
   }
@@ -72,7 +70,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       Netty3Transporter(mux.PipelineFactory, params)
     override protected def newDispatcher(
       transport: Transport[CB, CB]
-    ): Service[mux.Request, mux.Response] with Acting = {
+    ): Service[mux.Request, mux.Response] = {
       val param.Stats(sr) = params[param.Stats]
       val param.Label(name) = params[param.Label]
       new mux.ClientDispatcher(name, transport, sr)

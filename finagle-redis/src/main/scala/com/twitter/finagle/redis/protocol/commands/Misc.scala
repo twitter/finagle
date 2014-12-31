@@ -5,6 +5,11 @@ import com.twitter.finagle.redis.protocol.Commands.trimList
 import com.twitter.finagle.redis.util._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
+case object FlushAll extends Command {
+  def command = Commands.FLUSHALL
+  val toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.FLUSHALL))
+}
+
 case object FlushDB extends Command {
   def command = Commands.FLUSHDB
   val toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.FLUSHDB))

@@ -69,7 +69,7 @@ class ServerChannelConfigurationTest extends FunSuite {
 
     val client: Service[String, String] = ClientBuilder()
       .codec(ServerChannelConfigCodec)
-      .hosts(server.localAddress)
+      .hosts(server.boundAddress)
       .hostConnectionLimit(1)
       .build()
 
@@ -93,7 +93,7 @@ class ServerChannelConfigurationTest extends FunSuite {
 
     val client: Service[String, String] = ClientBuilder()
       .codec(ServerChannelConfigCodec)
-      .hosts(server.localAddress)
+      .hosts(server.boundAddress)
       .hostConnectionLimit(1)
       .build()
 

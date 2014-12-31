@@ -10,7 +10,7 @@ object Finagle extends Build {
   val zkVersion = "3.3.4"
   val utilVersion = "6.23.0"
   val ostrichVersion = "9.7.0"
-  val nettyLib = "io.netty" % "netty" % "3.9.4.Final"
+  val nettyLib = "io.netty" % "netty" % "3.10.0.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   // The following won't be necessary once we've upgraded internally to 2.4.
   def jacksonVersion(scalaVersion: String) =
@@ -153,31 +153,32 @@ object Finagle extends Build {
     base = file("."),
     settings = Project.defaultSettings ++
       sharedSettings ++
-      Unidoc.settings ++ Seq(
-        Unidoc.unidocExclude := Seq(finagleExample.id)
+      Unidoc.settings ++ Seq( 
+        // NB: KestrelX defines thrift structs which collide with Kestrel.
+        // We can remove this exception after the -x modules are deleted
+        // post netty4 migration.
+        Unidoc.unidocExclude := Seq(finagleExample.id, finagleKestrelX.id) 
       )
   ) aggregate(
     // Core, support.
     finagleCore, finagleTest, finagleStats,
     finagleZipkin, finagleServersets,
     finagleException, finagleCommonsStats,
-    finagleExp, finagleMdns, finagleTesters,
+    finagleExp, finagleMdns, finagleTesters, finagleOstrich4,
 
     // Protocols
     finagleHttp, finagleHttpX, finagleHttpXCompat, finagleStream, finagleNative,
     finagleThrift, finagleMemcached, finagleMemcachedX, finagleKestrel,
     finagleKestrelX, finagleMux, finagleThriftMux, finagleMySQL,
-    finagleSpdy
+    finagleSpdy, finagleRedis,
 
     // Use and integration
+    finagleStress
     // removing benchmark because swift can't build outside of twitter for now
     // finagleBenchmark
 
-    // Removing projects that depend on Ostrich
-    // finagleOstrich4, finagleStress, finagleExample
-
-    // Removing projects with specs tests
-    // finagleRedis
+    // Removing projects with specs tests and their dependencies
+    // finagleExample
   )
 
   lazy val finagleTest = Project(
@@ -208,7 +209,6 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-ostrich4",
-    crossScalaVersions ~= { versions => versions filter (_ != "2.11.4") },
     libraryDependencies ++= Seq(ostrichLib)
   ).dependsOn(finagleCore, finagleHttp)
 
@@ -439,17 +439,9 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-redis",
-    crossScalaVersions ~= { versions => versions filter (_ != "2.11.4") },
     libraryDependencies ++= Seq(
-      util("logging"),
-      "org.scala-tools.testing" %% "specs" % "1.6.9" % "test"
-    ),
-    testOptions in Test := Seq(Tests.Filter {
-      case "com.twitter.finagle.redis.integration.ClientSpec" => false
-      case "com.twitter.finagle.redis.integration.BtreeClientSpec" => false
-      case "com.twitter.finagle.redis.integration.ClientServerIntegrationSpec" => false
-      case _ => true
-    })
+      util("logging")
+    )
   ).dependsOn(finagleCore)
 
   lazy val finagleMux = Project(
@@ -507,7 +499,6 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-stress",
-    crossScalaVersions ~= { versions => versions filter (_ != "2.11.4") },
     libraryDependencies ++= Seq(ostrichLib, util("logging")) ++ thriftLibs,
     libraryDependencies += "com.google.caliper" % "caliper" % "0.5-rc1"
   ).dependsOn(finagleCore, finagleOstrich4, finagleThrift, finagleHttp, finagleThriftMux)
@@ -549,7 +540,6 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-benchmark",
-    crossScalaVersions ~= { versions => versions filter (_ != "2.11.4") },
     // include again when we can properly depend on finagleSwift
     excludeFilter in Compile := "ThriftDispatch.scala",
     libraryDependencies ++= Seq(

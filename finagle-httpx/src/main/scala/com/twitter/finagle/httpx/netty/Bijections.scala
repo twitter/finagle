@@ -97,9 +97,7 @@ object Bijections {
   // Response
 
   implicit val responseFromNetty = new Injection[HttpResponse, Response] {
-    def apply(r: HttpResponse): Response = new Response {
-      val httpResponse = r
-    }
+    def apply(r: HttpResponse): Response = Response(r)
   }
 
   implicit val responseToNetty = new Injection[Response, HttpResponse] {

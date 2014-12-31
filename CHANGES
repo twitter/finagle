@@ -8,14 +8,35 @@
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-http: deprecated methods in `c.t.f.http.HttpMessageProxy` have been removed.
+  * finagle-core: `c.t.f.builder.Server` now implements `c.t.f.ListeningServer`.
+  * finagle-core: `c.t.f.Server.serveAndAnnounce` with a `ServiceFactory` had
+    its first argument renamed to `name` from `forum`.
+
+  * finagle-core: `c.t.f.builder.ClientConfig.FailFast` has moved to
+    `c.t.f.FailFastFactory.FailFast`.
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Deprecations
 ~~~~~~~~~~~~
 
+  * finagle-core: `c.t.f.builder.Server.localAddress` is deprecated in favor of
+    `c.t.f.ListeningServer.boundAddress`.
+
 New Features
 ~~~~~~~~~~~~
+
+  * finagle-core: `Fail fast <https://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s>`_
+    is now `configurable <https://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6>`_
+    on Stack-based clients via the `com.twitter.finagle.FailFastFactory.FailFast` param.
+
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-core: `c.t.f.Server.serveAndAnnounce` for a `Service` had its usage
+    of `name` and `addr` transposed.
 
 
 6.24.0
@@ -38,6 +59,9 @@ Breaking API Changes
     added to `c.t.f.http.codec.HttpServerDispatcher`. In addition,
     the codecError in `c.t.f.http.BadHttpRequest` has been replaced
     with the exception thrown by the HttpServerCodec.
+
+  * finagle-httpx: Remove deprecated code, limited scope of access on internal
+    classes.
 
   * finagle-mux: `c.t.f.mux.lease.exp.WindowedByteCounter` no longer
     calls `Thread.start()` in its constructor. This should be now be
@@ -116,7 +140,6 @@ Breaking API Changes
           // Try to marshal 'body' into a trace id.
         }
       }
-
 
 
 Runtime Behavior Changes

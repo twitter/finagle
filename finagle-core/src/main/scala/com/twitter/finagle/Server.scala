@@ -121,15 +121,15 @@ trait Server[Req, Rep] {
     serve(addr, ServiceFactory.const(service))
 
   /** $serveAndAnnounce */
-  def serveAndAnnounce(forum: String, addr: String, service: ServiceFactory[Req, Rep]): ListeningServer = {
+  def serveAndAnnounce(name: String, addr: String, service: ServiceFactory[Req, Rep]): ListeningServer = {
     val server = serve(addr, service)
-    server.announce(forum)
+    server.announce(name)
     server
   }
 
   /** $serveAndAnnounce */
   def serveAndAnnounce(name: String, addr: String, service: Service[Req, Rep]): ListeningServer =
-    serveAndAnnounce(addr, name, ServiceFactory.const(service))
+    serveAndAnnounce(name, addr, ServiceFactory.const(service))
 
   /** $serveAndAnnounce */
   def serveAndAnnounce(name: String, service: ServiceFactory[Req, Rep]): ListeningServer =

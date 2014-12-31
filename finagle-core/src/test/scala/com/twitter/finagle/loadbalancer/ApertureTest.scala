@@ -52,10 +52,10 @@ private trait ApertureTesting {
       })
     }
     
-    var available = true
+    @volatile var _status: Status = Status.Open
     
-    override def isAvailable = available
-    def isAvailable_=(v: Boolean) { available = v }
+    override def status = _status
+    def status_=(v: Status) { _status = v }
     
     def close(deadline: Time) = ???
   }
@@ -138,7 +138,7 @@ private class ApertureTest extends FunSuite with ApertureTesting {
     // *Ok, technically we can, since we're using deterministic
     // randomness.
     val keys2 = counts.nonzero
-    counts(keys2.head).isAvailable = false
+    counts(keys2.head).status = Status.Closed
 
     bal.applyn(100)
     assert(counts.aperture === 3)
@@ -146,7 +146,7 @@ private class ApertureTest extends FunSuite with ApertureTesting {
     assert(keys2.forall(counts.nonzero.contains))
     
     // When we shrink again, we should use the same keyset.
-    counts(keys2.head).isAvailable = true
+    counts(keys2.head).status = Status.Open
     counts.clear()
     bal.applyn(100)
     assert(counts.nonzero === keys2)
@@ -186,14 +186,14 @@ private class ApertureTest extends FunSuite with ApertureTesting {
     
     bal.update(counts.range(10))
     for (f <- counts) 
-      f.isAvailable = false
+      f.status = Status.Closed
 
     bal.applyn(1000)
     // The correctness of this behavior could be argued either way.
     assert(counts.aperture === 1)
     val Seq(badkey) = counts.nonzero.toSeq
     val goodkey = (badkey + 1) % 10
-    counts(goodkey).isAvailable = true
+    counts(goodkey).status = Status.Open
     
     counts.clear()
     bal.applyn(1000)

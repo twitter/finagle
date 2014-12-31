@@ -206,9 +206,8 @@ object ThriftMux
     ) = copy(stack, params)
 
     protected def newListener(): Listener[CB, CB] = {
-      val Label(label) = params[Label]
       val Stats(sr) = params[Stats]
-      val scoped = sr.scope(label).scope("thriftmux")
+      val scoped = sr.scope("thriftmux")
       val Thrift.param.ProtocolFactory(pf) = params[Thrift.param.ProtocolFactory]
 
       // Create a Listener that maintains gauges of how many ThriftMux and non-Mux

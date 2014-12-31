@@ -87,7 +87,7 @@ Old APIs:
 
 ::
 
-	val client = ClientBuilder
+	val client = ClientBuilder()
 	  .codec(Http)
 	  .hosts("localhost:10000,localhost:10001,localhost:10003")
 	  .hostConnectionLimit(1)
@@ -115,7 +115,7 @@ For application requirements, you can use a service normally and then use
 
 ::
 
-	val get: Future[HttpResponse] = Http.fetchUrl("https://twitter.com/")
+	val get: Future[HttpResponse] = Http.fetchUrl("http://twitter.com/")
 	get.raiseWithin(1.ms)
 
 We found that having all of the extremely granular timeouts was making it harder

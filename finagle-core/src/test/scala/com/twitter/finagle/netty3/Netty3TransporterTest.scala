@@ -2,8 +2,10 @@ package com.twitter.finagle.netty3
 
 import com.twitter.finagle.socks.SocksConnectHandler
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
+import com.twitter.util.Duration
 import java.net.InetSocketAddress
 import org.jboss.netty.channel.{Channels, ChannelPipeline, ChannelPipelineFactory}
+import org.jboss.netty.handler.timeout.IdleStateHandler
 import org.junit.runner.RunWith
 import org.scalatest.FunSpec
 import org.scalatest.junit.JUnitRunner
@@ -12,6 +14,43 @@ import scala.collection.JavaConverters._
 @RunWith(classOf[JUnitRunner])
 class Netty3TransporterTest extends FunSpec {
   describe("Netty3Transporter") {
+
+    it("newPipeline handles unresolved InetSocketAddresses") {
+      val pipeline = Channels.pipeline()
+      val pipelineFactory = new ChannelPipelineFactory {
+        override def getPipeline(): ChannelPipeline = pipeline
+      }
+
+      val transporter = new Netty3Transporter[Int, Int](
+        "name",
+        pipelineFactory,
+        socksProxy = Some(InetSocketAddress.createUnresolved("anAddr", 0))
+      )
+
+      val unresolved = InetSocketAddress.createUnresolved("supdog", 0)
+      val pl = transporter.newPipeline(unresolved, NullStatsReceiver)
+      assert(pl === pipeline) // mainly just checking that we don't NPE anymore
+    }
+
+    it("newPipeline doesn't create IdleStateHandler unnecessarily") {
+      val pipeline = Channels.pipeline()
+      val pipelineFactory = new ChannelPipelineFactory {
+        override def getPipeline(): ChannelPipeline = pipeline
+      }
+
+      val transporter = new Netty3Transporter[Int, Int](
+        "name",
+        pipelineFactory,
+        channelReaderTimeout = Duration.Bottom,
+        channelWriterTimeout = Duration.Bottom
+      )
+      val pl = transporter.newPipeline(new InetSocketAddress(0), NullStatsReceiver)
+      val idleHandlerFound = pl.toMap.asScala.values.exists {
+        case _: IdleStateHandler => true
+        case _ => false
+      }
+      assert(!idleHandlerFound)
+    }
 
     it("should track connections with channelStatsHandler on different connections") {
       val sr = new InMemoryStatsReceiver

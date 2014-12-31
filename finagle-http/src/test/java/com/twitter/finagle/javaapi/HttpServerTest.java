@@ -15,7 +15,10 @@ import com.twitter.finagle.builder.ServerBuilder;
 import com.twitter.finagle.http.Http;
 import com.twitter.util.Future;
 
-public class HttpServerTest {
+public final class HttpServerTest {
+
+  private HttpServerTest() { }
+
   private static void runServer() {
     Service<HttpRequest, HttpResponse> service =
       new Service<HttpRequest, HttpResponse>() {
@@ -38,13 +41,7 @@ public class HttpServerTest {
       .name("HttpServer"));
   }
 
-  public static void main(String args[]) {
-    try {
-      runServer();
-    } catch (Throwable e) {
-      System.err.println("Caught top level exception: " + e);
-      e.printStackTrace();
-      System.exit(-1);
-    }
+  public static void main(String[] args) {
+    runServer();
   }
 }

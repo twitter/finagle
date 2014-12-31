@@ -123,13 +123,6 @@ object RequestBuilder {
     builder.buildPut(content)(RequestEvidence.FullyConfigured)
 
   /**
-   * Provides a typesafe `buildPut` for Java.
-   */
-  @deprecated("Typo, use safeBuildPut instead", "5.3.7")
-  def safeBuidlPut(builder: Complete, content: Buf): Request =
-    safeBuildPut(builder, content)
-
-  /**
    * Provides a typesafe `buildPost` for Java.
    */
   def safeBuildPost(builder: Complete, content: Buf): Request =
@@ -411,8 +404,13 @@ class RequestBuilder[HasUrl, HasForm] private[httpx](
     }
   }
 
-  private[httpx] def withoutContent(method: Method): Request =
-    Request(method, resource, config.version, config.headers)
+  private[httpx] def withoutContent(method: Method): Request = {
+    val req = Request(config.version, method, resource)
+    config.headers foreach { case (field, values) =>
+      values foreach { v => req.headers.add(field, v) }
+    }
+    req
+  }
 
   private[httpx] def withContent(method: Method, content: Buf): Request = {
     require(content != null)

@@ -15,7 +15,8 @@ import com.twitter.util.Future;
 import com.twitter.util.Time;
 
 public class ClientBase extends Client {
-  com.twitter.finagle.memcachedx.Client underlying;
+
+  protected com.twitter.finagle.memcachedx.Client underlying;
 
   public ClientBase(com.twitter.finagle.memcachedx.Client underlying) {
     this.underlying = underlying;
@@ -26,7 +27,7 @@ public class ClientBase extends Client {
     return result.map(new Function<Option<Buf>, Buf>() {
       public Buf apply(Option<Buf> value) {
         if (value.isDefined()) {
-          return (Buf)value.get();
+          return value.get();
         } else {
           return null;
         }
@@ -50,11 +51,13 @@ public class ClientBase extends Client {
   public Future<Map<String, Buf>> get(List<String> keys) {
     Future<scala.collection.immutable.Map<String, Buf>> result =
       underlying.get(JavaConversions.asScalaBuffer(keys));
-    return result.map(new Function<scala.collection.immutable.Map<String, Buf>, Map<String, Buf>>() {
-      public Map<String, Buf> apply(scala.collection.immutable.Map<String, Buf> underlying) {
-        return JavaConversions.mapAsJavaMap(underlying);
+    return result.map(
+      new Function<scala.collection.immutable.Map<String, Buf>, Map<String, Buf>>() {
+        public Map<String, Buf> apply(scala.collection.immutable.Map<String, Buf> map) {
+          return JavaConversions.mapAsJavaMap(map);
+        }
       }
-    });
+    );
   }
 
   public Future<Map<String, ResultWithCAS>> gets(List<String> keys) {
@@ -64,14 +67,13 @@ public class ClientBase extends Client {
       scala.collection.immutable.Map<String, Tuple2<Buf, Buf>>,
       Map<String, ResultWithCAS>>() {
       public Map<String, ResultWithCAS> apply(
-        scala.collection.immutable.Map<String, Tuple2<Buf, Buf>> underlying)
-      {
+        scala.collection.immutable.Map<String, Tuple2<Buf, Buf>> map) {
         return JavaConversions.mapAsJavaMap(
-          underlying.mapValues(new Function<Tuple2<Buf, Buf>, ResultWithCAS>() {
-            public ResultWithCAS apply(Tuple2<Buf, Buf> tuple) {
-              return new ResultWithCAS(tuple._1(), tuple._2());
-            }
-          })
+            map.mapValues(new Function<Tuple2<Buf, Buf>, ResultWithCAS>() {
+              public ResultWithCAS apply(Tuple2<Buf, Buf> tuple) {
+                return new ResultWithCAS(tuple._1(), tuple._2());
+              }
+            })
         );
       }
     });

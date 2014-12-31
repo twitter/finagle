@@ -8,8 +8,8 @@ object MaskCancelFilter {
 
   // TODO: we should simply transform the stack for boolean
   // stackables like this.
-  private[finagle] case class Param(yesOrNo: Boolean)
-  private[finagle] implicit object Param extends Stack.Param[Param] {
+  case class Param(yesOrNo: Boolean)
+  implicit object Param extends Stack.Param[Param] {
     val default = Param(false)
   }
 

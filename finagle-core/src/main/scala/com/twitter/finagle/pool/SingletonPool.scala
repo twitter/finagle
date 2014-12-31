@@ -158,12 +158,26 @@ extends ServiceFactory[Req, Rep] {
   /**
    * @inheritdoc
    *
-   * A SingletonPool is available when it is not closed and the underlying
-   * factory is also available.
+   * The status of a [[SingletonPool]] is the worse of the 
+   * the underlying status and the status of the currently
+   * cached service, if any.
    */
-  override def status: Status = 
-    if (state.get != Closed) underlying.status
-    else Status.Closed
+  override def status: Status =
+    state.get match {
+      case Closed => Status.Closed
+      case Open(svc) =>
+        // We don't account for closed services as these will
+        // be reestablished on the next request.
+        svc.status match {
+          case Status.Closed => underlying.status
+          case status => Status.worst(status, underlying.status)
+        }
+      case Idle | Awaiting(_) =>
+        // This could also be Status.worst(underlying.status, Status.Busy(p));
+        // in practice this probably won't make much of a difference, though,
+        // since pending requests are anyway queued.
+        underlying.status
+    }
 
   /**
    * @inheritdoc

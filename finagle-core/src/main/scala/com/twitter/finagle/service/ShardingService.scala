@@ -28,6 +28,7 @@ class ShardingService[Req, Rep](
   def apply(request: Req): Future[Rep] = {
     hash(request) map { hash =>
         val shard = distributor.nodeForHash(hash)
+        // TODO: a sharding service may consider fine-grained statuses.
         if (shard.status != Status.Closed)
           shard(request)
         else

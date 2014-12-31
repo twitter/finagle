@@ -8,6 +8,7 @@ import org.jboss.netty.handler.codec.http.{HttpContentCompressor, HttpHeaders, H
  * Custom compressor that only handles text-like content-types with the default
  * compression level.
  */
+private[httpx]
 class TextualContentCompressor extends HttpContentCompressor {
   import TextualContentCompressor._
 
@@ -34,8 +35,8 @@ class TextualContentCompressor extends HttpContentCompressor {
   }
 }
 
-object TextualContentCompressor {
-  private[codec] val TextLike = Set(
+private object TextualContentCompressor {
+  val TextLike = Set(
     "image/svg+xml",
     "application/atom+xml",
     "application/javascript",
