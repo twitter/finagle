@@ -152,7 +152,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
       dist.vector.count(n => n.status == Status.Open)
     },
     statsReceiver.addGauge("busy") {
-      dist.vector.count(n => Status.isBusy(n.status))
+      dist.vector.count(n => n.status == Status.Busy)
     },
     statsReceiver.addGauge("closed") {
       dist.vector.count(n => n.status == Status.Closed)

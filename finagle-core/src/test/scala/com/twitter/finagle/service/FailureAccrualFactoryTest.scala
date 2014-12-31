@@ -116,13 +116,11 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         Await.result(service(123))
       }
       
-      val Status.Busy(until) = factory.status
-      assert(!until.isDone)
-      
+      assert(factory.status == Status.Busy)
+
       tc.advance(10.seconds)
       timer.tick()
       
-      assert(until.isDone)
       assert(factory.status === Status.Open)
     }
   }
@@ -227,10 +225,9 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     // This propagates to the service as well.
     assert(!service.isAvailable)
     
-    val busy = Status.Busy(Future.never)
-    when(underlying.status) thenReturn busy
+    when(underlying.status) thenReturn Status.Busy
 
-    assert(service.status === busy)
+    assert(service.status === Status.Busy)
   }
 
   class BrokenFactoryHelper {

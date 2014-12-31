@@ -79,23 +79,6 @@ private object ClientDispatcher {
     def remaining: Duration = end.sinceNow
     def expired: Boolean = end < Time.now
   }
-
-  /**
-   * A latch is a weak, asynchronous, level-triggered condition
-   * variable. It does not enforce a locking regime, so users must be
-   * extra careful to flip() only under lock.
-   */
-  class Latch {
-    @volatile private[this] var p = new Promise[Unit]
-
-    def get: Future[Unit] = p
-
-    def flip(): Unit = {
-      val oldp = p
-      p = new Promise[Unit]
-      oldp.setDone()
-    }
-  }
 }
 
 /**
@@ -112,15 +95,12 @@ private[finagle] class ClientDispatcher (
   private[this] implicit val timer = DefaultTimer.twitter
   
   // Maintain the dispatcher's state, whose access is mediated
-  // by the readLk and writeLk. The condition variable latch
-  // is used to signal writes to the state variable. Note that 
-  // latch.flip() should only be called with writeLk held.
+  // by the readLk and writeLk. 
   @volatile private[this] var state: State = Dispatching
   private[this] val (readLk, writeLk) = {
     val lk = new ReentrantReadWriteLock
     (lk.readLock, lk.writeLock)
   }
-  private[this] val latch = new Latch
 
   @volatile private[this] var canDispatch: Cap.State = Cap.Unknown
 
@@ -157,7 +137,6 @@ private[finagle] class ClientDispatcher (
 
           writeLk.lock()
           state = Drained
-          latch.flip()
           writeLk.unlock()
         } else {
           readLk.unlock()
@@ -206,7 +185,6 @@ private[finagle] class ClientDispatcher (
           Drained
         }
 
-        latch.flip()
         trans.write(encode(Rdrain(tag)))
       } finally {
         writeLk.unlock()
@@ -221,7 +199,6 @@ private[finagle] class ClientDispatcher (
             state = Leasing(Time.now + millis.milliseconds)
             log.fine(s"leased for ${millis.milliseconds} to ${trans.remoteAddress}")
             leaseCounter.incr()
-            latch.flip()
          case Drained | Draining =>
            // Ignore the lease if we're in the process of draining, since
            // these are anyway irrecoverable states.
@@ -334,13 +311,14 @@ private[finagle] class ClientDispatcher (
 
   override def status: Status = 
     trans.status match {
-      case s@(Status.Closed | Status.Busy(_)) => s
+      case Status.Closed => Status.Closed
+      case Status.Busy => Status.Busy
       case Status.Open =>
         readLk.lock()
         val s = state match {
-          case Draining => Status.Busy(latch.get)
+          case Draining => Status.Busy
           case Drained => Status.Closed
-          case leased@Leasing(_) if leased.expired => Status.Busy(latch.get)
+          case leased@Leasing(_) if leased.expired => Status.Busy
           case Leasing(_) | Dispatching => Status.Open
         }
         readLk.unlock()

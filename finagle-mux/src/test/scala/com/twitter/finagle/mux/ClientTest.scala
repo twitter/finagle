@@ -48,12 +48,9 @@ class ClientTest extends FunSuite {
       assert(client.status === Status.Open)
       issue(1.millisecond)
       ctl.advance(2.milliseconds)
-      assert(Status.isBusy(client.status))
-      val Status.Busy(until) = client.status
-      assert(!until.isDefined)
+      assert(client.status == Status.Busy)
       assert(transport.status == Status.Open)
       issue(Tlease.MaxLease)
-      assert(until.poll === Some(Return.Unit))
       assert(client.status === Status.Open)
     }
   }
@@ -86,7 +83,7 @@ class ClientTest extends FunSuite {
       val Some(Return(rdrain)) = drained.poll
       val Rdrain(newTag) = Message.decode(rdrain)
 
-      val Status.Busy(doneBusy) = client.client.status
+      assert(client.client.status == Status.Busy)
       assert(newTag === tag + 1)
 
       client.respond(encode(RdispatchOk(tag, contexts,
@@ -127,7 +124,7 @@ class ClientTest extends FunSuite {
       val Rdrain(newTag) = Message.decode(rdrain)
 
       assert(newTag === tag + 1)
-      assert(Status.isBusy(client.client.status))
+      assert(client.client.status == Status.Busy)
     }
   }
 

@@ -1,5 +1,7 @@
 package com.twitter.finagle
 
+import com.twitter.conversions.time._
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Await, Future}
 import scala.math.Ordering
 
@@ -23,46 +25,27 @@ sealed trait Status
  * (An [[scala.math.Ordering]] is defined in these terms.)
  */
 object Status {
+  private implicit val timer = DefaultTimer.twitter
+
   class ClosedException extends Exception("Status was Closed; expected Open")
 
   implicit val StatusOrdering: Ordering[Status] = Ordering.by({
     case Open => 3
-    case Busy(_) => 2
+    case Busy => 2
     case Closed => 1
   })
-
-  /**
-   * A predicate indicating whether the given [[Status]]
-   * is [[Busy]].
-   */
-  def isBusy(status: Status) = status match {
-    case Busy(_) => true
-    case Open|Closed => false
-  }
 
   /**
    * A composite status indicating the least healthy of the two.
    */
   def worst(left: Status, right: Status): Status =
-    if (isBusy(left) && isBusy(right)) {
-      val Busy(f1) = left
-      val Busy(f2) = right
-      Busy(f1.join(f2).unit)
-    } else {
-      StatusOrdering.min(left, right)
-    }
+    StatusOrdering.min(left, right)
 
   /**
    * A composite status indicating the most healthy of the two.   
    */
   def best(left: Status, right: Status): Status =
-    if (isBusy(left) && isBusy(right)) {
-      val Busy(f1) = left
-      val Busy(f2) = right
-      Busy(f1.or(f2))
-    } else {
-      StatusOrdering.max(left, right)
-    }
+    StatusOrdering.max(left, right)
 
   /**
    * The status representing the worst of the given statuses
@@ -83,13 +66,19 @@ object Status {
    * when the status returned by `get` is [[Open]]. It returns
    * an exceptional [[com.twitter.util.Future]] should it be
    * [[Closed]].
+   *
+   * `whenOpen` polls the underlying status, using 
+   * exponential backoffs from 1ms to around 1s.
    */
-  def whenOpen(get: => Status): Future[Unit] = 
-    get match {
+  def whenOpen(get: => Status): Future[Unit] = {
+    def go(n: Int): Future[Unit] = get match {
       case Open => Future.Done
-      case Busy(p) => p before whenOpen(get)
       case Closed => Future.exception(new ClosedException)
+      case Busy => Future.sleep((1<<n).milliseconds) before go(math.min(n+1, 10))
     }
+
+    go(0)
+  }
   
   /**
    * A blocking version of [[whenOpen]]; this method returns 
@@ -111,12 +100,9 @@ object Status {
   /**
    * A busy [[Service]] or [[ServiceFactory]] is transiently
    * unavailable. A Busy [[Service]] or [[ServiceFactory]] can be
-   * used, but may not provide service immediately. Busy carries a
-   * [[com.twitter.util.Future]] that is used as a hint for when the
-   * [[Service]] or [[ServiceFactory]] changes state. Note that a status
-   * may transition from Busy to Busy.
+   * used, but may not provide service immediately. 
    */
-  case class Busy(until: Future[Unit]) extends Status
+  case object Busy extends Status
 
   /**
    * The [[Service]] or [[ServiceFactory]] is closed. It will never

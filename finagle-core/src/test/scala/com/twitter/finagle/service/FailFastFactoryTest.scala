@@ -98,13 +98,11 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
       
       assert(failfast.status === Status.Open)
       p() = Throw(new Exception)
-      val Status.Busy(done) = failfast.status
-      assert(!done.isDone)
+      assert(failfast.status == Status.Busy)
       
       tc.set(timer.tasks(0).when)
       when(underlying()).thenReturn(Future.value(service))
       timer.tick()
-      assert(done.isDone)
       assert(failfast.status === Status.Open)
     }
   }

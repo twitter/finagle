@@ -47,9 +47,7 @@ object FailureAccrualFactory {
 
   private sealed trait State
   private case object Alive extends State
-  private case class Dead(until: Promise[Unit]) extends State {
-    val status = Status.Busy(until)
-  }
+  private case object Dead extends State
 }
 
 /**
@@ -86,10 +84,10 @@ class FailureAccrualFactory[Req, Rep](
 
   protected def markDead() = synchronized {
     state match {
-      case Dead(_) =>
+      case Dead =>
       case Alive =>
         removalCounter.incr()
-        state = Dead(new Promise[Unit])
+        state = Dead
         val timerTask = timer.schedule(markDeadFor.fromNow) { revive() }
         reviveTimerTask = Some(timerTask)
     }
@@ -98,9 +96,8 @@ class FailureAccrualFactory[Req, Rep](
   protected def revive() = synchronized {
     state match {
       case Alive =>
-      case Dead(until) =>
+      case Dead =>
         state = Alive
-        until.setDone()
         revivalCounter.incr()
     }
     reviveTimerTask foreach { _.cancel() }
@@ -128,7 +125,7 @@ class FailureAccrualFactory[Req, Rep](
   
   override def status = state match {
     case Alive => underlying.status
-    case dead@Dead(_) => dead.status
+    case Dead => Status.Busy
   }
 
   def close(deadline: Time) = underlying.close(deadline) ensure {

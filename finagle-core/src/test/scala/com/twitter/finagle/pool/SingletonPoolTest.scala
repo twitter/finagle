@@ -258,22 +258,14 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
 
     val s = Await.result(pool())
     assert(pool.status === Status.Open)
-    val p1, p2 = new Promise[Unit]
-    val (busy1, busy2) = (Status.Busy(p1), Status.Busy(p2))
-    when(service.status).thenReturn(busy1)
-    assert(pool.status === busy1)
+    when(service.status).thenReturn(Status.Busy)
+    assert(pool.status === Status.Busy)
     when(underlying.status).thenReturn(Status.Closed)
     assert(pool.status === Status.Closed)
-    when(underlying.status).thenReturn(busy2)
-    val Status.Busy(p3) = pool.status
-    assert(!p3.isDone)
-    p1.setDone()
-    assert(!p3.isDone)
-    p2.setDone()
-    assert(p3.isDone)
+    when(underlying.status).thenReturn(Status.Busy)
     
     when(service.status).thenReturn(Status.Open)
-    assert(pool.status === busy2)
+    assert(pool.status === Status.Busy)
     when(pool.status).thenReturn(Status.Open)
     assert(pool.status === Status.Open)
     
@@ -290,9 +282,8 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     val s = Await.result(pool())
     
     // We're checked out; reflect the service status
-    val busy = Status.Busy(Future.never)
-    when(service.status).thenReturn(busy)
-    assert(pool.status === busy)
+    when(service.status).thenReturn(Status.Busy)
+    assert(pool.status === Status.Busy)
     
     when(service.status).thenReturn(Status.Closed)
     assert(pool.status === Status.Open)

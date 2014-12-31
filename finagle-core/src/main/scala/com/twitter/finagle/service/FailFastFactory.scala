@@ -17,7 +17,7 @@ object FailFastFactory {
       backoffs: Stream[Duration],
       until: Promise[Unit])
     extends State {
-    val status = Status.Busy(until)
+    val status = Status.Busy
   }
 
   private object Observation extends Enumeration {
