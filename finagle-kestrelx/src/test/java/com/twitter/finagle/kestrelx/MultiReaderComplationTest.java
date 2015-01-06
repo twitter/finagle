@@ -23,23 +23,21 @@ public class MultiReaderComplationTest {
    * make a MultiReader ReadHandle
    */
   @Test
-  public ReadHandle make() {
+  public void make() {
     ArrayList<SocketAddress> clusterMembers = new ArrayList<SocketAddress>();
     clusterMembers.add(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0));
     Var<Addr> cluster = Var$.MODULE$.apply(Addr.Bound$.MODULE$.apply(clusterMembers));
 
-    return
-      MultiReader.apply(cluster, "the-queue")
-        .clientBuilder(
-          ClientBuilder.get()
-            .codec(new Kestrel())
-            .hostConnectionLimit(1)
-            .requestTimeout(Duration.fromTimeUnit(30, TimeUnit.SECONDS)))
-        .build();
+    MultiReader.apply(cluster, "the-queue")
+      .clientBuilder(
+        ClientBuilder.get()
+        .codec(new Kestrel())
+        .hostConnectionLimit(1)
+        .requestTimeout(Duration.fromTimeUnit(30, TimeUnit.SECONDS)));
   }
 
   @Test
-  public ReadHandle directly() {
-    return ReadHandle.merged(new ArrayList<ReadHandle>().iterator());
+  public void directly() {
+    ReadHandle.merged(new ArrayList<ReadHandle>().iterator());
   }
 }

@@ -1,4 +1,4 @@
-java_library(name='java',
+junit_tests(name='java',
   dependencies=[
     '3rdparty:junit',
     '3rdparty:netty',
