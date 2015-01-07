@@ -2,6 +2,7 @@ import sbt._
 import Keys._
 import Tests._
 import com.twitter.scrooge.ScroogeSBT
+import com.twitter.util.TwitterDateFormat
 import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
@@ -129,7 +130,7 @@ object Finagle extends Build {
       (resourceManaged in Compile, name, version) map { (dir, name, ver) =>
         val file = dir / "com" / "twitter" / name / "build.properties"
         val buildRev = Process("git" :: "rev-parse" :: "HEAD" :: Nil).!!.trim
-        val buildName = new java.text.SimpleDateFormat("yyyyMMdd-HHmmss").format(new java.util.Date)
+        val buildName = TwitterDateFormat("yyyyMMdd-HHmmss").format(new java.util.Date)
         val contents = (
           "name=%s\nversion=%s\nbuild_revision=%s\nbuild_name=%s"
         ).format(name, ver, buildRev, buildName)

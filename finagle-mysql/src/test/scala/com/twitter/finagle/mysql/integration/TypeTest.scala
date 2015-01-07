@@ -1,9 +1,8 @@
 package com.twitter.finagle.exp.mysql.integration
 
 import com.twitter.finagle.exp.mysql._
-import com.twitter.util.{Await, Time}
+import com.twitter.util.{Await, Time, TwitterDateFormat}
 import java.sql.Timestamp
-import java.text.SimpleDateFormat
 import java.util.{Calendar, TimeZone}
 import org.junit.runner.RunWith
 import org.scalatest.BeforeAndAfter
@@ -308,7 +307,7 @@ class DateTimeTypeTest extends FunSuite with IntegrationClient {
       test("extract %s from %s in UTC".format(repr, rowType)) {
         row(repr) match {
           case Some(timestampValueUTC(t)) =>
-            val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            val format = TwitterDateFormat("yyyy-MM-dd HH:mm:ss")
             format.setTimeZone(TimeZone.getTimeZone("UTC"))
             val timestamp = new Timestamp(format.parse("2013-11-02 19:56:" + secs).getTime)
             assert(t === timestamp)
@@ -319,7 +318,7 @@ class DateTimeTypeTest extends FunSuite with IntegrationClient {
       test("extract %s from %s in EST".format(repr, rowType)) {
         row(repr) match {
           case Some(timestampValueEST(t)) =>
-            val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            val format = TwitterDateFormat("yyyy-MM-dd HH:mm:ss")
             format.setTimeZone(TimeZone.getTimeZone("EST"))
             val timestamp = new Timestamp(format.parse("2013-11-02 19:56:" + secs).getTime)
             assert(t === timestamp)
