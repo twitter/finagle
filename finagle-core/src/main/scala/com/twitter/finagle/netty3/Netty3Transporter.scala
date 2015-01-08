@@ -13,6 +13,7 @@ import com.twitter.util.{Future, Promise, Duration, NonFatal, Stopwatch}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.TimeUnit
 import java.util.IdentityHashMap
+import java.util.logging.Level
 import org.jboss.netty.channel.ChannelHandler
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 import org.jboss.netty.channel.{ChannelFactory => NettyChannelFactory, _}
@@ -103,6 +104,56 @@ object Netty3Transporter {
   }
 
   /**
+   * Constructs a `Netty3Transporter` given a netty3 `ChannelPipelineFactory`
+   * `Stack.Params`.
+   */
+  private[netty3] def make[In, Out](
+    pipelineFactory: ChannelPipelineFactory,
+    params: Stack.Params
+  ): Netty3Transporter[In, Out] = {
+    val Label(label) = params[Label]
+    val Logger(logger) = params[Logger]
+    // transport and transporter params
+    val ChannelFactory(cf) = params[ChannelFactory]
+    val TransportFactory(newTransport) = params[TransportFactory]
+    val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
+    val Transporter.TLSHostname(tlsHostname) = params[Transporter.TLSHostname]
+    val Transporter.HttpProxy(httpProxy) = params[Transporter.HttpProxy]
+    val Transporter.SocksProxy(socksProxy, credentials) = params[Transporter.SocksProxy]
+    val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
+    val Transport.TLSClientEngine(tls) = params[Transport.TLSClientEngine]
+    val Transport.Liveness(readerTimeout, writerTimeout, keepAlive) = params[Transport.Liveness]
+    val snooper = params[Transport.Verbose] match {
+      case Transport.Verbose(true) => Some(ChannelSnooper(label)(logger.log(Level.INFO, _, _)))
+      case _ => None
+    }
+
+    Netty3Transporter[In, Out](
+      label,
+      pipelineFactory,
+      newChannel = cf.newChannel(_),
+      newTransport = (ch: Channel) => newTransport(ch).cast[In, Out],
+      tlsConfig = tls map { case engine => Netty3TransporterTLSConfig(engine, tlsHostname) },
+      httpProxy = httpProxy,
+      socksProxy = socksProxy,
+      socksUsernameAndPassword = credentials,
+      channelReaderTimeout = readerTimeout,
+      channelWriterTimeout = writerTimeout,
+      channelSnooper = snooper,
+      channelOptions = {
+        val o = new scala.collection.mutable.MapBuilder[String, Object, Map[String, Object]](Map())
+        o += "connectTimeoutMillis" -> (connectTimeout.inMilliseconds: java.lang.Long)
+        o += "tcpNoDelay" -> java.lang.Boolean.TRUE
+        o += "reuseAddress" -> java.lang.Boolean.TRUE
+        for (v <- keepAlive) o += "keepAlive" -> (v: java.lang.Boolean)
+        for (s <- sendBufSize) o += "sendBufferSize" -> (s: java.lang.Integer)
+        for (s <- recvBufSize) o += "receiveBufferSize" -> (s: java.lang.Integer)
+        o.result()
+      }
+    )
+  }
+
+  /**
    * Constructs a `Transporter[In, Out]` given a netty3 `ChannelPipelineFactory`
    * responsible for framing a `Transport` stream. The `Transporter` is configured
    * via the passed in [[com.twitter.finagle.Stack.Param]]'s.
@@ -115,45 +166,11 @@ object Netty3Transporter {
     pipelineFactory: ChannelPipelineFactory,
     params: Stack.Params
   ): Transporter[In, Out] = {
-    val Label(label) = params[Label]
     val Stats(stats) = params[Stats]
 
-    // transport and transporter params
-    val ChannelFactory(cf) = params[ChannelFactory]
-    val TransportFactory(newTransport) = params[TransportFactory]
-    val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
-    val Transporter.TLSHostname(tlsHostname) = params[Transporter.TLSHostname]
-    val Transporter.HttpProxy(httpProxy) = params[Transporter.HttpProxy]
-    val Transporter.SocksProxy(socksProxy, credentials) = params[Transporter.SocksProxy]
-    val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
-    val Transport.TLSClientEngine(tls) = params[Transport.TLSClientEngine]
-    val Transport.Liveness(readerTimeout, writerTimeout, keepAlive) = params[Transport.Liveness]
-
-    val transporter = Netty3Transporter[In, Out](
-      label,
-      pipelineFactory,
-      newChannel = cf.newChannel(_),
-      newTransport = (ch: Channel) => newTransport(ch).cast[In, Out],
-      tlsConfig = tls map { case engine => Netty3TransporterTLSConfig(engine, tlsHostname) },
-      httpProxy = httpProxy,
-      socksProxy = socksProxy,
-      socksUsernameAndPassword = credentials,
-      channelReaderTimeout = readerTimeout,
-      channelWriterTimeout = writerTimeout,
-      channelOptions = {
-        val o = new scala.collection.mutable.MapBuilder[String, Object, Map[String, Object]](Map())
-        o += "connectTimeoutMillis" -> (connectTimeout.inMilliseconds: java.lang.Long)
-        o += "tcpNoDelay" -> java.lang.Boolean.TRUE
-        o += "reuseAddress" -> java.lang.Boolean.TRUE
-        for (v <- keepAlive) o += "keepAlive" -> (v: java.lang.Boolean)
-        for (s <- sendBufSize) o += "sendBufferSize" -> (s: java.lang.Integer)
-        for (s <- recvBufSize) o += "receiveBufferSize" -> (s: java.lang.Integer)
-        o.result()
-      }
-    )
     new Transporter[In, Out] {
       def apply(sa: SocketAddress): Future[Transport[In, Out]] =
-        transporter(sa, stats)
+        make(pipelineFactory, params)(sa, stats)
     }
   }
 }

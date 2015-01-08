@@ -1,7 +1,12 @@
 package com.twitter.finagle.netty3
 
+import com.twitter.conversions.time._
+import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.param.Label
 import com.twitter.finagle.socks.SocksConnectHandler
+import com.twitter.finagle.Stack
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
 import java.net.InetSocketAddress
 import org.jboss.netty.channel.{Channels, ChannelPipeline, ChannelPipelineFactory}
@@ -14,6 +19,39 @@ import scala.collection.JavaConverters._
 @RunWith(classOf[JUnitRunner])
 class Netty3TransporterTest extends FunSpec {
   describe("Netty3Transporter") {
+    it("creates a Netty3Transporter instance based on Stack params") {
+      val inputParams =
+        Stack.Params.empty +
+          Label("test") +
+          Netty3Transporter.TransportFactory.default +
+          Transporter.ConnectTimeout(1.seconds) +
+          Transporter.TLSHostname(Some("tls.host")) +
+          Transporter.HttpProxy(Some(new InetSocketAddress(0))) +
+          Transporter.SocksProxy(Some(new InetSocketAddress(0)), Some("user", "pw")) +
+          Transport.BufferSizes(Some(100), Some(200)) +
+          Transport.TLSClientEngine.default +
+          Transport.Liveness(1.seconds, 2.seconds, Some(true)) +
+          Transport.Verbose(true)
+
+      val pipelineFactory = Channels.pipelineFactory(Channels.pipeline())
+      val transporter = Netty3Transporter.make(pipelineFactory, inputParams)
+      assert(transporter.name == inputParams[Label].label)
+      assert(transporter.pipelineFactory == pipelineFactory)
+      assert(
+        transporter.tlsConfig ==
+          inputParams[Transport.TLSClientEngine].e.map(
+            Netty3TransporterTLSConfig(_, inputParams[Transporter.TLSHostname].hostname)))
+      assert(transporter.httpProxy == inputParams[Transporter.HttpProxy].sa)
+      assert(transporter.socksProxy == inputParams[Transporter.SocksProxy].sa)
+      assert(transporter.socksUsernameAndPassword == inputParams[Transporter.SocksProxy].credentials)
+      assert(transporter.channelReaderTimeout == inputParams[Transport.Liveness].readTimeout)
+      assert(transporter.channelWriterTimeout == inputParams[Transport.Liveness].writeTimeout)
+      assert(transporter.channelOptions.get("sendBufferSize") == inputParams[Transport.BufferSizes].send)
+      assert(transporter.channelOptions.get("receiveBufferSize") == inputParams[Transport.BufferSizes].recv)
+      assert(transporter.channelOptions.get("keepAlive") == inputParams[Transport.Liveness].keepAlive)
+      assert(transporter.channelOptions.get("connectTimeoutMillis").get == inputParams[Transporter.ConnectTimeout].howlong.inMilliseconds)
+      assert(transporter.channelSnooper.nonEmpty == inputParams[Transport.Verbose].b)
+    }
 
     it("newPipeline handles unresolved InetSocketAddresses") {
       val pipeline = Channels.pipeline()
@@ -32,24 +70,39 @@ class Netty3TransporterTest extends FunSpec {
       assert(pl === pipeline) // mainly just checking that we don't NPE anymore
     }
 
-    it("newPipeline doesn't create IdleStateHandler unnecessarily") {
-      val pipeline = Channels.pipeline()
-      val pipelineFactory = new ChannelPipelineFactory {
-        override def getPipeline(): ChannelPipeline = pipeline
+    describe("IdleStateHandler") {
+      def expectedIdleStateHandler(
+        readerTimeout: Duration,
+        writerTimeout: Duration,
+        isHanlderExist: Boolean
+      ) {
+        val transporter = new Netty3Transporter[Int, Int](
+          "name",
+          Channels.pipelineFactory(Channels.pipeline()),
+          channelReaderTimeout = readerTimeout,
+          channelWriterTimeout = writerTimeout
+        )
+        val pl = transporter.newPipeline(new InetSocketAddress(0), NullStatsReceiver)
+        val idleHandlerFound = pl.toMap.asScala.values.find {
+          case _: IdleStateHandler => true
+          case _ => false
+        }
+        assert(idleHandlerFound.nonEmpty == isHanlderExist)
+        idleHandlerFound.foreach { h =>
+          val ih = h.asInstanceOf[IdleStateHandler]
+          assert(ih.getReaderIdleTimeInMillis == readerTimeout.inMilliseconds)
+          assert(ih.getWriterIdleTimeInMillis == writerTimeout.inMilliseconds)
+          assert(ih.getAllIdleTimeInMillis == 0L)
+        }
       }
 
-      val transporter = new Netty3Transporter[Int, Int](
-        "name",
-        pipelineFactory,
-        channelReaderTimeout = Duration.Bottom,
-        channelWriterTimeout = Duration.Bottom
-      )
-      val pl = transporter.newPipeline(new InetSocketAddress(0), NullStatsReceiver)
-      val idleHandlerFound = pl.toMap.asScala.values.exists {
-        case _: IdleStateHandler => true
-        case _ => false
+      it("is added when channelReaderTimeout/channelWriteTimeout are finite") {
+        expectedIdleStateHandler(1.seconds, 2.seconds, true)
       }
-      assert(!idleHandlerFound)
+
+      it("is not added when neither channelReaderTimeout nor channelWriteTimeout are finite") {
+        expectedIdleStateHandler(Duration.Top, Duration.Bottom, false)
+      }
     }
 
     it("should track connections with channelStatsHandler on different connections") {
