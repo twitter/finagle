@@ -1,10 +1,10 @@
 package com.twitter.finagle.postgres.protocol
 
-import org.jboss.netty.buffer.ChannelBuffers
+import com.twitter.finagle.postgres.messages.PacketBuilder
+
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
-import java.util.Arrays
 
 @RunWith(classOf[JUnitRunner])
 class PacketSpec extends Specification {

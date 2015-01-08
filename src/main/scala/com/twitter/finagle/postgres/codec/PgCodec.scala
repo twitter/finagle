@@ -1,16 +1,29 @@
-package com.twitter.finagle.postgres.protocol
+package com.twitter.finagle.postgres.codec
 
 import com.twitter.finagle._
-import org.jboss.netty.channel._
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
-import org.jboss.netty.handler.codec.frame.FrameDecoder
+import com.twitter.finagle.postgres.ResultSet
+import com.twitter.finagle.postgres.connection.Connection
+import com.twitter.finagle.postgres.messages._
+import com.twitter.finagle.postgres.values.Md5Encryptor
 import com.twitter.logging.Logger
 import com.twitter.util.Future
-import scala.Some
-import com.twitter.finagle.postgres.ResultSet
+
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.channel._
+import org.jboss.netty.handler.codec.frame.FrameDecoder
+
 import scala.collection.mutable
 
-class PgCodec(user: String, password: Option[String], database: String, id:String) extends CodecFactory[PgRequest, PgResponse] {
+/*
+ * Postgres codec implementation.
+ *
+ * Used by client to encode requests and parse responses.
+ */
+class PgCodec(
+    user: String,
+    password: Option[String],
+    database: String,
+    id: String) extends CodecFactory[PgRequest, PgResponse] {
   def server = throw new UnsupportedOperationException("client only")
 
   def client = Function.const {
@@ -35,11 +48,13 @@ class PgCodec(user: String, password: Option[String], database: String, id:Strin
       }
     }
   }
-
 }
 
-class HandleErrorsProxy(delegate: ServiceFactory[PgRequest, PgResponse])
-  extends ServiceFactoryProxy(delegate) {
+/*
+ * Filter that converts exceptions into ServerErrors.
+ */
+class HandleErrorsProxy(
+    delegate: ServiceFactory[PgRequest, PgResponse]) extends ServiceFactoryProxy(delegate) {
 
   override def apply(conn: ClientConnection): Future[Service[PgRequest, PgResponse]] = {
     for {
@@ -48,18 +63,23 @@ class HandleErrorsProxy(delegate: ServiceFactory[PgRequest, PgResponse])
   }
 
   object HandleErrors extends SimpleFilter[PgRequest, PgResponse] {
-    def apply(request: PgRequest, service: Service[PgRequest, PgResponse]) =
+    def apply(request: PgRequest, service: Service[PgRequest, PgResponse]) = {
       service.apply(request).flatMap {
-        case Error(details) => Future.exception(Errors.server("%s\n%s".format(request.toString(), details.getOrElse(""))))
+        case Error(details) =>
+          Future.exception(Errors.server("%s\n%s".format(request.toString(), details.getOrElse(""))))
         case r => Future.value(r)
       }
+    }
   }
-
 }
 
-class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user: String, password: Option[String], database: String)
-  extends ServiceFactoryProxy(delegate) {
-
+/*
+ * Filter that does password authentication before issuing requests.
+ */
+class AuthenticationProxy(
+    delegate: ServiceFactory[PgRequest, PgResponse],
+    user: String, password: Option[String],
+    database: String) extends ServiceFactoryProxy(delegate) {
   private val logger = Logger(getClass.getName)
 
   override def apply(conn: ClientConnection): Future[Service[PgRequest, PgResponse]] = {
@@ -71,10 +91,11 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
     } yield service
   }
 
-  private[this] def sendPassword(startupResponse: PgResponse, service: Service[PgRequest, PgResponse]): Future[PgResponse] = {
-    logger.ifDebug("Startup response -- " + startupResponse)
-    startupResponse match {
+  private[this] def sendPassword(
+      startupResponse: PgResponse, service: Service[PgRequest, PgResponse]): Future[PgResponse] = {
+    logger.ifDebug("Startup response: %s".format(startupResponse))
 
+    startupResponse match {
       case PasswordRequired(encoding) => password match {
         case Some(pass) =>
           val msg = encoding match {
@@ -84,7 +105,6 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
           service(PgRequest(msg))
 
         case None => Future.exception(Errors.client("Password has to be specified for authenticated connection"))
-
       }
 
       case r => Future.value(r)
@@ -94,26 +114,29 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
   private[this] def verifyResponse(response: PgResponse): Future[Unit] = {
     response match {
       case AuthenticatedResponse(statuses, processId, secretKey) =>
-        logger.ifDebug("Authenticated " + processId + " " + secretKey + "\n" + statuses)
+        logger.ifDebug("Authenticated: %d %d\n%s".format(processId, secretKey, statuses))
         Future(Unit)
     }
   }
-
 }
 
 object CustomOIDProxy {
   val serviceOIDMap = new mutable.HashMap[String, Map[String, String]]()
 }
 
-class CustomOIDProxy(delegate:ServiceFactory[PgRequest, PgResponse], id:String) extends ServiceFactoryProxy(delegate) {
+/*
+ * Filter for handling custom types in responses.
+ */
+class CustomOIDProxy(
+    delegate: ServiceFactory[PgRequest, PgResponse], id:String) extends ServiceFactoryProxy(delegate) {
   val customTypes = """
-                      |SELECT      t.typname as type, t.oid as oid
-                      |FROM        pg_type t
-                      |LEFT JOIN   pg_catalog.pg_namespace n ON n.oid = t.typnamespace
-                      |WHERE       (t.typrelid = 0 OR (SELECT c.relkind = 'c' FROM pg_catalog.pg_class c WHERE c.oid = t.typrelid))
-                      |AND         NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type el WHERE el.oid = t.typelem AND el.typarray = t.oid)
-                      |AND         n.nspname NOT IN ('pg_catalog', 'information_schema')
-                    """.stripMargin
+    |SELECT      t.typname as type, t.oid as oid
+    |FROM        pg_type t
+    |LEFT JOIN   pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+    |WHERE       (t.typrelid = 0 OR (SELECT c.relkind = 'c' FROM pg_catalog.pg_class c WHERE c.oid = t.typrelid))
+    |AND         NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type el WHERE el.oid = t.typelem AND el.typarray = t.oid)
+    |AND         n.nspname NOT IN ('pg_catalog', 'information_schema')
+  """.stripMargin
 
   override def apply(conn: ClientConnection): Future[Service[PgRequest, PgResponse]] = {
     for {
@@ -139,9 +162,8 @@ class CustomOIDProxy(delegate:ServiceFactory[PgRequest, PgResponse], id:String) 
   }
 }
 
-
-/**
- * Decodes `Packet` to the `BackendMessage`.
+/*
+ * Decodes a Packet into a BackendMessage.
  */
 class BackendMessageDecoder(val parser: BackendMessageParser) extends SimpleChannelHandler {
   private val logger = Logger(getClass.getName)
@@ -149,15 +171,10 @@ class BackendMessageDecoder(val parser: BackendMessageParser) extends SimpleChan
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val message = e.getMessage
 
-    logger.ifDebug("Decoding request " + message)
-
     message match {
       case packet: Packet =>
-        logger.ifDebug("Packet passed. Trying to parse...")
-
         parser.parse(packet) match {
           case Some(backendMessage) =>
-            logger.ifDebug("Decoded message  " + backendMessage)
             Channels.fireMessageReceived(ctx, backendMessage)
           case None =>
             logger.warning("Cannot parse the packet. Disconnecting...")
@@ -168,18 +185,16 @@ class BackendMessageDecoder(val parser: BackendMessageParser) extends SimpleChan
         logger.warning("Only packet is supported...")
         Channels.disconnect(ctx.getChannel)
     }
-
   }
 }
 
-/**
- * Decodes byte stream to the `Packet`.
+/*
+ * Decodes a byte stream into a Packet.
  */
 class PacketDecoder extends FrameDecoder {
   private val logger = Logger(getClass.getName)
 
   def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): AnyRef = {
-    logger.ifDebug("decoding..")
     if (buffer.readableBytes() < 5) {
       return null
     }
@@ -194,17 +209,14 @@ class PacketDecoder extends FrameDecoder {
       return null
     }
 
-    logger.ifDebug("packet with code " + code)
     new Packet(Some(code), totalLength, buffer.readSlice(length))
-
   }
 }
 
-/**
- * PgRequest -> PgResponse
+/*
+ * Map PgRequest to PgResponse.
  */
 class PgClientChannelHandler extends SimpleChannelHandler {
-
   private[this] val logger = Logger(getClass.getName)
 
   private[this] val connection = new Connection()
@@ -222,30 +234,29 @@ class PgClientChannelHandler extends SimpleChannelHandler {
         logger.warning("Only backend message is supported...")
         Channels.disconnect(ctx.getChannel)
     }
-
   }
 
   override def writeRequested(ctx: ChannelHandlerContext, event: MessageEvent) = {
-    logger.ifDebug("Encoding message " + event.getMessage)
-
     val buf = event.getMessage match {
       case PgRequest(msg, flush) =>
-        // TODO this could be extracted as a separate handler
         val packet = msg.asPacket()
         val c = ChannelBuffers.dynamicBuffer()
+
         c.writeBytes(packet.encode)
+
         if (flush) {
           c.writeBytes(Flush.asPacket.encode)
         }
+
         connection.send(msg)
         c
       case _ =>
-        logger.ifDebug("Cannot convert message... Skipping")
+        logger.warning("Cannot convert message... Skipping")
         event.getMessage
     }
+
     Channels.write(ctx, event.getFuture, buf, event.getRemoteAddress)
   }
-
 }
 
 

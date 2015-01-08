@@ -1,5 +1,7 @@
 package com.twitter.finagle.postgres.protocol
 
+import com.twitter.finagle.postgres.connection.{ConnectionStateMachine, Connected}
+import com.twitter.finagle.postgres.messages.{Query, ParameterStatus, NotificationResponse, NoticeResponse}
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import org.specs2.mutable.Specification

@@ -1,14 +1,19 @@
-package com.twitter.finagle.postgres.protocol
+package com.twitter.finagle.postgres.messages
 
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffers
+import com.twitter.finagle.postgres.values.Charsets
+
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 object Packet {
   val INT_SIZE = 4
 }
 
+/*
+ * Representation of a "packet" sent to Postgres.
+ *
+ * Converts content into byte format expected by Postgres.
+ */
 case class Packet(code: Option[Char], length: Int, content: ChannelBuffer) {
-  
   def encode(): ChannelBuffer = {
     val result = ChannelBuffers.dynamicBuffer()
     code.map { c =>
@@ -20,6 +25,9 @@ case class Packet(code: Option[Char], length: Int, content: ChannelBuffer) {
   }
 }
 
+/*
+ * Helper class for creating packets from scala types.
+ */
 class PacketBuilder(val code: Option[Char]) {
   private val underlying = ChannelBuffers.dynamicBuffer()
 
@@ -59,7 +67,6 @@ class PacketBuilder(val code: Option[Char]) {
   }
 
   def toPacket = new Packet(code, underlying.writerIndex(), underlying)
-
 }
 
 object PacketBuilder {

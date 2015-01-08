@@ -1,10 +1,8 @@
-package com.twitter.finagle.postgres.protocol
+package com.twitter.finagle.postgres.messages
 
-import java.sql.{Date => SQLDate}
-import java.sql.Timestamp
-
-case class PgRequest(msg: FrontendMessage, flush: Boolean = false)
-
+/*
+ * Response message types.
+ */
 trait PgResponse
 
 case class SingleMessageResponse(msg: BackendMessage) extends PgResponse
@@ -26,8 +24,6 @@ case class Md5(salt: Array[Byte]) extends PasswordEncoding
 case class PasswordRequired(encoding: PasswordEncoding) extends PgResponse
 
 case class AuthenticatedResponse(params: Map[String, String], processId: Int, secretKey: Int) extends PgResponse
-
-case class Value[+A](value:A)
 
 case class Rows(rows: List[DataRow], completed: Boolean) extends PgResponse
 

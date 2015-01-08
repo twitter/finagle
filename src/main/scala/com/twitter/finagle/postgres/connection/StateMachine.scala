@@ -1,4 +1,4 @@
-package com.twitter.finagle.postgres.protocol
+package com.twitter.finagle.postgres.connection
 
 import com.twitter.logging.Logger
 
@@ -8,6 +8,10 @@ object Undefined extends PartialFunction[Any, Nothing] {
   def apply(o: Any) = sys.error("undefined")
 }
 
+/*
+ * Generic definition of a state machine. Used to define connection state machine
+ * in Connection.scala.
+ */
 trait StateMachine[E, R, S] {
   type Transition = PartialFunction[(E, S), (Option[R], S)]
 
@@ -20,7 +24,6 @@ trait StateMachine[E, R, S] {
     currentState = s
   }
 
-
   def transition(t: Transition) {
     transitionFunction = transitionFunction orElse t
   }
@@ -31,20 +34,12 @@ trait StateMachine[E, R, S] {
 
   def onEvent(e: E): Option[R] = {
     val f = transitionFunction.orElse(handleMisc)
+    logger.ifDebug("Received event in state %s".format(currentState.getClass.getName))
 
-
-    logger.ifDebug {
-      "received event " + e + " in state " + currentState
-    }
     val (result, newState) = f((e, currentState))
-
-    logger.ifDebug {
-      "transitioning to a state " + newState + " emiting " + result
-    }
-
+    logger.ifDebug("Transitioning to state %s and emiting result".format(newState.getClass.getName))
 
     currentState = newState
     result
   }
-
 }

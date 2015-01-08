@@ -1,11 +1,24 @@
-package com.twitter.finagle.postgres.protocol
+package com.twitter.finagle.postgres.values
 
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import scala.util.parsing.combinator.RegexParsers
-
-import java.sql.Timestamp
 import com.twitter.logging.Logger
 
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Date
+
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+
+import scala.util.matching.Regex
+import scala.util.parsing.combinator.RegexParsers
+
+/*
+ * Simple wrapper around a value in a Postgres row.
+ */
+case class Value[+A](value:A)
+
+/*
+ * Enumeration of value types that can be included in query results.
+ */
 object Type {
   val BOOL = 16
   val BYTE_A = 17
@@ -55,6 +68,9 @@ object Type {
   val UUID = 2950
 }
 
+/*
+ * Abstract trait for parsing values.
+ */
 trait ValueParser {
   def parseBoolean(b: ChannelBuffer): Value[Boolean]
 
@@ -70,14 +86,12 @@ trait ValueParser {
 
   def parseText(b: ChannelBuffer): Value[String]
 
-  // TODO is it string?
   def parseOid(b: ChannelBuffer): Value[String]
 
   def parseFloat4(b: ChannelBuffer): Value[Float]
 
   def parseFloat8(b: ChannelBuffer): Value[Double]
 
-  // TODO is it string?
   def parseInet(b: ChannelBuffer): Value[String]
 
   def parseBpChar(b: ChannelBuffer): Value[String]
@@ -93,6 +107,9 @@ trait ValueParser {
   def parseUnknown(b: ChannelBuffer): Value[String]
 }
 
+/*
+ * Implementation of ValueParser.
+ */
 object StringValueParser extends ValueParser {
   def parseBoolean(b: ChannelBuffer) = Value[Boolean](b.toString(Charsets.Utf8) == "t")
 
@@ -122,7 +139,23 @@ object StringValueParser extends ValueParser {
 
   def parseTimestamp(b: ChannelBuffer) = Value[Timestamp](Timestamp.valueOf(b.toString(Charsets.Utf8)))
 
-  def parseTimestampTZ(b: ChannelBuffer) = parseTimestamp(b)
+  def parseTimestampTZ(b: ChannelBuffer) = {
+    val timestampStr = b.toString(Charsets.Utf8)
+
+    // scalastyle:off
+    lazy val timestampWithMsRegex = new Regex(
+      "(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\.\\d*)?-(\\d{2})")
+    lazy val timestampWithTzFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssX")
+    // scalastyle:on
+
+    // Ignore milliseconds in the result since Postgres is flaky about putting those in
+    // with a consistent precision
+    val timestampWithoutMs = timestampWithMsRegex.replaceAllIn(timestampStr, "$1-$3")
+
+    val parsedDate: Date = timestampWithTzFormat.parse(timestampWithoutMs)
+
+    Value[Timestamp](new Timestamp(parsedDate.getTime))
+  }
 
   def parseHStore(b: ChannelBuffer) = {
     val data = b.toString(Charsets.Utf8)
@@ -138,12 +171,15 @@ object StringValueParser extends ValueParser {
   private[this] def parseInt(b: ChannelBuffer) = Value[Int](b.toString(Charsets.Utf8).toInt)
 
   private[this] def parseStr(b: ChannelBuffer) = Value[String](b.toString(Charsets.Utf8))
-
 }
 
+/*
+ * High-level parser helper object that converts response bytes into a wrapped value.
+ */
 object ValueParser {
-
   private[this] val logger = Logger("value parser")
+
+  import Type._
 
   def parserOf(format: Int, dataType: Int, customTypes:Map[String, String]): ChannelBuffer => Value[Any] = {
     val valueParser: ValueParser = format match {
@@ -151,7 +187,6 @@ object ValueParser {
       case _ => throw new UnsupportedOperationException("TODO Add support for binary format")
     }
 
-    import Type._
     val r: ChannelBuffer => Value[Any] =
       dataType match {
         case BOOL => valueParser.parseBoolean
@@ -175,25 +210,29 @@ object ValueParser {
               valueParser.parseHStore
             }
             case _ => {
-              logger.ifDebug("Unknown data type " + dataType + ", parsing as a unknown")
+              logger.warning("Unknown data type " + dataType + ", parsing as a unknown")
               valueParser.parseUnknown
             }
           }
         }
       }
     r
-
   }
 }
 
+/*
+ * Helpers for converting strings into bytes (i.e., for Postgres requests).
+ */
 object StringValueEncoder {
   def encode(value: Any): ChannelBuffer = {
     val result = ChannelBuffers.dynamicBuffer()
+
     if (value == null || value == None) {
       result.writeInt(-1)
     } else {
       result.writeBytes(convertValue(value).toString.getBytes(Charsets.Utf8))
     }
+
     result
   }
 
@@ -213,7 +252,10 @@ object StringValueEncoder {
 }
 
 object HStoreStringParser extends RegexParsers {
-  def term:Parser[String] = "\"" ~ """([^"\\]*(\\.[^"\\]*)*)""".r ~ "\"" ^^ { case o~value~c => value.replace("\\\"", "\"").replace("\\\\", "\\") }
+  def term:Parser[String] = "\"" ~ """([^"\\]*(\\.[^"\\]*)*)""".r ~ "\"" ^^ {
+    case o~value~c => value.replace("\\\"", "\"").replace("\\\\", "\\")
+  }
+
   def item:Parser[(String, String)] = term ~ "=>" ~ term ^^ { case key~arrow~value => (key, value) }
 
   def items:Parser[Map[String, String]] = repsep(item, ", ") ^^ { l => l.toMap }

@@ -1,5 +1,7 @@
 package com.twitter.finagle.postgres.protocol
 
+import com.twitter.finagle.postgres.connection.{ConnectionStateMachine, State}
+import com.twitter.finagle.postgres.messages.{PgResponse, FrontendMessage, BackendMessage}
 import org.specs2.specification.Example
 import org.specs2.mutable.{ArgumentsArgs, FragmentsBuilder}
 

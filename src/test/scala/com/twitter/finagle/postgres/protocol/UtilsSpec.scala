@@ -1,5 +1,6 @@
 package com.twitter.finagle.postgres.protocol
 
+import com.twitter.finagle.postgres.values.{Md5Encryptor, Buffers, Charsets}
 import org.specs2.mutable.Specification
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
