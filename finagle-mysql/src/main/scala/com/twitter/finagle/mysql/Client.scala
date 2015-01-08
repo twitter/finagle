@@ -1,40 +1,15 @@
 package com.twitter.finagle.exp.mysql
 
-import com.twitter.finagle.ServiceFactory
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.util.{Closable, Future, Time}
 import java.util.logging.Level
+import com.twitter.finagle.{ServiceProxy, ClientConnection, ServiceFactory}
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.util._
 
 object Client {
   /**
    * Creates a new Client based on a ServiceFactory.
    */
-  def apply(factory: ServiceFactory[Request, Result]): Client = new Client {
-    private[this] val service = factory.toService
-
-    def query(sql: String): Future[Result] = service(QueryRequest(sql))
-    def ping(): Future[Result] = service(PingRequest)
-
-    def select[T](sql: String)(f: Row => T): Future[Seq[T]] =
-      query(sql) map {
-        case rs: ResultSet => rs.rows.map(f)
-        case _ => Seq.empty
-      }
-
-    def prepare(sql: String): PreparedStatement = new PreparedStatement {
-      def apply(ps: Any*): Future[Result] = factory() flatMap { svc =>
-        svc(PrepareRequest(sql)) flatMap {
-          case ok: PrepareOK => svc(ExecuteRequest(ok.id, ps.toIndexedSeq))
-          case r => Future.exception(new Exception("Unexpected result %s when preparing %s"
-            .format(r, sql)))
-        } ensure {
-          svc.close()
-        }
-      }
-    }
-
-    def close(deadline: Time): Future[Unit] = factory.close(deadline)
-  }
+  def apply(factory: ServiceFactory[Request, Result]): Client with Transactions = new StdClient(factory)
 
   /**
    * Constructs a Client using a single host.
@@ -93,4 +68,88 @@ trait Client extends Closable {
    * Returns the result of pinging the server.
    */
   def ping(): Future[Result]
+}
+
+trait Transactions {
+  /**
+   * Execute `f` in a transaction.
+   *
+   * If `f` throws an exception, the transaction is rolled back. Otherwise, the transaction is
+   * committed.
+   *
+   * @example {{{
+   *   client.transaction[Foo] { c =>
+   *    for {
+   *       r0 <- c.query(q0)
+   *       r1 <- c.query(q1)
+   *       response: Foo <- buildResponse(r1, r2)
+   *     } yield response
+   *   }
+   * }}}
+   *
+   * @note we use a ServiceFactory that returns the same Service repeatedly to the client. This is
+   * to assure that a new MySQL connection (i.e. Service) from the connection pool (i.e.,
+   * ServiceFactory) will be used for each new transaction. Only upon completion of the transaction
+   * is the connection returned to the pool for re-use.
+   */
+  def transaction[T](f: Client => Future[T]): Future[T]
+}
+
+private[mysql] class StdClient(factory: ServiceFactory[Request, Result])
+  extends Client with Transactions {
+  private[this] val service = factory.toService
+
+  def query(sql: String): Future[Result] = service(QueryRequest(sql))
+  def ping(): Future[Result] = service(PingRequest)
+
+  def select[T](sql: String)(f: Row => T): Future[Seq[T]] =
+    query(sql) map {
+      case rs: ResultSet => rs.rows.map(f)
+      case _ => Seq.empty
+    }
+
+  def prepare(sql: String): PreparedStatement = new PreparedStatement {
+    def apply(ps: Any*): Future[Result] = factory() flatMap { svc =>
+      svc(PrepareRequest(sql)) flatMap {
+        case ok: PrepareOK => svc(ExecuteRequest(ok.id, ps.toIndexedSeq))
+        case r => Future.exception(new Exception("Unexpected result %s when preparing %s"
+          .format(r, sql)))
+      } ensure {
+        svc.close()
+      }
+    }
+  }
+
+  def transaction[T](f: Client => Future[T]): Future[T] = {
+    val singleton = new ServiceFactory[Request, Result] {
+      val svc = factory()
+      // Because the `singleton` is used in the context of a `FactoryToService` we override
+      // `Service#close` to ensure that we can control the checkout lifetime of the `Service`.
+      val proxiedService = svc map { service =>
+        new ServiceProxy(service) {
+          override def close(deadline: Time) = Future.Done
+        }
+      }
+
+      def apply(conn: ClientConnection) = proxiedService
+      def close(deadline: Time): Future[Unit] = svc.flatMap(_.close(deadline))
+    }
+
+    val client = Client(singleton)
+    val transaction = for {
+      _ <- client.query("START TRANSACTION")
+      result <- f(client)
+      _ <- client.query("COMMIT")
+    } yield result
+
+    // handle failures and put connection back in the pool
+    transaction respond {
+      case Return(_) => singleton.close()
+      case Throw(e) =>
+        client.query("ROLLBACK") ensure singleton.close()
+        Future.exception(e)
+    }
+  }
+
+  def close(deadline: Time): Future[Unit] = factory.close(deadline)
 }
