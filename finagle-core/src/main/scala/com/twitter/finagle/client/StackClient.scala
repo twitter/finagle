@@ -9,7 +9,7 @@ import com.twitter.finagle.param._
 import com.twitter.finagle.service._
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stack.nilStack
-import com.twitter.finagle.stats.ClientStatsReceiver
+import com.twitter.finagle.stats.{LoadedHostStatsReceiver, ClientStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.Showable
@@ -104,7 +104,10 @@ object StackClient {
   /**
    * The default params used for client stacks.
    */
-  val defaultParams: Stack.Params = Stack.Params.empty + Stats(ClientStatsReceiver)
+  val defaultParams: Stack.Params =
+    Stack.Params.empty +
+      Stats(ClientStatsReceiver) +
+      LoadBalancerFactory.HostStats(LoadedHostStatsReceiver)
 }
 
 /**

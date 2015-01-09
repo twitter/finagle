@@ -89,12 +89,20 @@ object LoadBalancerFactory {
 
         // Determine which stats receiver to use based on the flag
         // 'com.twitter.finagle.loadbalancer.perHostStats'
-        // and the configured per-host stats receiver
-        // If the per-host stats receiver is set, ignore the flag
+        // and the configured per-host stats receiver.
+        // if 'HostStats' param is not set, use LoadedHostStatsReceiver when flag is set.
+        // if 'HostStats' param is an instance of HostStatsReceiver, need the flag for it
+        // to take effect.
         val hostStatsReceiver =
           if (!params.contains[HostStats]) {
-            if (perHostStats()) LoadedStatsReceiver else NullStatsReceiver
-          } else params[HostStats].hostStatsReceiver
+            if (perHostStats()) LoadedHostStatsReceiver else NullStatsReceiver
+          } else {
+            params[HostStats].hostStatsReceiver match {
+              case _: HostStatsReceiver if !perHostStats() => NullStatsReceiver
+              case paramStats => paramStats
+            }
+          }
+
         val param.Stats(statsReceiver) = params[param.Stats]
         val param.Logger(log) = params[param.Logger]
         val param.Label(label) = params[param.Label]

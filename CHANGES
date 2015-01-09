@@ -33,6 +33,11 @@ New Features
     on Stack-based clients via the `com.twitter.finagle.FailFastFactory.FailFast` param.
   * finagle-mysql: Add support for MySQL transactions.
 
+  * finagle-stats: A new HostStatsReceiver type is added and used for per host stats.
+    It is loaded through LoadService and used by the Stack-based API as a default 
+    param. Per host stats can be turned on through `com.twitter.finagle.loadbalancer.perHostStats` 
+    flag, and is exported to the "/admin/per_host_metrics.json" route in twitter-server. 
+
 Bug Fixes
 ~~~~~~~~~
 

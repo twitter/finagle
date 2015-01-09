@@ -7,6 +7,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 object MetricsStatsReceiver {
   val defaultRegistry = Metrics.root()
+  private[this] val _defaultHostRegistry = Metrics.createDetached()
+  val defaultHostRegistry = _defaultHostRegistry
   private def defaultFactory(name: String): HistogramInterface = new Histogram(name)
 
   /**

@@ -3,7 +3,8 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.app.App
 import com.twitter.finagle.client.StringClient
 import com.twitter.finagle.{NoBrokersAvailableException, param}
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, LoadedStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, InMemoryHostStatsReceiver,
+  LoadedStatsReceiver, LoadedHostStatsReceiver, NullStatsReceiver}
 import com.twitter.util.Await
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -28,9 +29,9 @@ class LoadBalancerFactoryTest extends FunSuite
     val perHostStatKey = Seq(label, port, "available")
 
     def enablePerHostStats() =
-      flag.parse(Array("-com.twitter.finagle.loadbalancer.perHostStats=true"))
+      flag.parseArgs(Array("-com.twitter.finagle.loadbalancer.perHostStats=true"))
     def disablePerHostStats() =
-      flag.parse(Array("-com.twitter.finagle.loadbalancer.perHostStats=false"))
+      flag.parseArgs(Array("-com.twitter.finagle.loadbalancer.perHostStats=false"))
     //ensure the per-host stats are disabled if previous test didn't call disablePerHostStats()
     disablePerHostStats()
   }
@@ -59,11 +60,11 @@ class LoadBalancerFactoryTest extends FunSuite
   })
 
   test("per-host stats flag set, no configured per-host stats. " +
-    "Per-host stats should be reported to loadedStatsReceiver") (new PerHostFlagCtx {
+    "Per-host stats should be reported to loadedHostStatsReceiver") (new PerHostFlagCtx {
     enablePerHostStats()
 
     val hostStatsReceiver = new InMemoryStatsReceiver
-    LoadedStatsReceiver.self = hostStatsReceiver
+    LoadedHostStatsReceiver._self = hostStatsReceiver
     client.configured(param.Label(label))
       .newService(port)
     eventually {
@@ -97,6 +98,46 @@ class LoadBalancerFactoryTest extends FunSuite
       .newService(port)
     assert(loadedStatsReceiver.gauges.contains(perHostStatKey) === false)
 
+    disablePerHostStats()
+  })
+
+  test("per-host stats flag set, configured per-host stats is a HostStatsReceiver instance. " +
+    "Per-host stats should be reported to the hostStatsReceiver") (new PerHostFlagCtx {
+    enablePerHostStats()
+
+    val hostStatsReceiver = new InMemoryHostStatsReceiver
+    client.configured(param.Label(label))
+      .configured(LoadBalancerFactory.HostStats(hostStatsReceiver))
+      .newService(port)
+    eventually {
+      assert(hostStatsReceiver.self.gauges(perHostStatKey).apply === 1.0)
+    }
+    disablePerHostStats()
+  })
+
+  test("per-host stats flag not set, configured per-host stats is a HostStatsReceiver instance. " +
+    "Per-host stats should not be reported") (new PerHostFlagCtx {
+    val hostStatsReceiver = new InMemoryHostStatsReceiver
+    client.configured(param.Label(label))
+      .configured(LoadBalancerFactory.HostStats(hostStatsReceiver))
+      .newService(port)
+    assert(hostStatsReceiver.self.gauges.contains(perHostStatKey) === false)
+
+    disablePerHostStats()
+  })
+
+  test("per-host stats flag not set, configured per-host stats is LoadedHostStatsReceiver. " +
+    "Per-host stats should be reported to LoadedHostStatsReceiver") (new PerHostFlagCtx {
+    enablePerHostStats()
+
+    val hostStatsReceiver = new InMemoryHostStatsReceiver
+    LoadedHostStatsReceiver._self = hostStatsReceiver
+    client.configured(param.Label(label))
+      .configured(LoadBalancerFactory.HostStats(LoadedHostStatsReceiver))
+      .newService(port)
+    eventually {
+      assert(hostStatsReceiver.self.gauges(perHostStatKey).apply === 1.0)
+    }
     disablePerHostStats()
   })
 
