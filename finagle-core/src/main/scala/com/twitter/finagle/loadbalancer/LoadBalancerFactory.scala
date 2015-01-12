@@ -294,4 +294,6 @@ object DefaultBalancerFactory extends WeightedLoadBalancerFactory {
     emptyException: NoBrokersAvailableException
   ): ServiceFactory[Req, Rep] =
     underlying.newWeightedLoadBalancer(weighted, statsReceiver, emptyException)
+
+  val get = this
 }

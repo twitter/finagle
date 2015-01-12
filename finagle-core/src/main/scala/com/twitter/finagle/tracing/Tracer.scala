@@ -137,6 +137,8 @@ object DefaultTracer extends Tracer with Proxy {
 
   def record(record: Record) = self.record(record)
   def sampleTrace(traceId: TraceId) = self.sampleTrace(traceId)
+
+  val get = this
 }
 
 /**
