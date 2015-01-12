@@ -1,10 +1,8 @@
 package com.twitter.finagle.serverset2
 
-import com.twitter.util.RandomSocket
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
-import java.net.InetSocketAddress
 
 @RunWith(classOf[JUnitRunner])
 class ServiceDiscovererTest extends FunSuite {
@@ -12,8 +10,8 @@ class ServiceDiscovererTest extends FunSuite {
   def ep(port: Int) = Endpoint(None, Some(ia(port)), None, Endpoint.Status.Alive, port.toString)
 
   test("ServiceDiscoverer.zipWithWeights") {
-    val port1 = RandomSocket.nextPort()
-    val port2 = RandomSocket.nextPort()
+    val port1 = 80 // not bound
+    val port2 = 53 // ditto
     val ents = Set[Entry](ep(port1), ep(port2), ep(3), ep(4))
     val v1 = Vector(Seq(
       Descriptor(Selector.Host(ia(port1)), 1.1, 1),

@@ -3,7 +3,7 @@ package com.twitter.finagle.http
 import com.twitter.finagle.{param, Http => FHttp, Service}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.tracing._
-import com.twitter.util.{Closable, Await, Future, RandomSocket}
+import com.twitter.util.{Closable, Await, Future}
 import java.net.{InetAddress, InetSocketAddress}
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 import org.junit.runner.RunWith

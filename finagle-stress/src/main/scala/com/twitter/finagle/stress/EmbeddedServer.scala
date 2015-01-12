@@ -1,12 +1,10 @@
 package com.twitter.finagle.stress
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.ostrich.stats.StatsCollection
 import com.twitter.util.Duration
-import com.twitter.util.RandomSocket
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.Executors
 import org.jboss.netty.bootstrap.ServerBootstrap
@@ -21,8 +19,9 @@ object EmbeddedServer {
   def apply() = new EmbeddedServer()
 }
 
-class EmbeddedServer(val addr: SocketAddress) {
-  def this() = this(RandomSocket())
+class EmbeddedServer(private val addr: SocketAddress) {
+
+  def this() = this(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
 
   // (Publicly accessible) stats covering this server.
   val stats = new StatsCollection
@@ -113,6 +112,8 @@ class EmbeddedServer(val addr: SocketAddress) {
   })
 
   private[this] var serverChannel = bootstrap.bind(addr)
+
+  val boundAddress = serverChannel.getLocalAddress.asInstanceOf[InetSocketAddress]
 
   def stop() {
     if (stopped.getAndSet(true))

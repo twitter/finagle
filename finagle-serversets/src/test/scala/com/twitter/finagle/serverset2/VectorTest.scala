@@ -1,14 +1,12 @@
 package com.twitter.finagle.serverset2
 
-import com.twitter.util.RandomSocket
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
-import java.net.InetSocketAddress
 
 @RunWith(classOf[JUnitRunner])
 class VectorTest extends FunSuite {
-  val port = RandomSocket.nextPort()
+  val port = 80 // not bound
   test("Selector.matches") {
     val ep1 = Endpoint(
       None, Some(HostPort("10.0.0.1", port)),

@@ -191,7 +191,7 @@ class LoadBalancerTest(
 
     val client = clientBuilder
       .codec(Http())
-      .hosts(servers map(_.addr))
+      .hosts(servers map(_.boundAddress))
       .hostConnectionLimit(Int.MaxValue)
       .reportTo(new OstrichStatsReceiver)
       .build()
@@ -231,7 +231,7 @@ class LoadBalancerTest(
 
     servers.zipWithIndex foreach { case (server, which) =>
       server.stop()
-      println("> SERVER[%d] (%s)".format(which, server.addr))
+      println("> SERVER[%d] (%s)".format(which, server.boundAddress))
       Stats.prettyPrint(server.stats)
     }
 

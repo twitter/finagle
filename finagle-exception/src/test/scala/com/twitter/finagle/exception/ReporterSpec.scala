@@ -68,7 +68,7 @@ class SourceClientReporterTest extends FunSuite with MockitoSugar {
 
   val captor = ArgumentCaptor.forClass(classOf[Seq[LogEntry]])
 
-  val socket = new InetSocketAddress("localhost", RandomSocket.nextPort())
+  val socket = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
   val reporter = Reporter(logger, "service16")
     .withSource(socket)
     .withClient()
@@ -107,7 +107,7 @@ class ExceptionReporterTest extends FunSuite with MockitoSugar {
     val logger = mock[Scribe.FutureIface]
     when(logger.log(anyObject())) thenReturn(Future.value(ResultCode.Ok))
     val captor = ArgumentCaptor.forClass(classOf[Seq[LogEntry]])
-    val socket = new InetSocketAddress("localhost", RandomSocket.nextPort())
+    val socket = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val tse = new TestServiceException("service", "my cool message",
       clientAddress = Some(socket.getAddress.getHostName))
 

@@ -49,7 +49,7 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
     }
     val notConnected: (WatchState => Boolean) = w => !connected(w)
 
-    val session1 = ZkSession.retrying(zkTimeout, () => ZkSession(inst.zookeeperConnectstring))
+    val session1 = ZkSession.retrying(zkTimeout, () => ZkSession(inst.zookeeperConnectString))
     @volatile var states = Seq.empty[SessionState]
     val state = session1 flatMap { session1 => session1.state }
     state observe {
@@ -66,7 +66,7 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
       z.sessionPasswd.write(p, 0)
 
       ClientBuilder()
-        .hosts(inst.zookeeperConnectstring)
+        .hosts(inst.zookeeperConnectString)
         .sessionTimeout(zkTimeout)
         .sessionId(z.sessionId)
         .password(Buf.ByteArray(p))
@@ -87,7 +87,7 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
   if (!sys.props.contains("SKIP_FLAKY")) test("ZkSession.retrying") {
     implicit val timer = new MockTimer
     val watch = Stopwatch.start()
-    val varZkSession = ZkSession.retrying(zkTimeout, () => ZkSession(inst.zookeeperConnectstring))
+    val varZkSession = ZkSession.retrying(zkTimeout, () => ZkSession(inst.zookeeperConnectString))
     val varZkState = varZkSession flatMap { _.state }
 
     @volatile var zkStates = Seq[(SessionState, Duration)]()
@@ -117,7 +117,7 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
       session1.sessionPasswd.write(p, 0)
 
       ClientBuilder()
-        .hosts(inst.zookeeperConnectstring)
+        .hosts(inst.zookeeperConnectString)
         .sessionTimeout(zkTimeout)
         .sessionId(session1.sessionId)
         .password(Buf.ByteArray(p))
