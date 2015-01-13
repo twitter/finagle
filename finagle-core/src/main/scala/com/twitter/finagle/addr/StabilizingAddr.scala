@@ -86,7 +86,7 @@ private[finagle] object StabilizingAddr {
         },
 
         addr map {
-          case addr@Addr.Bound(newSet) =>
+          case addr@Addr.Bound(newSet, _) =>
             // Update our pending queue so that newly added
             // entries aren't later removed.
             var q = remq filter { case (e, _) => !(newSet contains e) }
@@ -120,8 +120,12 @@ private[finagle] object StabilizingAddr {
         if (!needPush) Offer.never else {
           // We always bind if active is nonempty. Otherwise we
           // pass through the current active address.
+          val attrs = srcAddr match {
+            case Addr.Bound(_, attrs) => attrs
+            case _ => Addr.Metadata.empty
+          }
           val addr =
-            if (active.nonEmpty) Addr.Bound(active)
+            if (active.nonEmpty) Addr.Bound(active, attrs)
             else srcAddr
           stabilized.send(addr) map { _ =>
             loop(remq, h, active, false, srcAddr)

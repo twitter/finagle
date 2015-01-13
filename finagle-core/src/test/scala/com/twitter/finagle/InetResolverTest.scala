@@ -32,7 +32,7 @@ class InetResolverTest extends FunSuite {
     val addr = resolver.bind("localhost:80") // name resolution only, not bound
     val f = addr.changes.filter(_ != Addr.Pending).toFuture
     Await.result(f) match {
-      case Addr.Bound(b) =>
+      case Addr.Bound(b, meta) if meta.isEmpty =>
         assert(b === Set(WeightedSocketAddress(new InetSocketAddress("localhost", 80), 1L)))
       case _ => fail()
     }

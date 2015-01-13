@@ -22,14 +22,14 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
   implicit val patienceConfig = PatienceConfig(
     timeout = toSpan(1.second),
     interval = toSpan(zkTimeout))
-
-    /* This can be useful if you want to retain ZK logging output for debugging.
-    val app = new org.apache.log4j.ConsoleAppender
-    app.setTarget(org.apache.log4j.ConsoleAppender.SYSTEM_ERR)
-    app.setLayout(new org.apache.log4j.SimpleLayout)
-    app.activateOptions()
-    org.apache.log4j.Logger.getRootLogger().addAppender(app)
-    */
+  
+  /* This can be useful if you want to retain ZK logging output for debugging.
+  val app = new org.apache.log4j.ConsoleAppender
+  app.setTarget(org.apache.log4j.ConsoleAppender.SYSTEM_ERR)
+  app.setLayout(new org.apache.log4j.SimpleLayout)
+  app.activateOptions()
+  org.apache.log4j.Logger.getRootLogger().addAppender(app)
+   */
 
   before {
     inst = new ZkInstance

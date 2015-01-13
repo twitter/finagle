@@ -113,7 +113,8 @@ object LoadBalancerFactory {
 
         type WeightedFactory = (ServiceFactory[Req, Rep], Double)
 
-        def mkFactory(sockaddr: SocketAddress): WeightedFactory = {
+        def mkFactory(sockaddr: SocketAddress, metadata: Addr.Metadata): WeightedFactory = {
+          // TODO(ver) install per-region stats from metadata?
           val stats = if (hostStatsReceiver.isNull) statsReceiver else {
             val scope = sockaddr match {
               case WeightedInetSocketAddress(addr, _) =>
@@ -128,6 +129,7 @@ object LoadBalancerFactory {
 
           val endpointStack: SocketAddress => ServiceFactory[Req, Rep] =
             (sa: SocketAddress) => {
+              // TODO(ver) determine latency compensation from metadata.
               val underlying = next.make(params +
                   Transporter.EndpointAddr(sa) +
                   param.Stats(stats) +
@@ -146,25 +148,27 @@ object LoadBalancerFactory {
         // Ensure that at most one WeightedFactory is built for each SocketAddress.
         var cachedFactories = Map[SocketAddress, WeightedFactory]()
         var lastAddrs = Set[SocketAddress]()
-        def mkFactories(sockaddrs: Set[SocketAddress]): Set[WeightedFactory] =
-          synchronized {
-            cachedFactories ++= (sockaddrs &~ lastAddrs) map { sa =>
-              sa -> mkFactory(sa)
-            }
-            cachedFactories --= lastAddrs &~ sockaddrs
-            lastAddrs = sockaddrs
-            cachedFactories.values.toSet
+        def mkFactories(
+          sockaddrs: Set[SocketAddress],
+          metadata: Addr.Metadata
+        ): Set[WeightedFactory] = synchronized {
+          cachedFactories ++= (sockaddrs &~ lastAddrs) map { sa =>
+            sa -> mkFactory(sa, metadata)
           }
+          cachedFactories --= lastAddrs &~ sockaddrs
+          lastAddrs = sockaddrs
+          cachedFactories.values.toSet
+        }
 
         val endpoints = Activity(dest map {
-          case Addr.Bound(sockaddrs) =>
-            Activity.Ok(mkFactories(sockaddrs))
+          case Addr.Bound(sockaddrs, metadata) =>
+            Activity.Ok(mkFactories(sockaddrs, metadata))
 
           case Addr.Neg =>
             if (log.isLoggable(Level.WARNING)) {
               log.warning("%s: name resolution is negative".format(label))
             }
-            Activity.Ok(mkFactories(Set.empty))
+            Activity.Ok(mkFactories(Set.empty, Addr.Metadata.empty))
 
           case Addr.Failed(e) =>
             if (log.isLoggable(Level.WARNING)) {

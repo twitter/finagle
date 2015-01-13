@@ -34,7 +34,7 @@ class ResolverTest extends FunSuite {
   test("resolve ServiceLoaded resolvers") {
     val Name.Bound(addr) = Resolver.eval("test!xyz")
     Var.sample(addr) match {
-      case Addr.Bound(addrs) if addrs.size == 1 =>
+      case Addr.Bound(addrs, attrs) if addrs.size == 1 && attrs.isEmpty =>
         assert(addrs.head === TestAddr("xyz"))
       case _ => fail()
     }
@@ -44,7 +44,7 @@ class ResolverTest extends FunSuite {
     val Some(resolver) = Resolver.get(classOf[TestResolver])
     val binding = resolver.bind("xyz")
     Var.sample(binding) match {
-      case Addr.Bound(addrs) if addrs.size == 1 =>
+      case Addr.Bound(addrs, attrs) if addrs.size == 1 && attrs.isEmpty =>
         assert(addrs.head === TestAddr("xyz"))
       case _ => fail()
     }
@@ -104,7 +104,7 @@ class ResolverTest extends FunSuite {
     val cacheBinding = resolver.bind("twcache!xyz")
 
     Var.sample(cacheBinding) match {
-      case Addr.Bound(addrs) if addrs.size == 1 =>
+      case Addr.Bound(addrs, attrs) if addrs.size == 1 && attrs.isEmpty =>
         assert(addrs.head === TestAddr("twcache!xyz"))
       case _ => fail()
     }

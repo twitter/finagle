@@ -413,7 +413,7 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrelx](
     val currentHandles = mutable.Map.empty[SocketAddress, ReadHandle]
 
     val event = config.va.changes map {
-      case Addr.Bound(socketAddrs) => {
+      case Addr.Bound(socketAddrs, _) => {
         val newHandles = (socketAddrs &~ currentHandles.keySet) map { socketAddr =>
           val factory = baseClientBuilder
             .hosts(socketAddr)

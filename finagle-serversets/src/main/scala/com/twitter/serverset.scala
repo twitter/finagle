@@ -59,7 +59,7 @@ class serverset extends Namer {
       // We have to bind the name ourselves in order to know whether
       // it resolves negatively.
       Activity(va map {
-        case Addr.Bound(_) => Activity.Ok(NameTree.Leaf(name))
+        case Addr.Bound(_, _) => Activity.Ok(NameTree.Leaf(name))
         case Addr.Neg => Activity.Ok(NameTree.Neg)
         case Addr.Pending => Activity.Pending
         case Addr.Failed(exc) => Activity.Failed(exc)

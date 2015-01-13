@@ -52,7 +52,7 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
     val va = res.bind(hostPath)
     eventually {
       Var.sample(va) match {
-        case Addr.Bound(sockaddrs) =>
+        case Addr.Bound(sockaddrs, attrs) if attrs.isEmpty =>
           assert(sockaddrs === Set(addr))
         case _ => fail()
       }

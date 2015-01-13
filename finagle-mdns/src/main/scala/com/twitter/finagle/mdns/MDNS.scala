@@ -89,12 +89,12 @@ class MDNSResolver extends Resolver {
   def bind(arg: String): Var[Addr] = {
     val (name, regType, domain) = parse(arg)
     resolver.resolve(regType, domain) map {
-      case Addr.Bound(sockaddrs) =>
+      case Addr.Bound(sockaddrs, attrs) =>
         val filtered = sockaddrs collect {
           case MdnsRecord(n, _, _, a) if n startsWith name =>
             a: SocketAddress
         }
-        Addr.Bound(filtered)
+        Addr.Bound(filtered, attrs)
       case a => a
     }
   }

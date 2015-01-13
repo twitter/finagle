@@ -18,8 +18,9 @@ class NameTest extends FunSuite {
     val set = Set(new SocketAddress {}, new SocketAddress {})
     g() = set
 
-    val Addr.Bound(s2) = addr
+    val Addr.Bound(s2, r) = addr
     assert(s2 === set)
+    assert(r.isEmpty)
   }
 
   test("Name.Bound maintains equality as per 'id'") {

@@ -127,18 +127,21 @@ object Name {
   /**
    * Create a name representing the union of the passed-in
    * names.
+   *
+   * Metadata is not preserved on bound addresses.
    */
   def all(names: Set[Name.Bound]): Name.Bound =
     if (names.isEmpty) empty
     else if (names.size == 1) names.head
     else {
       val va = Var.collect(names map(_.addr)) map {
-        case addrs if addrs.exists({case Addr.Bound(_) => true; case _ => false}) =>
-          Addr.Bound((addrs flatMap {
-            case Addr.Bound(as) => as
+        case addrs if addrs.exists({case Addr.Bound(_, _) => true; case _ => false}) =>
+          val sockaddrs = addrs.flatMap {
+            case Addr.Bound(as, _) => as
             case _ => Set.empty: Set[SocketAddress]
-          }).toSet)
-
+          }.toSet
+          Addr.Bound(sockaddrs, Addr.Metadata.empty)
+          
         case addrs if addrs.forall(_ == Addr.Neg) => Addr.Neg
         case addrs if addrs.forall({case Addr.Failed(_) => true; case _ => false}) =>
           Addr.Failed(new Exception)

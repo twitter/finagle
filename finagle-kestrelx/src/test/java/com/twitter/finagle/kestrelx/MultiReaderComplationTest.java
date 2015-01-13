@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 import com.twitter.finagle.Addr;
+import com.twitter.finagle.Addrs;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.kestrelx.protocol.Kestrel;
 import com.twitter.util.Duration;
@@ -26,7 +27,7 @@ public class MultiReaderComplationTest {
   public void make() {
     ArrayList<SocketAddress> clusterMembers = new ArrayList<SocketAddress>();
     clusterMembers.add(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0));
-    Var<Addr> cluster = Var$.MODULE$.apply(Addr.Bound$.MODULE$.apply(clusterMembers));
+    Var<Addr> cluster = Var$.MODULE$.apply(Addrs.newBoundAddr(clusterMembers));
 
     MultiReader.apply(cluster, "the-queue")
       .clientBuilder(
