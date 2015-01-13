@@ -62,7 +62,7 @@ and the symmetric remote dispatch:
 
 .. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftClient.scala#thriftclientapi
 
-Check out the `finagle-thrift` `API docs <http://twitter.github.io/finagle/docs/#com.twitter.finagle.Thrift$>`_
+Check out the `finagle-thrift` :api:`API <com.twitter.finagle.Thrift$>`
 for more info.
 
 .. [#] This API makes it difficult to wrap endpoints in Finagle
@@ -129,3 +129,43 @@ session.
 Mux enables servers to advertise availability on a per-window basis. This is
 useful for establishing explicit queueing policies, leading the way to
 intelligent back-pressure, slow start, and GC-avoidance.
+
+Mysql
+-----
+*finagle-mysql* is an asynchronous implementation of the MySQL protocol built on top of Finagle.
+The project provides a simple query API with support for prepared statements and
+transactions while taking advantage of Finagle's :ref:`client stack <client_modules>` for
+connection pooling. The implementation supports both the MySQL binary and string protocols.
+
+A client can be constructed using the
+:api:`Mysql <com.twitter.finagle.exp.Mysql$>`_ protocol object:
+
+.. includecode:: code/protocols/mysql.scala#client
+
+We configure the :api:`client's connection pool <com.twitter.finagle.client.DefaultPool>` to be
+compatible with our MySQL server. The constructor returns a Finagle :ref:`ServiceFactory <service_factory>`
+from :api:`mysql.Request <com.twitter.finagle.exp.mysql.Request>` to :api:`mysql.Result <com.twitter.finagle.exp.mysql.Result>`
+which we can use to query the db:
+
+.. includecode:: code/protocols/mysql.scala#query0
+
+A :api:`ResultSet <com.twitter.finagle.exp.mysql.ResultSet>` makes it easy to extract
+:api:`Values <com.twitter.finagle.exp.mysql.Value>` based on column names. For example, we can
+implement the above `processRow` as a pattern match on expected values:
+
+.. includecode:: code/protocols/mysql.scala#processRow
+
+The ServiceFactory API gives you more fine-grained control over the pool. This isn't always necessary
+- to simplify *finagle-mysql* offers a rich API that wraps the ServiceFactory returned from `newClient`:
+
+.. includecode:: code/protocols/mysql.scala#richClient
+
+and we can select:
+
+.. includecode:: code/protocols/mysql.scala#query1
+
+Note that `select` takes care of checking out the service and returning it to the pool. `select` and
+other useful methods are available on :api:`mysql.Client <com.twitter.finagle.exp.mysql.Client>` which is returned
+from the call to `newRichClient`.
+
+For a more involved example see the Finagle `example project <https://github.com/twitter/finagle/blob/master/finagle-example/src/main/scala/com/twitter/finagle/example/mysql/Example.scala>`_.
