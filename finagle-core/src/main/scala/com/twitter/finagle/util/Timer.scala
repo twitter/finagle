@@ -60,6 +60,4 @@ object DefaultTimer extends HashedWheelTimer(
   val twitter = new TimerFromNettyTimer(this)
 
   override def toString = "DefaultTimer"
-
-  val get = this
 }
