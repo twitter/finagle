@@ -14,7 +14,7 @@ import scala.util.parsing.combinator.RegexParsers
 /*
  * Simple wrapper around a value in a Postgres row.
  */
-case class Value[+A](value:A)
+case class Value[+A](value: A)
 
 /*
  * Enumeration of value types that can be included in query results.

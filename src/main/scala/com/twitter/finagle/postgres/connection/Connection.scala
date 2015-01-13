@@ -8,10 +8,9 @@ import scala.collection.mutable.ListBuffer
 /*
  * Representation of a single Postgres connection.
  */
-class Connection {
+class Connection(startState: State = AuthenticationRequired) {
   private[this] val logger = Logger("connection")
-
-  private[this] val stateMachine = new ConnectionStateMachine()
+  private[this] val stateMachine = new ConnectionStateMachine(startState)
 
   def send(msg: FrontendMessage) {
     logger.ifDebug("Sent frontend message of type: %s".format(msg.getClass.getName))
@@ -22,7 +21,7 @@ class Connection {
     logger.ifDebug("Received backend message of type: %s".format(msg.getClass.getName))
 
     val result = stateMachine.onEvent(msg)
-    logger.ifDebug("Emiting result")
+    logger.ifDebug("Emitting result")
     result
   }
 }
