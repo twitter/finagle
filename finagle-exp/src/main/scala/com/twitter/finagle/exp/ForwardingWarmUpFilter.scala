@@ -36,12 +36,13 @@ abstract class ForwardingWarmUpFilter[Req, Rep](
   val onWarm: Future[Unit] = onWarmp
 
   /**
-   * Indicates whether the request should be forwarded.
+   * Indicates whether the request may be forwarded (i.e. in the case where
+   * `bypassForward` is false) or must be handled locally (`bypassForward` is true).
    */
-  def shouldForward: Boolean
+  def bypassForward: Boolean
 
   final override def apply(request: Req, service: Service[Req, Rep]) = {
-    if (warmupComplete || shouldForward) {
+    if (warmupComplete || bypassForward) {
       service(request)
     } else {
       val start = startTime.inMillis

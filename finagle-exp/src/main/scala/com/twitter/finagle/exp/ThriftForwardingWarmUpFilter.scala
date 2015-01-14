@@ -25,5 +25,5 @@ class ThriftForwardingWarmUpFilter(
   statsReceiver
 ) {
 
-  override def shouldForward: Boolean = ClientId.current exists isBypassClient
+  override def bypassForward: Boolean = ClientId.current.forall(isBypassClient)
 }
