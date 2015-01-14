@@ -7,6 +7,7 @@ object Status {
   type Type = HttpResponseStatus
 
   val Continue                     = HttpResponseStatus.CONTINUE
+  val SwitchingProtocols           = HttpResponseStatus.SWITCHING_PROTOCOLS
   val Processing                   = HttpResponseStatus.PROCESSING
   val Ok                           = HttpResponseStatus.OK
   val Created                      = HttpResponseStatus.CREATED
@@ -41,13 +42,15 @@ object Status {
   val UnsupportedMediaType         = HttpResponseStatus.UNSUPPORTED_MEDIA_TYPE
   val RequestedRangeNotSatisfiable = HttpResponseStatus.REQUESTED_RANGE_NOT_SATISFIABLE
   val ExpectationFailed            = HttpResponseStatus.EXPECTATION_FAILED
-  val EnhanceYourCalm              = HttpResponseStatus.valueOf(420)
+  val EnhanceYourCalm              = new HttpResponseStatus(420, "Enhance Your Calm")
   val UnprocessableEntity          = HttpResponseStatus.UNPROCESSABLE_ENTITY
   val Locked                       = HttpResponseStatus.LOCKED
   val FailedDependency             = HttpResponseStatus.FAILED_DEPENDENCY
   val UnorderedCollection          = HttpResponseStatus.UNORDERED_COLLECTION
   val UpgradeRequired              = HttpResponseStatus.UPGRADE_REQUIRED
-  val TooManyRequests              = HttpResponseStatus.valueOf(429)
+  val PreconditionRequired         = HttpResponseStatus.PRECONDITION_REQUIRED
+  val TooManyRequests              = HttpResponseStatus.TOO_MANY_REQUESTS
+  val RequestHeaderFieldsTooLarge  = HttpResponseStatus.REQUEST_HEADER_FIELDS_TOO_LARGE
   val InternalServerError          = HttpResponseStatus.INTERNAL_SERVER_ERROR
   val NotImplemented               = HttpResponseStatus.NOT_IMPLEMENTED
   val BadGateway                   = HttpResponseStatus.BAD_GATEWAY
@@ -57,4 +60,5 @@ object Status {
   val VariantAlsoNegotiates        = HttpResponseStatus.VARIANT_ALSO_NEGOTIATES
   val InsufficientStorage          = HttpResponseStatus.INSUFFICIENT_STORAGE
   val NotExtended                  = HttpResponseStatus.NOT_EXTENDED
+  val NetworkAuthenticationRequired = HttpResponseStatus.NETWORK_AUTHENTICATION_REQUIRED
 }
