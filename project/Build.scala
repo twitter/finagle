@@ -2,7 +2,6 @@ import sbt._
 import Keys._
 import Tests._
 import com.twitter.scrooge.ScroogeSBT
-import com.twitter.util.TwitterDateFormat
 import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
@@ -130,7 +129,7 @@ object Finagle extends Build {
       (resourceManaged in Compile, name, version) map { (dir, name, ver) =>
         val file = dir / "com" / "twitter" / name / "build.properties"
         val buildRev = Process("git" :: "rev-parse" :: "HEAD" :: Nil).!!.trim
-        val buildName = TwitterDateFormat("yyyyMMdd-HHmmss").format(new java.util.Date)
+        val buildName = new java.text.SimpleDateFormat("yyyyMMdd-HHmmss").format(new java.util.Date)
         val contents = (
           "name=%s\nversion=%s\nbuild_revision=%s\nbuild_name=%s"
         ).format(name, ver, buildRev, buildName)
@@ -154,11 +153,11 @@ object Finagle extends Build {
     base = file("."),
     settings = Project.defaultSettings ++
       sharedSettings ++
-      Unidoc.settings ++ Seq( 
+      Unidoc.settings ++ Seq(
         // NB: KestrelX defines thrift structs which collide with Kestrel.
         // We can remove this exception after the -x modules are deleted
         // post netty4 migration.
-        Unidoc.unidocExclude := Seq(finagleExample.id, finagleKestrelX.id) 
+        Unidoc.unidocExclude := Seq(finagleExample.id, finagleKestrelX.id)
       )
   ) aggregate(
     // Core, support.
