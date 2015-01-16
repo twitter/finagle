@@ -5,6 +5,7 @@ scala_library(name='scala',
     repo = artifactory,
   ),
   dependencies=[
+    'finagle/finagle-cacheresolver',
     'finagle/finagle-core',
     'finagle/finagle-example/src/main/thrift:thrift-scala',
     'finagle/finagle-http',

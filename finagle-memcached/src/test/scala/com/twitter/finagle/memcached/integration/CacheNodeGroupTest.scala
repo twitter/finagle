@@ -6,7 +6,7 @@ import com.twitter.common.zookeeper.testing.ZooKeeperTestServer
 import com.twitter.common.zookeeper.{CompoundServerSet, ZooKeeperUtils, ServerSets, ZooKeeperClient}
 import com.twitter.conversions.time._
 import com.twitter.finagle.Group
-import com.twitter.finagle.memcached.{ZookeeperCacheNodeGroup, CacheNode, CachePoolConfig}
+import com.twitter.finagle.cacheresolver.{ZookeeperCacheNodeGroup, CacheNode, CachePoolConfig}
 import com.twitter.util.{Duration, Stopwatch, TimeoutException}
 import java.io.ByteArrayOutputStream
 import java.net.InetSocketAddress

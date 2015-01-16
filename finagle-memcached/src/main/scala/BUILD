@@ -16,13 +16,11 @@ scala_library(name='scala',
     '3rdparty/jvm/org/apache/zookeeper',
     '3rdparty:gson',
     '3rdparty:netty',
+    'finagle/finagle-cacheresolver',
     'finagle/finagle-core',
     'finagle/finagle-serversets',
     'util/util-core',
     'util/util-hashing',
   ],
-  sources=rglobs('*.scala'),
-  resources=[
-    'finagle/finagle-memcached/src/main/resources'
-  ],
+  sources=rglobs('*.scala')
 )

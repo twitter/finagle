@@ -2,8 +2,9 @@ package com.twitter.finagle.memcached.replication
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 import com.twitter.conversions.time._
-import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig}
 import com.twitter.finagle.Group
+import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig}
+import com.twitter.finagle.cacheresolver.CacheNode
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol.Value
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._

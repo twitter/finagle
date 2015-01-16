@@ -15,7 +15,7 @@ import com.twitter.common.quantity.{Time, Amount}
 import com.twitter.common.zookeeper.{ZooKeeperUtils, ServerSets, ZooKeeperClient}
 import com.twitter.conversions.time._
 import com.twitter.finagle.MemcachedxClient
-import com.twitter.finagle.memcachedx.CachePoolConfig
+import com.twitter.finagle.cacheresolver.CachePoolConfig
 import com.twitter.finagle.memcachedx.migration._
 import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster

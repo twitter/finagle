@@ -162,7 +162,7 @@ object Finagle extends Build {
   ) aggregate(
     // Core, support.
     finagleCore, finagleTest, finagleStats,
-    finagleZipkin, finagleServersets,
+    finagleZipkin, finagleServersets, finagleCacheResolver,
     finagleException, finagleCommonsStats,
     finagleExp, finagleMdns, finagleTesters, finagleOstrich4,
 
@@ -364,6 +364,19 @@ object Finagle extends Build {
     libraryDependencies ++= Seq("silly" % "silly-thrift" % "0.5.0" % "test") ++ thriftLibs
   ).dependsOn(finagleCore, finagleTest % "test")
 
+  lazy val finagleCacheResolver = Project(
+    id = "finagle-cacheresolver",
+    base = file("finagle-cacheresolver"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-cacheresolver",
+    libraryDependencies ++= Seq(
+      "com.twitter.common" % "zookeeper-testing" % "0.0.46" % "test"
+    ),
+    libraryDependencies <++= scalaVersion(jacksonLibs(_))
+  ).dependsOn(finagleCore, finagleServersets)
+
   lazy val finagleMemcached = Project(
     id = "finagle-memcached",
     base = file("finagle-memcached"),
@@ -377,7 +390,7 @@ object Finagle extends Build {
       "com.twitter.common" % "zookeeper-testing" % "0.0.46" % "test"
     ),
     libraryDependencies <++= scalaVersion(jacksonLibs(_))
-  ).dependsOn(finagleCore, finagleServersets)
+  ).dependsOn(finagleCacheResolver, finagleCore, finagleServersets)
 
   lazy val finagleMemcachedX = Project(
     id = "finagle-memcachedx",
@@ -392,7 +405,7 @@ object Finagle extends Build {
       "com.twitter.common" % "zookeeper-testing" % "0.0.46" % "test"
     ),
     libraryDependencies <++= scalaVersion(jacksonLibs(_))
-  ).dependsOn(finagleCore, finagleServersets)
+  ).dependsOn(finagleCacheResolver, finagleCore, finagleServersets)
 
   lazy val finagleKestrel = Project(
     id = "finagle-kestrel",

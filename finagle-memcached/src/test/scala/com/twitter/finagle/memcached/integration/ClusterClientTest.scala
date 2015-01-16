@@ -10,8 +10,9 @@ import com.twitter.concurrent.Spool
 import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, Cluster}
+import com.twitter.finagle.cacheresolver.{CacheNode, CachePoolCluster, CachePoolConfig}
 import com.twitter.finagle.memcached.protocol.text.Memcached
-import com.twitter.finagle.memcached.{CacheNode, CachePoolCluster, CachePoolConfig, Client, KetamaClientBuilder, PartitionedClient}
+import com.twitter.finagle.memcached.{Client, KetamaClientBuilder, PartitionedClient}
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.finagle.{Name, Resolver}

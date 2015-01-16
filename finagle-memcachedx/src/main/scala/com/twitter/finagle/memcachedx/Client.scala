@@ -10,6 +10,7 @@ import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig, StaticCluster}
+import com.twitter.finagle.cacheresolver.{CacheNode, CacheNodeGroup}
 import com.twitter.finagle.memcachedx.protocol._
 import com.twitter.finagle.memcachedx.protocol.text.Memcached
 import com.twitter.finagle.memcachedx.util.Bufs.RichBuf

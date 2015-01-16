@@ -13,9 +13,10 @@ import com.twitter.common.zookeeper.{ZooKeeperUtils, ServerSets, ZooKeeperClient
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Group, WriteException}
 import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.cacheresolver.{CachePoolCluster, CachePoolConfig}
 import com.twitter.finagle.memcachedx.protocol.text.Memcached
 import com.twitter.finagle.memcachedx.replication._
-import com.twitter.finagle.memcachedx.{CachePoolCluster, CachePoolConfig, KetamaClientBuilder}
+import com.twitter.finagle.memcachedx.KetamaClientBuilder
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Return, Throw}

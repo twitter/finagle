@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcached.java;
+package com.twitter.finagle.cacheresolver.java;
 
 import java.util.Collections;
 import java.util.Set;
@@ -6,8 +6,8 @@ import java.util.Set;
 import scala.collection.JavaConversions;
 
 import com.twitter.common.zookeeper.ZooKeeperClient;
-import com.twitter.finagle.memcached.CacheNode;
-import com.twitter.finagle.memcached.CachePoolCluster$;
+import com.twitter.finagle.cacheresolver.CacheNode;
+import com.twitter.finagle.cacheresolver.CachePoolCluster$;
 import com.twitter.finagle.stats.NullStatsReceiver;
 import com.twitter.finagle.stats.StatsReceiver;
 
@@ -24,7 +24,7 @@ public final class CachePoolClusterUtil {
    * @param cacheNodeSet static set of cache nodes to construct the cluster
    * @return a scala CachePoolCluster
    */
-  public static com.twitter.finagle.memcached.CachePoolCluster newStaticCluster(
+  public static com.twitter.finagle.cacheresolver.CachePoolCluster newStaticCluster(
       Set<CacheNode> cacheNodeSet) {
     scala.collection.immutable.Set<CacheNode> staticSet =
         JavaConversions.asScalaSet(cacheNodeSet).toSet();
@@ -45,7 +45,7 @@ public final class CachePoolClusterUtil {
    * @param statsReceiver the destination to report the stats to
    * @return a scala CachePoolCluster
    */
-  public static com.twitter.finagle.memcached.CachePoolCluster newZkCluster(
+  public static com.twitter.finagle.cacheresolver.CachePoolCluster newZkCluster(
       String zkPath,
       ZooKeeperClient zkClient,
       Set<CacheNode> backupPool,
@@ -81,7 +81,7 @@ public final class CachePoolClusterUtil {
    *                   null and empty backup pool means the same as no backup pool.
    * @return a scala CachePoolCluster
    */
-  public static com.twitter.finagle.memcached.CachePoolCluster newZkCluster(
+  public static com.twitter.finagle.cacheresolver.CachePoolCluster newZkCluster(
       String zkPath,
       ZooKeeperClient zkClient,
       Set<CacheNode> backupPool) {
@@ -97,7 +97,7 @@ public final class CachePoolClusterUtil {
    * @param zkClient zookeeper client to read zookeeper
    * @return a scala CachePoolCluster
    */
-  public static com.twitter.finagle.memcached.CachePoolCluster newZkCluster(
+  public static com.twitter.finagle.cacheresolver.CachePoolCluster newZkCluster(
       String zkPath,
       ZooKeeperClient zkClient) {
     return newZkCluster(zkPath, zkClient, Collections.<CacheNode>emptySet());

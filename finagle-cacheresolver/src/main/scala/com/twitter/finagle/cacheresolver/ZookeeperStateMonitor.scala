@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcached
+package com.twitter.finagle.cacheresolver
 
 import com.twitter.common.quantity.{Time, Amount}
 import com.twitter.common.zookeeper.ZooKeeperClient

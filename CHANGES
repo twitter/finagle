@@ -12,10 +12,11 @@ Breaking API Changes
   * finagle-core: `c.t.f.builder.Server` now implements `c.t.f.ListeningServer`.
   * finagle-core: `c.t.f.Server.serveAndAnnounce` with a `ServiceFactory` had
     its first argument renamed to `name` from `forum`.
-
   * finagle-core: Add an attribute map to `c.t.f.Addr.Bound`.
   * finagle-core: `c.t.f.builder.ClientConfig.FailFast` has moved to
     `c.t.f.FailFastFactory.FailFast`.
+  * finagle-memcached / finagle-memcachedx: move TwitterCacheResolver
+    and related objects to new finagle-cacheresolver package.
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

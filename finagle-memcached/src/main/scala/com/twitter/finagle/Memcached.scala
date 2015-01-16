@@ -3,6 +3,7 @@ package com.twitter.finagle
 import _root_.java.net.{InetSocketAddress, SocketAddress}
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
+import com.twitter.finagle.cacheresolver.CacheNodeGroup
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.{SerialServerDispatcher, PipeliningDispatcher}
 import com.twitter.finagle.memcached.protocol.text.{

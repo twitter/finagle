@@ -2,6 +2,7 @@ package com.twitter.finagle.memcachedx.unit
 
 import com.twitter.concurrent.Broker
 import com.twitter.finagle.{CancelledRequestException, Group, MutableGroup, Service, ShardNotAvailableException}
+import com.twitter.finagle.cacheresolver.CacheNode
 import com.twitter.finagle.memcachedx._
 import com.twitter.finagle.memcachedx.protocol._
 import com.twitter.hashing.KeyHasher

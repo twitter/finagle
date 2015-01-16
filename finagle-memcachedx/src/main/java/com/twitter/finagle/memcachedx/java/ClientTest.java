@@ -6,8 +6,9 @@ import com.google.common.collect.ImmutableSet;
 
 import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.ClientBuilder;
-import com.twitter.finagle.memcachedx.CacheNode;
-import com.twitter.finagle.memcachedx.CachePoolCluster;
+import com.twitter.finagle.cacheresolver.CacheNode;
+import com.twitter.finagle.cacheresolver.CachePoolCluster;
+import com.twitter.finagle.cacheresolver.java.CachePoolClusterUtil;
 import com.twitter.finagle.memcachedx.KetamaClientBuilder;
 import com.twitter.finagle.memcachedx.protocol.Command;
 import com.twitter.finagle.memcachedx.protocol.Response;
