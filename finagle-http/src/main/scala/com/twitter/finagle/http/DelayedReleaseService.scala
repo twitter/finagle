@@ -2,7 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.util.AsyncLatch
 import com.twitter.finagle.{Service, ServiceProxy}
-import com.twitter.io.{Buf, Reader}
+import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.{Future, Promise, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicBoolean
 
