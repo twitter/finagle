@@ -17,7 +17,7 @@ case class ServerError(code: Short, sqlState: String, message: String)
 
 case class LostSyncException(underlying: Throwable)
   extends RuntimeException(underlying) {
-    override def getMessage = underlying.getMessage
+    override def getMessage = underlying.toString
     override def getStackTrace = underlying.getStackTrace
   }
 

@@ -25,15 +25,32 @@ object HandshakeInit extends Decoder[HandshakeInit] {
     val threadId = br.readInt()
     val salt1 = br.take(8)
     br.skip(1) // 1 filler byte always 0x00
-    val serverCap = Capability(br.readUnsignedShort())
+
+    // the rest of the fields are optional and protocol version specific
+    val capLow = if (br.readable(2)) br.readUnsignedShort() else 0
+
+    require(protocol == 10 && (capLow & Capability.Protocol41) != 0,
+      "unsupported protocol version")
+
     val charset = br.readUnsignedByte()
-    val version = new String(bytesVersion, Charset(charset))
     val status = br.readShort()
-    br.skip(13)
-    val salt2 = br.take(12)
+    val capHigh = br.readUnsignedShort() << 16
+    val serverCap = Capability(capHigh, capLow)
+
+    // auth plugin data. Currently unused but we could verify
+    // that our secure connections respect the expected size.
+    br.readByte()
+
+    // next 10 bytes are all reserved
+    br.skip(10)
+
+    val salt2 =
+      if (!serverCap.has(Capability.SecureConnection)) Array.empty[Byte]
+      else br.readNullTerminatedBytes()
+
     HandshakeInit(
       protocol,
-      version,
+      new String(bytesVersion, Charset(charset)),
       threadId,
       Array.concat(salt1, salt2),
       serverCap,
