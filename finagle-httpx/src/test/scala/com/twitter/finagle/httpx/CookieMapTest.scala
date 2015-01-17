@@ -1,6 +1,5 @@
 package com.twitter.finagle.httpx
 import com.twitter.conversions.time._
-import com.twitter.finagle.http.{Cookie, Request}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
