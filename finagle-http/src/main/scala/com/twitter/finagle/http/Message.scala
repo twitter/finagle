@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.io.{Buf, Reader => BufReader, Writer => BufWriter}
+import com.twitter.io.{Reader => BufReader, Writer => BufWriter}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.util.{Await, Duration, Closable}
 import java.io.{InputStream, InputStreamReader, OutputStream, OutputStreamWriter, Reader, Writer}
@@ -10,9 +10,7 @@ import java.util.{Date, TimeZone}
 import org.apache.commons.lang.StringUtils
 import org.apache.commons.lang.time.FastDateFormat
 import org.jboss.netty.buffer._
-import org.jboss.netty.channel.ChannelFuture
-import org.jboss.netty.handler.codec.http.{HttpMessage, HttpHeaders, HttpMethod,
-  HttpVersion, DefaultHttpChunk, HttpChunk}
+import org.jboss.netty.handler.codec.http.{HttpMessage, HttpHeaders, HttpMethod, HttpVersion}
 import scala.collection.JavaConverters._
 
 
@@ -28,13 +26,13 @@ abstract class Message extends HttpMessage {
 
   /**
    * A read-only handle to the internal stream of bytes, representing the
-   * message body. See [[com.twitter.util.Reader]] for more information.
+   * message body. See [[com.twitter.io.Reader]] for more information.
    **/
   def reader: BufReader = readerWriter
 
   /**
    * A write-only handle to the internal stream of bytes, representing the
-   * message body. See [[com.twitter.util.Writer]] for more information.
+   * message body. See [[com.twitter.io.Writer]] for more information.
    **/
   def writer: BufWriter with Closable = readerWriter
 
@@ -362,7 +360,7 @@ abstract class Message extends HttpMessage {
    * `flatMap` to have the appropriate backpressure semantics.
    *
    * Attempting to `write` after calling `close` will result in a thrown
-   * [[com.twitter.util.Reader.ReaderDiscarded]].
+   * [[com.twitter.io.Reader.ReaderDiscarded]].
    */
   @throws(classOf[BufReader.ReaderDiscarded])
   @throws(classOf[IllegalStateException])

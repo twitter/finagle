@@ -30,13 +30,13 @@ abstract class Message extends HttpMessageProxy {
 
   /**
    * A read-only handle to the internal stream of bytes, representing the
-   * message body. See [[com.twitter.util.Reader]] for more information.
+   * message body. See [[com.twitter.io.Reader]] for more information.
    **/
   def reader: BufReader = readerWriter
 
   /**
    * A write-only handle to the internal stream of bytes, representing the
-   * message body. See [[com.twitter.util.Writer]] for more information.
+   * message body. See [[com.twitter.io.Writer]] for more information.
    **/
   def writer: BufWriter with Closable = readerWriter
 
@@ -364,7 +364,7 @@ abstract class Message extends HttpMessageProxy {
    * `flatMap` to have the appropriate backpressure semantics.
    *
    * Attempting to `write` after calling `close` will result in a thrown
-   * [[com.twitter.util.Reader.ReaderDiscarded]].
+   * [[com.twitter.io.Reader.ReaderDiscarded]].
    */
   @throws(classOf[BufReader.ReaderDiscarded])
   @throws(classOf[IllegalStateException])

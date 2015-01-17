@@ -1,5 +1,6 @@
 package com.twitter.finagle.httpx
 import com.twitter.conversions.time._
+import com.twitter.finagle.http.{Cookie, Request}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -77,9 +78,26 @@ class CookieMapTest extends FunSuite {
     request.cookies.add(cookie)
     request.cookies.add(cookie2)
 
+    assert(request.cookies.size === 1)
+    // We expect to see the recently added cookie
+    assert(request.cookies("name").value === "value2")
+    assert(request.headers.get("Cookie") === "name=value2")
+  }
+
+  test("add cookies with the same name but different domain") {
+    val request = Request()
+    val cookie = new Cookie("name", "value")
+    cookie.domain = "foo"
+    val cookie2 = new Cookie("name", "value2")
+    cookie2.domain = "bar"
+
+    request.cookies.add(cookie)
+    request.cookies.add(cookie2)
+
+    assert(cookie !== cookie2)
     assert(request.cookies.size === 2)
     assert(request.cookies("name").value === "value")
-    assert(request.headers.get("Cookie") === "name=value")
+    assert(request.headers.get("Cookie") === "name=value2; $Domain=bar; name=value; $Domain=foo")
   }
 
   test("remove cookie") {
