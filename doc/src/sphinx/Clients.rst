@@ -149,7 +149,7 @@ Pooling
 
 Finagle provides a generic pool that maintains a collection of
 service instances. Each endpoint the client connects to has an independent
-pool with high and low watermarks. The :src:`WatermarkPool <com/twitter/finagle/pool/WaterMarkPool.scala>` keeps
+pool with high and low watermarks. The :src:`WatermarkPool <com/twitter/finagle/pool/WatermarkPool.scala>` keeps
 persistent services up to the lower bound. It will keep making new services up
 to upper bound if you checkout more than lower bound services, but when
 you release those services above the lower bound, it immediately tries

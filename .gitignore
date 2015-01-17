@@ -19,3 +19,4 @@ out/
 .DS_Store
 sbt-launch-0.7.5.jar
 sbt-launch.jar
+*.pyc
