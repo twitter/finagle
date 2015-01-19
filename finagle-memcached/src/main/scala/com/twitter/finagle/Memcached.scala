@@ -36,7 +36,7 @@ private[finagle] object MemcachedTraceInitializer {
     def apply(command: Command, service: Service[Command, Response]): Future[Response] =
       Trace.letTracerAndNextId(tracer) {
         Trace.recordRpc(command.name)
-  
+
         val response = service(command)
         command match {
           case command: RetrievalCommand if Trace.isActivelyTracing =>
@@ -156,9 +156,16 @@ private[finagle] class MemcachedFailureAccrualClient(
   failureAccrual = {
     new KetamaFailureAccrualFactory(
       _,
-      failureAccrualParams._1,
-      failureAccrualParams._2,
-      DefaultTimer.twitter, key, broker)
+      numFailures     = failureAccrualParams._1,
+      markDeadFor     = failureAccrualParams._2,
+      timer           = DefaultTimer.twitter,
+      key             = key,
+      healthBroker    = broker,
+      // set ejection to be true by default.
+      // This is ok, since ejections is triggered only when failureAccrual
+      // is enabled. With `DefaultFailureAccrualParams`, ejections will never
+      // be triggered.
+      ejectFailedHost = true)
   },
   newTraceInitializer = MemcachedTraceInitializer.Module
 ) with MemcachedRichClient

@@ -6,10 +6,10 @@ import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 import _root_.java.net.{SocketAddress, InetSocketAddress}
 import _root_.java.util.{Map => JMap}
 
-import com.twitter.concurrent.{Broker, Offer}
+import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig, StaticCluster}
+import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig}
 import com.twitter.finagle.cacheresolver.{CacheNode, CacheNodeGroup}
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
@@ -657,14 +657,19 @@ private[finagle] sealed trait NodeHealth extends NodeEvent
 private[finagle] case class NodeMarkedDead(key: KetamaClientKey) extends NodeHealth
 private[finagle] case class NodeRevived(key: KetamaClientKey) extends NodeHealth
 
+class FailureAccrualException(message: String) extends RequestException(message, cause = null)
+
 class KetamaFailureAccrualFactory[Req, Rep](
   underlying: ServiceFactory[Req, Rep],
   numFailures: Int,
   markDeadFor: Duration,
   timer: Timer,
   key: KetamaClientKey,
-  healthBroker: Broker[NodeHealth]
+  healthBroker: Broker[NodeHealth],
+  ejectFailedHost: Boolean
 ) extends FailureAccrualFactory[Req, Rep](underlying, numFailures, markDeadFor, timer) {
+  private[this] val failureAccrualEx =
+    Future.exception(new FailureAccrualException("Endpoint is marked dead by failureAccrual"))
 
   // exclude CancelledRequestException and CancelledConnectionException for cache client failure accrual
   override def isSuccess(response: Try[Rep]): Boolean = response match {
@@ -679,15 +684,27 @@ class KetamaFailureAccrualFactory[Req, Rep](
     case Throw(e) => false
   }
 
-  override def markDead() = {
+  override def markDead() {
     super.markDead()
-    healthBroker ! NodeMarkedDead(key)
+    if (ejectFailedHost) healthBroker ! NodeMarkedDead(key)
   }
 
-  override def revive() = {
+  override def revive() {
     super.revive()
-    healthBroker ! NodeRevived(key)
+    if (ejectFailedHost) healthBroker ! NodeRevived(key)
   }
+
+  override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
+    super.status match {
+      case Status.Open => super.apply(conn)
+      // One finagle client presents one node on the Ketama ring,
+      // the load balancer has one cache client. When the client
+      // is in a busy state, the c.t.f.FailureAccrualFactory continues
+      // to dispatch requests to that client. Here we want to fail
+      // immediately to give the busy client some chances to recover
+      // from failures.
+      case _           => failureAccrualEx
+    }
 }
 
 object KetamaClient {
@@ -960,13 +977,10 @@ case class KetamaClientBuilder private[memcached] (
   )(timer: Timer) = {
     val (_numFailures, _markDeadFor) = faParams
     new ServiceFactoryWrapper {
-      def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) = {
-          if (ejectFailedHost)
-            new KetamaFailureAccrualFactory(
-              factory, _numFailures, _markDeadFor, timer, key, broker)
-          else
-            new FailureAccrualFactory(factory, _numFailures, _markDeadFor, timer)
-        }
+      def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) =
+        new KetamaFailureAccrualFactory(
+          factory, _numFailures, _markDeadFor, timer, key, broker, ejectFailedHost)
+
     }
   }
 }

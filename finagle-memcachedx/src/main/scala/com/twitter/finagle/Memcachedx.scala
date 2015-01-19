@@ -33,7 +33,7 @@ private[finagle] object MemcachedxTraceInitializer {
   }
 
   class Filter(tracer: Tracer) extends SimpleFilter[Command, Response] {
-    def apply(command: Command, service: Service[Command, Response]): Future[Response] = 
+    def apply(command: Command, service: Service[Command, Response]): Future[Response] =
       Trace.letTracerAndNextId(tracer) {
         val response = service(command)
         Trace.recordRpc(command.name)
@@ -155,9 +155,16 @@ private[finagle] class MemcachedxFailureAccrualClient(
   failureAccrual = {
     new KetamaFailureAccrualFactory(
       _,
-      failureAccrualParams._1,
-      failureAccrualParams._2,
-      DefaultTimer.twitter, key, broker)
+      numFailures     = failureAccrualParams._1,
+      markDeadFor     = failureAccrualParams._2,
+      timer           = DefaultTimer.twitter,
+      key             = key,
+      healthBroker    = broker,
+      // set ejection to be true by default.
+      // This is ok, since ejections is triggered only when failureAccrual
+      // is enabled. With `DefaultFailureAccrualParams`, ejections will never
+      // be triggered.
+      ejectFailedHost = true)
   },
   newTraceInitializer = MemcachedxTraceInitializer.Module
 ) with MemcachedxRichClient
