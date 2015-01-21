@@ -14,12 +14,12 @@ import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.kestrelx.protocol.Kestrel;
 import com.twitter.util.Duration;
 import com.twitter.util.Var;
-import com.twitter.util.Var$;
+import com.twitter.util.Vars;
 
 /**
  * A compilation test for using MultiReader in Java.
  */
-public class MultiReaderComplationTest {
+public class MultiReaderCompilationTest {
   /**
    * make a MultiReader ReadHandle
    */
@@ -27,8 +27,7 @@ public class MultiReaderComplationTest {
   public void make() {
     ArrayList<SocketAddress> clusterMembers = new ArrayList<SocketAddress>();
     clusterMembers.add(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0));
-    Var<Addr> cluster = Var$.MODULE$.apply(Addrs.newBoundAddr(clusterMembers));
-
+    Var<Addr> cluster = Vars.newVar(Addrs.newBoundAddr(clusterMembers));
     MultiReader.apply(cluster, "the-queue")
       .clientBuilder(
         ClientBuilder.get()
