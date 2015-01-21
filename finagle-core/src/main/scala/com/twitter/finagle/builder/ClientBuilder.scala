@@ -10,7 +10,7 @@ import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service._
 import com.twitter.finagle.ssl.Ssl
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver, RollupStatsReceiver}
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, TraceInitializerFilter}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
@@ -800,6 +800,17 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def daemon(daemonize: Boolean): This =
     configured(Daemonize(daemonize))
 
+  /**
+   * Provide an alternative to putting all request exceptions under
+   * a "failures" stat.  Typical implementations may report any
+   * cancellations or validation errors separately so success rate
+   * considers only valid non cancelled requests.
+   *
+   * @param exceptionStatsHandler function to record failure details.
+   */
+  def exceptionCategorizer(exceptionStatsHandler: stats.ExceptionStatsHandler): This =
+    configured(ExceptionStatsHandler(exceptionStatsHandler))
+
   /*** BUILD ***/
 
   // This is only used for client alterations outside of the stack.
@@ -918,7 +929,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   private def retryFilter(timer: com.twitter.util.Timer) =
     params[Retries] match {
       case Retries(policy) if params.contains[Retries] =>
-        val stats = new StatsFilter[Req, Rep](new RollupStatsReceiver(statsReceiver.scope("tries")))
+        val exceptions = params[ExceptionStatsHandler]
+        val stats = new StatsFilter[Req, Rep](statsReceiver.scope("tries"), exceptions.categorizer)
         val retries = new RetryingFilter[Req, Rep](policy, timer, statsReceiver)
         stats andThen retries
       case _ => identityFilter

@@ -14,6 +14,16 @@ trait SourcedException extends Exception {
 
 object SourcedException {
   val UnspecifiedServiceName = "unspecified"
+
+  def unapply(t: Throwable): Option[String] = t match {
+    case sourced: SourcedException
+      if sourced.serviceName != SourcedException.UnspecifiedServiceName =>
+      Some(sourced.serviceName)
+    case sourced: Failure =>
+      sourced.getSource(Failure.Sources.ServiceName).map(_.toString)
+    case _ =>
+      None
+  }
 }
 
 /**

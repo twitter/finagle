@@ -85,4 +85,23 @@ class ExceptionsTest extends FunSuite with MockitoSugar {
     assert(exc.getMessage.endsWith(exc.serviceName))
   }
 
+  test("SourcedException extractor understands SourceException") {
+    val exc = new ServiceTimeoutException(Duration.Top)
+
+    assert(SourcedException.unapply(exc) === None)
+
+    exc.serviceName = "finagle"
+
+    assert(SourcedException.unapply(exc) === Some("finagle"))
+  }
+
+  test("SourcedException extractor understands Failure") {
+    val exc = Failure.Cause(new Exception(""))
+
+    assert(SourcedException.unapply(exc) === None)
+
+    val finagleExc = exc.withSource(Failure.Sources.ServiceName, "finagle")
+
+    assert(SourcedException.unapply(finagleExc) === Some("finagle"))
+  }
 }

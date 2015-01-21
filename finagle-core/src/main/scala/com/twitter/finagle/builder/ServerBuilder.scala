@@ -376,6 +376,17 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def daemon(daemonize: Boolean): This =
     configured(Daemonize(daemonize))
 
+  /**
+   * Provide an alternative to putting all request exceptions under
+   * a "failures" stat.  Typical implementations may report any
+   * cancellations or validation errors separately so success rate
+   * considers only valid non cancelled requests.
+   *
+   * @param exceptionStatsHandler function to record failure details.
+   */
+  def exceptionCategorizer(exceptionStatsHandler: stats.ExceptionStatsHandler): This =
+    configured(ExceptionStatsHandler(exceptionStatsHandler))
+
   /* Builder methods follow */
 
   /**

@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, RollupStatsReceiver}
-import com.twitter.finagle.{BackupRequestLost, RequestException, Service, WriteException, Failure}
+import com.twitter.finagle.stats.{CategorizingExceptionStatsHandler, ExceptionStatsHandler, InMemoryStatsReceiver}
+import com.twitter.finagle._
 import com.twitter.util.{Await, Promise}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -9,9 +9,13 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class StatsFilterTest extends FunSuite {
-  def getService: (Promise[String], InMemoryStatsReceiver, Service[String, String]) = {
+  val BasicExceptions = new CategorizingExceptionStatsHandler(_ => None, _ => None, rollup = false)
+
+  def getService(
+    exceptionStatsHandler: ExceptionStatsHandler = BasicExceptions
+  ): (Promise[String], InMemoryStatsReceiver, Service[String, String]) = {
     val receiver = new InMemoryStatsReceiver()
-    val statsFilter = new StatsFilter[String, String](receiver)
+    val statsFilter = new StatsFilter[String, String](receiver, exceptionStatsHandler)
     val promise = new Promise[String]
     val service = new Service[String, String] {
       def apply(request: String) = promise
@@ -21,7 +25,7 @@ class StatsFilterTest extends FunSuite {
   }
 
   test("report exceptions") {
-    val (promise, receiver, statsService) = getService
+    val (promise, receiver, statsService) = getService()
 
     val e1 = new Exception("e1")
     val e2 = new RequestException(e1)
@@ -31,33 +35,42 @@ class StatsFilterTest extends FunSuite {
     val res = statsService("foo")
     assert(res.isDefined)
     assert(Await.ready(res).poll.get.isThrow)
-    val sourced = receiver.counters.keys.filter { _.exists(_ == "sourcedfailures") }
-    assert(sourced.size === 1)
-    assert(sourced.toSeq(0).exists(_.indexOf("bogus") >= 0))
-    val unsourced = receiver.counters.keys.filter { _.exists(_ == "failures") }
-    assert(unsourced.size === 1)
-    assert(unsourced.toSeq(0).exists { s => s.indexOf("RequestException") >= 0 })
-    assert(unsourced.toSeq(0).exists { s => s.indexOf("WriteException") >= 0 })
+
+    val sourced = receiver.counters.filterKeys { _.exists(_ == "sourcedfailures") }
+    assert(sourced.size === 0)
+
+    val unsourced = receiver.counters.filterKeys { _.exists(_ == "failures") }
+    assert(unsourced.size === 2)
+    assert(unsourced(Seq("failures")) === 1)
+    assert(unsourced(Seq("failures", classOf[ChannelWriteException].getName(),
+      classOf[RequestException].getName(), classOf[Exception].getName())) === 1)
   }
 
   test("source failures") {
-    val (promise, receiver, statsService) = getService
+    val esh = new CategorizingExceptionStatsHandler(
+      sourceFunction = _ => Some("bogus"))
+
+    val (promise, receiver, statsService) = getService(esh)
     val e = new Failure("e").withSource(Failure.Sources.ServiceName, "bogus")
     promise.setException(e)
     val res = statsService("foo")
     assert(res.isDefined)
     assert(Await.ready(res).poll.get.isThrow)
-    val sourced = receiver.counters.keys.filter { _.exists(_ == "sourcedfailures") }
-    assert(sourced.size == 1)
-    assert(sourced.toSeq(0).exists(_.indexOf("bogus") >=0))
-    val unsourced = receiver.counters.keys.filter { _.exists(_ == "failures") }
-    assert(unsourced.size == 1)
-    assert(unsourced.toSeq(0).exists { s => s.indexOf("Failure") >= 0 })
+
+    val sourced = receiver.counters.filterKeys { _.exists(_ == "sourcedfailures") }
+    assert(sourced.size === 2)
+    assert(sourced(Seq("sourcedfailures", "bogus")) === 1)
+    assert(sourced(Seq("sourcedfailures", "bogus", classOf[Failure].getName())) === 1)
+
+    val unsourced = receiver.counters.filterKeys { _.exists(_ == "failures") }
+    assert(unsourced.size === 2)
+    assert(unsourced(Seq("failures")) === 1)
+    assert(unsourced(Seq("failures", classOf[Failure].getName())) === 1)
   }
 
   test("don't report BackupRequestLost exceptions") {
     for (exc <- Seq(BackupRequestLost, WriteException(BackupRequestLost))) {
-      val (promise, receiver, statsService) = getService
+      val (promise, receiver, statsService) = getService()
 
       // It may seem strange to test for the absence
       // of these keys, but StatsReceiver semantics are
@@ -76,7 +89,7 @@ class StatsFilterTest extends FunSuite {
   }
 
   test("report pending requests on success") {
-    val (promise, receiver, statsService) = getService
+    val (promise, receiver, statsService) = getService()
     assert(receiver.gauges(Seq("pending"))() === 0.0)
     statsService("foo")
     assert(receiver.gauges(Seq("pending"))() === 1.0)
@@ -85,7 +98,7 @@ class StatsFilterTest extends FunSuite {
   }
 
   test("report pending requests on failure") {
-    val (promise, receiver, statsService) = getService
+    val (promise, receiver, statsService) = getService()
     assert(receiver.gauges(Seq("pending"))() === 0.0)
     statsService("foo")
     assert(receiver.gauges(Seq("pending"))() === 1.0)
@@ -93,53 +106,54 @@ class StatsFilterTest extends FunSuite {
     assert(receiver.gauges(Seq("pending"))() === 0.0)
   }
 
-  trait StatsFilterHelper {
-    val promise = Promise[String]()
-    val underlying = new InMemoryStatsReceiver()
-    val receiver = new RollupStatsReceiver(underlying)
-    val service = new StatsFilter(receiver) andThen Service.mk { string: String =>
-      promise
-    }
-  }
-
   test("should count failure requests only after they are finished") {
-    new StatsFilterHelper {
-      intercept[java.util.NoSuchElementException] {
-        underlying.counters(Seq("requests"))
-      }
-      intercept[java.util.NoSuchElementException] {
-        underlying.counters(Seq("failures"))
-      }
-      val f = service("foo")
-      intercept[java.util.NoSuchElementException] {
-        underlying.counters(Seq("requests"))
-      }
-      intercept[java.util.NoSuchElementException] {
-        underlying.counters(Seq("failures"))
-      }
-      promise.setException(new Exception)
-      assert(underlying.counters(Seq("requests")) === 1)
-      assert(underlying.counters(Seq("failures")) === 1)
-    }
+    val (promise, receiver, statsService) = getService()
+
+    assert(receiver.counters.contains(Seq("requests")) === false)
+    assert(receiver.counters.contains(Seq("failures")) === false)
+
+    val f = statsService("foo")
+
+    assert(receiver.counters.contains(Seq("requests")) === false)
+    assert(receiver.counters.contains(Seq("failures")) === false)
+
+    promise.setException(new Exception)
+
+    assert(receiver.counters(Seq("requests")) === 1)
+    assert(receiver.counters(Seq("failures")) === 1)
   }
 
   test("should count successful requests only after they are finished") {
-    val (promise, receiver, statsService) = getService
-    intercept[java.util.NoSuchElementException] {
-      receiver.counters(Seq("requests"))
-    }
-    intercept[java.util.NoSuchElementException] {
-      receiver.counters(Seq("success"))
-    }
+    val (promise, receiver, statsService) = getService()
+
+    assert(receiver.counters.contains(Seq("requests")) === false)
+    assert(receiver.counters.contains(Seq("failures")) === false)
+
     val f = statsService("foo")
-    intercept[java.util.NoSuchElementException] {
-      receiver.counters(Seq("requests"))
-    }
-    intercept[java.util.NoSuchElementException] {
-      receiver.counters(Seq("success"))
-    }
+
+    assert(receiver.counters.contains(Seq("requests")) === false)
+    assert(receiver.counters.contains(Seq("failures")) === false)
+
     promise.setValue("whatever")
+
     assert(receiver.counters(Seq("requests")) === 1)
     assert(receiver.counters(Seq("success")) === 1)
+  }
+
+  test("support rollup exceptions") {
+    val esh = new CategorizingExceptionStatsHandler(rollup = true)
+
+    val (promise, receiver, statsService) = getService(esh)
+
+    val e = ChannelWriteException(new Exception("e1"))
+    promise.setException(e)
+    val res = statsService("foo")
+
+    val unsourced = receiver.counters.filterKeys { _.exists(_ == "failures") }
+
+    assert(unsourced.size === 3)
+    assert(unsourced(Seq("failures")) === 1)
+    assert(unsourced(Seq("failures", classOf[ChannelWriteException].getName())) === 1)
+    assert(unsourced(Seq("failures", classOf[ChannelWriteException].getName(), classOf[Exception].getName())) === 1)
   }
 }

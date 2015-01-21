@@ -1,5 +1,6 @@
 package com.twitter.finagle.param
 
+import com.twitter.finagle.service.StatsFilter
 import com.twitter.finagle.{stats, tracing, util, Stack}
 
 /**
@@ -64,7 +65,7 @@ object Monitor {
 
 /**
  * A class eligible for configuring a
- * [[com.twitter.util.ReporterFactory]] throughout finagle servers and
+ * [[com.twitter.finagle.util.ReporterFactory]] throughout finagle servers and
  * clients.
  */
 case class Reporter(reporter: util.ReporterFactory)
@@ -87,5 +88,23 @@ object Tracer {
     // Note, this is lazy to avoid potential failures during
     // static initialization.
     lazy val default = Tracer(tracing.DefaultTracer)
+  }
+}
+
+/**
+ * A class eligible for configuring a
+ * [[com.twitter.finagle.stats.ExceptionStatsHandler]] throughout finagle servers
+ * and clients.
+ *
+ * NB: Since the default for failures is to be scoped under "failures", if you
+ * set the default to be in another scope, it may be difficult for engineers
+ * unfamiliar with your stats to understand your service's key metrics.
+ */
+case class ExceptionStatsHandler(categorizer: stats.ExceptionStatsHandler)
+object ExceptionStatsHandler {
+  implicit val param = new Stack.Param[ExceptionStatsHandler] {
+    // Note, this is lazy to avoid potential failures during
+    // static initialization.
+    lazy val default = ExceptionStatsHandler(StatsFilter.DefaultExceptions)
   }
 }

@@ -6,10 +6,9 @@ import com.twitter.finagle.http._
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.stats.{StatsReceiver, DefaultStatsReceiver, RollupStatsReceiver}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.Throwables
 import com.twitter.io.{Reader, Buf, BufReader}
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Promise, Throw, Return, NonFatal}
+import com.twitter.util.{Future, Promise, Throw, Return, NonFatal, Throwables}
 import java.net.InetSocketAddress
 import org.jboss.netty.handler.codec.frame.TooLongFrameException
 import org.jboss.netty.handler.codec.http._

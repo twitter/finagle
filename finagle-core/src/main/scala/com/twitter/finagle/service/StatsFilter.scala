@@ -1,27 +1,31 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle._
-import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver}
-import com.twitter.finagle.util.Throwables
+import com.twitter.finagle.stats.{CategorizingExceptionStatsHandler, ExceptionStatsHandler, StatsReceiver}
 import com.twitter.util.{Future, Stopwatch, Throw, Return}
 import java.util.concurrent.atomic.AtomicInteger
 
-private[finagle] object StatsFilter {
+object StatsFilter {
   val role = Stack.Role("RequestStats")
 
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.StatsFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module1[param.Stats, ServiceFactory[Req, Rep]] {
+    new Stack.Module2[param.Stats, param.ExceptionStatsHandler, ServiceFactory[Req, Rep]] {
       val role = StatsFilter.role
       val description = "Report request statistics"
-      def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]) = {
+      def make(_stats: param.Stats, _exceptions: param.ExceptionStatsHandler, next: ServiceFactory[Req, Rep]) = {
         val param.Stats(statsReceiver) = _stats
+        val param.ExceptionStatsHandler(handler) = _exceptions
         if (statsReceiver.isNull) next
-        else new StatsFilter(new RollupStatsReceiver(statsReceiver)) andThen next
+        else new StatsFilter(statsReceiver, handler) andThen next
       }
     }
+
+  /** Basic categorizer with all exceptions under 'failures'. */
+  val DefaultExceptions = new CategorizingExceptionStatsHandler(
+    sourceFunction = SourcedException.unapply(_))
 }
 
 /**
@@ -35,14 +39,16 @@ private[finagle] object StatsFilter {
  * "requests". This is why we don't increment "requests" on backup
  * request failures.
  */
-class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
+class StatsFilter[Req, Rep](
+    statsReceiver: StatsReceiver,
+    exceptionStatsHandler: ExceptionStatsHandler)
   extends SimpleFilter[Req, Rep]
 {
+  def this(statsReceiver: StatsReceiver) = this(statsReceiver, StatsFilter.DefaultExceptions)
+
   private[this] val outstandingRequestCount = new AtomicInteger(0)
   private[this] val dispatchCount = statsReceiver.counter("requests")
   private[this] val successCount = statsReceiver.counter("success")
-  private[this] val failureReceiver = statsReceiver.scope("failures")
-  private[this] val sourcedFailuresReceiver = statsReceiver.scope("sourcedfailures")
   private[this] val latencyStat = statsReceiver.stat("request_latency_ms")
   private[this] val loadGauge = statsReceiver.addGauge("load") { outstandingRequestCount.get }
   private[this] val outstandingRequestCountGauge =
@@ -66,22 +72,7 @@ class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
         case Throw(e) =>
           dispatchCount.incr()
           latencyStat.add(elapsed().inMilliseconds)
-          failureReceiver.counter(Throwables.mkString(e): _*).incr()
-          e match {
-            case sourced: SourcedException
-              if sourced.serviceName != SourcedException.UnspecifiedServiceName =>
-              sourcedFailuresReceiver
-                .counter(sourced.serviceName +: Throwables.mkString(sourced): _*)
-                .incr()
-            case sourced: Failure =>
-              val maybe = sourced.getSource(Failure.Sources.ServiceName)
-              maybe foreach { name =>
-                sourcedFailuresReceiver
-                  .counter(name.toString +: Throwables.mkString(sourced): _*)
-                  .incr()
-              }
-            case _ =>
-          }
+          exceptionStatsHandler.record(statsReceiver, e)
         case Return(_) =>
           dispatchCount.incr()
           successCount.incr()

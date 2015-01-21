@@ -21,6 +21,10 @@ Breaking API Changes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: `com.twitter.finagle.service.StatsFilter` no longer requires a
+    `com.twitter.finagle.stats.RollupStatsReceiver` for correct behaviour, and 
+    providing one will double count failures. 
+
 Deprecations
 ~~~~~~~~~~~~
 
@@ -33,6 +37,10 @@ New Features
   * finagle-core: `Fail fast <https://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s>`_
     is now `configurable <https://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6>`_
     on Stack-based clients via the `com.twitter.finagle.FailFastFactory.FailFast` param.
+
+  * finagle-core: `com.twitter.finagle.service.StatsFilter` is now configurable with an 
+    `com.twitter.finagle.stats.ExceptionStatsHandler` to customize how failures are recorded.
+
   * finagle-mysql: Add support for MySQL transactions.
 
   * finagle-stats: A new HostStatsReceiver type is added and used for per host stats.
