@@ -8,7 +8,7 @@ import com.twitter.finagle.kestrel.protocol.{Response, Command, Kestrel}
 import com.twitter.finagle.stats.{Gauge, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.{ThriftClientFramedCodec, ClientId, ThriftClientRequest}
 import com.twitter.finagle.util.DefaultLogger
-import com.twitter.util.{Closable, Duration, Future, Return, Throw, Try, Timer, Var, Witness}
+import com.twitter.util._
 import _root_.java.{util => ju}
 import _root_.java.lang.UnsupportedOperationException
 import _root_.java.net.SocketAddress
@@ -82,7 +82,7 @@ private[finagle] object MultiReaderHelper {
     }
 
     def onClose(handles: Set[ReadHandle]) {
-      handles foreach { _.close }
+      handles foreach { _.close() }
       error ! ReadClosedException
     }
 
@@ -95,43 +95,38 @@ private[finagle] object MultiReaderHelper {
       val queues = handles.map { _.messages }.toSeq
       val errors = handles.map { h =>
         h.error map { e =>
-          logger.warning("Read handle %d encountered exception : %s".format(
-            _root_.java.lang.System.identityHashCode(h), e.getMessage))
+          logger.warning(s"Read handle ${_root_.java.lang.System.identityHashCode(h)} " +
+            s"encountered exception : ${e.getMessage}")
           h
         }
       }.toSeq
-      val closeOf = close.recv { _ => onClose(handles) }
 
       // We sequence here to ensure that `close` gets priority over reads.
-      val of = closeOf orElse {
-        Offer.choose(
-          closeOf,
-          Offer.choose(queues:_*) { m =>
-            messages ! trackMessage(m)
-            loop(handles)
-          },
-          Offer.choose(errors:_*) { h =>
-            logger.info("Closed read handle %d due to it encountered error".format(
-              _root_.java.lang.System.identityHashCode(h)))
+      Offer.prioritize(
+        close.recv { _ => onClose(handles) },
+        Offer.choose(queues:_*) { m =>
+          messages ! trackMessage(m)
+          loop(handles)
+        },
+        Offer.choose(errors:_*) { h =>
+          logger.info(s"Closed read handle ${_root_.java.lang.System.identityHashCode(h)} due to " +
+            s"it encountered error")
+          h.close()
+          val newHandles = handles - h
+          exposeNumReadHandles(newHandles)
+          loop(newHandles)
+        },
+        clusterUpdate.recv { newHandles =>
+        // Close any handles that exist in old set but not the new one.
+          (handles &~ newHandles) foreach { h =>
+            logger.info(s"Closed read handle ${_root_.java.lang.System.identityHashCode(h)} due " +
+              s"to its host disappeared")
             h.close()
-            val newHandles = handles - h
-            exposeNumReadHandles(newHandles)
-            loop(newHandles)
-          },
-          clusterUpdate.recv { newHandles =>
-          // Close any handles that exist in old set but not the new one.
-            (handles &~ newHandles) foreach { h =>
-              logger.info("Closed read handle %d due to its host disappeared".format(
-                _root_.java.lang.System.identityHashCode(h)))
-              h.close()
-            }
-            exposeNumReadHandles(newHandles)
-            loop(newHandles)
           }
-        )
-      }
-
-      of.sync()
+          exposeNumReadHandles(newHandles)
+          loop(newHandles)
+        }
+      ).sync()
     }
 
     // Wait until the ReadHandles set is populated before initializing.
@@ -525,8 +520,8 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
 
     val event = config.va.changes map {
       case Addr.Bound(socketAddrs, _) => {
-        (currentHandles.keySet &~ socketAddrs) map { socketAddr =>
-          logger.info("Host %s left for reading %s.".format(socketAddr, config.queueName))
+        (currentHandles.keySet &~ socketAddrs) foreach { socketAddr =>
+          logger.info(s"Host ${socketAddr} left for reading queue ${config.queueName}")
         }
         val newHandles = (socketAddrs &~ currentHandles.keySet) map { socketAddr =>
           val factory = baseClientBuilder
@@ -541,8 +536,13 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
             case _ => client.readReliably(config.queueName)
           }
 
-          logger.info("Host %s joined for reading %s (handle = %d).".format(
-            socketAddr, config.queueName, _root_.java.lang.System.identityHashCode(handle)))
+          handle.error foreach { case NonFatal(cause) =>
+            logger.warning(s"Closing service factory for address: ${socketAddr}")
+            factory.close()
+          }
+
+          logger.info(s"Host ${socketAddr} joined for reading ${config.queueName} " +
+            s"(handle = ${_root_.java.lang.System.identityHashCode(handle)}).")
 
           (socketAddr, handle)
         }

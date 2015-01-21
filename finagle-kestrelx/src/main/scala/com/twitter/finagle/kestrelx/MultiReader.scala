@@ -6,7 +6,7 @@ import com.twitter.finagle.{Addr, Group, Name, ServiceFactory}
 import com.twitter.finagle.builder._
 import com.twitter.finagle.kestrelx.protocol.{Response, Command, Kestrel}
 import com.twitter.finagle.thrift.{ThriftClientFramedCodec, ClientId, ThriftClientRequest}
-import com.twitter.util.{Closable, Duration, Future, Return, Throw, Try, Timer, Var, Witness}
+import com.twitter.util._
 import _root_.java.{util => ju}
 import _root_.java.lang.UnsupportedOperationException
 import _root_.java.util.logging.Level
@@ -29,7 +29,7 @@ private[finagle] object MultiReaderHelper {
     val clusterUpdate = new Broker[Set[ReadHandle]]
 
     def onClose(handles: Set[ReadHandle]) {
-      handles foreach { _.close }
+      handles foreach { _.close() }
       error ! ReadClosedException
     }
 
@@ -44,26 +44,22 @@ private[finagle] object MultiReaderHelper {
       val closeOf = close.recv { _ => onClose(handles) }
 
       // We sequence here to ensure that `close` gets priority over reads.
-      val of = closeOf orElse {
-        Offer.choose(
-          closeOf,
-          Offer.choose(queues:_*) { m =>
-            messages ! m
-            loop(handles)
-          },
-          Offer.choose(errors:_*) { h =>
-            h.close()
-            loop(handles - h)
-          },
-          clusterUpdate.recv { newHandles =>
-          // Close any handles that exist in old set but not the new one.
-            (handles &~ newHandles) foreach { _.close() }
-            loop(newHandles)
-          }
-        )
-      }
-
-      of.sync()
+      Offer.prioritize(
+        closeOf,
+        Offer.choose(queues:_*) { m =>
+          messages ! m
+          loop(handles)
+        },
+        Offer.choose(errors:_*) { h =>
+          h.close()
+          loop(handles - h)
+        },
+        clusterUpdate.recv { newHandles =>
+        // Close any handles that exist in old set but not the new one.
+          (handles &~ newHandles) foreach { _.close() }
+          loop(newHandles)
+        }
+      ).sync()
     }
 
     // Wait until the ReadHandles set is populated before initializing.
@@ -426,7 +422,7 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrelx](
               client.readReliably(config.queueName, timer, backoffs())
             case _ => client.readReliably(config.queueName)
           }
-
+          handle.error foreach { case NonFatal(cause) => factory.close() }
           (socketAddr, handle)
         }
 
