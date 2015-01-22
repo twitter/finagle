@@ -41,6 +41,7 @@ junit_tests(name='serversets',
     'finagle/finagle-serversets/src/test/resources'
   ],
   sources=globs(
+    'com/twitter/finagle/*.scala',
     'com/twitter/finagle/serverset2/*.scala',
     'com/twitter/finagle/zookeeper/*.scala',
   )
