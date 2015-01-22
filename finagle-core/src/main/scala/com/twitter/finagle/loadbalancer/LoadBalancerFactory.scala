@@ -9,6 +9,7 @@ import com.twitter.finagle.util.OnReady
 import com.twitter.util.{Activity, Future, Var}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.logging.{Level, Logger}
+import scala.collection.mutable
 
 object defaultBalancer extends GlobalFlag("heap", "Default load balancer")
 object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n" +
@@ -18,6 +19,20 @@ object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n"
   "\tor the NullStatsReceiver if none given.")
 
 object LoadBalancerFactory {
+  /**
+   * A class eligible for configuring a client's load balancer probation setting.
+   */
+  case class EnableProbation(enable: Boolean)
+  implicit object EnableProbation extends Stack.Param[EnableProbation] {
+    val default = EnableProbation(false)
+  }
+
+  /**
+   * A tuple containing a [[com.twitter.finagle.ServiceFactory]] and its
+   * associated weight.
+   */
+  private[loadbalancer] type WeightedFactory[Req, Rep] = (ServiceFactory[Req, Rep], Double)
+
   val role = Stack.Role("LoadBalancer")
 
   /**
@@ -64,6 +79,42 @@ object LoadBalancerFactory {
   }
 
   /**
+   * Update a mutable Map of `WeightedFactory`s according to a set of
+   * active SocketAddresses and a factory construction function.
+   *
+   * Ensures that at most one WeightedFactory is built for each
+   * distinct SocketAddress.
+   *
+   * When `probationEnabled` is true, `ServiceFactory`s for addresses
+   * not present in `activeAddrs` are put "on probation". A
+   * `ServiceFactory` that is on probation will continue to be issued
+   * requests until it becomes unavailable
+   * (i.e. `factory.status != Status.Open`), at which point it is removed.
+   */
+  private[loadbalancer] def updateFactories[Req, Rep](
+    activeAddrs: Set[SocketAddress],
+    activeFactories: mutable.Map[SocketAddress, WeightedFactory[Req, Rep]],
+    mkFactory: SocketAddress => WeightedFactory[Req, Rep],
+    probationEnabled: Boolean
+  ): Unit = activeFactories.synchronized {
+    // Add new hosts.
+    (activeAddrs &~ activeFactories.keySet) foreach { sa =>
+      activeFactories += sa -> mkFactory(sa)
+    }
+
+    // Put hosts that have disappeared on probation.
+    (activeFactories.keySet &~ activeAddrs) foreach { sa =>
+      activeFactories.get(sa) match {
+        case Some((factory, _)) if !probationEnabled || factory.status != Status.Open =>
+          factory.close()
+          activeFactories -= sa
+
+        case _ => // nothing to do
+      }
+    }
+  }
+
+  /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]].
    * The module creates a new `ServiceFactory` based on the module above it for each `Addr`
    * in `LoadBalancerFactory.Dest`. Incoming requests are balanced using the load balancer
@@ -86,6 +137,7 @@ object LoadBalancerFactory {
         val ErrorLabel(errorLabel) = params[ErrorLabel]
         val Dest(dest) = params[Dest]
         val Param(loadBalancerFactory) = params[Param]
+        val EnableProbation(probationEnabled) = params[EnableProbation]
 
         // Determine which stats receiver to use based on the flag
         // 'com.twitter.finagle.loadbalancer.perHostStats'
@@ -111,9 +163,11 @@ object LoadBalancerFactory {
 
         val noBrokersException = new NoBrokersAvailableException(errorLabel)
 
-        type WeightedFactory = (ServiceFactory[Req, Rep], Double)
-
-        def mkFactory(sockaddr: SocketAddress, metadata: Addr.Metadata): WeightedFactory = {
+        def mkFactory(
+          metadata: Addr.Metadata
+        )(
+          sockaddr: SocketAddress
+        ): WeightedFactory[Req, Rep] = {
           // TODO(ver) install per-region stats from metadata?
           val stats = if (hostStatsReceiver.isNull) statsReceiver else {
             val scope = sockaddr match {
@@ -131,9 +185,9 @@ object LoadBalancerFactory {
             (sa: SocketAddress) => {
               // TODO(ver) determine latency compensation from metadata.
               val underlying = next.make(params +
-                  Transporter.EndpointAddr(sa) +
-                  param.Stats(stats) +
-                  param.Monitor(composite))
+                Transporter.EndpointAddr(sa) +
+                param.Stats(stats) +
+                param.Monitor(composite))
               new ServiceFactoryProxy(underlying) {
                 override def toString = sa.toString
               }
@@ -145,30 +199,19 @@ object LoadBalancerFactory {
           }
         }
 
-        // Ensure that at most one WeightedFactory is built for each SocketAddress.
-        var cachedFactories = Map[SocketAddress, WeightedFactory]()
-        var lastAddrs = Set[SocketAddress]()
-        def mkFactories(
-          sockaddrs: Set[SocketAddress],
-          metadata: Addr.Metadata
-        ): Set[WeightedFactory] = synchronized {
-          cachedFactories ++= (sockaddrs &~ lastAddrs) map { sa =>
-            sa -> mkFactory(sa, metadata)
-          }
-          cachedFactories --= lastAddrs &~ sockaddrs
-          lastAddrs = sockaddrs
-          cachedFactories.values.toSet
-        }
-
+        val cachedFactories = mutable.Map.empty[SocketAddress, WeightedFactory[Req, Rep]]
         val endpoints = Activity(dest map {
           case Addr.Bound(sockaddrs, metadata) =>
-            Activity.Ok(mkFactories(sockaddrs, metadata))
+            updateFactories(sockaddrs, cachedFactories, mkFactory(metadata), probationEnabled)
+            Activity.Ok(cachedFactories.values.toSet)
 
           case Addr.Neg =>
             if (log.isLoggable(Level.WARNING)) {
               log.warning("%s: name resolution is negative".format(label))
             }
-            Activity.Ok(mkFactories(Set.empty, Addr.Metadata.empty))
+            updateFactories(
+              Set.empty, cachedFactories, mkFactory(Addr.Metadata.empty), probationEnabled)
+            Activity.Ok(cachedFactories.values.toSet)
 
           case Addr.Failed(e) =>
             if (log.isLoggable(Level.WARNING)) {
