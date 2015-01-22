@@ -1,5 +1,6 @@
 package com.twitter.finagle.context
 
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.io.Buf
 import com.twitter.util.{Local, Try, Return, Throw}
 import scala.collection.mutable
@@ -9,14 +10,14 @@ import scala.collection.mutable
  * are indexed by type Key[A] in a typesafe manner. Later bindings
  * shadow earlier ones.
  *
- * Note that the implementation of context maintains all bindings 
+ * Note that the implementation of context maintains all bindings
  * in a linked list; context lookup requires a linear search.
  */
 trait Context {
   type Key[A]
-  
+
   sealed trait Env {
-    /** 
+    /**
      * Retrieve the current definition of a key.
      *
      * @throws NoSuchElementException when the key is undefined
@@ -26,7 +27,7 @@ trait Context {
     def apply[A](key: Key[A]): A
 
     /**
-     * Retrieve the current definition of a key, but only 
+     * Retrieve the current definition of a key, but only
      * if it is defined.
      */
     def get[A](key: Key[A]): Option[A]
@@ -35,15 +36,15 @@ trait Context {
      * Tells whether `key` is defined in this environment.
      */
     def contains[A](key: Key[A]): Boolean
-  
+
     /**
      * Create a derived environment where `key` is bound to
      * `value`; previous bindings of `key` are shadowed.
      */
     final def bound[A](key: Key[A], value: A): Env = Bound(this, key, value)
-    
+
     /**
-     * Clear the binding for the given key. Lookups for `key` will be 
+     * Clear the binding for the given key. Lookups for `key` will be
      * negative in the returned environment.
      */
     final def cleared(key: Key[_]): Env = Cleared(this, key)
@@ -58,7 +59,7 @@ trait Context {
     def contains[A](key: Key[A]) = false
     override def toString = "<empty com.twitter.finagle.context.Env>"
   }
-  
+
   /**
    * An environment with `key` bound to `value`; lookups for other keys
    * are forwarded to `next`.
@@ -72,18 +73,18 @@ trait Context {
       if (key == this.key) Some(value.asInstanceOf[B])
       else next.get(key)
 
-    def contains[B](key: Key[B]): Boolean = 
+    def contains[B](key: Key[B]): Boolean =
       key == this.key || next.contains(key)
 
     override def toString = s"Bound($key, $value) :: $next"
   }
-  
+
   /**
    * An environment without `key`. Lookups for other keys
    * are forwarded to `next.
    */
   case class Cleared(next: Env, key: Key[_]) extends Env {
-    def apply[A](key: Key[A]) = 
+    def apply[A](key: Key[A]) =
       if (key == this.key) throw new NoSuchElementException
       else next(key)
 
@@ -116,12 +117,12 @@ trait Context {
   }
 
   private[this] val local = new Local[Env]
-  
+
   private[finagle] def env: Env = local() match {
     case Some(env) => env
     case None => Empty
   }
-  
+
   /**
    * Retrieve the current definition of a key.
    *
@@ -132,7 +133,7 @@ trait Context {
   def apply[A](key: Key[A]): A = env(key)
 
   /**
-   * Retrieve the current definition of a key, but only 
+   * Retrieve the current definition of a key, but only
    * if it is defined in the current request-local context.
    */
   def get[A](key: Key[A]): Option[A] = env.get(key)
@@ -177,7 +178,7 @@ trait Context {
  * marshalled and sent across process boundaries. A set
  * of marshalled bindings may be restored in the local
  * environment. Thus we can use marshalled contexts to
- * propagate a set of bindings across a whole request 
+ * propagate a set of bindings across a whole request
  * tree.
  */
 final class MarshalledContext extends Context {
@@ -188,17 +189,17 @@ final class MarshalledContext extends Context {
   abstract class Key[A] {
     /**
      * A unique identifier defining this marshaller. This is
-     * transmitted together with marshalled values in order to 
+     * transmitted together with marshalled values in order to
      * pick the the appropriate unmarshaller for a given value.
      */
     def marshalId: Buf
-  
+
     /**
      * Marshal an A-typed value into a Buf.
      */
     def marshal(value: A): Buf
-  
-    /** 
+
+    /**
      * Attempt to unmarshal an A-typed context value.
      */
     def tryUnmarshal(buf: Buf): Try[A]
@@ -235,7 +236,7 @@ final class MarshalledContext extends Context {
       }
   }
 
-  private def marshalMap(env: Env, map: mutable.Map[Buf, Buf]): Unit = 
+  private def marshalMap(env: Env, map: mutable.Map[Buf, Buf]): Unit =
     env match {
       case Bound(next, key, value) =>
         marshalMap(next, map)
@@ -252,7 +253,7 @@ final class MarshalledContext extends Context {
       case Empty =>
         ()
   }
-  
+
   /**
    * Store into the current environment a set of marshalled
    * bindings and run `fn`. Bindings are unmarshalled on demand.
@@ -263,7 +264,7 @@ final class MarshalledContext extends Context {
       u.put(id, marshalled)
     let(u.build)(fn)
   }
-  
+
   /**
    * Marshal the `env` into a set of (id, value) pairs.
    */
@@ -273,7 +274,7 @@ final class MarshalledContext extends Context {
     map
   }
 
-  /** 
+  /**
    * Marshal the current environment into a set of (id, value) pairs.
    */
   def marshal(): Iterable[(Buf, Buf)] =
@@ -291,7 +292,7 @@ final class MarshalledContext extends Context {
   }
 
   /**
-   * An Unmarshaller gradually builds up an environment from 
+   * An Unmarshaller gradually builds up an environment from
    * a set of (id, value) pairs.
    */
   class Unmarshaller(init: Env) {
@@ -300,9 +301,15 @@ final class MarshalledContext extends Context {
     private[this] var env = init
 
     def put(id: Buf, marshalled: Buf) {
-      env = Translucent(env, id, marshalled)
+      // Copy the Bufs to avoid indirectly keeping a reference to Netty internal buffer (big)
+      env = Translucent(env, copy(id), copy(marshalled))
     }
 
     def build: Env = env
+
+    private[this] def copy(buf: Buf): Buf = buf match {
+      case ChannelBufferBuf(cb) => Buf.ByteBuffer.Shared(cb.toByteBuffer)
+      case _ => buf
+    }
   }
 }
