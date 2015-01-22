@@ -167,10 +167,11 @@ object Netty3Transporter {
     params: Stack.Params
   ): Transporter[In, Out] = {
     val Stats(stats) = params[Stats]
+    val transporter = make[In, Out](pipelineFactory, params)
 
     new Transporter[In, Out] {
       def apply(sa: SocketAddress): Future[Transport[In, Out]] =
-        make(pipelineFactory, params)(sa, stats)
+        transporter(sa, stats)
     }
   }
 }
