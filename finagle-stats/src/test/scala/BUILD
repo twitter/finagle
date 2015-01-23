@@ -1,7 +1,7 @@
 junit_tests(name='scala',
   dependencies=[
-    '3rdparty:junit',
-    '3rdparty:scalatest',
+    '3rdparty/jvm/junit',
+    '3rdparty/jvm/org/scalatest',
     '3rdparty/jvm/com/twitter/common:metrics',
     'finagle/finagle-stats'
   ],

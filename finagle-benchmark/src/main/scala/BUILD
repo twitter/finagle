@@ -1,7 +1,7 @@
 benchmark(name='scala',
   dependencies=[
-    '3rdparty:caliper',
-    '3rdparty:scala-library',
+    '3rdparty/jvm/com/google/caliper',
+    '3rdparty/jvm/org/scala-lang:scala-library',
     'finagle/finagle-core',
     'finagle/finagle-memcached',
     'finagle/finagle-ostrich4',

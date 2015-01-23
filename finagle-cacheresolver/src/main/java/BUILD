@@ -5,7 +5,7 @@ java_library(name='java',
     repo = artifactory,
   ),
   dependencies=[
-    '3rdparty:scala-library',
+    '3rdparty/jvm/org/scala-lang:scala-library',
     '3rdparty/jvm/com/twitter/common/zookeeper:client',
     'finagle/finagle-core',
     'finagle/finagle-cacheresolver/src/main/scala',

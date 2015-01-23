@@ -5,7 +5,7 @@ java_library(name='java',
     repo = artifactory,
   ),
   dependencies=[
-    '3rdparty:netty',
+    '3rdparty/jvm/io/netty',
     'finagle/finagle-core',
     'finagle/finagle-example/src/main/thrift:thrift-scala',
     'finagle/finagle-kestrel',

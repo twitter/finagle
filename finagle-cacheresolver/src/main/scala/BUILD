@@ -5,7 +5,7 @@ scala_library(name='scala',
     repo = artifactory,
   ),
   dependencies=[
-    '3rdparty:gson',
+    '3rdparty/jvm/com/google/code/gson',
     '3rdparty/jvm/org/apache/zookeeper',
     '3rdparty/jvm/com/twitter/common:io',
     '3rdparty/jvm/com/twitter/common:quantity',

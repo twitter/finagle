@@ -5,7 +5,7 @@ scala_library(name='scala',
     repo = artifactory,
   ),
   dependencies=[
-    '3rdparty:netty',
+    '3rdparty/jvm/io/netty',
     'util/util-core'
   ],
   sources=rglobs('*.scala'),

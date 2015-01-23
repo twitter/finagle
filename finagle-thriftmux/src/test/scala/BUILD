@@ -1,9 +1,9 @@
 junit_tests(name='scala',
   dependencies=[
-    '3rdparty:junit',
-    '3rdparty:netty',
-    '3rdparty:scalatest',
-    '3rdparty:thrift-0.5.0',
+    '3rdparty/jvm/junit',
+    '3rdparty/jvm/io/netty',
+    '3rdparty/jvm/org/scalatest',
+    '3rdparty/jvm/org/apache/thrift:thrift-0.5.0',
     'finagle/finagle-core',
     'finagle/finagle-thrift',
     'finagle/finagle-thriftmux',

@@ -1,7 +1,7 @@
 junit_tests(name='java',
   dependencies=[
-    '3rdparty:junit',
-    '3rdparty:netty',
+    '3rdparty/jvm/junit',
+    '3rdparty/jvm/io/netty',
     'finagle/finagle-core',
     'util/util-core',
   ],

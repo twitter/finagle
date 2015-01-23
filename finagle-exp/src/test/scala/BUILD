@@ -1,9 +1,9 @@
 junit_tests(name='scala',
   dependencies=[
-    '3rdparty:junit',
-    '3rdparty:mockito-all',
-    '3rdparty:scalatest',
-    '3rdparty:specs',
+    '3rdparty/jvm/junit',
+    '3rdparty/jvm/org/mockito:mockito-all',
+    '3rdparty/jvm/org/scalatest',
+    '3rdparty/jvm/org/scala-tools/testing:specs',
     'finagle/finagle-core',
     'finagle/finagle-exp',
     'finagle/finagle-test',

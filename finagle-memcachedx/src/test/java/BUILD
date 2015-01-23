@@ -1,8 +1,8 @@
 junit_tests(name='java',
   dependencies=[
-    '3rdparty:junit',
-    '3rdparty:netty',
-    '3rdparty:scala-library',
+    '3rdparty/jvm/junit',
+    '3rdparty/jvm/io/netty',
+    '3rdparty/jvm/org/scala-lang:scala-library',
     '3rdparty/jvm/com/twitter/common:zookeeper-testing',
     'finagle/finagle-core',
     'finagle/finagle-memcachedx',

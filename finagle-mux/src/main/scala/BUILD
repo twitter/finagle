@@ -5,7 +5,7 @@ scala_library(name='scala',
     repo = artifactory,
   ),
   dependencies=[
-    '3rdparty:netty',
+    '3rdparty/jvm/io/netty',
     '3rdparty/jvm/com/twitter/common:quantity',
     '3rdparty/jvm/com/twitter/common:stats-util',
     '3rdparty/jvm/com/twitter/common:util-system-mocks',

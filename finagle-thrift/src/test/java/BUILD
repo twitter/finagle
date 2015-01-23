@@ -1,8 +1,8 @@
 junit_tests(name='java',
   dependencies=[
-    '3rdparty:scala-library',
-    '3rdparty:slf4j-api',
-    '3rdparty:thrift-0.5.0',
+    '3rdparty/jvm/org/scala-lang:scala-library',
+    '3rdparty/jvm/org/slf4j:slf4j-api',
+    '3rdparty/jvm/org/apache/thrift:thrift-0.5.0',
     'finagle/finagle-thrift',
     'util/util-core',
   ],

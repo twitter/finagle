@@ -7,7 +7,7 @@ scala_library(name='scala',
   dependencies=[
     '3rdparty/jvm/com/google/guava',
     '3rdparty/jvm/commons-lang',
-    '3rdparty:netty',
+    '3rdparty/jvm/io/netty',
     'finagle/finagle-core',
     'util/util-codec',
     'util/util-core',
