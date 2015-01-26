@@ -2,15 +2,19 @@ package com.twitter.finagle.postgres.codec
 
 import com.twitter.finagle._
 import com.twitter.finagle.postgres.ResultSet
-import com.twitter.finagle.postgres.connection.Connection
+import com.twitter.finagle.postgres.connection.{AuthenticationRequired, Connection, RequestingSsl}
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values.Md5Encryptor
 import com.twitter.logging.Logger
 import com.twitter.util.Future
 
+import javax.net.ssl.TrustManagerFactory
+
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.frame.FrameDecoder
+import org.jboss.netty.handler.ssl.util.InsecureTrustManagerFactory
+import org.jboss.netty.handler.ssl.{SslHandler, SslContext}
 
 import scala.collection.mutable
 
@@ -23,24 +27,30 @@ class PgCodec(
     user: String,
     password: Option[String],
     database: String,
-    id: String) extends CodecFactory[PgRequest, PgResponse] {
+    id: String,
+    useSsl: Boolean,
+    trustManagerFactory: TrustManagerFactory = InsecureTrustManagerFactory.INSTANCE)
+      extends CodecFactory[PgRequest, PgResponse] {
   def server = throw new UnsupportedOperationException("client only")
+
+  val sslContext: SslContext = SslContext.newClientContext(trustManagerFactory)
 
   def client = Function.const {
     new Codec[PgRequest, PgResponse] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline = {
           val pipeline = Channels.pipeline()
-          pipeline.addLast("binary_to_packet", new PacketDecoder)
+
+          pipeline.addLast("binary_to_packet", new PacketDecoder(useSsl))
           pipeline.addLast("packet_to_backend_messages", new BackendMessageDecoder(new BackendMessageParser))
-          pipeline.addLast("backend_messages_to_postgres_response", new PgClientChannelHandler())
+          pipeline.addLast("backend_messages_to_postgres_response", new PgClientChannelHandler(sslContext, useSsl))
           pipeline
         }
       }
 
       override def prepareConnFactory(underlying: ServiceFactory[PgRequest, PgResponse]) = {
         val errorHandling = new HandleErrorsProxy(underlying)
-        new AuthenticationProxy(errorHandling, user, password, database)
+        new AuthenticationProxy(errorHandling, user, password, database, useSsl)
       }
 
       override def prepareServiceFactory(underlying: ServiceFactory[PgRequest, PgResponse]) = {
@@ -79,22 +89,41 @@ class HandleErrorsProxy(
 class AuthenticationProxy(
     delegate: ServiceFactory[PgRequest, PgResponse],
     user: String, password: Option[String],
-    database: String) extends ServiceFactoryProxy(delegate) {
+    database: String,
+    useSsl: Boolean) extends ServiceFactoryProxy(delegate) {
   private val logger = Logger(getClass.getName)
 
   override def apply(conn: ClientConnection): Future[Service[PgRequest, PgResponse]] = {
     for {
       service <- delegate.apply(conn)
+      optionalSslResponse <- sendSslRequest(service)
+      _ <- handleSslResponse(optionalSslResponse)
       startupResponse <- service(PgRequest(new StartupMessage(user, database)))
       passwordResponse <- sendPassword(startupResponse, service)
       _ <- verifyResponse(passwordResponse)
     } yield service
   }
 
+  private[this] def sendSslRequest(service: Service[PgRequest, PgResponse]): Future[Option[PgResponse]] = {
+    if (useSsl) {
+      service(PgRequest(new SslRequestMessage)).map { response => Some(response) }
+    } else {
+      Future.value(None)
+    }
+  }
+
+  private[this] def handleSslResponse(optionalSslResponse: Option[PgResponse]): Future[Unit] = {
+    logger.ifDebug("SSL response: %s".format(optionalSslResponse))
+
+    if (useSsl && optionalSslResponse == Some(SslNotSupportedResponse)) {
+      throw Errors.server("SSL requested by server doesn't support it")
+    } else {
+      Future(Unit)
+    }
+  }
+
   private[this] def sendPassword(
       startupResponse: PgResponse, service: Service[PgRequest, PgResponse]): Future[PgResponse] = {
-    logger.ifDebug("Startup response: %s".format(startupResponse))
-
     startupResponse match {
       case PasswordRequired(encoding) => password match {
         case Some(pass) =>
@@ -191,47 +220,81 @@ class BackendMessageDecoder(val parser: BackendMessageParser) extends SimpleChan
 /*
  * Decodes a byte stream into a Packet.
  */
-class PacketDecoder extends FrameDecoder {
+class PacketDecoder(@volatile var inSslNegotation: Boolean) extends FrameDecoder {
   private val logger = Logger(getClass.getName)
 
   def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): AnyRef = {
-    if (buffer.readableBytes() < 5) {
-      return null
+    if (inSslNegotation && buffer.readableBytes() >= 1) {
+      val SslCode: Char = buffer.readByte().asInstanceOf[Char]
+
+      logger.ifDebug("Got ssl negotiation char packet: %s".format(SslCode))
+
+      inSslNegotation = false
+
+      new Packet(Some(SslCode), 1, null, true)
+    } else if (buffer.readableBytes() < 5) {
+      null
+    } else {
+      buffer.markReaderIndex()
+      val code: Char = buffer.readByte().asInstanceOf[Char]
+
+      val totalLength = buffer.readInt()
+      val length = totalLength - 4
+
+      if (buffer.readableBytes() < length) {
+        buffer.resetReaderIndex()
+        return null
+      }
+
+      val packet = new Packet(Some(code), totalLength, buffer.readSlice(length))
+
+      packet
     }
-
-    buffer.markReaderIndex()
-    val code: Char = buffer.readByte().asInstanceOf[Char]
-    val totalLength = buffer.readInt()
-    val length = totalLength - 4
-
-    if (buffer.readableBytes() < length) {
-      buffer.resetReaderIndex()
-      return null
-    }
-
-    new Packet(Some(code), totalLength, buffer.readSlice(length))
   }
 }
 
 /*
  * Map PgRequest to PgResponse.
  */
-class PgClientChannelHandler extends SimpleChannelHandler {
+class PgClientChannelHandler(val sslContext: SslContext, val useSsl: Boolean) extends SimpleChannelHandler {
   private[this] val logger = Logger(getClass.getName)
+  private[this] val connection = {
+    if (useSsl) {
+      new Connection(startState = RequestingSsl)
+    } else {
+      new Connection(startState = AuthenticationRequired)
+    }
+  }
 
-  private[this] val connection = new Connection()
+  override def channelDisconnected(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+    logger.ifDebug("Detected channel disconnected!")
+
+    Channels.disconnect(ctx.getChannel)
+  }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val message = e.getMessage
 
     message match {
+      case SwitchToSsl =>
+        logger.ifDebug("Got switchToSSL message; adding ssl handler into pipeline")
+
+        val pipeline = ctx.getPipeline
+        val engine = sslContext.newEngine()
+
+        engine.setUseClientMode(true)
+
+        pipeline.addFirst("ssl", new SslHandler(engine))
+
+        connection.receive(SwitchToSsl).map {
+          Channels.fireMessageReceived(ctx, _)
+        }
       case msg: BackendMessage =>
         connection.receive(msg).map {
           Channels.fireMessageReceived(ctx, _)
         }
-
       case unsupported =>
-        logger.warning("Only backend message is supported...")
+        logger.warning("Only backend messages are supported...")
         Channels.disconnect(ctx.getChannel)
     }
   }

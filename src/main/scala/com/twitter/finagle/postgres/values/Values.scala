@@ -144,13 +144,13 @@ object StringValueParser extends ValueParser {
 
     // scalastyle:off
     lazy val timestampWithMsRegex = new Regex(
-      "(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\.\\d*)?-(\\d{2})")
+      "(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\.\\d*)?([+-]\\d{2,4})")
     lazy val timestampWithTzFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssX")
     // scalastyle:on
 
     // Ignore milliseconds in the result since Postgres is flaky about putting those in
     // with a consistent precision
-    val timestampWithoutMs = timestampWithMsRegex.replaceAllIn(timestampStr, "$1-$3")
+    val timestampWithoutMs = timestampWithMsRegex.replaceAllIn(timestampStr, "$1$3")
 
     val parsedDate: Date = timestampWithTzFormat.parse(timestampWithoutMs)
 

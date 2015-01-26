@@ -9,6 +9,10 @@ import scala.collection.mutable.ListBuffer
  */
 trait State
 
+case object RequestingSsl extends State
+
+case object AwaitingSslResponse extends State
+
 case object AuthenticationRequired extends State
 
 case object AuthenticationInProgress extends State

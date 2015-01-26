@@ -139,11 +139,16 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
  * TODO: Add other options (e.g., number of connections to keep open).
  */
 object Client {
-  def apply(host: String, username: String, password: Option[String], database: String): Client = {
+  def apply(
+      host: String,
+      username: String,
+      password: Option[String],
+      database: String,
+      useSsl: Boolean = false): Client = {
     val id = Random.alphanumeric.take(28).mkString
 
     val factory: ServiceFactory[PgRequest, PgResponse] = ClientBuilder()
-      .codec(new PgCodec(username, password, database, id))
+      .codec(new PgCodec(username, password, database, id, useSsl = useSsl))
       .hosts(host)
       .hostConnectionLimit(1)
       .buildFactory()

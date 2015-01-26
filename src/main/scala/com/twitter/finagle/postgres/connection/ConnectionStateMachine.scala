@@ -11,9 +11,15 @@ import scala.collection.mutable.ListBuffer
  * See associated Postgres documentation: http://www.postgresql.org/docs/9.0/static/protocol-flow.html
  */
 class ConnectionStateMachine(state: State = AuthenticationRequired) extends StateMachine[Message, PgResponse, State] {
-  private[this] val logger = Logger("pgsql state machine")
+  private[this] val logger = Logger("psql state machine")
 
   startState(state)
+
+  transition {
+    case (SslRequestMessage(), RequestingSsl) => (None, AwaitingSslResponse)
+    case (SwitchToSsl, AwaitingSslResponse) => (Some(SslSupportedResponse), AuthenticationRequired)
+    case (SslNotSupported, AwaitingSslResponse) => (Some(SslNotSupportedResponse), AuthenticationRequired)
+  }
 
   transition {
     case (StartupMessage(_, _), AuthenticationRequired) => (None, AuthenticationInProgress)

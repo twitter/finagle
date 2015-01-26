@@ -4,7 +4,7 @@ import java.sql.Timestamp
 
 import com.twitter.finagle.postgres.codec.ServerError
 import com.twitter.finagle.postgres.{Row, OK, Spec, Client}
-import com.twitter.util.Await
+import com.twitter.util.{Duration, Await}
 
 object IntegrationSpec {
   val pgHostPort = "localhost:5432"
@@ -24,6 +24,8 @@ object IntegrationSpec {
  *
  * If these are conditions are met, set the environment variable RUN_PG_INTEGRATION_TESTS to "1" before running pants.
  *
+ * The tests can be run with SSL by also setting the USE_PG_SSL variable to "1".
+ *
  * If the previous environment variable is not set, the tests will not be run.
  */
 class IntegrationSpec extends Spec {
@@ -31,18 +33,25 @@ class IntegrationSpec extends Spec {
     sys.env.get("RUN_PG_INTEGRATION_TESTS") == Some("1")
   }
 
+  def useSsl: Boolean = {
+    sys.env.get("USE_PG_SSL") == Some("1")
+  }
+
+  val queryTimeout = Duration.fromSeconds(2)
+
   def getClient = {
     Client(
       IntegrationSpec.pgHostPort,
       IntegrationSpec.pgUser,
       Some(IntegrationSpec.pgPassword),
       IntegrationSpec.pgDbName
+      //useSsl = useSsl
     )
   }
 
   def cleanDb(client: Client): Unit = {
     val dropQuery = client.executeUpdate("DROP TABLE IF EXISTS %s".format(IntegrationSpec.pgTestTable))
-    val response = Await.result(dropQuery)
+    val response = Await.result(dropQuery, queryTimeout)
 
     response must equal(OK(1))
 
@@ -56,7 +65,7 @@ class IntegrationSpec extends Spec {
         | bool_field BOOLEAN
         |)
       """.stripMargin.format(IntegrationSpec.pgTestTable))
-    val response2 = Await.result(createTableQuery)
+    val response2 = Await.result(createTableQuery, queryTimeout)
 
     response2 must equal(OK(1))
   }
@@ -71,7 +80,7 @@ class IntegrationSpec extends Spec {
         | ('goodbye', 4567, 15.8, '2015-01-09 16:55:12+0500', FALSE)
       """.stripMargin.format(IntegrationSpec.pgTestTable))
 
-    val response = Await.result(insertDataQuery)
+    val response = Await.result(insertDataQuery, queryTimeout)
 
     response must equal(OK(4))
   }
@@ -87,7 +96,7 @@ class IntegrationSpec extends Spec {
           "SELECT * FROM %s WHERE str_field='hello' ORDER BY timestamp_field".format(IntegrationSpec.pgTestTable)
         )((r: Row) => r)
 
-        val resultRows = Await.result(selectQuery)
+        val resultRows = Await.result(selectQuery, queryTimeout)
 
         resultRows.size must equal(3)
 
@@ -113,7 +122,7 @@ class IntegrationSpec extends Spec {
           "SELECT * FROM %s WHERE str_field='xxxx' ORDER BY timestamp_field".format(IntegrationSpec.pgTestTable)
         )((r: Row) => r)
 
-        val resultRows = Await.result(selectQuery)
+        val resultRows = Await.result(selectQuery, queryTimeout)
 
         resultRows.size must equal(0)
       }
@@ -129,7 +138,7 @@ class IntegrationSpec extends Spec {
           "UPDATE %s SET str_field='hello_updated' where int_field=4567".format(IntegrationSpec.pgTestTable)
         )
 
-        val response = Await.result(updateQuery)
+        val response = Await.result(updateQuery, queryTimeout)
 
         response must equal(OK(1))
 
@@ -137,7 +146,7 @@ class IntegrationSpec extends Spec {
           "SELECT * FROM %s WHERE str_field='hello_updated'".format(IntegrationSpec.pgTestTable)
         )((r: Row) => r)
 
-        val resultRows = Await.result(selectQuery)
+        val resultRows = Await.result(selectQuery, queryTimeout)
 
         resultRows.size must equal(1)
         resultRows(0).getOption("str_field") must equal(Some("hello_updated"))
@@ -154,7 +163,7 @@ class IntegrationSpec extends Spec {
           "DELETE FROM %s WHERE str_field='hello'".format(IntegrationSpec.pgTestTable)
         )
 
-        val response = Await.result(updateQuery)
+        val response = Await.result(updateQuery, queryTimeout)
 
         response must equal(OK(3))
 
@@ -162,7 +171,7 @@ class IntegrationSpec extends Spec {
           "SELECT * FROM %s".format(IntegrationSpec.pgTestTable)
         )((r: Row) => r)
 
-        val resultRows = Await.result(selectQuery)
+        val resultRows = Await.result(selectQuery, queryTimeout)
 
         resultRows.size must equal(1)
         resultRows(0).getOption("str_field") must equal(Some("goodbye"))
@@ -181,7 +190,8 @@ class IntegrationSpec extends Spec {
           preparedQuery.flatMap {
             preparedStatement =>
               preparedStatement.select("hello", true)((r: Row) => r)
-          }
+          },
+          queryTimeout
         )
 
         resultRows.size must equal(2)
@@ -204,7 +214,7 @@ class IntegrationSpec extends Spec {
           )((r: Row) => r)
 
           a[ServerError] must be thrownBy {
-            Await.result(selectQuery)
+            Await.result(selectQuery, queryTimeout)
           }
         }
       }
@@ -222,7 +232,8 @@ class IntegrationSpec extends Spec {
               preparedQuery.flatMap {
                 preparedStatement =>
                   preparedStatement.select("hello")((r: Row) => r)
-              }
+              },
+              queryTimeout
             )
           }
         }

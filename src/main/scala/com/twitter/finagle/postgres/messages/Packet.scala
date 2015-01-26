@@ -13,14 +13,16 @@ object Packet {
  *
  * Converts content into byte format expected by Postgres.
  */
-case class Packet(code: Option[Char], length: Int, content: ChannelBuffer) {
+case class Packet(code: Option[Char], length: Int, content: ChannelBuffer, inSslNegotation: Boolean = false) {
   def encode(): ChannelBuffer = {
     val result = ChannelBuffers.dynamicBuffer()
     code.map { c =>
       result.writeByte(c)
     }
+
     result.writeInt(length + Packet.INT_SIZE)
     result.writeBytes(content)
+
     result
   }
 }

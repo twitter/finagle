@@ -72,7 +72,7 @@ class BackendMessageParser {
   }
 
   def parseR(packet: Packet): Option[BackendMessage] = {
-    val Packet(_, length, content) = packet
+    val Packet(_, length, content, _) = packet
 
     length match {
       case 8 =>
@@ -103,7 +103,7 @@ class BackendMessageParser {
   }
 
   def parseE(packet: Packet): Option[BackendMessage] = {
-    val Packet(_, _, content) = packet
+    val Packet(_, _, content, _) = packet
 
     val builder = new StringBuilder()
     while (content.readable) {
@@ -114,18 +114,22 @@ class BackendMessageParser {
   }
 
   def parseN(packet: Packet): Option[BackendMessage] = {
-    val Packet(_, _, content) = packet
+    val Packet(_, _, content, inSslNegotation) = packet
 
-    val builder = new StringBuilder()
-    while (content.readable) {
-      builder.append(Buffers.readCString(content))
+    if (inSslNegotation) {
+      Some(SslNotSupported)
+    } else {
+      val builder = new StringBuilder()
+      while (content.readable) {
+        builder.append(Buffers.readCString(content))
+      }
+
+      Some(new NoticeResponse(Some(builder.toString)))
     }
-
-    Some(new NoticeResponse(Some(builder.toString)))
   }
 
   def parseZ(packet: Packet): Option[BackendMessage] = {
-    val Packet(_, length, content) = packet
+    val Packet(_, length, content, _) = packet
 
     if (length != 5) {
       throw new IllegalStateException("Unexpected message length ")
@@ -137,7 +141,7 @@ class BackendMessageParser {
   }
 
   def parseK(packet: Packet): Option[BackendMessage] = {
-    val Packet(_, length, content) = packet
+    val Packet(_, length, content, _) = packet
 
     if (length != 12) {
       throw new IllegalStateException("Unexpected message length ")
@@ -154,7 +158,7 @@ class BackendMessageParser {
   }
 
   def parseD(packet: Packet): Option[BackendMessage] = {
-    val Packet(_, _, content) = packet
+    val Packet(_, _, content, _) = packet
 
     val fieldNumber = content.readShort
     val fields = new Array[ChannelBuffer](fieldNumber)
@@ -178,7 +182,7 @@ class BackendMessageParser {
   }
 
   def parseT(packet: Packet): Option[BackendMessage] = {
-    val Packet(_, _, content) = packet
+    val Packet(_, _, content, _) = packet
 
     val fieldNumber = content.readShort
 
@@ -202,7 +206,7 @@ class BackendMessageParser {
   }
 
   def parseC(packet: Packet): Option[BackendMessage] = {
-    val Packet(_, _, content) = packet
+    val Packet(_, _, content, _) = packet
 
     val tag = Buffers.readCString(content)
 
@@ -230,10 +234,14 @@ class BackendMessageParser {
   }
 
   def parseS(packet: Packet): Option[BackendMessage] = {
-    val Packet(_, _, content) = packet
+    val Packet(_, _, content, inSslNegotation) = packet
 
-    val parameterStatus = new ParameterStatus(Buffers.readCString(content), Buffers.readCString(content))
-    Some(parameterStatus)
+    if (inSslNegotation) {
+      Some(SwitchToSsl)
+    } else {
+      val parameterStatus = new ParameterStatus(Buffers.readCString(content), Buffers.readCString(content))
+      Some(parameterStatus)
+    }
   }
 
   def parse1(packet: Packet): Option[BackendMessage] = {
@@ -245,7 +253,7 @@ class BackendMessageParser {
   }
 
   def parseSmallT(packet: Packet): Option[BackendMessage] = {
-    val Packet(_, _, content) = packet
+    val Packet(_, _, content, _) = packet
 
     val paramNumber = content.readShort
 
@@ -273,7 +281,7 @@ class BackendMessageParser {
   }
 
   def parseA(packet: Packet): Option[BackendMessage] = {
-    val Packet(_, _, content) = packet
+    val Packet(_, _, content, _) = packet
     val processId = content.readInt
     val channel = Buffers.readCString(content)
     val payload = Buffers.readCString(content)

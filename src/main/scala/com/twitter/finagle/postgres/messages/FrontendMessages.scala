@@ -23,6 +23,13 @@ case class StartupMessage(user: String, database: String) extends FrontendMessag
     .toPacket
 }
 
+case class SslRequestMessage() extends FrontendMessage {
+  def asPacket() = PacketBuilder()
+    .writeShort(1234)
+    .writeShort(5679)
+    .toPacket
+}
+
 case class PasswordMessage(password: String) extends FrontendMessage {
   def asPacket() = PacketBuilder('p')
     .writeCString(password)

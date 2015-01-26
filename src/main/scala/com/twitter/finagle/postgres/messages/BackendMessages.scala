@@ -7,6 +7,10 @@ import org.jboss.netty.buffer.ChannelBuffer
  */
 trait BackendMessage extends Message
 
+case object SwitchToSsl extends BackendMessage
+
+case object SslNotSupported extends BackendMessage
+
 case class ErrorResponse(msg: Option[String] = None) extends BackendMessage
 
 case class NoticeResponse(msg: Option[String]) extends BackendMessage

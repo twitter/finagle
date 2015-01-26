@@ -9,6 +9,10 @@ case class SingleMessageResponse(msg: BackendMessage) extends PgResponse
 
 case class Error(msg: Option[String]) extends PgResponse
 
+case object SslSupportedResponse extends PgResponse
+
+case object SslNotSupportedResponse extends PgResponse
+
 case object ParseCompletedResponse extends PgResponse
 
 case object BindCompletedResponse extends PgResponse
