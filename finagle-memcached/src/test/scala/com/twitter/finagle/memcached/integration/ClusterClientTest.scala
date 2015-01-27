@@ -268,38 +268,42 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
       catch { case _: Exception => fail("it shouldn't trown an exception") }
     }
 
-  test("Ketama ClusterClient using a distributor - set & get") {
-    val client = KetamaClientBuilder()
-      .clientBuilder(ClientBuilder().hostConnectionLimit(1).codec(Memcached()).failFast(false))
-      .failureAccrualParams(Int.MaxValue, Duration.Top)
-      .dest(dest)
-      .build()
+  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
+    test("Ketama ClusterClient using a distributor - set & get") {
+      val client = KetamaClientBuilder()
+        .clientBuilder(ClientBuilder().hostConnectionLimit(1).codec(Memcached()).failFast(false))
+        .failureAccrualParams(Int.MaxValue, Duration.Top)
+        .dest(dest)
+        .build()
 
-    client.delete("foo")()
-    assert(client.get("foo")() === None)
-    client.set("foo", "bar")()
-    assert(client.get("foo")().get.toString(Charsets.Utf8) === "bar")
+      client.delete("foo")()
+      assert(client.get("foo")() === None)
+      client.set("foo", "bar")()
+      assert(client.get("foo")().get.toString(Charsets.Utf8) === "bar")
+    }
   }
 
-  test("Ketama ClusterClient using a distributor - many keys") {
-    val client = KetamaClientBuilder()
-      .clientBuilder(ClientBuilder().hostConnectionLimit(1).codec(Memcached()).failFast(false))
-      .failureAccrualParams(Int.MaxValue, Duration.Top)
-      .dest(dest)
-      .build()
-      .asInstanceOf[PartitionedClient]
+  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
+    test("Ketama ClusterClient using a distributor - many keys") {
+      val client = KetamaClientBuilder()
+        .clientBuilder(ClientBuilder().hostConnectionLimit(1).codec(Memcached()).failFast(false))
+        .failureAccrualParams(Int.MaxValue, Duration.Top)
+        .dest(dest)
+        .build()
+        .asInstanceOf[PartitionedClient]
 
-    val count = 100
-      (0 until count).foreach{
+      val count = 100
+      (0 until count).foreach {
         n => {
-          client.set("foo"+n, "bar"+n)()
+          client.set("foo" + n, "bar" + n)()
         }
       }
 
-    (0 until count).foreach {
-      n => {
-        val c = client.clientOf("foo"+n)
-        assert(c.get("foo"+n)().get.toString(Charsets.Utf8) === "bar"+n)
+      (0 until count).foreach {
+        n => {
+          val c = client.clientOf("foo" + n)
+          assert(c.get("foo" + n)().get.toString(Charsets.Utf8) === "bar" + n)
+        }
       }
     }
   }
