@@ -106,7 +106,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     ) = {
       val param.Tracer(tracer) = params[param.Tracer]
       val Lessor.Param(lessor) = params[Lessor.Param]
-      new mux.ServerDispatcher(transport, service, true, lessor, tracer)
+      def ping() = Future.Done
+      new mux.ServerDispatcher(transport, service, true, lessor, tracer, ping)
     }
   }
 

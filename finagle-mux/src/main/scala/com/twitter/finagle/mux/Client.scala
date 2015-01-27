@@ -1,17 +1,25 @@
 package com.twitter.finagle.mux
 
+import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.DefaultTimer
+import com.twitter.finagle.util.{DefaultTimer, DefaultLogger}
 import com.twitter.finagle.{Dtab, Service, WriteException, NoStacktrace, Status}
-import com.twitter.util.{Future, Promise, Time, Duration}
+import com.twitter.util.{Future, Promise, Time, Duration, Throw, Return}
 import java.util.concurrent.locks.ReentrantReadWriteLock
+import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Logger
-import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.{ChannelBuffer, ReadOnlyChannelBuffer}
+
+// We can't name this 'failureDetector' because it won't
+// build on the Mac, due to its case-insensitive file system.
+object sessionFailureDetector extends GlobalFlag(
+  "none", 
+  "The failure detector used to determine session liveness [none|threshold:minPeriod:threshold:win]")
 
 /**
  * Indicates that a client request was denied by the server.
@@ -44,7 +52,7 @@ private object Cap extends Enumeration {
   val Unknown, Yes, No = Value
 }
 
-private object ClientDispatcher {
+private[twitter] object ClientDispatcher {
 
   /**
    * The client dispatcher can be in one of 4 states,
@@ -79,19 +87,27 @@ private object ClientDispatcher {
     def remaining: Duration = end.sinceNow
     def expired: Boolean = end < Time.now
   }
+
+
+  // We reserve a tag for a default ping message to that we
+  // can cache a full ping message and avoid encoding it
+  // every time.
+  val PingTag = Message.MinTag
+  val MinTag = PingTag+1
+  val MaxTag = Message.MaxTag
 }
 
 /**
  * A ClientDispatcher for the mux protocol.
  */
-private[finagle] class ClientDispatcher (
+private[twitter] class ClientDispatcher (
   name: String,
   trans: Transport[ChannelBuffer, ChannelBuffer],
   sr: StatsReceiver
 ) extends Service[Request, Response] {
   import ClientDispatcher._
-  import Message._
-
+  import Message.{MinTag=>_, MaxTag=>_, _}
+  
   private[this] implicit val timer = DefaultTimer.twitter
   
   // Maintain the dispatcher's state, whose access is mediated
@@ -105,7 +121,22 @@ private[finagle] class ClientDispatcher (
   @volatile private[this] var canDispatch: Cap.State = Cap.Unknown
 
   private[this] val futureNackedException = Future.exception(RequestNackedException)
-  private[this] val tags = TagSet()
+
+  // We pre-encode a ping message with the reserved ping tag
+  // (PingTag) in order to avoid re-encoding this frequently sent
+  // message. Since it uses ChannelBuffers, it maintains a read
+  // cursor, and thus it is important that it is not used
+  // concurrently. This happens to agree with the natural way you'd
+  // use it, since a client can only have one outstanding ping per
+  // tag.
+  private[this] val pingMessage = {
+    val buf = new ReadOnlyChannelBuffer(encode(Tping(PingTag)))
+    buf.markReaderIndex()
+    buf
+  }
+  private[this] val pingPromise = new AtomicReference[Promise[Unit]](null)
+
+  private[this] val tags = TagSet(MinTag to MaxTag)
   private[this] val reqs = TagMap[Promise[Response]](tags)
   private[this] val log = Logger.getLogger(getClass.getName)
 
@@ -169,6 +200,11 @@ private[finagle] class ClientDispatcher (
     case Rerr(tag, error) =>
       for (p <- releaseTag(tag))
         p.setException(ServerError(error))
+
+    case Rping(PingTag) =>
+      val p = pingPromise.getAndSet(null)
+      if (p != null)
+        p.setDone()
 
     case Rping(tag) =>
       for (p <- releaseTag(tag))
@@ -240,14 +276,28 @@ private[finagle] class ClientDispatcher (
   }
 
   def ping(): Future[Unit] = {
-    val p = new Promise[Response]
-    reqs.map(p) match {
-      case None =>
-        Future.exception(WriteException(new Exception("Exhausted tags")))
-      case Some(tag) =>
-        trans.write(encode(Tping(tag))).onFailure { case exc =>
-          releaseTag(tag)
-        }.flatMap(Function.const(p)).unit
+    val done = new Promise[Unit]
+    if (pingPromise.compareAndSet(null, done)) {
+      pingMessage.resetReaderIndex()
+      // Note that we ignore any errors here. In practice this is fine
+      // as (1) this will only happen when the session has anyway 
+      // died; (2) subsequent pings will use freshly allocated tags.
+      trans.write(pingMessage) before done
+    } else {
+      val p = new Promise[Response]
+      reqs.map(p) match {
+        case None =>
+          Future.exception(WriteException(new Exception("Exhausted tags")))
+        case Some(tag) =>
+          trans.write(encode(Tping(tag))) transform {
+            case Return(()) =>
+              p.unit
+            case t@Throw(_) =>
+              releaseTag(tag)
+              Future.const(t)
+              
+          }
+      }
     }
   }
 
@@ -308,22 +358,44 @@ private[finagle] class ClientDispatcher (
       }
     } else p
   }
+  
+  private[this] val detector = {
+    import com.twitter.finagle.util.parsers._
 
-  override def status: Status = 
-    trans.status match {
-      case Status.Closed => Status.Closed
-      case Status.Busy => Status.Busy
-      case Status.Open =>
-        readLk.lock()
-        val s = state match {
-          case Draining => Status.Busy
-          case Drained => Status.Closed
-          case leased@Leasing(_) if leased.expired => Status.Busy
-          case Leasing(_) | Dispatching => Status.Open
-        }
-        readLk.unlock()
-        s
+    sessionFailureDetector() match {
+      case list("threshold", duration(min), double(threshold), int(win)) =>
+        new ThresholdFailureDetector(ping, min, threshold, win)
+      case list("threshold", duration(min), double(threshold)) =>
+        new ThresholdFailureDetector(ping, min, threshold)
+      case list("threshold", duration(min)) =>
+        new ThresholdFailureDetector(ping, min)
+      case list("threshold") =>
+        new ThresholdFailureDetector(ping)
+
+      case list("none") =>
+        NullFailureDetector
+
+      case list(_*) =>
+        log.warning(s"unknown failure detector ${sessionFailureDetector()} specified")
+        NullFailureDetector
     }
+  }
+
+  override def status: Status =
+    Status.worst(detector.status,
+      trans.status match {
+        case Status.Closed => Status.Closed
+        case Status.Busy => Status.Busy
+        case Status.Open =>
+          readLk.lock()
+          try state match {
+            case Draining => Status.Busy
+            case Drained => Status.Closed
+            case leased@Leasing(_) if leased.expired => Status.Busy
+            case Leasing(_) | Dispatching => Status.Open
+          } finally readLk.unlock()
+      }
+    )
 
   override def close(deadline: Time): Future[Unit] = trans.close(deadline)
 }

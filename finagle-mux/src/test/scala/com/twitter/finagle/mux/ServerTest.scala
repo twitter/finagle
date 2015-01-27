@@ -2,8 +2,8 @@ package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
-import com.twitter.finagle.mux.lease.exp.{Lessor, nackOnExpiredLease}
 import com.twitter.finagle.mux.Message.Treq
+import com.twitter.finagle.mux.lease.exp.{Lessor, nackOnExpiredLease}
 import com.twitter.finagle.stats.{StatsReceiver, InMemoryStatsReceiver}
 import com.twitter.finagle.tracing.NullTracer
 import com.twitter.finagle.transport.{Transport, QueueTransport}
@@ -29,7 +29,8 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
     val service = mock[Service[Request, Response]]
     val lessor = mock[Lessor]
-    val server = new ServerDispatcher(transport, service, true, lessor, NullTracer)
+    def ping() = Future.Done
+    val server = new ServerDispatcher(transport, service, true, lessor, NullTracer, ping)
 
     def issue(lease: Duration) {
       val m = serverToClient.poll()
@@ -148,7 +149,8 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     when(trans.write(any[ChannelBuffer]))
       .thenReturn(Future.Done)
 
-    val dispatcher = new ServerDispatcher(trans, svc, true, lessor, NullTracer)
+    def ping() = Future.Done
+    val dispatcher = new ServerDispatcher(trans, svc, true, lessor, NullTracer, ping)
     assert(dispatcher.npending() === 1)
 
     p.updateIfEmpty(Throw(new RuntimeException("welp")))
@@ -166,6 +168,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
 
       val p = Promise[Response]
       var req: Request = null
+      def ping() = Future.Done
       val server = new ServerDispatcher(
         transport,
         Service.mk { _req: Request =>
@@ -174,7 +177,8 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
         },
         true,
         Lessor.nil,
-        NullTracer
+        NullTracer,
+        ping
       )
 
       clientToServer.offer(encode(Tdispatch(0, Seq.empty, Path.empty, Dtab.empty, buf)))
@@ -200,11 +204,12 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
       val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
 
       var promises: List[Promise[Response]] = Nil
+      def ping() = Future.Done
       val server = new ServerDispatcher(transport, Service.mk { _: Request =>
         val p = Promise[Response]()
         promises ::= p
         p
-      }, true, Lessor.nil, NullTracer)
+      }, true, Lessor.nil, NullTracer, ping)
 
       clientToServer.offer(encode(
         Tdispatch(0, Seq.empty, Path.empty, Dtab.empty, ChannelBuffers.EMPTY_BUFFER)))
@@ -239,10 +244,11 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
       val serverToClient = new AsyncQueue[ChannelBuffer]
       val clientToServer = new AsyncQueue[ChannelBuffer]
       val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
+      def ping() = Future.Done
 
       val server = new ServerDispatcher(transport, Service.mk { _: Request =>
         Future { ??? }
-      }, true, Lessor.nil, NullTracer)
+      }, true, Lessor.nil, NullTracer, ping)
 
       val drain = server.close(Time.Top) // synchronously sends drain request to client
 
@@ -259,13 +265,15 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     val serverToClient = new AsyncQueue[ChannelBuffer]
     val clientToServer = new AsyncQueue[ChannelBuffer]
     val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
+    def ping() = Future.Done
 
     val server = new ServerDispatcher(
       transport,
       svc,
       true,
       Lessor.nil,
-      NullTracer
+      NullTracer,
+      ping
     )
 
     def request(req: ChannelBuffer): Unit = clientToServer.offer(req)

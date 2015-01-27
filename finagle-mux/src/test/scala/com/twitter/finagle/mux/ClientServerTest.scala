@@ -1,18 +1,19 @@
 package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.Service
+import com.twitter.finagle.{Service, Status}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
-import com.twitter.finagle.tracing._
-import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.tracing._
 import com.twitter.finagle.tracing.{BufferingTracer, Flags, Trace}
+import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.{Path, Service}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Promise, Return, Throw, Time, TimeControl}
+import java.util.concurrent.atomic.AtomicInteger
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
@@ -22,6 +23,7 @@ import org.mockito.stubbing.Answer
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{OneInstancePerTest, FunSuite, Tag}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 
 private object TestContext {
   val testContext = new Contexts.broadcast.Key[Buf] {
@@ -32,33 +34,51 @@ private object TestContext {
 }
 
 private[mux] class ClientServerTest(canDispatch: Boolean)
-  extends FunSuite with OneInstancePerTest with MockitoSugar with AssertionsForJUnit {
+  extends FunSuite 
+  with OneInstancePerTest 
+  with MockitoSugar 
+  with AssertionsForJUnit 
+  with Eventually 
+  with IntegrationPatience {
   import TestContext._
-
   val tracer = new BufferingTracer
 
-  val clientToServer = new AsyncQueue[ChannelBuffer]
-  val serverToClient = new AsyncQueue[ChannelBuffer]
-  val serverTransport =
-    new QueueTransport(writeq=serverToClient, readq=clientToServer)
-  val clientTransport =
-    new QueueTransport(writeq=clientToServer, readq=serverToClient)
-  val service = mock[Service[Request, Response]]
-  val client = new ClientDispatcher("test", clientTransport, NullStatsReceiver)
-  val server = new ServerDispatcher(
-    serverTransport, service, canDispatch, 
-    Lessor.nil, tracer)
+  class Ctx {
   
+    val clientToServer = new AsyncQueue[ChannelBuffer]
+    val serverToClient = new AsyncQueue[ChannelBuffer]
+    val serverTransport =
+      new QueueTransport(writeq=serverToClient, readq=clientToServer)
+    val clientTransport =
+      new QueueTransport(writeq=clientToServer, readq=serverToClient)
+    val service = mock[Service[Request, Response]]
+    val client = new ClientDispatcher("test", clientTransport, NullStatsReceiver)
+    val nping = new AtomicInteger(0)
+    val pingReq, pingRep = new Latch
+    def ping() = {
+      nping.incrementAndGet()
+      val f = pingRep.get
+      pingReq.flip()
+      f
+    }
+  
+    val server = new ServerDispatcher(
+      serverTransport, service, canDispatch, 
+      Lessor.nil, tracer, ping)
+  }
+
   // Push a tracer for the client.
-  override def test(testName: String, testTags: Tag*)(f: => Unit) {
+  override def test(testName: String, testTags: Tag*)(f: => Unit): Unit =
     super.test(testName, testTags:_*) {
       Trace.letTracer(tracer)(f)      
-      }
     }
 
   def buf(b: Byte*) = Buf.ByteArray(b:_*)
 
   test("handle concurrent requests, handling out of order replies") {
+    val ctx = new Ctx
+    import ctx._
+
     val p1, p2, p3 = new Promise[Response]
     val reqs = (1 to 3) map { i => Request(Path.empty, buf(i.toByte)) }
     when(service(reqs(0))).thenReturn(p1)
@@ -90,10 +110,34 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   }
 
   test("server respond to pings") {
-    assert(client.ping().isDefined)
+    val ctx = new Ctx
+    import ctx._
+
+    for (i <- 0 until 5) {
+      assert(nping.get === i)
+      val pinged = client.ping()
+      assert(!pinged.isDefined)
+      assert(nping.get === i+1)
+      pingRep.flip()
+      assert(pinged.isDefined && Await.result(pinged) == ())
+    }
+  }
+
+  test("concurrent pings") {
+    val ctx = new Ctx
+    import ctx._
+    
+    val pinged = (client.ping() join client.ping()).unit
+    assert(!pinged.isDefined)
+    assert(nping.get === 2)
+    pingRep.flip()
+    assert(pinged.isDefined && Await.result(pinged) == ())
   }
 
   test("server nacks new requests after draining") {
+    val ctx = new Ctx
+    import ctx._
+
     val req1 = Request(Path.empty, buf(1))
     val p1 = new Promise[Response]
     when(service(req1)).thenReturn(p1)
@@ -112,6 +156,9 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   }
 
   test("handle errors") {
+    val ctx = new Ctx
+    import ctx._
+
     val req = Request(Path.empty, buf(1))
     when(service(req)).thenReturn(Future.exception(new Exception("sad panda")))
     assert(client(req).poll === Some(
@@ -119,6 +166,9 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   }
 
   test("propagate interrupts") {
+    val ctx = new Ctx
+    import ctx._
+
     val req = Request(Path.empty, buf(1))
     val p = new Promise[Response]
     when(service(req)).thenReturn(p)
@@ -136,6 +186,9 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   }
 
   test("propagate trace ids") {
+    val ctx = new Ctx
+    import ctx._
+
     when(service(any[Request])).thenAnswer(
       new Answer[Future[Response]]() {
         def answer(invocation: InvocationOnMock) =
@@ -153,6 +206,9 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   }
 
   test("propagate trace flags") {
+    val ctx = new Ctx
+    import ctx._
+
     when(service(any[Request])).thenAnswer(
       new Answer[Future[Response]] {
         def answer(invocation: InvocationOnMock) = {
@@ -175,11 +231,42 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     val respFlags = Flags(respCb.readLong())
     assert(respFlags === flags)
   }
+  
+  test("failure detection") {
+    sessionFailureDetector.let("threshold:10.milliseconds:2") {
+      val ctx = new Ctx
+      import ctx._
+
+      assert(nping.get === 1)
+      assert(client.status == Status.Busy)
+      pingRep.flip()
+      Status.awaitOpen(client.status)
+
+      // This is technically racy, but would require a pretty
+      // pathological test environment.
+      assert(client.status === Status.Open)
+      eventually { assert(client.status == Status.Busy) }
+
+      // Now begin replying.
+      def loop(): Future[Unit] = {
+        val f = pingReq.get
+        pingRep.flip()
+        f before loop()
+      }
+      loop()
+      eventually { 
+        assert(client.status === Status.Open)
+      }
+    }
+  }
 }
 
 @RunWith(classOf[JUnitRunner])
 class ClientServerTestNoDispatch extends ClientServerTest(false) {
   test("does not dispatch destinations") {
+    val ctx = new Ctx
+    import ctx._
+
     val withDst = Request(Path.read("/dst/name"), buf(123))
     val withoutDst = Request(Path.empty, buf(123))
     val rep = Response(buf(23))
@@ -195,8 +282,10 @@ class ClientServerTestDispatch extends ClientServerTest(true) {
 
   // Note: We test trace propagation here, too,
   // since it's a default request context.
-
   test("Transmits request contexts") {
+    val ctx = new Ctx
+    import ctx._
+
     when(service(any[Request])).thenAnswer(
       new Answer[Future[Response]] {
         def answer(invocation: InvocationOnMock) =
@@ -217,6 +306,9 @@ class ClientServerTestDispatch extends ClientServerTest(true) {
   }
 
   test("dispatches destinations") {
+    val ctx = new Ctx
+    import ctx._
+
     val req = Request(Path.read("/dst/name"), buf(123))
     val rep = Response(buf(23))
     when(service(req)).thenReturn(Future.value(rep))

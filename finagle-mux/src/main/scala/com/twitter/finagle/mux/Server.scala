@@ -23,7 +23,7 @@ import scala.collection.JavaConverters._
  */
 case class ClientDiscardedRequestException(why: String) extends Exception(why)
 
-object ServerDispatcher {
+private object ServerDispatcher {
   val Epsilon = 1.second // TODO decide whether this should be hard coded or not
 }
 
@@ -33,12 +33,13 @@ object gracefulShutdownEnabled extends GlobalFlag(true, "Graceful shutdown enabl
 /**
  * A ServerDispatcher for the mux protocol.
  */
-private[finagle] class ServerDispatcher private[finagle](
+private[twitter] class ServerDispatcher private[twitter](
     trans: Transport[ChannelBuffer, ChannelBuffer],
     service: Service[Request, Response],
     canDispatch: Boolean, // XXX: a hack to indicate whether a server understands {T,R}Dispatch
     lessor: Lessor, // the lessor that the dispatcher should register with in order to get leases
-    tracer: Tracer
+    tracer: Tracer,
+    ping: () => Future[Unit]
 ) extends Closable with Lessee {
 
   import Message._
@@ -129,7 +130,14 @@ private[finagle] class ServerDispatcher private[finagle](
         case f => f.raise(new ClientDiscardedRequestException(why))
       }
     case Tping(tag) =>
-      trans.write(encode(Rping(tag)))
+      ping() respond {
+        case Return(()) => 
+          trans.write(encode(Rping(tag)))
+        case Throw(exc) =>
+          val err = Rerr(tag, s"Error pinging: $exc")
+          trans.write(encode(err))
+      }
+
     case m@Tmessage(tag) =>
       val msg = Rerr(tag, f"Did not understand Tmessage ${m.typ}%d")
       trans.write(encode(msg))

@@ -252,6 +252,7 @@ private trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, R
   protected def highLoad: Double
 
   private[this] val total = new AtomicInteger(0)
+  private[this] val monoTime = new Ema.Monotime
   private[this] val ema = new Ema(smoothWin.inNanoseconds)
 
   /**
@@ -259,7 +260,7 @@ private trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, R
    */
   private[this] def adjustNode(node: Node, delta: Int) = {
     node.counter.addAndGet(delta)
-    val avg = ema.update(System.nanoTime(), total.addAndGet(delta))
+    val avg = ema.update(monoTime.nanos(), total.addAndGet(delta))
 
     // Compute the capacity-adjusted average load and adjust the
     // aperture accordingly. We make only directional adjustments as

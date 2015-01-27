@@ -229,8 +229,11 @@ object ThriftMux
       service: Service[mux.Request, mux.Response]
     ) = {
       val param.Tracer(tracer) = params[param.Tracer]
-      new mux.ServerDispatcher(transport, service, true, mux.lease.exp.ClockedDrainer.flagged,
-        tracer)
+      def ping() = Future.Done
+      new mux.ServerDispatcher(
+        transport, service, true, 
+        mux.lease.exp.ClockedDrainer.flagged,
+        tracer, ping)
     }
   }
 
