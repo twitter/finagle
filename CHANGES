@@ -48,6 +48,10 @@ New Features
     param. Per host stats can be turned on through `com.twitter.finagle.loadbalancer.perHostStats` 
     flag, and is exported to the "/admin/per_host_metrics.json" route in twitter-server. 
 
+  * finagle-http(x): Two missing params were added: `Decompression` and `CompressionLevel`. Both
+    client and server may be configured with either `configured` method or `withDecompression`/
+    `withCompressionLevel`.
+
 Bug Fixes
 ~~~~~~~~~
 

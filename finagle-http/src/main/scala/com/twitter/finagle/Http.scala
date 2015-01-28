@@ -54,10 +54,22 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
       val default = MaxResponseSize(5.megabytes)
     }
 
+    case class Decompression(enabled: Boolean)
+    implicit object Decompression extends Stack.Param[Decompression] {
+      val default = Decompression(true)
+    }
+
+    case class CompressionLevel(level: Int)
+    implicit object CompressionLevel extends Stack.Param[CompressionLevel] {
+      val default = CompressionLevel(-1)
+    }
+
     private[Http] def applyToCodec(params: Stack.Params, codec: http.Http): http.Http =
       codec
         .maxRequestSize(params[MaxRequestSize].size)
         .maxResponseSize(params[MaxResponseSize].size)
+        .decompressionEnabled(params[Decompression].enabled)
+        .compressionLevel(params[CompressionLevel].level)
   }
 
   object Client {
@@ -113,6 +125,12 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
 
     def withMaxResponseSize(size: StorageUnit): Client =
       configured(param.MaxResponseSize(size))
+
+    def withDecompression(enabled: Boolean): Client =
+      configured(param.Decompression(enabled))
+
+    def withCompressionLevel(level: Int): Client =
+      configured(param.CompressionLevel(level))
   }
 
   val client = Client()
@@ -158,6 +176,12 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
 
     def withMaxResponseSize(size: StorageUnit): Server =
       configured(param.MaxResponseSize(size))
+
+    def withDecompression(enabled: Boolean): Server =
+      configured(param.Decompression(enabled))
+
+    def withCompressionLevel(level: Int): Server =
+      configured(param.CompressionLevel(level))
   }
 
   val server = Server()

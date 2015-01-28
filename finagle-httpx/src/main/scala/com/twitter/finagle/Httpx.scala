@@ -2,7 +2,6 @@ package com.twitter.finagle
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
-import com.twitter.finagle.dispatch.SerialServerDispatcher
 import com.twitter.finagle.httpx.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.httpx.filter.DtabFilter
 import com.twitter.finagle.httpx.{
@@ -61,12 +60,24 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
       val default = Streaming(false)
     }
 
+    case class Decompression(enabled: Boolean)
+    implicit object Decompression extends Stack.Param[Decompression] {
+      val default = Decompression(enabled = true)
+    }
+
+    case class CompressionLevel(level: Int)
+    implicit object CompressionLevel extends Stack.Param[CompressionLevel] {
+      val default = CompressionLevel(-1)
+    }
+
     private[Httpx] def applyToCodec(
       params: Stack.Params, codec: httpx.Http): httpx.Http =
         codec
           .maxRequestSize(params[MaxRequestSize].size)
           .maxResponseSize(params[MaxResponseSize].size)
           .streaming(params[Streaming].enabled)
+          .decompressionEnabled(params[Decompression].enabled)
+          .compressionLevel(params[CompressionLevel].level)
   }
 
   object Client {
@@ -122,6 +133,12 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
 
     def withMaxResponseSize(size: StorageUnit): Client =
       configured(param.MaxResponseSize(size))
+
+    def withDecompression(enabled: Boolean): Client =
+      configured(param.Decompression(enabled))
+
+    def withCompressionLevel(level: Int): Client =
+      configured(param.CompressionLevel(level))
   }
 
   val client = Client()
@@ -169,6 +186,12 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
 
     def withMaxResponseSize(size: StorageUnit): Server =
       configured(param.MaxResponseSize(size))
+
+    def withDecompression(enabled: Boolean): Server =
+      configured(param.Decompression(enabled))
+
+    def withCompressionLevel(level: Int): Server =
+      configured(param.CompressionLevel(level))
   }
 
   val server = Server()
