@@ -1,16 +1,14 @@
 package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.{Service, Status}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.tracing.{BufferingTracer, Flags, Trace}
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.finagle.transport.QueueTransport
-import com.twitter.finagle.{Path, Service}
+import com.twitter.finagle.{Path, Service, Failure}
+import com.twitter.finagle.{Service, Status}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Promise, Return, Throw, Time, TimeControl}
 import java.util.concurrent.atomic.AtomicInteger
@@ -20,10 +18,10 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify, when}
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{OneInstancePerTest, FunSuite, Tag}
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 
 private object TestContext {
   val testContext = new Contexts.broadcast.Key[Buf] {
@@ -147,12 +145,30 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     server.close(Time.now)
     assert(f1.poll === None)
     val req2 = Request(Path.empty, buf(2))
-    assert(client(req2).poll === Some(Throw(RequestNackedException)))
+    client(req2).poll match {
+      case Some(Throw(Failure.Rejected(_))) => 
+      case _ => fail()
+    }
     verify(service, never)(req2)
 
     val rep1 = Response(buf(123))
     p1.setValue(rep1)
     assert(f1.poll === Some(Return(rep1)))
+  }
+
+  test("requeueable failures transit server-to-client") {
+    val ctx = new Ctx
+    import ctx._
+
+    val req1 = Request(Path.empty, buf(1))
+    val p1 = new Promise[Response]
+    when(service(req1)).thenReturn(Future.exception(
+      Failure.Rejected("come back tomorrow")))
+
+    client(req1).poll match {
+      case Some(Throw(Failure.Rejected(_))) =>
+      case bad => fail(s"got $bad")
+    }
   }
 
   test("handle errors") {

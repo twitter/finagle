@@ -13,6 +13,7 @@ import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Promise, Duration, Closable, Time}
 import java.io.{PrintWriter, StringWriter}
 import java.net.{Socket, InetSocketAddress}
+import java.util.concurrent.atomic.AtomicInteger
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{IntegrationPatience, Eventually}
@@ -130,6 +131,26 @@ class EndToEndTest extends FunSuite
       Annotation.ServerSend(),
       Annotation.ClientRecv()
     ))
+  }
+  
+  test("requeue nacks") {
+    val n = new AtomicInteger(0)
+
+    val service = new Service[Request, Response] {
+      def apply(req: Request): Future[Response] = {
+        if (n.getAndIncrement() == 0)
+          Future.exception(Failure.Rejected("better luck next time"))
+        else
+          Future.value(Response.empty)
+      }
+    }
+
+    val a, b = Mux.serve("localhost:*", service)
+    val client = Mux.newService(Name.bound(a.boundAddress, b.boundAddress), "client")
+    
+    assert(n.get == 0)
+    assert(Await.result(client(Request.empty), 30.seconds).body.isEmpty)
+    assert(n.get == 2)
   }
   
   private[this] def nextPort(): Int = {

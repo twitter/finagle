@@ -2,7 +2,7 @@ package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Path, Status}
+import com.twitter.finagle.{Path, Status, Failure}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.{Transport, QueueTransport}
@@ -93,8 +93,11 @@ class ClientTest extends FunSuite {
       assert(result === Response(Buf.Utf8("KO")))
 
       val f2 = client(req)
-      val Some(Throw(nack)) = f2.poll
-      assert(nack === RequestNackedException)
+      f2.poll match {
+        case Some(Throw(Failure.Rejected(cause))) =>
+          assert(cause.getMessage == "The request was Nacked by the server")
+        case _ => fail()
+      }
 
       assert(client.read().poll === None)
       

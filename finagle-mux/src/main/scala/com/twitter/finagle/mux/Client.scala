@@ -7,11 +7,11 @@ import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.{DefaultTimer, DefaultLogger}
-import com.twitter.finagle.{Dtab, Service, WriteException, NoStacktrace, Status}
+import com.twitter.finagle.util.DefaultTimer
+import com.twitter.finagle.{Dtab, Service, WriteException, NoStacktrace, Status, Failure}
 import com.twitter.util.{Future, Promise, Time, Duration, Throw, Return}
-import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.logging.Logger
 import org.jboss.netty.buffer.{ChannelBuffer, ReadOnlyChannelBuffer}
 
@@ -20,13 +20,6 @@ import org.jboss.netty.buffer.{ChannelBuffer, ReadOnlyChannelBuffer}
 object sessionFailureDetector extends GlobalFlag(
   "none", 
   "The failure detector used to determine session liveness [none|threshold:minPeriod:threshold:win]")
-
-/**
- * Indicates that a client request was denied by the server.
- */
-object RequestNackedException
-  extends Exception("The request was nackd by the server")
-  with WriteException with NoStacktrace
 
 /**
  * Indicates that the server failed to interpret or act on the request. This
@@ -95,6 +88,8 @@ private[twitter] object ClientDispatcher {
   val PingTag = Message.MinTag
   val MinTag = PingTag+1
   val MaxTag = Message.MaxTag
+
+  val NackFailure = Failure.Rejected("The request was Nacked by the server")
 }
 
 /**
@@ -120,7 +115,7 @@ private[twitter] class ClientDispatcher (
 
   @volatile private[this] var canDispatch: Cap.State = Cap.Unknown
 
-  private[this] val futureNackedException = Future.exception(RequestNackedException)
+  private[this] val futureNackedException = Future.exception(NackFailure)
 
   // We pre-encode a ping message with the reserved ping tag
   // (PingTag) in order to avoid re-encoding this frequently sent
@@ -185,7 +180,7 @@ private[twitter] class ClientDispatcher (
         p.setException(ServerApplicationError(error))
     case RreqNack(tag) =>
       for (p <- releaseTag(tag))
-        p.setException(RequestNackedException)
+        p.setException(NackFailure)
 
     case RdispatchOk(tag, _, rep) =>
       for (p <- releaseTag(tag))
@@ -195,7 +190,7 @@ private[twitter] class ClientDispatcher (
         p.setException(ServerApplicationError(error))
     case RdispatchNack(tag, _) =>
       for (p <- releaseTag(tag))
-        p.setException(RequestNackedException)
+        p.setException(NackFailure)
 
     case Rerr(tag, error) =>
       for (p <- releaseTag(tag))

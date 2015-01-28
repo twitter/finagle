@@ -113,21 +113,16 @@ object Failure {
     val None          = 0L
     val Retryable     = 1L << 0
     val Interrupted   = 1L << 1
+    val Rejected      = 1L << 2
     // Bits 32 to 63 are reserved for
     // flags private to finagle.
-    val Requeueable    = 1L << 32
   }
 
-  private[this] def validate(flag: Long) =
-    require((flag & flag-1) == 0, "flag should be a power of 2")
-
-  private def isSet(flags: Long, flag: Long) = {
-    validate(flag)
-    (flags & flag) != 0
-  }
+  private def isSet(x: Long, flags: Long) =
+    (x & flags) == flags
 
   private def toggle(on: Boolean, flags: Long, flag: Long) = {
-    validate(flag)
+    require((flag & flag-1) == 0, s"flag ($flag) should be a power of 2")
     if (on) flags | flag else flags & (~flag)
   }
 
@@ -135,8 +130,8 @@ object Failure {
    * Defines methods to create a Failure type with the given `flag` bit.
    */
   trait Injections {
-    val flag: Long
-    def apply(why: String, cause: Throwable = null): Failure = new Failure(why, cause, flag)
+    val flags: Long
+    def apply(why: String, cause: Throwable = null): Failure = new Failure(why, cause, flags)
     def apply(cause: Throwable): Failure =
       if (cause == null) apply("unknown cause")
       else if (cause.getMessage == null) apply(cause.getClass.getName, cause)
@@ -148,10 +143,10 @@ object Failure {
    * an underlying cause is set, the underlying exception is extracted.
    */
   trait Extractions {
-    val flag: Long
+    val flags: Long
     def unapply(exc: Throwable): Option[Throwable] = exc match {
-      case f@Failure(null, fs) if isSet(fs, flag) => Some(f)
-      case Failure(cause, fs) if isSet(fs, flag) => Some(cause)
+      case f@Failure(null, fs) if isSet(fs, flags) => Some(f)
+      case Failure(cause, fs) if isSet(fs, flags) => Some(cause)
       case _ => None
     }
   }
@@ -160,7 +155,7 @@ object Failure {
    * A Failure with a throwable cause.
    */
   object Cause extends Injections {
-    val flag = Flag.None
+    val flags = Flag.None
     def unapply(exc: Throwable): Option[Throwable] = exc match {
       case Failure(cause, _) if cause != null => Some(cause)
       case _ => None
@@ -172,25 +167,25 @@ object Failure {
    * Note, this does does not guarantee that the request was not dispatched.
    */
   object InterruptedBy extends Injections with Extractions {
-    val flag = Flag.Interrupted
+    val flags = Flag.Interrupted
   }
 
   /**
-   * A retryable failure indicates that thw corresponding dispatch has failed and
+   * A retryable failure indicates that the corresponding dispatch has failed and
    * is eligible for a retry. These types of failures should count against a retry
    * budget.
    */
   object Retryable extends Injections with Extractions {
-    val flag = Flag.Retryable
+    val flags = Flag.Retryable
   }
 
   /**
-   * A requeueable failure indicates that a corresponding dispatch has failed
-   * and finagle can safely attempt to redispatch. These failures should be
-   * handled by finagle and should not count against any user defined retry
-   * budget.
+   * A rejected failure indicates that a corresponding dispatch was not
+   * accepted. These kinds of errors are handled by finagle and should 
+   * not count against any user defined retry budget. Rejected dispatches
+   * are by definition also [[Retryable]].
    */
-  private[finagle] object Requeueable extends Injections with Extractions {
-    val flag = Flag.Requeueable
+  object Rejected extends Injections with Extractions {
+    val flags = Flag.Rejected | Flag.Retryable
   }
 }

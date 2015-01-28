@@ -17,6 +17,8 @@ Breaking API Changes
     `c.t.f.FailFastFactory.FailFast`.
   * finagle-memcached / finagle-memcachedx: move TwitterCacheResolver
     and related objects to new finagle-cacheresolver package.
+  * finagle-mux: `c.t.f.mux.RequestNackedException` is removed in favor of a standard
+    Failure (`c.t.f.Failure.Rejected`).
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
