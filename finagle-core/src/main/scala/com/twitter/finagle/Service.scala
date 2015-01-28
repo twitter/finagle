@@ -240,9 +240,12 @@ object FactoryToService {
 
   // TODO: we should simply transform the stack for boolean
   // stackables like this.
-  case class Enabled(enabled: Boolean)
-  implicit object Enabled extends Stack.Param[Enabled] {
-    val default = Enabled(false)
+  case class Enabled(enabled: Boolean) {
+    def mk(): (Enabled, Stack.Param[Enabled]) =
+      (this, Enabled.param)
+  }
+  object Enabled {
+    implicit val param = Stack.Param(Enabled(false))
   }
 
   /**

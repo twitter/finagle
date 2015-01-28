@@ -23,13 +23,13 @@ class Netty3TransporterTest extends FunSpec {
       val inputParams =
         Stack.Params.empty +
           Label("test") +
-          Netty3Transporter.TransportFactory.default +
+          Netty3Transporter.TransportFactory.param.default +
           Transporter.ConnectTimeout(1.seconds) +
           Transporter.TLSHostname(Some("tls.host")) +
           Transporter.HttpProxy(Some(new InetSocketAddress(0))) +
           Transporter.SocksProxy(Some(new InetSocketAddress(0)), Some("user", "pw")) +
           Transport.BufferSizes(Some(100), Some(200)) +
-          Transport.TLSClientEngine.default +
+          Transport.TLSClientEngine.param.default +
           Transport.Liveness(1.seconds, 2.seconds, Some(true)) +
           Transport.Verbose(true)
 

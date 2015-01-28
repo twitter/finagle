@@ -7,33 +7,36 @@ import com.twitter.finagle.{stats, tracing, util, Stack}
  * A class eligible for configuring a label used to identify finagle
  * clients and servers.
  */
-case class Label(label: String)
+case class Label(label: String) {
+  def mk(): (Label, Stack.Param[Label]) =
+    (this, Label.param)
+}
 object Label {
-  implicit val param = new Stack.Param[Label] {
-    val default = Label("")
-  }
+  implicit val param = Stack.Param(Label(""))
 }
 
 /**
  * A class eligible for configuring a [[com.twitter.util.Timer]] used
  * throughout finagle clients and servers.
  */
-case class Timer(timer: com.twitter.util.Timer)
+case class Timer(timer: com.twitter.util.Timer) {
+  def mk(): (Timer, Stack.Param[Timer]) =
+    (this, Timer.param)
+}
 object Timer {
-  implicit val param = new Stack.Param[Timer] {
-    val default = Timer(util.DefaultTimer.twitter)
-  }
+  implicit val param = Stack.Param(Timer(util.DefaultTimer.twitter))
 }
 
 /**
  * A class eligible for configuring a [[java.util.logging.Logger]]
  * used throughout finagle clients and servers.
  */
-case class Logger(log: java.util.logging.Logger)
+case class Logger(log: java.util.logging.Logger) {
+  def mk(): (Logger, Stack.Param[Logger]) =
+    (this, Logger.param)
+}
 object Logger {
-  implicit val param = new Stack.Param[Logger] {
-    val default = Logger(util.DefaultLogger)
-  }
+  implicit val param = Stack.Param(Logger(util.DefaultLogger))
 }
 
 /**
@@ -41,26 +44,24 @@ object Logger {
  * [[com.twitter.finagle.stats.StatsReceiver]] throughout finagle
  * clients and servers.
  */
-case class Stats(statsReceiver: stats.StatsReceiver)
+case class Stats(statsReceiver: stats.StatsReceiver) {
+  def mk(): (Stats, Stack.Param[Stats]) =
+    (this, Stats.param)
+}
 object Stats {
-  implicit val param = new Stack.Param[Stats] {
-    // Note, this is lazy to avoid potential failures during
-    // static initialization.
-    lazy val default = Stats(stats.DefaultStatsReceiver)
-  }
+  implicit val param = Stack.Param(Stats(stats.DefaultStatsReceiver))
 }
 
 /**
  * A class eligible for configuring a [[com.twitter.util.Monitor]]
  * throughout finagle servers and clients.
  */
-case class Monitor(monitor: com.twitter.util.Monitor)
+case class Monitor(monitor: com.twitter.util.Monitor) {
+  def mk(): (Monitor, Stack.Param[Monitor]) =
+    (this, Monitor.param)
+}
 object Monitor {
-  implicit val param = new Stack.Param[Monitor] {
-    // Note, this is lazy to avoid potential failures during
-    // static initialization.
-    lazy val default = Monitor(util.DefaultMonitor)
-  }
+  implicit val param = Stack.Param(Monitor(util.DefaultMonitor))
 }
 
 /**
@@ -68,13 +69,12 @@ object Monitor {
  * [[com.twitter.finagle.util.ReporterFactory]] throughout finagle servers and
  * clients.
  */
-case class Reporter(reporter: util.ReporterFactory)
+case class Reporter(reporter: util.ReporterFactory) {
+  def mk(): (Reporter, Stack.Param[Reporter]) =
+    (this, Reporter.param)
+}
 object Reporter {
-  implicit val param = new Stack.Param[Reporter] {
-    // Note, this is lazy to avoid potential failures during
-    // static initialization.
-    lazy val default = Reporter(util.LoadedReporterFactory)
-  }
+  implicit val param = Stack.Param(Reporter(util.LoadedReporterFactory))
 }
 
 /**
@@ -82,13 +82,12 @@ object Reporter {
  * [[com.twitter.finagle.tracing.Tracer]] throughout finagle servers
  * and clients.
  */
-case class Tracer(tracer: tracing.Tracer)
+case class Tracer(tracer: tracing.Tracer) {
+  def mk(): (Tracer, Stack.Param[Tracer]) =
+    (this, Tracer.param)
+}
 object Tracer {
-  implicit val param = new Stack.Param[Tracer] {
-    // Note, this is lazy to avoid potential failures during
-    // static initialization.
-    lazy val default = Tracer(tracing.DefaultTracer)
-  }
+  implicit val param = Stack.Param(Tracer(tracing.DefaultTracer))
 }
 
 /**

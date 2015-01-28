@@ -89,18 +89,24 @@ object Netty3Transporter {
    * A [[com.twitter.finagle.Stack.Param]] used to configure a netty3
    * ChannelFactory.
    */
-  case class ChannelFactory(cf: NettyChannelFactory)
-  implicit object ChannelFactory extends Stack.Param[ChannelFactory] {
-    val default = ChannelFactory(channelFactory)
+  case class ChannelFactory(cf: NettyChannelFactory) {
+    def mk(): (ChannelFactory, Stack.Param[ChannelFactory]) =
+      (this, ChannelFactory.param)
+  }
+  object ChannelFactory {
+    implicit val param = Stack.Param(ChannelFactory(channelFactory))
   }
 
   /**
    * A [[com.twitter.finagle.Stack.Param]] used to configure a transport
    * factory, a function from a netty3 channel to a finagle Transport.
    */
-  case class TransportFactory(newTransport: Channel => Transport[Any, Any])
-  implicit object TransportFactory extends Stack.Param[TransportFactory] {
-    val default = TransportFactory(new ChannelTransport(_))
+  case class TransportFactory(newTransport: Channel => Transport[Any, Any]) {
+    def mk(): (TransportFactory, Stack.Param[TransportFactory]) =
+      (this, TransportFactory.param)
+  }
+  object TransportFactory {
+    implicit val param = Stack.Param(TransportFactory(new ChannelTransport(_)))
   }
 
   /**

@@ -41,6 +41,8 @@ New Features
   * finagle-core: `com.twitter.finagle.service.StatsFilter` is now configurable with an 
     `com.twitter.finagle.stats.ExceptionStatsHandler` to customize how failures are recorded.
 
+  * finagle-core: improved Java compatiblity for `c.t.f.Stack.Params` / `c.t.f.Stack.Parameterized`.
+
   * finagle-mysql: Add support for MySQL transactions.
 
   * finagle-stats: A new HostStatsReceiver type is added and used for per host stats.

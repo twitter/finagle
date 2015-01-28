@@ -249,14 +249,27 @@ object Stack {
    * typeclasses should be persistent:
    *
    * {{{
-   * case class Multiplier(i: Int)
-   * implicit object Multiplier extends Stack.Param[Multiplier] {
-   *   val default = Multiplier(123)
+   * case class Multiplier(i: Int) {
+   *   def mk(): (Multipler, Stack.Param[Multipler]) =
+   *     (this, Multiplier.param)
+   * }
+   * object Multiplier {
+   *   implicit val param = Stack.Param(Multiplier(123))
    * }
    * }}}
+   *
+   * The `mk()` function together with `Parameterized.configured`
+   * provides a convenient Java interface.
    */
   trait Param[P] {
     def default: P
+  }
+  object Param {
+    def apply[T](t: => T): Param[T] = new Param[T] {
+      // Note, this is lazy to avoid potential failures during
+      // static initialization.
+      lazy val default = t
+    }
   }
 
   /**
@@ -334,6 +347,11 @@ object Stack {
 
     def configured[P: Stack.Param](p: P): T =
       withParams(params+p)
+
+    def configured[P](psp: (P, Stack.Param[P])): T = {
+      val (p, sp) = psp
+      configured(p)(sp)
+    }
 
     def withParams(ps: Stack.Params): T
   }

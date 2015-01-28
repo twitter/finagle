@@ -44,9 +44,12 @@ object LoadBalancerFactory {
    * large host sets in their destination, this can cause unmanageable
    * memory pressure.
    */
-  case class HostStats(hostStatsReceiver: StatsReceiver)
-  implicit object HostStats extends Stack.Param[HostStats] {
-    val default = HostStats(NullStatsReceiver)
+  case class HostStats(hostStatsReceiver: StatsReceiver) {
+    def mk(): (HostStats, Stack.Param[HostStats]) =
+      (this, HostStats.param)
+  }
+  object HostStats {
+    implicit val param = Stack.Param(HostStats(NullStatsReceiver))
   }
 
   /**
@@ -54,9 +57,12 @@ object LoadBalancerFactory {
    * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] with a collection
    * of addrs to load balance.
    */
-  case class Dest(va: Var[Addr])
-  implicit object Dest extends Stack.Param[Dest] {
-    val default = Dest(Var.value(Addr.Neg))
+  case class Dest(va: Var[Addr]) {
+    def mk(): (Dest, Stack.Param[Dest]) =
+      (this, Dest.param)
+  }
+  object Dest {
+    implicit val param = Stack.Param(Dest(Var.value(Addr.Neg)))
   }
 
   /**
@@ -64,18 +70,24 @@ object LoadBalancerFactory {
     * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] with a label
     * for use in error messages.
     */
-  case class ErrorLabel(label: String)
-  implicit object ErrorLabel extends Stack.Param[ErrorLabel] {
-    val default = ErrorLabel("unknown")
+  case class ErrorLabel(label: String) {
+    def mk(): (ErrorLabel, Stack.Param[ErrorLabel]) =
+      (this, ErrorLabel.param)
+  }
+  object ErrorLabel {
+    implicit val param = Stack.Param(ErrorLabel("unknown"))
   }
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]].
    */
-  case class Param(loadBalancerFactory: WeightedLoadBalancerFactory)
-  implicit object Param extends Stack.Param[Param] {
-    val default = Param(DefaultBalancerFactory)
+  case class Param(loadBalancerFactory: WeightedLoadBalancerFactory) {
+    def mk(): (Param, Stack.Param[Param]) =
+      (this, Param.param)
+  }
+  object Param {
+    implicit val param = Stack.Param(Param(DefaultBalancerFactory))
   }
 
   /**

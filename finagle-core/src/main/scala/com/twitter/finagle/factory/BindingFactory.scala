@@ -62,9 +62,12 @@ object NamerTracingFilter {
    * [[com.twitter.finagle.factory.NamerTracingFilter]] with a
    * [[com.twitter.finagle.Path]] and [[com.twitter.finagle.Name.Bound]]
    */
-  case class BoundPath(boundPath: Option[(Path, Name.Bound)])
-  implicit object BoundPath extends Stack.Param[BoundPath] {
-    val default = BoundPath(None)
+  case class BoundPath(boundPath: Option[(Path, Name.Bound)]) {
+    def mk(): (BoundPath, Stack.Param[BoundPath]) =
+      (this, BoundPath.param)
+  }
+  object BoundPath {
+    implicit val param: Stack.Param[BoundPath] = Stack.Param(BoundPath(None))
   }
 }
 
@@ -351,9 +354,12 @@ object BindingFactory {
    * [[com.twitter.finagle.factory.BindingFactory]] with a destination
    * [[com.twitter.finagle.Name]] to bind.
    */
-  case class Dest(dest: Name)
-  implicit object Dest extends Stack.Param[Dest] {
-    val default = Dest(Name.Path(Path.read("/$/fail")))
+  case class Dest(dest: Name) {
+    def mk(): (Dest, Stack.Param[Dest]) =
+      (this, Dest.param)
+  }
+  object Dest {
+    implicit val param = Stack.Param(Dest(Name.Path(Path.read("/$/fail"))))
   }
 
   private[finagle] val DefaultBaseDtab = () => Dtab.base
@@ -363,9 +369,12 @@ object BindingFactory {
    * [[com.twitter.finagle.factory.BindingFactory]] with a
    * [[com.twitter.finagle.Dtab]].
    */
-  case class BaseDtab(baseDtab: () => Dtab)
-  implicit object BaseDtab extends Stack.Param[BaseDtab] {
-    val default = BaseDtab(DefaultBaseDtab)
+  case class BaseDtab(baseDtab: () => Dtab) {
+    def mk(): (BaseDtab, Stack.Param[BaseDtab]) =
+      (this, BaseDtab.param)
+  }
+  object BaseDtab {
+    implicit val param = Stack.Param(BaseDtab(DefaultBaseDtab))
   }
 
   /**

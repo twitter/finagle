@@ -16,9 +16,12 @@ object ExpiringService {
    * @param idleTime max duration for which a connection is allowed to be idle.
    * @param lifeTime max lifetime of a connection.
    */
-  case class Param(idleTime: Duration, lifeTime: Duration)
-  implicit object Param extends Stack.Param[Param] {
-    val default = Param(Duration.Top, Duration.Top)
+  case class Param(idleTime: Duration, lifeTime: Duration) {
+    def mk(): (Param, Stack.Param[Param]) =
+      (this, Param.param)
+  }
+  object Param {
+    implicit val param = Stack.Param(Param(Duration.Top, Duration.Top))
   }
 
   /**

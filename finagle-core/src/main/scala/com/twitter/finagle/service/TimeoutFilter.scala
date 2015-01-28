@@ -13,9 +13,12 @@ object TimeoutFilter {
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.service.TimeoutFilter]] module.
    */
-  case class Param(timeout: Duration)
-  implicit object Param extends Stack.Param[Param] {
-    val default = Param(Duration.Top)
+  case class Param(timeout: Duration) {
+    def mk(): (Param, Stack.Param[Param]) =
+      (this, Param.param)
+  }
+  object Param {
+    implicit val param = Stack.Param(Param(Duration.Top))
   }
 
   /**

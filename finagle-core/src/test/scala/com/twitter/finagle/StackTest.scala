@@ -63,16 +63,19 @@ class StackTest extends FunSuite {
     assert(stack.make(Stack.Params.empty) === Seq(20,10,20,10,1,2,3,4))
   }
 
-  case class TestParam(p1: Int)
-  implicit object TestParam extends Stack.Param[TestParam] {
-    val default = TestParam(1)
+  case class TestParam(p1: Int) {
+    def mk() = (this, TestParam.param)
+  }
+  object TestParam {
+    implicit val param = Stack.Param(TestParam(1))
   }
 
   case class TestParamInnerVar(p1: Int) {
     val p2: String = "foo"
+    def mk() = (this, TestParamInnerVar.param)
   }
-  implicit object TestParamInnerVar extends Stack.Param[TestParamInnerVar] {
-    val default = TestParamInnerVar(1)
+  object TestParamInnerVar {
+    implicit val param = Stack.Param(TestParamInnerVar(1))
   }
 
   test("Params") {

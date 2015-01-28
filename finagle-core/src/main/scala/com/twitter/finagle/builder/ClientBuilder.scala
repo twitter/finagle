@@ -14,6 +14,7 @@ import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, TraceInitializerFilter}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
+import com.twitter.util
 import com.twitter.util.{Duration, Future, NullMonitor, Time, Try}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.AtomicBoolean
@@ -92,40 +93,58 @@ object ClientConfig {
   }
 
   // params specific to ClientBuilder
-  case class DestName(name: Name)
-  implicit object DestName extends Stack.Param[DestName] {
-    val default = DestName(Name.empty)
+  case class DestName(name: Name) {
+    def mk(): (DestName, Stack.Param[DestName]) =
+      (this, DestName.param)
+  }
+  object DestName {
+    implicit val param = Stack.Param(DestName(Name.empty))
   }
 
-  case class GlobalTimeout(timeout: Duration)
-  implicit object GlobalTimeout extends Stack.Param[GlobalTimeout] {
-    val default = GlobalTimeout(Duration.Top)
+  case class GlobalTimeout(timeout: Duration) {
+    def mk(): (GlobalTimeout, Stack.Param[GlobalTimeout]) =
+      (this, GlobalTimeout.param)
+  }
+  object GlobalTimeout {
+    implicit val param = Stack.Param(GlobalTimeout(Duration.Top))
   }
 
-  case class Retries(policy: RetryPolicy[Try[Nothing]])
-  implicit object Retries extends Stack.Param[Retries] {
-    private[this] val none = new RetryPolicy[Try[Nothing]] {
+  case class Retries(policy: RetryPolicy[Try[Nothing]]) {
+    def mk(): (Retries, Stack.Param[Retries]) =
+      (this, Retries.param)
+  }
+  object Retries {
+    implicit val param = Stack.Param(Retries(new RetryPolicy[Try[Nothing]] {
       def apply(t: Try[Nothing]) = None
-    }
-    val default = Retries(none)
+    }))
   }
 
-  case class Daemonize(onOrOff: Boolean)
-  implicit object Daemonize extends Stack.Param[Daemonize] {
-    val default = Daemonize(true)
+  case class Daemonize(onOrOff: Boolean) {
+    def mk(): (Daemonize, Stack.Param[Daemonize]) =
+      (this, Daemonize.param)
+  }
+  object Daemonize {
+    implicit val param = Stack.Param(Daemonize(true))
   }
 
   // TODO - @bmdhacks - make these private after deprecation ends
   @deprecated("Please use `FailureAccrualFactory.Param` instead", "6.22.1")
-  case class FailureAccrualFac(fac: com.twitter.util.Timer => ServiceFactoryWrapper)
+  case class FailureAccrualFac(fac: util.Timer => ServiceFactoryWrapper) {
+    def mk(): (FailureAccrualFac, Stack.Param[FailureAccrualFac]) =
+      (this, FailureAccrualFac.param)
+  }
   @deprecated("Please use `FailureAccrualFactory.Param` instead", "6.22.1")
-  implicit object FailureAccrualFac extends Stack.Param[FailureAccrualFac] {
-    val default = FailureAccrualFac(Function.const(ServiceFactoryWrapper.identity)_)
+  object FailureAccrualFac {
+    implicit val param =
+      Stack.Param(FailureAccrualFac(Function.const(ServiceFactoryWrapper.identity)_))
   }
 
-  case class MonitorFactory(mFactory: String => com.twitter.util.Monitor)
-  implicit object MonitorFactory extends Stack.Param[MonitorFactory] {
-    val default = MonitorFactory(_ => NullMonitor)
+  case class MonitorFactory(mFactory: String => util.Monitor) {
+    def mk(): (MonitorFactory, Stack.Param[MonitorFactory]) =
+      (this, MonitorFactory.param)
+  }
+  object MonitorFactory {
+    implicit val param = Stack.Param(MonitorFactory(_ => NullMonitor))
   }
 
   // historical defaults for ClientBuilder
@@ -728,7 +747,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     failureAccrualFactory { _ => failureAccrual }
 
   @deprecated("Use failureAccrualParams", "6.22.1")
-  def failureAccrualFactory(factory: com.twitter.util.Timer => ServiceFactoryWrapper): This =
+  def failureAccrualFactory(factory: util.Timer => ServiceFactoryWrapper): This =
     configured(FailureAccrualFac(factory))
 
   @deprecated(
@@ -862,7 +881,7 @@ private case class ClientBuilderClient[Req, Rep](
     sr.scope(label)
   }
 
-  private def retryFilter(timer: com.twitter.util.Timer) =
+  private def retryFilter(timer: util.Timer) =
     params[Retries] match {
       case Retries(policy) if params.contains[Retries] =>
         val exceptions = params[ExceptionStatsHandler]
@@ -872,7 +891,7 @@ private case class ClientBuilderClient[Req, Rep](
       case _ => identityFilter
     }
 
-  private def globalTimeoutFilter(timer: com.twitter.util.Timer) = {
+  private def globalTimeoutFilter(timer: util.Timer) = {
     val GlobalTimeout(timeout) = params[GlobalTimeout]
     if (timeout < Duration.Top) {
       val exception = new GlobalRequestTimeoutException(timeout)

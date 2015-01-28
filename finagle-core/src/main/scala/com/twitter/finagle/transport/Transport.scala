@@ -2,6 +2,7 @@ package com.twitter.finagle.transport
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.{Stack, Status}
+import com.twitter.finagle.ssl
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.{Closable, Future, Promise, Time, Throw, Return, Duration}
 import java.net.SocketAddress
@@ -82,9 +83,12 @@ object Transport {
    * @param recv An option indicating the size of the receive buffer.
    * If None, the implementation default is used.
    */
-  case class BufferSizes(send: Option[Int], recv: Option[Int])
-  implicit object BufferSizes extends Stack.Param[BufferSizes] {
-    val default = BufferSizes(None, None)
+  case class BufferSizes(send: Option[Int], recv: Option[Int]) {
+    def mk(): (BufferSizes, Stack.Param[BufferSizes]) =
+      (this, BufferSizes.param)
+  }
+  object BufferSizes {
+    implicit val param = Stack.Param(BufferSizes(None, None))
   }
 
   /**
@@ -104,34 +108,46 @@ object Transport {
     readTimeout: Duration,
     writeTimeout: Duration,
     keepAlive: Option[Boolean]
-  )
-  implicit object Liveness extends Stack.Param[Liveness] {
-    val default = Liveness(Duration.Top, Duration.Top, None)
+  ) {
+    def mk(): (Liveness, Stack.Param[Liveness]) =
+      (this, Liveness.param)
+  }
+  object Liveness {
+    implicit val param = Stack.Param(Liveness(Duration.Top, Duration.Top, None))
   }
 
   /**
    * $param the verbosity of a `Transport`. Transport activity is
    * written to [[com.twitter.finagle.param.Logger]].
    */
-  case class Verbose(b: Boolean)
-  implicit object Verbose extends Stack.Param[Verbose] {
-    val default = Verbose(false)
+  case class Verbose(b: Boolean) {
+    def mk(): (Verbose, Stack.Param[Verbose]) =
+      (this, Verbose.param)
+  }
+  object Verbose {
+    implicit val param = Stack.Param(Verbose(false))
   }
 
   /**
    * $param the TLS engine for a `Transport`.
    */
-  case class TLSClientEngine(e: Option[SocketAddress => com.twitter.finagle.ssl.Engine])
-  implicit object TLSClientEngine extends Stack.Param[TLSClientEngine] {
-    val default = TLSClientEngine(None)
+  case class TLSClientEngine(e: Option[SocketAddress => ssl.Engine]) {
+    def mk(): (TLSClientEngine, Stack.Param[TLSClientEngine]) =
+      (this, TLSClientEngine.param)
+  }
+  object TLSClientEngine {
+    implicit val param = Stack.Param(TLSClientEngine(None))
   }
 
   /**
    * $param the TLS engine for a `Transport`.
    */
-  case class TLSServerEngine(e: Option[() => com.twitter.finagle.ssl.Engine])
-  implicit object TLSServerEngine extends Stack.Param[TLSServerEngine] {
-    val default = TLSServerEngine(None)
+  case class TLSServerEngine(e: Option[() => ssl.Engine]) {
+    def mk(): (TLSServerEngine, Stack.Param[TLSServerEngine]) =
+      (this, TLSServerEngine.param)
+  }
+  object TLSServerEngine {
+    implicit val param = Stack.Param(TLSServerEngine(None))
   }
 
   /**

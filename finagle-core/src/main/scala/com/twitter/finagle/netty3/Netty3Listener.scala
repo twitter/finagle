@@ -129,9 +129,12 @@ object Netty3Listener {
    * A [[com.twitter.finagle.Stack.Param]] used to configure
    * the ServerChannelFactory for a `Listener`.
    */
-  case class ChannelFactory(cf: ServerChannelFactory)
-  implicit object ChannelFactory extends Stack.Param[ChannelFactory] {
-    val default = ChannelFactory(channelFactory)
+  case class ChannelFactory(cf: ServerChannelFactory) {
+    def mk(): (ChannelFactory, Stack.Param[ChannelFactory]) =
+      (this, ChannelFactory.param)
+  }
+  object ChannelFactory {
+    implicit val param = Stack.Param(ChannelFactory(channelFactory))
   }
 
   /**

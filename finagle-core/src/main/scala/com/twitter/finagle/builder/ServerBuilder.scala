@@ -13,6 +13,7 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.util._
+import com.twitter.util
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Time}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
@@ -73,21 +74,30 @@ object ServerConfig {
   }
 
   // params specific to ServerBuilder
-  case class BindTo(addr: SocketAddress)
-  implicit object BindTo extends Stack.Param[BindTo] {
-    val default = BindTo(new SocketAddress {
+  case class BindTo(addr: SocketAddress) {
+    def mk(): (BindTo, Stack.Param[BindTo]) =
+      (this, BindTo.param)
+  }
+  object BindTo {
+    implicit val param = Stack.Param(BindTo(new SocketAddress {
       override val toString = "unknown"
-    })
+    }))
   }
 
-  case class MonitorFactory(mFactory: (String, SocketAddress) => com.twitter.util.Monitor)
-  implicit object MonitorFactory extends Stack.Param[MonitorFactory] {
-    val default = MonitorFactory((_, _) => NullMonitor)
+  case class MonitorFactory(mFactory: (String, SocketAddress) => util.Monitor) {
+    def mk(): (MonitorFactory, Stack.Param[MonitorFactory]) =
+      (this, MonitorFactory.param)
+  }
+  object MonitorFactory {
+    implicit val param = Stack.Param(MonitorFactory((_, _) => NullMonitor))
   }
 
-  case class Daemonize(onOrOff: Boolean)
-  implicit object Daemonize extends Stack.Param[Daemonize] {
-    val default = Daemonize(false)
+  case class Daemonize(onOrOff: Boolean) {
+    def mk(): (Daemonize, Stack.Param[Daemonize]) =
+      (this, Daemonize.param)
+  }
+  object Daemonize {
+    implicit val param = Stack.Param(Daemonize(false))
   }
 }
 
@@ -334,7 +344,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def writeCompletionTimeout(howlong: Duration): This =
     configured(params[Transport.Liveness].copy(writeTimeout = howlong))
 
-  def monitor(mFactory: (String, SocketAddress) => com.twitter.util.Monitor): This =
+  def monitor(mFactory: (String, SocketAddress) => util.Monitor): This =
     configured(MonitorFactory(mFactory))
 
   @deprecated("Use tracer() instead", "7.0.0")

@@ -25,9 +25,12 @@ object FailureAccrualFactory {
    * @param numFailures The number of consecutive failures before marking an endpoint as dead.
    * @param markDeadFor The duration to mark an endpoint as dead.
    */
-  case class Param(numFailures: Int, markDeadFor: Duration)
-  implicit object Param extends Stack.Param[Param] {
-    val default = Param(5, 5.seconds)
+  case class Param(numFailures: Int, markDeadFor: Duration) {
+    def mk(): (Param, Stack.Param[Param]) =
+      (this, Param.param)
+  }
+  object Param {
+    implicit val param = Stack.Param(Param(5, 5.seconds))
   }
 
   /**
@@ -117,12 +120,12 @@ class FailureAccrualFactory[Req, Rep](
         }
 
         override def close(deadline: Time) = service.close(deadline)
-        override def status = Status.worst(service.status, 
+        override def status = Status.worst(service.status,
           FailureAccrualFactory.this.status)
       }
     } onFailure { _ => didFail() }
   }
-  
+
   override def status = state match {
     case Alive => underlying.status
     case Dead => Status.Busy
