@@ -117,7 +117,7 @@ trait MemcachedxKetamaClient {
 
   private def faParams(ejectFailedHost: Boolean) = {
     if (ejectFailedHost) MemcachedxFailureAccrualClient.DefaultFailureAccrualParams
-    else (Int.MaxValue, Duration.Zero)
+    else (Int.MaxValue, () => Duration.Zero)
   }
 }
 
@@ -133,12 +133,12 @@ object MemcachedxClient extends DefaultClient[Command, Response](
 ) with MemcachedxRichClient with MemcachedxKetamaClient
 
 private[finagle] object MemcachedxFailureAccrualClient {
-  val DefaultFailureAccrualParams = (5, 30.seconds)
+  val DefaultFailureAccrualParams = (5, () => 30.seconds)
 
   def apply(
       key: KetamaClientKey,
       broker: Broker[NodeHealth],
-      failureAccrualParams: (Int, Duration) = DefaultFailureAccrualParams
+      failureAccrualParams: (Int, () => Duration) = DefaultFailureAccrualParams
   ): Client[Command, Response] with MemcachedxRichClient = {
     new MemcachedxFailureAccrualClient(key, broker, failureAccrualParams)
   }
@@ -146,7 +146,7 @@ private[finagle] object MemcachedxFailureAccrualClient {
 private[finagle] class MemcachedxFailureAccrualClient(
   key: KetamaClientKey,
   broker: Broker[NodeHealth],
-  failureAccrualParams: (Int, Duration)
+  failureAccrualParams: (Int, () => Duration)
 ) extends DefaultClient[Command, Response](
   name = "memcached",
   endpointer = Bridge[Command, Response, Command, Response](

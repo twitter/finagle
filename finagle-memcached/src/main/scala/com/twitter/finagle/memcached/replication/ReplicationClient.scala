@@ -48,7 +48,7 @@ object ReplicationClient {
     pools: Seq[Cluster[CacheNode]],
     clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]] = None,
     hashName: Option[String] = None,
-    failureAccrualParams: (Int, Duration) = (5, 30.seconds)
+    failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds)
   ) = {
     val underlyingClients = pools map { pool =>
       Await.result(pool.ready)
@@ -63,7 +63,7 @@ object ReplicationClient {
     pools: Seq[Cluster[CacheNode]],
     clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]] = None,
     hashName: Option[String] = None,
-    failureAccrualParams: (Int, Duration) = (5, 30.seconds)
+    failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds)
   ) = {
     new SimpleReplicationClient(newBaseReplicationClient(pools, clientBuilder, hashName, failureAccrualParams))
   }

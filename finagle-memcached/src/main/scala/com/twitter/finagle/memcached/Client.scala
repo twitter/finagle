@@ -1,7 +1,5 @@
 package com.twitter.finagle.memcached
 
-import scala.collection.{immutable, mutable}
-
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 import _root_.java.net.{SocketAddress, InetSocketAddress}
 import _root_.java.util.{Map => JMap}
@@ -15,13 +13,14 @@ import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.service.{FailureAccrualFactory, FailedService}
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, DefaultStatsReceiver}
 import com.twitter.hashing._
 import com.twitter.io.Charsets.Utf8
 import com.twitter.util.{Command => _, Function => _, _}
-
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers
+import scala.collection.{immutable, mutable}
+import scala.util.Random
 
 object Client {
   /**
@@ -660,14 +659,30 @@ private[finagle] case class NodeRevived(key: KetamaClientKey) extends NodeHealth
 class FailureAccrualException(message: String) extends RequestException(message, cause = null)
 
 class KetamaFailureAccrualFactory[Req, Rep](
-  underlying: ServiceFactory[Req, Rep],
-  numFailures: Int,
-  markDeadFor: Duration,
-  timer: Timer,
-  key: KetamaClientKey,
-  healthBroker: Broker[NodeHealth],
-  ejectFailedHost: Boolean
-) extends FailureAccrualFactory[Req, Rep](underlying, numFailures, markDeadFor, timer) {
+    underlying: ServiceFactory[Req, Rep],
+    numFailures: Int,
+    markDeadFor: () => Duration,
+    timer: Timer,
+    key: KetamaClientKey,
+    healthBroker: Broker[NodeHealth],
+    ejectFailedHost: Boolean)
+  extends FailureAccrualFactory[Req, Rep](
+    underlying,
+    numFailures,
+    markDeadFor,
+    timer,
+    DefaultStatsReceiver)
+{
+  def this(
+    underlying: ServiceFactory[Req, Rep],
+    numFailures: Int,
+    markDeadFor: Duration,
+    timer: Timer,
+    key: KetamaClientKey,
+    healthBroker: Broker[NodeHealth],
+    ejectFailedHost: Boolean
+  ) = this(underlying, numFailures, () => markDeadFor, timer, key, healthBroker, ejectFailedHost)
+
   private[this] val failureAccrualEx =
     Future.exception(new FailureAccrualException("Endpoint is marked dead by failureAccrual"))
 
@@ -719,8 +734,8 @@ class KetamaClient private[finagle](
   initialServices: Group[CacheNode],
   keyHasher: KeyHasher,
   numReps: Int,
-  failureAccrualParams: (Int, Duration) = (5, 30.seconds),
-  legacyFAClientBuilder: Option[(CacheNode, KetamaClientKey, Broker[NodeHealth], (Int, Duration)) => Service[Command, Response]],
+  failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds),
+  legacyFAClientBuilder: Option[(CacheNode, KetamaClientKey, Broker[NodeHealth], (Int, () => Duration)) => Service[Command, Response]],
   statsReceiver: StatsReceiver = NullStatsReceiver,
   oldLibMemcachedVersionComplianceMode: Boolean = false
 ) extends PartitionedClient {
@@ -879,7 +894,7 @@ case class KetamaClientBuilder private[memcached] (
   _group: Group[CacheNode],
   _hashName: Option[String],
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
-  _failureAccrualParams: (Int, Duration) = (5, 30.seconds),
+  _failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds),
   _ejectFailedHost: Boolean = true,
   oldLibMemcachedVersionComplianceMode: Boolean = false,
   numReps: Int = KetamaClient.DefaultNumReps
@@ -934,10 +949,13 @@ case class KetamaClientBuilder private[memcached] (
     copy(_clientBuilder = Some(clientBuilder))
 
   def failureAccrualParams(numFailures: Int, markDeadFor: Duration): KetamaClientBuilder =
+    copy(_failureAccrualParams = (numFailures, () => markDeadFor))
+
+  def failureAccrualParams(numFailures: Int, markDeadFor: () => Duration): KetamaClientBuilder =
     copy(_failureAccrualParams = (numFailures, markDeadFor))
 
   def noFailureAccrual: KetamaClientBuilder =
-    copy(_failureAccrualParams = (Int.MaxValue, Duration.Zero))
+    copy(_failureAccrualParams = (Int.MaxValue, () => Duration.Zero))
 
   def enableOldLibMemcachedVersionComplianceMode(): KetamaClientBuilder =
     copy(oldLibMemcachedVersionComplianceMode = true)
@@ -951,7 +969,7 @@ case class KetamaClientBuilder private[memcached] (
         .codec(Memcached())
 
     def legacyFAClientBuilder(
-      node: CacheNode, key: KetamaClientKey, broker: Broker[NodeHealth], faParams: (Int, Duration)
+      node: CacheNode, key: KetamaClientKey, broker: Broker[NodeHealth], faParams: (Int, () => Duration)
     ) = {
       builder.hosts(new InetSocketAddress(node.host, node.port))
           .failureAccrualFactory(filter(key, broker, faParams, _ejectFailedHost) _)
@@ -973,7 +991,10 @@ case class KetamaClientBuilder private[memcached] (
   }
 
   private[this] def filter(
-    key: KetamaClientKey, broker: Broker[NodeHealth], faParams: (Int, Duration), ejectFailedHost: Boolean
+    key: KetamaClientKey,
+    broker: Broker[NodeHealth],
+    faParams: (Int, () => Duration),
+    ejectFailedHost: Boolean
   )(timer: Timer) = {
     val (_numFailures, _markDeadFor) = faParams
     new ServiceFactoryWrapper {

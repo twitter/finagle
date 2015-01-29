@@ -19,8 +19,15 @@ Breaking API Changes
     arguments, both the base and local Dtabs.
   * finagle-memcached / finagle-memcachedx: move TwitterCacheResolver
     and related objects to new finagle-cacheresolver package.
+<<<<<<< HEAD
+  * finagle-memcached / finagle-memcachedx: failureAccrual param in ReplicationClient
+    is changed from type (Int, Duration) to (Int, () => Duration), to allow flexibility
+    to config duration. Also see `markDeadFor` change in finagle-core in the "New Features"
+    section below.
+=======
   * finagle-mux: `c.t.f.mux.RequestNackedException` is removed in favor of a standard
     Failure (`c.t.f.Failure.Rejected`).
+>>>>>>> master
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,6 +54,20 @@ New Features
   * finagle-core: `com.twitter.finagle.service.StatsFilter` is now configurable with an 
     `com.twitter.finagle.stats.ExceptionStatsHandler` to customize how failures are recorded.
 
+  * finagle-core: `markDeadFor` in c.t.f.service.FailureAccrualFactory.Param is changed from
+    Duration type to () => Duration. So it's flexible for clients to pass in a function that
+    specifies Duration. For example, c.t.f.service.FailureAccrualFactory provides a function
+    that adds perturbation in durations. Stack-based API and c.t.f.builder.ClientBuilder
+    support both types for client configuration. For example,
+
+    ::
+
+      Thrift.client.configured(FailureAccrualFactory(5, () => 1.seconds))
+      // or
+      Thrift.client.configured(new FailureAccrualFactory(5, 1.seconds)).
+
+    c.t.f.client.DefaultClient does not support Duration type in failureAccrual anymore.
+
   * finagle-core: improved Java compatiblity for `c.t.f.Stack.Params` / `c.t.f.Stack.Parameterized`.
 
   * finagle-mysql: Add support for MySQL transactions.
@@ -54,7 +75,7 @@ New Features
   * finagle-stats: A new HostStatsReceiver type is added and used for per host stats.
     It is loaded through LoadService and used by the Stack-based API as a default 
     param. Per host stats can be turned on through `com.twitter.finagle.loadbalancer.perHostStats` 
-    flag, and is exported to the "/admin/per_host_metrics.json" route in twitter-server. 
+    flag, and is exported to the "/admin/per_host_metrics.json" route in twitter-server.
 
   * finagle-http(x): Two missing params were added: `Decompression` and `CompressionLevel`. Both
     client and server may be configured with either `configured` method or `withDecompression`/

@@ -245,7 +245,7 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
         timer = timer,
         statsReceiver = statsReceiver,
         failureAccrual = { factory: ServiceFactory[Int, Int] =>
-          FailureAccrualFactory.wrapper(statsReceiver, 6, 3.seconds)(timer) andThen factory
+          FailureAccrualFactory.wrapper(statsReceiver, 6, () => 3.seconds)(timer) andThen factory
         }
       )
 

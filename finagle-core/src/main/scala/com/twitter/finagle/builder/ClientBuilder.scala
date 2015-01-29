@@ -739,7 +739,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def failureAccrualParams(pair: (Int, Duration)): This = {
     val (numFailures, markDeadFor) = pair
-    failureAccrualFactory(FailureAccrualFactory.wrapper(client.statsReceiver, numFailures, markDeadFor)(_))
+    failureAccrualFactory(FailureAccrualFactory.wrapper(statsReceiver, numFailures, () => markDeadFor)(_))
   }
 
   @deprecated("Use failureAccrualParams", "6.22.1")
