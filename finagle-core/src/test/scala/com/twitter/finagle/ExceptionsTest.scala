@@ -104,4 +104,18 @@ class ExceptionsTest extends FunSuite with MockitoSugar {
 
     assert(SourcedException.unapply(finagleExc) === Some("finagle"))
   }
+
+  test("NoBrokersAvailableException includes dtabs in error message") {
+    val ex = new NoBrokersAvailableException(
+      "/s/cool/story",
+      Dtab.base,
+      Dtab.read("/=>/#/com.twitter.butt")
+    )
+
+    assert(ex.getMessage ===
+      "No hosts are available for /s/cool/story, " +
+      s"Dtab.base=[${Dtab.base.show}], " +
+      "Dtab.local=[/=>/#/com.twitter.butt]"
+    )
+  }
 }

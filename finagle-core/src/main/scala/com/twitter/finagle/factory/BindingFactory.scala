@@ -331,11 +331,11 @@ private[finagle] class BindingFactory[Req, Rep](
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
     val localDtab = Dtab.local
-    val service = dtabCache(baseDtab() ++ localDtab, conn)
-    if (localDtab.isEmpty) service
-    else service rescue {
+    val baseDtabSnap = baseDtab()
+    val service = dtabCache(baseDtabSnap ++ localDtab, conn)
+    service rescue {
       case e: NoBrokersAvailableException =>
-        Future.exception(new NoBrokersAvailableException(e.name, localDtab))
+        Future.exception(new NoBrokersAvailableException(e.name, baseDtabSnap, localDtab))
     }
   }
 

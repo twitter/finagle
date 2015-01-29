@@ -15,6 +15,8 @@ Breaking API Changes
   * finagle-core: Add an attribute map to `c.t.f.Addr.Bound`.
   * finagle-core: `c.t.f.builder.ClientConfig.FailFast` has moved to
     `c.t.f.FailFastFactory.FailFast`.
+  * finagle-core: NoBrokersAvailableException now has two Dtab constructor
+    arguments, both the base and local Dtabs.
   * finagle-memcached / finagle-memcachedx: move TwitterCacheResolver
     and related objects to new finagle-cacheresolver package.
   * finagle-mux: `c.t.f.mux.RequestNackedException` is removed in favor of a standard
@@ -25,7 +27,9 @@ Runtime Behavior Changes
 
   * finagle-core: `com.twitter.finagle.service.StatsFilter` no longer requires a
     `com.twitter.finagle.stats.RollupStatsReceiver` for correct behaviour, and 
-    providing one will double count failures. 
+    providing one will double count failures.
+  * finagle-core: The error message provided by `c.t.f.NoBrokersAvailableException`
+    prints both the base and local Dtabs.
 
 Deprecations
 ~~~~~~~~~~~~

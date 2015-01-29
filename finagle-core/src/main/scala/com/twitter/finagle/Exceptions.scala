@@ -129,14 +129,13 @@ class GlobalRequestTimeoutException(timeout: Duration)
  */
 class NoBrokersAvailableException(
   val name: String,
+  val baseDtab: Dtab,
   val localDtab: Dtab
 ) extends RequestException {
-  def this(name: String = "unknown") = this(name, Dtab.empty)
+  def this(name: String = "unknown") = this(name, Dtab.empty, Dtab.empty)
 
   override def getMessage =
-    "No hosts are available for " +
-      (if (localDtab.isEmpty) name
-      else name + " [" + localDtab.show + "]")
+    s"No hosts are available for $name, Dtab.base=[${baseDtab.show}], Dtab.local=[${localDtab.show}]"
 }
 
 @deprecated("no longer used by com.twitter.finagle.service.RetryingFilter", "7.0.0")
