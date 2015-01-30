@@ -1,6 +1,6 @@
 package com.twitter.finagle.http.netty
 
-import org.jboss.netty.handler.codec.http.{DefaultHttpRequest, HttpMethod, HttpVersion}
+import org.jboss.netty.handler.codec.http.{DefaultHttpRequest=>DefaultHttpAsk, HttpMethod, HttpVersion}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -8,7 +8,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class HttpMessageProxyTest extends FunSuite {
   test("basics") {
-    val message = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
+    val message = new DefaultHttpAsk(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
     val proxy = new HttpMessageProxy {
       final val httpMessage = message
     }

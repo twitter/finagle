@@ -12,10 +12,10 @@ trait UnifiedProtocolCodec {
   def decodeUnifiedFormat[T <: AnyRef](argCount: Long, doneFn: ByteArrays => T) =
     argCount match {
       case n if n < 0 => throw new ProtocolError("Invalid argument count specified")
-      case n => decodeRequestLines(n, Nil, { lines => doneFn(lines) } )
+      case n => decodeAskLines(n, Nil, { lines => doneFn(lines) } )
     }
 
-  def decodeRequestLines[T <: AnyRef](
+  def decodeAskLines[T <: AnyRef](
     i: Long,
     lines: ByteArrays,
     doneFn: ByteArrays => T): NextStep =
@@ -29,29 +29,29 @@ trait UnifiedProtocolCodec {
           case ARG_SIZE_MARKER =>
             val size = NumberFormat.toInt(line.drop(1))
             if (size < 1) {
-              decodeRequestLines(i - 1, lines.+:(RedisCodec.NIL_VALUE_BA.array), doneFn)
+              decodeAskLines(i - 1, lines.+:(RedisCodec.NIL_VALUE_BA.array), doneFn)
             } else {
               readBytes(size) { byteArray =>
                 readBytes(2) { eol =>
                   if (eol(0) != '\r' || eol(1) != '\n') {
                     throw new ProtocolError("Expected EOL after line data and didn't find it")
                   }
-                  decodeRequestLines(i - 1, lines.+:(byteArray), doneFn)
+                  decodeAskLines(i - 1, lines.+:(byteArray), doneFn)
                 }
               }
             }
           case STATUS_REPLY =>
-            decodeRequestLines(i - 1, lines.+:(line.drop(1).getBytes), doneFn)
+            decodeAskLines(i - 1, lines.+:(line.drop(1).getBytes), doneFn)
           case ARG_COUNT_MARKER =>
-            decodeRequestLines(line.drop(1).toLong, lines, doneFn)
+            decodeAskLines(line.drop(1).toLong, lines, doneFn)
           case INTEGER_REPLY =>
-            decodeRequestLines(i - 1, lines.+:(line.drop(1).getBytes), doneFn)
+            decodeAskLines(i - 1, lines.+:(line.drop(1).getBytes), doneFn)
           case ERROR_REPLY =>
-            decodeRequestLines(i - 1, lines.+:(line.drop(1).getBytes), doneFn)
+            decodeAskLines(i - 1, lines.+:(line.drop(1).getBytes), doneFn)
           case b: Char =>
             throw new ProtocolError("Expected size marker $, got " + b)
         } // header match
       } // readLine
     } // else
-  } // decodeRequestLines
+  } // decodeAskLines
 }

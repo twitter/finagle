@@ -43,7 +43,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     new QueueTransport(writeq=serverToClient, readq=clientToServer)
   val clientTransport =
     new QueueTransport(writeq=clientToServer, readq=serverToClient)
-  val service = mock[Service[Request, Response]]
+  val service = mock[Service[Ask, Response]]
   val client = new ClientDispatcher("test", clientTransport, NullStatsReceiver)
   val server = new ServerDispatcher(
     serverTransport, service, canDispatch, 
@@ -60,7 +60,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
 
   test("handle concurrent requests, handling out of order replies") {
     val p1, p2, p3 = new Promise[Response]
-    val reqs = (1 to 3) map { i => Request(Path.empty, buf(i.toByte)) }
+    val reqs = (1 to 3) map { i => Ask(Path.empty, buf(i.toByte)) }
     when(service(reqs(0))).thenReturn(p1)
     when(service(reqs(1))).thenReturn(p2)
     when(service(reqs(2))).thenReturn(p3)
@@ -94,7 +94,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   }
 
   test("server nacks new requests after draining") {
-    val req1 = Request(Path.empty, buf(1))
+    val req1 = Ask(Path.empty, buf(1))
     val p1 = new Promise[Response]
     when(service(req1)).thenReturn(p1)
 
@@ -102,8 +102,8 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     verify(service)(req1)
     server.close(Time.now)
     assert(f1.poll === None)
-    val req2 = Request(Path.empty, buf(2))
-    assert(client(req2).poll === Some(Throw(RequestNackedException)))
+    val req2 = Ask(Path.empty, buf(2))
+    assert(client(req2).poll === Some(Throw(AskNackedException)))
     verify(service, never)(req2)
 
     val rep1 = Response(buf(123))
@@ -112,14 +112,14 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   }
 
   test("handle errors") {
-    val req = Request(Path.empty, buf(1))
+    val req = Ask(Path.empty, buf(1))
     when(service(req)).thenReturn(Future.exception(new Exception("sad panda")))
     assert(client(req).poll === Some(
       Throw(ServerApplicationError("java.lang.Exception: sad panda"))))
   }
 
   test("propagate interrupts") {
-    val req = Request(Path.empty, buf(1))
+    val req = Ask(Path.empty, buf(1))
     val p = new Promise[Response]
     when(service(req)).thenReturn(p)
     val f = client(req)
@@ -130,13 +130,13 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     val exc = new Exception("sad panda")
     f.raise(exc)
     assert(p.isInterrupted === Some(
-      ClientDiscardedRequestException("java.lang.Exception: sad panda")))
+      ClientDiscardedAskException("java.lang.Exception: sad panda")))
 
     assert(f.poll === Some(Throw(exc)))
   }
 
   test("propagate trace ids") {
-    when(service(any[Request])).thenAnswer(
+    when(service(any[Ask])).thenAnswer(
       new Answer[Future[Response]]() {
         def answer(invocation: InvocationOnMock) =
           Future.value(Response(Buf.Utf8(Trace.id.toString)))
@@ -145,7 +145,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
 
     val id = Trace.nextId
     val resp = Trace.letId(id) {
-      client(Request(Path.empty, buf(1)))
+      client(Ask(Path.empty, buf(1)))
     }
     assert(resp.poll.isDefined)
     val Buf.Utf8(respStr) = Await.result(resp).body
@@ -153,7 +153,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   }
 
   test("propagate trace flags") {
-    when(service(any[Request])).thenAnswer(
+    when(service(any[Ask])).thenAnswer(
       new Answer[Future[Response]] {
         def answer(invocation: InvocationOnMock) = {
           val buf = ChannelBuffers.directBuffer(8)
@@ -166,7 +166,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     val flags = Flags().setDebug
     val id = Trace.nextId.copy(flags=flags)
     val resp = Trace.letId(id) {
-      val p = client(Request(Path.empty, buf(1)))
+      val p = client(Ask(Path.empty, buf(1)))
       p
     }
     assert(resp.poll.isDefined)
@@ -180,8 +180,8 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
 @RunWith(classOf[JUnitRunner])
 class ClientServerTestNoDispatch extends ClientServerTest(false) {
   test("does not dispatch destinations") {
-    val withDst = Request(Path.read("/dst/name"), buf(123))
-    val withoutDst = Request(Path.empty, buf(123))
+    val withDst = Ask(Path.read("/dst/name"), buf(123))
+    val withoutDst = Ask(Path.empty, buf(123))
     val rep = Response(buf(23))
     when(service(withoutDst)).thenReturn(Future.value(rep))
     assert(Await.result(client(withDst)) === rep)
@@ -197,7 +197,7 @@ class ClientServerTestDispatch extends ClientServerTest(true) {
   // since it's a default request context.
 
   test("Transmits request contexts") {
-    when(service(any[Request])).thenAnswer(
+    when(service(any[Ask])).thenAnswer(
       new Answer[Future[Response]] {
         def answer(invocation: InvocationOnMock) =
           Future.value(Response(
@@ -207,17 +207,17 @@ class ClientServerTestDispatch extends ClientServerTest(true) {
     )
 
     // No context set
-    assert(Await.result(client(Request(Path.empty, Buf.Empty))).body.isEmpty)
+    assert(Await.result(client(Ask(Path.empty, Buf.Empty))).body.isEmpty)
 
     val f = Contexts.broadcast.let(testContext, Buf.Utf8("My context!")) {
-      client(Request.empty)
+      client(Ask.empty)
     }
 
     assert(Await.result(f).body === Buf.Utf8("My context!"))
   }
 
   test("dispatches destinations") {
-    val req = Request(Path.read("/dst/name"), buf(123))
+    val req = Ask(Path.read("/dst/name"), buf(123))
     val rep = Response(buf(23))
     when(service(req)).thenReturn(Future.value(rep))
     assert(Await.result(client(req)) === rep)

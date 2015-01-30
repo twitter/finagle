@@ -8,7 +8,7 @@ import scala.collection.mutable
 import java.net.SocketAddress
 import com.twitter.util.Await
 import com.twitter.conversions.time._
-import com.twitter.finagle.GlobalRequestTimeoutException
+import com.twitter.finagle.GlobalAskTimeoutException
 
 @RunWith(classOf[JUnitRunner])
 class ClusterTest extends FunSuite {
@@ -102,7 +102,7 @@ class ClusterTest extends FunSuite {
         .timeout(1.seconds) //global time out
         .build()
 
-    intercept[GlobalRequestTimeoutException] {
+    intercept[GlobalAskTimeoutException] {
       Await.result(client("hello1"))
     }
 

@@ -48,7 +48,7 @@ object SpnegoAuthenticator {
   }
 
   object Authenticated {
-    case class Http(request: Request, context: GSSContext) extends Authenticated[Request]
+    case class Http(request: Ask, context: GSSContext) extends Authenticated[Ask]
   }
 
   case class Negotiated(
@@ -207,15 +207,15 @@ object SpnegoAuthenticator {
     def unauthorized(version: Version) =  Response(version, Status.Unauthorized)
   }
 
-  implicit val httpRequestSupport = new ReqSupport[Request] {
-    def authorizationHeader(req: Request) =
+  implicit val httpAskSupport = new ReqSupport[Ask] {
+    def authorizationHeader(req: Ask) =
       Option(req.headers.get(Fields.Authorization))
-    def authorizationHeader(req: Request, token: Token) =
+    def authorizationHeader(req: Ask, token: Token) =
       AuthHeader(Some(token)).foreach { header =>
         req.headers.set(Fields.Authorization, header)
       }
-    def protocolVersion(req: Request) = req.version
-    def authenticated(req: Request, context: GSSContext) =
+    def protocolVersion(req: Ask) = req.version
+    def authenticated(req: Ask, context: GSSContext) =
       Authenticated.Http(req, context)
   }
 
@@ -300,9 +300,9 @@ object SpnegoAuthenticator {
   }
 
   case class ClientFilter(credSrc: Credentials.ClientSource)
-      extends Client[Request, Response]
+      extends Client[Ask, Response]
 
   case class ServerFilter(credSrc: Credentials.ServerSource)
-      extends Server[Request,  Response]
+      extends Server[Ask,  Response]
 
 }

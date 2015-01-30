@@ -1,7 +1,7 @@
 package com.twitter.finagle.httpx.compat
 
 import com.twitter.finagle.http
-import com.twitter.finagle.httpx.{Fields, Request, Method, Version}
+import com.twitter.finagle.httpx.{Fields, Ask, Method, Version}
 import com.twitter.finagle.httpx.netty.Bijections
 import com.twitter.util.Await
 import com.twitter.io.{Buf, BufReader, Reader}
@@ -10,7 +10,7 @@ import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponseStatus, HttpResponse}
+import org.jboss.netty.handler.codec.http.{DefaultHttpRequest=>HttpAsk, HttpResponseStatus, HttpResponse}
 import java.net.{InetAddress, InetSocketAddress, URI}
 
 @RunWith(classOf[JUnitRunner])
@@ -39,7 +39,7 @@ class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
   } yield (key, util.Random.alphanumeric.take(len).mkString)
 
 
-  val arbRequest = for {
+  val arbAsk = for {
     method  <- arbMethod
     uri     <- arbUri
     version <- Gen.oneOf(Version.Http10, Version.Http11)
@@ -47,10 +47,10 @@ class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
     headers <- Gen.containerOf[Seq, (String, String)](arbHeader)
     body    <- arbitrary[String]
   } yield {
-    val reqIn = Request(method, uri, version)
+    val reqIn = Ask(method, uri, version)
     headers foreach { case (k, v) => reqIn.headers.add(k, v) }
-    val req = new Request {
-      val httpRequest = reqIn.httpRequest
+    val req = new Ask {
+      val httpAsk = reqIn.httpAsk
       override val reader = BufReader(Buf.Utf8(body))
       lazy val remoteSocketAddress = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     }
@@ -86,13 +86,13 @@ class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
       (r.httpResponse, body)
     }
 
-  val arbNettyRequest =
-    arbRequest map { case (r: Request, body: String) =>
-      (r.httpRequest, body)
+  val arbNettyAsk =
+    arbAsk map { case (r: Ask, body: String) =>
+      (r.httpAsk, body)
     }
 
   test("http: httpx request to http") {
-    forAll(arbRequest) { case (in: Request, body: String) =>
+    forAll(arbAsk) { case (in: Ask, body: String) =>
       val out = Await.result(HttpAdaptor.in(in))
       assert(out.version === from(in.version))
       assert(out.method === from(in.method))
@@ -119,7 +119,7 @@ class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
   }
 
   test("netty: httpx request to netty") {
-    forAll(arbRequest) { case (in: Request, body: String) =>
+    forAll(arbAsk) { case (in: Ask, body: String) =>
       if (in.isChunked) {
         val exc = intercept[Exception] { Await.result(NettyAdaptor.in(in)) }
         assert(NettyAdaptor.NoStreaming === exc)
@@ -152,7 +152,7 @@ class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
   }
 
   test("netty: netty request to httpx") {
-    forAll(arbNettyRequest) { case (in: HttpRequest, body: String) =>
+    forAll(arbNettyAsk) { case (in: HttpAsk, body: String) =>
       if (in.isChunked) {
         val exc = intercept[Exception] { Await.result(NettyClientAdaptor.in(in)) }
         assert(NettyClientAdaptor.NoStreaming === exc)

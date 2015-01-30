@@ -7,8 +7,8 @@ import org.jboss.netty.handler.codec.http._
 
 object Server extends App {
 //#service
-  val service = new Service[HttpRequest, HttpResponse] {
-    def apply(req: HttpRequest): Future[HttpResponse] =
+  val service = new Service[HttpAsk, HttpResponse] {
+    def apply(req: HttpAsk): Future[HttpResponse] =
       Future.value(new DefaultHttpResponse(
         req.getProtocolVersion, HttpResponseStatus.OK))
   }

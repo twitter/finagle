@@ -1,7 +1,7 @@
 package com.twitter.finagle.httpx.filter
 
 import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.finagle.httpx.{Method, Request, Response, Status}
+import com.twitter.finagle.httpx.{Method, Ask, Response, Status}
 import com.twitter.util.Future
 
 /**
@@ -9,13 +9,13 @@ import com.twitter.util.Future
  *
  * Respond with 405 Method Not Allowed error if method not in supported method list.
  */
-class MethodRequiredFilter[REQUEST <: Request](
+class MethodRequiredFilter[ASK <: Ask](
    val supportedMethods: Set[Method] = Set(Method.Get, Method.Head, Method.Post))
- extends SimpleFilter[REQUEST, Response] {
+ extends SimpleFilter[ASK, Response] {
 
   private[this] val allowedMethods = supportedMethods.mkString(", ").toUpperCase
 
-  def apply(request: REQUEST, service: Service[REQUEST, Response]): Future[Response] =
+  def apply(request: ASK, service: Service[ASK, Response]): Future[Response] =
     if (!supportedMethods.contains(request.method)) {
       val response = request.response
       response.status = Status.MethodNotAllowed
@@ -28,4 +28,4 @@ class MethodRequiredFilter[REQUEST <: Request](
 
 
 object MethodRequiredFilter
-  extends MethodRequiredFilter[Request](Set(Method.Get, Method.Head, Method.Post))
+  extends MethodRequiredFilter[Ask](Set(Method.Get, Method.Head, Method.Post))

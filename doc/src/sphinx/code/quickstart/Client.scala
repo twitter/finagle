@@ -5,11 +5,11 @@ import org.jboss.netty.handler.codec.http._
 
 object Client extends App {
 //#builder
-  val client: Service[HttpRequest, HttpResponse] =
+  val client: Service[HttpAsk, HttpResponse] =
     Http.newService("www.google.com:80")
 //#builder
 //#dispatch
-  val request =  new DefaultHttpRequest(
+  val request =  new DefaultHttpAsk(
     HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
   val response: Future[HttpResponse] = client(request)
 //#dispatch

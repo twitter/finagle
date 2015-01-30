@@ -2,15 +2,14 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Status
-import com.twitter.finagle.http.{Request, Response}
+import com.twitter.finagle.http.{Ask, Response}
 import com.twitter.finagle.transport.{Transport, QueueTransport}
 import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.handler.codec.http.HttpResponseStatus.OK
 import org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1
-import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, DefaultHttpResponse, HttpChunk}
+import org.jboss.netty.handler.codec.http.{DefaultHttpRequest=>DefaultHttpAsk, HttpRequest=>HttpAsk, _}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -85,8 +84,8 @@ class HttpClientDispatcherTest extends FunSuite {
 
   test("streaming request body") {
     val (in, out) = mkPair[Any,Any]
-    val disp = new HttpClientDispatcher[Request](in)
-    val req = Request()
+    val disp = new HttpClientDispatcher[Ask](in)
+    val req = Ask()
     req.setChunked(true)
     val f = disp(req)
     assert(!f.isDefined)
@@ -120,16 +119,16 @@ class HttpClientDispatcherTest extends FunSuite {
 
   test("invalid message") {
     val (in, out) = mkPair[Any,Any]
-    val disp = new HttpClientDispatcher[Request](in)
+    val disp = new HttpClientDispatcher[Ask](in)
     out.write("invalid message")
-    intercept[IllegalArgumentException] { Await.result(disp(Request())) }
+    intercept[IllegalArgumentException] { Await.result(disp(Ask())) }
   }
 
   test("not chunked") {
     val (in, out) = mkPair[Any,Any]
-    val disp = new HttpClientDispatcher[Request](in)
+    val disp = new HttpClientDispatcher[Ask](in)
     val httpRes = new DefaultHttpResponse(HTTP_1_1, OK)
-    val req = Request()
+    val req = Ask()
     val f = disp(req)
     Await.result(out.read())
     out.write(httpRes)
@@ -139,11 +138,11 @@ class HttpClientDispatcherTest extends FunSuite {
 
   test("chunked") {
     val (in, out) = mkPair[Any,Any]
-    val disp = new HttpClientDispatcher[Request](in)
+    val disp = new HttpClientDispatcher[Ask](in)
     val httpRes = new DefaultHttpResponse(HTTP_1_1, OK)
     httpRes.setChunked(true)
 
-    val f = disp(Request())
+    val f = disp(Ask())
     out.write(httpRes)
     val reader = Await.result(f).reader
 
@@ -162,11 +161,11 @@ class HttpClientDispatcherTest extends FunSuite {
   test("error mid-chunk") {
     val (in, out) = mkPair[Any,Any]
     val inSpy = spy(in)
-    val disp = new HttpClientDispatcher[Request](inSpy)
+    val disp = new HttpClientDispatcher[Ask](inSpy)
     val httpRes = new DefaultHttpResponse(HTTP_1_1, OK)
     httpRes.setChunked(true)
 
-    val f = disp(Request())
+    val f = disp(Ask())
     out.write(httpRes)
     val reader = Await.result(f).reader
 
@@ -188,8 +187,8 @@ class HttpClientDispatcherTest extends FunSuite {
       Write(Function.const(true), writep),
       Close(Future.Done))
 
-    val disp = new HttpClientDispatcher[Request](transport)
-    val req = Request()
+    val disp = new HttpClientDispatcher[Ask](transport)
+    val req = Ask()
     req.setChunked(true)
     
     val f = disp(req)
@@ -214,13 +213,13 @@ class HttpClientDispatcherTest extends FunSuite {
     val readp = new Promise[Nothing]
     val transport = OpTransport[Any, Any](
       // First write the initial request.
-      Write(_.isInstanceOf[HttpRequest], Future.Done),
+      Write(_.isInstanceOf[HttpAsk], Future.Done),
       // Read the response
       Read(readp),
       Close(Future.Done))
 
-    val disp = new HttpClientDispatcher[Request](transport)
-    val req = Request()
+    val disp = new HttpClientDispatcher[Ask](transport)
+    val req = Ask()
     req.setChunked(true)
 
     val f = disp(req)
@@ -245,15 +244,15 @@ class HttpClientDispatcherTest extends FunSuite {
     val chunkp = new Promise[Unit]
     val transport = OpTransport[Any, Any](
       // First write the initial request.
-      Write(_.isInstanceOf[HttpRequest], Future.Done),
+      Write(_.isInstanceOf[HttpAsk], Future.Done),
       // Read the response
       Read(Future.never),
       // Then we try to write the chunk
       Write(_.isInstanceOf[HttpChunk], chunkp),
       Close(Future.Done))
 
-    val disp = new HttpClientDispatcher[Request](transport)
-    val req = Request()
+    val disp = new HttpClientDispatcher[Ask](transport)
+    val req = Ask()
     req.setChunked(true)
 
     val f = disp(req)

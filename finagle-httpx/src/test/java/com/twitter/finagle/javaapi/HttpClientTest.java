@@ -8,7 +8,7 @@ import com.twitter.finagle.Client;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.httpx.Http;
 import com.twitter.finagle.httpx.Response;
-import com.twitter.finagle.httpx.Request;
+import com.twitter.finagle.httpx.Ask;
 
 import com.twitter.util.Future;
 import com.twitter.util.FutureEventListener;
@@ -16,13 +16,13 @@ import com.twitter.util.Promise;
 
 public class HttpClientTest {
   public static void main(String args[]) {
-    Service<Request, Response> client =
+    Service<Ask, Response> client =
       ClientBuilder.safeBuild(ClientBuilder.get()
         .codec(Http.get())
         .hosts("localhost:10000")
         .hostConnectionLimit(1));
 
-    Request request = Request.apply("/");
+    Ask request = Ask.apply("/");
 
     Future<Response> response = client.apply(request);
     response.addEventListener(
@@ -58,7 +58,7 @@ public class HttpClientTest {
 
     // New APIs
     com.twitter.finagle.Httpx.newClient(":80");
-    Client<Request, Response> newStyleClient =
+    Client<Ask, Response> newStyleClient =
       com.twitter.finagle.Httpx.client().withTls("foo.com");
   }
 }

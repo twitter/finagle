@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{DefaultHttpRequest => DefaultHttpAsk, _}
 
 import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, InconsistentStateException}
 
@@ -37,9 +37,9 @@ class HttpConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress, clie
     Channels.close(c)
   }
 
-  private[this] def writeRequest(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+  private[this] def writeAsk(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     val hostNameWithPort = addr.getAddress.getHostName + ":" + addr.getPort
-    val req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.CONNECT, hostNameWithPort)
+    val req = new DefaultHttpAsk(HttpVersion.HTTP_1_1, HttpMethod.CONNECT, hostNameWithPort)
     req.headers().set("Host", hostNameWithPort)
     Channels.write(ctx, Channels.future(ctx.getChannel), req, null)
   }
@@ -100,7 +100,7 @@ class HttpConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress, clie
       }
     })
 
-    writeRequest(ctx, e)
+    writeAsk(ctx, e)
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {

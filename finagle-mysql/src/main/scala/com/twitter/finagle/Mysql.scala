@@ -12,7 +12,7 @@ import com.twitter.util.Duration
  * Supplements a [[com.twitter.finagle.Client]] with convenient
  * builder methods for constructing a mysql client.
  */
-trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
+trait MysqlRichClient { self: com.twitter.finagle.Client[Ask, Result] =>
   /**
    * Creates a new `RichClient` connected to the logical
    * destination described by `dest` with the assigned
@@ -30,26 +30,26 @@ trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
 }
 
 object MySqlClientTracingFilter {
-  object Stackable extends Stack.Module1[param.Label, ServiceFactory[Request, Result]] {
+  object Stackable extends Stack.Module1[param.Label, ServiceFactory[Ask, Result]] {
     val role = ClientTracingFilter.role
     val description = "Add MySql client specific annotations to the trace"
-    def make(_label: param.Label, next: ServiceFactory[Request, Result]) = {
+    def make(_label: param.Label, next: ServiceFactory[Ask, Result]) = {
       val param.Label(label) = _label
       // TODO(jeff): should be able to get this directly from ClientTracingFilter
-      val annotations = new AnnotatingTracingFilter[Request, Result](
+      val annotations = new AnnotatingTracingFilter[Ask, Result](
         label, Annotation.ClientSend(), Annotation.ClientRecv())
       annotations andThen TracingFilter andThen next
     }
   }
 
-  object TracingFilter extends SimpleFilter[Request, Result] {
-    def apply(request: Request, service: Service[Request, Result]) = {
+  object TracingFilter extends SimpleFilter[Ask, Result] {
+    def apply(request: Ask, service: Service[Ask, Result]) = {
       if (Trace.isActivelyTracing) {
         request match {
-          case QueryRequest(sqlStatement) => Trace.recordBinary("mysql.query", sqlStatement)
-          case PrepareRequest(sqlStatement) => Trace.recordBinary("mysql.prepare", sqlStatement)
+          case QueryAsk(sqlStatement) => Trace.recordBinary("mysql.query", sqlStatement)
+          case PrepareAsk(sqlStatement) => Trace.recordBinary("mysql.prepare", sqlStatement)
           // TODO: save the prepared statement and put it in the executed request trace
-          case ExecuteRequest(id, _, _, _) => Trace.recordBinary("mysql.execute", id)
+          case ExecuteAsk(id, _, _, _) => Trace.recordBinary("mysql.execute", id)
           case _ => Trace.record("mysql." + request.getClass.getSimpleName.replace("$", ""))
         }
       }
@@ -67,7 +67,7 @@ object MySqlClientTracingFilter {
  *   .newRichClient("inet!localhost:3306")
  * }}}
  */
-object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichClient {
+object Mysql extends com.twitter.finagle.Client[Ask, Result] with MysqlRichClient {
 
   /**
    * Implements a mysql client in terms of a
@@ -79,22 +79,22 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
    * client which exposes a rich mysql api.
    */
   case class Client(
-    stack: Stack[ServiceFactory[Request, Result]] = StackClient.newStack
+    stack: Stack[ServiceFactory[Ask, Result]] = StackClient.newStack
       .replace(ClientTracingFilter.role, MySqlClientTracingFilter.Stackable),
     params: Stack.Params = StackClient.defaultParams + DefaultPool.Param(
         low = 0, high = 1, bufferSize = 0,
         idleTime = Duration.Top,
         maxWaiters = Int.MaxValue)
-  ) extends StdStackClient[Request, Result, Client] with MysqlRichClient {
+  ) extends StdStackClient[Ask, Result, Client] with MysqlRichClient {
     protected def copy1(
-      stack: Stack[ServiceFactory[Request, Result]] = this.stack,
+      stack: Stack[ServiceFactory[Ask, Result]] = this.stack,
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
 
     protected type In = Packet
     protected type Out = Packet
     protected def newTransporter() = MysqlTransporter(params)
-    protected def newDispatcher(transport: Transport[Packet, Packet]):  Service[Request, Result] =
+    protected def newDispatcher(transport: Transport[Packet, Packet]):  Service[Ask, Result] =
       mysql.ClientDispatcher(transport, Handshake(params))
 
     /**
@@ -119,7 +119,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
 
   val client = Client()
 
-  def newClient(dest: Name, label: String): ServiceFactory[Request, Result] =
+  def newClient(dest: Name, label: String): ServiceFactory[Ask, Result] =
     client.newClient(dest, label)
 
   /**

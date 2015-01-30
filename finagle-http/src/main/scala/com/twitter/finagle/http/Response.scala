@@ -5,14 +5,14 @@ import com.twitter.finagle.http.netty.HttpResponseProxy
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{HttpRequest => HttpAsk, DefaultHttpRequest => DefaultHttpAsk, _}
 
 /**
  * Rich HttpResponse
  */
 abstract class Response extends Message with HttpResponseProxy {
 
-  def isRequest = false
+  def isAsk = false
 
   def status: HttpResponseStatus          = getStatus
   def status_=(value: HttpResponseStatus) { setStatus(value) }
@@ -70,10 +70,10 @@ object Response {
       final val httpResponse = httpResponseArg
     }
 
-  /** Create Response from HttpRequest. */
-  def apply(httpRequest: HttpRequest): Response =
+  /** Create Response from HttpAsk. */
+  def apply(httpAsk: HttpAsk): Response =
     new Response {
       final val httpResponse =
-        new DefaultHttpResponse(httpRequest.getProtocolVersion, Status.Ok)
+        new DefaultHttpResponse(httpAsk.getProtocolVersion, Status.Ok)
   }
 }

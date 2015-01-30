@@ -39,7 +39,7 @@ class TTwitterClientFilterTest extends FunSuite with MockitoSugar {
     val stack = tracing andThen filter
     stack(new ThriftClientRequest(buffer.toArray, false), service)
 
-    val header = new thrift.RequestHeader
+    val header = new thrift.AskHeader
     InputBuffer.peelMessage(_request.getValue.message, header, protocolFactory)
 
     assert(header.isSampled)
@@ -63,7 +63,7 @@ class TTwitterClientFilterTest extends FunSuite with MockitoSugar {
 
       filter(new ThriftClientRequest(buffer.toArray, false), service)
 
-      val header = new thrift.RequestHeader
+      val header = new thrift.AskHeader
       InputBuffer.peelMessage(_request.getValue.message, header, protocolFactory)
 
       assert(header.getTrace_id === 1L)
@@ -91,7 +91,7 @@ class TTwitterClientFilterTest extends FunSuite with MockitoSugar {
 
     filter(new ThriftClientRequest(buffer.toArray, false), service)
 
-    val header = new thrift.RequestHeader
+    val header = new thrift.AskHeader
     InputBuffer.peelMessage(_request.getValue.message, header, protocolFactory)
     
     assert(header.getContexts != null)
@@ -123,7 +123,7 @@ class TTwitterClientFilterTest extends FunSuite with MockitoSugar {
       filter(new ThriftClientRequest(buffer.toArray, false), service)
     }
 
-    val header = new thrift.RequestHeader
+    val header = new thrift.AskHeader
     InputBuffer.peelMessage(_request.getValue.message, header, protocolFactory)
 
     val clientIdContextWasSet = header.getContexts.asScala exists { c =>

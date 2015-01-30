@@ -6,7 +6,7 @@ import com.twitter.finagle.stream.{Stream, StreamResponse}
 import com.twitter.conversions.time._
 import com.twitter.io.Charsets
 import com.twitter.util.{Base64StringEncoder => Base64, Future}
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpVersion, HttpMethod, DefaultHttpRequest}
+import org.jboss.netty.handler.codec.http.{HttpAsk, HttpVersion, HttpMethod, DefaultHttpAsk}
 
 /**
  * This client connects to a Streaming HTTP service, prints 1000 messages, then disconnects.
@@ -22,14 +22,14 @@ object HosebirdClient {
 
     // Construct a ServiceFactory rather than a Client since the TCP Connection
     // is stateful (i.e., messages on the stream even after the initial response).
-    val clientFactory: ServiceFactory[HttpRequest, StreamResponse] = ClientBuilder()
+    val clientFactory: ServiceFactory[HttpAsk, StreamResponse] = ClientBuilder()
       .codec(Stream())
       .hosts(hostAndPort)
       .tcpConnectTimeout(1.microsecond)
       .hostConnectionLimit(1)
       .buildFactory()
 
-    val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path)
+    val request = new DefaultHttpAsk(HttpVersion.HTTP_1_1, HttpMethod.GET, path)
     val userpass = username + ":" + password
     request.setHeader("Authorization", "Basic " + Base64.encode(userpass.getBytes("UTF-8")))
     request.setHeader("User-Agent", "Finagle 0.0")

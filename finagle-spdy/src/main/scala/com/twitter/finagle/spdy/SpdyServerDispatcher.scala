@@ -1,14 +1,14 @@
 package com.twitter.finagle.spdy
 
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
+import org.jboss.netty.handler.codec.http.{HttpRequest => HttpAsk, HttpResponse}
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Closable, Time, Local}
 
 class SpdyServerDispatcher(
-  trans: Transport[HttpResponse, HttpRequest],
-  service: Service[HttpRequest, HttpResponse])
+  trans: Transport[HttpResponse, HttpAsk],
+  service: Service[HttpAsk, HttpResponse])
   extends Closable
 {
   private[this] def loop(): Unit = {

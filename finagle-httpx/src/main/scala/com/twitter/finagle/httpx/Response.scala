@@ -16,7 +16,7 @@ import Bijections._
  */
 abstract class Response extends Message with HttpResponseProxy {
 
-  def isRequest = false
+  def isAsk = false
 
   def status: Status          = from(getStatus)
   def status_=(value: Status) { setStatus(from(value)) }
@@ -75,10 +75,10 @@ object Response {
   def apply(status: Status): Response =
     apply(Version.Http11, status)
 
-  /** Create Response from Request. */
-  private[finagle] def apply(httpRequest: Request): Response =
+  /** Create Response from Ask. */
+  private[finagle] def apply(httpAsk: Ask): Response =
     new Response {
       final val httpResponse =
-        new DefaultHttpResponse(httpRequest.getProtocolVersion, HttpResponseStatus.OK)
+        new DefaultHttpResponse(httpAsk.getProtocolVersion, HttpResponseStatus.OK)
     }
 }

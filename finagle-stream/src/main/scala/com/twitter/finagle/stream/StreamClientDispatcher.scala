@@ -6,13 +6,13 @@ import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Future, Promise, Return, Throw}
 import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{HttpRequest=>HttpAsk, _}
 
 /**
  * Stream chunks into StreamResponses.
  */
 private class StreamClientDispatcher(trans: Transport[Any, Any])
-    extends GenSerialClientDispatcher[HttpRequest, StreamResponse, Any, Any](trans) {
+    extends GenSerialClientDispatcher[HttpAsk, StreamResponse, Any, Any](trans) {
   import GenSerialClientDispatcher.wrapWriteException
 
   private[this] def readChunks(out: Broker[ChannelBuffer]): Future[Unit] =
@@ -28,7 +28,7 @@ private class StreamClientDispatcher(trans: Transport[Any, Any])
           new IllegalArgumentException("invalid message \"%s\"".format(invalid)))
     }
 
-  protected def dispatch(req: HttpRequest, p: Promise[StreamResponse]) =
+  protected def dispatch(req: HttpAsk, p: Promise[StreamResponse]) =
     trans.write(req) rescue(wrapWriteException) flatMap { unit =>
       trans.read() flatMap {
         case httpRes: HttpResponse =>

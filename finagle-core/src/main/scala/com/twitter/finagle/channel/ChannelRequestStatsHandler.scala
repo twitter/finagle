@@ -14,7 +14,7 @@ import org.jboss.netty.channel.{
 import com.twitter.util.Future
 import com.twitter.finagle.stats.StatsReceiver
 
-private[finagle] class ChannelRequestStatsHandler(statsReceiver: StatsReceiver)
+private[finagle] class ChannelAskStatsHandler(statsReceiver: StatsReceiver)
   extends SimpleChannelHandler
   with ConnectionLifecycleHandler
 {

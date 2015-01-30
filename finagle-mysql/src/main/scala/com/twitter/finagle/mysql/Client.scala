@@ -9,11 +9,11 @@ object Client {
   /**
    * Creates a new Client based on a ServiceFactory.
    */
-  def apply(factory: ServiceFactory[Request, Result]): Client = new Client {
+  def apply(factory: ServiceFactory[Ask, Result]): Client = new Client {
     private[this] val service = factory.toService
 
-    def query(sql: String): Future[Result] = service(QueryRequest(sql))
-    def ping(): Future[Result] = service(PingRequest)
+    def query(sql: String): Future[Result] = service(QueryAsk(sql))
+    def ping(): Future[Result] = service(PingAsk)
 
     def select[T](sql: String)(f: Row => T): Future[Seq[T]] =
       query(sql) map {
@@ -23,8 +23,8 @@ object Client {
 
     def prepare(sql: String): PreparedStatement = new PreparedStatement {
       def apply(ps: Any*): Future[Result] = factory() flatMap { svc =>
-        svc(PrepareRequest(sql)) flatMap {
-          case ok: PrepareOK => svc(ExecuteRequest(ok.id, ps.toIndexedSeq))
+        svc(PrepareAsk(sql)) flatMap {
+          case ok: PrepareOK => svc(ExecuteAsk(ok.id, ps.toIndexedSeq))
           case r => Future.exception(new Exception("Unexpected result %s when preparing %s"
             .format(r, sql)))
         } ensure {

@@ -14,21 +14,21 @@ import com.twitter.util.{Await, Future, Duration, Stopwatch, StorageUnit}
 import java.net.{SocketAddress, InetSocketAddress}
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{HttpRequest=>HttpAsk, _}
 import scala.util.Random
 import com.twitter.app.App
 import com.twitter.logging.Logging
 import com.twitter.finagle.topo.{thriftscala => thrift}
 
 class AppService(clients: Seq[thrift.Backend.FutureIface], responseSample: Seq[(Duration, StorageUnit)])
-  extends Service[HttpRequest, HttpResponse]
+  extends Service[HttpAsk, HttpResponse]
 {
   private[this] val rng = new Random
 
   private[this] def nextResponse() =
     responseSample(rng.nextInt(responseSample.size))
 
-  def apply(req: HttpRequest) = {
+  def apply(req: HttpAsk) = {
     val responses = for (client <- clients) yield {
       val (latency, size) = nextResponse()
       client.request(size.inBytes.toInt, latency.inMilliseconds.toInt)

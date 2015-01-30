@@ -8,13 +8,13 @@ package com.twitter.finagle.httpx.codec
 import org.jboss.netty.channel.{
   SimpleChannelUpstreamHandler, Channels,
   ChannelHandlerContext, MessageEvent}
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest}
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest=>HttpAsk}
 
 private[httpx]
 class RespondToExpectContinue extends SimpleChannelUpstreamHandler {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     e.getMessage match {
-      case request: HttpRequest if HttpHeaders.is100ContinueExpected(request) =>
+      case request: HttpAsk if HttpHeaders.is100ContinueExpected(request) =>
         // Write the response immediately.
         Channels.write(
           ctx, Channels.future(ctx.getChannel),

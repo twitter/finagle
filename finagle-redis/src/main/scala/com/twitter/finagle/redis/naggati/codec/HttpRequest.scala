@@ -19,11 +19,11 @@ package codec
 
 import Stages._
 
-case class RequestLine(method: String, resource: String, version: String)
+case class AskLine(method: String, resource: String, version: String)
 case class HeaderLine(name: String, value: String)
-case class HttpRequest(request: RequestLine, headers: List[HeaderLine], body: Array[Byte])
+case class HttpAsk(request: AskLine, headers: List[HeaderLine], body: Array[Byte])
 
-object HttpRequest {
+object HttpAsk {
   def codec(bytesReadCounter: Int => Unit, bytesWrittenCounter: Int => Unit) =
     new Codec(read, Codec.NONE, bytesReadCounter, bytesWrittenCounter)
 
@@ -32,20 +32,20 @@ object HttpRequest {
   val read = readLine(true, "UTF-8") { line =>
     line.split(' ').toList match {
       case method :: resource :: version :: Nil =>
-        val requestLine = RequestLine(method, resource, version)
+        val requestLine = AskLine(method, resource, version)
         readHeader(requestLine, Nil)
       case _ =>
         throw new ProtocolError("Malformed request line: " + line)
     }
   }
 
-  def readHeader(requestLine: RequestLine, headers: List[HeaderLine]): Stage = {
+  def readHeader(requestLine: AskLine, headers: List[HeaderLine]): Stage = {
     readLine(true, "UTF-8") { line =>
       if (line == "") {
         // end of headers
         val contentLength = headers.find { _.name == "content-length" }.map { _.value.toInt }.getOrElse(0)
         readBytes(contentLength) { data =>
-          emit(HttpRequest(requestLine, headers.reverse, data))
+          emit(HttpAsk(requestLine, headers.reverse, data))
         }
       } else if (line.length > 0 && (line.head == ' ' || line.head == '\t')) {
         // continuation line

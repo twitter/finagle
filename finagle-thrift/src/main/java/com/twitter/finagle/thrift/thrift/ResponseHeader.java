@@ -40,7 +40,7 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
   private static final TField CONTEXTS_FIELD_DESC = new TField("contexts", TType.LIST, (short)2);
 
   public List<Span> spans;
-  public List<RequestContext> contexts;
+  public List<AskContext> contexts;
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements TFieldIdEnum {
@@ -113,7 +113,7 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
             new StructMetaData(TType.STRUCT, Span.class))));
     tmpMap.put(_Fields.CONTEXTS, new FieldMetaData("contexts", TFieldRequirementType.DEFAULT,
         new ListMetaData(TType.LIST,
-            new StructMetaData(TType.STRUCT, RequestContext.class))));
+            new StructMetaData(TType.STRUCT, AskContext.class))));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     FieldMetaData.addStructMetaDataMap(ResponseHeader.class, metaDataMap);
   }
@@ -123,7 +123,7 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
 
   public ResponseHeader(
     List<Span> spans,
-    List<RequestContext> contexts)
+    List<AskContext> contexts)
   {
     this();
     this.spans = spans;
@@ -142,9 +142,9 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
       this.spans = __this__spans;
     }
     if (other.isSetContexts()) {
-      List<RequestContext> __this__contexts = new ArrayList<RequestContext>();
-      for (RequestContext other_element : other.contexts) {
-        __this__contexts.add(new RequestContext(other_element));
+      List<AskContext> __this__contexts = new ArrayList<AskContext>();
+      for (AskContext other_element : other.contexts) {
+        __this__contexts.add(new AskContext(other_element));
       }
       this.contexts = __this__contexts;
     }
@@ -203,22 +203,22 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
     return (this.contexts == null) ? 0 : this.contexts.size();
   }
 
-  public java.util.Iterator<RequestContext> getContextsIterator() {
+  public java.util.Iterator<AskContext> getContextsIterator() {
     return (this.contexts == null) ? null : this.contexts.iterator();
   }
 
-  public void addToContexts(RequestContext elem) {
+  public void addToContexts(AskContext elem) {
     if (this.contexts == null) {
-      this.contexts = new ArrayList<RequestContext>();
+      this.contexts = new ArrayList<AskContext>();
     }
     this.contexts.add(elem);
   }
 
-  public List<RequestContext> getContexts() {
+  public List<AskContext> getContexts() {
     return this.contexts;
   }
 
-  public ResponseHeader setContexts(List<RequestContext> contexts) {
+  public ResponseHeader setContexts(List<AskContext> contexts) {
     this.contexts = contexts;
     return this;
   }
@@ -252,7 +252,7 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
       if (value == null) {
         unsetContexts();
       } else {
-        setContexts((List<RequestContext>)value);
+        setContexts((List<AskContext>)value);
       }
       break;
 
@@ -392,11 +392,11 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
           if (field.type == TType.LIST) {
             {
               TList _list19 = iprot.readListBegin();
-              this.contexts = new ArrayList<RequestContext>(_list19.size);
+              this.contexts = new ArrayList<AskContext>(_list19.size);
               for (int _i20 = 0; _i20 < _list19.size; ++_i20)
               {
-                RequestContext _elem21;
-                _elem21 = new RequestContext();
+                AskContext _elem21;
+                _elem21 = new AskContext();
                 _elem21.read(iprot);
                 this.contexts.add(_elem21);
               }
@@ -437,7 +437,7 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
       oprot.writeFieldBegin(CONTEXTS_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.STRUCT, this.contexts.size()));
-        for (RequestContext _iter23 : this.contexts)
+        for (AskContext _iter23 : this.contexts)
         {
           _iter23.write(oprot);
         }

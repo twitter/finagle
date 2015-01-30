@@ -15,7 +15,7 @@ class MessageTest extends FunSuite {
   }
 
   test("headers") {
-    val response = Request()
+    val response = Ask()
     response.allow.toList === Nil
     response.allow = Method.Get :: Method.Head :: Nil
     assert(response.allow === Some("GET,HEAD"))
@@ -42,7 +42,7 @@ class MessageTest extends FunSuite {
       ";;;;;;" -> null
     )
     tests.foreach { case (header, expected) =>
-      val request = Request()
+      val request = Ask()
       request.headers.set("Content-Type", header)
       assert(request.charset === Option(expected))
     }
@@ -60,7 +60,7 @@ class MessageTest extends FunSuite {
       ("" -> "b") -> ";charset=b"
     )
     tests.foreach { case ((header, charset), expected) =>
-      val request = Request()
+      val request = Ask()
       request.headers.set("Content-Type", header)
       request.charset = charset
       assert(request.headers.get("Content-Type") === expected)
@@ -79,7 +79,7 @@ class MessageTest extends FunSuite {
       "APPLICATION/JSON" -> "application/json"
     )
     tests.foreach { case (header, expected) =>
-      val request = Request()
+      val request = Ask()
       request.headers.set("Content-Type", header)
       // shorthand for empty mediaTypes really being returned as None after being parsed.
       assert(request.mediaType === (if (expected.isEmpty) None else Some(expected)))
@@ -87,7 +87,7 @@ class MessageTest extends FunSuite {
   }
 
   test("empty mediaType") {
-    val request = Request()
+    val request = Ask()
     request.mediaType === None
   }
 
@@ -101,7 +101,7 @@ class MessageTest extends FunSuite {
       ("" -> "y") -> "y"
     )
     tests.foreach { case ((header, mediaType), expected) =>
-      val request = Request()
+      val request = Ask()
       request.headers.set("Content-Type", header)
       request.mediaType = mediaType
       assert(request.headers.get("Content-Type") === expected)

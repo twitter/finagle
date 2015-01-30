@@ -6,7 +6,7 @@ import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 
 //#app
 object Proxy extends App {
-  val client: Service[HttpRequest, HttpResponse] =
+  val client: Service[HttpAsk, HttpResponse] =
     Http.newService("www.google.com:80")
 
   val server = Http.serve(":8080", client)

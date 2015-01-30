@@ -34,7 +34,7 @@ private[finagle] class ClockedDrainer(
   coord: Coordinator,
   forceGc: () => Unit,
   space: MemorySpace,
-  rSnooper: RequestSnooper,
+  rSnooper: AskSnooper,
   log: Logger,
   lr: LogsReceiver = NullLogsReceiver,
   statsReceiver: StatsReceiver = NullStatsReceiver,
@@ -287,7 +287,7 @@ private[finagle] object ClockedDrainer {
           "construct drainer")
         Lessor.nil
       case Some(coord) =>
-        val rSnooper = new RequestSnooper(
+        val rSnooper = new AskSnooper(
           coord.counter,
           drainerPercentile().toDouble / 100.0,
           lr

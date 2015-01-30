@@ -168,7 +168,7 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  * above is
  *
  * {{{
- * Service<HttpRequest, HttpResponse> service =
+ * Service<HttpAsk, HttpResponse> service =
  *  ClientBuilder.safeBuild(
  *    ClientBuilder.get()
  *      .codec(new Http())
@@ -250,7 +250,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     copy(params + param, mk)
 
   /**
-   * Specify the set of hosts to connect this client to.  Requests
+   * Specify the set of hosts to connect this client to.  Asks
    * will be load balanced across these.  This is a shorthand form for
    * specifying a cluster.
    *
@@ -932,7 +932,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   private def globalTimeoutFilter(timer: com.twitter.util.Timer) = {
     val GlobalTimeout(timeout) = params[GlobalTimeout]
     if (timeout < Duration.Top) {
-      val exception = new GlobalRequestTimeoutException(timeout)
+      val exception = new GlobalAskTimeoutException(timeout)
       new TimeoutFilter[Req, Rep](timeout, exception, timer)
     } else {
       identityFilter

@@ -9,14 +9,14 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Await, Promise, Duration, Timer, Time, StorageUnit}
 
 /**
- * RequestSnooper maintains a histogram of handle time unaffected by garbage
+ * AskSnooper maintains a histogram of handle time unaffected by garbage
  * collection, and can cross-reference this histogram with the bytes per second
  * rate from a [[ByteCounter]] to create a "handle bytes" metric.
  *
  * This is useful since after our lease expires, we'll probably need to wait for
  * at minimum "handle bytes" for the outstanding requests to finish up.
  */
-private[lease] class RequestSnooper(
+private[lease] class AskSnooper(
   counter: ByteCounter,
   quantile: Double,
   lr: LogsReceiver = NullLogsReceiver,

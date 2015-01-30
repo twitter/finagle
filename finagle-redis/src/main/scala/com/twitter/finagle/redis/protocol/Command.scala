@@ -416,11 +416,11 @@ class CommandCodec extends UnifiedProtocolCodec {
           readLine { line => decodeUnifiedFormat(NumberFormat.toLong(line), doneFn) }
         }
       case b: Byte =>
-        decodeInlineRequest(b.asInstanceOf[Char])
+        decodeInlineAsk(b.asInstanceOf[Char])
     }
   }
 
-  def decodeInlineRequest(c: Char) = readLine { line =>
+  def decodeInlineAsk(c: Char) = readLine { line =>
     val listOfArrays = (c + line).split(' ').toList.map {
       args => args.getBytes(Charsets.Utf8)
     }

@@ -7,7 +7,7 @@ import java.net.InetSocketAddress
 import java.util.Arrays.{equals => arrayEquals}
 import org.ietf.jgss.GSSContext
 import org.jboss.netty.handler.codec.http.{
-  DefaultHttpResponse, HttpHeaders, HttpRequest, HttpResponse}
+  DefaultHttpResponse, HttpHeaders, HttpRequest=>HttpAsk, HttpResponse}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{stub, verify}
@@ -19,8 +19,8 @@ import org.scalatest.mock.MockitoSugar
 class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
   import SpnegoAuthenticator._
 
-  def builder = RequestBuilder().url("http://0.0.0.0/arbitrary")
-  def anyAuthenticated = any[Authenticated[HttpRequest]]
+  def builder = AskBuilder().url("http://0.0.0.0/arbitrary")
+  def anyAuthenticated = any[Authenticated[HttpAsk]]
 
   test("no header") {
     negative(builder.buildGet())
@@ -72,7 +72,7 @@ class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
   /**
    * An unauthorized request to the server (no ClientFilter in place.)
    */
-  def negative(req: HttpRequest): HttpResponse = {
+  def negative(req: HttpAsk): HttpResponse = {
     // negative tests will not reach the credential source
     val serverSrc = new Credentials.JAASServerSource("test-authenticated-service")
     val (client, server, _) = serve(serverSrc)
@@ -89,7 +89,7 @@ class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
     serverSrc: Credentials.ServerSource,
     clientSrc: Option[Credentials.ClientSource] = None
   ) = {
-    val service = mock[Service[Authenticated[HttpRequest],HttpResponse]]
+    val service = mock[Service[Authenticated[HttpAsk],HttpResponse]]
     val server = finagle.Http.serve("localhost:*", new ServerFilter(serverSrc) andThen service)
     val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
     val rawClient = finagle.Http.newService(s"localhost:$port")

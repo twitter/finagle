@@ -7,7 +7,7 @@ import org.jboss.netty.bootstrap.ServerBootstrap
 import com.twitter.util.TimeConversions._
 import com.twitter.util.{Await, Throw, Try}
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.httpx.{Http, Request, Response, Version, Method}
+import com.twitter.finagle.httpx.{Http, Ask, Response, Version, Method}
 import com.twitter.finagle.ChannelClosedException
 
 import org.junit.runner.RunWith
@@ -16,7 +16,7 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class ClientTest extends FunSuite {
-  def withServer(handler: ChannelHandler)(spec: ClientBuilder.Complete[Request, Response] => Unit) {
+  def withServer(handler: ChannelHandler)(spec: ClientBuilder.Complete[Ask, Response] => Unit) {
     val cf = new DefaultLocalServerChannelFactory()
 
     val bs = new ServerBootstrap(cf)
@@ -60,7 +60,7 @@ class ClientTest extends FunSuite {
       try {
         // No failures have happened yet.
         assert(client.isAvailable === true)
-        val future = client(Request(Version.Http11, Method.Get, "/"))
+        val future = client(Ask(Version.Http11, Method.Get, "/"))
         val resolved = Try(Await.result(future, 1.second))
         assert(resolved.isThrow === true)
         val Throw(cause) = resolved
@@ -76,7 +76,7 @@ class ClientTest extends FunSuite {
         .retries(10)
         .build()
       try {
-        val future = client(Request(Version.Http11, Method.Get, "/"))
+        val future = client(Ask(Version.Http11, Method.Get, "/"))
         val resolved = Try(Await.result(future, 1.second))
         assert(resolved.isThrow === true)
         val Throw(cause) = resolved

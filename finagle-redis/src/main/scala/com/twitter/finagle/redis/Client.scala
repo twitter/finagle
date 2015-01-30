@@ -49,7 +49,7 @@ class BaseClient(service: Service[Command, Reply]) {
    * @param password
    */
   def auth(password: ChannelBuffer): Future[Unit] =
-    doRequest(Auth(password)) {
+    doAsk(Auth(password)) {
       case StatusReply(message) => Future.Unit
     }
 
@@ -59,7 +59,7 @@ class BaseClient(service: Service[Command, Reply]) {
    * @return ChannelBuffer with collection of \r\n terminated lines if server has info on section
    */
   def info(section: ChannelBuffer = ChannelBuffers.EMPTY_BUFFER): Future[Option[ChannelBuffer]] =
-    doRequest(Info(section)) {
+    doAsk(Info(section)) {
       case BulkReply(message) => Future.value(Some(message))
       case EmptyBulkReply() => Future.value(None)
     }
@@ -68,7 +68,7 @@ class BaseClient(service: Service[Command, Reply]) {
    * Deletes all keys in current DB
    */
   def flushDB(): Future[Unit] =
-    doRequest(FlushDB) {
+    doAsk(FlushDB) {
       case StatusReply(message) => Future.Unit
     }
 
@@ -76,7 +76,7 @@ class BaseClient(service: Service[Command, Reply]) {
    * Closes connection to Redis instance
    */
   def quit(): Future[Unit] =
-    doRequest(Quit) {
+    doAsk(Quit) {
       case StatusReply(message) => Future.Unit
     }
 
@@ -85,7 +85,7 @@ class BaseClient(service: Service[Command, Reply]) {
    * @param index
    */
   def select(index: Int): Future[Unit] =
-    doRequest(Select(index)) {
+    doAsk(Select(index)) {
       case StatusReply(message) => Future.Unit
     }
 
@@ -97,7 +97,7 @@ class BaseClient(service: Service[Command, Reply]) {
   /**
    * Helper function for passing a command to the service
    */
-  private[redis] def doRequest[T](cmd: Command)(handler: PartialFunction[Reply, Future[T]]) =
+  private[redis] def doAsk[T](cmd: Command)(handler: PartialFunction[Reply, Future[T]]) =
     service(cmd) flatMap (handler orElse {
       case ErrorReply(message)  => Future.exception(new ServerError(message))
       case _                    => Future.exception(new IllegalStateException)
@@ -124,7 +124,7 @@ trait TransactionalClient extends Client {
    * Flushes all previously watched keys for a transaction
    */
   def unwatch(): Future[Unit] =
-    doRequest(UnWatch) {
+    doAsk(UnWatch) {
       case StatusReply(message)  => Future.Unit
     }
 
@@ -133,7 +133,7 @@ trait TransactionalClient extends Client {
    * @param keys to watch
    */
   def watch(keys: Seq[ChannelBuffer]): Future[Unit] =
-    doRequest(Watch(keys)) {
+    doAsk(Watch(keys)) {
       case StatusReply(message)  => Future.Unit
     }
 

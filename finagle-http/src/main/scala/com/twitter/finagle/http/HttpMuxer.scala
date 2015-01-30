@@ -6,7 +6,7 @@ import com.twitter.util.Future
 import java.net.URI
 import java.util.logging.Logger
 import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders,
-  HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
+  HttpRequest=>HttpAsk, HttpResponse, HttpResponseStatus, HttpVersion}
 
 /**
  * A service that dispatches incoming requests to registered handlers.
@@ -25,12 +25,12 @@ import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders,
  *
  *  NOTE: When multiple pattern matches exist, the longest pattern wins.
  */
-class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpRequest, HttpResponse])])
-  extends Service[HttpRequest, HttpResponse] {
+class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpAsk, HttpResponse])])
+  extends Service[HttpAsk, HttpResponse] {
 
-  def this() = this(Seq[(String, Service[HttpRequest, HttpResponse])]())
+  def this() = this(Seq[(String, Service[HttpAsk, HttpResponse])]())
 
-  private[this] val sorted: Seq[(String, Service[HttpRequest, HttpResponse])] =
+  private[this] val sorted: Seq[(String, Service[HttpAsk, HttpResponse])] =
     (handlers.sortBy { case (pattern, _) => pattern.length }).reverse
 
   def patterns = sorted map { case(p, _) => p }
@@ -39,16 +39,16 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpRequest, 
    * Create a new Mux service with the specified pattern added. If the pattern already exists, overwrite existing value.
    * Pattern ending with "/" indicates prefix matching; otherwise exact matching.
    */
-  def withHandler(pattern: String, service: Service[HttpRequest, HttpResponse]): HttpMuxer = {
+  def withHandler(pattern: String, service: Service[HttpAsk, HttpResponse]): HttpMuxer = {
     val norm = normalize(pattern)
     new HttpMuxer(handlers.filterNot { case (pat, _) => pat == norm } :+ (norm, service))
   }
 
   /**
-   * Extract path from HttpRequest; look for a matching pattern; if found, dispatch the
-   * HttpRequest to the registered service; otherwise create a NOT_FOUND response
+   * Extract path from HttpAsk; look for a matching pattern; if found, dispatch the
+   * HttpAsk to the registered service; otherwise create a NOT_FOUND response
    */
-  def apply(request: HttpRequest): Future[HttpResponse] = {
+  def apply(request: HttpAsk): Future[HttpResponse] = {
     val u = request.getUri
     val uri = u.indexOf('?') match {
       case -1 => u
@@ -91,24 +91,24 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpRequest, 
 /**
  * Singleton default multiplex service
  */
-object HttpMuxer extends Service[HttpRequest, HttpResponse] {
+object HttpMuxer extends Service[HttpAsk, HttpResponse] {
   @volatile private[this] var underlying = new HttpMuxer()
-  override def apply(request: HttpRequest): Future[HttpResponse] =
+  override def apply(request: HttpAsk): Future[HttpResponse] =
     underlying(request)
 
   /**
    * add handlers to mutate dispatching strategies.
    */
-  def addHandler(pattern: String, service: Service[HttpRequest, HttpResponse]) = synchronized {
+  def addHandler(pattern: String, service: Service[HttpAsk, HttpResponse]) = synchronized {
     underlying = underlying.withHandler(pattern, service)
   }
 
   private[this] val nettyToFinagle =
-    Filter.mk[HttpRequest, HttpResponse, Request, Response] { (req, service) =>
-      service(Request(req)) map { _.httpResponse }
+    Filter.mk[HttpAsk, HttpResponse, Ask, Response] { (req, service) =>
+      service(Ask(req)) map { _.httpResponse }
     }
 
-  def addRichHandler(pattern: String, service: Service[Request, Response]) =
+  def addRichHandler(pattern: String, service: Service[Ask, Response]) =
     addHandler(pattern, nettyToFinagle andThen service)
 
   def patterns = underlying.patterns
@@ -124,7 +124,7 @@ object HttpMuxer extends Service[HttpRequest, HttpResponse] {
 /**
  * Trait HttpMuxHandler is used for service-loading HTTP handlers.
  */
-trait HttpMuxHandler extends Service[HttpRequest, HttpResponse] {
+trait HttpMuxHandler extends Service[HttpAsk, HttpResponse] {
   /** The pattern on to bind this handler to */
   val pattern: String
 }

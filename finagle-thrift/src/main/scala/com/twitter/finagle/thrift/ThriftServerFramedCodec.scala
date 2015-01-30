@@ -93,15 +93,15 @@ private[thrift] class ThriftServerChannelBufferEncoder
 private[finagle] object UncaughtAppExceptionFilter {
 
   /**
-   * Creates a Thrift exception message for the given `exception` and thrift `thriftRequest`
+   * Creates a Thrift exception message for the given `exception` and thrift `thriftAsk`
    * message using the given [[org.apache.thrift.protocol.TProtocolFactory]].
    */
   def writeExceptionMessage(
-    thriftRequest: Buf,
+    thriftAsk: Buf,
     throwable: Throwable,
     protocolFactory: TProtocolFactory
   ): Buf = {
-    val reqBytes = Buf.ByteArray.Owned.extract(thriftRequest)
+    val reqBytes = Buf.ByteArray.Owned.extract(thriftAsk)
     // NB! This is technically incorrect for one-way calls,
     // but we have no way of knowing it here. We may
     // consider simply not supporting one-way calls at all.

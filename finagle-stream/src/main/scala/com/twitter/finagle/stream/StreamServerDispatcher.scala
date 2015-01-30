@@ -4,15 +4,15 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.dispatch.GenSerialServerDispatcher
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Future, Promise}
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{HttpRequest => HttpAsk, _}
 
 /**
  * Stream StreamResponse messages into HTTP chunks.
  */
 private class StreamServerDispatcher(
     trans: Transport[Any, Any],
-    service: Service[HttpRequest, StreamResponse])
-  extends GenSerialServerDispatcher[HttpRequest, StreamResponse, Any, Any](trans) {
+    service: Service[HttpAsk, StreamResponse])
+  extends GenSerialServerDispatcher[HttpAsk, StreamResponse, Any, Any](trans) {
 
   trans.onClose ensure {
     service.close()
@@ -31,7 +31,7 @@ private class StreamServerDispatcher(
   }
 
   protected def dispatch(req: Any, eos: Promise[Unit]) = req match {
-    case req: HttpRequest =>
+    case req: HttpAsk =>
       service(req) ensure eos.setDone()
     case invalid =>
       eos.setDone()

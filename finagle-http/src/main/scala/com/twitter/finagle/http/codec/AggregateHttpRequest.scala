@@ -8,7 +8,7 @@ package com.twitter.finagle.http.codec
 import org.jboss.netty.channel.{
   MessageEvent, Channels, ChannelHandlerContext}
 import org.jboss.netty.handler.codec.http.{
-  HttpHeaders, HttpRequest,
+  HttpHeaders, HttpRequest=>HttpAsk,
   HttpChunk, DefaultHttpResponse,
   HttpVersion, HttpResponseStatus}
 import org.jboss.netty.buffer.{
@@ -34,7 +34,7 @@ private[finagle] class HttpFailure(ctx: ChannelHandlerContext, status: HttpRespo
 
 case class AggregateHttpChunks(
     whenDone: LeftFoldUpstreamHandler,
-    request: HttpRequest,
+    request: HttpAsk,
     bufferBudget: Int,
     buffer: ChannelBuffer = ChannelBuffers.EMPTY_BUFFER)
   extends LeftFoldUpstreamHandler
@@ -74,12 +74,12 @@ case class AggregateHttpChunks(
     }
 }
 
-class AggregateHttpRequest(maxBufferSize: Int)
+class AggregateHttpAsk(maxBufferSize: Int)
   extends LeftFoldUpstreamHandler
 {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) =
     e.getMessage match {
-      case request: HttpRequest if HttpHeaders.is100ContinueExpected(request) =>
+      case request: HttpAsk if HttpHeaders.is100ContinueExpected(request) =>
         if (HttpHeaders.getContentLength(request, -1L) > maxBufferSize) {
           new HttpFailure(ctx, HttpResponseStatus.EXPECTATION_FAILED)
         } else {

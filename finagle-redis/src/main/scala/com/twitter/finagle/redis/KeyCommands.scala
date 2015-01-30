@@ -14,7 +14,7 @@ trait Keys { self: BaseClient =>
    * @return Number of keys removed
    */
   def del(keys: Seq[ChannelBuffer]): Future[JLong] =
-    doRequest(Del(keys)) {
+    doAsk(Del(keys)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -25,7 +25,7 @@ trait Keys { self: BaseClient =>
    * @return bytes, or none if the key did not exist
    */
   def dump(key: ChannelBuffer): Future[Option[ChannelBuffer]] =
-    doRequest(Dump(key)) {
+    doAsk(Dump(key)) {
       case BulkReply(message) => Future.value(Some(message))
       case EmptyBulkReply()   => Future.value(None)
     }
@@ -36,7 +36,7 @@ trait Keys { self: BaseClient =>
    * @return true if key exists, false otherwise
    */
   def exists(key: ChannelBuffer): Future[JBoolean] =
-    doRequest(Exists(key)) {
+    doAsk(Exists(key)) {
       case IntegerReply(n) => Future.value((n == 1))
     }
 
@@ -48,7 +48,7 @@ trait Keys { self: BaseClient =>
    * false otherwise.
    */
   def expire(key: ChannelBuffer, ttl: JLong): Future[JBoolean] =
-    doRequest(Expire(key, ttl)) {
+    doAsk(Expire(key, ttl)) {
       case IntegerReply(n) => Future.value(n == 1)
     }
 
@@ -60,7 +60,7 @@ trait Keys { self: BaseClient =>
    * false otherwise.
    */
   def expireAt(key: ChannelBuffer, ttl: JLong): Future[JBoolean] =
-    doRequest(ExpireAt(key, Time.fromMilliseconds(ttl))) {
+    doAsk(ExpireAt(key, Time.fromMilliseconds(ttl))) {
       case IntegerReply(n) => Future.value(n == 1)
     }
 
@@ -70,7 +70,7 @@ trait Keys { self: BaseClient =>
    * @return list of keys matching pattern
    */
   def keys(pattern: ChannelBuffer): Future[Seq[ChannelBuffer]] =
-    doRequest(Keys(pattern)) {
+    doAsk(Keys(pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
       case EmptyMBulkReply()    => Future.Nil
     }
@@ -85,7 +85,7 @@ trait Keys { self: BaseClient =>
    *         false if key was not moved for any reason.
    */
    def move(key: ChannelBuffer, db: ChannelBuffer): Future[JBoolean] =
-     doRequest(Move(key, db)) {
+     doAsk(Move(key, db)) {
        case IntegerReply(n) => Future.value(n == 1)
      }
 
@@ -98,7 +98,7 @@ trait Keys { self: BaseClient =>
    * @see http://redis.io/commands/pexpire
    */
   def pExpire(key: ChannelBuffer, milliseconds: JLong): Future[JBoolean] =
-    doRequest(PExpire(key, milliseconds)) {
+    doAsk(PExpire(key, milliseconds)) {
       case IntegerReply(n) => Future.value(n == 1)
     }
 
@@ -112,7 +112,7 @@ trait Keys { self: BaseClient =>
    * @see http://redis.io/commands/pexpireat
    */
   def pExpireAt(key: ChannelBuffer, timestamp: JLong): Future[JBoolean] =
-    doRequest(PExpireAt(key, Time.fromMilliseconds(timestamp))) {
+    doAsk(PExpireAt(key, Time.fromMilliseconds(timestamp))) {
       case IntegerReply(n) => Future.value(n == 1)
     }
 
@@ -125,7 +125,7 @@ trait Keys { self: BaseClient =>
    * @see
    */
   def pTtl(key: ChannelBuffer): Future[Option[JLong]] =
-    doRequest(PTtl(key)) {
+    doAsk(PTtl(key)) {
       case IntegerReply(n) =>
         if (n != -1) Future.value(Some(n))
         else Future.value(None)
@@ -138,7 +138,7 @@ trait Keys { self: BaseClient =>
    */
   def scan(cursor: JLong, count: Option[JLong], pattern: Option[ChannelBuffer]
   ): Future[Seq[ChannelBuffer]] =
-    doRequest(Scan(cursor, count, pattern)) {
+    doAsk(Scan(cursor, count, pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
       case EmptyMBulkReply()    => Future.Nil
     }
@@ -150,7 +150,7 @@ trait Keys { self: BaseClient =>
    * and has a timeout, or else nothing.
    */
   def ttl(key: ChannelBuffer): Future[Option[JLong]] =
-    doRequest(Ttl(key)) {
+    doAsk(Ttl(key)) {
       case IntegerReply(n) => {
         if (n != -1) {
           Future.value(Some(n))

@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.finagle.http.{MediaType, Method, Request, Response}
+import com.twitter.finagle.http.{MediaType, Method, Ask, Response}
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffers
 
@@ -13,9 +13,9 @@ import org.jboss.netty.buffer.ChannelBuffers
  *
  * See: http://en.wikipedia.org/wiki/JSONP
  */
-class JsonpFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response] {
+class JsonpFilter[ASK <: Ask] extends SimpleFilter[ASK, Response] {
 
-  def apply(request: REQUEST, service: Service[REQUEST, Response]): Future[Response] = {
+  def apply(request: ASK, service: Service[ASK, Response]): Future[Response] = {
     getCallback(request) match {
       case Some(callback) =>
         addCallback(callback, request, service)
@@ -24,7 +24,7 @@ class JsonpFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response] {
     }
   }
 
-  def addCallback(callback: String, request: REQUEST, service: Service[REQUEST, Response]): Future[Response] =
+  def addCallback(callback: String, request: ASK, service: Service[ASK, Response]): Future[Response] =
     service(request) map { response =>
       if (response.mediaType == Some(MediaType.Json)) {
         response.content =
@@ -40,7 +40,7 @@ class JsonpFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response] {
     }
 
 
-  def getCallback(request: Request): Option[String] = {
+  def getCallback(request: Ask): Option[String] = {
     // Ignore HEAD, though in practice this should be behind the HeadFilter
     if (request.method != Method.Head)
       request.params.get("callback") flatMap { callback =>
@@ -56,7 +56,7 @@ class JsonpFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response] {
 }
 
 
-object JsonpFilter extends JsonpFilter[Request] {
+object JsonpFilter extends JsonpFilter[Ask] {
   // Sanitize to prevent cross domain policy attacks and such
   private val SanitizerRegex = """[^\/\@\.\[\]\:\w\d]""".r
 

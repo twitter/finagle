@@ -101,7 +101,7 @@ class SocksConnectHandler(
       None
   }
 
-  private[this] def writeRequest(ctx: ChannelHandlerContext) {
+  private[this] def writeAsk(ctx: ChannelHandlerContext) {
     val buf = ChannelBuffers.dynamicBuffer(1024)
     buf.writeBytes(Array[Byte](Version5, Connect, Reserved))
 
@@ -257,7 +257,7 @@ class SocksConnectHandler(
           readInit() match {
             case Some(Unauthenticated) =>
               state = Requested
-              writeRequest(ctx)
+              writeAsk(ctx)
             case Some(UsernamePassAuthenticationSetting(username,pass)) =>
               state = Authenticating
               writeUserNameAndPass(ctx, username, pass)
@@ -268,7 +268,7 @@ class SocksConnectHandler(
         case Authenticating =>
           if (readAuthenticated()) {
             state = Requested
-            writeRequest(ctx)
+            writeAsk(ctx)
           } else {
             fail(e.getChannel, new ConnectionFailedException(InvalidResponse, addr))
           }

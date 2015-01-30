@@ -2,7 +2,7 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.{Failure, Dentry, Dtab, NameTree, Path}
 import com.twitter.util.Try
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{DefaultHttpRequest=>DefaultHttpAsk, HttpRequest=>HttpAsk, _}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
@@ -20,7 +20,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     Dtab.empty +: (okDentries.permutations map(ds => Dtab(ds))).toIndexedSeq
 
   def newMsg(): HttpMessage =
-    new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
+    new DefaultHttpAsk(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
 
   test("write(dtab, msg); read(msg) == dtab") {
     for (dtab <- okDtabs) {

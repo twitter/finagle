@@ -1,7 +1,7 @@
 package com.twitter.finagle.exp
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Service, SimpleFilter, NoStacktrace, BackupRequestLost}
+import com.twitter.finagle.{Service, SimpleFilter, NoStacktrace, BackupAskLost}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.{Future, Return, Throw, Duration, Timer, Stopwatch}
 
@@ -42,7 +42,7 @@ import com.twitter.util.{Future, Return, Throw, Duration, Timer, Stopwatch}
  * onto a different endpoint from the original. Eventually, this
  * should be implemented as a sort of queueing policy.
  */
-class BackupRequestFilter[Req, Rep](
+class BackupAskFilter[Req, Rep](
     quantile: Int,
     range: Duration,
     timer: Timer,
@@ -84,7 +84,7 @@ class BackupRequestFilter[Req, Rep](
           histo.add(elapsed())
         }
 
-        other.raise(BackupRequestLost)
+        other.raise(BackupAskLost)
         Future.value(res)
       case (Throw(_), Seq(other)) => other
     }

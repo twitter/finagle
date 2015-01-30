@@ -3,7 +3,7 @@ package com.twitter.finagle.builder
 import com.twitter.finagle.{Server => FinagleServer, _}
 import com.twitter.finagle.channel.IdleConnectionFilter
 import com.twitter.finagle.channel.OpenConnectionsThresholds
-import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter}
+import com.twitter.finagle.filter.{MaskCancelFilter, AskSemaphoreFilter}
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service.ExpiringService
@@ -151,7 +151,7 @@ private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName
  * these options are typically only changed by expert users.
  *
  * - `openConnectionsThresholds`: None
- * - `maxConcurrentRequests`: Int.MaxValue
+ * - `maxConcurrentAsks`: Int.MaxValue
  * - `backlog`: OS-defined default value
  */
 class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
@@ -316,8 +316,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def newFinagleSslEngine(v: () => Engine): This =
     configured(Transport.TLSServerEngine(Some(v)))
 
-  def maxConcurrentRequests(max: Int): This =
-    configured(RequestSemaphoreFilter.Param(max))
+  def maxConcurrentAsks(max: Int): This =
+    configured(AskSemaphoreFilter.Param(max))
 
   def requestTimeout(howlong: Duration): This =
     configured(TimeoutFilter.Param(howlong))

@@ -10,6 +10,6 @@ class ServerSideDecoder(val repo: MethodLookup, val service: Service) extends Fr
 
   def getPrototype(methodName: String): Message = {
     val m = service.getDescriptorForType().findMethodByName(methodName)
-    service.getRequestPrototype(m)
+    service.getAskPrototype(m)
   }
 }

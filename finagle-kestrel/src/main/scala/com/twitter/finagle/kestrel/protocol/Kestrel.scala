@@ -7,7 +7,7 @@ import com.twitter.finagle.memcached.protocol.text.{Encoder, server, client}
 import server.{Decoder => ServerDecoder}
 import client.{Decoder => ClientDecoder}
 import com.twitter.finagle.{ServiceFactory, Codec, CodecFactory}
-import com.twitter.finagle.tracing.ClientRequestTracingFilter
+import com.twitter.finagle.tracing.ClientAskTracingFilter
 
 class Kestrel(failFast: Boolean) extends CodecFactory[Command, Response] {
   private[this] val storageCommands = collection.Set[ChannelBuffer]("set")
@@ -61,7 +61,7 @@ class Kestrel(failFast: Boolean) extends CodecFactory[Command, Response] {
  * Adds tracing information for each kestrel request.
  * Including command name, when request was sent and when it was received.
  */
-private class KestrelTracingFilter extends ClientRequestTracingFilter[Command, Response] {
+private class KestrelTracingFilter extends ClientAskTracingFilter[Command, Response] {
   val serviceName = "kestrel"
   def methodName(req: Command): String = req.name
 }

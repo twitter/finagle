@@ -26,7 +26,7 @@ class NaggatiSpec extends SpecificationWithJUnit {
   def wrap(s: String) = StringToChannelBuffer(s)
   implicit def s2cb(s: String) = StringToChannelBuffer(s)
 
-  "A Redis Request" should {
+  "A Redis Ask" should {
     val commandCodec = new CommandCodec
     val (codec, counter) = TestCodec(commandCodec.decode, commandCodec.encode)
 
@@ -702,11 +702,11 @@ class NaggatiSpec extends SpecificationWithJUnit {
         new String(bytes, "UTF-8")
       }
 
-      "Inline Requests" >> {
+      "Inline Asks" >> {
         codec.send(Get("foo")) mustEqual List("*2\r\n$3\r\nGET\r\n$3\r\nfoo\r\n")
       }
 
-      "Unified Requests" >> {
+      "Unified Asks" >> {
         val value = "bar\r\nbaz"
         val valSz = 8
         val expected = "*3\r\n$3\r\nSET\r\n$3\r\nfoo\r\n$%d\r\n%s\r\n".format(valSz, value)
@@ -719,7 +719,7 @@ class NaggatiSpec extends SpecificationWithJUnit {
       }
     } // Encode properly
 
-  } // A Redis Request
+  } // A Redis Ask
 
   "A Redis Response" should {
     val replyCodec = new ReplyCodec

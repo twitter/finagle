@@ -7,7 +7,7 @@ import com.twitter.util.{Future, Duration, Timer}
 object TimeoutFilter {
   val TimeoutAnnotation = "finagle.timeout"
 
-  val role = new Stack.Role("RequestTimeout")
+  val role = new Stack.Role("AskTimeout")
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
@@ -29,7 +29,7 @@ object TimeoutFilter {
         val Param(timeout) = _param
         val param.Timer(timer) = _timer
         if (!timeout.isFinite) next else {
-          val exc = new IndividualRequestTimeoutException(timeout)
+          val exc = new IndividualAskTimeoutException(timeout)
           new TimeoutFilter(timeout, exc, timer) andThen next
         }
       }
@@ -45,11 +45,11 @@ object TimeoutFilter {
  */
 class TimeoutFilter[Req, Rep](
     timeout: Duration,
-    exception: RequestTimeoutException,
+    exception: AskTimeoutException,
     timer: Timer)
     extends SimpleFilter[Req, Rep] {
   def this(timeout: Duration, timer: Timer) =
-    this(timeout, new IndividualRequestTimeoutException(timeout), timer)
+    this(timeout, new IndividualAskTimeoutException(timeout), timer)
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val res = service(request)

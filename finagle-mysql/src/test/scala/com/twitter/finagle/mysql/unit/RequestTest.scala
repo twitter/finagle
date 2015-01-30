@@ -8,11 +8,11 @@ import org.scalatest.junit.JUnitRunner
 import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader}
 
 @RunWith(classOf[JUnitRunner])
-class SimpleCommandRequestTest extends FunSuite {
+class SimpleCommandAskTest extends FunSuite {
   test("encode") {
     val bytes = "table".getBytes
     val cmd = 0x00
-    val req = new SimpleCommandRequest(cmd.toByte, bytes)
+    val req = new SimpleCommandAsk(cmd.toByte, bytes)
     val buf = Buffer.fromChannelBuffer(req.toPacket.toChannelBuffer)
     val br = BufferReader(buf)
     assert(br.readInt24() === bytes.size + 1) // cmd byte
@@ -70,11 +70,11 @@ class HandshakeResponseTest extends FunSuite {
 }
 
 @RunWith(classOf[JUnitRunner])
-class ExecuteRequestTest extends FunSuite {
+class ExecuteAskTest extends FunSuite {
   test("null values") {
     val numOfParams = 18
     val nullParams: Array[Any] = Array.fill(numOfParams)(null)
-    val e = ExecuteRequest(0, nullParams, false)
+    val e = ExecuteAsk(0, nullParams, false)
     val br = BufferReader(e.toPacket.body)
     br.skip(10) // payload header (10bytes)
     br.skip(1) // new params bound flag
@@ -125,7 +125,7 @@ class ExecuteRequestTest extends FunSuite {
   // create a prepared statement
   val stmtId = 1
   val flags = 0
-  val req = ExecuteRequest(stmtId, params)
+  val req = ExecuteAsk(stmtId, params)
   val br = BufferReader(req.toPacket.body)
 
   val cmd = br.readByte()

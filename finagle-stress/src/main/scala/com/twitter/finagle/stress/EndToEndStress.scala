@@ -12,14 +12,14 @@ import java.net.{SocketAddress, InetSocketAddress}
 import java.util.concurrent.CountDownLatch
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.{
-  DefaultHttpRequest, HttpVersion, HttpResponseStatus, HttpMethod, HttpHeaders, HttpRequest
-  , HttpResponse, DefaultHttpResponse}
+  DefaultHttpRequest=>DefaultHttpAsk, HttpVersion, HttpResponseStatus, HttpMethod, HttpHeaders,
+  HttpRequest=>HttpAsk, HttpResponse, DefaultHttpResponse}
 
 object EndToEndStress {
   private[this] object HttpService
-    extends Service[HttpRequest, HttpResponse]
+    extends Service[HttpAsk, HttpResponse]
   {
-    def apply(request: HttpRequest) = Future {
+    def apply(request: HttpAsk) = Future {
       val response = new DefaultHttpResponse(
         request.getProtocolVersion, HttpResponseStatus.OK)
       response.headers.set(HttpHeaders.Names.CONTENT_LENGTH, 1)
@@ -30,13 +30,13 @@ object EndToEndStress {
 
   @volatile private[this] var running = true
 
-  def dispatchLoop(service: Service[HttpRequest, HttpResponse], latch: CountDownLatch) {
+  def dispatchLoop(service: Service[HttpAsk, HttpResponse], latch: CountDownLatch) {
     if (!running) {
       latch.countDown()
       return
     }
 
-    val request = new DefaultHttpRequest(
+    val request = new DefaultHttpAsk(
       HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
 
     val elapsed = Stopwatch.start()
@@ -56,7 +56,7 @@ object EndToEndStress {
     .bindTo(new InetSocketAddress(0))
     .codec(Http())
     .reportTo(new OstrichStatsReceiver)
-    .maxConcurrentRequests(5)
+    .maxConcurrentAsks(5)
     .build(HttpService)
 
   private[this] def buildClient(concurrency: Int, addr: SocketAddress) = ClientBuilder()

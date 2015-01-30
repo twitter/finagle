@@ -2,7 +2,7 @@ package com.twitter.finagle.builder
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.integration.{DynamicCluster, StringCodec}
-import com.twitter.finagle.{Service, WriteException, IndividualRequestTimeoutException}
+import com.twitter.finagle.{Service, WriteException, IndividualAskTimeoutException}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Future, Await, CountDownLatch, Promise}
 import java.net.{InetAddress, SocketAddress, InetSocketAddress}
@@ -107,8 +107,8 @@ class EndToEndTest extends FunSuite {
       .reportTo(mem)
       .build()
 
-    // generate com.twitter.finagle.IndividualRequestTimeoutException
-    intercept[IndividualRequestTimeoutException] { Await.result(client("hi")) }
+    // generate com.twitter.finagle.IndividualAskTimeoutException
+    intercept[IndividualAskTimeoutException] { Await.result(client("hi")) }
     Await.ready(server.close())
     // generate com.twitter.finagle.WriteException$$anon$1
     intercept[WriteException] { Await.result(client("hi")) }

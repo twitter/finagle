@@ -6,7 +6,7 @@ import java.lang.{Iterable => JIterable}
 import java.util.{List => JList, Map => JMap, Set => JSet}
 
 
-/** Proxy for HttpMessage.  Used by Request and Response. */
+/** Proxy for HttpMessage.  Used by Ask and Response. */
 private[finagle] trait HttpMessageProxy extends Proxy {
   protected[finagle] def httpMessage: HttpMessage
   protected[finagle] def getHttpMessage(): HttpMessage = httpMessage

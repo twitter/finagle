@@ -7,7 +7,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class HeaderMapTest extends FunSuite {
   test("get") {
-    val request = Request()
+    val request = Ask()
     request.headers.add("Host", "api.twitter.com")
 
     assert(request.headerMap.get("Host")    === Some("api.twitter.com"))
@@ -16,7 +16,7 @@ class HeaderMapTest extends FunSuite {
   }
 
   test("getAll") {
-    val request = Request()
+    val request = Ask()
     request.headers.add("Cookie", "1")
     request.headers.add("Cookie", "2")
 
@@ -26,7 +26,7 @@ class HeaderMapTest extends FunSuite {
   }
 
   test("iterator") {
-    val request = Request()
+    val request = Ask()
     request.headers.add("Cookie", "1")
     request.headers.add("Cookie", "2")
 
@@ -34,7 +34,7 @@ class HeaderMapTest extends FunSuite {
   }
 
   test("keys") {
-    val request = Request()
+    val request = Ask()
     request.headers.add("Cookie", "1")
     request.headers.add("Cookie", "2")
 
@@ -44,7 +44,7 @@ class HeaderMapTest extends FunSuite {
   }
 
   test("contains") {
-    val request = Request()
+    val request = Ask()
     request.headers.add("Cookie", "1")
 
     assert(request.headerMap.contains("Cookie") === true)
@@ -53,7 +53,7 @@ class HeaderMapTest extends FunSuite {
   }
 
   test("add") {
-    val request = Request()
+    val request = Ask()
     request.headers.add("Cookie", "1")
 
     request.headerMap.add("Cookie", "2")
@@ -61,7 +61,7 @@ class HeaderMapTest extends FunSuite {
   }
 
   test("+=") {
-    val request = Request()
+    val request = Ask()
     request.headers.add("Cookie", "1")
 
     request.headerMap += "Cookie" -> "2"
@@ -69,7 +69,7 @@ class HeaderMapTest extends FunSuite {
   }
 
   test("-=") {
-    val request = Request()
+    val request = Ask()
     request.headers.add("Cookie", "1")
 
     request.headerMap -= "Cookie"

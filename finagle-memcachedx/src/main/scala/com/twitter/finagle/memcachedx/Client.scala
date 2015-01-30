@@ -406,7 +406,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
           "Invalid response type from get: %s".format(other.getClass.getSimpleName)
         )
     } handle {
-      case t: RequestException => GetResult(failures = (keys map { (_, t) }).toMap)
+      case t: AskException => GetResult(failures = (keys map { (_, t) }).toMap)
       case t: ChannelException => GetResult(failures = (keys map { (_, t) }).toMap)
       case t: ServiceException => GetResult(failures = (keys map { (_, t) }).toMap)
     }
@@ -668,14 +668,14 @@ class KetamaFailureAccrualFactory[Req, Rep](
   healthBroker: Broker[NodeHealth]
 ) extends FailureAccrualFactory[Req, Rep](underlying, numFailures, markDeadFor, timer) {
 
-  // exclude CancelledRequestException and CancelledConnectionException for cache client failure accrual
+  // exclude CancelledAskException and CancelledConnectionException for cache client failure accrual
   override def isSuccess(response: Try[Rep]): Boolean = response match {
     case Return(_) => true
-    case Throw(Failure.InterruptedBy(_: CancelledRequestException)) => true
+    case Throw(Failure.InterruptedBy(_: CancelledAskException)) => true
     case Throw(Failure.InterruptedBy(_: CancelledConnectionException)) => true
       // Failure.InterruptedBy(_) would subsume all these eventually after rb/334371
-    case Throw(WriteException(_: CancelledRequestException)) => true
-    case Throw(_: CancelledRequestException) => true
+    case Throw(WriteException(_: CancelledAskException)) => true
+    case Throw(_: CancelledAskException) => true
     case Throw(WriteException(_: CancelledConnectionException)) => true
     case Throw(_: CancelledConnectionException) => true
     case Throw(e) => false

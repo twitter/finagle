@@ -10,7 +10,7 @@ import com.twitter.conversions.time._
 import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
-import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpRequest, HttpResponseStatus}
+import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpAsk, HttpResponseStatus}
 import scala.util.Random
 
 /**
@@ -46,8 +46,8 @@ object StreamServer {
   produce(new Random, new JavaTimer)
 
   def main(args: Array[String]) {
-    val myService = new Service[HttpRequest, StreamResponse] {
-      def apply(request: HttpRequest) = Future {
+    val myService = new Service[HttpAsk, StreamResponse] {
+      def apply(request: HttpAsk) = Future {
         val subscriber = new Broker[ChannelBuffer]
         addBroker ! subscriber
         new StreamResponse {

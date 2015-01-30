@@ -15,7 +15,7 @@ trait Lists { self: BaseClient =>
    * lists, and return 0.
    */
   def lLen(key: ChannelBuffer): Future[JLong] =
-    doRequest(LLen(key)) {
+    doAsk(LLen(key)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -28,7 +28,7 @@ trait Lists { self: BaseClient =>
    * Nothing if the index is out of range.
    */
   def lIndex(key: ChannelBuffer, index: JLong): Future[Option[ChannelBuffer]] =
-    doRequest(LIndex(key, index)) {
+    doAsk(LIndex(key, index)) {
       case BulkReply(message) => Future.value(Some(message))
       case EmptyBulkReply()   => Future.value(None)
     }
@@ -48,7 +48,7 @@ trait Lists { self: BaseClient =>
     pivot: ChannelBuffer,
     value: ChannelBuffer
   ): Future[Option[JLong]] =
-    doRequest(LInsert(key, "AFTER", pivot, value)) {
+    doAsk(LInsert(key, "AFTER", pivot, value)) {
       case IntegerReply(n) => Future.value(if (n == -1) None else Some(n))
     }
 
@@ -67,7 +67,7 @@ trait Lists { self: BaseClient =>
     pivot: ChannelBuffer,
     value: ChannelBuffer
   ): Future[Option[JLong]] =
-    doRequest(LInsert(key, "BEFORE", pivot, value)) {
+    doAsk(LInsert(key, "BEFORE", pivot, value)) {
       case IntegerReply(n) => Future.value(if (n == -1) None else Some(n))
     }
 
@@ -78,7 +78,7 @@ trait Lists { self: BaseClient =>
    * @return an option of the value of the popped element, or nothing if the list is empty.
    */
   def lPop(key: ChannelBuffer): Future[Option[ChannelBuffer]] =
-    doRequest(LPop(key)) {
+    doAsk(LPop(key)) {
       case BulkReply(message) => Future.value(Some(message))
       case EmptyBulkReply() => Future.value(None)
     }
@@ -91,7 +91,7 @@ trait Lists { self: BaseClient =>
    * @return the length of the list
    */
   def lPush(key: ChannelBuffer, value: List[ChannelBuffer]): Future[JLong] =
-    doRequest(LPush(key, value)) {
+    doAsk(LPush(key, value)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -105,7 +105,7 @@ trait Lists { self: BaseClient =>
    * @return the number of removed elements.
    */
   def lRem(key: ChannelBuffer, count: JLong, value: ChannelBuffer): Future[JLong] =
-    doRequest(LRem(key, count, value)) {
+    doAsk(LRem(key, count, value)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -117,7 +117,7 @@ trait Lists { self: BaseClient =>
    * @param value
    */
   def lSet(key: ChannelBuffer, index: JLong, value: ChannelBuffer): Future[Unit] =
-    doRequest(LSet(key, index, value)) {
+    doAsk(LSet(key, index, value)) {
       case StatusReply(message) => Future.Unit
     }
 
@@ -130,7 +130,7 @@ trait Lists { self: BaseClient =>
    * @return a list of the value
    */
   def lRange(key: ChannelBuffer, start: JLong, end: JLong): Future[List[ChannelBuffer]] =
-    doRequest(LRange(key, start, end)) {
+    doAsk(LRange(key, start, end)) {
       case MBulkReply(message) => Future.value(ReplyFormat.toChannelBuffers(message))
       case EmptyMBulkReply() => Future.value(List())
     }
@@ -142,7 +142,7 @@ trait Lists { self: BaseClient =>
    * @return an option of the value of the popped element, or nothing if the list is empty.
    */
   def rPop(key: ChannelBuffer): Future[Option[ChannelBuffer]] =
-    doRequest(RPop(key)) {
+    doAsk(RPop(key)) {
       case BulkReply(message) => Future.value(Some(message))
       case EmptyBulkReply() => Future.value(None)
     }
@@ -155,7 +155,7 @@ trait Lists { self: BaseClient =>
    * @return the length of the list
    */
   def rPush(key: ChannelBuffer, value: List[ChannelBuffer]): Future[JLong] =
-    doRequest(RPush(key, value)) {
+    doAsk(RPush(key, value)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -166,7 +166,7 @@ trait Lists { self: BaseClient =>
    * @param end (exclusive)
    */
   def lTrim(key: ChannelBuffer, start: JLong, end: JLong): Future[Unit] =
-    doRequest(LTrim(key, start, end)) {
+    doAsk(LTrim(key, start, end)) {
       case StatusReply(message) => Future.Unit
     }
 }

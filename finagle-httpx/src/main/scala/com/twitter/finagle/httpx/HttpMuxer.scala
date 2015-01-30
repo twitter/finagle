@@ -23,12 +23,12 @@ import java.util.logging.Logger
  *
  *  NOTE: When multiple pattern matches exist, the longest pattern wins.
  */
-class HttpMuxer(protected[this] val handlers: Seq[(String, Service[Request, Response])])
-  extends Service[Request, Response] {
+class HttpMuxer(protected[this] val handlers: Seq[(String, Service[Ask, Response])])
+  extends Service[Ask, Response] {
 
-  def this() = this(Seq[(String, Service[Request, Response])]())
+  def this() = this(Seq[(String, Service[Ask, Response])]())
 
-  private[this] val sorted: Seq[(String, Service[Request, Response])] =
+  private[this] val sorted: Seq[(String, Service[Ask, Response])] =
     handlers.sortBy { case (pattern, _) => pattern.length } reverse
 
   def patterns: Seq[String] = sorted map { case(p, _) => p }
@@ -37,16 +37,16 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[Request, Resp
    * Create a new Mux service with the specified pattern added. If the pattern already exists, overwrite existing value.
    * Pattern ending with "/" indicates prefix matching; otherwise exact matching.
    */
-  def withHandler(pattern: String, service: Service[Request, Response]): HttpMuxer = {
+  def withHandler(pattern: String, service: Service[Ask, Response]): HttpMuxer = {
     val norm = normalize(pattern)
     new HttpMuxer(handlers.filterNot { case (pat, _) => pat == norm } :+ (norm, service))
   }
 
   /**
-   * Extract path from Request; look for a matching pattern; if found, dispatch the
-   * Request to the registered service; otherwise create a NOT_FOUND response
+   * Extract path from Ask; look for a matching pattern; if found, dispatch the
+   * Ask to the registered service; otherwise create a NOT_FOUND response
    */
-  def apply(request: Request): Future[Response] = {
+  def apply(request: Ask): Future[Response] = {
     val u = request.getUri
     val uri = u.indexOf('?') match {
       case -1 => u
@@ -86,19 +86,19 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[Request, Resp
 /**
  * Singleton default multiplex service
  */
-object HttpMuxer extends Service[Request, Response] {
+object HttpMuxer extends Service[Ask, Response] {
   @volatile private[this] var underlying = new HttpMuxer()
-  override def apply(request: Request): Future[Response] =
+  override def apply(request: Ask): Future[Response] =
     underlying(request)
 
   /**
    * add handlers to mutate dispatching strategies.
    */
-  def addHandler(pattern: String, service: Service[Request, Response]) = synchronized {
+  def addHandler(pattern: String, service: Service[Ask, Response]) = synchronized {
     underlying = underlying.withHandler(pattern, service)
   }
 
-  def addRichHandler(pattern: String, service: Service[Request, Response]) =
+  def addRichHandler(pattern: String, service: Service[Ask, Response]) =
     addHandler(pattern, service)
 
   def patterns = underlying.patterns
@@ -114,7 +114,7 @@ object HttpMuxer extends Service[Request, Response] {
 /**
  * Trait HttpMuxHandler is used for service-loading HTTP handlers.
  */
-trait HttpMuxHandler extends Service[Request, Response] {
+trait HttpMuxHandler extends Service[Ask, Response] {
   /** The pattern on to bind this handler to */
   val pattern: String
 }

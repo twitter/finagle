@@ -1,7 +1,7 @@
 package com.twitter.finagle.httpx.filter
 
 import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.finagle.httpx.{MediaType, Method, Request, Response}
+import com.twitter.finagle.httpx.{MediaType, Method, Ask, Response}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.util.Future
 import com.twitter.io.Buf
@@ -13,7 +13,7 @@ import com.twitter.io.Buf
  *
  * See: http://en.wikipedia.org/wiki/JSONP
  */
-class JsonpFilter[Req <: Request] extends SimpleFilter[Req, Response] {
+class JsonpFilter[Req <: Ask] extends SimpleFilter[Req, Response] {
 
   def apply(request: Req, service: Service[Req, Response]): Future[Response] = {
     getCallback(request) match {
@@ -40,7 +40,7 @@ class JsonpFilter[Req <: Request] extends SimpleFilter[Req, Response] {
     }
 
 
-  def getCallback(request: Request): Option[String] = {
+  def getCallback(request: Ask): Option[String] = {
     // Ignore HEAD, though in practice this should be behind the HeadFilter
     if (request.method != Method.Head)
       request.params.get("callback") flatMap { callback =>
@@ -56,7 +56,7 @@ class JsonpFilter[Req <: Request] extends SimpleFilter[Req, Response] {
 }
 
 
-object JsonpFilter extends JsonpFilter[Request] {
+object JsonpFilter extends JsonpFilter[Ask] {
   // Sanitize to prevent cross domain policy attacks and such
   private val SanitizerRegex = """[^\/\@\.\[\]\:\w\d]""".r
 

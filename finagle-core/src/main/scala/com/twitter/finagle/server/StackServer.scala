@@ -38,7 +38,7 @@ object StackServer {
    * @see [[com.twitter.finagle.service.TimeoutFilter]]
    * @see [[com.twitter.finagle.filter.DtabStatsFilter]]
    * @see [[com.twitter.finagle.service.StatsFilter]]
-   * @see [[com.twitter.finagle.filter.RequestSemaphoreFilter]]
+   * @see [[com.twitter.finagle.filter.AskSemaphoreFilter]]
    * @see [[com.twitter.finagle.filter.ExceptionSourceFilter]]
    * @see [[com.twitter.finagle.filter.MkJvmFilter]]
    * @see [[com.twitter.finagle.tracing.ServerTracingFilter]]
@@ -55,7 +55,7 @@ object StackServer {
     stk.push(TimeoutFilter.module)
     stk.push(DtabStatsFilter.module)
     stk.push(StatsFilter.module)
-    stk.push(RequestSemaphoreFilter.module)
+    stk.push(AskSemaphoreFilter.module)
     stk.push(MaskCancelFilter.module)
     stk.push(ExceptionSourceFilter.module)
     stk.push(Role.jvmTracing, ((next: ServiceFactory[Req, Rep]) =>

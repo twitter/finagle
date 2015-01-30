@@ -1,14 +1,14 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.http.{Response, Request, ReaderUtils}
+import com.twitter.finagle.http.{Response, Ask, ReaderUtils}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.Dtab
 import com.twitter.io.{Reader, BufReader}
 import com.twitter.util.{Future, Promise, Return, Throw}
 import org.jboss.netty.handler.codec.http.{
-  HttpRequest, HttpResponse, HttpHeaders
+  HttpRequest => HttpAsk, HttpResponse, HttpHeaders
 }
 
 /**
@@ -17,7 +17,7 @@ import org.jboss.netty.handler.codec.http.{
  * The dispatcher modifies each request with Dtab encoding and streams chunked
  * responses via `Reader`.
  */
-class HttpClientDispatcher[Req <: HttpRequest](
+class HttpClientDispatcher[Req <: HttpAsk](
   trans: Transport[Any, Any]
 ) extends GenSerialClientDispatcher[Req, Response, Any, Any](trans) {
 
@@ -45,14 +45,14 @@ class HttpClientDispatcher[Req <: HttpRequest](
     }
     
     val reader = req match {
-      case r: Request if r.isChunked => Some(r.reader)
+      case r: Ask if r.isChunked => Some(r.reader)
       case _ => None
     }
     
     trans.write(req) rescue(wrapWriteException) before {
       // Do these concurrently:
       Future.join(
-        // 1. Drain the Request body into the Transport.
+        // 1. Drain the Ask body into the Transport.
         // (If we have a reader.)
         reader.map(streamChunks(trans, _)).getOrElse(Future.Done),
 

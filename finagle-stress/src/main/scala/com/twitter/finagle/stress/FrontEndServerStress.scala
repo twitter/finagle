@@ -5,7 +5,8 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.channel.OpenConnectionsThresholds
 import com.twitter.finagle.Service
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{
+  HttpRequest=>HttpAsk, DefaultHttpRequest=>DefaultHttpAsk, _}
 import java.net.{SocketAddress, InetSocketAddress}
 import java.util.concurrent.CountDownLatch
 import com.twitter.finagle.http.Http
@@ -17,9 +18,9 @@ import com.twitter.ostrich.stats
 object FrontEndServerStress {
 
   object DummyService
-    extends Service[HttpRequest, HttpResponse]
+    extends Service[HttpAsk, HttpResponse]
   {
-    def apply(request: HttpRequest) = Future {
+    def apply(request: HttpAsk) = Future {
       val response = new DefaultHttpResponse(
         request.getProtocolVersion, HttpResponseStatus.OK)
       response.headers.set(HttpHeaders.Names.CONTENT_LENGTH, 1)
@@ -31,13 +32,13 @@ object FrontEndServerStress {
 
   @volatile private[this] var running = true
 
-  def dispatchLoop(service: Service[HttpRequest, HttpResponse], latch: CountDownLatch) {
+  def dispatchLoop(service: Service[HttpAsk, HttpResponse], latch: CountDownLatch) {
     if (!running) {
       latch.countDown()
       return
     }
 
-    val request = new DefaultHttpRequest(
+    val request = new DefaultHttpAsk(
       HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
 
     val beginTime = Time.now

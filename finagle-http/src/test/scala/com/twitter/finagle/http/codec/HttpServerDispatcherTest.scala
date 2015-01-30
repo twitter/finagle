@@ -2,7 +2,7 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.{ChannelClosedException, Service, Status}
-import com.twitter.finagle.http.{BadHttpRequest, Request, Response}
+import com.twitter.finagle.http.{BadHttpAsk, Ask, Response}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.io.{Reader, Buf}
@@ -27,8 +27,8 @@ class HttpServerDispatcherTest extends FunSuite {
 
   test("invalid message") {
     val (in, out) = mkPair[Any, Any]
-    val service = Service.mk { req: Request => Future.value(Response()) }
-    val disp = new HttpServerDispatcher[Request](out, service)
+    val service = Service.mk { req: Ask => Future.value(Response()) }
+    val disp = new HttpServerDispatcher[Ask](out, service)
 
     in.write("invalid")
     Await.ready(out.onClose)
@@ -37,20 +37,20 @@ class HttpServerDispatcherTest extends FunSuite {
 
   test("bad request") {
     val (in, out) = mkPair[Any, Any]
-    val service = Service.mk { req: Request => Future.value(Response()) }
-    val disp = new HttpServerDispatcher[Request](out, service)
+    val service = Service.mk { req: Ask => Future.value(Response()) }
+    val disp = new HttpServerDispatcher[Ask](out, service)
 
-    in.write(BadHttpRequest(new Exception()))
+    in.write(BadHttpAsk(new Exception()))
     Await.result(in.read)
     assert(out.status === Status.Closed)
   }
 
   test("streaming request body") {
-    val service = Service.mk { req: Request => ok(req.reader) }
+    val service = Service.mk { req: Ask => ok(req.reader) }
     val (in, out) = mkPair[Any, Any]
-    val disp = new HttpServerDispatcher[Request](out, service)
+    val disp = new HttpServerDispatcher[Ask](out, service)
 
-    val req = Request()
+    val req = Ask()
     req.setChunked(true)
     in.write(req)
     val res = Await.result(in.read).asInstanceOf[Response]
@@ -62,12 +62,12 @@ class HttpServerDispatcherTest extends FunSuite {
 
   test("client abort before dispatch") {
     val promise = new Promise[Response]
-    val service = Service.mk { _: Request => promise }
+    val service = Service.mk { _: Ask => promise }
 
     val (in, out) = mkPair[Any, Any]
-    val disp = new HttpServerDispatcher[Request](out, service)
+    val disp = new HttpServerDispatcher[Ask](out, service)
 
-    in.write(Request())
+    in.write(Ask())
 
     // Simulate channel closure
     out.close()
@@ -75,12 +75,12 @@ class HttpServerDispatcherTest extends FunSuite {
   }
 
   test("client abort after dispatch") {
-    val req = Request()
+    val req = Ask()
     val res = req.response
-    val service = Service.mk { _: Request => Future.value(res) }
+    val service = Service.mk { _: Ask => Future.value(res) }
 
     val (in, out) = mkPair[Any, Any]
-    val disp = new HttpServerDispatcher[Request](out, service)
+    val disp = new HttpServerDispatcher[Ask](out, service)
 
     req.response.setChunked(true)
     in.write(req)

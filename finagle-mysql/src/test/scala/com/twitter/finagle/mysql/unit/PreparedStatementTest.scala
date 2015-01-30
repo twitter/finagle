@@ -13,20 +13,20 @@ import org.scalatest.mock.MockitoSugar
 @RunWith(classOf[JUnitRunner])
 class PrepareCacheTest extends FunSuite with MockitoSugar {
   test("cache prepare requests") {
-    val dispatcher = mock[Service[Request, Result]]
+    val dispatcher = mock[Service[Ask, Result]]
     val stmtId = 2
-    when(dispatcher(any[Request])).thenReturn(Future.value(
+    when(dispatcher(any[Ask])).thenReturn(Future.value(
       PrepareOK(stmtId, 1, 1, 0)))
 
     val svc = new PrepareCache(dispatcher, 11)
-    val r0 = PrepareRequest("SELECT 0")
+    val r0 = PrepareAsk("SELECT 0")
     svc(r0)
     svc(r0)
     verify(dispatcher, times(1)).apply(r0)
 
-    for (i <- 1 to 10) svc(PrepareRequest("SELECT %d".format(i)))
-    svc(PrepareRequest("SELECT 5"))
-    verify(dispatcher, times(1)).apply(PrepareRequest("SELECT 5"))
+    for (i <- 1 to 10) svc(PrepareAsk("SELECT %d".format(i)))
+    svc(PrepareAsk("SELECT 5"))
+    verify(dispatcher, times(1)).apply(PrepareAsk("SELECT 5"))
 
     // dispatch current eldest.
     // we should maintain access order.
@@ -34,11 +34,11 @@ class PrepareCacheTest extends FunSuite with MockitoSugar {
     verify(dispatcher, times(1)).apply(r0)
 
     // fill cache and evict eldest.
-    svc(PrepareRequest("SELECT 11"))
-    verify(dispatcher, times(1)).apply(CloseRequest(stmtId))
+    svc(PrepareAsk("SELECT 11"))
+    verify(dispatcher, times(1)).apply(CloseAsk(stmtId))
 
     // evicted element is not in cache.
-    svc(PrepareRequest("SELECT 1"))
-    verify(dispatcher, times(2)).apply(PrepareRequest("SELECT 1"))
+    svc(PrepareAsk("SELECT 1"))
+    verify(dispatcher, times(2)).apply(PrepareAsk("SELECT 1"))
   }
 }

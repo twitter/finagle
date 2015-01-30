@@ -1,13 +1,13 @@
 package com.twitter.finagle.httpx.filter
 
 import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.finagle.httpx.{Method, Request, Response}
+import com.twitter.finagle.httpx.{Method, Ask, Response}
 import com.twitter.util.Future
 
 /**
  * HEAD filter.  Implements HEAD by converting to a GET.
  */
-class HeadFilter[Req <: Request] extends SimpleFilter[Req, Response] {
+class HeadFilter[Req <: Ask] extends SimpleFilter[Req, Response] {
 
   def apply(request: Req, service: Service[Req, Response]): Future[Response] =
     if (request.method == Method.Head) {
@@ -31,4 +31,4 @@ class HeadFilter[Req <: Request] extends SimpleFilter[Req, Response] {
 }
 
 
-object HeadFilter extends HeadFilter[Request]
+object HeadFilter extends HeadFilter[Ask]

@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.http.{MediaType, Method, Request, Response, Status}
+import com.twitter.finagle.http.{MediaType, Method, Ask, Response, Status}
 import com.twitter.util.{Await, Future}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -10,8 +10,8 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class JsonpFilterTest extends FunSuite {
 
-  val dummyService = new Service[Request, Response] {
-    def apply(request: Request): Future[Response] = {
+  val dummyService = new Service[Ask, Response] {
+    def apply(request: Ask): Future[Response] = {
       val response = request.response
       response.status = Status.Ok
       if (request.params.contains("not_json"))
@@ -24,7 +24,7 @@ class JsonpFilterTest extends FunSuite {
   }
 
   test("wrap json") {
-    val request = Request("/test.json", "callback" -> "mycallback")
+    val request = Ask("/test.json", "callback" -> "mycallback")
     val response = Await.result(JsonpFilter(request, dummyService))
 
     assert(response.contentType   === Some("application/javascript"))
@@ -32,7 +32,7 @@ class JsonpFilterTest extends FunSuite {
   }
 
   test("ignore non-json") {
-    val request = Request("/test.json", "callback" -> "mycallback", "not_json" -> "t")
+    val request = Ask("/test.json", "callback" -> "mycallback", "not_json" -> "t")
     val response = Await.result(JsonpFilter(request, dummyService))
 
     assert(response.mediaType     === Some("not_json"))
@@ -41,7 +41,7 @@ class JsonpFilterTest extends FunSuite {
   }
 
   test("ignore HEAD") {
-    val request = Request("/test.json", "callback" -> "mycallback")
+    val request = Ask("/test.json", "callback" -> "mycallback")
     request.method = Method.Head
 
     val response = Await.result(JsonpFilter(request, dummyService))
@@ -51,7 +51,7 @@ class JsonpFilterTest extends FunSuite {
 
   test("ignore empty callback") {
     // Search Varnish sets callback to blank.  These should not be wrapped.
-    val request = Request("/test.json", "callback" -> "")
+    val request = Ask("/test.json", "callback" -> "")
 
     val response = Await.result(JsonpFilter(request, dummyService))
     assert(response.contentType   === Some("application/json"))

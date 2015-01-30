@@ -1,7 +1,7 @@
 package com.twitter.finagle.httpx.filter
 
-import com.twitter.finagle.{CancelledRequestException, Service, SimpleFilter}
-import com.twitter.finagle.httpx.{Request, Response, Status}
+import com.twitter.finagle.{CancelledAskException, Service, SimpleFilter}
+import com.twitter.finagle.httpx.{Ask, Response, Status}
 import com.twitter.logging.Logger
 import com.twitter.util.Future
 
@@ -9,16 +9,16 @@ import com.twitter.util.Future
  * General purpose exception filter.
  *
  * Uncaught exceptions are converted to 500 Internal Server Error. Cancellations
- * are converted to 499 Client Closed Request. 499 is an Nginx extension for
+ * are converted to 499 Client Closed Ask. 499 is an Nginx extension for
  * exactly this situation, see:
  *   http://trac.nginx.org/nginx/browser/nginx/trunk/src/http/ngx_http_request.h
  */
-class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response] {
-  import ExceptionFilter.ClientClosedRequestStatus
+class ExceptionFilter[ASK <: Ask] extends SimpleFilter[ASK, Response] {
+  import ExceptionFilter.ClientClosedAskStatus
 
   private val log = Logger("finagle.httpx")
 
-  def apply(request: REQUEST, service: Service[REQUEST, Response]): Future[Response] =
+  def apply(request: ASK, service: Service[ASK, Response]): Future[Response] =
     {
       try {
         service(request)
@@ -27,10 +27,10 @@ class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response
         case e => Future.exception(e)
       }
     } rescue {
-      case e: CancelledRequestException =>
+      case e: CancelledAskException =>
         // This only happens when ChannelService cancels a reply.
         log.warning("cancelled request: uri:%s", request.getUri)
-        respond(request, ClientClosedRequestStatus)
+        respond(request, ClientClosedAskStatus)
       case e =>
         try {
           log.warning(e, "exception: uri:%s exception:%s", request.getUri, e)
@@ -44,7 +44,7 @@ class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response
         }
     }
 
-  private def respond(request: REQUEST, responseStatus: Status): Future[Response] = {
+  private def respond(request: ASK, responseStatus: Status): Future[Response] = {
     val response = request.response
     response.status = responseStatus
     response.clearContent()
@@ -54,7 +54,7 @@ class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response
 }
 
 
-object ExceptionFilter extends ExceptionFilter[Request] {
-  private[ExceptionFilter] val ClientClosedRequestStatus =
-    Status.ClientClosedRequest
+object ExceptionFilter extends ExceptionFilter[Ask] {
+  private[ExceptionFilter] val ClientClosedAskStatus =
+    Status.ClientClosedAsk
 }

@@ -17,7 +17,7 @@ import com.twitter.finagle.{
  *       .withHash { req => Some(hashCodeOfSomething)}
  *       .buildFactory()
  *   val service = serviceFactory()
- *   service(req) // where req is a Req and may have ShardableRequest mixed in
+ *   service(req) // where req is a Req and may have ShardableAsk mixed in
  */
 
 class ShardingService[Req, Rep](

@@ -13,16 +13,16 @@ import com.twitter.logging.Logger
 import com.twitter.util.{Future, Promise, Throw, Return, NonFatal}
 import java.net.InetSocketAddress
 import org.jboss.netty.handler.codec.frame.TooLongFrameException
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpHeaders}
+import org.jboss.netty.handler.codec.http.{HttpRequest=>HttpAsk, HttpResponse, HttpHeaders}
 
 class HttpServerDispatcher(
   trans: Transport[Any, Any],
-  service: Service[Request, Response],
-  stats: StatsReceiver) extends GenSerialServerDispatcher[Request, Response, Any, Any](trans) {
+  service: Service[Ask, Response],
+  stats: StatsReceiver) extends GenSerialServerDispatcher[Ask, Response, Any, Any](trans) {
 
   def this(
     trans: Transport[Any, Any],
-    service: Service[Request, Response]) = this(trans, service, DefaultStatsReceiver)
+    service: Service[Ask, Response]) = this(trans, service, DefaultStatsReceiver)
 
   private[this] val failureReceiver = new RollupStatsReceiver(stats.scope("stream")).scope("failures")
 
@@ -32,27 +32,27 @@ class HttpServerDispatcher(
     service.close()
   }
 
-  private[this] def BadRequestResponse =
-    Response(Version.Http10, Status.BadRequest)
+  private[this] def BadAskResponse =
+    Response(Version.Http10, Status.BadAsk)
 
-  private[this] def RequestUriTooLongResponse =
-    Response(Version.Http10, Status.RequestURITooLong)
+  private[this] def AskUriTooLongResponse =
+    Response(Version.Http10, Status.AskURITooLong)
 
-  private[this] def RequestHeaderFieldsTooLarge =
-    Response(Version.Http10, Status.RequestHeaderFieldsTooLarge)
+  private[this] def AskHeaderFieldsTooLarge =
+    Response(Version.Http10, Status.AskHeaderFieldsTooLarge)
 
   protected def dispatch(m: Any, eos: Promise[Unit]) = m match {
-    case badReq: BadHttpRequest =>
+    case badReq: BadHttpAsk =>
       eos.setDone()
       val response = badReq.exception match {
         case ex: TooLongFrameException =>
           // this is very brittle :(
           if (ex.getMessage().startsWith("An HTTP line is larger than "))
-            RequestUriTooLongResponse
+            AskUriTooLongResponse
           else
-            RequestHeaderFieldsTooLarge
+            AskHeaderFieldsTooLarge
         case _ =>
-          BadRequestResponse
+          BadAskResponse
       }
       // The connection in unusable so we close it here.
       // Note that state != Idle while inside dispatch
@@ -64,9 +64,9 @@ class HttpServerDispatcher(
       close()
       Future.value(response)
 
-    case reqIn: HttpRequest =>
-      val req = new Request {
-        val httpRequest = reqIn
+    case reqIn: HttpAsk =>
+      val req = new Ask {
+        val httpAsk = reqIn
         override val httpMessage = reqIn
         lazy val remoteSocketAddress = trans.remoteAddress match {
           case ia: InetSocketAddress => ia

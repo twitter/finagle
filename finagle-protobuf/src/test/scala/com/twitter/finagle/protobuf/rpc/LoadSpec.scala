@@ -10,7 +10,7 @@ object RpcProtobufSpec extends SpecificationWithJUnit {
 
     def THREAD_COUNT = 40
 
-    def REQ_PER_THREAD = 100
+    def REQUEST_PER_THREAD = 100
 
     def port = 8080
 
@@ -18,7 +18,7 @@ object RpcProtobufSpec extends SpecificationWithJUnit {
 
     def factory = new RpcFactoryImpl()
 
-    def serverBuilder = ServerBuilder.get().maxConcurrentRequests(10)
+    def serverBuilder = ServerBuilder.get().maxConcurrentAsks(10)
 
     def clientBuilder = ClientBuilder
             .get()
@@ -29,7 +29,7 @@ object RpcProtobufSpec extends SpecificationWithJUnit {
 
   "A client" should {
 
-        val totalRequests = new AtomicInteger()
+        val totalAsks = new AtomicInteger()
 
         val service = new SampleWeatherServiceImpl(80, null)
         val server = factory.createServer(serverBuilder.asInstanceOf[ServerBuilder[(String, com.google.protobuf.Message),(String, com.google.protobuf.Message),Any,Any,Any]], port, service, executorService)
@@ -43,8 +43,8 @@ object RpcProtobufSpec extends SpecificationWithJUnit {
                 def run() {
                     startBarrier.await();
                     try {
-                        for (k <- 0 until REQ_PER_THREAD) {
-                            makeRequest(service, stub, totalRequests)
+                        for (k <- 0 until REQUEST_PER_THREAD) {
+                            makeAsk(service, stub, totalAsks)
                         }
                     }
                     finally {
@@ -56,18 +56,18 @@ object RpcProtobufSpec extends SpecificationWithJUnit {
         finishBarrier.await(60l, TimeUnit.SECONDS)
         server.close(Duration(1, TimeUnit.SECONDS))
 
-      "receive THREAD_COUNT * REQ_PER_THREAD responses." in {
-        THREAD_COUNT * REQ_PER_THREAD mustEqual totalRequests.get()
+      "receive THREAD_COUNT * REQUEST_PER_THREAD responses." in {
+        THREAD_COUNT * REQUEST_PER_THREAD mustEqual totalAsks.get()
       }
 
   }
 
 
-  def makeRequest(service: SampleWeatherServiceImpl, stub: WeatherService, totalRequests: AtomicInteger) {
+  def makeAsk(service: SampleWeatherServiceImpl, stub: WeatherService, totalAsks: AtomicInteger) {
         val controller = factory.createController().asInstanceOf[RpcControllerWithOnFailureCallback]
 
         val l = new java.util.concurrent.CountDownLatch(1);
-        val request = GetWeatherForecastRequest.newBuilder().setZip("80301").build()
+        val request = GetWeatherForecastAsk.newBuilder().setZip("80301").build()
         stub.getWeatherForecast(controller.onFailure(new RpcCallback[Throwable]() {
 
             def run(e: Throwable) {
@@ -76,7 +76,7 @@ object RpcProtobufSpec extends SpecificationWithJUnit {
         }), request, new RpcCallback[GetWeatherForecastResponse]() {
 
             def run(resp: GetWeatherForecastResponse) {
-                totalRequests.incrementAndGet()
+                totalAsks.incrementAndGet()
                 l.countDown()
             }
         });
@@ -90,12 +90,12 @@ class SampleWeatherServiceImpl(val temperature: Int, val getHistoricWeather: Cal
 
         def getTemperature() = temperature
 
-        def getWeatherForecast(controller: RpcController, request: GetWeatherForecastRequest, done:
+        def getWeatherForecast(controller: RpcController, request: GetWeatherForecastAsk, done:
                 RpcCallback[GetWeatherForecastResponse])  {
             done.run(GetWeatherForecastResponse.newBuilder().setTemp(temperature).build())
         }
 
-        def getHistoricWeather(controller: RpcController, request: GetHistoricWeatherRequest,
+        def getHistoricWeather(controller: RpcController, request: GetHistoricWeatherAsk,
                 done: RpcCallback[GetHistoricWeatherResponse]) {
             if (getHistoricWeather != null) {
                 getHistoricWeather.call()

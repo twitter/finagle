@@ -201,7 +201,7 @@ case class PrepareOK(
 /**
  * Used internally to synthesize a response from
  * the server when sending a prepared statement
- * CloseRequest
+ * CloseAsk
  */
 object CloseStatementOK extends OK(0,0,0,0, "Internal Close OK")
 

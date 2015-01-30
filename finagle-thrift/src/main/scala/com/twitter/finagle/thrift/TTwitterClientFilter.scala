@@ -15,7 +15,7 @@ import org.apache.thrift.protocol.TProtocolFactory
  *
  * - Dapper-style RPC tracing
  * - Passing client IDs
- * - Request contexts
+ * - Ask contexts
  * - Name delegation
  *
  * @param isUpgraded Whether this connection is with a server that
@@ -34,8 +34,8 @@ private[thrift] class TTwitterClientFilter(
    * Produces an upgraded TTwitter ThriftClientRequest based on Trace,
    * ClientId, and Dtab state.
    */
-  private[this] def mkTTwitterRequest(baseRequest: ThriftClientRequest): ThriftClientRequest = {
-    val header = new thrift.RequestHeader
+  private[this] def mkTTwitterAsk(baseAsk: ThriftClientRequest): ThriftClientRequest = {
+    val header = new thrift.AskHeader
 
     clientId match {
       case Some(clientId) =>
@@ -54,7 +54,7 @@ private[thrift] class TTwitterClientFilter(
     }
 
     val contexts = Contexts.broadcast.marshal().iterator
-    val ctxs = new ArrayList[thrift.RequestContext]()
+    val ctxs = new ArrayList[thrift.AskContext]()
     if (contexts.hasNext) {
       while (contexts.hasNext) {
         val (k, buf) = contexts.next()
@@ -65,7 +65,7 @@ private[thrift] class TTwitterClientFilter(
         // however if the ClientIdContext handler failed to load for
         // some reason, a pass-through context would be used instead.
         if (k != ClientId.clientIdCtx.marshalId) {
-          val c = new thrift.RequestContext(
+          val c = new thrift.AskContext(
             Buf.ByteBuffer.Owned.extract(k), Buf.ByteBuffer.Owned.extract(buf))
           ctxs.add(c)
         }
@@ -74,7 +74,7 @@ private[thrift] class TTwitterClientFilter(
     clientIdBuf match {
 
       case Some(buf) =>
-        val ctx = new thrift.RequestContext(
+        val ctx = new thrift.AskContext(
           Buf.toByteBuffer(ClientId.clientIdCtx.marshalId), 
           Buf.toByteBuffer(buf))
         ctxs.add(ctx)
@@ -96,9 +96,9 @@ private[thrift] class TTwitterClientFilter(
     new ThriftClientRequest(
       ByteArrays.concat(
         OutputBuffer.messageToArray(header, protocolFactory),
-        baseRequest.message
+        baseAsk.message
       ),
-      baseRequest.oneway
+      baseAsk.oneway
     )
   }
 
@@ -108,15 +108,15 @@ private[thrift] class TTwitterClientFilter(
     val msg = new InputBuffer(request.message, protocolFactory)().readMessageBegin()
     Trace.recordRpc(msg.name)
 
-    val thriftRequest =
+    val thriftAsk =
       if (isUpgraded)
-        mkTTwitterRequest(request)
+        mkTTwitterAsk(request)
       else
         request
 
-    val reply = service(thriftRequest)
+    val reply = service(thriftAsk)
 
-    if (thriftRequest.oneway) {
+    if (thriftAsk.oneway) {
       // Oneway requests don't contain replies, so they can't be traced.
       reply
     } else {

@@ -9,7 +9,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.http.MediaType
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{HttpRequest=>HttpAsk, _}
 import scala.collection.immutable
 import scala.util.matching.Regex
 
@@ -21,7 +21,7 @@ import scala.util.matching.Regex
 object statsFilter extends GlobalFlag[String]("",
                       "Comma-separated regexes that indicate which metrics to filter out")
 
-class JsonExporter(registry: Metrics) extends Service[HttpRequest, HttpResponse] {
+class JsonExporter(registry: Metrics) extends Service[HttpAsk, HttpResponse] {
   private[this] val mapper = new ObjectMapper
   mapper.registerModule(DefaultScalaModule)
 
@@ -32,7 +32,7 @@ class JsonExporter(registry: Metrics) extends Service[HttpRequest, HttpResponse]
     mkRegex(regexesString)
   }
 
-  def apply(request: HttpRequest): Future[HttpResponse] = {
+  def apply(request: HttpAsk): Future[HttpResponse] = {
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
     response.headers.add(HttpHeaders.Names.CONTENT_TYPE, MediaType.Json)
 
@@ -43,7 +43,7 @@ class JsonExporter(registry: Metrics) extends Service[HttpRequest, HttpResponse]
     Future.value(response)
   }
 
-  private[this] def readBooleanParam(request: HttpRequest, name: String, default: Boolean): Boolean = {
+  private[this] def readBooleanParam(request: HttpAsk, name: String, default: Boolean): Boolean = {
     try {
       val params = new QueryStringDecoder(request.getUri).getParameters
       Option(params.get(name)) match {

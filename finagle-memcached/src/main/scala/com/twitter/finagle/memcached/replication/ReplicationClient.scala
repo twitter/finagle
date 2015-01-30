@@ -86,7 +86,7 @@ class BaseReplicationClient(clients: Seq[Client], statsReceiver: StatsReceiver =
    * This method will send the requested keys to each underlying replicas in a fixed order or
    * random order, and will stop passing along a key if a replica has returned 'hit'.
    *
-   * TODO: introducing BackupRequestFilter to shorten the waiting period for secondary requests
+   * TODO: introducing BackupAskFilter to shorten the waiting period for secondary requests
    */
   private[memcached] def getResult(keys: Iterable[String], useRandomOrder: Boolean): Future[GetResult] = {
     val clientsInOrder = if (useRandomOrder) Random.shuffle(clients) else clients

@@ -1,7 +1,7 @@
 package com.twitter.finagle.httpx.filter
 
-import com.twitter.finagle.httpx.{Request, Response, Status}
-import com.twitter.finagle.{CancelledRequestException, Service}
+import com.twitter.finagle.httpx.{Ask, Response, Status}
+import com.twitter.finagle.{CancelledAskException, Service}
 import com.twitter.util.{Await, Future}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -10,8 +10,8 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class ExceptionFilterTest extends FunSuite {
 
-  val service = new Service[Request, Response] {
-    def apply(request: Request): Future[Response] = {
+  val service = new Service[Ask, Response] {
+    def apply(request: Ask): Future[Response] = {
       request.response.write("hello")
       request.response.contentLength = 5
       if (request.params.get("exception").isDefined)
@@ -19,14 +19,14 @@ class ExceptionFilterTest extends FunSuite {
       else if (request.params.get("throw").isDefined)
         Future.exception(new Exception)
       else if (request.params.get("cancel").isDefined)
-        Future.exception(new CancelledRequestException)
+        Future.exception(new CancelledAskException)
       else
         Future.value(request.response)
     }
   }
 
   test("ignore success") {
-    val request = Request()
+    val request = Ask()
     val filter = (new ExceptionFilter) andThen service
 
     val response = Await.result(filter(request))
@@ -36,7 +36,7 @@ class ExceptionFilterTest extends FunSuite {
   }
 
   test("handle exception") {
-    val request = Request("exception" -> "true")
+    val request = Ask("exception" -> "true")
     val filter = (new ExceptionFilter) andThen service
 
     val response = Await.result(filter(request))
@@ -46,7 +46,7 @@ class ExceptionFilterTest extends FunSuite {
   }
 
   test("handle throw") {
-    val request = Request("throw" -> "true")
+    val request = Ask("throw" -> "true")
     val filter = (new ExceptionFilter) andThen service
 
     val response = Await.result(filter(request))
@@ -56,7 +56,7 @@ class ExceptionFilterTest extends FunSuite {
   }
 
   test("handle cancel") {
-    val request = Request("cancel" -> "true")
+    val request = Ask("cancel" -> "true")
     val filter = (new ExceptionFilter) andThen service
 
     val response = Await.result(filter(request))

@@ -14,7 +14,7 @@ import org.scalatest.mock.MockitoSugar
 class DelayedReleaseServiceTest extends FunSuite with MockitoSugar {
 
   test("close closes underlying") {
-    val service = mock[Service[Request, Response]]
+    val service = mock[Service[Ask, Response]]
     val proxy = new DelayedReleaseService(service)
     stub(service.close()).toReturn(Future.Done)
 
@@ -23,12 +23,12 @@ class DelayedReleaseServiceTest extends FunSuite with MockitoSugar {
   }
 
   test("close waits for response completion") {
-    val request = Request()
+    val request = Ask()
     request.response.setChunked(true)
 
-    val service = mock[Service[Request,Response]]
+    val service = mock[Service[Ask,Response]]
     stub(service.close()).toReturn(Future.Done)
-    stub(service.apply(any[Request])).toReturn(Future.value(request.response))
+    stub(service.apply(any[Ask])).toReturn(Future.value(request.response))
 
     val proxy = new DelayedReleaseService(service)
 
@@ -42,12 +42,12 @@ class DelayedReleaseServiceTest extends FunSuite with MockitoSugar {
   }
 
   test("inner service failure") {
-    val service = mock[Service[Request, Response]]
+    val service = mock[Service[Ask, Response]]
     val proxy = new DelayedReleaseService(service)
     stub(service.close()).toReturn(Future.Done)
-    stub(service.apply(any[Request])).toReturn(Future.exception(new Exception))
+    stub(service.apply(any[Ask])).toReturn(Future.exception(new Exception))
 
-    val request = Request()
+    val request = Ask()
     request.response.setChunked(true)
     proxy(request)
     proxy.close()

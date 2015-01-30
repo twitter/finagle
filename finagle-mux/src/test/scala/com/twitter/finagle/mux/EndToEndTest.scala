@@ -39,7 +39,7 @@ class EndToEndTest extends FunSuite
       handled = true
     }
 
-    val svc = Service.mk[Request, Response](_ => p)
+    val svc = Service.mk[Ask, Response](_ => p)
 
     val q0, q1 = new AsyncQueue[ChannelBuffer]
     val clientTrans = new QueueTransport[ChannelBuffer, ChannelBuffer](q0, q1)
@@ -48,7 +48,7 @@ class EndToEndTest extends FunSuite
     val server = new ServerDispatcher(serverTrans, svc, true, Lessor.nil, NullTracer)
     val client = new ClientDispatcher("test", clientTrans, NullStatsReceiver)
 
-    val f = client(Request(Path.empty, Buf.Empty))
+    val f = client(Ask(Path.empty, Buf.Empty))
     assert(!f.isDefined)
     assert(!p.isDefined)
     f.raise(new Exception())
@@ -56,7 +56,7 @@ class EndToEndTest extends FunSuite
   }
 
   test("Dtab propagation") {
-    val server = Mux.serve("localhost:*", Service.mk[Request, Response] { _ =>
+    val server = Mux.serve("localhost:*", Service.mk[Ask, Response] { _ =>
       val stringer = new StringWriter
       val printer = new PrintWriter(stringer)
       Dtab.local.print(printer)
@@ -68,7 +68,7 @@ class EndToEndTest extends FunSuite
     Dtab.unwind {
       Dtab.local ++= Dtab.read("/foo=>/bar; /web=>/$/inet/twitter.com/80")
       for (n <- 0 until 2) {
-        val rsp = Await.result(client(Request(Path.empty, Buf.Empty)), 30.seconds)
+        val rsp = Await.result(client(Ask(Path.empty, Buf.Empty)), 30.seconds)
         val Buf.Utf8(str) = rsp.body
         assert(str === "Dtab(2)\n\t/foo => /bar\n\t/web => /$/inet/twitter.com/80\n")
       }
@@ -76,7 +76,7 @@ class EndToEndTest extends FunSuite
   }
 
   test("(no) Dtab propagation") {
-    val server = Mux.serve("localhost:*", Service.mk[Request, Response] { _ =>
+    val server = Mux.serve("localhost:*", Service.mk[Ask, Response] { _ =>
       val buf = ChannelBuffers.buffer(4)
       buf.writeInt(Dtab.local.size)
       Future.value(Response(ChannelBufferBuf.Owned(buf)))
@@ -84,7 +84,7 @@ class EndToEndTest extends FunSuite
 
     val client = Mux.newService(server)
 
-    val payload = Await.result(client(Request.empty), 30.seconds).body
+    val payload = Await.result(client(Ask.empty), 30.seconds).body
     val cb = BufChannelBuffer(payload)
     assert(cb.readableBytes() === 4)
     assert(cb.readInt() === 0)
@@ -98,13 +98,13 @@ class EndToEndTest extends FunSuite
     val tracer = new BufferingTracer
 
     var count: Int = 0
-    var client: Service[Request, Response] = null
+    var client: Service[Ask, Response] = null
 
     val server = Mux.server
       .configured(param.Tracer(tracer))
       .configured(param.Label("theServer"))
-      .serve("localhost:*", new Service[Request, Response] {
-        def apply(req: Request) = {
+      .serve("localhost:*", new Service[Ask, Response] {
+        def apply(req: Ask) = {
           count += 1
           if (count >= 1) Future.value(Response(req.body))
           else client(req)
@@ -116,7 +116,7 @@ class EndToEndTest extends FunSuite
       .configured(param.Label("theClient"))
       .newService(server)
 
-    Await.result(client(Request.empty), 30.seconds)
+    Await.result(client(Ask.empty), 30.seconds)
 
     assertAnnotationsInOrder(tracer.toSeq, Seq(
       Annotation.ServiceName("theClient"),
@@ -149,8 +149,8 @@ class EndToEndTest extends FunSuite
 
       val server = Mux.server
         .configured(Lessor.Param(lessor))
-        .serve("localhost:*", new Service[mux.Request, mux.Response] {
-          def apply(req: Request) = ???
+        .serve("localhost:*", new Service[mux.Ask, mux.Response] {
+          def apply(req: Ask) = ???
         }
       )
 

@@ -1,7 +1,7 @@
 package com.twitter.finagle.httpx.codec
 
 import com.twitter.finagle.{Failure, Dentry, Dtab, NameTree, Path}
-import com.twitter.finagle.httpx.{Message, Method, Request, Version}
+import com.twitter.finagle.httpx.{Message, Method, Ask, Version}
 import com.twitter.util.Try
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -19,7 +19,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
   val okDtabs =
     Dtab.empty +: (okDentries.permutations map(ds => Dtab(ds))).toIndexedSeq
 
-  def newMsg(): Message = Request(Method.Get, "/", Version.Http11)
+  def newMsg(): Message = Ask(Method.Get, "/", Version.Http11)
 
   test("write(dtab, msg); read(msg) == dtab") {
     for (dtab <- okDtabs) {

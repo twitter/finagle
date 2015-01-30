@@ -1,7 +1,7 @@
 package com.twitter.finagle.httpx.filter
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.httpx.{Method, Request, Response, Status}
+import com.twitter.finagle.httpx.{Method, Ask, Response, Status}
 import com.twitter.util.{Await, Future}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -11,8 +11,8 @@ import org.scalatest.junit.JUnitRunner
 class HeadFilterTest extends FunSuite {
   val Body = "hello world"
 
-  val dummyService = new Service[Request, Response] {
-   def apply(request: Request) = {
+  val dummyService = new Service[Ask, Response] {
+   def apply(request: Ask) = {
      assert(request.method === Method.Get)
 
      val response = request.response
@@ -23,7 +23,7 @@ class HeadFilterTest extends FunSuite {
   }
 
   test("convert GET to HEAD") {
-    val request = Request("/test.json")
+    val request = Ask("/test.json")
     request.method = Method.Head
 
     val response = Await.result(HeadFilter(request, dummyService))
@@ -33,7 +33,7 @@ class HeadFilterTest extends FunSuite {
   }
 
   test("GET is normal") {
-    val request = Request("/test.json")
+    val request = Ask("/test.json")
 
     val response = Await.result(HeadFilter(request, dummyService))
     request.method === Method.Get // unchanged

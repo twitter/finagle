@@ -8,15 +8,15 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.ServerBuilder;
 import com.twitter.finagle.httpx.Http;
-import com.twitter.finagle.httpx.Request;
+import com.twitter.finagle.httpx.Ask;
 import com.twitter.finagle.httpx.Response;
 import com.twitter.util.Future;
 
 public class HttpServerTest {
   private static void runServer() {
-    Service<Request, Response> service =
-      new Service<Request, Response>() {
-        public Future<Response> apply(Request request) {
+    Service<Ask, Response> service =
+      new Service<Ask, Response>() {
+        public Future<Response> apply(Ask request) {
           Response response = Response.apply();
           // Respond right away.
           response.setContent(ChannelBuffers.wrappedBuffer("yo".getBytes()));

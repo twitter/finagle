@@ -1,7 +1,7 @@
 package com.twitter.finagle.exp.mysql.transport
 
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.exp.mysql.{Request, Result}
+import com.twitter.finagle.exp.mysql.{Ask, Result}
 import com.twitter.finagle.netty3.{ChannelSnooper, Netty3Transporter}
 import com.twitter.finagle.Stack
 import com.twitter.util.NonFatal

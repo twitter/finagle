@@ -1,7 +1,7 @@
 package com.twitter.finagle.memcachedx.unit
 
 import com.twitter.concurrent.Broker
-import com.twitter.finagle.{CancelledRequestException, Group, MutableGroup, Service, ShardNotAvailableException}
+import com.twitter.finagle.{CancelledAskException, Group, MutableGroup, Service, ShardNotAvailableException}
 import com.twitter.finagle.memcachedx._
 import com.twitter.finagle.memcachedx.protocol._
 import com.twitter.hashing.KeyHasher
@@ -86,7 +86,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
     // simulate a cancelled request
     val r = ketamaClient.getResult(Seq("key"))
     assert(r.poll === None)
-    r.raise(new CancelledRequestException())
+    r.raise(new CancelledAskException())
     try {
       Await.result(r)
       assert(false)

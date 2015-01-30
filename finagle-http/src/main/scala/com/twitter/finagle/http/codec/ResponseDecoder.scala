@@ -20,7 +20,7 @@ class ResponseDecoder extends SimpleChannelHandler {
         Channels.fireMessageReceived(ctx, Response(httpResponse))
 
       case unknown =>
-        log.warning("ClientRequestDecoder: illegal message type: %s", unknown.getClass())
+        log.warning("ClientAskDecoder: illegal message type: %s", unknown.getClass())
         Channels.disconnect(ctx.getChannel)
     }
   }

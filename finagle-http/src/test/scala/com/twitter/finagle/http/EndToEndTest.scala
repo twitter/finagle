@@ -5,13 +5,13 @@ import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.{
-  CancelledRequestException, ChannelClosedException, Dtab, Service, ServiceProxy}
+  CancelledAskException, ChannelClosedException, Dtab, Service, ServiceProxy}
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.{Await, Closable, Future, Promise, Time, JavaTimer}
 import java.io.{StringWriter, PrintWriter}
 import java.net.{InetAddress, InetSocketAddress}
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{HttpRequest=>HttpAsk, _}
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.Eventually
 import org.scalatest.junit.JUnitRunner
@@ -29,8 +29,8 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
     Dtab.base = saveBase
   }
 
-  type HttpService = Service[HttpRequest, HttpResponse]
-  type RichHttpService = Service[Request, Response]
+  type HttpService = Service[HttpAsk, HttpResponse]
+  type RichHttpService = Service[Ask, Response]
 
   def drip(w: Writer): Future[Unit] = w.write(buf("*")) before drip(w)
   def buf(msg: String): Buf =
@@ -56,22 +56,22 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
   def go(name: String)(connect: HttpService => HttpService) {
     test(name + ": echo") {
       val service = new HttpService {
-        def apply(request: HttpRequest) = {
+        def apply(request: HttpAsk) = {
           val response = Response(request)
-          response.contentString = Request(request).uri
+          response.contentString = Ask(request).uri
           Future.value(response)
         }
       }
 
       val client = connect(service)
-      val response = client(Request("123"))
+      val response = client(Ask("123"))
       assert(Response(Await.result(response)).contentString === "123")
       client.close()
     }
 
     test(name + ": dtab") {
       val service = new HttpService {
-        def apply(request: HttpRequest) = {
+        def apply(request: HttpAsk) = {
           val stringer = new StringWriter
           val printer = new PrintWriter(stringer)
           Dtab.local.print(printer)
@@ -86,7 +86,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
       Dtab.unwind {
         Dtab.local ++= Dtab.read("/a=>/b; /c=>/d")
 
-        val res = Response(Await.result(client(Request("/"))))
+        val res = Response(Await.result(client(Ask("/"))))
         assert(res.contentString === "Dtab(2)\n\t/a => /b\n\t/c => /d\n")
       }
 
@@ -95,7 +95,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
 
     test(name + ": (no) dtab") {
       val service = new HttpService {
-        def apply(request: HttpRequest) = {
+        def apply(request: HttpAsk) = {
           val stringer = new StringWriter
           val printer = new PrintWriter(stringer)
 
@@ -107,7 +107,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
 
       val client = connect(service)
 
-      val res = Response(Await.result(client(Request("/"))))
+      val res = Response(Await.result(client(Ask("/"))))
       assert(res.contentString === "0")
 
       client.close()
@@ -115,7 +115,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
 
     test(name + ": stream") {
       def service(r: Reader) = new HttpService {
-        def apply(request: HttpRequest) = {
+        def apply(request: HttpAsk) = {
           val response = Response()
           response.setChunked(true)
           response.writer.write(buf("hello")) before
@@ -127,7 +127,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
 
       val writer = Reader.writable()
       val client = connect(service(writer))
-      val response = Response(Await.result(client(Request())))
+      val response = Response(Await.result(client(Ask())))
       assert(response.contentString === "helloworld")
       client.close()
     }
@@ -137,13 +137,13 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
       val timer = new JavaTimer
       val promise = new Promise[Response]
       val service = new HttpService {
-        def apply(request: HttpRequest) = promise
+        def apply(request: HttpAsk) = promise
       }
       val client = connect(service)
-      client(Request())
+      client(Ask())
       Await.ready(timer.doLater(20.milliseconds) {
         Await.ready(client.close())
-        intercept[CancelledRequestException] {
+        intercept[CancelledAskException] {
           promise.isInterrupted match {
             case Some(intr) => throw intr
             case _ =>
@@ -155,25 +155,25 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
     test(name + ": request uri too long") {
       val ok = Response()
       val service = new HttpService {
-        def apply(request: HttpRequest) = Future.value(ok)
+        def apply(request: HttpAsk) = Future.value(ok)
       }
       val client = connect(service)
-      val request = Request("/" + "a" * 4096)
+      val request = Ask("/" + "a" * 4096)
       val response = Await.result(client(request))
       assert(response.getStatus === HttpResponseStatus.REQUEST_URI_TOO_LONG)
 
       // Subsequent valid requests should succeed.
-      assert(Await.result(client(Request())).getStatus === ok.status)
+      assert(Await.result(client(Ask())).getStatus === ok.status)
 
       client.close()
     }
 
     test(name + ": request header fields too large") {
       val service = new HttpService {
-        def apply(request: HttpRequest) = Future.value(Response())
+        def apply(request: HttpAsk) = Future.value(Response())
       }
       val client = connect(service)
-      val request = Request()
+      val request = Ask()
       request.headers().add("header", "a" * 8192)
       val response = Await.result(client(request))
       assert(response.getStatus === HttpResponseStatus.REQUEST_HEADER_FIELDS_TOO_LARGE)
@@ -183,7 +183,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
 
   def rich(name: String)(connect: RichHttpService => RichHttpService) {
     def service(r: Reader) = new RichHttpService {
-      def apply(request: Request) = {
+      def apply(request: Ask) = {
         val response = new Response {
           final val httpResponse = request.response.httpResponse
           override def reader = r
@@ -194,7 +194,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
     }
 
     test(name + ": symmetric reader and getContent") {
-      val s = Service.mk[Request, Response] { req =>
+      val s = Service.mk[Ask, Response] { req =>
         val buf = Await.result(Reader.readAll(req.reader))
         assert(buf === Buf.Utf8("hello"))
         assert(req.contentString === "hello")
@@ -202,7 +202,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
         req.response.setContent(req.getContent)
         Future.value(req.response)
       }
-      val req = Request()
+      val req = Ask()
       req.contentString = "hello"
       req.headers.set("Content-Length", 5)
       val client = connect(s)
@@ -216,7 +216,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
     test(name + ": stream") {
       val writer = Reader.writable()
       val client = connect(service(writer))
-      val reader = Await.result(client(Request())).reader
+      val reader = Await.result(client(Ask())).reader
       Await.result(writer.write(buf("hello")))
       assert(Await.result(readNBytes(5, reader)) === Buf.Utf8("hello"))
       Await.result(writer.write(buf("world")))
@@ -226,12 +226,12 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
 
     test(name + ": transport closure propagates to request stream reader") {
       val p = new Promise[Buf]
-      val s = Service.mk[Request, Response] { req =>
+      val s = Service.mk[Ask, Response] { req =>
         p.become(Reader.readAll(req.reader))
         Future.value(Response())
       }
       val client = connect(s)
-      val req = Request()
+      val req = Ask()
       req.setChunked(true)
       Await.result(client(req))
       client.close()
@@ -239,9 +239,9 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
     }
 
     test(name + ": transport closure propagates to request stream producer") {
-      val s = Service.mk[Request, Response] { _ => Future.value(Response()) }
+      val s = Service.mk[Ask, Response] { _ => Future.value(Response()) }
       val client = connect(s)
-      val req = Request()
+      val req = Ask()
       req.setChunked(true)
       client(req)
       intercept[Reader.ReaderDiscarded] {
@@ -252,7 +252,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
     }
 
     test(name + ": request discard terminates remote stream producer") {
-      val s = Service.mk[Request, Response] { req =>
+      val s = Service.mk[Ask, Response] { req =>
         val res = Response()
         res.setChunked(true)
         def go = for {
@@ -267,7 +267,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
       }
 
       val client = connect(s)
-      val req = Request()
+      val req = Ask()
       req.setChunked(true)
       val resf = client(req)
 
@@ -281,10 +281,10 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
     }
 
     test(name + ": client discard terminates stream and frees up the connection") {
-      val s = new Service[Request, Response] {
+      val s = new Service[Ask, Response] {
         var rep: Response = null
 
-        def apply(req: Request) = {
+        def apply(req: Ask) = {
           rep = Response()
           rep.setChunked(true)
 
@@ -297,38 +297,38 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
       }
 
       val client = connect(s)
-      val rep = Await.result(client(Request()), 10.seconds)
+      val rep = Await.result(client(Ask()), 10.seconds)
       assert(s.rep != null)
       rep.reader.discard()
 
       s.rep = null
 
       // Now, make sure the connection doesn't clog up.
-      Await.result(client(Request()), 10.seconds)
+      Await.result(client(Ask()), 10.seconds)
       assert(s.rep != null)
     }
 
     test(name + ": two fixed-length requests") {
-      val svc = Service.mk[Request, Response] { _ => Future.value(Response()) }
+      val svc = Service.mk[Ask, Response] { _ => Future.value(Response()) }
       val client = connect(svc)
-      Await.result(client(Request()))
-      Await.result(client(Request()))
+      Await.result(client(Ask()))
+      Await.result(client(Ask()))
       client.close()
     }
 
     test(name + ": request uri too long") {
-      val svc = Service.mk[Request, Response] { _ => Future.value(Response()) }
+      val svc = Service.mk[Ask, Response] { _ => Future.value(Response()) }
       val client = connect(svc)
-      val request = Request("/" + "a" * 4096)
+      val request = Ask("/" + "a" * 4096)
       val response = Await.result(client(request))
       assert(response.getStatus === HttpResponseStatus.REQUEST_URI_TOO_LONG)
       client.close()
     }
 
     test(name + ": request header fields too large") {
-      val svc = Service.mk[Request, Response] { _ => Future.value(Response()) }
+      val svc = Service.mk[Ask, Response] { _ => Future.value(Response()) }
       val client = connect(svc)
-      val request = Request()
+      val request = Ask()
       request.headers.add("header", "a" * 8192)
       val response = Await.result(client(request))
       assert(response.getStatus === HttpResponseStatus.REQUEST_HEADER_FIELDS_TOO_LARGE)
@@ -341,7 +341,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
       var (outerTrace, outerSpan) = ("", "")
 
       val inner = connect(new HttpService {
-        def apply(request: HttpRequest) = {
+        def apply(request: HttpAsk) = {
           val response = Response(request)
           response.contentString = Seq(
             Trace.id.traceId.toString,
@@ -353,14 +353,14 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
       })
 
       val outer = connect(new HttpService {
-        def apply(request: HttpRequest) = {
+        def apply(request: HttpAsk) = {
           outerTrace = Trace.id.traceId.toString
           outerSpan = Trace.id.spanId.toString
           inner(request)
         }
       })
 
-      val response = Response(Await.result(outer(Request())))
+      val response = Response(Await.result(outer(Ask())))
       val Seq(innerTrace, innerSpan, innerParent) =
         response.contentString.split('.').toSeq
       assert(innerTrace === outerTrace, "traceId")
@@ -442,13 +442,13 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
   rich("ClientBuilder (RichHttp)") {
     service =>
       val server = ServerBuilder()
-        .codec(RichHttp[Request](Http(), aggregateChunks = false))
+        .codec(RichHttp[Ask](Http(), aggregateChunks = false))
         .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .name("server")
         .build(service)
 
       val client = ClientBuilder()
-        .codec(RichHttp[Request](Http(), aggregateChunks = false))
+        .codec(RichHttp[Ask](Http(), aggregateChunks = false))
         .hosts(Seq(server.localAddress))
         .hostConnectionLimit(1)
         .name("client")

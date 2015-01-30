@@ -36,7 +36,7 @@ private[finagle] class TTwitterServerFilter(
       service: Service[Array[Byte], Array[Byte]]): Future[Array[Byte]] = {
     // What to do on exceptions here?
     if (isUpgraded) {
-      val header = new thrift.RequestHeader
+      val header = new thrift.AskHeader
       val request_ = InputBuffer.peelMessage(request, header, protocolFactory)
 
       // Set the TraceId. This will be overwritten by TraceContext, if it is
@@ -123,7 +123,7 @@ private[finagle] class TTwitterServerFilter(
     }
   }
 
-  private[this] def extractClientId(header: thrift.RequestHeader) = {
+  private[this] def extractClientId(header: thrift.AskHeader) = {
     Option(header.client_id) map { clientId => ClientId(clientId.name) }
   }
 }

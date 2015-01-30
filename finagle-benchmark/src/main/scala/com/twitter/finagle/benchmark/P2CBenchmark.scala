@@ -151,7 +151,7 @@ private[finagle] object P2CBenchmark extends com.twitter.app.App {
 
       if (ms%1000==0) {
         println("-"*100)
-        println("Requests at %s".format(stopWatch()))
+        println("Asks at %s".format(stopWatch()))
 
         val lines = for ((name, fn) <- stats.gauges.toSeq) yield (name.mkString("/"), fn())
         for ((name, value) <- lines.sortBy(_._1))

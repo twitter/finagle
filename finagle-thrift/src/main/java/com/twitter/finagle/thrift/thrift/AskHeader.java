@@ -29,11 +29,11 @@ import org.apache.thrift.protocol.*;
 // No additional import required for struct/union.
 
 /**
- * RequestHeader defines headers for the request. These carry the span data, and
+ * AskHeader defines headers for the request. These carry the span data, and
  * a flag indicating whether the request is to be debugged.
  */
-public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields>, java.io.Serializable, Cloneable {
-  private static final TStruct STRUCT_DESC = new TStruct("RequestHeader");
+public class AskHeader implements TBase<AskHeader, AskHeader._Fields>, java.io.Serializable, Cloneable {
+  private static final TStruct STRUCT_DESC = new TStruct("AskHeader");
 
   private static final TField TRACE_ID_FIELD_DESC = new TField("trace_id", TType.I64, (short)1);
   private static final TField SPAN_ID_FIELD_DESC = new TField("span_id", TType.I64, (short)2);
@@ -51,7 +51,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
   public boolean sampled;
   public ClientId client_id;
   public long flags;
-  public List<RequestContext> contexts;
+  public List<AskContext> contexts;
   public String dest;
   public List<Delegation> delegations;
 
@@ -162,23 +162,23 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
         new FieldValueMetaData(TType.I64)));
     tmpMap.put(_Fields.CONTEXTS, new FieldMetaData("contexts", TFieldRequirementType.DEFAULT,
         new ListMetaData(TType.LIST,
-            new StructMetaData(TType.STRUCT, RequestContext.class))));
+            new StructMetaData(TType.STRUCT, AskContext.class))));
     tmpMap.put(_Fields.DEST, new FieldMetaData("dest", TFieldRequirementType.OPTIONAL,
         new FieldValueMetaData(TType.STRING)));
     tmpMap.put(_Fields.DELEGATIONS, new FieldMetaData("delegations", TFieldRequirementType.OPTIONAL,
         new ListMetaData(TType.LIST,
             new StructMetaData(TType.STRUCT, Delegation.class))));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
-    FieldMetaData.addStructMetaDataMap(RequestHeader.class, metaDataMap);
+    FieldMetaData.addStructMetaDataMap(AskHeader.class, metaDataMap);
   }
 
-  public RequestHeader() {
+  public AskHeader() {
   }
 
-  public RequestHeader(
+  public AskHeader(
     long trace_id,
     long span_id,
-    List<RequestContext> contexts)
+    List<AskContext> contexts)
   {
     this();
     this.trace_id = trace_id;
@@ -191,7 +191,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public RequestHeader(RequestHeader other) {
+  public AskHeader(AskHeader other) {
     __isset_bit_vector.clear();
     __isset_bit_vector.or(other.__isset_bit_vector);
     this.trace_id = other.trace_id;
@@ -203,9 +203,9 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     }
     this.flags = other.flags;
     if (other.isSetContexts()) {
-      List<RequestContext> __this__contexts = new ArrayList<RequestContext>();
-      for (RequestContext other_element : other.contexts) {
-        __this__contexts.add(new RequestContext(other_element));
+      List<AskContext> __this__contexts = new ArrayList<AskContext>();
+      for (AskContext other_element : other.contexts) {
+        __this__contexts.add(new AskContext(other_element));
       }
       this.contexts = __this__contexts;
     }
@@ -221,8 +221,8 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     }
   }
 
-  public RequestHeader deepCopy() {
-    return new RequestHeader(this);
+  public AskHeader deepCopy() {
+    return new AskHeader(this);
   }
 
   @Override
@@ -247,7 +247,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     return this.trace_id;
   }
 
-  public RequestHeader setTrace_id(long trace_id) {
+  public AskHeader setTrace_id(long trace_id) {
     this.trace_id = trace_id;
     setTrace_idIsSet(true);
     return this;
@@ -270,7 +270,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     return this.span_id;
   }
 
-  public RequestHeader setSpan_id(long span_id) {
+  public AskHeader setSpan_id(long span_id) {
     this.span_id = span_id;
     setSpan_idIsSet(true);
     return this;
@@ -293,7 +293,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     return this.parent_span_id;
   }
 
-  public RequestHeader setParent_span_id(long parent_span_id) {
+  public AskHeader setParent_span_id(long parent_span_id) {
     this.parent_span_id = parent_span_id;
     setParent_span_idIsSet(true);
     return this;
@@ -316,7 +316,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     return this.sampled;
   }
 
-  public RequestHeader setSampled(boolean sampled) {
+  public AskHeader setSampled(boolean sampled) {
     this.sampled = sampled;
     setSampledIsSet(true);
     return this;
@@ -339,7 +339,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     return this.client_id;
   }
 
-  public RequestHeader setClient_id(ClientId client_id) {
+  public AskHeader setClient_id(ClientId client_id) {
     this.client_id = client_id;
     return this;
   }
@@ -363,7 +363,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     return this.flags;
   }
 
-  public RequestHeader setFlags(long flags) {
+  public AskHeader setFlags(long flags) {
     this.flags = flags;
     setFlagsIsSet(true);
     return this;
@@ -386,22 +386,22 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     return (this.contexts == null) ? 0 : this.contexts.size();
   }
 
-  public java.util.Iterator<RequestContext> getContextsIterator() {
+  public java.util.Iterator<AskContext> getContextsIterator() {
     return (this.contexts == null) ? null : this.contexts.iterator();
   }
 
-  public void addToContexts(RequestContext elem) {
+  public void addToContexts(AskContext elem) {
     if (this.contexts == null) {
-      this.contexts = new ArrayList<RequestContext>();
+      this.contexts = new ArrayList<AskContext>();
     }
     this.contexts.add(elem);
   }
 
-  public List<RequestContext> getContexts() {
+  public List<AskContext> getContexts() {
     return this.contexts;
   }
 
-  public RequestHeader setContexts(List<RequestContext> contexts) {
+  public AskHeader setContexts(List<AskContext> contexts) {
     this.contexts = contexts;
     return this;
   }
@@ -425,7 +425,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     return this.dest;
   }
 
-  public RequestHeader setDest(String dest) {
+  public AskHeader setDest(String dest) {
     this.dest = dest;
     return this;
   }
@@ -464,7 +464,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     return this.delegations;
   }
 
-  public RequestHeader setDelegations(List<Delegation> delegations) {
+  public AskHeader setDelegations(List<Delegation> delegations) {
     this.delegations = delegations;
     return this;
   }
@@ -538,7 +538,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       if (value == null) {
         unsetContexts();
       } else {
-        setContexts((List<RequestContext>)value);
+        setContexts((List<AskContext>)value);
       }
       break;
 
@@ -627,12 +627,12 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
   public boolean equals(Object that) {
     if (that == null)
       return false;
-    if (that instanceof RequestHeader)
-      return this.equals((RequestHeader)that);
+    if (that instanceof AskHeader)
+      return this.equals((AskHeader)that);
     return false;
   }
 
-  public boolean equals(RequestHeader that) {
+  public boolean equals(AskHeader that) {
     if (that == null)
       return false;
 
@@ -725,13 +725,13 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     return 0;
   }
 
-  public int compareTo(RequestHeader other) {
+  public int compareTo(AskHeader other) {
     if (!getClass().equals(other.getClass())) {
       return getClass().getName().compareTo(other.getClass().getName());
     }
 
     int lastComparison = 0;
-    RequestHeader typedOther = (RequestHeader)other;
+    AskHeader typedOther = (AskHeader)other;
 
     lastComparison = Boolean.valueOf(isSetTrace_id()).compareTo(typedOther.isSetTrace_id());
     if (lastComparison != 0) {
@@ -892,11 +892,11 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
           if (field.type == TType.LIST) {
             {
               TList _list8 = iprot.readListBegin();
-              this.contexts = new ArrayList<RequestContext>(_list8.size);
+              this.contexts = new ArrayList<AskContext>(_list8.size);
               for (int _i9 = 0; _i9 < _list8.size; ++_i9)
               {
-                RequestContext _elem10;
-                _elem10 = new RequestContext();
+                AskContext _elem10;
+                _elem10 = new AskContext();
                 _elem10.read(iprot);
                 this.contexts.add(_elem10);
               }
@@ -978,7 +978,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       oprot.writeFieldBegin(CONTEXTS_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.STRUCT, this.contexts.size()));
-        for (RequestContext _iter14 : this.contexts)
+        for (AskContext _iter14 : this.contexts)
         {
           _iter14.write(oprot);
         }
@@ -1013,7 +1013,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("RequestHeader(");
+    StringBuilder sb = new StringBuilder("AskHeader(");
     boolean first = true;
 
     sb.append("trace_id:");

@@ -1,6 +1,6 @@
 package com.twitter.finagle.thrift
 
-import com.twitter.finagle.{RequestException, SimpleFilter, Service}
+import com.twitter.finagle.{AskException, SimpleFilter, Service}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.util.Future
 
@@ -9,7 +9,7 @@ import com.twitter.util.Future
  * was issued to a server that requires them. See
  * [[com.twitter.finagle.thrift.ClientIdRequiredFilter]] for details.
  */
-class NoClientIdSpecifiedException extends RequestException
+class NoClientIdSpecifiedException extends AskException
 
 /**
  * A [[com.twitter.finagle.Filter]] for Thrift services that enforces all

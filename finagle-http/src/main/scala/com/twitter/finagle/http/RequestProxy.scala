@@ -1,14 +1,14 @@
 package com.twitter.finagle.http
 
 /**
- * Proxy for Request.  This can be used to create a richer request class
- * that wraps Request.
+ * Proxy for Ask.  This can be used to create a richer request class
+ * that wraps Ask.
  */
-abstract class RequestProxy extends Request {
-  def request: Request
-  def getRequest(): Request = request
+abstract class AskProxy extends Ask {
+  def request: Ask
+  def getAsk(): Ask = request
 
-  override def httpRequest = request
+  override def httpAsk = request
   override def httpMessage = request
 
   override def params = request.params

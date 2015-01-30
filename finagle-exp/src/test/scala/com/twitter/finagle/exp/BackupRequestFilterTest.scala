@@ -3,7 +3,7 @@ package com.twitter.finagle.exp
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{Service, MockTimer, BackupRequestLost}
+import com.twitter.finagle.{Service, MockTimer, BackupAskLost}
 import com.twitter.util.{Future, Promise, Time, Return, TimeControl, Duration}
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
@@ -14,7 +14,7 @@ import org.scalatest.mock.MockitoSugar
 import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
-class BackupRequestFilterTest extends FunSuite with MockitoSugar {
+class BackupAskFilterTest extends FunSuite with MockitoSugar {
   def quantile(ds: Seq[Duration], which: Int) = {
     val sorted = ds.sorted
     sorted(which*sorted.size/100)
@@ -26,7 +26,7 @@ class BackupRequestFilterTest extends FunSuite with MockitoSugar {
     val statsReceiver = new InMemoryStatsReceiver
     val underlying = mock[Service[String, String]]
     when(underlying.close(anyObject())) thenReturn Future.Done
-    val filter = new BackupRequestFilter[String, String](
+    val filter = new BackupAskFilter[String, String](
       95, range, timer, statsReceiver, Duration.Top)
     val service = filter andThen underlying
     val cutoffGauge = statsReceiver.gauges(Seq("cutoff_ms"))
@@ -98,7 +98,7 @@ class BackupRequestFilterTest extends FunSuite with MockitoSugar {
       p1.setValue("backup")
       assert(f.poll === Some(Return("backup")))
       assert(p1.isInterrupted === None)
-      assert(p.isInterrupted === Some(BackupRequestLost))
+      assert(p.isInterrupted === Some(BackupAskLost))
       assert(statsReceiver.counters(Seq("lost")) === 1)
     }
   }

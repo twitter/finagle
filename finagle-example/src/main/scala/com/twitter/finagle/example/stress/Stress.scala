@@ -20,17 +20,17 @@ object Stress {
   def main(args: Array[String]) {
     val uri           = new URI(args(0))
     val concurrency   = args(1).toInt
-    val totalRequests = args(2).toInt
+    val totalAsks = args(2).toInt
 
     val errors    = new AtomicInteger(0)
     val responses = AtomicLongMap.create[HttpResponseStatus]()
 
-    val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri.getPath)
+    val request = new DefaultHttpAsk(HttpVersion.HTTP_1_1, HttpMethod.GET, uri.getPath)
     HttpHeaders.setHost(request, uri.getHost)
 
     val statsReceiver = new SummarizingStatsReceiver
 
-    val client: Service[HttpRequest, HttpResponse] = ClientBuilder()
+    val client: Service[HttpAsk, HttpResponse] = ClientBuilder()
       .codec(Http())
       .hosts(new InetSocketAddress(uri.getHost, uri.getPort))
       .hostConnectionCoresize(concurrency)
@@ -39,16 +39,16 @@ object Stress {
       .hostConnectionLimit(concurrency)
       .build()
 
-    val completedRequests = new AtomicInteger(0)
+    val completedAsks = new AtomicInteger(0)
 
     val requests = Future.parallel(concurrency) {
-      Future.times(totalRequests / concurrency) {
+      Future.times(totalAsks / concurrency) {
         client(request) onSuccess { response =>
           responses.incrementAndGet(response.getStatus)
         } handle { case e =>
           errors.incrementAndGet()
         } ensure {
-          completedRequests.incrementAndGet()
+          completedAsks.incrementAndGet()
         }
       }
     }
@@ -64,8 +64,8 @@ object Stress {
         println("%20s\t%d".format(status, count))
       println("================")
       println("%d requests completed in %dms (%f requests per second)".format(
-        completedRequests.get, duration.inMilliseconds,
-        totalRequests.toFloat / duration.inMillis.toFloat * 1000))
+        completedAsks.get, duration.inMilliseconds,
+        totalAsks.toFloat / duration.inMillis.toFloat * 1000))
       println("%d errors".format(errors.get))
 
       println("stats")

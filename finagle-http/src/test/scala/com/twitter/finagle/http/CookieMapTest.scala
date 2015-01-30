@@ -8,12 +8,12 @@ import org.scalatest.junit.JUnitRunner
 class CookieMapTest extends FunSuite {
 
   test("no cookies") {
-    val request = Request()
+    val request = Ask()
     request.cookies.isEmpty === true
   }
 
   test("request cookie basics") {
-    val request = Request()
+    val request = Ask()
     request.headers.set("Cookie", "name=value; name2=value2")
     assert(request.cookies("name").value === "value")
     assert(request.cookies("name2").value === "value2")
@@ -41,7 +41,7 @@ class CookieMapTest extends FunSuite {
   }
 
   test("cookie with attributes") {
-    val request = Request()
+    val request = Ask()
     request.headers.set("Cookie", "name=value; Max-Age=23; Domain=.example.com; Path=/")
     val cookie = request.cookies("name")
 
@@ -52,7 +52,7 @@ class CookieMapTest extends FunSuite {
   }
 
   test("add cookie") {
-    val request = Request()
+    val request = Ask()
     val cookie = new Cookie("name", "value")
     request.cookies += cookie
     assert(request.cookies("name").value === "value")
@@ -60,7 +60,7 @@ class CookieMapTest extends FunSuite {
   }
 
   test("add same cookie only once") {
-    val request = Request()
+    val request = Ask()
     val cookie = new Cookie("name", "value")
     request.cookies += cookie
     request.cookies += cookie
@@ -71,7 +71,7 @@ class CookieMapTest extends FunSuite {
   }
 
   test("add same cookie more than once") {
-    val request = Request()
+    val request = Ask()
     val cookie = new Cookie("name", "value")
     val cookie2 = new Cookie("name", "value2")
     request.cookies.add(cookie)
@@ -83,7 +83,7 @@ class CookieMapTest extends FunSuite {
   }
 
   test("remove cookie") {
-    val request = Request()
+    val request = Ask()
     request.headers.add("Cookie", "name=value")
     request.headers.add("Cookie", "name=value2") // same name - gets removed too
     request.cookies -= "name"
@@ -92,7 +92,7 @@ class CookieMapTest extends FunSuite {
   }
 
   test("invalid cookies are ignored") {
-    val request = Request()
+    val request = Ask()
     request.headers.add("Cookie", "namé=value")
 
     assert(request.cookies.size === 0)

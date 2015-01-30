@@ -50,9 +50,9 @@ class ClientDispatcherTest extends FunSuite {
   test("serially dispatch requests") {
     val ctx = newCtx
     import ctx._
-    val r1 = service(QueryRequest("SELECT 1"))
-    val r2 = service(QueryRequest("SELECT 2"))
-    val r3 = service(QueryRequest("SELECT 3"))
+    val r1 = service(QueryAsk("SELECT 1"))
+    val r2 = service(QueryAsk("SELECT 2"))
+    val r3 = service(QueryAsk("SELECT 3"))
     assert(serverq.size === 1)
     clientq.offer(okPacket)
     assert(r1.isDefined)
@@ -63,7 +63,7 @@ class ClientDispatcherTest extends FunSuite {
   test("decode OK packet") {
     val ctx = newCtx
     import ctx._
-    val r = service(PingRequest)
+    val r = service(PingAsk)
     clientq.offer(okPacket)
     assert(Await.result(r).isInstanceOf[OK])
     val okResult = Await.result(r).asInstanceOf[OK]
@@ -83,7 +83,7 @@ class ClientDispatcherTest extends FunSuite {
     bw.writeBytes(message.getBytes(Charset.defaultCharset.displayName))
     val expectedError = Error.decode(errpacket)
 
-    val r = service(QueryRequest("SELECT * FROM q"))
+    val r = service(QueryAsk("SELECT * FROM q"))
     clientq.offer(errpacket)
     intercept[ServerError] {
       Await.result(r)
@@ -165,7 +165,7 @@ class ClientDispatcherTest extends FunSuite {
   test("Decode a ResultSet") {
     val ctx = newCtx
     import ctx._
-    val query = service(QueryRequest("SELECT 1 + 1"))
+    val query = service(QueryAsk("SELECT 1 + 1"))
     clientq.offer(headerPacket)
     fieldPackets foreach { clientq.offer(_) }
     clientq.offer(eof)
@@ -191,7 +191,7 @@ class ClientDispatcherTest extends FunSuite {
   test("Decode PreparedStatement numParams = 0, numCols = 0") {
     val ctx = newCtx
     import ctx._
-    val query = service(PrepareRequest(""))
+    val query = service(PrepareAsk(""))
     clientq.offer(makePreparedHeader(0, 0))
     assert(Await.result(query).isInstanceOf[PrepareOK])
     val res = Await.result(query).asInstanceOf[PrepareOK]
@@ -202,7 +202,7 @@ class ClientDispatcherTest extends FunSuite {
   test("Decode PreparedStatement numParams > 0, numCols > 0") {
     val ctx = newCtx
     import ctx._
-    val query = service(PrepareRequest("SELECT name FROM t1 WHERE id IN (?, ?, ?, ?, ?)"))
+    val query = service(PrepareAsk("SELECT name FROM t1 WHERE id IN (?, ?, ?, ?, ?)"))
     val numParams = numFields
     clientq.offer(makePreparedHeader(1, numParams))
     fieldPackets foreach { clientq.offer(_) }
@@ -223,7 +223,7 @@ class ClientDispatcherTest extends FunSuite {
     val ctx = newCtx
     import ctx._
     val stmtId = 5
-    val query = service(CloseRequest(5))
+    val query = service(CloseAsk(5))
     val sent = Await.result(serverq.poll())
     val br = BufferReader(sent.body)
     assert(br.readByte() === Command.COM_STMT_CLOSE)
@@ -238,7 +238,7 @@ class ClientDispatcherTest extends FunSuite {
     import ctx._
     // offer an ill-formed packet
     clientq.offer(Packet(0, Buffer(Array[Byte]())))
-    intercept[LostSyncException] { Await.result(service(PingRequest)) }
+    intercept[LostSyncException] { Await.result(service(PingAsk)) }
     assert(!service.isAvailable)
     assert(trans.onClose.isDefined)
   }
@@ -249,7 +249,7 @@ class ClientDispatcherTest extends FunSuite {
       new AsyncQueue[Packet](), clientq)
     val service = new ClientDispatcher(trans, handshake)
     clientq.offer(Packet(0, Buffer(Array[Byte]())))
-    intercept[LostSyncException] { Await.result(service(PingRequest)) }
+    intercept[LostSyncException] { Await.result(service(PingAsk)) }
     assert(!service.isAvailable)
     assert(trans.onClose.isDefined)
   }

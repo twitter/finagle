@@ -6,7 +6,7 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import org.scalatest.mock.MockitoSugar
-import com.twitter.finagle.{IndividualRequestTimeoutException, Service, MockTimer}
+import com.twitter.finagle.{IndividualAskTimeoutException, Service, MockTimer}
 import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
@@ -24,7 +24,7 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
       def apply(request: String) = promise
     }
     val timeout = 1.second
-    val exception = new IndividualRequestTimeoutException(timeout)
+    val exception = new IndividualAskTimeoutException(timeout)
     val timeoutFilter = new TimeoutFilter[String, String](timeout, exception, timer)
     val timeoutService = timeoutFilter.andThen(service)
   }
@@ -54,7 +54,7 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
       intercept[java.util.concurrent.TimeoutException] {
         throw t.get
       }
-      intercept[IndividualRequestTimeoutException] {
+      intercept[IndividualAskTimeoutException] {
         Await.result(res)
       }
     }

@@ -12,20 +12,20 @@ import java.net.InetSocketAddress
  * service.
  */
 abstract class Adaptor[Req, Rep]
-  extends Filter[httpx.Request, httpx.Response, Req, Rep] {
-  private[compat] def in(req: httpx.Request): Future[Req]
+  extends Filter[httpx.Ask, httpx.Response, Req, Rep] {
+  private[compat] def in(req: httpx.Ask): Future[Req]
   private[compat] def out(rep: Rep): Future[httpx.Response]
-  def apply(req: httpx.Request, next: Service[Req, Rep]): Future[httpx.Response] =
+  def apply(req: httpx.Ask, next: Service[Req, Rep]): Future[httpx.Response] =
     in(req) flatMap(next) flatMap(out)
 }
 
 /**
  * An Adaptor for the older generation of HTTP services.
  */
-object HttpAdaptor extends Adaptor[http.Request, http.Response] {
-  private[compat] def in(r: httpx.Request): Future[http.Request] = {
-    val req = new http.Request {
-      val httpRequest = r.httpRequest
+object HttpAdaptor extends Adaptor[http.Ask, http.Response] {
+  private[compat] def in(r: httpx.Ask): Future[http.Ask] = {
+    val req = new http.Ask {
+      val httpAsk = r.httpAsk
       lazy val remoteSocketAddress = r.remoteSocketAddress
       override val reader = r.reader
       override val writer = r.writer
@@ -51,9 +51,9 @@ object HttpAdaptor extends Adaptor[http.Request, http.Response] {
 object NettyAdaptor extends Adaptor[netty.HttpRequest, netty.HttpResponse] {
   val NoStreaming = new IllegalArgumentException("this service doesn't support streaming")
 
-  private[compat] def in(req: httpx.Request): Future[netty.HttpRequest] =
+  private[compat] def in(req: httpx.Ask): Future[netty.HttpRequest] =
     if (req.isChunked) Future.exception(NoStreaming)
-    else Future.value(req.httpRequest)
+    else Future.value(req.httpAsk)
 
   private[compat] def out(r: netty.HttpResponse): Future[httpx.Response] =
     if (r.isChunked) Future.exception(NoStreaming)
@@ -64,10 +64,10 @@ object NettyAdaptor extends Adaptor[netty.HttpRequest, netty.HttpResponse] {
  * A abstract filter to adapt HTTPx clients into arbitrary clients.
  */
 abstract class ClientAdaptor[Req, Rep]
-  extends Filter[Req, Rep, httpx.Request, httpx.Response] {
-  private[compat] def in(req: Req): Future[httpx.Request]
+  extends Filter[Req, Rep, httpx.Ask, httpx.Response] {
+  private[compat] def in(req: Req): Future[httpx.Ask]
   private[compat] def out(rep: httpx.Response): Future[Rep]
-  def apply(req: Req, next: Service[httpx.Request, httpx.Response]): Future[Rep] =
+  def apply(req: Req, next: Service[httpx.Ask, httpx.Response]): Future[Rep] =
     in(req) flatMap(next) flatMap(out)
 }
 
@@ -77,10 +77,10 @@ abstract class ClientAdaptor[Req, Rep]
 object NettyClientAdaptor extends ClientAdaptor[netty.HttpRequest, netty.HttpResponse] {
   val NoStreaming = new IllegalArgumentException("this client doesn't support streaming")
 
-  private[compat] def in(req: netty.HttpRequest): Future[httpx.Request] =
+  private[compat] def in(req: netty.HttpRequest): Future[httpx.Ask] =
     if (req.isChunked) Future.exception(NoStreaming)
-    else Future.value(new httpx.Request {
-      val httpRequest = req
+    else Future.value(new httpx.Ask {
+      val httpAsk = req
       lazy val remoteSocketAddress = new InetSocketAddress(0)
     })
 

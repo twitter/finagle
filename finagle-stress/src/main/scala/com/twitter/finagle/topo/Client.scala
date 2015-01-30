@@ -6,11 +6,11 @@ import com.twitter.finagle.Http
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.logging.{Level, LoggerFactory, ConsoleHandler}
 import com.twitter.ostrich.admin.{RuntimeEnvironment, AdminHttpService}
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{HttpRequest=>HttpAsk, DefaultHttpRequest=>DefaultHttpAsk, _}
 
 object Client {
-  private[this] def go(svc: Service[HttpRequest, HttpResponse]) {
-    val req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
+  private[this] def go(svc: Service[HttpAsk, HttpResponse]) {
+    val req = new DefaultHttpAsk(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
     svc(req) ensure { go(svc) }
   }
 

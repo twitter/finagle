@@ -41,7 +41,7 @@ object NoStacktrace {
  * A base class for request failures. Indicates that some failure occurred
  * before a request could be successfully serviced.
  */
-class RequestException(message: String, cause: Throwable)
+class AskException(message: String, cause: Throwable)
   extends Exception(message, cause)
   with NoStacktrace
   with SourcedException
@@ -67,23 +67,23 @@ trait TimeoutException extends SourcedException { self: Exception =>
 
 /**
  * Indicates that a request timed out. See
- * [[com.twitter.finagle.IndividualRequestTimeoutException]] and
- * [[com.twitter.finagle.GlobalRequestTimeoutException]] for details on the
+ * [[com.twitter.finagle.IndividualAskTimeoutException]] and
+ * [[com.twitter.finagle.GlobalAskTimeoutException]] for details on the
  * different request granularities that this exception class can pertain to.
  */
-class RequestTimeoutException(
+class AskTimeoutException(
   protected val timeout: Duration,
   protected val explanation: String
-) extends RequestException with TimeoutException
+) extends AskException with TimeoutException
 
 /**
  * Indicates that a single Finagle-level request timed out. In contrast to
- * [[com.twitter.finagle.RequestTimeoutException]], an "individual request"
+ * [[com.twitter.finagle.AskTimeoutException]], an "individual request"
  * could be a single request-retry performed as a constituent of an
  * application-level RPC.
  */
-class IndividualRequestTimeoutException(timeout: Duration)
-  extends RequestTimeoutException(
+class IndividualAskTimeoutException(timeout: Duration)
+  extends AskTimeoutException(
     timeout,
     "waiting for a response for an individual request, excluding retries")
 
@@ -93,8 +93,8 @@ class IndividualRequestTimeoutException(timeout: Duration)
  * Finagle-level requests could constitute the single request that this
  * exception pertains to.
  */
-class GlobalRequestTimeoutException(timeout: Duration)
-  extends RequestTimeoutException(
+class GlobalAskTimeoutException(timeout: Duration)
+  extends AskTimeoutException(
     timeout,
     "waiting for a response for the request, including retries (if applicable)")
 
@@ -120,7 +120,7 @@ class GlobalRequestTimeoutException(timeout: Duration)
 class NoBrokersAvailableException(
   val name: String,
   val localDtab: Dtab
-) extends RequestException {
+) extends AskException {
   def this(name: String = "unknown") = this(name, Dtab.empty)
 
   override def getMessage =
@@ -130,7 +130,7 @@ class NoBrokersAvailableException(
 }
 
 @deprecated("no longer used by com.twitter.finagle.service.RetryingFilter", "7.0.0")
-class RetryFailureException(cause: Throwable) extends RequestException(cause)
+class RetryFailureException(cause: Throwable) extends AskException(cause)
 
 /**
  * Indicates that a request was cancelled. Cancellation is propagated between a
@@ -140,7 +140,7 @@ class RetryFailureException(cause: Throwable) extends RequestException(cause)
  * default propagate an interrupt to its downstream, and so on. This is done to
  * conserve resources.
  */
-class CancelledRequestException(cause: Throwable) extends RequestException(cause) {
+class CancelledAskException(cause: Throwable) extends AskException(cause) {
   def this() = this(null)
   override def getMessage = {
     if (cause == null)
@@ -155,7 +155,7 @@ class CancelledRequestException(cause: Throwable) extends RequestException(cause
  * failed because too many requests are already waiting for a connection to
  * become available from a client's connection pool.
  */
-class TooManyWaitersException extends RequestException
+class TooManyWaitersException extends AskException
 
 /**
  * A Future is satisfied with this exception when the process of establishing
@@ -165,14 +165,14 @@ class TooManyWaitersException extends RequestException
  * an available session or if an interrupt is propagated from a Finagle server
  * during session establishment.
  *
- * @see com.twitter.finagle.CancelledRequestException
+ * @see com.twitter.finagle.CancelledAskException
  */
-class CancelledConnectionException(cause: Throwable) extends RequestException(cause) {
+class CancelledConnectionException(cause: Throwable) extends AskException(cause) {
   def this() = this(null)
 }
 
 @deprecated("no longer used by com.twitter.finagle.service.RetryingFilter", "7.0.0")
-class ReplyCastException extends RequestException
+class ReplyCastException extends AskException
 
 /**
  * Used by [[com.twitter.finagle.service.FailFastFactory]] to indicate that a
@@ -180,7 +180,7 @@ class ReplyCastException extends RequestException
  * connected have been marked as failed. See FailFastFactory for details on
  * this behavior.
  */
-class FailedFastException(message: String) extends RequestException(message, cause = null) {
+class FailedFastException(message: String) extends AskException(message, cause = null) {
   def this() = this(null)
 }
 
@@ -188,7 +188,7 @@ class FailedFastException(message: String) extends RequestException(message, cau
  * Indicates that the request was not servable, according to some policy. See
  * [[com.twitter.finagle.service.OptionallyServableFilter]] as an example.
  */
-class NotServableException extends RequestException
+class NotServableException extends AskException
 
 /**
  * Indicates that the client failed to distribute a given request according to
@@ -407,7 +407,7 @@ class ApiException extends Exception
  * allowable, where "allowable" is typically determined based on some
  * configurable maximum.
  */
-class TooManyConcurrentRequestsException extends ApiException
+class TooManyConcurrentAsksException extends ApiException
 
 @deprecated("no longer used", "7.0.0")
 class InvalidPipelineException extends ApiException
@@ -430,6 +430,6 @@ class ChannelBufferUsageException(description: String) extends Exception(descrip
 /**
  * An exception that is raised on backup requests that are discarded because
  * their corresponding initial requests succeeded in time. See
- * [[com.twitter.finagle.exp.BackupRequestFilter]] for details.
+ * [[com.twitter.finagle.exp.BackupAskFilter]] for details.
  */
-object BackupRequestLost extends Exception with NoStacktrace
+object BackupAskLost extends Exception with NoStacktrace

@@ -8,7 +8,7 @@ import scala.collection.immutable
 import scala.collection.JavaConverters._
 
 /**
- * Request parameter map.
+ * Ask parameter map.
  *
  * This is a multi-map.  Use getAll() get all values for a key.
  */
@@ -156,12 +156,12 @@ object EmptyParamMap extends ParamMap {
 }
 
 /**
- * HttpRequest-backed param map.  Handle parameters in the URL and form encoded
+ * HttpAsk-backed param map.  Handle parameters in the URL and form encoded
  * body.  Multipart forms are not supported (not needed, could be abusive).
  *
  * This map is a multi-map.  Use getAll() to get all values for a key.
  */
-class RequestParamMap(val request: Request) extends ParamMap {
+class AskParamMap(val request: Ask) extends ParamMap {
   override def isValid: Boolean = _isValid
 
   private[this] var _isValid = true
@@ -180,7 +180,7 @@ class RequestParamMap(val request: Request) extends ParamMap {
   }
 
   // Convert IllegalArgumentException to ParamMapException so it can be handled
-  // appropriately (e.g., 400 Bad Request).
+  // appropriately (e.g., 400 Bad Ask).
   private[this] def parseParams(s: String): JMap[String, JList[String]] = {
     try {
       new QueryStringDecoder(s).getParameters

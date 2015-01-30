@@ -1,33 +1,38 @@
-package com.twitter.finagle.httpx
+package com.twitter.finagle.http
 
-import com.twitter.finagle.httpx.netty.{HttpRequestProxy, Bijections}
-import com.twitter.io.Charsets
+import com.google.common.base.Charsets
+import com.twitter.finagle.http.netty.HttpAskProxy
 import java.net.{InetAddress, InetSocketAddress}
 import java.io.ByteArrayOutputStream
 import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{
+  DefaultHttpRequest => DefaultHttpAsk,
+  HttpRequest => HttpAsk,
+  HttpRequestEncoder => HttpAskEncoder,
+  HttpRequestDecoder => HttpAskDecoder,
+  _
+}
 import scala.collection.JavaConverters._
 import scala.beans.BeanProperty
 
-import Bijections._
 
 /**
- * Rich HttpRequest.
+ * Rich HttpAsk.
  *
- * Use RequestProxy to create an even richer subclass.
+ * Use AskProxy to created an even richer subclass.
  */
-abstract class Request extends Message with HttpRequestProxy {
+abstract class Ask extends Message with HttpAskProxy {
 
-  def isRequest = true
+  def isAsk = true
 
   def params: ParamMap = _params
-  private[this] lazy val _params: ParamMap = new RequestParamMap(this)
+  private[this] lazy val _params: ParamMap = new AskParamMap(this)
 
-  def method: Method           = from(getMethod)
-  def method_=(method: Method) = setMethod(from(method))
+  def method: HttpMethod           = getMethod
+  def method_=(method: HttpMethod) = setMethod(method)
   def uri: String                  = getUri()
   def uri_=(uri: String)           { setUri(uri) }
 
@@ -149,8 +154,8 @@ abstract class Request extends Message with HttpRequestProxy {
 
   /** Encode an HTTP message to Array[Byte] */
   def encodeBytes(): Array[Byte] = {
-    val encoder = new EncoderEmbedder[ChannelBuffer](new HttpRequestEncoder)
-    encoder.offer(from[Request, HttpRequest](this))
+    val encoder = new EncoderEmbedder[ChannelBuffer](new HttpAskEncoder)
+    encoder.offer(this)
     val buffer = encoder.poll()
     val bytes = new Array[Byte](buffer.readableBytes())
     buffer.readBytes(bytes)
@@ -158,52 +163,33 @@ abstract class Request extends Message with HttpRequestProxy {
   }
 
   override def toString =
-    "Request(\"" + method + " " + uri + "\", from " + remoteSocketAddress + ")"
+    "Ask(\"" + method + " " + uri + "\", from " + remoteSocketAddress + ")"
 }
 
 
-object Request {
+object Ask {
 
-  /** Decode a Request from a String */
-  def decodeString(s: String): Request = {
-    decodeBytes(s.getBytes(Charsets.Utf8))
+  /** Decode a Ask from a String */
+  def decodeString(s: String): Ask = {
+    decodeBytes(s.getBytes("UTF-8"))
   }
 
-  /** Decode a Request from Array[Byte] */
-  def decodeBytes(b: Array[Byte]): Request = {
+  /** Decode a Ask from Array[Byte] */
+  def decodeBytes(b: Array[Byte]): Ask = {
     val decoder = new DecoderEmbedder(
-      new HttpRequestDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue))
+      new HttpAskDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue))
     decoder.offer(ChannelBuffers.wrappedBuffer(b))
-    val req = decoder.poll().asInstanceOf[HttpRequest]
-    assert(req ne null)
-    new Request {
-      val httpRequest = req
-      lazy val remoteSocketAddress = new InetSocketAddress(0)
-    }
+    val httpAsk = decoder.poll().asInstanceOf[HttpAsk]
+    assert(httpAsk ne null)
+    Ask(httpAsk)
   }
 
-  private[httpx] def apply(
-    method: Method,
-    uri: String,
-    version: Version = Version.Http11,
-    headers: Map[String, Seq[String]] = Map.empty
-  ): Request = {
-    val req = new DefaultHttpRequest(from(version), from(method), uri)
-    headers foreach { case (field, values) =>
-      values foreach { v => req.headers.add(field, v) }
-    }
-    new Request {
-      val httpRequest = req
-      lazy val remoteSocketAddress = new InetSocketAddress(0)
-    }
-  }
-
-  /** Create Request from parameters.  Convenience method for testing. */
-  def apply(params: Tuple2[String, String]*): MockRequest =
+  /** Create Ask from parameters.  Convenience method for testing. */
+  def apply(params: Tuple2[String, String]*): MockAsk =
     apply("/", params:_*)
 
-  /** Create Request from URI and parameters.  Convenience method for testing. */
-  def apply(uri: String, params: Tuple2[String, String]*): MockRequest = {
+  /** Create Ask from URI and parameters.  Convenience method for testing. */
+  def apply(uri: String, params: Tuple2[String, String]*): MockAsk = {
     val encoder = new QueryStringEncoder(uri)
     params.foreach { case (key, value) =>
       encoder.addParam(key, value)
@@ -211,46 +197,53 @@ object Request {
     apply(Method.Get, encoder.toString)
   }
 
-  /** Create Request from URI string.  Convenience method for testing. */
-  def apply(uri: String): MockRequest =
+  /** Create Ask from URI string.  Convenience method for testing. */
+  def apply(uri: String): MockAsk =
     apply(Method.Get, uri)
 
-  /** Create Request from method and URI string.  Convenience method for testing. */
-  def apply(method: Method, uri: String): MockRequest =
+  /** Create Ask from method and URI string.  Convenience method for testing. */
+  def apply(method: HttpMethod, uri: String): MockAsk =
     apply(Version.Http11, method, uri)
 
-  /** Create Request from version, method, and URI string.  Convenience method for testing. */
-  def apply(version: Version, method: Method, uri: String): MockRequest = {
-    val req = new DefaultHttpRequest(from(version), from(method), uri)
-    new MockRequest {
-      override val httpRequest = req
+  /** Create Ask from version, method, and URI string.  Convenience method for testing. */
+  def apply(version: HttpVersion, method: HttpMethod, uri: String): MockAsk =
+    apply(new DefaultHttpAsk(version, method, uri))
+
+  /** Create Ask from HttpAsk. */
+  def apply(httpAskArg: HttpAsk): MockAsk = {
+    new MockAsk {
+      override val httpAsk = httpAskArg
+      override val httpMessage = httpAskArg
       override val remoteSocketAddress = new InetSocketAddress("127.0.0.1", 12345)
     }
   }
 
-  /** Create Request from HttpRequest and Channel.  Used by Codec. */
-  private[finagle] def apply(httpRequestArg: HttpRequest, channel: Channel): Request =
-    new Request {
-      val httpRequest = httpRequestArg
+  /** Create Ask from HttpAsk and Channel.  Used by Codec. */
+  def apply(httpAskArg: HttpAsk, channel: Channel): Ask =
+    new Ask {
+      val httpAsk = httpAskArg
+      override val httpMessage = httpAskArg
       lazy val remoteSocketAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
     }
 
   // for testing
-  protected class MockRequest extends Request {
-    val httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
+  protected class MockAsk extends Ask {
+    val httpAsk: HttpAsk = new DefaultHttpAsk(Version.Http11, Method.Get, "/")
+    override val httpMessage: HttpMessage = httpAsk
     val remoteSocketAddress = new InetSocketAddress("127.0.0.1", 12345)
 
-    // Create a MockRequest with a specific IP
+    // Create a MockAsk with a specific IP
     def withIp(ip: String) =
-      new MockRequest {
-        override val httpRequest = MockRequest.this.httpRequest
+      new MockAsk {
+        override val httpAsk = MockAsk.this
+        override final val httpMessage = MockAsk.this
         override val remoteSocketAddress = new InetSocketAddress(ip, 12345)
       }
 
-    // Create an internal MockRequest
+    // Create an internal MockAsk
     def internal = withIp("10.0.0.1")
 
-    // Create an external MockRequest
+    // Create an external MockAsk
     def external = withIp("8.8.8.8")
   }
 

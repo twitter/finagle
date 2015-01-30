@@ -10,7 +10,7 @@ import org.mockito.Matchers._
 import org.jboss.netty.channel._
 import com.twitter.util.RandomSocket
 import java.net.{SocketAddress, InetSocketAddress}
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{DefaultHttpRequest=>DefaultHttpAsk, HttpRequest=>HttpAsk, _}
 
 @RunWith(classOf[JUnitRunner])
 class HttpConnectHandlerTest extends FunSuite with MockitoSugar {
@@ -108,7 +108,7 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar {
       val ec = ArgumentCaptor.forClass(classOf[DownstreamMessageEvent])
       verify(ctx, atLeastOnce).sendDownstream(ec.capture)
       val e = ec.getValue
-      val req = e.getMessage.asInstanceOf[DefaultHttpRequest]
+      val req = e.getMessage.asInstanceOf[DefaultHttpAsk]
       assert(req.getMethod === HttpMethod.CONNECT)
       assert(req.getUri === "localhost:" + port)
       assert(req.headers().get("Host") === "localhost:" + port)
