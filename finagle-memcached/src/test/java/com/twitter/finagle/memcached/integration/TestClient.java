@@ -1,6 +1,5 @@
 package com.twitter.finagle.memcached.integration;
 
-import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 
 import scala.Option;
@@ -30,6 +29,9 @@ public class TestClient {
     Assume.assumeTrue(server.isDefined());
   }
 
+  /**
+   * Tests Get and Set operations.
+   */
   @Test
   public void testGetAndSet() throws Exception {
     Service<Command, Response> service =

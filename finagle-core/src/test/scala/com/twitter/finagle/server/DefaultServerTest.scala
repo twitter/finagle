@@ -20,7 +20,6 @@ import org.scalatest.mock.MockitoSugar
 class DefaultServerTest extends FunSpec with MockitoSugar {
   describe("DefaultServer") {
     val name = "name"
-    val port = RandomSocket.nextPort()
 
     it("should successfully add sourcedexception") {
       val qIn = new AsyncQueue[Try[Int]]()
@@ -40,8 +39,7 @@ class DefaultServerTest extends FunSpec with MockitoSugar {
 
       val server: Server[Try[Int], Try[Int]] = DefaultServer[Try[Int], Try[Int], Try[Int], Try[Int]](name, listener, serviceTransport)
 
-      val port = RandomSocket.nextPort()
-      val socket = new InetSocketAddress(InetAddress.getLoopbackAddress, port)
+      val socket = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
       val factory = ServiceFactory.const(Service.mk[Try[Int], Try[Int]] { num =>
         Future.exception(new SourcedException {})
       })
@@ -69,7 +67,7 @@ class DefaultServerTest extends FunSpec with MockitoSugar {
 
       val server: Server[Try[Int], Try[Int]] = DefaultServer[Try[Int], Try[Int], Try[Int], Try[Int]](name, listener, serviceTransport)
 
-      val socket = new InetSocketAddress(InetAddress.getLoopbackAddress, port)
+      val socket = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
       val factory = mock[ServiceFactory[Try[Int], Try[Int]]]
       val service = Service.mk[Try[Int], Try[Int]] { Future.value }
       when(factory(any[ClientConnection])) thenReturn Future.value(service)
@@ -97,7 +95,7 @@ class DefaultServerTest extends FunSpec with MockitoSugar {
         new SerialServerDispatcher(_, _)
 
       val server: Server[Try[Int], Try[Int]] = DefaultServer[Try[Int], Try[Int], Try[Int], Try[Int]](name, listener, serviceTransport)
-      val socket = new InetSocketAddress(InetAddress.getLoopbackAddress, port)
+      val socket = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
 
       val p = Promise[Try[Int]]
       val svc = Service.mk[Try[Int], Try[Int]] { _ => p }

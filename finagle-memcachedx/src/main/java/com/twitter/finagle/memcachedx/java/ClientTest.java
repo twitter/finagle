@@ -17,7 +17,10 @@ import com.twitter.io.Buf;
 /**
  * This is mainly for internal testing, not for external purpose
  */
-public class ClientTest {
+public final class ClientTest {
+
+  private ClientTest() { }
+
   public static void main(String[] args) {
     Service<Command, Response> service =
       ClientBuilder.safeBuild(
@@ -49,12 +52,12 @@ public class ClientTest {
     client.delete("foo").get();
     client.set("foo", "bar").get();
     Option<String> res = Buf.Utf8$.MODULE$.unapply(client.get("foo").get());
-    assert(res.get() == "bar");
+    assert "bar".equals(res.get());
     ResultWithCAS casRes = client.gets("foo").get();
-    assert(client.cas("foo", "baz", casRes.casUnique).get());
+    assert client.cas("foo", "baz", casRes.casUnique).get();
 
     Option<String> res2 = Buf.Utf8$.MODULE$.unapply(client.get("foo").get());
-    assert(res2.get() == "baz");
+    assert "baz".equals(res2.get());
     client.delete("foo").get();
     System.err.println("passed.");
     client.release();

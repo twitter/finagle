@@ -71,7 +71,7 @@ class TraceInitializationTest extends FunSuite {
         .tracer(serverTracer)
         .build(Svc)
 
-      val port = server.localAddress.asInstanceOf[InetSocketAddress].getPort
+      val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
       val client = ClientBuilder()
         .name("theClient")
         .hosts(s"localhost:$port")

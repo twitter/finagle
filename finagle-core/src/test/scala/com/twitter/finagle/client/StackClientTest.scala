@@ -1,7 +1,9 @@
 package com.twitter.finagle.client
 
+import com.twitter.finagle.Stack.Module0
 import com.twitter.finagle._
 import com.twitter.finagle.factory.BindingFactory
+import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.StackRegistry
 import com.twitter.finagle.{param, Name}
@@ -52,10 +54,58 @@ class StackClientTest extends FunSuite
     client.newClient(Name.bound(new InetSocketAddress(8080)), name)
     client.newClient(Name.bound(new InetSocketAddress(8080)), name)
 
-    assert((ClientRegistry.registrants filter {
-      case e: StackRegistry.Entry => name == e.name
-    }).size === 1)
+    assert(ClientRegistry.registrants.count {
+      e: StackRegistry.Entry => name == e.name
+    } === 1)
   })
+
+  test("FailFast is respected") {
+    val ctx = new Ctx { }
+
+    val ex = new RuntimeException("lol")
+    val alwaysFail = new Module0[ServiceFactory[String, String]] {
+      val role = Stack.Role("lol")
+      val description = "lool"
+      def make(next: ServiceFactory[String, String]) =
+        ServiceFactory.apply(() => Future.exception(ex))
+    }
+
+    val alwaysFailStack = new StackBuilder(stack.nilStack[String, String])
+      .push(alwaysFail)
+      .result
+    val stk = ctx.client.stack.concat(alwaysFailStack)
+
+    def newClient(name: String, failFastOn: Option[Boolean]): Service[String, String] = {
+      var stack = ctx.client
+        .configured(param.Label(name))
+        .withStack(stk)
+      failFastOn.foreach { ffOn =>
+        stack = stack.configured(FailFast(ffOn))
+      }
+      val client = stack.newClient("/$/inet/localhost/0")
+      new FactoryToService[String, String](client)
+    }
+
+    def testClient(name: String, failFastOn: Option[Boolean]): Unit = {
+      val svc = newClient(name, failFastOn)
+      val e = intercept[RuntimeException] { Await.result(svc("hi")) }
+      assert(e === ex)
+      failFastOn match {
+        case Some(on) if !on =>
+          assert(ctx.sr.counters.get(Seq(name, "failfast", "marked_dead")) === None)
+          intercept[RuntimeException] { Await.result(svc("hi2")) }
+        case _ =>
+          eventually {
+            assert(ctx.sr.counters(Seq(name, "failfast", "marked_dead")) === 1)
+          }
+          intercept[FailedFastException] { Await.result(svc("hi2")) }
+      }
+    }
+
+    testClient("ff-client-default", None)
+    testClient("ff-client-enabled", Some(true))
+    testClient("ff-client-disabled", Some(false))
+  }
 
   test("FactoryToService close propagated to underlying service") {
     /*
@@ -75,7 +125,8 @@ class StackClientTest extends FunSuite
       def close(deadline: Time) = Future.Done
     }
 
-    val stack = (StackClient.newStack ++ Stack.Leaf(Stack.Role("role"), underlyingFactory))
+    val stack = StackClient.newStack[Unit, Unit]
+      .concat(Stack.Leaf(Stack.Role("role"), underlyingFactory))
       // don't pool or else we don't see underlying close until service is ejected from pool
       .remove(DefaultPool.Role)
 
@@ -86,7 +137,7 @@ class StackClientTest extends FunSuite
       BindingFactory.Dest(Name.Path(Path.read("/$/inet/localhost/0"))))
 
     val service = new FactoryToService(factory)
-    Await.result(service(Unit))
+    Await.result(service(()))
 
     assert(closed)
   }
@@ -112,7 +163,8 @@ class StackClientTest extends FunSuite
       def close(deadline: Time) = Future.Done
     }
 
-    val stack = (StackClient.newStack ++ Stack.Leaf(Stack.Role("role"), underlyingFactory))
+    val stack = StackClient.newStack[Unit, Unit]
+      .concat(Stack.Leaf(Stack.Role("role"), underlyingFactory))
       // don't pool or else we don't see underlying close until service is ejected from pool
       .remove(DefaultPool.Role)
 
@@ -131,7 +183,7 @@ class StackClientTest extends FunSuite
       BindingFactory.Dest(Name.Path(Path.read("/$/inet/localhost/0"))))
 
     val service = new FactoryToService(factory)
-    Await.result(service(Unit))
+    Await.result(service(()))
 
     assert(!closed)
   }

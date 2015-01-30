@@ -125,7 +125,7 @@ object LoadBalancerFactory {
                   param.Stats(stats) +
                   param.Monitor(composite))
               new ServiceFactoryProxy(underlying) {
-                override def toString = sa.toString + "_" + underlying.toString
+                override def toString = sa.toString
               }
             }
 

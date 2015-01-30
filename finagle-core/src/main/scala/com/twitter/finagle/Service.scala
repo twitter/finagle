@@ -50,7 +50,7 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) with Closable {
   final def release() { close() }
 
   def close(deadline: Time) = Future.Done
-  
+
   /**
    * The current availability [[Status]] of this Service.
    */
@@ -174,7 +174,7 @@ abstract class ServiceFactory[-Req, +Rep]
    * releases the service.
    */
   final def toService: Service[Req, Rep] = new FactoryToService(this)
-  
+
   /**
    * The current availability [[Status]] of this ServiceFactory
    */
@@ -300,17 +300,17 @@ object FactoryToService {
 class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
   extends Service[Req, Rep]
 {
-  def apply(request: Req) =
+  def apply(request: Req): Future[Rep] =
     factory() flatMap { service =>
       service(request) ensure {
         service.close()
       }
     }
 
-  override def close(deadline: Time) = factory.close(deadline)
-  override def status = factory.status
+  override def close(deadline: Time): Future[Unit] = factory.close(deadline)
+  override def status: Status = factory.status
   // TODO(CSL-1336): Finalize isAvailable
-  override def isAvailable = factory.isAvailable
+  override def isAvailable: Boolean = factory.isAvailable
 }
 
 /**

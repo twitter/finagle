@@ -1,7 +1,7 @@
 package com.twitter.finagle.util
 
 import com.twitter.finagle.WeightedSocketAddress
-import com.twitter.util.{Await, RandomSocket}
+import com.twitter.util.Await
 import com.google.common.cache.{Cache => GCache, CacheBuilder}
 import java.net.{InetAddress, InetSocketAddress, UnknownHostException}
 import org.junit.runner.RunWith
@@ -10,8 +10,8 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class InetSocketAddressUtilTest extends FunSuite {
-  val port1 = RandomSocket.nextPort()
-  val port2 = RandomSocket.nextPort()
+  val port1 = 80 // never bound
+  val port2 = 53 // ditto
   val weight1: Double = 0.5
   val weight2: Double = 0.25
   val cache: GCache[String, Seq[InetAddress]] = CacheBuilder.newBuilder().build()
@@ -21,22 +21,22 @@ class InetSocketAddressUtilTest extends FunSuite {
       val myAddr = InetAddress.getLocalHost
       val mySockAddr = new InetSocketAddress(myAddr, port1)
       val inaddr_any = InetAddress.getByName("0.0.0.0")
-      val boundSock = new InetSocketAddress(inaddr_any, port1)
+      val sock = new InetSocketAddress(inaddr_any, port1)
       val loopback = InetAddress.getByName("127.0.0.1")
-      val boundLoopback = new InetSocketAddress(loopback, port1)
+      val loopbackSockAddr = new InetSocketAddress(loopback, port1)
       val ipv6loopback = InetAddress.getByName("::1")
-      val boundIpv6Lo = new InetSocketAddress(ipv6loopback, port1)
+      val ipv6LoSockAddr = new InetSocketAddress(ipv6loopback, port1)
       val ipv6any = InetAddress.getByName("::0")
-      val boundIpv6Any = new InetSocketAddress(ipv6any, port1)
+      val ipv6AnySockAddr= new InetSocketAddress(ipv6any, port1)
 
       assert(InetSocketAddressUtil.toPublic(mySockAddr) === mySockAddr)
-      assert(InetSocketAddressUtil.toPublic(boundSock) === mySockAddr)
-      assert(InetSocketAddressUtil.toPublic(boundIpv6Any) === mySockAddr)
+      assert(InetSocketAddressUtil.toPublic(sock) === mySockAddr)
+      assert(InetSocketAddressUtil.toPublic(ipv6AnySockAddr) === mySockAddr)
 
       // It's ok if this test fails due to some future change, I just want to highlight it
       // to whoever re-implements toPublic in case they change the behavior
-      assert(InetSocketAddressUtil.toPublic(boundLoopback) === boundLoopback)
-      assert(InetSocketAddressUtil.toPublic(boundIpv6Lo) === boundIpv6Lo)
+      assert(InetSocketAddressUtil.toPublic(loopbackSockAddr) === loopbackSockAddr)
+      assert(InetSocketAddressUtil.toPublic(ipv6LoSockAddr) === ipv6LoSockAddr)
     }
     catch {
       // this could happen if you don't have a resolvable hostname or a public ip

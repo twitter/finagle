@@ -1,11 +1,17 @@
 package com.twitter.finagle.service;
 
-import com.twitter.util.Try;
-import junit.framework.TestCase;
 import scala.runtime.Nothing$;
 
-public class RetryPolicyCompilationTest extends TestCase {
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.twitter.util.Try;
+
+public class RetryPolicyCompilationTest {
+
+  @Test
   public void testFutureCastMap() throws Exception {
     RetryPolicy<Try<Nothing$>> policy = RetryPolicy.tries(2);
+    Assert.assertNotNull(policy);
   }
 }

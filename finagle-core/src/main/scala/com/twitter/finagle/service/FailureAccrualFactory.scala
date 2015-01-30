@@ -3,7 +3,7 @@ package com.twitter.finagle.service
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.util.{Duration, Time, Timer, TimerTask, Try}
+import com.twitter.util.{Duration, Time, Timer, TimerTask, Try, Promise}
 
 object FailureAccrualFactory {
   private[finagle] def wrapper(
@@ -44,6 +44,10 @@ object FailureAccrualFactory {
         wrapper(statsReceiver, n, d)(timer) andThen next
       }
     }
+
+  private sealed trait State
+  private case object Alive extends State
+  private case object Dead extends State
 }
 
 /**
@@ -59,10 +63,11 @@ class FailureAccrualFactory[Req, Rep](
   markDeadFor: Duration,
   timer: Timer,
   statsReceiver: StatsReceiver
-) extends ServiceFactory[Req, Rep]
-{
+) extends ServiceFactory[Req, Rep] {
+  import FailureAccrualFactory.{State, Alive, Dead}
+
   private[this] var failureCount = 0
-  @volatile private[this] var markedDead = false
+  @volatile private[this] var state: State = Alive
   private[this] var reviveTimerTask: Option[TimerTask] = None
 
   private[this] val removalCounter = statsReceiver.counter("removals")
@@ -78,17 +83,23 @@ class FailureAccrualFactory[Req, Rep](
   }
 
   protected def markDead() = synchronized {
-    if (!markedDead) {
-      removalCounter.incr()
-      markedDead = true
-      val timerTask = timer.schedule(markDeadFor.fromNow) { revive() }
-      reviveTimerTask = Some(timerTask)
+    state match {
+      case Dead =>
+      case Alive =>
+        removalCounter.incr()
+        state = Dead
+        val timerTask = timer.schedule(markDeadFor.fromNow) { revive() }
+        reviveTimerTask = Some(timerTask)
     }
   }
 
   protected def revive() = synchronized {
-    if (markedDead) revivalCounter.incr()
-    markedDead = false
+    state match {
+      case Alive =>
+      case Dead =>
+        state = Alive
+        revivalCounter.incr()
+    }
     reviveTimerTask foreach { _.cancel() }
     reviveTimerTask = None
   }
@@ -112,10 +123,10 @@ class FailureAccrualFactory[Req, Rep](
     } onFailure { _ => didFail() }
   }
   
-  // TODO(CSL-1336): Convert to using Busy
-  override def status = 
-    if (markedDead) Status.Closed
-    else underlying.status
+  override def status = state match {
+    case Alive => underlying.status
+    case Dead => Status.Busy
+  }
 
   def close(deadline: Time) = underlying.close(deadline) ensure {
     // We revive to make sure we've cancelled timer tasks, etc.

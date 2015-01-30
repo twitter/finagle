@@ -1,5 +1,7 @@
 language: scala
 
+sudo: false
+
 scala:
   - 2.10.4
   - 2.11.4
@@ -20,8 +22,8 @@ script:
   - echo skip ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test
   - echo skip ./sbt ++$TRAVIS_SCALA_VERSION finagle-mux/test
 
-  # run conditinally because they don't pass with openjdks
-  - if [ "$TRAVIS_JDK_VERSION" = "oraclejdk7" ]; then ./sbt ++$TRAVIS_SCALA_VERSION finagle-native/test; fi
+  # run conditionally because they don't pass with openjdks
+  - if [[ "$TRAVIS_JDK_VERSION" = oraclejdk* ]]; then ./sbt ++$TRAVIS_SCALA_VERSION finagle-native/test; fi
 
   # run for all environments
   - ./sbt ++$TRAVIS_SCALA_VERSION finagle-commons-stats/test

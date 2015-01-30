@@ -1,9 +1,9 @@
 package com.twitter.finagle.httpx
 
 import com.twitter.finagle.httpx.netty.{HttpAskProxy, Bijections}
-import com.twitter.io.Charsets
-import java.net.{InetAddress, InetSocketAddress}
+import com.twitter.io.{Charsets, Reader}
 import java.io.ByteArrayOutputStream
+import java.net.{InetAddress, InetSocketAddress}
 import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.Channel
@@ -15,8 +15,8 @@ import org.jboss.netty.handler.codec.http.{
   HttpRequestDecoder => HttpAskDecoder,
   _
 }
-import scala.collection.JavaConverters._
 import scala.beans.BeanProperty
+import scala.collection.JavaConverters._
 
 import Bijections._
 
@@ -188,28 +188,20 @@ object Ask {
     }
   }
 
-  private[httpx] def apply(
-    method: Method,
-    uri: String,
-    version: Version = Version.Http11,
-    headers: Map[String, Seq[String]] = Map.empty
-  ): Ask = {
-    val req = new DefaultHttpAsk(from(version), from(method), uri)
-    headers foreach { case (field, values) =>
-      values foreach { v => req.headers.add(field, v) }
-    }
-    new Ask {
-      val httpAsk = req
-      lazy val remoteSocketAddress = new InetSocketAddress(0)
-    }
-  }
-
-  /** Create Ask from parameters.  Convenience method for testing. */
-  def apply(params: Tuple2[String, String]*): MockAsk =
+  /**
+   * Create an HTTP/1.1 GET Request from query string parameters.
+   *
+   * @params params a list of key-value pairs representing the query string.
+   */
+  def apply(params: Tuple2[String, String]*): Ask =
     apply("/", params:_*)
 
-  /** Create Ask from URI and parameters.  Convenience method for testing. */
-  def apply(uri: String, params: Tuple2[String, String]*): MockAsk = {
+  /**
+   * Create an HTTP/1.1 GET Request from URI and query string parameters.
+   *
+   * @params params a list of key-value pairs representing the query string.
+   */
+  def apply(uri: String, params: Tuple2[String, String]*): Ask = {
     val encoder = new QueryStringEncoder(uri)
     params.foreach { case (key, value) =>
       encoder.addParam(key, value)
@@ -217,21 +209,66 @@ object Ask {
     apply(Method.Get, encoder.toString)
   }
 
-  /** Create Ask from URI string.  Convenience method for testing. */
-  def apply(uri: String): MockAsk =
+  /**
+   * Create an HTTP/1.1 GET Ask from URI string.
+   * */
+  def apply(uri: String): Ask =
     apply(Method.Get, uri)
 
-  /** Create Ask from method and URI string.  Convenience method for testing. */
-  def apply(method: Method, uri: String): MockAsk =
+  /**
+   * Create an HTTP/1.1 GET Ask from method and URI string.
+   */
+  def apply(method: Method, uri: String): Ask =
     apply(Version.Http11, method, uri)
 
-  /** Create Ask from version, method, and URI string.  Convenience method for testing. */
-  def apply(version: Version, method: Method, uri: String): MockAsk = {
-    val req = new DefaultHttpAsk(from(version), from(method), uri)
-    new MockAsk {
-      override val httpAsk = req
-      override val remoteSocketAddress = new InetSocketAddress("127.0.0.1", 12345)
+  /**
+   * Create an HTTP/1.1 GET Ask from version, method, and URI string.
+   */
+  def apply(version: Version, method: Method, uri: String): Ask = {
+    val reqIn = new DefaultHttpAsk(from(version), from(method), uri)
+    new Ask {
+      val httpAsk = reqIn
+      lazy val remoteSocketAddress = new InetSocketAddress(0)
     }
+  }
+
+  /**
+   * Create an HTTP/1.1 GET Ask from Version, Method, URI, and Reader.
+   *
+   * A [[com.twitter.io.Reader]] is a stream of bytes serialized to HTTP chunks.
+   * `Reader`s are useful for representing streaming data in the body of the
+   * request (e.g. a large file, or long lived computation that produces results
+   * incrementally).
+   *
+   * {{{
+   * val data = Reader.fromStream(File.open("data.txt"))
+   * val post = Ask(Http11, Post, "/upload", data)
+   *
+   * client(post) onSuccess {
+   *   case r if r.status == Ok => println("Success!")
+   *   case _                   => println("Something went wrong...")
+   * }
+   * }}}
+   */
+  def apply(
+    version: Version,
+    method: Method,
+    uri: String,
+    reader: Reader
+  ): Ask = {
+    val httpReq = new DefaultHttpAsk(from(version), from(method), uri)
+    httpReq.setChunked(true)
+    apply(httpReq, reader, new InetSocketAddress(0))
+  }
+
+  private[httpx] def apply(
+    reqIn: HttpAsk,
+    readerIn: Reader,
+    remoteAddr: InetSocketAddress
+  ): Ask = new Ask {
+    override val reader = readerIn
+    val httpAsk = reqIn
+    lazy val remoteSocketAddress = remoteAddr
   }
 
   /** Create Ask from HttpAsk and Channel.  Used by Codec. */
@@ -240,25 +277,6 @@ object Ask {
       val httpAsk = httpAskArg
       lazy val remoteSocketAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
     }
-
-  // for testing
-  protected class MockAsk extends Ask {
-    val httpAsk = new DefaultHttpAsk(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
-    val remoteSocketAddress = new InetSocketAddress("127.0.0.1", 12345)
-
-    // Create a MockAsk with a specific IP
-    def withIp(ip: String) =
-      new MockAsk {
-        override val httpAsk = MockAsk.this.httpAsk
-        override val remoteSocketAddress = new InetSocketAddress(ip, 12345)
-      }
-
-    // Create an internal MockAsk
-    def internal = withIp("10.0.0.1")
-
-    // Create an external MockAsk
-    def external = withIp("8.8.8.8")
-  }
 
   /** Create a query string from URI and parameters. */
   def queryString(uri: String, params: Tuple2[String, String]*): String = {

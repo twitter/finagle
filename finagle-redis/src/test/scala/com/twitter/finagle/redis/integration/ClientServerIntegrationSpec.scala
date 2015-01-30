@@ -43,7 +43,7 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
   lazy val client = ClientBuilder()
     .name("redis-client")
     .codec(Redis())
-    .hosts(server.localAddress)
+    .hosts(server.boundAddress)
     .hostConnectionLimit(2)
     .retries(2)
     .build()

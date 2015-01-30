@@ -19,6 +19,10 @@ import com.twitter.util.Var$;
  * A compilation test for using MultiReader in Java.
  */
 public class MultiReaderCompilationTest {
+
+  /**
+   * Tests whether the {@code MultiReader} is compilable or not.
+   */
   @Test
   public ReadHandle make() {
     ArrayList<SocketAddress> clusterMembers = new ArrayList<SocketAddress>();

@@ -13,7 +13,7 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.util._
-import com.twitter.util.{Closable, Duration, Future, NullMonitor, Time}
+import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Time}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Level
@@ -22,14 +22,17 @@ import org.jboss.netty.channel.ServerChannelFactory
 import scala.annotation.implicitNotFound
 
 /**
- * A listening server.
+ * A listening server. This is for compatibility with older code that is
+ * using builder.Server. New code should use the ListeningServer trait.
  */
-trait Server extends Closable {
+trait Server extends ListeningServer {
+
   /**
    * When a server is bound to an ephemeral port, gets back the address
    * with concrete listening port picked.
    */
-  def localAddress: SocketAddress
+  @deprecated("Use boundAddress", "2014-12-19")
+  final def localAddress: SocketAddress = boundAddress
 }
 
 /**
@@ -420,7 +423,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def build(serviceFactory: ServiceFactory[Req, Rep])(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
       ServerConfigEvidence[HasCodec, HasBindTo, HasName]
-  ): Server = new Server {
+  ): Server = {
+
     val Label(label) = params[Label]
     val BindTo(addr) = params[BindTo]
     val Logger(logger) = params[Logger]
@@ -436,22 +440,26 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
     val listeningServer = mk(serverParams).serve(addr, serviceFactory)
 
-    val closed = new AtomicBoolean(false)
+    new Server with CloseAwaitably {
 
-    if (!daemon) ExitGuard.guard()
-    def close(deadline: Time): Future[Unit] = {
-      if (!closed.compareAndSet(false, true)) {
-        logger.log(Level.WARNING, "Server closed multiple times!",
-          new Exception/*stack trace please*/)
-        return Future.exception(new IllegalStateException)
+      val closed = new AtomicBoolean(false)
+
+      if (!daemon) ExitGuard.guard()
+
+      override protected def closeServer(deadline: Time): Future[Unit] = closeAwaitably {
+        if (!closed.compareAndSet(false, true)) {
+          logger.log(Level.WARNING, "Server closed multiple times!",
+            new Exception /*stack trace please*/)
+          return Future.exception(new IllegalStateException)
+        }
+
+        listeningServer.close(deadline) ensure {
+          if (!daemon) ExitGuard.unguard()
+        }
       }
 
-      listeningServer.close(deadline) ensure {
-        if (!daemon) ExitGuard.unguard()
-      }
+      override def boundAddress: SocketAddress = listeningServer.boundAddress
     }
-
-    val localAddress = listeningServer.boundAddress
   }
 
   @deprecated("Used for ABI compat", "5.0.1")

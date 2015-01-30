@@ -108,8 +108,8 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       socketAddr.asInstanceOf[InetSocketAddress].getPort
 
     Seq(
-      ("ServerBuilder deprecated", builderOld, port(builderOld.localAddress)),
-      ("ServerBuilder", builder, port(builder.localAddress)),
+      ("ServerBuilder deprecated", builderOld, port(builderOld.boundAddress)),
+      ("ServerBuilder", builder, port(builder.boundAddress)),
       ("ThriftMux proto deprecated", protoOld, port(protoOld.boundAddress)),
       ("ThriftMux proto", protoOld, port(protoNew.boundAddress))
     )
@@ -322,7 +322,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
 
       assert(Await.result(client.query("ok")) == "okok")
       Await.result(server.close())
-      intercept[ChannelWriteException] {
+      intercept[FailedFastException] { // will automatically requeue while trying to connect
         Await.result(client.query("ok"))
       }
     }

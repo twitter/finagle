@@ -2,7 +2,7 @@ package com.twitter.finagle.builder
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.integration.{DynamicCluster, StringCodec}
-import com.twitter.finagle.{Service, WriteException, IndividualAskTimeoutException}
+import com.twitter.finagle.{Service, FailedFastException, IndividualAskTimeoutException}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Future, Await, CountDownLatch, Promise}
 import java.net.{InetAddress, SocketAddress, InetSocketAddress}
@@ -28,7 +28,7 @@ class EndToEndTest extends FunSuite {
       .bindTo(address)
       .name("FinagleServer")
       .build(service)
-    val cluster = new DynamicCluster[SocketAddress](Seq(server.localAddress))
+    val cluster = new DynamicCluster[SocketAddress](Seq(server.boundAddress))
     val client = ClientBuilder()
       .cluster(cluster)
       .codec(StringCodec)
@@ -39,7 +39,7 @@ class EndToEndTest extends FunSuite {
     //  then verify the request can still finish
     val response = client("123")
     arrivalLatch.await()
-    cluster.del(server.localAddress)
+    cluster.del(server.boundAddress)
     assert(!response.isDefined)
     constRes.setValue("foo")
     assert(Await.result(response) === "foo")
@@ -73,7 +73,7 @@ class EndToEndTest extends FunSuite {
 
     // make cluster available, now queued requests should be processed
     val thread = new Thread {
-      override def run = cluster.add(server.localAddress)
+      override def run = cluster.add(server.boundAddress)
     }
 
     cluster.ready.map { _ =>
@@ -99,7 +99,7 @@ class EndToEndTest extends FunSuite {
     val mem = new InMemoryStatsReceiver
     val client = ClientBuilder()
       .name("client")
-      .hosts(server.localAddress)
+      .hosts(server.boundAddress)
       .codec(StringCodec)
       .requestTimeout(10.millisecond)
       .hostConnectionLimit(1)
@@ -110,14 +110,19 @@ class EndToEndTest extends FunSuite {
     // generate com.twitter.finagle.IndividualAskTimeoutException
     intercept[IndividualAskTimeoutException] { Await.result(client("hi")) }
     Await.ready(server.close())
-    // generate com.twitter.finagle.WriteException$$anon$1
-    intercept[WriteException] { Await.result(client("hi")) }
+    // generate com.twitter.finagle.FailedFastException
+    intercept[FailedFastException] { Await.result(client("hi")) }
 
     val requestFailures = mem.counters(Seq("client", "failures"))
     val serviceCreationFailures =
       mem.counters(Seq("client", "service_creation", "failures"))
+    val automaticRetries =
+      mem.stats(Seq("client", "automatic", "retries"))
 
     assert(requestFailures === 1)
-    assert(serviceCreationFailures === 1)
+
+    // write exception, then failedfastexception
+    assert(serviceCreationFailures === 2)
+    assert(automaticRetries === Seq(0.0f, 1.0f))
   }
 }

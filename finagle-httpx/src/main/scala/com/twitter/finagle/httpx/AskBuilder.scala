@@ -408,8 +408,13 @@ class AskBuilder[HasUrl, HasForm] private[httpx](
     }
   }
 
-  private[httpx] def withoutContent(method: Method): Ask =
-    Ask(method, resource, config.version, config.headers)
+  private[httpx] def withoutContent(method: Method): Ask = {
+    val req = Ask(config.version, method, resource)
+    config.headers foreach { case (field, values) =>
+      values foreach { v => req.headers.add(field, v) }
+    }
+    req
+  }
 
   private[httpx] def withContent(method: Method, content: Buf): Ask = {
     require(content != null)

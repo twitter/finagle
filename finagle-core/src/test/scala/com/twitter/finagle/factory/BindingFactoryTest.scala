@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.Rng
 import com.twitter.util._
-import java.net.InetSocketAddress
+import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{times, verify, when}
@@ -232,7 +232,7 @@ class NamerTracingFilterTest extends FunSuite {
       records :+= key -> value
     }
 
-    val addr = RandomSocket.nextAddress()
+    val addr = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val path = Path.read("/foo")
 
     val baseDtab = () => Dtab.read("/foo => /bar")

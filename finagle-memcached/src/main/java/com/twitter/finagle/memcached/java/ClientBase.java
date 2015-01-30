@@ -1,11 +1,11 @@
 package com.twitter.finagle.memcached.java;
 
 import java.util.List;
-import java.util.Map;
 
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
+import scala.collection.immutable.Map;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 
@@ -16,7 +16,8 @@ import com.twitter.util.Future;
 import com.twitter.util.Time;
 
 public class ClientBase extends Client {
-  com.twitter.finagle.memcached.Client underlying;
+
+  protected com.twitter.finagle.memcached.Client underlying;
 
   public ClientBase(com.twitter.finagle.memcached.Client underlying) {
     this.underlying = underlying;
@@ -27,7 +28,7 @@ public class ClientBase extends Client {
     return result.map(new Function<Option<ChannelBuffer>, ChannelBuffer>() {
       public ChannelBuffer apply(Option<ChannelBuffer> value) {
         if (value.isDefined()) {
-          return (ChannelBuffer)value.get();
+          return value.get();
         } else {
           return null;
         }
@@ -37,38 +38,41 @@ public class ClientBase extends Client {
 
   public Future<ResultWithCAS> gets(String key) {
     Future<Option<Tuple2<ChannelBuffer, ChannelBuffer>>> result = underlying.gets(key);
-    return result.map(new Function<Option<Tuple2<ChannelBuffer, ChannelBuffer>>, ResultWithCAS>() {
-      public ResultWithCAS apply(Option<Tuple2<ChannelBuffer, ChannelBuffer>> value) {
-        if (value.isDefined()) {
-          return new ResultWithCAS(value.get()._1(), value.get()._2());
-        } else {
-          return null;
+    return result.map(
+      new Function<Option<Tuple2<ChannelBuffer, ChannelBuffer>>, ResultWithCAS>() {
+        public ResultWithCAS apply(Option<Tuple2<ChannelBuffer, ChannelBuffer>> value) {
+          if (value.isDefined()) {
+            return new ResultWithCAS(value.get()._1(), value.get()._2());
+          } else {
+            return null;
+          }
         }
       }
-    });
+    );
   }
 
-  public Future<Map<String, ChannelBuffer>> get(List<String> keys) {
+  public Future<java.util.Map<String, ChannelBuffer>> get(List<String> keys) {
     Future<scala.collection.immutable.Map<String, ChannelBuffer>> result =
       underlying.get(JavaConversions.asScalaBuffer(keys));
-    return result.map(new Function<scala.collection.immutable.Map<String, ChannelBuffer>, Map<String, ChannelBuffer>>() {
-      public Map<String, ChannelBuffer> apply(scala.collection.immutable.Map<String, ChannelBuffer> underlying) {
-        return JavaConversions.mapAsJavaMap(underlying);
+    return result.map(
+      new Function<Map<String, ChannelBuffer>, java.util.Map<String, ChannelBuffer>>() {
+        public java.util.Map<String, ChannelBuffer> apply(Map<String, ChannelBuffer> map) {
+          return JavaConversions.mapAsJavaMap(map);
+        }
       }
-    });
+    );
   }
 
-  public Future<Map<String, ResultWithCAS>> gets(List<String> keys) {
-    Future<scala.collection.immutable.Map<String, Tuple2<ChannelBuffer, ChannelBuffer>>> result =
+  public Future<java.util.Map<String, ResultWithCAS>> gets(List<String> keys) {
+    Future<Map<String, Tuple2<ChannelBuffer, ChannelBuffer>>> result =
       underlying.gets(JavaConversions.asScalaBuffer(keys));
     return result.map(new Function<
-      scala.collection.immutable.Map<String, Tuple2<ChannelBuffer, ChannelBuffer>>,
-      Map<String, ResultWithCAS>>() {
-      public Map<String, ResultWithCAS> apply(
-        scala.collection.immutable.Map<String, Tuple2<ChannelBuffer, ChannelBuffer>> underlying)
-      {
+      Map<String, Tuple2<ChannelBuffer, ChannelBuffer>>,
+      java.util.Map<String, ResultWithCAS>>() {
+      public java.util.Map<String, ResultWithCAS> apply(
+        Map<String, Tuple2<ChannelBuffer, ChannelBuffer>> map) {
         return JavaConversions.mapAsJavaMap(
-          underlying.mapValues(new Function<Tuple2<ChannelBuffer, ChannelBuffer>, ResultWithCAS>() {
+          map.mapValues(new Function<Tuple2<ChannelBuffer, ChannelBuffer>, ResultWithCAS>() {
             public ResultWithCAS apply(Tuple2<ChannelBuffer, ChannelBuffer> tuple) {
               return new ResultWithCAS(tuple._1(), tuple._2());
             }
