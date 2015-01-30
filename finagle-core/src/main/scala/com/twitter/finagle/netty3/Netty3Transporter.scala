@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty3
 
-import com.twitter.finagle.channel.{ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler}
+import com.twitter.finagle.channel.{ChannelAskStatsHandler, ChannelStatsHandler, IdleChannelHandler}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.httpproxy.HttpConnectHandler
 import com.twitter.finagle.socks.{SocksProxyFlags, SocksConnectHandler, Unauthenticated, UsernamePassAuthenticationSetting}
@@ -236,8 +236,8 @@ case class Netty3Transporter[In, Out](
     val pipeline = pipelineFactory.getPipeline()
 
     pipeline.addFirst("channelStatsHandler", channelStatsHandler(statsReceiver))
-    pipeline.addFirst("channelRequestStatsHandler",
-      new ChannelRequestStatsHandler(statsReceiver)
+    pipeline.addFirst("channelAskStatsHandler",
+      new ChannelAskStatsHandler(statsReceiver)
     )
 
     if (channelReaderTimeout.isFinite || channelWriterTimeout.isFinite) {

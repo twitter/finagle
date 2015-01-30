@@ -20,12 +20,12 @@ class ThriftCall[A <: TBase[_, _], R <: TBase[_, _]](
   def this(@BeanProperty method: String, args: A, replyClass: Class[R]) =
     this(method, args, replyClass, -1)
 
-  private[thrift] def readRequestArgs(p: TProtocol) {
+  private[thrift] def readAskArgs(p: TProtocol) {
     args.read(p)
     p.readMessageEnd()
   }
 
-  private[thrift] def writeRequest(seqid: Int, p: TProtocol) {
+  private[thrift] def writeAsk(seqid: Int, p: TProtocol) {
     p.writeMessageBegin(new TMessage(method, TMessageType.CALL, seqid))
     args.write(p)
     p.writeMessageEnd()

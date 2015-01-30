@@ -18,13 +18,13 @@ Thus a simple HTTP server is built like this:
 {{{
 import com.twitter.finagle.{Http, Service}
 import org.jboss.netty.handler.codec.http.{
-  HttpRequest, HttpResponse, DefaultHttpResponse}
+  HttpAsk, HttpResponse, DefaultHttpResponse}
 import org.jboss.netty.handler.codec.http.HttpVersion._
 import org.jboss.netty.handler.codec.http.HttpResponseStatus._
 import com.twitter.util.{Future, Await}
 
-val service = new Service[HttpRequest, HttpResponse] {
-  def apply(req: HttpRequest) =
+val service = new Service[HttpAsk, HttpResponse] {
+  def apply(req: HttpAsk) =
     Future.value(new DefaultHttpResponse(HTTP_1_1, OK))
 }
 val server = Http.serve(":8080", service)
@@ -53,15 +53,15 @@ added for illustration.)
 {{{
 import com.twitter.finagle.{Http, Service}
 import org.jboss.netty.handler.codec.http.{
-  HttpRequest, HttpResponse, DefaultHttpRequest}
+  HttpAsk, HttpResponse, DefaultHttpAsk}
 import org.jboss.netty.handler.codec.http.HttpVersion._
 import org.jboss.netty.handler.codec.http.HttpMethod._
 import com.twitter.util.{Future, Return, Throw}
 
-val client: Service[HttpRequest, HttpResponse] =
+val client: Service[HttpAsk, HttpResponse] =
   Http.newService("localhost:8080")
 val f: Future[HttpResponse] =
-  client(new DefaultHttpRequest(HTTP_1_1, GET, "/"))
+  client(new DefaultHttpAsk(HTTP_1_1, GET, "/"))
 f respond {
   case Return(res) =>
     printf("Got HTTP response %s\n", res)

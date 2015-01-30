@@ -1,25 +1,25 @@
 package com.twitter.finagle.httpx.filter
 
 import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.finagle.httpx.{Request, Response, Status}
+import com.twitter.finagle.httpx.{Ask, Response, Status}
 import com.twitter.util.Future
 
 
 /**
  * Validate request filter:
- *   400 Bad Request is the request is /bad-http-request - Finagle sets this if the
+ *   400 Bad Ask is the request is /bad-http-request - Finagle sets this if the
  *      request is malformed.
- *   400 Bad Request if the parameters are invalid.
+ *   400 Bad Ask if the parameters are invalid.
  */
-class ValidateRequestFilter[REQUEST <: Request]
-  extends SimpleFilter[REQUEST, Response] {
+class ValidateAskFilter[ASK <: Ask]
+  extends SimpleFilter[ASK, Response] {
 
-  def apply(request: REQUEST, service: Service[REQUEST, Response]): Future[Response] = {
+  def apply(request: ASK, service: Service[ASK, Response]): Future[Response] = {
     if (request.uri != "/bad-http-request" && request.params.isValid) {
       service(request)
     } else {
       val response = request.response
-      response.status = Status.BadRequest
+      response.status = Status.BadAsk
       response.clearContent()
       Future.value(response)
     }
@@ -27,4 +27,4 @@ class ValidateRequestFilter[REQUEST <: Request]
 }
 
 
-object ValidateRequestFilter extends ValidateRequestFilter[Request]
+object ValidateAskFilter extends ValidateAskFilter[Ask]

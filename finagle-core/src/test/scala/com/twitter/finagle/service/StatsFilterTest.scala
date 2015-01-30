@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, RollupStatsReceiver}
-import com.twitter.finagle.{BackupRequestLost, RequestException, Service, WriteException, Failure}
+import com.twitter.finagle.{BackupAskLost, AskException, Service, WriteException, Failure}
 import com.twitter.util.{Await, Promise}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -24,7 +24,7 @@ class StatsFilterTest extends FunSuite {
     val (promise, receiver, statsService) = getService
 
     val e1 = new Exception("e1")
-    val e2 = new RequestException(e1)
+    val e2 = new AskException(e1)
     val e3 = WriteException(e2)
     e3.serviceName = "bogus"
     promise.setException(e3)
@@ -36,7 +36,7 @@ class StatsFilterTest extends FunSuite {
     assert(sourced.toSeq(0).exists(_.indexOf("bogus") >= 0))
     val unsourced = receiver.counters.keys.filter { _.exists(_ == "failures") }
     assert(unsourced.size === 1)
-    assert(unsourced.toSeq(0).exists { s => s.indexOf("RequestException") >= 0 })
+    assert(unsourced.toSeq(0).exists { s => s.indexOf("AskException") >= 0 })
     assert(unsourced.toSeq(0).exists { s => s.indexOf("WriteException") >= 0 })
   }
 
@@ -55,8 +55,8 @@ class StatsFilterTest extends FunSuite {
     assert(unsourced.toSeq(0).exists { s => s.indexOf("Failure") >= 0 })
   }
 
-  test("don't report BackupRequestLost exceptions") {
-    for (exc <- Seq(BackupRequestLost, WriteException(BackupRequestLost))) {
+  test("don't report BackupAskLost exceptions") {
+    for (exc <- Seq(BackupAskLost, WriteException(BackupAskLost))) {
       val (promise, receiver, statsService) = getService
 
       // It may seem strange to test for the absence
@@ -67,7 +67,7 @@ class StatsFilterTest extends FunSuite {
       assert(!receiver.counters.keys.exists(_ contains "failure"))
       statsService("foo")
       assert(receiver.gauges(Seq("pending"))() === 1.0)
-      promise.setException(BackupRequestLost)
+      promise.setException(BackupAskLost)
       assert(!receiver.counters.keys.exists(_ contains "failure"))
       assert(!receiver.counters.contains(Seq("requests")))
       assert(!receiver.counters.contains(Seq("success")))

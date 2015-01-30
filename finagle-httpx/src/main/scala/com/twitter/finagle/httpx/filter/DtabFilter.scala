@@ -33,7 +33,7 @@ abstract class DtabFilter[Req <: Message, Rep <: Message]
 object DtabFilter {
   private def invalidResponse(msg: String): Future[Response] = {
     val rspTxt = "Invalid Dtab headers: %s".format(msg)
-    val rsp = Response(Status.BadRequest)
+    val rsp = Response(Status.BadAsk)
     rsp.contentType = "text/plain; charset=UTF-8"
     rsp.contentLength = rspTxt.getBytes.length
     rsp.contentString = rspTxt

@@ -6,7 +6,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 import scala.util.matching.Regex
-import com.twitter.finagle.http.{MediaType, Response, Request}
+import com.twitter.finagle.http.{MediaType, Response, Ask}
 import com.twitter.util.Await
 
 @RunWith(classOf[JUnitRunner])
@@ -42,12 +42,12 @@ class JsonExporterTest extends FunSuite {
     val exporter = new JsonExporter(registry) {
       override lazy val statsFilterRegex: Option[Regex] = mkRegex("jvm.*,vie")
     }
-    val requestFiltered = Request("/admin/metrics.json?filtered=1&pretty=0")
+    val requestFiltered = Ask("/admin/metrics.json?filtered=1&pretty=0")
     val responseFiltered = Response(Await.result(exporter.apply(requestFiltered))).contentString
     assert(responseFiltered.contains("views"), "'Views' should be present - 'vie' is not a match")
     assert(! responseFiltered.contains("jvm_gcs"), "'jvm_gcs' should be present - jvm.* matches it")
 
-    val requestUnfiltered = Request("/admin/metrics.json")
+    val requestUnfiltered = Ask("/admin/metrics.json")
     val responseUnfiltered = Response(Await.result(exporter.apply(requestUnfiltered)))
     assert(MediaType.Json.equals(responseUnfiltered.headers().get(HttpHeaders.Names.CONTENT_TYPE)))
 

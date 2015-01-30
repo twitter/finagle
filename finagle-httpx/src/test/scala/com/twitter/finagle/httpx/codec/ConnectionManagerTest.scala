@@ -1,14 +1,14 @@
 package com.twitter.finagle.httpx.codec
 
 import com.twitter.finagle.httpx.{
-  HttpTransport, Request, Version, Method, Response, Fields, Status
+  HttpTransport, Ask, Version, Method, Response, Fields, Status
 }
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Promise, Return, Future, Time}
 import java.net.InetSocketAddress
 import java.nio.charset.Charset
 import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
+import org.jboss.netty.handler.codec.http.{HttpRequest=>HttpAsk, HttpResponse}
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
@@ -28,12 +28,12 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
   val cFuture = new DefaultChannelFuture(c, false)
   when(me.getChannel).thenReturn(c)
 
-  def makeRequest(version: Version, headers: (String, String)*) = {
-    val request = Request(version, Method.Get, "/")
+  def makeAsk(version: Version, headers: (String, String)*) = {
+    val ask = Ask(version, Method.Get, "/")
     headers foreach { case (k, v) =>
-      request.headers.set(k, v)
+      ask.headers.set(k, v)
     }
-    request
+    ask
   }
 
   def makeResponse(version: Version, headers: (String, String)*) = {
@@ -44,7 +44,7 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
     response
   }
 
-  def perform(request: Request, response: Response, shouldMarkDead: Boolean) {
+  def perform(request: Ask, response: Response, shouldMarkDead: Boolean) {
     val trans = mock[Transport[Any, Any]]
     when(trans.close(any[Time])).thenReturn(Future.Done)
     when(trans.close).thenReturn(Future.Done)
@@ -52,12 +52,12 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
     val disp = new HttpClientDispatcher(new HttpTransport(trans))
 
     val wp = new Promise[Unit]
-    when(trans.write(any[HttpRequest])).thenReturn(wp)
+    when(trans.write(any[HttpAsk])).thenReturn(wp)
 
     val f = disp(request)
     assert(f.isDefined === false)
 
-    verify(trans, times(1)).write(any[HttpRequest])
+    verify(trans, times(1)).write(any[HttpAsk])
     verify(trans, never()).read()
 
     val rp = new Promise[HttpResponse]
@@ -85,7 +85,7 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
 
   test("not terminate regular http/1.1 connections") {
     perform(
-      makeRequest(Version.Http11),
+      makeAsk(Version.Http11),
       makeResponse(Version.Http11, Fields.ContentLength -> "1"),
       false)
   }
@@ -93,7 +93,7 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
   // Note: by way of the codec, this reply is already taken care of.
   test("terminate http/1.1 connections without content length") {
     perform(
-      makeRequest(Version.Http11),
+      makeAsk(Version.Http11),
       makeResponse(Version.Http11),
       true
     )
@@ -101,7 +101,7 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
 
   test("terminate http/1.1 connections with Connection: close") {
     perform(
-      makeRequest(Version.Http11, "Connection" -> "close"),
+      makeAsk(Version.Http11, "Connection" -> "close"),
       makeResponse(Version.Http11),
       true
     )

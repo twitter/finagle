@@ -8,7 +8,7 @@ import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import com.twitter.finagle.tracing.{NullTracer, Trace, Tracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
-import com.twitter.finagle.{CancelledRequestException, Dtab, Service, Path}
+import com.twitter.finagle.{CancelledAskException, Dtab, Service, Path}
 import com.twitter.util._
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
@@ -21,7 +21,7 @@ import scala.collection.JavaConverters._
  * This implies that the client issued a Tdiscarded message for a given tagged
  * request, as per [[com.twitter.finagle.mux]].
  */
-case class ClientDiscardedRequestException(why: String) extends Exception(why)
+case class ClientDiscardedAskException(why: String) extends Exception(why)
 
 object ServerDispatcher {
   val Epsilon = 1.second // TODO decide whether this should be hard coded or not
@@ -35,7 +35,7 @@ object gracefulShutdownEnabled extends GlobalFlag(true, "Graceful shutdown enabl
  */
 private[finagle] class ServerDispatcher private[finagle](
     trans: Transport[ChannelBuffer, ChannelBuffer],
-    service: Service[Request, Response],
+    service: Service[Ask, Response],
     canDispatch: Boolean, // XXX: a hack to indicate whether a server understands {T,R}Dispatch
     lessor: Lessor, // the lessor that the dispatcher should register with in order to get leases
     tracer: Tracer
@@ -80,7 +80,7 @@ private[finagle] class ServerDispatcher private[finagle](
           if (dtab.length > 0)
             Dtab.local ++= dtab
           val elapsed = Stopwatch.start()
-          val f = service(Request(dst, ChannelBufferBuf.Owned(bytes)))
+          val f = service(Ask(dst, ChannelBufferBuf.Owned(bytes)))
           pending.put(tag, f)
           f transform {
             case Return(rep) =>
@@ -104,7 +104,7 @@ private[finagle] class ServerDispatcher private[finagle](
     lessor.observeArrival()
     Trace.letIdOption(traceId) {
       val elapsed = Stopwatch.start()
-      val f = service(Request(Path.empty, ChannelBufferBuf.Owned(bytes)))
+      val f = service(Ask(Path.empty, ChannelBufferBuf.Owned(bytes)))
       pending.put(tag, f)
       f transform {
         case Return(rep) =>
@@ -126,7 +126,7 @@ private[finagle] class ServerDispatcher private[finagle](
     case Tdiscarded(tag, why) =>
       pending.get(tag) match {
         case null => ()
-        case f => f.raise(new ClientDiscardedRequestException(why))
+        case f => f.raise(new ClientDiscardedAskException(why))
       }
     case Tping(tag) =>
       trans.write(encode(Rping(tag)))
@@ -135,7 +135,7 @@ private[finagle] class ServerDispatcher private[finagle](
       trans.write(encode(msg))
   }
 
-  private[this] val nackRequests: Message => Unit = {
+  private[this] val nackAsks: Message => Unit = {
     case tdispatch: Tdispatch =>
       trans.write(encode(RdispatchNack(tdispatch.tag, Nil)))
     case treq: Treq =>
@@ -154,7 +154,7 @@ private[finagle] class ServerDispatcher private[finagle](
   private[this] val readyToDrain: PartialFunction[Message, Unit] = {
     case Rdrain(1) =>
       draining = true
-      receive = nackRequests
+      receive = nackAsks
       if (pending.isEmpty) {
         log.info("Finished draining a connection")
         closep.setDone()
@@ -192,7 +192,7 @@ private[finagle] class ServerDispatcher private[finagle](
   } onFailure { case cause =>
     // We know that if we have a failure, we cannot from this point forward
     // insert new entries in the pending map.
-    val exc = new CancelledRequestException(cause)
+    val exc = new CancelledAskException(cause)
     pending.asScala.foreach { case (tag, f) =>
       removeTag(tag)
       f.raise(exc)

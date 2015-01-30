@@ -3,7 +3,7 @@ package com.twitter.finagle.http
 import com.twitter.finagle.Service
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceId, Trace}
 import com.twitter.util.Future
-import org.jboss.netty.handler.codec.http.{HttpResponse, HttpRequest}
+import org.jboss.netty.handler.codec.http.{HttpResponse, HttpRequest=>HttpAsk}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -18,8 +18,8 @@ class TracingTest extends FunSuite {
   test("set header") {
     Trace.letId(traceId) {
 
-      val dummyService = new Service[HttpRequest, HttpResponse] {
-        def apply(request: HttpRequest) = {
+      val dummyService = new Service[HttpAsk, HttpResponse] {
+        def apply(request: HttpAsk) = {
           assert(request.headers.get(Header.TraceId) === traceId.traceId.toString)
           assert(request.headers.get(Header.SpanId) === traceId.spanId.toString)
           assert(request.headers.contains(Header.ParentSpanId) === false)
@@ -30,8 +30,8 @@ class TracingTest extends FunSuite {
         }
       }
 
-      val filter = new HttpClientTracingFilter[HttpRequest, HttpResponse]("testservice")
-      val req = Request("/test.json")
+      val filter = new HttpClientTracingFilter[HttpAsk, HttpResponse]("testservice")
+      val req = Ask("/test.json")
       filter(req, dummyService)
     }
   }
@@ -45,16 +45,16 @@ class TracingTest extends FunSuite {
   }
 
   test("parse header") {
-    val dummyService = new Service[HttpRequest, HttpResponse] {
-      def apply(request: HttpRequest) = {
+    val dummyService = new Service[HttpAsk, HttpResponse] {
+      def apply(request: HttpAsk) = {
         assert(Trace.id === traceId)
         assert(Trace.id.flags === flags)
         Future.value(Response())
       }
     }
 
-    val filter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("testservice")
-    val req = Request("/test.json")
+    val filter = new HttpServerTracingFilter[HttpAsk, HttpResponse]("testservice")
+    val req = Ask("/test.json")
     req.headers.add(Header.TraceId, "0000000000000001")
     req.headers.add(Header.SpanId, "0000000000000002")
     req.headers.add(Header.Sampled, "true")
@@ -63,30 +63,30 @@ class TracingTest extends FunSuite {
   }
 
   test("not parse header if no trace id") {
-    val dummyService = new Service[HttpRequest, HttpResponse] {
-      def apply(request: HttpRequest) = {
+    val dummyService = new Service[HttpAsk, HttpResponse] {
+      def apply(request: HttpAsk) = {
         assert(Trace.id != traceId)
         Future.value(Response())
       }
     }
 
-    val filter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("testservice")
-    val req = Request("/test.json")
+    val filter = new HttpServerTracingFilter[HttpAsk, HttpResponse]("testservice")
+    val req = Ask("/test.json")
     // push span id, but no trace id
     req.headers.add(Header.SpanId, "0000000000000002")
     filter(req, dummyService)
   }
 
   test("survive bad flags entry") {
-    val dummyService = new Service[HttpRequest, HttpResponse] {
-      def apply(request: HttpRequest) = {
+    val dummyService = new Service[HttpAsk, HttpResponse] {
+      def apply(request: HttpAsk) = {
         assert(Trace.id.flags === Flags())
         Future.value(Response())
       }
     }
 
-    val filter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("testservice")
-    val req = Request("/test.json")
+    val filter = new HttpServerTracingFilter[HttpAsk, HttpResponse]("testservice")
+    val req = Ask("/test.json")
     req.headers.add(Header.TraceId, "0000000000000001")
     req.headers.add(Header.SpanId, "0000000000000002")
     req.headers.add(Header.Flags, "these aren't the droids you're looking for")
@@ -94,15 +94,15 @@ class TracingTest extends FunSuite {
   }
 
   test("survive no flags entry") {
-    val dummyService = new Service[HttpRequest, HttpResponse] {
-      def apply(request: HttpRequest) = {
+    val dummyService = new Service[HttpAsk, HttpResponse] {
+      def apply(request: HttpAsk) = {
         assert(Trace.id.flags === Flags())
         Future.value(Response())
       }
     }
 
-    val filter = new HttpServerTracingFilter[HttpRequest, HttpResponse]("testservice")
-    val req = Request("/test.json")
+    val filter = new HttpServerTracingFilter[HttpAsk, HttpResponse]("testservice")
+    val req = Ask("/test.json")
     req.headers.add(Header.TraceId, "0000000000000001")
     req.headers.add(Header.SpanId, "0000000000000002")
     filter(req, dummyService)

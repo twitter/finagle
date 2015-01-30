@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Delay release of the connection until all chunks have been received.
  */
-private[finagle] class DelayedReleaseService[-Req <: Request](
+private[finagle] class DelayedReleaseService[-Req <: Ask](
   service: Service[Req, Response]
 ) extends ServiceProxy[Req, Response](service) {
 

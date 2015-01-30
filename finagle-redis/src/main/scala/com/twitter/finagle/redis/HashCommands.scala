@@ -15,7 +15,7 @@ trait Hashes { self: BaseClient =>
    * @return Number of fields deleted
    */
   def hDel(key: ChannelBuffer, fields: Seq[ChannelBuffer]): Future[JLong] =
-    doRequest(HDel(key, fields)) {
+    doAsk(HDel(key, fields)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -25,7 +25,7 @@ trait Hashes { self: BaseClient =>
    * @return true if key field exists, false otherwise
    */
   def hExists(key: ChannelBuffer, field: ChannelBuffer): Future[JBoolean] =
-    doRequest(HExists(key, field)) {
+    doAsk(HExists(key, field)) {
       case IntegerReply(n) => Future.value(n == 1)
     }
 
@@ -35,7 +35,7 @@ trait Hashes { self: BaseClient =>
    * @return Value if field exists
    */
   def hGet(key: ChannelBuffer, field: ChannelBuffer): Future[Option[ChannelBuffer]] =
-    doRequest(HGet(key, field)) {
+    doAsk(HGet(key, field)) {
       case BulkReply(message)   => Future.value(Some(message))
       case EmptyBulkReply()     => Future.value(None)
     }
@@ -46,7 +46,7 @@ trait Hashes { self: BaseClient =>
    * @return Sequence of field/value pairs
    */
   def hGetAll(key: ChannelBuffer): Future[Seq[(ChannelBuffer, ChannelBuffer)]] =
-    doRequest(HGetAll(key)) {
+    doAsk(HGetAll(key)) {
       case MBulkReply(messages) => Future.value(
         returnPairs(ReplyFormat.toChannelBuffers(messages)))
       case EmptyMBulkReply()    => Future.Nil
@@ -58,7 +58,7 @@ trait Hashes { self: BaseClient =>
    * @return new value of field
    */
   def hIncrBy(key: ChannelBuffer, field: ChannelBuffer, amount: Long): Future[JLong] =
-    doRequest(HIncrBy(key, field, amount)) {
+    doAsk(HIncrBy(key, field, amount)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -68,7 +68,7 @@ trait Hashes { self: BaseClient =>
    * @return List of fields in hash
    */
   def hKeys(key: ChannelBuffer): Future[Seq[ChannelBuffer]] =
-    doRequest(HKeys(key)) {
+    doAsk(HKeys(key)) {
       case MBulkReply(messages) => Future.value(
         ReplyFormat.toChannelBuffers(messages))
       case EmptyMBulkReply()    => Future.Nil
@@ -80,7 +80,7 @@ trait Hashes { self: BaseClient =>
    * @return List of values
    */
   def hMGet(key: ChannelBuffer, fields: Seq[ChannelBuffer]): Future[Seq[ChannelBuffer]] =
-    doRequest(HMGet(key, fields)) {
+    doAsk(HMGet(key, fields)) {
       case MBulkReply(messages) => Future.value(
         ReplyFormat.toChannelBuffers(messages))
       case EmptyMBulkReply()    => Future.Nil
@@ -93,7 +93,7 @@ trait Hashes { self: BaseClient =>
    * @see http://redis.io/commands/hmset
    */
   def hMSet(key: ChannelBuffer, fv: Map[ChannelBuffer, ChannelBuffer]): Future[Unit] =
-    doRequest(HMSet(key, fv)) {
+    doAsk(HMSet(key, fv)) {
       case StatusReply(msg) => Future.Unit
     }
 
@@ -104,7 +104,7 @@ trait Hashes { self: BaseClient =>
    */
   def hScan(key: ChannelBuffer, cursor: JLong, count: Option[JLong], pattern: Option[ChannelBuffer]
   ): Future[Seq[ChannelBuffer]] =
-    doRequest(HScan(key, cursor, count, pattern)) {
+    doAsk(HScan(key, cursor, count, pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
       case EmptyMBulkReply()    => Future.Nil
     }
@@ -115,7 +115,7 @@ trait Hashes { self: BaseClient =>
    * @return 1 if field is new, 0 if field was updated
    */
   def hSet(key: ChannelBuffer, field: ChannelBuffer, value: ChannelBuffer): Future[JLong] =
-    doRequest(HSet(key, field, value)) {
+    doAsk(HSet(key, field, value)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -125,7 +125,7 @@ trait Hashes { self: BaseClient =>
    * @return 1 if field is new, 0 if no operation was performed
    */
   def hSetNx(key: ChannelBuffer, field: ChannelBuffer, value: ChannelBuffer): Future[JLong] =
-    doRequest(HSetNx(key, field, value)) {
+    doAsk(HSetNx(key, field, value)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -135,7 +135,7 @@ trait Hashes { self: BaseClient =>
    * @return list of values, or empty list when key does not exist
    */
   def hVals(key: ChannelBuffer): Future[Seq[ChannelBuffer]] =
-    doRequest(HVals(key)) {
+    doAsk(HVals(key)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
       case EmptyMBulkReply()    => Future.Nil
     }

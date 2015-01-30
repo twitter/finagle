@@ -22,8 +22,8 @@ object HttpServer {
    * A simple Filter that catches exceptions and converts them to appropriate
    * HTTP responses.
    */
-  class HandleExceptions extends SimpleFilter[HttpRequest, HttpResponse] {
-    def apply(request: HttpRequest, service: Service[HttpRequest, HttpResponse]) = {
+  class HandleExceptions extends SimpleFilter[HttpAsk, HttpResponse] {
+    def apply(request: HttpAsk, service: Service[HttpAsk, HttpResponse]) = {
 
       // `handle` asynchronously handles exceptions.
       service(request) handle { case error =>
@@ -45,8 +45,8 @@ object HttpServer {
    * A simple Filter that checks that the request is valid by inspecting the
    * "Authorization" header.
    */
-  class Authorize extends SimpleFilter[HttpRequest, HttpResponse] {
-    def apply(request: HttpRequest, continue: Service[HttpRequest, HttpResponse]) = {
+  class Authorize extends SimpleFilter[HttpAsk, HttpResponse] {
+    def apply(request: HttpAsk, continue: Service[HttpAsk, HttpResponse]) = {
       if ("open sesame" == request.headers().get(HttpHeaders.Names.AUTHORIZATION)) {
         continue(request)
       } else {
@@ -58,8 +58,8 @@ object HttpServer {
   /**
    * The service itself. Simply echos back "hello world"
    */
-  class Respond extends Service[HttpRequest, HttpResponse] {
-    def apply(request: HttpRequest) = {
+  class Respond extends Service[HttpAsk, HttpResponse] {
+    def apply(request: HttpAsk) = {
       val response = new DefaultHttpResponse(HTTP_1_1, OK)
       response.setContent(copiedBuffer("hello world", Utf8))
       Future.value(response)
@@ -72,7 +72,7 @@ object HttpServer {
     val respond = new Respond
 
     // compose the Filters and Service together:
-    val myService: Service[HttpRequest, HttpResponse] = handleExceptions andThen authorize andThen respond
+    val myService: Service[HttpAsk, HttpResponse] = handleExceptions andThen authorize andThen respond
 
     val server: Server = ServerBuilder()
       .codec(Http())

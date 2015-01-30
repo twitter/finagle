@@ -5,14 +5,14 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class RequestTest extends FunSuite {
+class AskTest extends FunSuite {
   test("constructors") {
-    Seq(Request(),
-      Request(Version.Http11, Method.Get, "/"),
-      Request(Method.Get, "/"),
-      Request("/"),
-      Request("/", "q" -> "twitter"),
-      Request("q" -> "twitter")
+    Seq(Ask(),
+      Ask(Version.Http11, Method.Get, "/"),
+      Ask(Method.Get, "/"),
+      Ask("/"),
+      Ask("/", "q" -> "twitter"),
+      Ask("q" -> "twitter")
     ).foreach { request =>
       assert(request.version    === Version.Http11)
       assert(request.method     === Method.Get)
@@ -28,7 +28,7 @@ class RequestTest extends FunSuite {
       "/search.json?q=twitter" -> "/search.json",
       "/search.json%3Fq=twitter" -> "/search.json%3Fq=twitter"
     )
-    tests.foreach { case (input, expected) => assert(Request(input).path === expected) }
+    tests.foreach { case (input, expected) => assert(Ask(input).path === expected) }
   }
 
   test("file extension") {
@@ -44,11 +44,11 @@ class RequestTest extends FunSuite {
       "/"            -> "",
       "/."           -> ""
     )
-    tests.foreach { case (input, expected) => assert(Request(input).fileExtension === expected) }
+    tests.foreach { case (input, expected) => assert(Ask(input).fileExtension === expected) }
   }
 
   test("response") {
-    val request = Request("/search.json", "q" -> "twitter")
+    val request = Ask("/search.json", "q" -> "twitter")
     val response = request.response
 
     assert(response.version === Version.Http11)
@@ -56,7 +56,7 @@ class RequestTest extends FunSuite {
   }
 
   test("toHttpString") {
-    val request = Request("/search.json", "q" -> "twitter")
+    val request = Ask("/search.json", "q" -> "twitter")
     request.headers.set("Host", "search.twitter.com")
 
     val expected = "GET /search.json?q=twitter HTTP/1.1\r\nHost: search.twitter.com\r\n\r\n"
@@ -66,7 +66,7 @@ class RequestTest extends FunSuite {
   }
 
   test("decode") {
-    val request = Request.decodeString(
+    val request = Ask.decodeString(
       "GET /search.json?q=twitter HTTP/1.1\r\nHost: search.twitter.com\r\n\r\n")
     assert(request.path                === "/search.json")
     assert(request.params("q")         === "twitter")
@@ -74,25 +74,25 @@ class RequestTest extends FunSuite {
   }
 
   test("decodeBytes") {
-    val originalRequest = Request("/", "foo" -> "bar")
-    val bytes = originalRequest.encodeBytes()
-    val decodedRequest = Request.decodeBytes(bytes)
+    val originalAsk = Ask("/", "foo" -> "bar")
+    val bytes = originalAsk.encodeBytes()
+    val decodedAsk = Ask.decodeBytes(bytes)
 
-    assert(decodedRequest.path          === "/")
-    assert(decodedRequest.params("foo") === "bar")
+    assert(decodedAsk.path          === "/")
+    assert(decodedAsk.params("foo") === "bar")
   }
 
   test("queryString") {
-    assert(Request.queryString()                                          === "")
-    assert(Request.queryString(Map.empty[String, String])                 === "")
-    assert(Request.queryString("/search.json")                            === "/search.json")
-    assert(Request.queryString("/search.json", Map.empty[String, String]) === "/search.json")
+    assert(Ask.queryString()                                          === "")
+    assert(Ask.queryString(Map.empty[String, String])                 === "")
+    assert(Ask.queryString("/search.json")                            === "/search.json")
+    assert(Ask.queryString("/search.json", Map.empty[String, String]) === "/search.json")
 
-    assert(Request.queryString("/search.json", "q" -> "twitter")      === "/search.json?q=twitter")
-    assert(Request.queryString("/search.json", Map("q" -> "twitter")) === "/search.json?q=twitter")
-    assert(Request.queryString("q" -> "twitter")                      === "?q=twitter")
-    assert(Request.queryString(Map("q" -> "twitter"))                 === "?q=twitter")
+    assert(Ask.queryString("/search.json", "q" -> "twitter")      === "/search.json?q=twitter")
+    assert(Ask.queryString("/search.json", Map("q" -> "twitter")) === "/search.json?q=twitter")
+    assert(Ask.queryString("q" -> "twitter")                      === "?q=twitter")
+    assert(Ask.queryString(Map("q" -> "twitter"))                 === "?q=twitter")
 
-    assert(Request.queryString("q!" -> "twitter!") === "?q%21=twitter%21")
+    assert(Ask.queryString("q!" -> "twitter!") === "?q%21=twitter%21")
   }
 }

@@ -14,26 +14,26 @@ import org.scalatest.mock.MockitoSugar
 @RunWith(classOf[JUnitRunner])
 class ShardingServiceTest extends FunSuite with MockitoSugar {
 
-  class MockRequest
-  class ShardingRequest(key: Long) extends MockRequest {
+  class MockAsk
+  class ShardingAsk(key: Long) extends MockAsk {
     def shardingKey = key
   }
 
   class ShardingServiceHelper {
-    val distributor = mock[Distributor[Service[MockRequest, String]]]
+    val distributor = mock[Distributor[Service[MockAsk, String]]]
     val service = new ShardingService(distributor, {
-      request: MockRequest =>
+      request: MockAsk =>
         request match {
-          case req: ShardingRequest => Some(req.shardingKey)
+          case req: ShardingAsk => Some(req.shardingKey)
           case _ => None
         }
     })
 
-    val reqA = new ShardingRequest(1L)
-    val serviceForA = mock[Service[MockRequest, String]]
+    val reqA = new ShardingAsk(1L)
+    val serviceForA = mock[Service[MockAsk, String]]
     when(serviceForA.close(any)) thenReturn Future.Done
 
-    val unshardableReq = new MockRequest
+    val unshardableReq = new MockAsk
     val reply = Future.value("hello")
   }
 
@@ -41,8 +41,8 @@ class ShardingServiceTest extends FunSuite with MockitoSugar {
     val h = new ShardingServiceHelper
     import h._
 
-    val reqB = new ShardingRequest(2L)
-    val serviceForB = mock[Service[MockRequest, String]]
+    val reqB = new ShardingAsk(2L)
+    val serviceForB = mock[Service[MockAsk, String]]
     when(serviceForB.close(any)) thenReturn Future.Done
 
     when(distributor.nodeForHash(1L)) thenReturn serviceForA

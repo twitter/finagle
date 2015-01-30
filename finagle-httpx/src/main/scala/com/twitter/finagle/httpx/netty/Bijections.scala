@@ -1,10 +1,10 @@
 package com.twitter.finagle.httpx.netty
 
-import com.twitter.finagle.httpx.{Status, Version, Method, Request, Response}
+import com.twitter.finagle.httpx.{Status, Version, Method, Ask, Response}
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import java.net.InetSocketAddress
 import org.jboss.netty.handler.codec.http.{
-  HttpVersion, HttpResponseStatus, HttpMethod, HttpRequest, HttpResponse
+  HttpVersion, HttpResponseStatus, HttpMethod, HttpRequest => HttpAsk, HttpResponse
 }
 
 // TODO Use bijection-core when bijection.Conversion is contravariant in A.
@@ -81,15 +81,15 @@ object Bijections {
     def apply(s: HttpResponseStatus) = Status.fromCode(s.getCode)
   }
 
-  // Request
+  // Ask
 
-  implicit val requestToNetty = new Injection[Request, HttpRequest] {
-    def apply(r: Request): HttpRequest = r.httpRequest
+  implicit val requestToNetty = new Injection[Ask, HttpAsk] {
+    def apply(r: Ask): HttpAsk = r.httpAsk
   }
 
-  implicit val requestFromNetty = new Injection[HttpRequest, Request] {
-    def apply(r: HttpRequest): Request = new Request {
-      val httpRequest = r
+  implicit val requestFromNetty = new Injection[HttpAsk, Ask] {
+    def apply(r: HttpAsk): Ask = new Ask {
+      val httpAsk = r
       lazy val remoteSocketAddress = new InetSocketAddress(0)
     }
   }

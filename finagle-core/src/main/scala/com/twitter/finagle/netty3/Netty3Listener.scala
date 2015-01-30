@@ -2,7 +2,7 @@ package com.twitter.finagle.netty3
 
 import com.twitter.finagle._
 import com.twitter.finagle.channel.{
-  ChannelRequestStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler}
+  ChannelAskStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler}
 import com.twitter.finagle.server.{Listener, ServerRegistry}
 import com.twitter.finagle.ssl.{Engine, SslShutdownHandler}
 import com.twitter.finagle.stats.{ServerStatsReceiver, StatsReceiver}
@@ -282,8 +282,8 @@ case class Netty3Listener[In, Out](
 
         if (!statsReceiver.isNull) {
           pipeline.addLast(
-            "channelRequestStatsHandler",
-            new ChannelRequestStatsHandler(statsReceiver))
+            "channelAskStatsHandler",
+            new ChannelAskStatsHandler(statsReceiver))
         }
 
         pipeline.addLast("finagleBridge", newBridge())

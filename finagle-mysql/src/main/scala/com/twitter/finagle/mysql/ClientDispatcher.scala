@@ -5,7 +5,7 @@ import com.twitter.cache.guava.GuavaCache
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.exp.mysql.transport.{BufferReader, Packet}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{CancelledRequestException, Service, WriteException, ServiceProxy}
+import com.twitter.finagle.{CancelledAskException, Service, WriteException, ServiceProxy}
 import com.twitter.util.{Future, Promise, Return, Try, Throw}
 
 /**
@@ -29,16 +29,16 @@ case class LostSyncException(underlying: Throwable)
  * The cache is capped at `max` and least recently used elements are evicted.
  */
 private[mysql] class PrepareCache(
-  svc: Service[Request, Result],
+  svc: Service[Ask, Result],
   max: Int = 20
-) extends ServiceProxy[Request, Result](svc) {
+) extends ServiceProxy[Ask, Result](svc) {
 
   private[this] val fn = {
-    val listener = new RemovalListener[Request, Future[Result]] {
+    val listener = new RemovalListener[Ask, Future[Result]] {
       // make sure prepared futures get removed eventually
-      def onRemoval(notification: RemovalNotification[Request, Future[Result]]): Unit = {
+      def onRemoval(notification: RemovalNotification[Ask, Future[Result]]): Unit = {
         notification.getValue() onSuccess {
-          case r: PrepareOK => svc(CloseRequest(r.id))
+          case r: PrepareOK => svc(CloseAsk(r.id))
           case _ => // nop
         }
       }
@@ -46,7 +46,7 @@ private[mysql] class PrepareCache(
     val underlying = CacheBuilder.newBuilder()
       .maximumSize(max)
       .removalListener(listener)
-      .build[Request, Future[Result]]()
+      .build[Ask, Future[Result]]()
 
     GuavaCache.fromCache(svc, underlying)
   }
@@ -55,14 +55,14 @@ private[mysql] class PrepareCache(
    * Populate cache with unique prepare requests identified by their
    * sql queries.
    */
-  override def apply(req: Request): Future[Result] = req match {
-    case _: PrepareRequest => fn(req)
+  override def apply(req: Ask): Future[Result] = req match {
+    case _: PrepareAsk => fn(req)
     case _ => super.apply(req)
   }
 }
 
 object ClientDispatcher {
-  private val cancelledRequestExc = new CancelledRequestException
+  private val cancelledAskExc = new CancelledAskException
   private val lostSyncExc = new LostSyncException(new Throwable)
   private val emptyTx = (Nil, EOF(0: Short, 0: Short))
   private val wrapWriteException: PartialFunction[Throwable, Future[Nothing]] = {
@@ -78,7 +78,7 @@ object ClientDispatcher {
   def apply(
     trans: Transport[Packet, Packet],
     handshake: HandshakeInit => Try[HandshakeResponse]
-  ): Service[Request, Result] = {
+  ): Service[Ask, Result] = {
     new PrepareCache(new ClientDispatcher(trans, handshake))
   }
 
@@ -103,10 +103,10 @@ object ClientDispatcher {
 class ClientDispatcher(
   trans: Transport[Packet, Packet],
   handshake: HandshakeInit => Try[HandshakeResponse]
-) extends GenSerialClientDispatcher[Request, Result, Packet, Packet](trans) {
+) extends GenSerialClientDispatcher[Ask, Result, Packet, Packet](trans) {
   import ClientDispatcher._
 
-  override def apply(req: Request): Future[Result] =
+  override def apply(req: Ask): Future[Result] =
     connPhase flatMap { _ =>
       super.apply(req)
     } onFailure {
@@ -141,7 +141,7 @@ class ClientDispatcher(
    * is decoupled from the promise that signals a complete exchange.
    * This leaves room for implementing streaming results.
    */
-  protected def dispatch(req: Request, rep: Promise[Result]): Future[Unit] =
+  protected def dispatch(req: Ask, rep: Promise[Result]): Future[Unit] =
     trans.write(req.toPacket) rescue {
       wrapWriteException
     } before {

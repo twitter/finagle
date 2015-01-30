@@ -16,7 +16,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 /**
  * Indicates that a client request was denied by the server.
  */
-object RequestNackedException
+object AskNackedException
   extends Exception("The request was nackd by the server")
   with WriteException with NoStacktrace
 
@@ -88,7 +88,7 @@ private[finagle] class ClientDispatcher (
   name: String,
   trans: Transport[ChannelBuffer, ChannelBuffer],
   sr: StatsReceiver
-) extends Service[Request, Response] {
+) extends Service[Ask, Response] {
   import ClientDispatcher._
   import Message._
 
@@ -104,7 +104,7 @@ private[finagle] class ClientDispatcher (
 
   @volatile private[this] var canDispatch: Cap.State = Cap.Unknown
 
-  private[this] val futureNackedException = Future.exception(RequestNackedException)
+  private[this] val futureNackedException = Future.exception(AskNackedException)
   private[this] val tags = TagSet()
   private[this] val reqs = TagMap[Promise[Response]](tags)
   private[this] val log = Logger.getLogger(getClass.getName)
@@ -154,7 +154,7 @@ private[finagle] class ClientDispatcher (
         p.setException(ServerApplicationError(error))
     case RreqNack(tag) =>
       for (p <- releaseTag(tag))
-        p.setException(RequestNackedException)
+        p.setException(AskNackedException)
 
     case RdispatchOk(tag, _, rep) =>
       for (p <- releaseTag(tag))
@@ -164,7 +164,7 @@ private[finagle] class ClientDispatcher (
         p.setException(ServerApplicationError(error))
     case RdispatchNack(tag, _) =>
       for (p <- releaseTag(tag))
-        p.setException(RequestNackedException)
+        p.setException(AskNackedException)
 
     case Rerr(tag, error) =>
       for (p <- releaseTag(tag))
@@ -251,7 +251,7 @@ private[finagle] class ClientDispatcher (
     }
   }
 
-  def apply(req: Request): Future[Response] = {
+  def apply(req: Ask): Future[Response] = {
     readLk.lock()
     try state match {
       case Dispatching | Leasing(_) => dispatch(req)
@@ -264,7 +264,7 @@ private[finagle] class ClientDispatcher (
    *
    * @param req the buffer representation of the request to be dispatched
    */
-  private def dispatch(req: Request): Future[Response] = {
+  private def dispatch(req: Ask): Future[Response] = {
     val p = new Promise[Response]
     val couldDispatch = canDispatch
 

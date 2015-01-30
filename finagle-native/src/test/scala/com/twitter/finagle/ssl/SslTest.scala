@@ -8,7 +8,7 @@ import com.twitter.util.{Await, Future, NonFatal}
 import java.io.File
 import java.net.{InetAddress, InetSocketAddress}
 import org.jboss.netty.buffer._
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{HttpRequest=>HttpAsk, DefaultHttpRequest=>DefaultHttpAsk, _}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -70,8 +70,8 @@ class SslTest extends FunSuite {
       buf
     }
 
-    val service = new Service[HttpRequest, HttpResponse] {
-      def apply(request: HttpRequest) = Future {
+    val service = new Service[HttpAsk, HttpResponse] {
+      def apply(request: HttpAsk) = Future {
         val requestedBytes = request.headers.get("Requested-Bytes")
           match {
           case s: String => s.toInt
@@ -110,7 +110,7 @@ class SslTest extends FunSuite {
         .build()
 
     def check(requestSize: Int, responseSize: Int) {
-      val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1,
+      val request = new DefaultHttpAsk(HttpVersion.HTTP_1_1,
         HttpMethod.GET, "/")
 
       if (requestSize > 0) {
@@ -146,8 +146,8 @@ class SslTest extends FunSuite {
 
   test("be able to validate a properly constructed authentication chain") {
     // ... spin up an SSL server ...
-    val service = new Service[HttpRequest, HttpResponse] {
-      def apply(request: HttpRequest) = Future {
+    val service = new Service[HttpAsk, HttpResponse] {
+      def apply(request: HttpAsk) = Future {
         def makeContent(length: Int) = {
           val buf = ChannelBuffers.directBuffer(length)
           while (buf.writableBytes() > 0)

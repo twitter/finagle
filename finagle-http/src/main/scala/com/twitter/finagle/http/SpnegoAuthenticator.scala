@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.http.netty.HttpRequestProxy
+import com.twitter.finagle.http.netty.HttpAskProxy
 import com.twitter.finagle.{Service, Filter}
 import com.twitter.util.{Base64StringEncoder, Future, FuturePool, Return}
 import com.twitter.logging.Logger
@@ -9,7 +9,7 @@ import javax.security.auth.Subject
 import javax.security.auth.login.LoginContext
 import org.ietf.jgss._
 import org.jboss.netty.handler.codec.http.{
-  HttpRequest,
+  HttpRequest=>HttpAsk,
   HttpResponse,
   HttpHeaders,
   HttpVersion,
@@ -56,15 +56,15 @@ object SpnegoAuthenticator {
   }
 
   object Authenticated {
-    case class Http(httpRequest: HttpRequest, context: GSSContext)
-         extends HttpRequestProxy
-         with Authenticated[HttpRequest] {
-      val request = httpRequest
+    case class Http(httpAsk: HttpAsk, context: GSSContext)
+         extends HttpAskProxy
+         with Authenticated[HttpAsk] {
+      val request = httpAsk
     }
 
-    case class RichHttp(request: Request, context: GSSContext)
-         extends RequestProxy
-         with Authenticated[Request]
+    case class RichHttp(request: Ask, context: GSSContext)
+         extends AskProxy
+         with Authenticated[Ask]
   }
 
   case class Negotiated(
@@ -217,15 +217,15 @@ object SpnegoAuthenticator {
     def unauthorized(version: HttpVersion) = new DefaultHttpResponse(version, Status.Unauthorized)
   }
 
-  implicit val httpRequestSupport = new ReqSupport[HttpRequest] {
-    def authorizationHeader(req: HttpRequest) =
+  implicit val httpAskSupport = new ReqSupport[HttpAsk] {
+    def authorizationHeader(req: HttpAsk) =
       Option(req.headers.get(HttpHeaders.Names.AUTHORIZATION))
-    def authorizationHeader(req: HttpRequest, token: Token) =
+    def authorizationHeader(req: HttpAsk, token: Token) =
       AuthHeader(Some(token)).foreach { header =>
         req.headers.set(HttpHeaders.Names.AUTHORIZATION, header)
       }
-    def protocolVersion(req: HttpRequest) = req.getProtocolVersion
-    def authenticated(req: HttpRequest, context: GSSContext) =
+    def protocolVersion(req: HttpAsk) = req.getProtocolVersion
+    def authenticated(req: HttpAsk, context: GSSContext) =
       Authenticated.Http(req, context)
   }
 
@@ -236,12 +236,12 @@ object SpnegoAuthenticator {
     def unauthorized(version: HttpVersion) = Response(version, Status.Unauthorized)
   }
 
-  implicit val httpRichRequestSupport = new ReqSupport[Request] {
-    def authorizationHeader(req: Request) = req.authorization
-    def authorizationHeader(req: Request, token: Token) =
+  implicit val httpRichAskSupport = new ReqSupport[Ask] {
+    def authorizationHeader(req: Ask) = req.authorization
+    def authorizationHeader(req: Ask, token: Token) =
       AuthHeader(Some(token)).foreach { header => req.authorization = header }
-    def protocolVersion(req: Request) = req.version
-    def authenticated(req: Request, context: GSSContext) = Authenticated.RichHttp(req, context)
+    def protocolVersion(req: Ask) = req.version
+    def authenticated(req: Ask, context: GSSContext) = Authenticated.RichHttp(req, context)
   }
 
   sealed abstract class Client[Req: ReqSupport, Rsp: RspSupport]
@@ -325,14 +325,14 @@ object SpnegoAuthenticator {
   }
 
   case class ClientFilter(credSrc: Credentials.ClientSource)
-      extends Client[HttpRequest,HttpResponse]
+      extends Client[HttpAsk,HttpResponse]
 
   case class RichClientFilter(credSrc: Credentials.ClientSource)
-      extends Client[Request,Response]
+      extends Client[Ask,Response]
 
   case class ServerFilter(credSrc: Credentials.ServerSource)
-      extends Server[HttpRequest,HttpResponse]
+      extends Server[HttpAsk,HttpResponse]
 
   case class RichServerFilter(credSrc: Credentials.ServerSource)
-      extends Server[Request,Response]
+      extends Server[Ask,Response]
 }

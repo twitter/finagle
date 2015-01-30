@@ -3,23 +3,23 @@ package com.twitter.finagle.stream
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.{Transport, ChannelTransport}
 import com.twitter.finagle.{
-  Codec, CodecFactory, Service, ServiceFactory, ServiceProxy, TooManyConcurrentRequestsException}
+  Codec, CodecFactory, Service, ServiceFactory, ServiceProxy, TooManyConcurrentAsksException}
 import com.twitter.util.{Future, Promise, Time, Closable}
 import org.jboss.netty.channel.{ChannelPipelineFactory, Channels, Channel}
-import org.jboss.netty.handler.codec.http.{  HttpClientCodec, HttpRequest, HttpServerCodec}
+import org.jboss.netty.handler.codec.http.{HttpClientCodec, HttpRequest => HttpAsk, HttpServerCodec}
 
 /**
  * Don't release the underlying service until the response has
  * completed.
  */
-private[stream] class DelayedReleaseService(self: Service[HttpRequest, StreamResponse])
-  extends ServiceProxy[HttpRequest, StreamResponse](self)
+private[stream] class DelayedReleaseService(self: Service[HttpAsk, StreamResponse])
+  extends ServiceProxy[HttpAsk, StreamResponse](self)
 {
   @volatile private[this] var done: Future[Unit] = Future.Done
 
-  override def apply(req: HttpRequest) = {
+  override def apply(req: HttpAsk) = {
     if (!done.isDefined)
-      Future.exception(new TooManyConcurrentRequestsException)
+      Future.exception(new TooManyConcurrentAsksException)
     else {
       val p = new Promise[Unit]
       done = p
@@ -46,9 +46,9 @@ object Stream {
   def get() = apply()
 }
 
-class Stream extends CodecFactory[HttpRequest, StreamResponse] {
+class Stream extends CodecFactory[HttpAsk, StreamResponse] {
   def server = Function.const {
-    new Codec[HttpRequest, StreamResponse] {
+    new Codec[HttpAsk, StreamResponse] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline = {
           val pipeline = Channels.pipeline()
@@ -59,13 +59,13 @@ class Stream extends CodecFactory[HttpRequest, StreamResponse] {
 
       override def newServerDispatcher(
           transport: Transport[Any, Any],
-          service: Service[HttpRequest, StreamResponse]): Closable =
+          service: Service[HttpAsk, StreamResponse]): Closable =
         new StreamServerDispatcher(transport, service)
     }
   }
 
  def client = Function.const {
-    new Codec[HttpRequest, StreamResponse] {
+    new Codec[HttpAsk, StreamResponse] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline = {
           val pipeline = Channels.pipeline()
@@ -75,12 +75,12 @@ class Stream extends CodecFactory[HttpRequest, StreamResponse] {
       }
 
      override def newClientDispatcher(trans: Transport[Any, Any])
-       : Service[HttpRequest, StreamResponse] = new StreamClientDispatcher(trans)
+       : Service[HttpAsk, StreamResponse] = new StreamClientDispatcher(trans)
 
       // TODO: remove when the Meta[_] patch lands.
       override def prepareServiceFactory(
-        underlying: ServiceFactory[HttpRequest, StreamResponse]
-      ): ServiceFactory[HttpRequest, StreamResponse] =
+        underlying: ServiceFactory[HttpAsk, StreamResponse]
+      ): ServiceFactory[HttpAsk, StreamResponse] =
         underlying map(new DelayedReleaseService(_))
 
       // TODO: remove when ChannelTransport is the default for clients.

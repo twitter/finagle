@@ -15,7 +15,7 @@ trait BtreeSortedSetCommands { self: BaseClient =>
    * @return Number of fields deleted
    */
   def bRem(key: ChannelBuffer, fields: Seq[ChannelBuffer]): Future[JLong] =
-    doRequest(BRem(key, fields)) {
+    doAsk(BRem(key, fields)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -25,7 +25,7 @@ trait BtreeSortedSetCommands { self: BaseClient =>
    * @return Value if field exists
    */
   def bGet(key: ChannelBuffer, field: ChannelBuffer): Future[Option[ChannelBuffer]] =
-    doRequest(BGet(key, field)) {
+    doAsk(BGet(key, field)) {
       case BulkReply(message)   => Future.value(Some(message))
       case EmptyBulkReply()     => Future.value(None)
     }
@@ -36,7 +36,7 @@ trait BtreeSortedSetCommands { self: BaseClient =>
    * @return 1 if field is new, 0 if field was updated
    */
   def bAdd(key: ChannelBuffer, field: ChannelBuffer, value: ChannelBuffer): Future[JLong] =
-    doRequest(BAdd(key, field, value)) {
+    doAsk(BAdd(key, field, value)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -47,7 +47,7 @@ trait BtreeSortedSetCommands { self: BaseClient =>
    * or 0 if key does not exist
    */
   def bCard(key: ChannelBuffer): Future[JLong] =
-    doRequest(BCard(key)) {
+    doAsk(BCard(key)) {
       case IntegerReply(n) => Future.value(n)
     }
   /**
@@ -57,7 +57,7 @@ trait BtreeSortedSetCommands { self: BaseClient =>
    */
   def bRange(key: ChannelBuffer, startField: Option[ChannelBuffer], endField: Option[ChannelBuffer]):
     Future[Seq[(ChannelBuffer, ChannelBuffer)]] = {
-    doRequest(BRange(key, startField, endField)) {
+    doAsk(BRange(key, startField, endField)) {
       case MBulkReply(messages) => Future.value(
         returnPairs(ReplyFormat.toChannelBuffers(messages)))
       case EmptyMBulkReply()    => Future.Nil

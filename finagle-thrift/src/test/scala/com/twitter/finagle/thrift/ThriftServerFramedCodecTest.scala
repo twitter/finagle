@@ -36,7 +36,7 @@ class ThriftServerFramedCodecTest extends FunSuite with MockitoSugar {
       filter(upgradeMsg.toArray, service)
   
       // let's create a header
-      val header = new thrift.RequestHeader
+      val header = new thrift.AskHeader
       header.setSpan_id(2L)
       header.setTrace_id(1L)
       header.setSampled(true)

@@ -27,7 +27,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     val clientToServer = new AsyncQueue[ChannelBuffer]
     val serverToClient = new AsyncQueue[ChannelBuffer]
     val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
-    val service = mock[Service[Request, Response]]
+    val service = mock[Service[Ask, Response]]
     val lessor = mock[Lessor]
     val server = new ServerDispatcher(transport, service, true, lessor, NullTracer)
 
@@ -131,7 +131,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     import ctx._
 
     val p = new Promise[Response]
-    val svc = Service.mk[Request, Response](_ => p)
+    val svc = Service.mk[Ask, Response](_ => p)
 
     val encodedMsg = Message.encode(
       Treq(tag = 9, traceId = None, ChannelBuffers.EMPTY_BUFFER))
@@ -165,10 +165,10 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
       val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
 
       val p = Promise[Response]
-      var req: Request = null
+      var req: Ask = null
       val server = new ServerDispatcher(
         transport,
-        Service.mk { _req: Request =>
+        Service.mk { _req: Ask =>
           req = _req
           p
         },
@@ -200,7 +200,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
       val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
 
       var promises: List[Promise[Response]] = Nil
-      val server = new ServerDispatcher(transport, Service.mk { _: Request =>
+      val server = new ServerDispatcher(transport, Service.mk { _: Ask =>
         val p = Promise[Response]()
         promises ::= p
         p
@@ -240,7 +240,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
       val clientToServer = new AsyncQueue[ChannelBuffer]
       val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
 
-      val server = new ServerDispatcher(transport, Service.mk { _: Request =>
+      val server = new ServerDispatcher(transport, Service.mk { _: Ask =>
         Future { ??? }
       }, true, Lessor.nil, NullTracer)
 
@@ -255,7 +255,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     }
   }
 
-  class Server(svc: Service[Request, Response]) {
+  class Server(svc: Service[Ask, Response]) {
     val serverToClient = new AsyncQueue[ChannelBuffer]
     val clientToServer = new AsyncQueue[ChannelBuffer]
     val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
@@ -276,7 +276,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     Time.withCurrentTimeFrozen { ctl =>
       import Message._
 
-      val server = new Server(Service.mk { req: Request =>
+      val server = new Server(Service.mk { req: Ask =>
         Future.value(Response.empty)
       })
 
@@ -319,10 +319,10 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
       val finished = "Finished draining a connection\n"
 
       val p = Promise[Response]
-      val server1 = new Server(Service.mk { buf: Request =>
+      val server1 = new Server(Service.mk { buf: Ask =>
         p
       })
-      val server2 = new Server(Service.mk { buf: Request =>
+      val server2 = new Server(Service.mk { buf: Ask =>
         Future.value(Response.empty)
       })
       server1.request(Message.encode( // request before closing

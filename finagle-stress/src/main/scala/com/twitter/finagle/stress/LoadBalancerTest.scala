@@ -13,7 +13,7 @@ import com.twitter.ostrich.stats.{Stats => OstrichStats}
 import com.twitter.util.{Duration, CountDownLatch, Return, Throw, Stopwatch}
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.{ThreadFactory, ThreadPoolExecutor, TimeUnit}
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{HttpRequest=>HttpAsk, DefaultHttpRequest=>DefaultHttpAsk, _}
 import scala.collection.mutable.ArrayBuffer
 
 object LoadBalancerTest extends App {
@@ -21,7 +21,7 @@ object LoadBalancerTest extends App {
   val latencyFlag = flag("l", 0.seconds, "req latency forced at the server")
   val schedFlag = flag("sched", "local", "Use the specified scheduler")
 
-  val totalRequests = new AtomicInteger(0)
+  val totalAsks = new AtomicInteger(0)
   val clientBuilder = ClientBuilder()
     .requestTimeout(100.milliseconds)
     .retries(10)
@@ -141,27 +141,27 @@ class LoadBalancerBenchmark extends SimpleBenchmark {
 class LoadBalancerTest(
   clientBuilder: ClientBuilder[_, _, _, _, _],
   serverLatency: Duration = 0.seconds,
-  numRequests: Int = 100000,
+  numAsks: Int = 100000,
   concurrency: Int = 20)(behavior: PartialFunction[(Int, Seq[EmbeddedServer]), Unit])
 {
   private[this] val requestNumber = new AtomicInteger(0)
-  private[this] val requestCount  = new AtomicInteger(numRequests)
+  private[this] val requestCount  = new AtomicInteger(numAsks)
   private[this] val latch         = new CountDownLatch(concurrency)
   private[this] val stats         = new StatsCollection
   private[this] val gaugeValues   = new ArrayBuffer[(Int, Map[String, Float])]
 
   private[this] def dispatch(
-      client: Service[HttpRequest, HttpResponse],
+      client: Service[HttpAsk, HttpResponse],
       servers: Seq[EmbeddedServer],
       f: PartialFunction[(Int, Seq[EmbeddedServer]), Unit]) {
     val num = requestNumber.incrementAndGet()
-    LoadBalancerTest.totalRequests.incrementAndGet()
+    LoadBalancerTest.totalAsks.incrementAndGet()
     if (f.isDefinedAt((num, servers)))
       f((num, servers))
 
     val elapsed = Stopwatch.start()
 
-    client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")) respond { result =>
+    client(new DefaultHttpAsk(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")) respond { result =>
       result match {
         case Return(_) =>
           val duration = elapsed()
@@ -200,7 +200,7 @@ class LoadBalancerTest(
     0 until concurrency foreach { _ => dispatch(client, servers, behavior) }
     latch.await()
     val duration = elapsed()
-    val rps = numRequests.toDouble / duration.inMilliseconds.toDouble * 1000
+    val rps = numAsks.toDouble / duration.inMilliseconds.toDouble * 1000
 
     // Produce a "report" here instead, so we have some sort of
     // semantic information here.

@@ -48,7 +48,7 @@ private[thrift] class ThriftServerDecoder(protocolFactory: TProtocolFactory)
         try {
           val factory = ThriftTypes(message.name)
           val request = factory.newInstance(message.seqid)
-          request.readRequestArgs(protocol)
+          request.readAskArgs(protocol)
           request.asInstanceOf[AnyRef]
         } catch {
           // Pass through invalid message exceptions, etc.

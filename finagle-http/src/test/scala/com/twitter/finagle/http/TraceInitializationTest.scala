@@ -5,20 +5,20 @@ import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.tracing._
 import com.twitter.util.{Closable, Await, Future, RandomSocket}
 import java.net.{InetAddress, InetSocketAddress}
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
+import org.jboss.netty.handler.codec.http.{HttpRequest=>HttpAsk, HttpResponse}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-private object Svc extends Service[HttpRequest, HttpResponse] {
-  def apply(req: HttpRequest): Future[HttpResponse] = {
-    Future.value(Request(req).response)
+private object Svc extends Service[HttpAsk, HttpResponse] {
+  def apply(req: HttpAsk): Future[HttpResponse] = {
+    Future.value(Ask(req).response)
   }
 }
 
 @RunWith(classOf[JUnitRunner])
 class TraceInitializationTest extends FunSuite {
-  def req = RequestBuilder().url("http://foo/this/is/a/uri/path").buildGet()
+  def req = AskBuilder().url("http://foo/this/is/a/uri/path").buildGet()
 
   def assertAnnotationsInOrder(records: Seq[Record], annos: Seq[Annotation]) {
     assert(records.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } === annos)
@@ -28,7 +28,7 @@ class TraceInitializationTest extends FunSuite {
    * Ensure all annotations have the same TraceId (it should be passed between client and server)
    * Ensure core annotations are present and properly ordered
    */
-  def testTraces(f: (Tracer, Tracer) => (Service[HttpRequest, HttpResponse], Closable)) {
+  def testTraces(f: (Tracer, Tracer) => (Service[HttpAsk, HttpResponse], Closable)) {
     val tracer = new BufferingTracer
 
     val (svc, closable) = f(tracer, tracer)

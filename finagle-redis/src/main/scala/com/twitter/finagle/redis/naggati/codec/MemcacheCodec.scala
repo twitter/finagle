@@ -20,9 +20,9 @@ package codec
 import java.nio.ByteBuffer
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
-case class MemcacheRequest(line: List[String], data: Option[ByteBuffer], bytesRead: Int) {
+case class MemcacheAsk(line: List[String], data: Option[ByteBuffer], bytesRead: Int) {
   override def toString = {
-    "<Request: " + line.mkString("[", " ", "]") + (data match {
+    "<Ask: " + line.mkString("[", " ", "]") + (data match {
       case None => ""
       case Some(x) => " data=" + x.remaining
     }) + " read=" + bytesRead + ">"
@@ -88,10 +88,10 @@ object MemcacheCodec {
         buffer.readBytes(bytes)
         bytes.flip()
         buffer.skipBytes(2)
-        emit(MemcacheRequest(segments.toList, Some(bytes), line.length + dataBytes + 4))
+        emit(MemcacheAsk(segments.toList, Some(bytes), line.length + dataBytes + 4))
       }
     } else {
-      emit(MemcacheRequest(segments.toList, None, line.length + 2))
+      emit(MemcacheAsk(segments.toList, None, line.length + 2))
     }
   }
 

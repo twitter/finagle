@@ -1,6 +1,6 @@
 package com.twitter.finagle.builder
 
-import com.twitter.finagle.{Failure, RequestException}
+import com.twitter.finagle.{Failure, AskException}
 import java.io.IOException
 import java.util.logging.{Level, Logger}
 import org.junit.runner.RunWith
@@ -18,7 +18,7 @@ class SourceTrackingMonitorTest extends FunSuite with MockitoSugar {
     val e = new Exception
     val f1 = new Failure("foo", e, sources = Map(Failure.Sources.ServiceName -> "tweet"))
     val f2 = new Failure("bar", f1)
-    val exc = new RequestException(f2)
+    val exc = new AskException(f2)
     exc.serviceName = "user"
     monitor.handle(exc)
     verify(logger).log(

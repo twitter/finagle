@@ -20,7 +20,7 @@ object StackClient {
    */
   object Role extends Stack.Role("StackClient"){
     val pool = Stack.Role("Pool")
-    val requestDraining = Stack.Role("RequestDraining")
+    val requestDraining = Stack.Role("AskDraining")
     val prepFactory = Stack.Role("PrepFactory")
     /** PrepConn is special in that it's the first role before the `Endpoint` role */
     val prepConn = Stack.Role("PrepConn")
@@ -141,7 +141,7 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
 
   /**
    * Defines a dispatcher, a function which reconciles the stream based
-   * `Transport` with a Request/Response oriented `Service`.
+   * `Transport` with a Ask/Response oriented `Service`.
    * Together with a `Transporter`, it forms the foundation of a
    * finagle client. Concrete implementations are expected to specify this.
    *

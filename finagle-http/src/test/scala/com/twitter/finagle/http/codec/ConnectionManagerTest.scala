@@ -6,7 +6,7 @@ import com.twitter.util.{Promise, Return, Future, Time}
 import java.nio.charset.Charset
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{DefaultHttpRequest=>DefaultHttpAsk, HttpRequest=>HttpAsk, _}
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
@@ -26,8 +26,8 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
   val cFuture = new DefaultChannelFuture(c, false)
   when(me.getChannel).thenReturn(c)
 
-  def makeRequest(version: HttpVersion, headers: (String, String)*) = {
-    val request = new DefaultHttpRequest(version, HttpMethod.GET, "/")
+  def makeAsk(version: HttpVersion, headers: (String, String)*) = {
+    val request = new DefaultHttpAsk(version, HttpMethod.GET, "/")
     headers foreach { case (k, v) =>
       request.headers.set(k, v)
     }
@@ -44,15 +44,15 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
     response
   }
 
-  def perform(request: HttpRequest, response: HttpResponse, shouldMarkDead: Boolean) {
+  def perform(request: HttpAsk, response: HttpResponse, shouldMarkDead: Boolean) {
     val trans = mock[Transport[Any, Any]]
     when(trans.close(any[Time])).thenReturn(Future.Done)
     when(trans.close).thenReturn(Future.Done)
 
-    val disp = new HttpClientDispatcher[HttpRequest](new HttpTransport(trans))
+    val disp = new HttpClientDispatcher[HttpAsk](new HttpTransport(trans))
 
     val wp = new Promise[Unit]
-    when(trans.write(any[HttpRequest])).thenReturn(wp)
+    when(trans.write(any[HttpAsk])).thenReturn(wp)
 
     val f = disp(request)
     assert(f.isDefined === false)
@@ -85,7 +85,7 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
 
   test("not terminate regular http/1.1 connections") {
     perform(
-      makeRequest(HttpVersion.HTTP_1_1),
+      makeAsk(HttpVersion.HTTP_1_1),
       makeResponse(HttpVersion.HTTP_1_1, HttpHeaders.Names.CONTENT_LENGTH -> "1"),
       false)
   }
@@ -93,7 +93,7 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
   // Note: by way of the codec, this reply is already taken care of.
   test("terminate http/1.1 connections without content length") {
     perform(
-      makeRequest(HttpVersion.HTTP_1_1),
+      makeAsk(HttpVersion.HTTP_1_1),
       makeResponse(HttpVersion.HTTP_1_1),
       true
     )
@@ -101,7 +101,7 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
 
   test("terminate http/1.1 connections with Connection: close") {
     perform(
-      makeRequest(HttpVersion.HTTP_1_1, "Connection" -> "close"),
+      makeAsk(HttpVersion.HTTP_1_1, "Connection" -> "close"),
       makeResponse(HttpVersion.HTTP_1_1),
       true
     )

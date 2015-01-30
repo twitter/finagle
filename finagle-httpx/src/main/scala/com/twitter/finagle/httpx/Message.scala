@@ -21,7 +21,7 @@ import Bijections._
 /**
  * Rich Message
  *
- * Base class for Request and Response.  There are both input and output
+ * Base class for Ask and Response.  There are both input and output
  * methods, though only one set of methods should be used.
  */
 abstract class Message extends HttpMessageProxy {
@@ -40,8 +40,8 @@ abstract class Message extends HttpMessageProxy {
    **/
   def writer: BufWriter with Closable = readerWriter
 
-  def isRequest: Boolean
-  def isResponse = !isRequest
+  def isAsk: Boolean
+  def isResponse = !isAsk
 
   // XXX should we may be using the Shared variants here?
   def content: Buf = ChannelBufferBuf.Owned(getContent())
@@ -278,12 +278,12 @@ abstract class Message extends HttpMessageProxy {
   def xForwardedFor_=(value: String) { headers.set("X-Forwarded-For", value) }
 
   /**
-   * Check if X-Requested-With contains XMLHttpRequest, usually signalling a
+   * Check if X-Requested-With contains XMLHttpAsk, usually signalling a
    * request from a JavaScript AJAX libraries.  Some servers treat these
    * requests specially.  For example, an endpoint might render JSON or XML
-   * instead HTML if it's an XmlHttpRequest.  (Tip: don't do this - it's gross.)
+   * instead HTML if it's an XmlHttpAsk.  (Tip: don't do this - it's gross.)
    */
-  def isXmlHttpRequest = {
+  def isXmlHttpAsk = {
     Option(headers.get("X-Requested-With")) exists { _.toLowerCase.contains("xmlhttprequest") }
   }
 

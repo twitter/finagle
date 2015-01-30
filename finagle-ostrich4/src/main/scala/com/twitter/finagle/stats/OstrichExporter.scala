@@ -6,7 +6,7 @@ import com.twitter.ostrich.stats.{StatsListener, Stats}
 import com.twitter.finagle.http.HttpMuxHandler
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{HttpRequest=>HttpAsk, _}
 
 object ostrichFilterRegex extends GlobalFlag(Seq.empty[String], "Ostrich filter regex")
 
@@ -15,7 +15,7 @@ class OstrichExporter extends HttpMuxHandler {
 
   val regexes = ostrichFilterRegex().toList map { _.r }
 
-  def apply(request: HttpRequest): Future[HttpResponse] = {
+  def apply(request: HttpAsk): Future[HttpResponse] = {
     val params = new QueryStringDecoder(request.getUri).getParameters
     val period = Option(params.get("period")) map { _.get(0) }
     val namespace = Option(params.get("namespace")) map { _.get(0) }

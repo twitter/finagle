@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.http.{Request, Response, Status}
+import com.twitter.finagle.http.{Ask, Response, Status}
 import com.twitter.util.{Await, Future, Duration}
 import org.jboss.netty.handler.codec.http.HttpMethod
 import org.junit.runner.RunWith
@@ -11,7 +11,7 @@ import org.scalatest.junit.{JUnitRunner, MustMatchersForJUnit => MustMatchers}
 @RunWith(classOf[JUnitRunner])
 class CorsTest extends FlatSpec with MustMatchers {
   val TRAP = new HttpMethod("TRAP")
-  val underlying = Service.mk[Request, Response] { request =>
+  val underlying = Service.mk[Ask, Response] { request =>
     val response = request.response
     if (request.method == TRAP) {
       response.contentString = "#guwop"
@@ -38,10 +38,10 @@ class CorsTest extends FlatSpec with MustMatchers {
   val service = corsFilter andThen underlying
 
   "Cors.HttpFilter" should "handle preflight requests" in {
-    val request = Request()
+    val request = Ask()
     request.method = HttpMethod.OPTIONS
     request.headers.set("Origin", "thestreet")
-    request.headers.set("Access-Control-Request-Method", "BRR")
+    request.headers.set("Access-Control-Ask-Method", "BRR")
 
     val response = Await result service(request)
     response.headerMap.get("Access-Control-Allow-Origin") must be(Some("thestreet"))
@@ -54,7 +54,7 @@ class CorsTest extends FlatSpec with MustMatchers {
   }
 
   it should "respond to invalid preflight requests without CORS headers" in {
-    val request = Request()
+    val request = Ask()
     request.method = HttpMethod.OPTIONS
 
     val response = Await result service(request)
@@ -67,7 +67,7 @@ class CorsTest extends FlatSpec with MustMatchers {
   }
 
   it should "respond to unacceptable cross-origin requests without CORS headers" in {
-    val request = Request()
+    val request = Ask()
     request.method = HttpMethod.OPTIONS
     request.headers.set("Origin", "theclub")
 
@@ -81,7 +81,7 @@ class CorsTest extends FlatSpec with MustMatchers {
   }
 
   it should "handle simple requests" in {
-    val request = Request()
+    val request = Ask()
     request.method = TRAP
     request.headers.set("Origin", "juughaus")
 
@@ -94,7 +94,7 @@ class CorsTest extends FlatSpec with MustMatchers {
   }
 
   it should "not add response headers to simple requests if request headers aren't present" in {
-    val request = Request()
+    val request = Ask()
     request.method = TRAP
 
     val response = Await result service(request)

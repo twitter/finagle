@@ -3,7 +3,7 @@ package com.twitter.finagle.stream
 import com.twitter.concurrent._
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.{Service, ServiceProxy, TooManyConcurrentRequestsException}
+import com.twitter.finagle.{Service, ServiceProxy, TooManyConcurrentAsksException}
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.nio.charset.Charset
@@ -12,7 +12,7 @@ import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{DefaultHttpRequest=>DefaultHttpAsk, HttpRequest=>HttpAsk, _}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -30,12 +30,12 @@ class EndToEndTest extends FunSuite {
     def release() = released.updateIfEmpty(Return(()))
   }
 
-  class MyService(response: StreamResponse) extends Service[HttpRequest, StreamResponse] {
-    def apply(request: HttpRequest) = Future.value(response)
+  class MyService(response: StreamResponse) extends Service[HttpAsk, StreamResponse] {
+    def apply(request: HttpAsk) = Future.value(response)
   }
 
   class WorkItContext(){
-    val httpRequest: DefaultHttpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
+    val httpAsk: DefaultHttpAsk = new DefaultHttpAsk(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
     val httpResponse: DefaultHttpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
     val messages: Broker[ChannelBuffer] = new Broker[ChannelBuffer]
     val error: Broker[Throwable] = new Broker[Throwable]
@@ -43,12 +43,12 @@ class EndToEndTest extends FunSuite {
     val serverRes = MyStreamResponse(httpResponse, messages.recv, error.recv)
   }
 
-  def workIt(what: String)(mkClient: (MyStreamResponse) => (Service[HttpRequest, StreamResponse], SocketAddress)) {
+  def workIt(what: String)(mkClient: (MyStreamResponse) => (Service[HttpAsk, StreamResponse], SocketAddress)) {
     test("Streams %s: writes from the server arrive on the client's channel".format(what)) {
       val c = new WorkItContext()
       import c._
       val (client, _) = mkClient(serverRes)
-      val clientRes = Await.result(client(httpRequest), 1.second)
+      val clientRes = Await.result(client(httpAsk), 1.second)
       var result = ""
       val latch = new CountDownLatch(1)
       (clientRes.error?) ensure {
@@ -75,7 +75,7 @@ class EndToEndTest extends FunSuite {
       val c = new WorkItContext()
       import c._
       val (client, _) = mkClient(serverRes)
-      val clientRes = Await.result(client(httpRequest), 1.second)
+      val clientRes = Await.result(client(httpAsk), 1.second)
       messages !! ChannelBuffers.wrappedBuffer("1".getBytes)
       messages !! ChannelBuffers.wrappedBuffer("2".getBytes)
       messages !! ChannelBuffers.wrappedBuffer("3".getBytes)
@@ -99,9 +99,9 @@ class EndToEndTest extends FunSuite {
       val c = new WorkItContext()
       import c._
       val (client, _) = mkClient(serverRes)
-      val clientRes = Await.result(client(httpRequest), 15.seconds)
-      assert(client(httpRequest).poll match {
-        case Some(Throw(_: TooManyConcurrentRequestsException)) => true
+      val clientRes = Await.result(client(httpAsk), 15.seconds)
+      assert(client(httpAsk).poll match {
+        case Some(Throw(_: TooManyConcurrentAsksException)) => true
         case _ => false
       })
       client.close()
@@ -147,7 +147,7 @@ class EndToEndTest extends FunSuite {
 
       // first request is accepted
       assert(channel
-        .write(httpRequest)
+        .write(httpAsk)
         .awaitUninterruptibly()
         .isSuccess)
 
@@ -179,7 +179,7 @@ class EndToEndTest extends FunSuite {
 
       // The following requests should be ignored
       assert(channel
-        .write(httpRequest)
+        .write(httpAsk)
         .awaitUninterruptibly()
         .isSuccess)
 
@@ -221,7 +221,7 @@ class EndToEndTest extends FunSuite {
       import c._
       val (client, address) = mkClient(serverRes)
 
-      val clientRes = Await.result(client(httpRequest), 1.second)
+      val clientRes = Await.result(client(httpAsk), 1.second)
       var result = ""
       val latch = new CountDownLatch(1)
 
@@ -261,7 +261,7 @@ class EndToEndTest extends FunSuite {
       .buildFactory()
 
     val underlying = Await.result(factory())
-    val client = new ServiceProxy[HttpRequest, StreamResponse](underlying) {
+    val client = new ServiceProxy[HttpAsk, StreamResponse](underlying) {
       override def close(deadline: Time) =
         Closable.all(underlying, server, factory).close(deadline)
     }
@@ -295,7 +295,7 @@ class EndToEndTest extends FunSuite {
       .buildFactory()
 
     val underlying = Await.result(factory())
-    val client = new ServiceProxy[HttpRequest, StreamResponse](underlying) {
+    val client = new ServiceProxy[HttpAsk, StreamResponse](underlying) {
       override def close(deadline: Time) =
         Closable.all(server, serverClient, proxy, factory).close(deadline)
     }
@@ -312,7 +312,7 @@ class EndToEndTest extends FunSuite {
       .codec(new Stream)
       .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
       .name("Streams")
-      .build((new MyService(serverRes)) map { r: HttpRequest =>
+      .build((new MyService(serverRes)) map { r: HttpAsk =>
         synchronized { count += 1 }
         r
       })
@@ -323,9 +323,9 @@ class EndToEndTest extends FunSuite {
       .retries(2)
       .build()
 
-    val res = Await.result(client(httpRequest), 1.second)
+    val res = Await.result(client(httpAsk), 1.second)
     assert(count === 1)
-    val f2 = client(httpRequest)
+    val f2 = client(httpAsk)
     assert(f2.poll.isEmpty)  // because of the host connection limit
 
     messages !! ChannelBuffers.wrappedBuffer("1".getBytes)

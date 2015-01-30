@@ -7,7 +7,7 @@ import com.twitter.finagle.httpx.codec.{HttpClientDispatcher, HttpServerDispatch
 import com.twitter.finagle.httpx.filter.DtabFilter
 import com.twitter.finagle.httpx.{
   HttpTransport, HttpServerTraceInitializer, HttpClientTraceInitializer,
-  Request, Response
+  Ask, Response
 }
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.param.Stats
@@ -23,7 +23,7 @@ import org.jboss.netty.channel.Channel
  * A rich client with a *very* basic URL fetcher. (It does not handle
  * redirects, does not have a cookie jar, etc.)
  */
-trait HttpxRichClient { self: Client[Request, Response] =>
+trait HttpxRichClient { self: Client[Ask, Response] =>
   def fetchUrl(url: String): Future[Response] = fetchUrl(new java.net.URL(url))
   def fetchUrl(url: java.net.URL): Future[Response] = {
     val addr = {
@@ -31,7 +31,7 @@ trait HttpxRichClient { self: Client[Request, Response] =>
       new InetSocketAddress(url.getHost, port)
     }
     val group = Group[SocketAddress](addr)
-    val req = httpx.RequestBuilder().url(url).buildGet()
+    val req = httpx.AskBuilder().url(url).buildGet()
     val service = newClient(group).toService
     service(req) ensure {
       service.close()
@@ -42,13 +42,13 @@ trait HttpxRichClient { self: Client[Request, Response] =>
 /**
  * Http protocol support, including client and server.
  */
-object Httpx extends Client[Request, Response] with HttpxRichClient
-    with Server[Request, Response] {
+object Httpx extends Client[Ask, Response] with HttpxRichClient
+    with Server[Ask, Response] {
 
   object param {
-    case class MaxRequestSize(size: StorageUnit)
-    implicit object MaxRequestSize extends Stack.Param[MaxRequestSize] {
-      val default = MaxRequestSize(5.megabytes)
+    case class MaxAskSize(size: StorageUnit)
+    implicit object MaxAskSize extends Stack.Param[MaxAskSize] {
+      val default = MaxAskSize(5.megabytes)
     }
 
     case class MaxResponseSize(size: StorageUnit)
@@ -64,20 +64,20 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
     private[Httpx] def applyToCodec(
       params: Stack.Params, codec: httpx.Http): httpx.Http =
         codec
-          .maxRequestSize(params[MaxRequestSize].size)
+          .maxAskSize(params[MaxAskSize].size)
           .maxResponseSize(params[MaxResponseSize].size)
           .streaming(params[Streaming].enabled)
   }
 
   object Client {
-    val stack: Stack[ServiceFactory[Request, Response]] = StackClient.newStack
+    val stack: Stack[ServiceFactory[Ask, Response]] = StackClient.newStack
   }
 
   case class Client(
-    stack: Stack[ServiceFactory[Request, Response]] = Client.stack.replace(
-        TraceInitializerFilter.role, new HttpClientTraceInitializer[Request, Response]),
+    stack: Stack[ServiceFactory[Ask, Response]] = Client.stack.replace(
+        TraceInitializerFilter.role, new HttpClientTraceInitializer[Ask, Response]),
     params: Stack.Params = StackClient.defaultParams
-  ) extends StdStackClient[Request, Response, Client] {
+  ) extends StdStackClient[Ask, Response, Client] {
     protected type In = Any
     protected type Out = Any
 
@@ -93,11 +93,11 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
     }
 
     protected def copy1(
-      stack: Stack[ServiceFactory[Request, Response]] = this.stack,
+      stack: Stack[ServiceFactory[Ask, Response]] = this.stack,
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
 
-    protected def newDispatcher(transport: Transport[Any, Any]): Service[Request, Response] =
+    protected def newDispatcher(transport: Transport[Any, Any]): Service[Ask, Response] =
       new HttpClientDispatcher(transport)
 
     def withTls(cfg: Netty3TransporterTLSConfig): Client =
@@ -117,8 +117,8 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
         case _ => Ssl.clientWithoutCertificateValidation()
       })))
 
-    def withMaxRequestSize(size: StorageUnit): Client =
-      configured(param.MaxRequestSize(size))
+    def withMaxAskSize(size: StorageUnit): Client =
+      configured(param.MaxAskSize(size))
 
     def withMaxResponseSize(size: StorageUnit): Client =
       configured(param.MaxResponseSize(size))
@@ -126,16 +126,16 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
 
   val client = Client()
 
-  def newClient(dest: Name, label: String): ServiceFactory[Request, Response] =
+  def newClient(dest: Name, label: String): ServiceFactory[Ask, Response] =
     client.newClient(dest, label)
 
   case class Server(
-    stack: Stack[ServiceFactory[Request, Response]] =
+    stack: Stack[ServiceFactory[Ask, Response]] =
       StackServer.newStack.replace(
         TraceInitializerFilter.role,
-        new HttpServerTraceInitializer[Request, Response]),
+        new HttpServerTraceInitializer[Ask, Response]),
     params: Stack.Params = StackServer.defaultParams
-  ) extends StdStackServer[Request, Response, Server] {
+  ) extends StdStackServer[Ask, Response, Server] {
     protected type In = Any
     protected type Out = Any
 
@@ -149,23 +149,23 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
     }
 
     protected def newDispatcher(transport: Transport[In, Out],
-        service: Service[Request, Response]) = {
-      val dtab = new DtabFilter.Finagle[Request]
+        service: Service[Ask, Response]) = {
+      val dtab = new DtabFilter.Finagle[Ask]
       val Stats(stats) = params[Stats]
 
       new HttpServerDispatcher(new HttpTransport(transport), dtab andThen service, stats.scope("dispatch"))
     }
 
     protected def copy1(
-      stack: Stack[ServiceFactory[Request, Response]] = this.stack,
+      stack: Stack[ServiceFactory[Ask, Response]] = this.stack,
       params: Stack.Params = this.params
     ): Server = copy(stack, params)
 
     def withTls(cfg: Netty3ListenerTLSConfig): Server =
       configured(Transport.TLSServerEngine(Some(cfg.newEngine)))
 
-    def withMaxRequestSize(size: StorageUnit): Server =
-      configured(param.MaxRequestSize(size))
+    def withMaxAskSize(size: StorageUnit): Server =
+      configured(param.MaxAskSize(size))
 
     def withMaxResponseSize(size: StorageUnit): Server =
       configured(param.MaxResponseSize(size))
@@ -173,6 +173,6 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
 
   val server = Server()
 
-  def serve(addr: SocketAddress, service: ServiceFactory[Request, Response]): ListeningServer =
+  def serve(addr: SocketAddress, service: ServiceFactory[Ask, Response]): ListeningServer =
     server.serve(addr, service)
 }

@@ -16,17 +16,17 @@ import java.net.InetSocketAddress
 import org.jboss.netty.channel.{
   ChannelPipelineFactory, UpstreamMessageEvent, Channel, Channels,
   ChannelEvent, ChannelHandlerContext, SimpleChannelDownstreamHandler, MessageEvent}
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{DefaultHttpRequest => DefaultHttpAsk, HttpRequest => HttpAsk, _}
 
-case class BadHttpRequest(httpVersion: HttpVersion, method: HttpMethod, uri: String, exception: Exception)
-  extends DefaultHttpRequest(httpVersion, method, uri)
+case class BadHttpAsk(httpVersion: HttpVersion, method: HttpMethod, uri: String, exception: Exception)
+  extends DefaultHttpAsk(httpVersion, method, uri)
 
-object BadHttpRequest {
+object BadHttpAsk {
   def apply(exception: Exception) =
-    new BadHttpRequest(HttpVersion.HTTP_1_0, HttpMethod.GET, "/bad-http-request", exception)
+    new BadHttpAsk(HttpVersion.HTTP_1_0, HttpMethod.GET, "/bad-http-request", exception)
 }
 
-/** Convert exceptions to BadHttpRequests */
+/** Convert exceptions to BadHttpAsks */
 class SafeHttpServerCodec(
     maxInitialLineLength: Int,
     maxHeaderSize: Int,
@@ -43,7 +43,7 @@ class SafeHttpServerCodec(
       case ex: Exception =>
         val channel = ctx.getChannel()
         ctx.sendUpstream(new UpstreamMessageEvent(
-          channel, BadHttpRequest(ex), channel.getRemoteAddress()))
+          channel, BadHttpAsk(ex), channel.getRemoteAddress()))
     }
   }
 }
@@ -57,7 +57,7 @@ class SafeHttpServerCodec(
  */
 case class Http(
     _compressionLevel: Int = -1,
-    _maxRequestSize: StorageUnit = 5.megabytes,
+    _maxAskSize: StorageUnit = 5.megabytes,
     _maxResponseSize: StorageUnit = 5.megabytes,
     _decompressionEnabled: Boolean = true,
     _channelBufferUsageTracker: Option[ChannelBufferUsageTracker] = None,
@@ -65,10 +65,10 @@ case class Http(
     _enableTracing: Boolean = false,
     _maxInitialLineLength: StorageUnit = 4096.bytes,
     _maxHeaderSize: StorageUnit = 8192.bytes)
-  extends CodecFactory[HttpRequest, HttpResponse]
+  extends CodecFactory[HttpAsk, HttpResponse]
 {
   def compressionLevel(level: Int) = copy(_compressionLevel = level)
-  def maxRequestSize(bufferSize: StorageUnit) = copy(_maxRequestSize = bufferSize)
+  def maxAskSize(bufferSize: StorageUnit) = copy(_maxAskSize = bufferSize)
   def maxResponseSize(bufferSize: StorageUnit) = copy(_maxResponseSize = bufferSize)
   def decompressionEnabled(yesno: Boolean) = copy(_decompressionEnabled = yesno)
   def channelBufferUsageTracker(usageTracker: ChannelBufferUsageTracker) =
@@ -79,7 +79,7 @@ case class Http(
   def maxHeaderSize(size: StorageUnit) = copy(_maxHeaderSize = size)
 
   def client = { config =>
-    new Codec[HttpRequest, HttpResponse] {
+    new Codec[HttpAsk, HttpResponse] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
           val pipeline = Channels.pipeline()
@@ -102,13 +102,13 @@ case class Http(
         new DtabHttpDispatcher(transport)
 
       override def newTraceInitializer =
-        if (_enableTracing) new HttpClientTraceInitializer[HttpRequest, HttpResponse]
-        else TraceInitializerFilter.empty[HttpRequest, HttpResponse]
+        if (_enableTracing) new HttpClientTraceInitializer[HttpAsk, HttpResponse]
+        else TraceInitializerFilter.empty[HttpAsk, HttpResponse]
     }
   }
 
   def server = { config =>
-    new Codec[HttpRequest, HttpResponse] {
+    new Codec[HttpAsk, HttpResponse] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
           val pipeline = Channels.pipeline()
@@ -117,10 +117,10 @@ case class Http(
               "channelBufferManager", new ChannelBufferManager(_channelBufferUsageTracker.get))
           }
 
-          val maxRequestSizeInBytes = _maxRequestSize.inBytes.toInt
+          val maxAskSizeInBytes = _maxAskSize.inBytes.toInt
           val maxInitialLineLengthInBytes = _maxInitialLineLength.inBytes.toInt
           val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt
-          pipeline.addLast("httpCodec", new SafeHttpServerCodec(maxInitialLineLengthInBytes, maxHeaderSizeInBytes, maxRequestSizeInBytes))
+          pipeline.addLast("httpCodec", new SafeHttpServerCodec(maxInitialLineLengthInBytes, maxHeaderSizeInBytes, maxAskSizeInBytes))
 
           if (_compressionLevel > 0) {
             pipeline.addLast("httpCompressor", new HttpContentCompressor(_compressionLevel))
@@ -132,7 +132,7 @@ case class Http(
           pipeline.addLast("respondToExpectContinue", new RespondToExpectContinue)
           pipeline.addLast(
             "httpDechunker",
-            new HttpChunkAggregator(maxRequestSizeInBytes))
+            new HttpChunkAggregator(maxAskSizeInBytes))
 
           _annotateCipherHeader foreach { headerName: String =>
             pipeline.addLast("annotateCipher", new AnnotateCipher(headerName))
@@ -144,18 +144,18 @@ case class Http(
 
       override def newServerDispatcher(
         transport: Transport[Any, Any],
-        service: Service[HttpRequest, HttpResponse]
+        service: Service[HttpAsk, HttpResponse]
       ): Closable =
         new HttpServerDispatcher(new HttpTransport(transport), service)
 
       override def prepareConnFactory(
-        underlying: ServiceFactory[HttpRequest, HttpResponse]
-      ): ServiceFactory[HttpRequest, HttpResponse] =
+        underlying: ServiceFactory[HttpAsk, HttpResponse]
+      ): ServiceFactory[HttpAsk, HttpResponse] =
         DtabFilter.Netty andThen underlying
 
       override def newTraceInitializer =
-        if (_enableTracing) new HttpServerTraceInitializer[HttpRequest, HttpResponse]
-        else TraceInitializerFilter.empty[HttpRequest, HttpResponse]
+        if (_enableTracing) new HttpServerTraceInitializer[HttpAsk, HttpResponse]
+        else TraceInitializerFilter.empty[HttpAsk, HttpResponse]
     }
   }
 }
@@ -190,7 +190,7 @@ object HttpTracing {
 private object TraceInfo {
   import HttpTracing._
 
-  def letTraceIdFromRequestHeaders[R](request: HttpRequest)(f: => R): R = {
+  def letTraceIdFromAskHeaders[R](request: HttpAsk)(f: => R): R = {
     val id = if (Header.Required.forall { request.headers.contains(_) }) {
       val spanId = SpanId.fromString(request.headers.get(Header.SpanId))
 
@@ -229,7 +229,7 @@ private object TraceInfo {
   }
   }
 
-  def setClientRequestHeaders(request: HttpRequest): Unit = {
+  def setClientAskHeaders(request: HttpAsk): Unit = {
     Header.All foreach { request.headers.remove(_) }
 
     request.headers.add(Header.TraceId, Trace.id.traceId.toString)
@@ -246,7 +246,7 @@ private object TraceInfo {
     traceRpc(request)
   }
 
-  def traceRpc(request: HttpRequest): Unit = {
+  def traceRpc(request: HttpAsk): Unit = {
     if (Trace.isActivelyTracing) {
       Trace.recordRpc(request.getMethod.getName)
       Trace.recordBinary("http.uri", stripParameters(request.getUri))
@@ -256,7 +256,7 @@ private object TraceInfo {
   /**
    * Safely extract the flags from the header, if they exist. Otherwise return empty flag.
    */
-  def getFlags(request: HttpRequest): Flags = {
+  def getFlags(request: HttpAsk): Flags = {
     try {
       Flags(Option(request.headers.get(Header.Flags)).map(_.toLong).getOrElse(0L))
     } catch {
@@ -265,7 +265,7 @@ private object TraceInfo {
   }
 }
 
-private[finagle] class HttpServerTraceInitializer[Req <: HttpRequest, Rep]
+private[finagle] class HttpServerTraceInitializer[Req <: HttpAsk, Rep]
   extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
   val role = TraceInitializerFilter.role
   val description = "Initialize the tracing system with trace info from the incoming request"
@@ -273,14 +273,14 @@ private[finagle] class HttpServerTraceInitializer[Req <: HttpRequest, Rep]
     val param.Tracer(tracer) = _tracer
     val traceInitializer = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
       Trace.letTracer(tracer) {
-        TraceInfo.letTraceIdFromRequestHeaders(req) { svc(req) }
+        TraceInfo.letTraceIdFromAskHeaders(req) { svc(req) }
       }
     }
     traceInitializer andThen next
   }
 }
 
-private[finagle] class HttpClientTraceInitializer[Req <: HttpRequest, Rep]
+private[finagle] class HttpClientTraceInitializer[Req <: HttpAsk, Rep]
   extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
   val role = TraceInitializerFilter.role
   val description = "Sets the next TraceId and attaches trace information to the outgoing request"
@@ -288,7 +288,7 @@ private[finagle] class HttpClientTraceInitializer[Req <: HttpRequest, Rep]
     val param.Tracer(tracer) = _tracer
     val traceInitializer = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
       Trace.letTracerAndNextId(tracer) {
-        TraceInfo.setClientRequestHeaders(req)
+        TraceInfo.setClientAskHeaders(req)
         svc(req)
       }
     }
@@ -299,13 +299,13 @@ private[finagle] class HttpClientTraceInitializer[Req <: HttpRequest, Rep]
 /**
  * Pass along headers with the required tracing information.
  */
-private[finagle] class HttpClientTracingFilter[Req <: HttpRequest, Res](serviceName: String)
+private[finagle] class HttpClientTracingFilter[Req <: HttpAsk, Res](serviceName: String)
   extends SimpleFilter[Req, Res]
 {
   import HttpTracing._
 
   def apply(request: Req, service: Service[Req, Res]) = {
-    TraceInfo.setClientRequestHeaders(request)
+    TraceInfo.setClientAskHeaders(request)
     service(request)
   }
 }
@@ -314,19 +314,19 @@ private[finagle] class HttpClientTracingFilter[Req <: HttpRequest, Res](serviceN
  * Adds tracing annotations for each http request we receive.
  * Including uri, when request was sent and when it was received.
  */
-private[finagle] class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String)
+private[finagle] class HttpServerTracingFilter[Req <: HttpAsk, Res](serviceName: String)
   extends SimpleFilter[Req, Res]
 {
   def apply(request: Req, service: Service[Req, Res]) = 
-    TraceInfo.letTraceIdFromRequestHeaders(request) {
+    TraceInfo.letTraceIdFromAskHeaders(request) {
     service(request)
   }
 }
 
 /**
- * Ed. note: I'm not sure how parameterizing on REQUEST <: Request
+ * Ed. note: I'm not sure how parameterizing on ASK <: Ask
  * works safely, ever. This is a big typesafety bug: the codec is
- * blindly casting Requests to REQUEST.
+ * blindly casting Asks to ASK.
  *
  * Setting aggregateChunks to false disables the aggregator, and consequently
  * lifts the restriction on request size.
@@ -334,13 +334,13 @@ private[finagle] class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceN
  * @param httpFactory the underlying HTTP CodecFactory
  * @param aggregateChunks if true, the client pipeline collects HttpChunks into the body of each HttpResponse
  */
-case class RichHttp[REQUEST <: Request](
+case class RichHttp[ASK <: Ask](
   httpFactory: Http,
   aggregateChunks: Boolean = true
-) extends CodecFactory[REQUEST, Response] {
+) extends CodecFactory[ASK, Response] {
 
   def client = { config =>
-    new Codec[REQUEST, Response] {
+    new Codec[ASK, Response] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
           val pipeline = httpFactory.client(config).pipelineFactory.getPipeline
@@ -350,13 +350,13 @@ case class RichHttp[REQUEST <: Request](
       }
 
       override def prepareServiceFactory(
-        underlying: ServiceFactory[REQUEST, Response]
-      ): ServiceFactory[REQUEST, Response] =
+        underlying: ServiceFactory[ASK, Response]
+      ): ServiceFactory[ASK, Response] =
         underlying map(new DelayedReleaseService(_))
 
       override def prepareConnFactory(
-        underlying: ServiceFactory[REQUEST, Response]
-      ): ServiceFactory[REQUEST, Response] = {
+        underlying: ServiceFactory[ASK, Response]
+      ): ServiceFactory[ASK, Response] = {
         // Note: This is a horrible hack to ensure that close() calls from
         // ExpiringService do not propagate until all chunks have been read
         // Waiting on CSL-915 for a proper fix.
@@ -370,13 +370,13 @@ case class RichHttp[REQUEST <: Request](
         new HttpClientDispatcher(transport)
 
       override def newTraceInitializer =
-        if (httpFactory._enableTracing) new HttpClientTraceInitializer[REQUEST, Response]
-        else TraceInitializerFilter.empty[REQUEST, Response]
+        if (httpFactory._enableTracing) new HttpClientTraceInitializer[ASK, Response]
+        else TraceInitializerFilter.empty[ASK, Response]
     }
   }
 
   def server = { config =>
-    new Codec[REQUEST, Response] {
+    new Codec[ASK, Response] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
           val pipeline = httpFactory.server(config).pipelineFactory.getPipeline
@@ -387,17 +387,17 @@ case class RichHttp[REQUEST <: Request](
 
       override def newServerDispatcher(
           transport: Transport[Any, Any],
-          service: Service[REQUEST, Response]): Closable =
+          service: Service[ASK, Response]): Closable =
         new HttpServerDispatcher(new HttpTransport(transport), service)
 
       override def prepareConnFactory(
-        underlying: ServiceFactory[REQUEST, Response]
-      ): ServiceFactory[REQUEST, Response] =
-        new DtabFilter.Finagle[REQUEST] andThen underlying
+        underlying: ServiceFactory[ASK, Response]
+      ): ServiceFactory[ASK, Response] =
+        new DtabFilter.Finagle[ASK] andThen underlying
 
       override def newTraceInitializer =
-        if (httpFactory._enableTracing) new HttpServerTraceInitializer[REQUEST, Response]
-        else TraceInitializerFilter.empty[REQUEST, Response]
+        if (httpFactory._enableTracing) new HttpServerTraceInitializer[ASK, Response]
+        else TraceInitializerFilter.empty[ASK, Response]
     }
   }
 }

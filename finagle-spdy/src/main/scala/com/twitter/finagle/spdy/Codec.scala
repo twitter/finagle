@@ -3,7 +3,7 @@ package com.twitter.finagle.spdy
 import java.util.concurrent.atomic.AtomicInteger
 
 import org.jboss.netty.channel.{Channel, ChannelPipelineFactory, Channels}
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
+import org.jboss.netty.handler.codec.http.{HttpRequest => HttpAsk, HttpResponse}
 import org.jboss.netty.handler.codec.spdy._
 
 import com.twitter.conversions.storage._
@@ -12,8 +12,8 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.{ChannelTransport, Transport}
 import com.twitter.util.{Closable, StorageUnit}
 
-class AnnotateSpdyStreamId extends SimpleFilter[HttpRequest, HttpResponse] {
-  def apply(request: HttpRequest, service: Service[HttpRequest, HttpResponse]) = {
+class AnnotateSpdyStreamId extends SimpleFilter[HttpAsk, HttpResponse] {
+  def apply(request: HttpAsk, service: Service[HttpAsk, HttpResponse]) = {
     val streamId = request.headers.get(SpdyHttpHeaders.Names.STREAM_ID)
     service(request) map { response =>
       response.headers.set(SpdyHttpHeaders.Names.STREAM_ID, streamId)
@@ -22,10 +22,10 @@ class AnnotateSpdyStreamId extends SimpleFilter[HttpRequest, HttpResponse] {
   }
 }
 
-class GenerateSpdyStreamId extends SimpleFilter[HttpRequest, HttpResponse] {
+class GenerateSpdyStreamId extends SimpleFilter[HttpAsk, HttpResponse] {
   private[this] val currentStreamId = new AtomicInteger(1)
 
-  def apply(request: HttpRequest, service: Service[HttpRequest, HttpResponse]) = {
+  def apply(request: HttpAsk, service: Service[HttpAsk, HttpResponse]) = {
     SpdyHttpHeaders.setStreamId(request, currentStreamId.getAndAdd(2))
     service(request) map { response =>
       SpdyHttpHeaders.removeStreamId(response)
@@ -38,14 +38,14 @@ case class Spdy(
     _version: SpdyVersion = SpdyVersion.SPDY_3_1,
     _enableHeaderCompression: Boolean = true,
     _maxHeaderSize: StorageUnit = 16384.bytes,
-    _maxRequestSize: StorageUnit = 5.megabytes,
+    _maxAskSize: StorageUnit = 5.megabytes,
     _maxResponseSize: StorageUnit = 5.megabytes)
-  extends CodecFactory[HttpRequest, HttpResponse]
+  extends CodecFactory[HttpAsk, HttpResponse]
 {
   def version(version: SpdyVersion) = copy(_version = version)
   def enableHeaderCompression(enable: Boolean) = copy(_enableHeaderCompression = enable)
   def maxHeaderSize(size: StorageUnit) = copy(_maxHeaderSize = size)
-  def maxRequestSize(size: StorageUnit) = copy(_maxRequestSize = size)
+  def maxAskSize(size: StorageUnit) = copy(_maxAskSize = size)
   def maxResponseSize(size: StorageUnit) = copy(_maxResponseSize = size)
 
   private[this] def spdyFrameCodec = {
@@ -62,7 +62,7 @@ case class Spdy(
   }
 
   def client = { config =>
-    new Codec[HttpRequest, HttpResponse] {
+    new Codec[HttpAsk, HttpResponse] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
           val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt
@@ -77,8 +77,8 @@ case class Spdy(
       }
 
       override def prepareConnFactory(
-        underlying: ServiceFactory[HttpRequest, HttpResponse]
-      ): ServiceFactory[HttpRequest, HttpResponse] = {
+        underlying: ServiceFactory[HttpAsk, HttpResponse]
+      ): ServiceFactory[HttpAsk, HttpResponse] = {
         new GenerateSpdyStreamId andThen super.prepareConnFactory(underlying)
       }
 
@@ -86,35 +86,35 @@ case class Spdy(
         new ChannelTransport(ch)
 
       override def newClientDispatcher(transport: Transport[Any, Any]) =
-        new SpdyClientDispatcher(transport.cast[HttpRequest, HttpResponse])
+        new SpdyClientDispatcher(transport.cast[HttpAsk, HttpResponse])
     }
   }
 
   def server = { config =>
-    new Codec[HttpRequest, HttpResponse] {
+    new Codec[HttpAsk, HttpResponse] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
-          val maxRequestSizeInBytes = _maxRequestSize.inBytes.toInt
+          val maxAskSizeInBytes = _maxAskSize.inBytes.toInt
 
           val pipeline = Channels.pipeline()
           pipeline.addLast("spdyFrameCodec",     spdyFrameCodec)
           pipeline.addLast("spdySessionHandler", new SpdySessionHandler(_version, true))
-          pipeline.addLast("spdyHttpCodec",      new SpdyHttpCodec(_version, maxRequestSizeInBytes))
+          pipeline.addLast("spdyHttpCodec",      new SpdyHttpCodec(_version, maxAskSizeInBytes))
           pipeline
         }
       }
 
       override def prepareConnFactory(
-        underlying: ServiceFactory[HttpRequest, HttpResponse]
-      ): ServiceFactory[HttpRequest, HttpResponse] = {
+        underlying: ServiceFactory[HttpAsk, HttpResponse]
+      ): ServiceFactory[HttpAsk, HttpResponse] = {
         new AnnotateSpdyStreamId andThen super.prepareConnFactory(underlying)
       }
 
       override def newServerDispatcher(
           transport: Transport[Any, Any],
-          service: Service[HttpRequest, HttpResponse]
+          service: Service[HttpAsk, HttpResponse]
       ): Closable = new SpdyServerDispatcher(
-        transport.cast[HttpResponse, HttpRequest], service)
+        transport.cast[HttpResponse, HttpAsk], service)
     }
   }
 }

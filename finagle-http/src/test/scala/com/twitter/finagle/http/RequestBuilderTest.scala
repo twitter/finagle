@@ -9,7 +9,7 @@ import org.scalatest.junit.JUnitRunner
 import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
-class RequestBuilderTest extends FunSuite {
+class AskBuilderTest extends FunSuite {
   val URL0 = new URL("http://joe:blow@www.google.com:77/xxx?foo=bar#xxx")
   val URL1 = new URL("https://www.google.com/")
   val URL2 = new URL("http://joe%40host.com:blow@www.google.com:77/xxx?foo=bar#xxx")
@@ -44,16 +44,16 @@ v3
 
   test("reject non-http urls") {
     intercept[IllegalArgumentException] {
-      RequestBuilder().url(new URL("ftp:///blah"))
+      AskBuilder().url(new URL("ftp:///blah"))
     }
   }
 
   test("set the HOST header") {
-    val get = RequestBuilder().url(URL0).buildGet
-    val head = RequestBuilder().url(URL0).buildHead
-    val delete = RequestBuilder().url(URL0).buildDelete
-    val put = RequestBuilder().url(URL0).buildPut(BODY0)
-    val post = RequestBuilder().url(URL0).buildPost(BODY0)
+    val get = AskBuilder().url(URL0).buildGet
+    val head = AskBuilder().url(URL0).buildHead
+    val delete = AskBuilder().url(URL0).buildDelete
+    val put = AskBuilder().url(URL0).buildPut(BODY0)
+    val post = AskBuilder().url(URL0).buildPost(BODY0)
 
     val expected = "www.google.com:77"
     assert(get.headers.get(HttpHeaders.Names.HOST) === expected)
@@ -64,17 +64,17 @@ v3
   }
 
   test("set the Authorization header when userInfo is present") {
-    val req0 = RequestBuilder().url(URL0).buildGet
-    val req1 = RequestBuilder().url(URL1).buildGet
-    val req2 = RequestBuilder().url(URL0).buildHead
-    val req3 = RequestBuilder().url(URL1).buildHead
-    val req4 = RequestBuilder().url(URL0).buildDelete
-    val req5 = RequestBuilder().url(URL1).buildDelete
-    val req6 = RequestBuilder().url(URL0).buildPut(BODY0)
-    val req7 = RequestBuilder().url(URL1).buildPut(BODY0)
-    val req8 = RequestBuilder().url(URL0).buildPost(BODY0)
-    val req9 = RequestBuilder().url(URL1).buildPost(BODY0)
-    val req10 = RequestBuilder().url(URL2).buildPost(BODY0)
+    val req0 = AskBuilder().url(URL0).buildGet
+    val req1 = AskBuilder().url(URL1).buildGet
+    val req2 = AskBuilder().url(URL0).buildHead
+    val req3 = AskBuilder().url(URL1).buildHead
+    val req4 = AskBuilder().url(URL0).buildDelete
+    val req5 = AskBuilder().url(URL1).buildDelete
+    val req6 = AskBuilder().url(URL0).buildPut(BODY0)
+    val req7 = AskBuilder().url(URL1).buildPut(BODY0)
+    val req8 = AskBuilder().url(URL0).buildPost(BODY0)
+    val req9 = AskBuilder().url(URL1).buildPost(BODY0)
+    val req10 = AskBuilder().url(URL2).buildPost(BODY0)
 
     val expected = "Basic am9lOmJsb3c="
     val expectedSpecial = "Basic am9lQGhvc3QuY29tOmJsb3c="
@@ -92,8 +92,8 @@ v3
   }
 
   test("replace the empty path with /") {
-    val req0 = RequestBuilder().url(new URL("http://a.com")).buildGet
-    val req1 = RequestBuilder().url(new URL("http://a.com?xxx")).buildGet
+    val req0 = AskBuilder().url(new URL("http://a.com")).buildGet
+    val req1 = AskBuilder().url(new URL("http://a.com?xxx")).buildGet
 
     req0.getUri === "/"
     req1.getUri === "/?xxx"
@@ -104,21 +104,21 @@ v3
     val u1 = new URL("http://a.com/#xxx")
     val u2 = new URL("http://a.com/?abc=def#xxx")
 
-    val get0 = RequestBuilder().url(u0).buildGet
-    val get1 = RequestBuilder().url(u1).buildGet
-    val get2 = RequestBuilder().url(u2).buildGet
-    val head0 = RequestBuilder().url(u0).buildHead
-    val head1 = RequestBuilder().url(u1).buildHead
-    val head2 = RequestBuilder().url(u2).buildHead
-    val del0 = RequestBuilder().url(u0).buildDelete
-    val del1 = RequestBuilder().url(u1).buildDelete
-    val del2 = RequestBuilder().url(u2).buildDelete
-    val put0 = RequestBuilder().url(u0).buildPut(BODY0)
-    val put1 = RequestBuilder().url(u1).buildPut(BODY0)
-    val put2 = RequestBuilder().url(u2).buildPut(BODY0)
-    val post0 = RequestBuilder().url(u0).buildPost(BODY0)
-    val post1 = RequestBuilder().url(u1).buildPost(BODY0)
-    val post2 = RequestBuilder().url(u2).buildPost(BODY0)
+    val get0 = AskBuilder().url(u0).buildGet
+    val get1 = AskBuilder().url(u1).buildGet
+    val get2 = AskBuilder().url(u2).buildGet
+    val head0 = AskBuilder().url(u0).buildHead
+    val head1 = AskBuilder().url(u1).buildHead
+    val head2 = AskBuilder().url(u2).buildHead
+    val del0 = AskBuilder().url(u0).buildDelete
+    val del1 = AskBuilder().url(u1).buildDelete
+    val del2 = AskBuilder().url(u2).buildDelete
+    val put0 = AskBuilder().url(u0).buildPut(BODY0)
+    val put1 = AskBuilder().url(u1).buildPut(BODY0)
+    val put2 = AskBuilder().url(u2).buildPut(BODY0)
+    val post0 = AskBuilder().url(u0).buildPost(BODY0)
+    val post1 = AskBuilder().url(u1).buildPost(BODY0)
+    val post2 = AskBuilder().url(u2).buildPost(BODY0)
 
     assert(get0.getUri === "/")
     assert(get1.getUri === "/")
@@ -142,21 +142,21 @@ v3
     val u1 = new URL("http://a.com/?")
     val u2 = new URL("http://a.com/?#xxx")
 
-    val get0 = RequestBuilder().url(u0).buildGet
-    val get1 = RequestBuilder().url(u1).buildGet
-    val get2 = RequestBuilder().url(u2).buildGet
-    val head0 = RequestBuilder().url(u0).buildHead
-    val head1 = RequestBuilder().url(u1).buildHead
-    val head2 = RequestBuilder().url(u2).buildHead
-    val del0 = RequestBuilder().url(u0).buildDelete
-    val del1 = RequestBuilder().url(u1).buildDelete
-    val del2 = RequestBuilder().url(u2).buildDelete
-    val put0 = RequestBuilder().url(u0).buildPut(BODY0)
-    val put1 = RequestBuilder().url(u1).buildPut(BODY0)
-    val put2 = RequestBuilder().url(u2).buildPut(BODY0)
-    val post0 = RequestBuilder().url(u0).buildPost(BODY0)
-    val post1 = RequestBuilder().url(u1).buildPost(BODY0)
-    val post2 = RequestBuilder().url(u2).buildPost(BODY0)
+    val get0 = AskBuilder().url(u0).buildGet
+    val get1 = AskBuilder().url(u1).buildGet
+    val get2 = AskBuilder().url(u2).buildGet
+    val head0 = AskBuilder().url(u0).buildHead
+    val head1 = AskBuilder().url(u1).buildHead
+    val head2 = AskBuilder().url(u2).buildHead
+    val del0 = AskBuilder().url(u0).buildDelete
+    val del1 = AskBuilder().url(u1).buildDelete
+    val del2 = AskBuilder().url(u2).buildDelete
+    val put0 = AskBuilder().url(u0).buildPut(BODY0)
+    val put1 = AskBuilder().url(u1).buildPut(BODY0)
+    val put2 = AskBuilder().url(u2).buildPut(BODY0)
+    val post0 = AskBuilder().url(u0).buildPost(BODY0)
+    val post1 = AskBuilder().url(u1).buildPost(BODY0)
+    val post2 = AskBuilder().url(u2).buildPost(BODY0)
 
     assert(get0.getUri === "/")
     assert(get1.getUri === "/")
@@ -176,16 +176,16 @@ v3
   }
 
   test("set the correct protocol version") {
-    val get0 = RequestBuilder().url(URL0).buildGet
-    val get1 = RequestBuilder().url(URL0).http10.buildGet
-    val head0 = RequestBuilder().url(URL0).buildHead
-    val head1 = RequestBuilder().url(URL0).http10.buildHead
-    val del0 = RequestBuilder().url(URL0).buildDelete
-    val del1 = RequestBuilder().url(URL0).http10.buildDelete
-    val put0 = RequestBuilder().url(URL0).buildPut(BODY0)
-    val put1 = RequestBuilder().url(URL0).http10.buildPut(BODY0)
-    val post0 = RequestBuilder().url(URL0).buildPost(BODY0)
-    val post1 = RequestBuilder().url(URL0).http10.buildPost(BODY0)
+    val get0 = AskBuilder().url(URL0).buildGet
+    val get1 = AskBuilder().url(URL0).http10.buildGet
+    val head0 = AskBuilder().url(URL0).buildHead
+    val head1 = AskBuilder().url(URL0).http10.buildHead
+    val del0 = AskBuilder().url(URL0).buildDelete
+    val del1 = AskBuilder().url(URL0).http10.buildDelete
+    val put0 = AskBuilder().url(URL0).buildPut(BODY0)
+    val put1 = AskBuilder().url(URL0).http10.buildPut(BODY0)
+    val post0 = AskBuilder().url(URL0).buildPost(BODY0)
+    val post1 = AskBuilder().url(URL0).http10.buildPost(BODY0)
 
     assert(get0.getProtocolVersion === HttpVersion.HTTP_1_1)
     assert(get1.getProtocolVersion === HttpVersion.HTTP_1_0)
@@ -200,11 +200,11 @@ v3
   }
 
   test("set the correct method") {
-    val get = RequestBuilder().url(URL0).buildGet
-    val head = RequestBuilder().url(URL0).buildHead
-    val del = RequestBuilder().url(URL0).buildDelete
-    val put = RequestBuilder().url(URL0).buildPut(BODY0)
-    val post = RequestBuilder().url(URL0).buildPost(BODY0)
+    val get = AskBuilder().url(URL0).buildGet
+    val head = AskBuilder().url(URL0).buildHead
+    val del = AskBuilder().url(URL0).buildDelete
+    val put = AskBuilder().url(URL0).buildPut(BODY0)
+    val post = AskBuilder().url(URL0).buildPost(BODY0)
 
     assert(get.getMethod === HttpMethod.GET)
     assert(head.getMethod === HttpMethod.HEAD)
@@ -218,7 +218,7 @@ v3
     val B = "B"
     val C = "C"
     val D = "D"
-    val builder0 = RequestBuilder()
+    val builder0 = AskBuilder()
       .url(URL0)
       .setHeader(A, B)
 
@@ -268,22 +268,22 @@ v3
   }
 
   test("build form") {
-    val builder0 = RequestBuilder()
+    val builder0 = AskBuilder()
       .url(URL0)
       .addFormElement(FORM0:_*)
 
     val req0 = builder0.buildFormPost(false)
-    val content = Request(req0).contentString.replace("\r\n", "\n")
+    val content = Ask(req0).contentString.replace("\r\n", "\n")
     assert(content === FORMPOST0)
   }
 
   test("build multipart form") {
-    val builder0 = RequestBuilder()
+    val builder0 = AskBuilder()
       .url(URL0)
       .addFormElement(FORM0:_*)
 
     val req0 = builder0.buildFormPost(true)
-    val content = "--[^-\r\n]+".r.replaceAllIn(Request(req0).contentString, "--Boundary")
+    val content = "--[^-\r\n]+".r.replaceAllIn(Ask(req0).contentString, "--Boundary")
       .replace("\r\n", "\n")
     assert(content === MULTIPART0)
   }

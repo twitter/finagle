@@ -7,7 +7,7 @@ import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.thrift.thrift.{
-  RequestContext, RequestHeader, ResponseHeader, UpgradeReply}
+  AskContext, AskHeader, ResponseHeader, UpgradeReply}
 import com.twitter.finagle.tracing.{Trace, Flags, SpanId, TraceId}
 import com.twitter.finagle.{Failure, mux, Dtab, ThriftMuxUtil}
 import com.twitter.logging.Level
@@ -34,7 +34,7 @@ private[finagle] class PipelineFactory(
   extends ChannelPipelineFactory
 {
 
-  def newUnexpectedRequestException(err: String): Failure =
+  def newUnexpectedAskException(err: String): Failure =
     Failure.Cause(err).withLogLevel(Level.DEBUG)
 
   private object TTwitterToMux {
@@ -45,11 +45,11 @@ private[finagle] class PipelineFactory(
   private class TTwitterToMux extends SimpleChannelHandler {
     import TTwitterToMux._
 
-    private[this] def contextStructToKVTuple(c: RequestContext): (ChannelBuffer, ChannelBuffer) =
+    private[this] def contextStructToKVTuple(c: AskContext): (ChannelBuffer, ChannelBuffer) =
       (ChannelBuffers.wrappedBuffer(c.getKey), ChannelBuffers.wrappedBuffer(c.getValue))
 
     private[this] def thriftToMux(req: ChannelBuffer): Message.Tdispatch = {
-      val header = new RequestHeader
+      val header = new AskHeader
       val request_ = InputBuffer.peelMessage(
         ThriftMuxUtil.bufferToArray(req),
         header,
@@ -139,10 +139,10 @@ private[finagle] class PipelineFactory(
         case Message.RdispatchError(_, _, error) =>
           // OK to throw an exception here as ServerBridge take cares it
           // by logging the error and then closing the channel.
-          throw newUnexpectedRequestException(error)
+          throw newUnexpectedAskException(error)
 
         case unexpected =>
-          throw newUnexpectedRequestException(
+          throw newUnexpectedAskException(
             "Unexpected request type %s".format(unexpected.getClass.getName))
       }
     }
@@ -203,16 +203,16 @@ private[finagle] class PipelineFactory(
         case Message.RdispatchError(_, _, error) =>
           // OK to throw an exception here as ServerBridge take cares it
           // by logging the error and then closing the channel.
-          throw newUnexpectedRequestException(error)
+          throw newUnexpectedAskException(error)
 
         case unexpected =>
-          throw newUnexpectedRequestException(
+          throw newUnexpectedAskException(
             "Unexpected request type %s".format(unexpected.getClass.getName))
       }
     }
   }
 
-  class RequestSerializer(pendingReqs: Int = 0) extends SimpleChannelHandler {
+  class AskSerializer(pendingReqs: Int = 0) extends SimpleChannelHandler {
     // Note: Since there can only be at most one pending request at any time,
     // the only race condition that needs to be handled is one thread (a
     // Netty worker thread) executes messageReceived while another thread
@@ -302,7 +302,7 @@ private[finagle] class PipelineFactory(
 
           // Add a ChannelHandler to serialize the requests since we may
           // deal with a client that pipelines requests
-          ctx.getPipeline.addBefore(ctx.getName, "request_serializer", new RequestSerializer(1))
+          ctx.getPipeline.addBefore(ctx.getName, "request_serializer", new AskSerializer(1))
           if (isTTwitterUpNegotiation(buf)) {
             ctx.getPipeline.replace(this, "twitter_thrift_to_mux", new TTwitterToMux)
             Channels.write(ctx, e.getFuture, upNegotiationAck, e.getRemoteAddress)

@@ -1,6 +1,6 @@
 package com.twitter.finagle.httpx.codec
 
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{HttpRequest=>HttpAsk, _}
 
 /**
  * The HTTP connection manager implements connection management in
@@ -14,14 +14,14 @@ class ConnectionManager {
 
   def observeMessage(message: Any) = synchronized {
     message match {
-      case request: HttpRequest   => observeRequest(request)
+      case request: HttpAsk   => observeAsk(request)
       case response: HttpResponse => observeResponse(response)
       case chunk: HttpChunk       => observeChunk(chunk)
       case _                      => isKeepAlive = false  // conservative
     }
   }
 
-  def observeRequest(request: HttpRequest) = synchronized {
+  def observeAsk(request: HttpAsk) = synchronized {
     isIdle = false
     isKeepAlive = HttpHeaders.isKeepAlive(request)
     if (request.isChunked) chunks += 1

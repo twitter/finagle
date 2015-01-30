@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.http.{Method, Request, Response, Version}
+import com.twitter.finagle.http.{Method, Ask, Response, Version}
 import com.twitter.logging.{BareFormatter, Logger, StringHandler}
 import com.twitter.util.{Await, Future, Time}
 import org.junit.runner.RunWith
@@ -18,7 +18,7 @@ class LoggingFilterTest extends FunSuite {
     logger.addHandler(stringHandler)
     logger.setUseParentHandlers(false)
 
-    val request = Request("/search.json")
+    val request = Ask("/search.json")
     request.method = Method.Get
     request.xForwardedFor = "10.0.0.1"
     request.referer       = "http://www.example.com/"
@@ -26,8 +26,8 @@ class LoggingFilterTest extends FunSuite {
     request.version = Version.Http11
 
     val formatter = new CommonLogFormatter
-    val service = new Service[Request, Response] {
-      def apply(request: Request): Future[Response] = {
+    val service = new Service[Ask, Response] {
+      def apply(request: Ask): Future[Response] = {
         val response = request.response
         response.statusCode = 123
         response.write("hello")

@@ -49,14 +49,14 @@ object ThriftMux
   /**
    * Base [[com.twitter.finagle.Stack]] for ThriftMux clients.
    */
-  private[twitter] val BaseClientStack: Stack[ServiceFactory[mux.Request, mux.Response]] =
+  private[twitter] val BaseClientStack: Stack[ServiceFactory[mux.Ask, mux.Response]] =
     (ThriftMuxUtil.protocolRecorder +: Mux.client.stack)
       .replace(StackClient.Role.protoTracing, ClientRpcTracing)
 
   /**
    * Base [[com.twitter.finagle.Stack]] for ThriftMux servers.
    */
-  private[twitter] val BaseServerStack: Stack[ServiceFactory[mux.Request, mux.Response]] = {
+  private[twitter] val BaseServerStack: Stack[ServiceFactory[mux.Ask, mux.Response]] = {
     // NOTE: ideally this would not use the `prepConn` role, but it's conveniently
     // located in the right location of the stack and is defaulted to a no-op.
     // We would like this located anywhere before the StatsFilter so that success
@@ -76,10 +76,10 @@ object ThriftMux
   }
 
   private object ClientRpcTracing extends Mux.ClientProtoTracing {
-    private[this] val rpcTracer = new SimpleFilter[mux.Request, mux.Response] {
+    private[this] val rpcTracer = new SimpleFilter[mux.Ask, mux.Response] {
       def apply(
-        request: mux.Request,
-        svc: Service[mux.Request, mux.Response]
+        request: mux.Ask,
+        svc: Service[mux.Ask, mux.Response]
       ): Future[mux.Response] = {
         // we're reasonably sure that this filter sits just after the ThriftClientRequest's
         // message array is wrapped by a ChannelBuffer
@@ -88,12 +88,12 @@ object ThriftMux
       }
     }
 
-    override def make(next: ServiceFactory[mux.Request, mux.Response]) =
+    override def make(next: ServiceFactory[mux.Ask, mux.Response]) =
       rpcTracer andThen super.make(next)
   }
 
   case class Client(
-    muxer: StackClient[mux.Request, mux.Response] = Mux.client.copy(stack = BaseClientStack)
+    muxer: StackClient[mux.Ask, mux.Response] = Mux.client.copy(stack = BaseClientStack)
   ) extends com.twitter.finagle.Client[ThriftClientRequest, Array[Byte]]
       with ThriftRichClient with Stack.Parameterized[Client] {
     def stack = muxer.stack
@@ -136,7 +136,7 @@ object ThriftMux
             val Thrift.param.ClientId(clientId) = params[Thrift.param.ClientId]
             ClientId.let(clientId) {
               // TODO set the Path here.
-              val muxreq = mux.Request(Path.empty, Buf.ByteArray.Owned(req.message))
+              val muxreq = mux.Ask(Path.empty, Buf.ByteArray.Owned(req.message))
               service(muxreq).map(rep => Buf.ByteArray.Owned.extract(rep.body))
             }
           }
@@ -194,14 +194,14 @@ object ThriftMux
    */
 
   case class ServerMuxer(
-    stack: Stack[ServiceFactory[mux.Request, mux.Response]] = BaseServerStack,
+    stack: Stack[ServiceFactory[mux.Ask, mux.Response]] = BaseServerStack,
     params: Stack.Params = Mux.server.params
-  ) extends StdStackServer[mux.Request, mux.Response, ServerMuxer] {
+  ) extends StdStackServer[mux.Ask, mux.Response, ServerMuxer] {
     protected type In = CB
     protected type Out = CB
 
     protected def copy1(
-      stack: Stack[ServiceFactory[mux.Request, mux.Response]] = this.stack,
+      stack: Stack[ServiceFactory[mux.Ask, mux.Response]] = this.stack,
       params: Stack.Params = this.params
     ) = copy(stack, params)
 
@@ -226,7 +226,7 @@ object ThriftMux
 
     protected def newDispatcher(
       transport: Transport[In, Out],
-      service: Service[mux.Request, mux.Response]
+      service: Service[mux.Ask, mux.Response]
     ) = {
       val param.Tracer(tracer) = params[param.Tracer]
       new mux.ServerDispatcher(transport, service, true, mux.lease.exp.ClockedDrainer.flagged,
@@ -238,9 +238,9 @@ object ThriftMux
 
   object Server {
     private val MuxToArrayFilter =
-      new Filter[mux.Request, mux.Response, Array[Byte], Array[Byte]] {
+      new Filter[mux.Ask, mux.Response, Array[Byte], Array[Byte]] {
         def apply(
-          request: mux.Request, service: Service[Array[Byte], Array[Byte]]
+          request: mux.Ask, service: Service[Array[Byte], Array[Byte]]
         ): Future[mux.Response] = {
           val reqBytes = Buf.ByteArray.Owned.extract(request.body)
           service(reqBytes) map { repBytes =>
@@ -250,11 +250,11 @@ object ThriftMux
       }
 
     private[this] class ExnFilter(protocolFactory: TProtocolFactory)
-      extends SimpleFilter[mux.Request, mux.Response]
+      extends SimpleFilter[mux.Ask, mux.Response]
     {
       def apply(
-        request: mux.Request,
-        service: Service[mux.Request, mux.Response]
+        request: mux.Ask,
+        service: Service[mux.Ask, mux.Response]
       ): Future[mux.Response] = {
         service(request).handle {
           case e if !e.isInstanceOf[TException] =>
@@ -266,13 +266,13 @@ object ThriftMux
     }
 
     private[ThriftMux] val ExnHandler =
-      new Stack.Module1[Thrift.param.ProtocolFactory, ServiceFactory[mux.Request, mux.Response]]
+      new Stack.Module1[Thrift.param.ProtocolFactory, ServiceFactory[mux.Ask, mux.Response]]
     {
       val role = Stack.Role("appExceptionHandling")
       val description = "Translates uncaught application exceptions into Thrift messages"
       def make(
         _pf: Thrift.param.ProtocolFactory,
-        next: ServiceFactory[mux.Request, mux.Response]
+        next: ServiceFactory[mux.Ask, mux.Response]
       ) = {
         val Thrift.param.ProtocolFactory(pf) = _pf
         val exnFilter = new ExnFilter(pf)
@@ -282,7 +282,7 @@ object ThriftMux
   }
 
   case class Server(
-      muxer: StackServer[mux.Request, mux.Response] = serverMuxer)
+      muxer: StackServer[mux.Ask, mux.Response] = serverMuxer)
     extends com.twitter.finagle.Server[Array[Byte], Array[Byte]]
     with ThriftRichServer with Stack.Parameterized[Server]
   {

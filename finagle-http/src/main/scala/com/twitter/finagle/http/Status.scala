@@ -23,7 +23,7 @@ object Status {
   val NotModified                  = HttpResponseStatus.NOT_MODIFIED
   val UseProxy                     = HttpResponseStatus.USE_PROXY
   val TemporaryRedirect            = HttpResponseStatus.TEMPORARY_REDIRECT
-  val BadRequest                   = HttpResponseStatus.BAD_REQUEST
+  val BadAsk                   = HttpResponseStatus.BAD_REQUEST
   val Unauthorized                 = HttpResponseStatus.UNAUTHORIZED
   val PaymentRequired              = HttpResponseStatus.PAYMENT_REQUIRED
   val Forbidden                    = HttpResponseStatus.FORBIDDEN
@@ -31,13 +31,13 @@ object Status {
   val MethodNotAllowed             = HttpResponseStatus.METHOD_NOT_ALLOWED
   val NotAcceptable                = HttpResponseStatus.NOT_ACCEPTABLE
   val ProxyAuthenticationRequired  = HttpResponseStatus.PROXY_AUTHENTICATION_REQUIRED
-  val RequestTimeout               = HttpResponseStatus.REQUEST_TIMEOUT
+  val AskTimeout               = HttpResponseStatus.REQUEST_TIMEOUT
   val Conflict                     = HttpResponseStatus.CONFLICT
   val Gone                         = HttpResponseStatus.GONE
   val LengthRequired               = HttpResponseStatus.LENGTH_REQUIRED
   val PreconditionFailed           = HttpResponseStatus.PRECONDITION_FAILED
-  val RequestEntityTooLarge        = HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE
-  val RequestUriTooLong            = HttpResponseStatus.REQUEST_URI_TOO_LONG
+  val AskEntityTooLarge        = HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE
+  val AskUriTooLong            = HttpResponseStatus.REQUEST_URI_TOO_LONG
   val UnsupportedMediaType         = HttpResponseStatus.UNSUPPORTED_MEDIA_TYPE
   val RequestedRangeNotSatisfiable = HttpResponseStatus.REQUESTED_RANGE_NOT_SATISFIABLE
   val ExpectationFailed            = HttpResponseStatus.EXPECTATION_FAILED
@@ -47,7 +47,7 @@ object Status {
   val FailedDependency             = HttpResponseStatus.FAILED_DEPENDENCY
   val UnorderedCollection          = HttpResponseStatus.UNORDERED_COLLECTION
   val UpgradeRequired              = HttpResponseStatus.UPGRADE_REQUIRED
-  val TooManyRequests              = HttpResponseStatus.valueOf(429)
+  val TooManyAsks              = HttpResponseStatus.valueOf(429)
   val InternalServerError          = HttpResponseStatus.INTERNAL_SERVER_ERROR
   val NotImplemented               = HttpResponseStatus.NOT_IMPLEMENTED
   val BadGateway                   = HttpResponseStatus.BAD_GATEWAY

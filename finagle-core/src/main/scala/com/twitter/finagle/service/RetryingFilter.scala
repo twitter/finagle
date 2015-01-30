@@ -33,7 +33,7 @@ object RetryingFilter {
 
 /**
  * A [[com.twitter.finagle.Filter]] that coordinatess retries of subsequent
- * [[com.twitter.finagle.Service Services]]. Requests can be classified as retryable via
+ * [[com.twitter.finagle.Service Services]]. Asks can be classified as retryable via
  * the argument [[com.twitter.finagle.service.RetryPolicy]].
  */
 class RetryingFilter[Req, Rep](

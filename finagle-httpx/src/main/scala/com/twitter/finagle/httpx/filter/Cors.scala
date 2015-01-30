@@ -1,7 +1,7 @@
 package com.twitter.finagle.httpx.filter
 
 import com.twitter.finagle.{Filter, Service}
-import com.twitter.finagle.httpx.{Request, Response, Status, Method}
+import com.twitter.finagle.httpx.{Ask, Response, Status, Method}
 import com.twitter.util.{Duration, Future}
 
 /** Implements http://www.w3.org/TR/cors/ */
@@ -15,11 +15,11 @@ object Cors {
    * allowsOrigin is a function that takes the value specified in the Origin request header
    * and optionally returns the value of Access-Control-Allow-Origin.
    *
-   * allowsMethods is a function that takes the value of the Access-Control-Request-Method
+   * allowsMethods is a function that takes the value of the Access-Control-Ask-Method
    * preflight request header and optionally returns a list of methods to be set in the
    * Access-Control-Allow-Methods response header.
    *
-   * allowsHeaders is a function that takes the values set in the Access-Control-Request-Headers
+   * allowsHeaders is a function that takes the values set in the Access-Control-Ask-Headers
    * preflight request header and returns the header names to be set in the Access-Control-Allow-
    * Headers response header.
    *
@@ -52,13 +52,13 @@ object Cors {
    * as described in the W3C CORS spec.
    */
   class HttpFilter(policy: Policy)
-      extends Filter[Request, Response, Request, Response] {
+      extends Filter[Ask, Response, Ask, Response] {
 
     /*
-     * Simple Cross-Origin Request, Actual Request, and Redirects
+     * Simple Cross-Origin Ask, Actual Ask, and Redirects
      */
 
-    protected[this] def getOrigin(request: Request): Option[String] = {
+    protected[this] def getOrigin(request: Ask): Option[String] = {
       /*
        * If the Origin header is not present terminate this set of steps. The request is outside
        * the scope of this specification.
@@ -122,7 +122,7 @@ object Cors {
     }
 
     /** http://www.w3.org/TR/cors/#resource-requests */
-    protected[this] def handleSimple(request: Request, response: Response): Response =
+    protected[this] def handleSimple(request: Ask, response: Response): Response =
       getOrigin(request) map {
         setOriginAndCredentials(response, _)
       } map {
@@ -134,13 +134,13 @@ object Cors {
      */
 
     protected[this] object Preflight {
-      def unapply(request: Request): Boolean =
+      def unapply(request: Ask): Boolean =
         request.method == Method.Options
     }
 
-    /** Let method be the value as result of parsing the Access-Control-Request-Method header. */
-    protected[this] def getMethod(request: Request): Option[String] =
-      Option(request.headers.get("Access-Control-Request-Method"))
+    /** Let method be the value as result of parsing the Access-Control-Ask-Method header. */
+    protected[this] def getMethod(request: Ask): Option[String] =
+      Option(request.headers.get("Access-Control-Ask-Method"))
 
     /**
      * If method is a simple method this step may be skipped.
@@ -168,11 +168,11 @@ object Cors {
 
     /**
      * Let header field-names be the values as result of parsing the
-     * Access-Control-Request-Headers headers. If there are no Access-Control-Request-Headers
+     * Access-Control-Ask-Headers headers. If there are no Access-Control-Ask-Headers
      * headers let header field-names be the empty list.
      */
-    protected[this] def getHeaders(request: Request): Seq[String] =
-      Option(request.headers.get("Access-Control-Request-Headers")) map {
+    protected[this] def getHeaders(request: Ask): Seq[String] =
+      Option(request.headers.get("Access-Control-Ask-Headers")) map {
         commaSpace.split(_).toSeq
       } getOrElse List.empty[String]
 
@@ -191,7 +191,7 @@ object Cors {
     }
 
     /** http://www.w3.org/TR/cors/#resource-preflight-requests */
-    protected[this] def handlePreflight(request: Request): Option[Response] =
+    protected[this] def handlePreflight(request: Ask): Option[Response] =
       getOrigin(request) flatMap { origin =>
         getMethod(request) flatMap { method =>
           val headers = getHeaders(request)
@@ -215,7 +215,7 @@ object Cors {
      * Adds CORS response headers onto all non-preflight requests that have the 'Origin' header
      * set to a value that is allowed by the Policy.
      */
-    def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
+    def apply(request: Ask, service: Service[Ask, Response]): Future[Response] = {
       val response = request match {
         case Preflight() => Future {
           // If preflight is not acceptable, just return a 200 without CORS headers
@@ -239,7 +239,7 @@ object CorsFilter {
   def apply(origin:  String = "*",
             methods: String = "GET",
             headers: String = "x-requested-with",
-            exposes: String = ""): Filter[Request, Response, Request, Response] = {
+            exposes: String = ""): Filter[Ask, Response, Ask, Response] = {
     val methodList = Some(sep.split(methods).toSeq)
     val headerList = Some(sep.split(headers).toSeq)
     val exposeList = sep.split(exposes).toSeq

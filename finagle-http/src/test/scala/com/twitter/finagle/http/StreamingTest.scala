@@ -72,7 +72,7 @@ class StreamingTest extends FunSuite with Eventually {
 
     // Assert previously queued request is now processed, and not interrupted
     // midstream.
-    def assertSecondRequestOk() = {
+    def assertSecondAskOk() = {
       val reader = await(res2).reader
       req2.writer.close()
       await(Reader.readAll(reader))
@@ -88,7 +88,7 @@ class StreamingTest extends FunSuite with Eventually {
     // We call read for the collating function to notice transport failure.
     intercept[ChannelClosedException] { await(res.reader.read(1)) }
 
-    assertSecondRequestOk()
+    assertSecondAskOk()
   })
 
   test("client: response stream fails on read") (new ClientCtx {
@@ -103,7 +103,7 @@ class StreamingTest extends FunSuite with Eventually {
     intercept[ChannelClosedException] { await(f) }
     intercept[Reader.ReaderDiscarded] { await(writeLots(req.writer, buf)) }
 
-    assertSecondRequestOk()
+    assertSecondAskOk()
   })
 
   test("client: fail request writer") (new ClientCtx {
@@ -112,12 +112,12 @@ class StreamingTest extends FunSuite with Eventually {
     assert(!res2.isDefined)
     res.reader.discard()
 
-    assertSecondRequestOk()
+    assertSecondAskOk()
   })
 
   test("client: discard respond reader") (new ClientCtx {
     res.reader.discard()
-    assertSecondRequestOk()
+    assertSecondAskOk()
   })
 
   test("server: request stream fails read") {
@@ -128,8 +128,8 @@ class StreamingTest extends FunSuite with Eventually {
     val readp = new Promise[Unit]
     val writer = Reader.writable()
 
-    val service = new Service[Request, Response] {
-      def apply(req: Request) = n.getAndIncrement() match {
+    val service = new Service[Ask, Response] {
+      def apply(req: Ask) = n.getAndIncrement() match {
         case 0 =>
           req.reader.read(1).unit proxyTo readp
           Future.value(ok(writer))
@@ -176,8 +176,8 @@ class StreamingTest extends FunSuite with Eventually {
     val writep = new Promise[Unit]
     (fail before writeLots(writer, buf)) proxyTo writep
 
-    val service = new Service[Request, Response] {
-      def apply(req: Request) = n.getAndIncrement() match {
+    val service = new Service[Ask, Response] {
+      def apply(req: Ask) = n.getAndIncrement() match {
         case 0 =>
           writep ensure req.reader.read(1).unit proxyTo readp
           Future.value(ok(writer))
@@ -220,8 +220,8 @@ class StreamingTest extends FunSuite with Eventually {
     val n = new AtomicInteger(0)
     val fail = new Promise[Unit]
 
-    val service = new Service[Request, Response] {
-      def apply(req: Request) = n.getAndIncrement() match {
+    val service = new Service[Ask, Response] {
+      def apply(req: Ask) = n.getAndIncrement() match {
         case 0 =>
           val writer = Reader.writable()
           fail ensure writer.fail(new Exception)
@@ -258,8 +258,8 @@ class StreamingTest extends FunSuite with Eventually {
     val n = new AtomicInteger(0)
     val fail = new Promise[Unit]
 
-    val service = new Service[Request, Response] {
-      def apply(req: Request) = n.getAndIncrement() match {
+    val service = new Service[Ask, Response] {
+      def apply(req: Ask) = n.getAndIncrement() match {
         case 0 =>
           fail ensure req.reader.discard()
           val writer = Reader.writable()
@@ -295,12 +295,12 @@ class StreamingTest extends FunSuite with Eventually {
 
 object StreamingTest {
 
-  val echo = new Service[Request, Response] {
-    def apply(req: Request) = Future.value(ok(req.reader))
+  val echo = new Service[Ask, Response] {
+    def apply(req: Ask) = Future.value(ok(req.reader))
   }
 
   def get(uri: String) = {
-    val req = Request(uri)
+    val req = Ask(uri)
     req.setChunked(true)
     req
   }
@@ -317,11 +317,11 @@ object StreamingTest {
 
   type Modifier = Transport[Any, Any] => Transport[Any, Any]
 
-  def startServer(service: Service[Request, Response], mod: Modifier) =
+  def startServer(service: Service[Ask, Response], mod: Modifier) =
     ServerBuilder()
       .codec(new Custom(identity, mod))
       .bindTo(new InetSocketAddress(0))
-      .maxConcurrentRequests(1)
+      .maxConcurrentAsks(1)
       .name("server")
       .build(service)
 
@@ -334,14 +334,14 @@ object StreamingTest {
       .build()
 
   class Custom(cmod: Modifier, smod: Modifier)
-    extends CodecFactory[Request, Response] {
+    extends CodecFactory[Ask, Response] {
 
-    def customize(codec: Codec[Request, Response]) =
-      new Codec[Request, Response] {
+    def customize(codec: Codec[Ask, Response]) =
+      new Codec[Ask, Response] {
         val pipelineFactory = codec.pipelineFactory
-        override def prepareServiceFactory(sf: ServiceFactory[Request, Response]) =
+        override def prepareServiceFactory(sf: ServiceFactory[Ask, Response]) =
           codec.prepareServiceFactory(sf)
-        override def prepareConnFactory(sf: ServiceFactory[Request, Response]) =
+        override def prepareConnFactory(sf: ServiceFactory[Ask, Response]) =
           codec.prepareConnFactory(sf)
         override def newClientTransport(ch: Channel, sr: StatsReceiver) =
           codec.newClientTransport(ch, sr)
@@ -352,11 +352,11 @@ object StreamingTest {
           codec.newClientDispatcher(cmod(transport))
         override def newServerDispatcher(
           transport: Transport[Any, Any],
-          service: Service[Request, Response]
+          service: Service[Ask, Response]
         ) = codec.newServerDispatcher(smod(transport), service)
       }
 
-    val factory = RichHttp[Request](Http(), aggregateChunks = false)
+    val factory = RichHttp[Ask](Http(), aggregateChunks = false)
     val client: Client = config => customize(factory.client(config))
     val server: Server = config => customize(factory.server(config))
   }

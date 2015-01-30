@@ -16,7 +16,7 @@ case class BadMessageException(why: String) extends Exception(why)
 // parsing as a bijection between ChannelBuffers and Message.
 
 /** A mux request. */
-trait Request {
+trait Ask {
   /** The destination name specified by Tdispatch requests. Otherwise, Path.empty */
   def destination: Path
 
@@ -24,21 +24,21 @@ trait Request {
   def body: Buf
 }
 
-object Request {
-  private[this] case class Impl(destination: Path, body: Buf) extends Request {
-    override def toString = s"mux.Request.Impl($destination, $body)"
+object Ask {
+  private[this] case class Impl(destination: Path, body: Buf) extends Ask {
+    override def toString = s"mux.Ask.Impl($destination, $body)"
   }
 
-  val empty: Request = Impl(Path.empty, Buf.Empty)
+  val empty: Ask = Impl(Path.empty, Buf.Empty)
 
-  def apply(dst: Path, payload: Buf): Request = Impl(dst, payload)
+  def apply(dst: Path, payload: Buf): Ask = Impl(dst, payload)
 }
 
 /** For java compatibility */
-object Requests {
-  val empty: Request = Request.empty
+object Asks {
+  val empty: Ask = Ask.empty
 
-  def make(dst: Path, payload: Buf): Request = Request(dst, payload)
+  def make(dst: Path, payload: Buf): Ask = Ask(dst, payload)
 }
 
 /** A mux response containing an immutable byte buffer. */

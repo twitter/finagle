@@ -56,7 +56,7 @@ class FinagleStatsTest extends FunSuite with MockitoSugar {
     .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
     .codec(codec)
     .reportTo(statsReceiver)
-    .maxConcurrentRequests(5)
+    .maxConcurrentAsks(5)
     .build(dummyService)
 
   val service = ClientBuilder()

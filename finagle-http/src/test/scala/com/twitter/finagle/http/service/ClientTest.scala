@@ -3,7 +3,7 @@ package com.twitter.finagle.http.service
 import org.jboss.netty.channel.local._
 import org.jboss.netty.channel._
 import org.jboss.netty.bootstrap.ServerBootstrap
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{DefaultHttpRequest=>DefaultHttpAsk, HttpRequest=>HttpAsk, _}
 
 import com.twitter.util.TimeConversions._
 import com.twitter.util.{Await, Throw, Try}
@@ -17,7 +17,7 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class ClientTest extends FunSuite {
-  def withServer(handler: ChannelHandler)(spec: ClientBuilder.Complete[HttpRequest, HttpResponse] => Unit) {
+  def withServer(handler: ChannelHandler)(spec: ClientBuilder.Complete[HttpAsk, HttpResponse] => Unit) {
     val cf = new DefaultLocalServerChannelFactory()
 
     val bs = new ServerBootstrap(cf)
@@ -61,7 +61,7 @@ class ClientTest extends FunSuite {
       try {
         // No failures have happened yet.
         assert(client.isAvailable === true)
-        val future = client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))
+        val future = client(new DefaultHttpAsk(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))
         val resolved = Try(Await.result(future, 1.second))
         assert(resolved.isThrow === true)
         val Throw(cause) = resolved
@@ -77,7 +77,7 @@ class ClientTest extends FunSuite {
         .retries(10)
         .build()
       try {
-        val future = client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))
+        val future = client(new DefaultHttpAsk(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))
         val resolved = Try(Await.result(future, 1.second))
         assert(resolved.isThrow === true)
         val Throw(cause) = resolved

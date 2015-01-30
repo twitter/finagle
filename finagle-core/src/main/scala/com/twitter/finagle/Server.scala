@@ -75,10 +75,10 @@ object NullServer extends ListeningServer with CloseAwaitably {
  * for example [[com.twitter.finagle.Http]]:
  *
  * {{{
- * object Http extends Server[HttpRequest, HttpResponse] ...
+ * object Http extends Server[HttpAsk, HttpResponse] ...
  *
- * val server = Http.serve(":*", new Service[HttpRequest, HttpResponse] {
- *   def apply(req: HttpRequest): Future[HttpResponse] = ...
+ * val server = Http.serve(":*", new Service[HttpAsk, HttpResponse] {
+ *   def apply(req: HttpAsk): Future[HttpResponse] = ...
  * })
  * }}}
  *

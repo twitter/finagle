@@ -3,7 +3,7 @@ package com.twitter.finagle.javaapi;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.twitter.finagle.httpx.Request;
+import com.twitter.finagle.httpx.Ask;
 import com.twitter.finagle.httpx.Response;
 import com.twitter.finagle.httpx.filter.DtabFilter;
 
@@ -14,7 +14,7 @@ public class DtabFilterTest {
 
   @Test
   public void tesDtab() {
-    DtabFilter<Request, Response> finagleDtabFilter = new DtabFilter.Finagle<Request>();
+    DtabFilter<Ask, Response> finagleDtabFilter = new DtabFilter.Finagle<Ask>();
     Assert.assertNotNull(finagleDtabFilter);
   }
 }

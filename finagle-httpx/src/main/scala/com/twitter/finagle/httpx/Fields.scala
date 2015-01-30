@@ -13,8 +13,8 @@ private[httpx] object Fields {
   val AccessControlAllowOrigin = "Access-Control-Allow-Origin";
   val AccessControlExposeHeaders = "Access-Control-Expose-Headers";
   val AccessControlMaxAge = "Access-Control-Max-Age";
-  val AccessControlRequestHeaders = "Access-Control-Request-Headers";
-  val AccessControlRequestMethod = "Access-Control-Request-Method";
+  val AccessControlAskHeaders = "Access-Control-Ask-Headers";
+  val AccessControlAskMethod = "Access-Control-Ask-Method";
   val Age = "Age";
   val Allow = "Allow";
   val Authorization = "Authorization";

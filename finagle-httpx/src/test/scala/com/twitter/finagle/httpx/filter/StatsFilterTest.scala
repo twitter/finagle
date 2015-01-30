@@ -1,7 +1,7 @@
 package com.twitter.finagle.httpx.filter
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.httpx.{Request, Response}
+import com.twitter.finagle.httpx.{Ask, Response}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Future, Time}
 import org.junit.runner.RunWith
@@ -14,8 +14,8 @@ class StatsFilterTest extends FunSuite {
   test("increment stats") {
     val receiver = new InMemoryStatsReceiver
 
-    val filter = new StatsFilter(receiver) andThen new Service[Request, Response] {
-      def apply(request: Request): Future[Response] = {
+    val filter = new StatsFilter(receiver) andThen new Service[Ask, Response] {
+      def apply(request: Ask): Future[Response] = {
         val response = request.response
         response.statusCode = 404
         response.write("hello")
@@ -24,7 +24,7 @@ class StatsFilterTest extends FunSuite {
     }
 
     Time.withCurrentTimeFrozen { _ =>
-      Await.result(filter(Request()))
+      Await.result(filter(Ask()))
     }
 
     assert(receiver.counters(Seq("status", "404")) === 1)

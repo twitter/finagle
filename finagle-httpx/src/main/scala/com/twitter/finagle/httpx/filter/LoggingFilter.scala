@@ -5,14 +5,14 @@ import com.twitter.finagle.filter.{
   LogFormatter => CoreLogFormatter,
   LoggingFilter => CoreLoggingFilter
 }
-import com.twitter.finagle.httpx.{Request, Response, Status}
+import com.twitter.finagle.httpx.{Ask, Response, Status}
 import com.twitter.logging.Logger
 import com.twitter.util.{Duration, Future, Return, Throw, Time, Stopwatch}
 import java.util.TimeZone
 import org.apache.commons.lang.time.FastDateFormat
 
 
-trait LogFormatter extends CoreLogFormatter[Request, Response] {
+trait LogFormatter extends CoreLogFormatter[Ask, Response] {
   def escape(s: String): String = LogFormatter.escape(s)
 }
 
@@ -83,7 +83,7 @@ class CommonLogFormatter extends LogFormatter {
    */
   val DateFormat = FastDateFormat.getInstance("dd/MMM/yyyy:HH:mm:ss Z",
                      TimeZone.getTimeZone("GMT"))
-  def format(request: Request, response: Response, responseTime: Duration) = {
+  def format(request: Ask, response: Response, responseTime: Duration) = {
     val remoteAddr = request.remoteAddress.getHostAddress
 
     val contentLength = response.length
@@ -114,7 +114,7 @@ class CommonLogFormatter extends LogFormatter {
     builder.toString
   }
 
-  def formatException(request: Request, throwable: Throwable, responseTime: Duration): String = throw new UnsupportedOperationException("Log throwables as empty 500s instead")
+  def formatException(request: Ask, throwable: Throwable, responseTime: Duration): String = throw new UnsupportedOperationException("Log throwables as empty 500s instead")
 
   def formattedDate(): String =
     DateFormat.format(Time.now.toDate)
@@ -125,16 +125,16 @@ class CommonLogFormatter extends LogFormatter {
  *  Logging filter.
  *
  * Logs all requests according to formatter.
- * Note this may be used upstream of a ValidateRequestFilter, so the URL and
+ * Note this may be used upstream of a ValidateAskFilter, so the URL and
  * parameters may be invalid.
  */
-class LoggingFilter[REQUEST <: Request](
+class LoggingFilter[ASK <: Ask](
   val log: Logger,
-  val formatter: CoreLogFormatter[REQUEST, Response]
-) extends CoreLoggingFilter[REQUEST, Response] {
+  val formatter: CoreLogFormatter[ASK, Response]
+) extends CoreLoggingFilter[ASK, Response] {
 
   // Treat exceptions as empty 500 errors
-  override protected def logException(duration: Duration, request: REQUEST, throwable: Throwable) {
+  override protected def logException(duration: Duration, request: ASK, throwable: Throwable) {
     val response = Response(request.version, Status.InternalServerError)
     val line = formatter.format(request, response, duration)
     log.info(line)
@@ -142,7 +142,7 @@ class LoggingFilter[REQUEST <: Request](
 }
 
 
-object LoggingFilter extends LoggingFilter[Request]({
+object LoggingFilter extends LoggingFilter[Ask]({
     val log = Logger("access")
     log.setUseParentHandlers(false)
     log

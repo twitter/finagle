@@ -1,6 +1,6 @@
 package com.twitter.finagle.httpx
 
-import com.twitter.finagle.httpx.netty.{HttpRequestProxy, Bijections}
+import com.twitter.finagle.httpx.netty.{HttpAskProxy, Bijections}
 import com.twitter.io.{Charsets, Reader}
 import java.io.ByteArrayOutputStream
 import java.net.{InetAddress, InetSocketAddress}
@@ -8,23 +8,29 @@ import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{
+  DefaultHttpRequest => DefaultHttpAsk,
+  HttpRequest => HttpAsk,
+  HttpRequestEncoder => HttpAskEncoder,
+  HttpRequestDecoder => HttpAskDecoder,
+  _
+}
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
 
 import Bijections._
 
 /**
- * Rich HttpRequest.
+ * Rich HttpAsk.
  *
- * Use RequestProxy to create an even richer subclass.
+ * Use AskProxy to create an even richer subclass.
  */
-abstract class Request extends Message with HttpRequestProxy {
+abstract class Ask extends Message with HttpAskProxy {
 
-  def isRequest = true
+  def isAsk = true
 
   def params: ParamMap = _params
-  private[this] lazy val _params: ParamMap = new RequestParamMap(this)
+  private[this] lazy val _params: ParamMap = new AskParamMap(this)
 
   def method: Method           = from(getMethod)
   def method_=(method: Method) = setMethod(from(method))
@@ -149,8 +155,8 @@ abstract class Request extends Message with HttpRequestProxy {
 
   /** Encode an HTTP message to Array[Byte] */
   def encodeBytes(): Array[Byte] = {
-    val encoder = new EncoderEmbedder[ChannelBuffer](new HttpRequestEncoder)
-    encoder.offer(from[Request, HttpRequest](this))
+    val encoder = new EncoderEmbedder[ChannelBuffer](new HttpAskEncoder)
+    encoder.offer(from[Ask, HttpAsk](this))
     val buffer = encoder.poll()
     val bytes = new Array[Byte](buffer.readableBytes())
     buffer.readBytes(bytes)
@@ -158,26 +164,26 @@ abstract class Request extends Message with HttpRequestProxy {
   }
 
   override def toString =
-    "Request(\"" + method + " " + uri + "\", from " + remoteSocketAddress + ")"
+    "Ask(\"" + method + " " + uri + "\", from " + remoteSocketAddress + ")"
 }
 
 
-object Request {
+object Ask {
 
-  /** Decode a Request from a String */
-  def decodeString(s: String): Request = {
+  /** Decode a Ask from a String */
+  def decodeString(s: String): Ask = {
     decodeBytes(s.getBytes(Charsets.Utf8))
   }
 
-  /** Decode a Request from Array[Byte] */
-  def decodeBytes(b: Array[Byte]): Request = {
+  /** Decode a Ask from Array[Byte] */
+  def decodeBytes(b: Array[Byte]): Ask = {
     val decoder = new DecoderEmbedder(
-      new HttpRequestDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue))
+      new HttpAskDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue))
     decoder.offer(ChannelBuffers.wrappedBuffer(b))
-    val req = decoder.poll().asInstanceOf[HttpRequest]
+    val req = decoder.poll().asInstanceOf[HttpAsk]
     assert(req ne null)
-    new Request {
-      val httpRequest = req
+    new Ask {
+      val httpAsk = req
       lazy val remoteSocketAddress = new InetSocketAddress(0)
     }
   }
@@ -187,7 +193,7 @@ object Request {
    *
    * @params params a list of key-value pairs representing the query string.
    */
-  def apply(params: Tuple2[String, String]*): Request =
+  def apply(params: Tuple2[String, String]*): Ask =
     apply("/", params:_*)
 
   /**
@@ -195,7 +201,7 @@ object Request {
    *
    * @params params a list of key-value pairs representing the query string.
    */
-  def apply(uri: String, params: Tuple2[String, String]*): Request = {
+  def apply(uri: String, params: Tuple2[String, String]*): Ask = {
     val encoder = new QueryStringEncoder(uri)
     params.foreach { case (key, value) =>
       encoder.addParam(key, value)
@@ -204,30 +210,30 @@ object Request {
   }
 
   /**
-   * Create an HTTP/1.1 GET Request from URI string.
+   * Create an HTTP/1.1 GET Ask from URI string.
    * */
-  def apply(uri: String): Request =
+  def apply(uri: String): Ask =
     apply(Method.Get, uri)
 
   /**
-   * Create an HTTP/1.1 GET Request from method and URI string.
+   * Create an HTTP/1.1 GET Ask from method and URI string.
    */
-  def apply(method: Method, uri: String): Request =
+  def apply(method: Method, uri: String): Ask =
     apply(Version.Http11, method, uri)
 
   /**
-   * Create an HTTP/1.1 GET Request from version, method, and URI string.
+   * Create an HTTP/1.1 GET Ask from version, method, and URI string.
    */
-  def apply(version: Version, method: Method, uri: String): Request = {
-    val reqIn = new DefaultHttpRequest(from(version), from(method), uri)
-    new Request {
-      val httpRequest = reqIn
+  def apply(version: Version, method: Method, uri: String): Ask = {
+    val reqIn = new DefaultHttpAsk(from(version), from(method), uri)
+    new Ask {
+      val httpAsk = reqIn
       lazy val remoteSocketAddress = new InetSocketAddress(0)
     }
   }
 
   /**
-   * Create an HTTP/1.1 GET Request from Version, Method, URI, and Reader.
+   * Create an HTTP/1.1 GET Ask from Version, Method, URI, and Reader.
    *
    * A [[com.twitter.io.Reader]] is a stream of bytes serialized to HTTP chunks.
    * `Reader`s are useful for representing streaming data in the body of the
@@ -236,7 +242,7 @@ object Request {
    *
    * {{{
    * val data = Reader.fromStream(File.open("data.txt"))
-   * val post = Request(Http11, Post, "/upload", data)
+   * val post = Ask(Http11, Post, "/upload", data)
    *
    * client(post) onSuccess {
    *   case r if r.status == Ok => println("Success!")
@@ -249,26 +255,26 @@ object Request {
     method: Method,
     uri: String,
     reader: Reader
-  ): Request = {
-    val httpReq = new DefaultHttpRequest(from(version), from(method), uri)
+  ): Ask = {
+    val httpReq = new DefaultHttpAsk(from(version), from(method), uri)
     httpReq.setChunked(true)
     apply(httpReq, reader, new InetSocketAddress(0))
   }
 
   private[httpx] def apply(
-    reqIn: HttpRequest,
+    reqIn: HttpAsk,
     readerIn: Reader,
     remoteAddr: InetSocketAddress
-  ): Request = new Request {
+  ): Ask = new Ask {
     override val reader = readerIn
-    val httpRequest = reqIn
+    val httpAsk = reqIn
     lazy val remoteSocketAddress = remoteAddr
   }
 
-  /** Create Request from HttpRequest and Channel.  Used by Codec. */
-  private[finagle] def apply(httpRequestArg: HttpRequest, channel: Channel): Request =
-    new Request {
-      val httpRequest = httpRequestArg
+  /** Create Ask from HttpAsk and Channel.  Used by Codec. */
+  private[finagle] def apply(httpAskArg: HttpAsk, channel: Channel): Ask =
+    new Ask {
+      val httpAsk = httpAskArg
       lazy val remoteSocketAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
     }
 

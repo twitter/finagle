@@ -2,7 +2,7 @@ package com.twitter.finagle.httpx.filter
 
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.httpx.{Request, Response, Status}
+import com.twitter.finagle.httpx.{Ask, Response, Status}
 import com.twitter.util.{Duration, Future, Return, Stopwatch, Throw}
 
 
@@ -17,14 +17,14 @@ import com.twitter.util.{Duration, Future, Return, Stopwatch, Throw}
  *    time.[code]
  *    time.[class]
  */
-class StatsFilter[REQUEST <: Request](stats: StatsReceiver)
-  extends SimpleFilter[REQUEST, Response] {
+class StatsFilter[ASK <: Ask](stats: StatsReceiver)
+  extends SimpleFilter[ASK, Response] {
 
   private[this] val statusReceiver = stats.scope("status")
   private[this] val timeReceiver = stats.scope("time")
   private[this] val responseSizeStat = stats.stat("response_size")
 
-  def apply(request: REQUEST, service: Service[REQUEST, Response]): Future[Response] = {
+  def apply(request: ASK, service: Service[ASK, Response]): Future[Response] = {
     val elapsed = Stopwatch.start()
     val future = service(request)
     future respond {

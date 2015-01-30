@@ -111,7 +111,7 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
         control.advance(rTimeout)
         timer.tick()
         assert(f1.isDefined) // times out
-        intercept[IndividualRequestTimeoutException] {
+        intercept[IndividualAskTimeoutException] {
           Await.result(f1)
         }
         assert(!f2.isDefined)
@@ -120,7 +120,7 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
         control.advance(rTimeout)
         timer.tick()
         assert(f2.isDefined) // times out
-        intercept[IndividualRequestTimeoutException] {
+        intercept[IndividualAskTimeoutException] {
           Await.result(f2)
         }
       }

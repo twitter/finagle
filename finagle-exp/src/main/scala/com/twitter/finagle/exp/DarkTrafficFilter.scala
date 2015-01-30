@@ -25,11 +25,11 @@ class DarkTrafficFilter[Req, Rep](
 
   override def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val rep = service(request)
-    darkRequest(request, service)
+    darkAsk(request, service)
     rep
   }
 
-  private[this] def darkRequest(request: Req, service: Service[Req, Rep]): Unit = {
+  private[this] def darkAsk(request: Req, service: Service[Req, Rep]): Unit = {
     if (enableSampling(request)) {
       requestsForwardedCounter.incr()
       darkService(request).onFailure { t: Throwable =>

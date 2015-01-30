@@ -61,7 +61,7 @@ class ClientTest extends FunSuite {
     val transport = new QueueTransport(writeq=clientToServer, readq=serverToClient)
     val client = new ClientDispatcher("test", transport, sr)
 
-    def apply(req: Request): Future[Response] = client(req)
+    def apply(req: Ask): Future[Response] = client(req)
     def respond(rep: ChannelBuffer): Unit = serverToClient.offer(rep)
     def read(): Future[ChannelBuffer] = clientToServer.poll
   }
@@ -72,7 +72,7 @@ class ClientTest extends FunSuite {
       val buf = ChannelBuffers.copiedBuffer("OK", Charsets.Utf8)
       val client = new Client(NullStatsReceiver)
 
-      val req = Request(Path.empty, ChannelBufferBuf(buf))
+      val req = Ask(Path.empty, ChannelBufferBuf(buf))
       val f = client(req)
       val Some(Return(treq)) = client.read().poll
       val Tdispatch(tag, contexts, _, _, _) = decode(treq)
@@ -94,7 +94,7 @@ class ClientTest extends FunSuite {
 
       val f2 = client(req)
       val Some(Throw(nack)) = f2.poll
-      assert(nack === RequestNackedException)
+      assert(nack === AskNackedException)
 
       assert(client.read().poll === None)
       
@@ -109,7 +109,7 @@ class ClientTest extends FunSuite {
       val buf = ChannelBuffers.copiedBuffer("OK", Charsets.Utf8)
       val client = new Client(NullStatsReceiver)
 
-      val req = Request(Path.empty, ChannelBufferBuf(buf))
+      val req = Ask(Path.empty, ChannelBufferBuf(buf))
 
       val f = client(req)
       val Some(Return(treq)) = client.read().poll
@@ -138,7 +138,7 @@ class ClientTest extends FunSuite {
       log.addHandler(handler)
 
       val buf = ChannelBuffers.copiedBuffer("OK", Charsets.Utf8)
-      val req = Request(Path.empty, ChannelBufferBuf(buf))
+      val req = Ask(Path.empty, ChannelBufferBuf(buf))
       val inMemory = new InMemoryStatsReceiver
 
       var accumulated: String = ""

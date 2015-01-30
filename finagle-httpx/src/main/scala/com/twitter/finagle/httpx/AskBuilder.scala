@@ -1,13 +1,22 @@
-package com.twitter.finagle.http
+package com.twitter.finagle.httpx
 
+import com.twitter.finagle.httpx.netty.Bijections
+import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
 import com.twitter.util.Base64StringEncoder
+import com.twitter.io.Buf
 import java.net.URL
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.handler.codec.http.multipart.{DefaultHttpDataFactory, HttpPostRequestEncoder, HttpDataFactory}
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpHeaders, HttpVersion, HttpMethod, DefaultHttpRequest}
+import org.jboss.netty.handler.codec.http.multipart.{DefaultHttpDataFactory, HttpPostRequestEncoder => HttpPostAskEncoder, HttpDataFactory}
+import org.jboss.netty.handler.codec.http.{
+  HttpRequest => HttpAsk,
+  DefaultHttpRequest => DefaultHttpAsk,
+  HttpHeaders, HttpVersion, HttpMethod
+}
 import scala.annotation.implicitNotFound
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
+
+import Bijections._
 
 /*
  * HTML form element.
@@ -22,22 +31,22 @@ case class SimpleElement(name: String, content: String) extends FormElement
 /*
  * HTML form file input field.
  */
-case class FileElement(name: String, content: ChannelBuffer, contentType: Option[String] = None,
+case class FileElement(name: String, content: Buf, contentType: Option[String] = None,
   filename: Option[String] = None) extends FormElement
 
 /**
- * Provides a class for building [[org.jboss.netty.handler.codec.http.HttpRequest]]s.
- * The main class to use is [[com.twitter.finagle.http.RequestBuilder]], as so
+ * Provides a class for building [[org.jboss.netty.handler.codec.http.HttpAsk]]s.
+ * The main class to use is [[com.twitter.finagle.httpx.AskBuilder]], as so
  *
  * {{{
- * val getRequest = RequestBuilder()
+ * val getAsk = AskBuilder()
  *   .setHeader(HttpHeaders.Names.USER_AGENT, "MyBot")
  *   .setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
  *   .url(new URL("http://www.example.com"))
  *   .buildGet()
  * }}}
  *
- * The `RequestBuilder` requires the definition of `url`. In Scala,
+ * The `AskBuilder` requires the definition of `url`. In Scala,
  * this is statically type checked, and in Java the lack of any of
  * a url causes a runtime error.
  *
@@ -48,39 +57,39 @@ case class FileElement(name: String, content: ChannelBuffer, contentType: Option
  * above is
  *
  * {{{
- * HttpRequest getRequest =
- *   RequestBuilder.safeBuildGet(
- *     RequestBuilder.create()
+ * HttpAsk getAsk =
+ *   AskBuilder.safeBuildGet(
+ *     AskBuilder.create()
  *       .setHeader(HttpHeaders.Names.USER_AGENT, "MyBot")
  *       .setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
  *       .url(new URL("http://www.example.com")))
  * }}}
  *
- * Overall RequestBuilder's pretty barebones. It does provide certain protocol level support
+ * Overall AskBuilder's pretty barebones. It does provide certain protocol level support
  * for more involved requests. For example, it support easy creation of POST request to submit
  * multipart web forms with `buildMultipartPost` and default form post with `buildFormPost`.
  */
 
 /**
- * Factory for [[com.twitter.finagle.http.RequestBuilder]] instances
+ * Factory for [[com.twitter.finagle.httpx.AskBuilder]] instances
  */
-object RequestBuilder {
-  @implicitNotFound("Http RequestBuilder is not correctly configured: HasUrl (exp: Yes): ${HasUrl}, HasForm (exp: Nothing) ${HasForm}.")
-  private trait RequestEvidence[HasUrl, HasForm]
-  private object RequestEvidence {
-    implicit object FullyConfigured extends RequestEvidence[RequestConfig.Yes, Nothing]
+object AskBuilder {
+  @implicitNotFound("Http AskBuilder is not correctly configured: HasUrl (exp: Yes): ${HasUrl}, HasForm (exp: Nothing) ${HasForm}.")
+  private trait AskEvidence[HasUrl, HasForm]
+  private object AskEvidence {
+    implicit object FullyConfigured extends AskEvidence[AskConfig.Yes, Nothing]
   }
 
-  @implicitNotFound("Http RequestBuilder is not correctly configured for form post: HasUrl (exp: Yes): ${HasUrl}, HasForm (exp: Yes): ${HasForm}.")
-  private trait PostRequestEvidence[HasUrl, HasForm]
-  private object PostRequestEvidence {
-    implicit object FullyConfigured extends PostRequestEvidence[RequestConfig.Yes, RequestConfig.Yes]
+  @implicitNotFound("Http AskBuilder is not correctly configured for form post: HasUrl (exp: Yes): ${HasUrl}, HasForm (exp: Yes): ${HasForm}.")
+  private trait PostAskEvidence[HasUrl, HasForm]
+  private object PostAskEvidence {
+    implicit object FullyConfigured extends PostAskEvidence[AskConfig.Yes, AskConfig.Yes]
   }
 
-  type Complete = RequestBuilder[RequestConfig.Yes, Nothing]
-  type CompleteForm = RequestBuilder[RequestConfig.Yes, RequestConfig.Yes]
+  type Complete = AskBuilder[AskConfig.Yes, Nothing]
+  type CompleteForm = AskBuilder[AskConfig.Yes, AskConfig.Yes]
 
-  def apply() = new RequestBuilder()
+  def apply() = new AskBuilder()
 
   /**
    * Used for Java access.
@@ -90,89 +99,82 @@ object RequestBuilder {
   /**
    * Provides a typesafe `build` with content for Java.
    */
-  def safeBuild(builder: Complete, method: HttpMethod, content: Option[ChannelBuffer]): HttpRequest =
-    builder.build(method, content)(RequestEvidence.FullyConfigured)
+  def safeBuild(builder: Complete, method: Method, content: Option[Buf]): Ask =
+    builder.build(method, content)(AskEvidence.FullyConfigured)
 
   /**
    * Provides a typesafe `buildGet` for Java.
    */
-  def safeBuildGet(builder: Complete): HttpRequest =
-    builder.buildGet()(RequestEvidence.FullyConfigured)
+  def safeBuildGet(builder: Complete): Ask =
+    builder.buildGet()(AskEvidence.FullyConfigured)
 
   /**
    * Provides a typesafe `buildHead` for Java.
    */
-  def safeBuildHead(builder: Complete): HttpRequest =
-    builder.buildHead()(RequestEvidence.FullyConfigured)
+  def safeBuildHead(builder: Complete): Ask =
+    builder.buildHead()(AskEvidence.FullyConfigured)
 
   /**
    * Provides a typesafe `buildDelete` for Java.
    */
-  def safeBuildDelete(builder: Complete): HttpRequest =
-    builder.buildDelete()(RequestEvidence.FullyConfigured)
+  def safeBuildDelete(builder: Complete): Ask =
+    builder.buildDelete()(AskEvidence.FullyConfigured)
 
   /**
    * Provides a typesafe `buildPut` for Java.
    */
-  def safeBuildPut(builder: Complete, content: ChannelBuffer): HttpRequest =
-    builder.buildPut(content)(RequestEvidence.FullyConfigured)
-
-  /**
-   * Provides a typesafe `buildPut` for Java.
-   */
-  @deprecated("Typo, use safeBuildPut instead", "5.3.7")
-  def safeBuidlPut(builder: Complete, content: ChannelBuffer): HttpRequest =
-    safeBuildPut(builder, content)
+  def safeBuildPut(builder: Complete, content: Buf): Ask =
+    builder.buildPut(content)(AskEvidence.FullyConfigured)
 
   /**
    * Provides a typesafe `buildPost` for Java.
    */
-  def safeBuildPost(builder: Complete, content: ChannelBuffer): HttpRequest =
-    builder.buildPost(content)(RequestEvidence.FullyConfigured)
+  def safeBuildPost(builder: Complete, content: Buf): Ask =
+    builder.buildPost(content)(AskEvidence.FullyConfigured)
 
   /**
    * Provides a typesafe `buildFormPost` for Java.
    */
-  def safeBuildFormPost(builder: CompleteForm, multipart: Boolean): HttpRequest =
-    builder.buildFormPost(multipart)(PostRequestEvidence.FullyConfigured)
+  def safeBuildFormPost(builder: CompleteForm, multipart: Boolean): Ask =
+    builder.buildFormPost(multipart)(PostAskEvidence.FullyConfigured)
 }
 
-object RequestConfig {
+object AskConfig {
   sealed abstract trait Yes
 
-  type FullySpecifiedConfig = RequestConfig[Yes, Nothing]
-  type FullySpecifiedConfigForm = RequestConfig[Yes, Yes]
+  type FullySpecifiedConfig = AskConfig[Yes, Nothing]
+  type FullySpecifiedConfigForm = AskConfig[Yes, Yes]
 }
 
-private[http] final case class RequestConfig[HasUrl, HasForm](
-  url: Option[URL]                 = None,
-  headers: Map[String,Seq[String]] = Map(),
-  formElements: Seq[FormElement]   = Seq(),
-  version: HttpVersion             = HttpVersion.HTTP_1_1,
-  proxied: Boolean                 = false
+private[httpx] final case class AskConfig[HasUrl, HasForm](
+  url: Option[URL]                  = None,
+  headers: Map[String, Seq[String]] = Map.empty,
+  formElements: Seq[FormElement]    = Nil,
+  version: Version                  = Version.Http11,
+  proxied: Boolean                  = false
 )
 
-class RequestBuilder[HasUrl, HasForm] private[http](
-  config: RequestConfig[HasUrl, HasForm]
+class AskBuilder[HasUrl, HasForm] private[httpx](
+  config: AskConfig[HasUrl, HasForm]
 ) {
-  import RequestConfig._
+  import AskConfig._
 
-  type This = RequestBuilder[HasUrl, HasForm]
+  type This = AskBuilder[HasUrl, HasForm]
 
   private[this] val SCHEME_WHITELIST = Seq("http","https")
 
-  private[http] def this() = this(RequestConfig())
+  private[httpx] def this() = this(AskConfig())
 
   /*
    * Specify url as String
    */
-  def url(u: String): RequestBuilder[Yes, HasForm] = url(new java.net.URL(u))
+  def url(u: String): AskBuilder[Yes, HasForm] = url(new java.net.URL(u))
 
   /**
    * Specify the url to request. Sets the HOST header and possibly
    * the Authorization header using the authority portion of the URL.
    */
-  def url(u: URL): RequestBuilder[Yes, HasForm] = {
+  def url(u: URL): AskBuilder[Yes, HasForm] = {
     require(SCHEME_WHITELIST.contains(u.getProtocol), "url must be http(s)")
     val uri = u.toURI
     val host = uri.getHost.toLowerCase
@@ -190,34 +192,34 @@ class RequestBuilder[HasUrl, HasForm] private[http](
         val auth = "Basic " + Base64StringEncoder.encode(userInfo.getBytes)
         withHost.updated(HttpHeaders.Names.AUTHORIZATION, Seq(auth))
       }
-    new RequestBuilder(config.copy(url = Some(u), headers = updated))
+    new AskBuilder(config.copy(url = Some(u), headers = updated))
   }
 
   /*
-   * Add simple form name/value pairs. In this mode, this RequestBuilder will only
+   * Add simple form name/value pairs. In this mode, this AskBuilder will only
    * be able to generate a multipart/form POST request.
    */
-   def addFormElement(kv: (String, String)*): RequestBuilder[HasUrl, Yes] = {
+   def addFormElement(kv: (String, String)*): AskBuilder[HasUrl, Yes] = {
      val elems = config.formElements
      val updated = kv.foldLeft(elems) { case (es, (k, v)) => es :+ new SimpleElement(k, v) }
-     new RequestBuilder(config.copy(formElements = updated))
+     new AskBuilder(config.copy(formElements = updated))
    }
 
   /*
-   * Add a FormElement to a request. In this mode, this RequestBuilder will only
+   * Add a FormElement to a request. In this mode, this AskBuilder will only
    * be able to generate a multipart/form POST request.
    */
-  def add(elem: FormElement): RequestBuilder[HasUrl, Yes] = {
+  def add(elem: FormElement): AskBuilder[HasUrl, Yes] = {
     val elems = config.formElements
     val updated = elems ++ Seq(elem)
-    new RequestBuilder(config.copy(formElements = updated))
+    new AskBuilder(config.copy(formElements = updated))
   }
 
   /*
-   * Add a group of FormElements to a request. In this mode, this RequestBuilder will only
+   * Add a group of FormElements to a request. In this mode, this AskBuilder will only
    * be able to generate a multipart/form POST request.
    */
-  def add(elems: Seq[FormElement]): RequestBuilder[HasUrl, Yes] = {
+  def add(elems: Seq[FormElement]): AskBuilder[HasUrl, Yes] = {
     val first = this.add(elems.head)
     elems.tail.foldLeft(first) { (b, elem) => b.add(elem) }
   }
@@ -226,14 +228,14 @@ class RequestBuilder[HasUrl, HasForm] private[http](
    * Declare the HTTP protocol version be HTTP/1.0
    */
   def http10(): This =
-    new RequestBuilder(config.copy(version = HttpVersion.HTTP_1_0))
+    new AskBuilder(config.copy(version = Version.Http10))
 
   /**
    * Set a new header with the specified name and value.
    */
   def setHeader(name: String, value: String): This = {
     val updated = config.headers.updated(name, Seq(value))
-    new RequestBuilder(config.copy(headers = updated))
+    new AskBuilder(config.copy(headers = updated))
   }
 
   /**
@@ -241,7 +243,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
    */
   def setHeader(name: String, values: Seq[String]): This = {
     val updated = config.headers.updated(name, values)
-    new RequestBuilder(config.copy(headers = updated))
+    new AskBuilder(config.copy(headers = updated))
   }
 
   /**
@@ -260,7 +262,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
     val values = config.headers.get(name).getOrElse(Seq())
     val updated = config.headers.updated(
       name, values ++ Seq(value))
-    new RequestBuilder(config.copy(headers = updated))
+    new AskBuilder(config.copy(headers = updated))
   }
 
   /**
@@ -293,15 +295,15 @@ class RequestBuilder[HasUrl, HasForm] private[http](
       config.headers.updated(HttpHeaders.Names.PROXY_AUTHORIZATION, Seq(creds.basicAuthorization))
     } getOrElse config.headers
 
-    new RequestBuilder(config.copy(headers = headers, proxied = true))
+    new AskBuilder(config.copy(headers = headers, proxied = true))
   }
 
   /**
    * Construct an HTTP request with a specified method.
    */
-  def build(method: HttpMethod, content: Option[ChannelBuffer])(
-    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
-  ): HttpRequest = {
+  def build(method: Method, content: Option[Buf])(
+    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: AskBuilder.AskEvidence[HasUrl, HasForm]
+  ): Ask = {
     content match {
       case Some(content) => withContent(method, content)
       case None => withoutContent(method)
@@ -312,50 +314,55 @@ class RequestBuilder[HasUrl, HasForm] private[http](
    * Construct an HTTP GET request.
    */
   def buildGet()(
-    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
-  ): HttpRequest = withoutContent(HttpMethod.GET)
+    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: AskBuilder.AskEvidence[HasUrl, HasForm]
+  ): Ask = withoutContent(Method.Get)
 
   /**
    * Construct an HTTP HEAD request.
    */
   def buildHead()(
-    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
-  ): HttpRequest = withoutContent(HttpMethod.HEAD)
+    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: AskBuilder.AskEvidence[HasUrl, HasForm]
+  ): Ask = withoutContent(Method.Head)
 
   /**
    * Construct an HTTP DELETE request.
    */
   def buildDelete()(
-    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
-  ): HttpRequest = withoutContent(HttpMethod.DELETE)
+    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: AskBuilder.AskEvidence[HasUrl, HasForm]
+  ): Ask = withoutContent(Method.Delete)
 
   /**
    * Construct an HTTP POST request.
    */
-  def buildPost(content: ChannelBuffer)(
-    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
-  ): HttpRequest = withContent(HttpMethod.POST, content)
+  def buildPost(content: Buf)(
+    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: AskBuilder.AskEvidence[HasUrl, HasForm]
+  ): Ask = withContent(Method.Post, content)
 
   /**
    * Construct an HTTP PUT request.
    */
-  def buildPut(content: ChannelBuffer)(
-    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
-  ): HttpRequest = withContent(HttpMethod.PUT, content)
+  def buildPut(content: Buf)(
+    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: AskBuilder.AskEvidence[HasUrl, HasForm]
+  ): Ask = withContent(Method.Put, content)
 
   /**
    * Construct a form post request.
    */
   def buildFormPost(multipart: Boolean = false) (
-    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.PostRequestEvidence[HasUrl, HasForm]
-  ): HttpRequest = {
+    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: AskBuilder.PostAskEvidence[HasUrl, HasForm]
+  ): Ask = {
     val dataFactory = new DefaultHttpDataFactory(false) // we don't use disk
-    val req = withoutContent(HttpMethod.POST)
-    val encoder = new HttpPostRequestEncoder(dataFactory, req, multipart)
+    val req = withoutContent(Method.Post)
+    val encoder = new HttpPostAskEncoder(dataFactory, req.httpAsk, multipart)
 
     config.formElements.foreach {
       case FileElement(name, content, contentType, filename) =>
-        HttpPostRequestEncoderEx.addBodyFileUpload(encoder, dataFactory, req)(name, filename.getOrElse(""), content, contentType.getOrElse(null), false)
+        HttpPostAskEncoderEx.addBodyFileUpload(encoder, dataFactory, req.httpAsk)(
+          name, filename.getOrElse(""),
+          BufChannelBuffer(content),
+          contentType.getOrElse(null),
+          false)
+
       case SimpleElement(name, value) =>
         encoder.addBodyAttribute(name, value)
     }
@@ -376,7 +383,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
       encodedReq.setContent(ChannelBuffers.wrappedBuffer(chunks:_*))
     }
 
-    encodedReq
+    from(encodedReq)
   }
 
   // absoluteURI if proxied, otherwise relativeURI
@@ -401,30 +408,28 @@ class RequestBuilder[HasUrl, HasForm] private[http](
     }
   }
 
-  private[http] def withoutContent(method: HttpMethod): HttpRequest = {
-    val req = new DefaultHttpRequest(config.version, method, resource)
-    config.headers.foreach { case (k,vs) =>
-      vs.foreach { v =>
-        req.headers.add(k, v)
-      }
+  private[httpx] def withoutContent(method: Method): Ask = {
+    val req = Ask(config.version, method, resource)
+    config.headers foreach { case (field, values) =>
+      values foreach { v => req.headers.add(field, v) }
     }
     req
   }
 
-  private[http] def withContent(method: HttpMethod, content: ChannelBuffer): HttpRequest = {
+  private[httpx] def withContent(method: Method, content: Buf): Ask = {
     require(content != null)
     val req = withoutContent(method)
-    req.setContent(content)
-    req.headers.set(HttpHeaders.Names.CONTENT_LENGTH, content.readableBytes.toString)
+    req.content = content
+    req.headers.set(HttpHeaders.Names.CONTENT_LENGTH, content.length.toString)
     req
   }
 }
 
 /**
- * Add a missing method to HttpPostRequestEncoder to allow specifying a ChannelBuffer directly as
+ * Add a missing method to HttpPostAskEncoder to allow specifying a ChannelBuffer directly as
  * content of a file. This logic should eventually move to netty.
  */
-private object HttpPostRequestEncoderEx {
+private object HttpPostAskEncoderEx {
   //TODO: HttpPostBodyUtil not accessible from netty 3.5.0.Final jar
   //      This HttpPostBodyUtil simulates what we need.
   object HttpPostBodyUtil {
@@ -439,7 +444,7 @@ private object HttpPostRequestEncoderEx {
   /*
    * allow specifying post body as ChannelBuffer, the logic is adapted from netty code.
    */
-  def addBodyFileUpload(encoder: HttpPostRequestEncoder, factory: HttpDataFactory, request: HttpRequest)
+  def addBodyFileUpload(encoder: HttpPostAskEncoder, factory: HttpDataFactory, request: HttpAsk)
     (name: String, filename: String, content: ChannelBuffer, contentType: String, isText: Boolean) {
     require(name != null)
     require(filename != null)

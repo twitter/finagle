@@ -37,7 +37,7 @@ class MysqlBuilderTest extends FunSuite with IntegrationClient {
       val mysqlTraces = annotations collect {
         case Annotation.BinaryAnnotation("mysql.query", "query") => ()
         case Annotation.BinaryAnnotation("mysql.prepare", "prepare query") => ()
-        case Annotation.Message("mysql.PingRequest") => ()
+        case Annotation.Message("mysql.PingAsk") => ()
       }
 
       assert(mysqlTraces.size === 3, "missing traces")

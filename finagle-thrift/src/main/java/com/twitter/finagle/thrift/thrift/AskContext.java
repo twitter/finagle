@@ -31,8 +31,8 @@ import org.apache.thrift.protocol.*;
 /**
  * This struct serializes com.twitter.finagle.Context
  */
-public class RequestContext implements TBase<RequestContext, RequestContext._Fields>, java.io.Serializable, Cloneable {
-  private static final TStruct STRUCT_DESC = new TStruct("RequestContext");
+public class AskContext implements TBase<AskContext, AskContext._Fields>, java.io.Serializable, Cloneable {
+  private static final TStruct STRUCT_DESC = new TStruct("AskContext");
 
   private static final TField KEY_FIELD_DESC = new TField("key", TType.STRING, (short)1);
   private static final TField VALUE_FIELD_DESC = new TField("value", TType.STRING, (short)2);
@@ -111,13 +111,13 @@ public class RequestContext implements TBase<RequestContext, RequestContext._Fie
     tmpMap.put(_Fields.VALUE, new FieldMetaData("value", TFieldRequirementType.DEFAULT,
         new FieldValueMetaData(TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
-    FieldMetaData.addStructMetaDataMap(RequestContext.class, metaDataMap);
+    FieldMetaData.addStructMetaDataMap(AskContext.class, metaDataMap);
   }
 
-  public RequestContext() {
+  public AskContext() {
   }
 
-  public RequestContext(
+  public AskContext(
     ByteBuffer key,
     ByteBuffer value)
   {
@@ -129,7 +129,7 @@ public class RequestContext implements TBase<RequestContext, RequestContext._Fie
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public RequestContext(RequestContext other) {
+  public AskContext(AskContext other) {
     if (other.isSetKey()) {
       this.key = TBaseHelper.copyBinary(other.key);
 ;
@@ -140,8 +140,8 @@ public class RequestContext implements TBase<RequestContext, RequestContext._Fie
     }
   }
 
-  public RequestContext deepCopy() {
-    return new RequestContext(this);
+  public AskContext deepCopy() {
+    return new AskContext(this);
   }
 
   @Override
@@ -159,12 +159,12 @@ public class RequestContext implements TBase<RequestContext, RequestContext._Fie
     return key;
   }
 
-  public RequestContext setKey(byte[] key) {
+  public AskContext setKey(byte[] key) {
     setKey(ByteBuffer.wrap(key));
     return this;
   }
 
-  public RequestContext setKey(ByteBuffer key) {
+  public AskContext setKey(ByteBuffer key) {
     this.key = key;
     return this;
   }
@@ -193,12 +193,12 @@ public class RequestContext implements TBase<RequestContext, RequestContext._Fie
     return value;
   }
 
-  public RequestContext setValue(byte[] value) {
+  public AskContext setValue(byte[] value) {
     setValue(ByteBuffer.wrap(value));
     return this;
   }
 
-  public RequestContext setValue(ByteBuffer value) {
+  public AskContext setValue(ByteBuffer value) {
     this.value = value;
     return this;
   }
@@ -270,12 +270,12 @@ public class RequestContext implements TBase<RequestContext, RequestContext._Fie
   public boolean equals(Object that) {
     if (that == null)
       return false;
-    if (that instanceof RequestContext)
-      return this.equals((RequestContext)that);
+    if (that instanceof AskContext)
+      return this.equals((AskContext)that);
     return false;
   }
 
-  public boolean equals(RequestContext that) {
+  public boolean equals(AskContext that) {
     if (that == null)
       return false;
 
@@ -305,13 +305,13 @@ public class RequestContext implements TBase<RequestContext, RequestContext._Fie
     return 0;
   }
 
-  public int compareTo(RequestContext other) {
+  public int compareTo(AskContext other) {
     if (!getClass().equals(other.getClass())) {
       return getClass().getName().compareTo(other.getClass().getName());
     }
 
     int lastComparison = 0;
-    RequestContext typedOther = (RequestContext)other;
+    AskContext typedOther = (AskContext)other;
 
     lastComparison = Boolean.valueOf(isSetKey()).compareTo(typedOther.isSetKey());
     if (lastComparison != 0) {
@@ -395,7 +395,7 @@ public class RequestContext implements TBase<RequestContext, RequestContext._Fie
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("RequestContext(");
+    StringBuilder sb = new StringBuilder("AskContext(");
     boolean first = true;
 
     sb.append("key:");

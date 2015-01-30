@@ -24,7 +24,7 @@ object Service {
 }
 
 /**
- * A Service is an asynchronous function from Request to Future[Response]. It is the
+ * A Service is an asynchronous function from Ask to Future[Response]. It is the
  * basic unit of an RPC interface.
  *
  * '''Note:''' this is an abstract class (vs. a trait) to maintain java

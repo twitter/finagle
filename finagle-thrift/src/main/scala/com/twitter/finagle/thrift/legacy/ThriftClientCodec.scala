@@ -23,7 +23,7 @@ private[thrift] class ThriftClientEncoder(protocolFactory: TProtocolFactory)
         val protocol = protocolFactory.getProtocol(transport)
         seqid += 1
         call.seqid = seqid
-        call.writeRequest(seqid, protocol)
+        call.writeAsk(seqid, protocol)
         Channels.write(ctx, Channels.succeededFuture(e.getChannel()),
                        buffer, e.getRemoteAddress)
       case _: Throwable =>

@@ -38,7 +38,7 @@ object Command {
   val COM_STMT_FETCH          = 0x1C.toByte // mysql_stmt_fetch
 }
 
-sealed trait Request {
+sealed trait Ask {
   val seq: Short
   val cmd: Byte = Command.COM_NO_OP
   def toPacket: Packet
@@ -48,7 +48,7 @@ sealed trait Request {
  * A command request is a request initiated by the client
  * and has a cmd byte associated with it.
  */
-abstract class CommandRequest(override val cmd: Byte) extends Request {
+abstract class CommandAsk(override val cmd: Byte) extends Ask {
   val seq: Short = 0
 }
 
@@ -56,8 +56,8 @@ abstract class CommandRequest(override val cmd: Byte) extends Request {
  * Defines a request that encodes the command byte and
  * associated data into a packet.
  */
-class SimpleCommandRequest(command: Byte, data: Array[Byte])
-  extends CommandRequest(command) {
+class SimpleCommandAsk(command: Byte, data: Array[Byte])
+  extends CommandAsk(command) {
     val buf = Buffer(Buffer(Array(command)), Buffer(data))
     val toPacket = Packet(seq, buf)
 }
@@ -66,31 +66,31 @@ class SimpleCommandRequest(command: Byte, data: Array[Byte])
  * A request to check if the server is alive.
  * [[http://dev.mysql.com/doc/internals/en/com-ping.html]]
  */
-case object PingRequest
-  extends SimpleCommandRequest(Command.COM_PING, Buffer.EmptyByteArray)
+case object PingAsk
+  extends SimpleCommandAsk(Command.COM_PING, Buffer.EmptyByteArray)
 
 /**
- * A UseRequest is used to change the default schema of the connection.
+ * A UseAsk is used to change the default schema of the connection.
  * [[http://dev.mysql.com/doc/internals/en/com-init-db.html]]
  */
-case class UseRequest(dbName: String)
-  extends SimpleCommandRequest(Command.COM_INIT_DB, dbName.getBytes)
+case class UseAsk(dbName: String)
+  extends SimpleCommandAsk(Command.COM_INIT_DB, dbName.getBytes)
 
 /**
- * A QueryRequest is used to send the server a text-based query that
+ * A QueryAsk is used to send the server a text-based query that
  * is executed immediately.
  * [[http://dev.mysql.com/doc/internals/en/com-query.html]]
  */
-case class QueryRequest(sqlStatement: String)
-  extends SimpleCommandRequest(Command.COM_QUERY, sqlStatement.getBytes)
+case class QueryAsk(sqlStatement: String)
+  extends SimpleCommandAsk(Command.COM_QUERY, sqlStatement.getBytes)
 
 /**
  * Allocates a prepared statement on the server from the
  * passed in query string.
  * [[http://dev.mysql.com/doc/internals/en/com-stmt-prepare.html]]
  */
-case class PrepareRequest(sqlStatement: String)
-  extends SimpleCommandRequest(Command.COM_STMT_PREPARE, sqlStatement.getBytes)
+case class PrepareAsk(sqlStatement: String)
+  extends SimpleCommandAsk(Command.COM_STMT_PREPARE, sqlStatement.getBytes)
 
 /**
  * Client response sent during connection phase.
@@ -107,7 +107,7 @@ case class HandshakeResponse(
   serverCap: Capability,
   charset: Short,
   maxPacketSize: Int
-) extends Request {
+) extends Ask {
   import Capability._
   override val seq: Short = 1
   lazy val hashPassword = encryptPassword(password.getOrElse(""), salt)
@@ -151,12 +151,12 @@ case class HandshakeResponse(
  * a prepared statement.
  * [[http://dev.mysql.com/doc/internals/en/com-stmt-execute.html]]
  */
-case class ExecuteRequest(
+case class ExecuteAsk(
   stmtId: Int,
   params: IndexedSeq[Any] = IndexedSeq.empty,
   hasNewParams: Boolean = true,
   flags: Byte = 0
-) extends CommandRequest(Command.COM_STMT_EXECUTE) {
+) extends CommandAsk(Command.COM_STMT_EXECUTE) {
     private[this] val log = Logger.getLogger("finagle-mysql")
 
     private[this] def isNull(param: Any): Boolean = param match {
@@ -259,11 +259,11 @@ case class ExecuteRequest(
 }
 
 /**
- * A CloseRequest deallocates a prepared statement on the server.
+ * A CloseAsk deallocates a prepared statement on the server.
  * No response is sent back to the client.
  * [[http://dev.mysql.com/doc/internals/en/com-stmt-close.html]]
  */
-case class CloseRequest(stmtId: Int) extends CommandRequest(Command.COM_STMT_CLOSE) {
+case class CloseAsk(stmtId: Int) extends CommandAsk(Command.COM_STMT_CLOSE) {
   override val toPacket = {
     val bw = BufferWriter(new Array[Byte](5))
     bw.writeByte(cmd).writeInt(stmtId)

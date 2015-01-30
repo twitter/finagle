@@ -29,7 +29,7 @@ private[finagle] object MultiReaderHelper {
 
   private[finagle] def merge(
     readHandles: Var[Try[Set[ReadHandle]]],
-    trackOutstandingRequests: Boolean = false,
+    trackOutstandingAsks: Boolean = false,
     statsReceiver: StatsReceiver = NullStatsReceiver
   ): ReadHandle = {
     val error = new Broker[Throwable]
@@ -56,7 +56,7 @@ private[finagle] object MultiReaderHelper {
     val abortCounter = msgStatsReceiver.counter("abort")
 
     def trackMessage(msg: ReadMessage): ReadMessage = {
-      if (trackOutstandingRequests) {
+      if (trackOutstandingAsks) {
         receivedCounter.incr()
         outstandingReads.incrementAndGet()
         ReadMessage(
@@ -403,7 +403,7 @@ final case class MultiReaderConfig[Req, Rep] private[kestrel](
     Option[ClientBuilder[Req, Rep, Nothing, ClientConfig.Yes, ClientConfig.Yes]] = None,
   private val _timer: Option[Timer] = None,
   private val _retryBackoffs: Option[() => Stream[Duration]] = None,
-  private val _trackOutstandingRequests: Boolean = false,
+  private val _trackOutstandingAsks: Boolean = false,
   private val _statsReceiver: StatsReceiver = NullStatsReceiver) {
 
   // Delegators to make a friendly public API
@@ -414,7 +414,7 @@ final case class MultiReaderConfig[Req, Rep] private[kestrel](
   val retryBackoffs = _retryBackoffs
   val clientId = _clientId
   val txnAbortTimeout = _txnAbortTimeout
-  val trackOutstandingRequests = _trackOutstandingRequests
+  val trackOutstandingAsks = _trackOutstandingAsks
   val statsReceiver = _statsReceiver
 }
 
@@ -497,12 +497,12 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
   /**
    * Specify whether to track outstanding requests.
    *
-   * @param trackOutstandingRequests
+   * @param trackOutstandingAsks
    *          flag to track outstanding requests.
    * @return multi reader builder
    */
-  def trackOutstandingRequests(trackOutstandingRequests: Boolean): Builder =
-    withConfig(_.copy(_trackOutstandingRequests = trackOutstandingRequests))
+  def trackOutstandingAsks(trackOutstandingAsks: Boolean): Builder =
+    withConfig(_.copy(_trackOutstandingAsks = trackOutstandingAsks))
 
   /**
    * Specify the statsReceiver to use to expose multi reader stats.
@@ -568,7 +568,7 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
    * The handle is updated as members are added or removed.
    */
   def build(): ReadHandle = MultiReaderHelper.merge(buildReadHandleVar(),
-    config.trackOutstandingRequests,
+    config.trackOutstandingAsks,
     config.statsReceiver.scope("multireader").scope(config.queueName))
 }
 

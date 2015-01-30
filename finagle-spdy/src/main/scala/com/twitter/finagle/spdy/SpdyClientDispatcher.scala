@@ -5,12 +5,12 @@ import com.twitter.finagle.{Service, WriteException}
 import com.twitter.util.{Future, Promise, Return, Throw, Time}
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{HttpRequest => HttpAsk, _}
 import org.jboss.netty.handler.codec.spdy.SpdyHttpHeaders
 import scala.collection.JavaConverters._
 
-class SpdyClientDispatcher(trans: Transport[HttpRequest, HttpResponse])
-  extends Service[HttpRequest, HttpResponse]
+class SpdyClientDispatcher(trans: Transport[HttpAsk, HttpResponse])
+  extends Service[HttpAsk, HttpResponse]
 {
   private[this] val readFailure = new AtomicReference[Throwable]()
 
@@ -37,7 +37,7 @@ class SpdyClientDispatcher(trans: Transport[HttpRequest, HttpResponse])
     }
   }
 
-  def apply(req: HttpRequest): Future[HttpResponse] = {
+  def apply(req: HttpAsk): Future[HttpResponse] = {
     val p = new Promise[HttpResponse]
     val streamId = SpdyHttpHeaders.getStreamId(req)
 

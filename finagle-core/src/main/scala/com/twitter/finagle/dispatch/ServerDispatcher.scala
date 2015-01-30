@@ -1,7 +1,7 @@
 package com.twitter.finagle.dispatch
 
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Service, NoStacktrace, CancelledRequestException}
+import com.twitter.finagle.{Service, NoStacktrace, CancelledAskException}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
 
@@ -23,7 +23,7 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
   import GenSerialServerDispatcher._
 
   private[this] val state = new AtomicReference[Future[_]](Idle)
-  private[this] val cancelled = new CancelledRequestException
+  private[this] val cancelled = new CancelledAskException
 
   /**
    * Dispatches a request. The first argument is the request. The second

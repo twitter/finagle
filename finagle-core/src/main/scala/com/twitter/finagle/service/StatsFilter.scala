@@ -7,7 +7,7 @@ import com.twitter.util.{Future, Stopwatch, Throw, Return}
 import java.util.concurrent.atomic.AtomicInteger
 
 private[finagle] object StatsFilter {
-  val role = Stack.Role("RequestStats")
+  val role = Stack.Role("AskStats")
 
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.StatsFilter]].
@@ -38,30 +38,30 @@ private[finagle] object StatsFilter {
 class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
   extends SimpleFilter[Req, Rep]
 {
-  private[this] val outstandingRequestCount = new AtomicInteger(0)
+  private[this] val outstandingAskCount = new AtomicInteger(0)
   private[this] val dispatchCount = statsReceiver.counter("requests")
   private[this] val successCount = statsReceiver.counter("success")
   private[this] val failureReceiver = statsReceiver.scope("failures")
   private[this] val sourcedFailuresReceiver = statsReceiver.scope("sourcedfailures")
   private[this] val latencyStat = statsReceiver.stat("request_latency_ms")
-  private[this] val loadGauge = statsReceiver.addGauge("load") { outstandingRequestCount.get }
-  private[this] val outstandingRequestCountGauge =
-    statsReceiver.addGauge("pending") { outstandingRequestCount.get }
+  private[this] val loadGauge = statsReceiver.addGauge("load") { outstandingAskCount.get }
+  private[this] val outstandingAskCountGauge =
+    statsReceiver.addGauge("pending") { outstandingAskCount.get }
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val elapsed = Stopwatch.start()
 
-    outstandingRequestCount.incrementAndGet()
+    outstandingAskCount.incrementAndGet()
     service(request) respond { response =>
-      outstandingRequestCount.decrementAndGet()
+      outstandingAskCount.decrementAndGet()
       response match {
-        case Throw(BackupRequestLost) | Throw(WriteException(BackupRequestLost)) =>
+        case Throw(BackupAskLost) | Throw(WriteException(BackupAskLost)) =>
           // We blackhole this request. It doesn't count for anything.
           // After the Failure() patch, this should no longer need to
           // be a special case.
           //
           // In theory, we should probably unwind the whole cause
-          // chain to look for a BackupRequestLost, but in practice it
+          // chain to look for a BackupAskLost, but in practice it
           // is wrapped only once.
         case Throw(e) =>
           dispatchCount.incr()

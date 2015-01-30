@@ -209,12 +209,12 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
     factories.drop(2).foreach(n => group() -= n)
 
     // Sequentially issue requests to the 2 nodes.
-    // Requests should end up getting serviced by more than just one
+    // Asks should end up getting serviced by more than just one
     // of the nodes.
     val results = (0 until N).foldLeft(Map.empty[LoadedFactory, Int]) { case (map, i) =>
-      val sequentialRequest = Await.result(b())
+      val sequentialAsk = Await.result(b())
       val chosenNode = factories.filter(_.load == 1).head
-      sequentialRequest.close()
+      sequentialAsk.close()
       map + (chosenNode -> (map.getOrElse(chosenNode, 0) + 1))
     }
 

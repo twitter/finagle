@@ -7,7 +7,7 @@ import scala.collection.JavaConverters._
 
 /**
  * Adapt cookies of a Message to a mutable Map where cookies are indexed by
- * their name. Requests use the Cookie header and Responses use the Set-Cookie
+ * their name. Asks use the Cookie header and Responses use the Set-Cookie
  * header. If a cookie is added to the CookieMap, a header is automatically
  * added to the Message. You can add the same cookie more than once. Use getAll
  * to retrieve all of them, otherwise only the first one is returned. If a
@@ -17,7 +17,7 @@ import scala.collection.JavaConverters._
 class CookieMap(message: Message)
   extends mutable.Map[String, Cookie]
   with mutable.MapLike[String, Cookie, CookieMap] {
-  override def empty: CookieMap = new CookieMap(Request())
+  override def empty: CookieMap = new CookieMap(Ask())
 
   private[this] val underlying = mutable.Map[String, Seq[Cookie]]()
 
@@ -26,7 +26,7 @@ class CookieMap(message: Message)
   private[this] var _isValid = true
 
   private[this] val cookieHeaderName =
-    if (message.isRequest)
+    if (message.isAsk)
       HttpHeaders.Names.COOKIE
     else
       HttpHeaders.Names.SET_COOKIE
@@ -47,7 +47,7 @@ class CookieMap(message: Message)
     message.headers.remove(cookieHeaderName)
 
     // Add cookies back again
-    if (message.isRequest) {
+    if (message.isAsk) {
       val encoder = new NettyCookieEncoder(false)
       foreach { case (_, cookie) =>
         encoder.addCookie(cookie.underlying)

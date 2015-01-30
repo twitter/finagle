@@ -16,7 +16,7 @@ trait Strings { self: BaseClient =>
    * @return length of string after append operation
    */
   def append(key: ChannelBuffer, value: ChannelBuffer): Future[JLong] =
-    doRequest(Append(key, value)) {
+    doAsk(Append(key, value)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -31,7 +31,7 @@ trait Strings { self: BaseClient =>
    */
   def bitCount(key: ChannelBuffer, start: Option[Int] = None,
       end: Option[Int] = None): Future[JLong] =
-    doRequest(BitCount(key, start, end)) {
+    doAsk(BitCount(key, start, end)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -48,7 +48,7 @@ trait Strings { self: BaseClient =>
    */
   def bitOp(op: ChannelBuffer, dstKey: ChannelBuffer,
       srcKeys: Seq[ChannelBuffer]): Future[JLong] =
-    doRequest(BitOp(op, dstKey, srcKeys)) {
+    doAsk(BitOp(op, dstKey, srcKeys)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -58,7 +58,7 @@ trait Strings { self: BaseClient =>
    * @return value after decrement.
    */
   def decr(key: ChannelBuffer): Future[JLong] =
-    doRequest(Decr(key)) {
+    doAsk(Decr(key)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -71,7 +71,7 @@ trait Strings { self: BaseClient =>
    * of the wrong type
    */
   def decrBy(key: ChannelBuffer, amount: Long): Future[JLong] =
-    doRequest(DecrBy(key, amount)) {
+    doAsk(DecrBy(key, amount)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -81,7 +81,7 @@ trait Strings { self: BaseClient =>
    * @return value, or none if key doesn't exist
    */
   def get(key: ChannelBuffer): Future[Option[ChannelBuffer]] =
-    doRequest(Get(key)) {
+    doAsk(Get(key)) {
       case BulkReply(message)   => Future.value(Some(message))
       case EmptyBulkReply()     => Future.value(None)
     }
@@ -94,7 +94,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io/commands/getbit
    */
   def getBit(key: ChannelBuffer, offset: Int): Future[JLong] =
-    doRequest(GetBit(key, offset)) {
+    doAsk(GetBit(key, offset)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -106,7 +106,7 @@ trait Strings { self: BaseClient =>
    * @return substring, or none if key doesn't exist
    */
   def getRange(key: ChannelBuffer, start: Long, end: Long): Future[Option[ChannelBuffer]] =
-    doRequest(GetRange(key, start, end)) {
+    doAsk(GetRange(key, start, end)) {
       case BulkReply(message)   => Future.value(Some(message))
       case EmptyBulkReply()     => Future.value(None)
     }
@@ -121,7 +121,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io/commands/getset
    */
   def getSet(key: ChannelBuffer, value: ChannelBuffer): Future[Option[ChannelBuffer]] =
-    doRequest(GetSet(key, value)) {
+    doAsk(GetSet(key, value)) {
       case BulkReply(message)   => Future.value(Some(message))
       case EmptyBulkReply()     => Future.value(None)
     }
@@ -134,7 +134,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io/commands/incr
    */
   def incr(key: ChannelBuffer): Future[JLong] =
-    doRequest(Incr(key)) {
+    doAsk(Incr(key)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -146,7 +146,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io/commands/incrby
    */
   def incrBy(key: ChannelBuffer, increment: Long): Future[JLong] =
-    doRequest(IncrBy(key, increment)) {
+    doAsk(IncrBy(key, increment)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -158,7 +158,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io/commands/mget
    */
   def mGet(keys: Seq[ChannelBuffer]): Future[Seq[Option[ChannelBuffer]]] =
-    doRequest(MGet(keys)) {
+    doAsk(MGet(keys)) {
       case MBulkReply(messages) => Future {
         messages map {
           case BulkReply(message) => Some(message)
@@ -177,7 +177,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io/commands/mset
    */
   def mSet(kv: Map[ChannelBuffer, ChannelBuffer]): Future[Unit] =
-    doRequest(MSet(kv)) {
+    doAsk(MSet(kv)) {
       case StatusReply(message) => Future.Unit
     }
 
@@ -190,7 +190,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io/commands/msetnx
    */
   def mSetNx(kv: Map[ChannelBuffer, ChannelBuffer]): Future[JBoolean] =
-    doRequest(MSetNx(kv)) {
+    doAsk(MSetNx(kv)) {
       case IntegerReply(n) => Future.value(n == 1)
     }
 
@@ -202,7 +202,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io/commands/psetex
    */
   def pSetEx(key: ChannelBuffer, millis: Long, value: ChannelBuffer): Future[Unit] =
-    doRequest(PSetEx(key, millis, value)) {
+    doAsk(PSetEx(key, millis, value)) {
       case StatusReply(message) => Future.Unit
     }
 
@@ -213,7 +213,7 @@ trait Strings { self: BaseClient =>
    * @param value
    */
   def set(key: ChannelBuffer, value: ChannelBuffer): Future[Unit] =
-    doRequest(Set(key, value)) {
+    doAsk(Set(key, value)) {
       case StatusReply(message) => Future.Unit
     }
 
@@ -225,7 +225,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io/commands/setbit
    */
   def setBit(key: ChannelBuffer, offset: Int, value: Int): Future[JLong] =
-    doRequest(SetBit(key, offset, value)) {
+    doAsk(SetBit(key, offset, value)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -237,7 +237,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io/commands/setex
    */
   def setEx(key: ChannelBuffer, seconds: Long, value: ChannelBuffer): Future[Unit] =
-    doRequest(SetEx(key, seconds, value)) {
+    doAsk(SetEx(key, seconds, value)) {
       case StatusReply(message) => Future.Unit
     }
 
@@ -250,7 +250,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io.commands/set
    */
   def setExNx(key: ChannelBuffer, seconds: Long, value: ChannelBuffer): Future[JBoolean] =
-    doRequest(Set(key, value, Some(InSeconds(seconds)), true, false)) {
+    doAsk(Set(key, value, Some(InSeconds(seconds)), true, false)) {
       case StatusReply(_) => Future.value(true)
       case EmptyBulkReply() => Future.value(false)
     }
@@ -264,7 +264,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io.commands/set
    */
   def setExXx(key: ChannelBuffer, seconds: Long, value: ChannelBuffer): Future[JBoolean] =
-    doRequest(Set(key, value, Some(InSeconds(seconds)), false, true)) {
+    doAsk(Set(key, value, Some(InSeconds(seconds)), false, true)) {
       case StatusReply(_) => Future.value(true)
       case EmptyBulkReply() => Future.value(false)
     }
@@ -278,7 +278,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io/commands/setnx
    */
   def setNx(key: ChannelBuffer, value: ChannelBuffer): Future[JBoolean] =
-    doRequest(SetNx(key, value)) {
+    doAsk(SetNx(key, value)) {
       case IntegerReply(n) => Future.value(n == 1)
     }
 
@@ -289,7 +289,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io.commands/set
    */
   def setPx(key: ChannelBuffer, millis: Long, value: ChannelBuffer): Future[Unit] =
-    doRequest(Set(key, value, Some(InMilliseconds(millis)))) {
+    doAsk(Set(key, value, Some(InMilliseconds(millis)))) {
       case StatusReply(_) => Future.Unit
     }
 
@@ -302,7 +302,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io.commands/set
    */
   def setPxNx(key: ChannelBuffer, millis: Long, value: ChannelBuffer): Future[JBoolean] =
-    doRequest(Set(key, value, Some(InMilliseconds(millis)), true, false)) {
+    doAsk(Set(key, value, Some(InMilliseconds(millis)), true, false)) {
       case StatusReply(_) => Future.value(true)
       case EmptyBulkReply() => Future.value(false)
     }
@@ -316,7 +316,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io.commands/set
    */
   def setPxXx(key: ChannelBuffer, millis: Long, value: ChannelBuffer): Future[JBoolean] =
-    doRequest(Set(key, value, Some(InMilliseconds(millis)), false, true)) {
+    doAsk(Set(key, value, Some(InMilliseconds(millis)), false, true)) {
       case StatusReply(_) => Future.value(true)
       case EmptyBulkReply() => Future.value(false)
     }
@@ -329,7 +329,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io.commands/set
    */
   def setXx(key: ChannelBuffer, value: ChannelBuffer): Future[JBoolean] =
-    doRequest(Set(key, value, None, false, true)) {
+    doAsk(Set(key, value, None, false, true)) {
       case StatusReply(_) => Future.value(true)
       case EmptyBulkReply() => Future.value(false)
     }
@@ -343,7 +343,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io/commands/setrange
    */
   def setRange(key: ChannelBuffer, offset: Int, value: ChannelBuffer): Future[JLong] =
-    doRequest(SetRange(key, offset, value)) {
+    doAsk(SetRange(key, offset, value)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -355,7 +355,7 @@ trait Strings { self: BaseClient =>
    * @see http://redis.io/commands/strlen
    */
   def strlen(key: ChannelBuffer): Future[JLong] =
-    doRequest(Strlen(key)) {
+    doAsk(Strlen(key)) {
       case IntegerReply(n) => Future.value(n)
     }
 }

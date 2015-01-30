@@ -14,7 +14,7 @@ import org.jboss.netty.buffer._
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{HttpRequestDecoder=>HttpAskDecoder, _}
 import scala.collection.JavaConversions._
 
 object EmbeddedServer {
@@ -61,7 +61,7 @@ class EmbeddedServer(val addr: SocketAddress) {
         }
       })
 
-      pipeline.addLast("decoder", new HttpRequestDecoder)
+      pipeline.addLast("decoder", new HttpAskDecoder)
       pipeline.addLast("encoder", new HttpResponseEncoder)
       pipeline.addLast("logger", new SimpleChannelHandler {
         override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {

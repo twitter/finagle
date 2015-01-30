@@ -16,7 +16,7 @@ trait Sets { self: BaseClient =>
    * @return the number of new members added to the set.
    */
   def sAdd(key: ChannelBuffer, members: List[ChannelBuffer]): Future[JLong] =
-    doRequest(SAdd(key, members)) {
+    doAsk(SAdd(key, members)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -27,7 +27,7 @@ trait Sets { self: BaseClient =>
    * @return a list of the members
    */
   def sMembers(key: ChannelBuffer): Future[ImmutableSet[ChannelBuffer]] =
-    doRequest(SMembers(key)) {
+    doAsk(SMembers(key)) {
       case MBulkReply(list) => Future.value(ReplyFormat.toChannelBuffers(list) toSet)
       case EmptyMBulkReply() => Future.value(ImmutableSet())
     }
@@ -41,7 +41,7 @@ trait Sets { self: BaseClient =>
    * keys are considered empty sets.
    */
   def sIsMember(key: ChannelBuffer, member: ChannelBuffer): Future[JBoolean] =
-    doRequest(SIsMember(key, member)) {
+    doAsk(SIsMember(key, member)) {
       case IntegerReply(n) => Future.value(n == 1)
     }
 
@@ -53,7 +53,7 @@ trait Sets { self: BaseClient =>
    * empty sets.
    */
   def sCard(key: ChannelBuffer): Future[JLong] =
-    doRequest(SCard(key)) {
+    doAsk(SCard(key)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -66,7 +66,7 @@ trait Sets { self: BaseClient =>
    * 0 if the key is unassigned.
    */
   def sRem(key: ChannelBuffer, members: List[ChannelBuffer]): Future[JLong] =
-    doRequest(SRem(key, members)) {
+    doAsk(SRem(key, members)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -77,7 +77,7 @@ trait Sets { self: BaseClient =>
    * @return the member, or nothing if the set is empty.
    */
   def sPop(key: ChannelBuffer): Future[Option[ChannelBuffer]] =
-    doRequest(SPop(key)) {
+    doAsk(SPop(key)) {
       case BulkReply(message) => Future.value(Some(message))
       case EmptyBulkReply() => Future.value(None)
     }
@@ -90,7 +90,7 @@ trait Sets { self: BaseClient =>
     * @return a sequence with count random entries from the set
     */
   def sRandMember(key: ChannelBuffer, count: Option[Int] = None): Future[Seq[ChannelBuffer]] =
-    doRequest(SRandMember(key, count)) {
+    doAsk(SRandMember(key, count)) {
       case BulkReply(message) => Future.value(Seq(message))
       case EmptyBulkReply() => Future.Nil
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
@@ -112,7 +112,7 @@ trait Sets { self: BaseClient =>
    * @return set of members from the resulting intersection
    */
   def sInter(keys: Seq[ChannelBuffer]): Future[ImmutableSet[ChannelBuffer]] =
-    doRequest(SInter(keys)) {
+    doAsk(SInter(keys)) {
       case MBulkReply(messages) =>
         Future.value(ReplyFormat.toChannelBuffers(messages).toSet)
       case EmptyMBulkReply() => Future.value(ImmutableSet())

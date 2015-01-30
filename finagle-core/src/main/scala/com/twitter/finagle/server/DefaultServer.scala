@@ -1,6 +1,6 @@
 package com.twitter.finagle.server
 
-import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter}
+import com.twitter.finagle.filter.{MaskCancelFilter, AskSemaphoreFilter}
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.{StatsReceiver, ServerStatsReceiver}
 import com.twitter.finagle.tracing._
@@ -22,14 +22,14 @@ import java.net.SocketAddress
  * Transports.
  *
  * @param serveTransport The function used to bind an accepted
- * Transport with a Service. Requests read from the transport are
+ * Transport with a Service. Asks read from the transport are
  * dispatched onto the Service, with replies written back.
  *
  * @param requestTimeout The maximum amount of time the server is
  * allowed to handle a request. If the timeout expires, the server
  * will cancel the future and terminate the client connection.
  *
- * @param maxConcurrentRequests The maximum number of concurrent
+ * @param maxConcurrentAsks The maximum number of concurrent
  * requests the server is willing to handle.
  *
  * @param cancelOnHangup Enabled by default. If disabled,
@@ -42,7 +42,7 @@ case class DefaultServer[Req, Rep, In, Out](
   listener: Listener[In, Out],
   serviceTransport: (Transport[In, Out], Service[Req, Rep]) => Closable,
   requestTimeout: Duration = Duration.Top,
-  maxConcurrentRequests: Int = Int.MaxValue,
+  maxConcurrentAsks: Int = Int.MaxValue,
   cancelOnHangup: Boolean = true,
   prepare: ServiceFactory[Req, Rep] => ServiceFactory[Req, Rep] =
     (sf: ServiceFactory[Req, Rep]) => sf,
@@ -90,7 +90,7 @@ case class DefaultServer[Req, Rep, In, Out](
     .configured(param.Reporter(reporter))
     .configured(MaskCancelFilter.Param(!cancelOnHangup))
     .configured(TimeoutFilter.Param(requestTimeout))
-    .configured(RequestSemaphoreFilter.Param(maxConcurrentRequests))
+    .configured(AskSemaphoreFilter.Param(maxConcurrentAsks))
 
   def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
     configured.serve(addr, factory)

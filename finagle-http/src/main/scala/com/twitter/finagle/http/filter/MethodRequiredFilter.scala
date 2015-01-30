@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.finagle.http.{Method, Request, Response, Status}
+import com.twitter.finagle.http.{Method, Ask, Response, Status}
 import com.twitter.util.Future
 import org.jboss.netty.handler.codec.http.HttpMethod
 
@@ -11,13 +11,13 @@ import org.jboss.netty.handler.codec.http.HttpMethod
  *
  * Respond with 405 Method Not Allowed error if method not in supported method list.
  */
-class MethodRequiredFilter[REQUEST <: Request](
+class MethodRequiredFilter[ASK <: Ask](
    val supportedMethods: Set[HttpMethod] = Set(Method.Get, Method.Head, Method.Post))
- extends SimpleFilter[REQUEST, Response] {
+ extends SimpleFilter[ASK, Response] {
 
   private[this] val allowedMethods = supportedMethods.mkString(", ")
 
-  def apply(request: REQUEST, service: Service[REQUEST, Response]): Future[Response] =
+  def apply(request: ASK, service: Service[ASK, Response]): Future[Response] =
     if (!supportedMethods.contains(request.getMethod)) {
       val response = request.response
       response.status = Status.MethodNotAllowed
@@ -30,4 +30,4 @@ class MethodRequiredFilter[REQUEST <: Request](
 
 
 object MethodRequiredFilter
-  extends MethodRequiredFilter[Request](Set(Method.Get, Method.Head, Method.Post))
+  extends MethodRequiredFilter[Ask](Set(Method.Get, Method.Head, Method.Post))

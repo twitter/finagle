@@ -19,14 +19,14 @@ class LocalRateLimitingStrategy[Req](
   def apply(req: Req) = synchronized {
     val now = Time.now
     val id = categorizer(req)
-    val (remainingRequests, timestamp) = rates.getOrElse(id, (rate, now))
+    val (remainingAsks, timestamp) = rates.getOrElse(id, (rate, now))
 
     val accept = if (timestamp.until(now) > windowSize) {
       rates(id) = (rate, now)
       true
     } else {
-      if (remainingRequests > 0) {
-        rates(id) = (remainingRequests - 1, timestamp)
+      if (remainingAsks > 0) {
+        rates(id) = (remainingAsks - 1, timestamp)
         true
       } else
         false

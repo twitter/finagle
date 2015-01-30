@@ -11,9 +11,9 @@ import java.net.SocketAddress
  * finagle, for example [[com.twitter.finagle.Http]]:
  *
  * {{{
- * object Http extends Client[HttpRequest, HttpResponse] ...
+ * object Http extends Client[HttpAsk, HttpResponse] ...
  *
- * val service: Service[HttpRequest, HttpResponse] =
+ * val service: Service[HttpAsk, HttpResponse] =
  *   Http.newService("google.com:80")
  * }}}
  *

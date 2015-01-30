@@ -97,7 +97,7 @@ private[thrift] class ThriftClientChannelBufferEncoder
             case Error(e) =>
               Channels.fireExceptionCaught(ctx, e)
             case Cancelled =>
-              Channels.fireExceptionCaught(ctx, new CancelledRequestException)
+              Channels.fireExceptionCaught(ctx, new CancelledAskException)
           }
         }
 

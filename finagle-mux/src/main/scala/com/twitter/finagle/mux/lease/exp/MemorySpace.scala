@@ -14,7 +14,7 @@ private[lease] class MemorySpace(
   info: JvmInfo,
   val minDiscount: StorageUnit,
   maxDiscount: StorageUnit,
-  rSnooper: RequestSnooper,
+  rSnooper: AskSnooper,
   lr: LogsReceiver,
   rnd: GenerationalRandom
 ) {
@@ -22,7 +22,7 @@ private[lease] class MemorySpace(
     info: JvmInfo,
     minDiscount: StorageUnit,
     maxDiscount: StorageUnit,
-    rSnooper: RequestSnooper,
+    rSnooper: AskSnooper,
     lr: LogsReceiver
   ) = this(info, minDiscount, maxDiscount, rSnooper, lr, new GenerationalRandom(info))
 
@@ -30,7 +30,7 @@ private[lease] class MemorySpace(
     info: JvmInfo,
     minDiscount: StorageUnit,
     maxDiscount: StorageUnit,
-    rSnooper: RequestSnooper
+    rSnooper: AskSnooper
   ) = this(info, minDiscount, maxDiscount, rSnooper, NullLogsReceiver)
 
 

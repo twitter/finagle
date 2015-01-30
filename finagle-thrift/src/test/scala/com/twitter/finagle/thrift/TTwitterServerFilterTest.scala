@@ -43,7 +43,7 @@ class TTwitterServerFilterTest extends FunSuite {
         new TMessage("testrpc", TMessageType.CALL, 0))
       buffer().writeMessageEnd()
 
-      val header = new thrift.RequestHeader
+      val header = new thrift.AskHeader
       header.setClient_id(new thrift.ClientId("testclient"))
       val bytes = ByteArrays.concat(
         OutputBuffer.messageToArray(header, protocolFactory),
