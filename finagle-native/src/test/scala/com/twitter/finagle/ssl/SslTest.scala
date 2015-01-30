@@ -71,7 +71,7 @@ class SslTest extends FunSuite {
     }
 
     val service = new Service[HttpAsk, HttpResponse] {
-      def apply(request: HttpRequest) = Future {
+      def apply(request: HttpAsk) = Future {
         val requestedBytes = request.headers.get("Requested-Bytes")
           match {
           case s: String => s.toInt
