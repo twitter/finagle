@@ -50,7 +50,7 @@ trait IntegrationBase extends FunSuite with MockitoSugar {
         }
       }
     }
-    when(codec.newClientDispatcher(any[Transport[Any, Any]])) thenAnswer {
+    when(codec.newClientDispatcher(any[Transport[Any, Any]], any[Stack.Params])) thenAnswer {
       new Answer[SerialClientDispatcher[String, String]] {
         def answer(invocation: InvocationOnMock): SerialClientDispatcher[String, String] = {
           val arg = invocation.getArguments.head

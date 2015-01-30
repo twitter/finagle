@@ -1032,7 +1032,7 @@ private object ClientBuilderClient {
           }
 
           protected def newDispatcher(transport: Transport[In, Out]) =
-            codec.newClientDispatcher(transport)
+            codec.newClientDispatcher(transport, params)
         }
 
         Client()
