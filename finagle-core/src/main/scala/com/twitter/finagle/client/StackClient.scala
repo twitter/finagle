@@ -32,6 +32,7 @@ object StackClient {
    * Note that this is terminated by a [[com.twitter.finagle.service.FailingFactory]]:
    * users are expected to terminate it with a concrete service factory.
    *
+   * @see [[com.twitter.finagle.client.LatencyCompensation]]
    * @see [[com.twitter.finagle.service.ExpiringService]]
    * @see [[com.twitter.finagle.service.FailFastFactory]]
    * @see [[com.twitter.finagle.client.DefaultPool]]
@@ -61,6 +62,7 @@ object StackClient {
     stk.push(ClientDestTracingFilter.module)
     stk.push(MonitorFilter.module)
     stk.push(ExceptionSourceFilter.module)
+    stk.push(LatencyCompensation.module)
     stk.result
   }
 
@@ -229,7 +231,9 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
     ClientRegistry.register(clientLabel, Showable.show(dest), clientStack,
       clientParams + LoadBalancerFactory.Dest(va))
 
-    val finalStack = if (!clientStack.contains(FailFastFactory.role)) clientStack.remove(RequeueingFilter.role) else clientStack
+    val finalStack =
+      if (!clientStack.contains(FailFastFactory.role)) clientStack.remove(RequeueingFilter.role)
+      else clientStack
 
     finalStack.make(clientParams)
   }

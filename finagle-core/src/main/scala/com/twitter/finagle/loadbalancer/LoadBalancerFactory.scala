@@ -66,6 +66,21 @@ object LoadBalancerFactory {
   }
 
   /**
+   * A class that may be configured by a
+   * [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] with
+   * bound address metadata.
+   */
+  case class AddrMetadata(metadata: Addr.Metadata) {
+    def mk(): (AddrMetadata, Stack.Param[AddrMetadata]) =
+      (this, AddrMetadata.param)
+  }
+  object AddrMetadata {
+    implicit val param =
+      Stack.Param(AddrMetadata(Addr.Metadata.empty))
+  }
+
+  /**
     * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
     * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] with a label
     * for use in error messages.
@@ -180,7 +195,6 @@ object LoadBalancerFactory {
         )(
           sockaddr: SocketAddress
         ): WeightedFactory[Req, Rep] = {
-          // TODO(ver) install per-region stats from metadata?
           val stats = if (hostStatsReceiver.isNull) statsReceiver else {
             val scope = sockaddr match {
               case WeightedInetSocketAddress(addr, _) =>
@@ -195,11 +209,11 @@ object LoadBalancerFactory {
 
           val endpointStack: SocketAddress => ServiceFactory[Req, Rep] =
             (sa: SocketAddress) => {
-              // TODO(ver) determine latency compensation from metadata.
               val underlying = next.make(params +
                 Transporter.EndpointAddr(sa) +
                 param.Stats(stats) +
-                param.Monitor(composite))
+                param.Monitor(composite) +
+                AddrMetadata(metadata))
               new ServiceFactoryProxy(underlying) {
                 override def toString = sa.toString
               }

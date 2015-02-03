@@ -67,6 +67,11 @@ New Features
 
   * finagle-core: improved Java compatiblity for `c.t.f.Stack.Params` / `c.t.f.Stack.Parameterized`.
 
+  * finagle-core: Introduce per-address latency compensation.  Clients may be configured with
+    a 'Compensator' function that uses the client's address metadata to adjust connection and
+    request timeouts.  This can be used, for instance, to account for speed-of-light latency
+    between physical regions.
+
   * finagle-mysql: Add support for MySQL transactions.
 
   * finagle-stats: A new HostStatsReceiver type is added and used for per host stats.
