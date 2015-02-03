@@ -1,7 +1,7 @@
 package com.twitter.finagle.http
 
 import com.google.common.base.Charsets
-import com.twitter.collection.DynamicRecord
+import com.twitter.collection.RecordSchema
 import com.twitter.finagle.http.netty.HttpResponseProxy
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.Channel
@@ -14,13 +14,13 @@ import org.jboss.netty.handler.codec.http._
 abstract class Response extends Message with HttpResponseProxy {
 
   /**
-   * Arbitrary, user-defined context associated with this response object.
-   * [[com.twitter.collection.DynamicRecord.Instance DynamicRecord.Instance]] is
+   * Arbitrary user-defined context associated with this response object.
+   * [[com.twitter.collection.RecordSchema.Record RecordSchema.Record]] is
    * used here, rather than [[com.twitter.finagle.Context Context]] or similar
    * out-of-band mechanisms, to make the connection between the response and its
    * associated context explicit.
-   **/
-  val ctx: Response.Context.Instance = Response.Context.newInstance
+   */
+  val ctx: Response.Schema.Record = Response.Schema.newRecord
 
   def isRequest = false
 
@@ -53,11 +53,11 @@ class MockResponse extends Response {
 object Response {
 
   /**
-   * [[com.twitter.collection.DynamicRecord DynamicRecord]] declaration, used
-   * to generate [[com.twitter.collection.DynamicRecord.Instance Instance]]s
+   * [[com.twitter.collection.RecordSchema RecordSchema]] declaration, used
+   * to generate [[com.twitter.collection.RecordSchema.Record Record]] instances
    * for Response.ctx.
    */
-  val Context: DynamicRecord = new DynamicRecord
+  val Schema: RecordSchema = new RecordSchema
 
   /** Decode a Response from a String */
   def decodeString(s: String): Response = {
