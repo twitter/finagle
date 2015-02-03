@@ -4,7 +4,7 @@ import com.google.caliper.SimpleBenchmark
 import com.twitter.finagle.core.util.InetAddressUtil
 import java.net.InetAddress
 
-// ./pants goal bench finagle/finagle-benchmark --bench-target=com.twitter.finagle.benchmark.InetAddressUtilBenchmark
+// ./pants bench finagle/finagle-benchmark --bench-target=com.twitter.finagle.benchmark.InetAddressUtilBenchmark
 
 class InetAddressUtilBenchmark extends SimpleBenchmark {
   val Ip = "69.55.236.117"

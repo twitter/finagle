@@ -6,7 +6,7 @@ import org.apache.thrift.protocol.{TProtocol, TBinaryProtocol}
 import org.apache.thrift.transport.TMemoryBuffer
 import scala.util.Random
 
-// ./pants goal bench finagle/finagle-benchmark --bench-target=com.twitter.finagle.benchmark.TFinagleBinaryProtocolBenchmark
+// ./pants bench finagle/finagle-benchmark --bench-target=com.twitter.finagle.benchmark.TFinagleBinaryProtocolBenchmark
 class TFinagleBinaryProtocolBenchmark extends SimpleBenchmark {
 
   private val LooongStrings: Seq[String] = {

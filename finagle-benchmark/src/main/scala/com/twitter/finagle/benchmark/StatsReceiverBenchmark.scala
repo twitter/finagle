@@ -6,7 +6,7 @@ import java.util.Random
 import com.twitter.common.metrics.Metrics
 
 // From $BIRDCAGE_HOME run:
-// ./pants goal bench finagle/finagle-benchmark --bench-target=com.twitter.finagle.benchmark.StatsReceiverBenchmark
+// ./pants bench finagle/finagle-benchmark --bench-target=com.twitter.finagle.benchmark.StatsReceiverBenchmark
 class StatsReceiverBenchmark extends SimpleBenchmark {
 
   private[this] val rnd = new Random
