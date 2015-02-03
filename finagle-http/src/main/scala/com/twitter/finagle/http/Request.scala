@@ -1,6 +1,7 @@
 package com.twitter.finagle.http
 
 import com.google.common.base.Charsets
+import com.twitter.collection.DynamicRecord
 import com.twitter.finagle.http.netty.HttpRequestProxy
 import java.net.{InetAddress, InetSocketAddress}
 import java.io.ByteArrayOutputStream
@@ -19,6 +20,15 @@ import scala.beans.BeanProperty
  * Use RequestProxy to created an even richer subclass.
  */
 abstract class Request extends Message with HttpRequestProxy {
+
+  /**
+   * Arbitrary, user-defined context associated with this request object.
+   * [[com.twitter.collection.DynamicRecord.Instance DynamicRecord.Instance]] is
+   * used here, rather than [[com.twitter.finagle.Context Context]] or similar
+   * out-of-band mechanisms, to make the connection between the request and its
+   * associated context explicit.
+   **/
+  val ctx: Request.Context.Instance = Request.Context.newInstance
 
   def isRequest = true
 
@@ -162,6 +172,13 @@ abstract class Request extends Message with HttpRequestProxy {
 
 
 object Request {
+
+  /**
+   * [[com.twitter.collection.DynamicRecord DynamicRecord]] declaration, used
+   * to generate [[com.twitter.collection.DynamicRecord.Instance Instance]]s
+   * for Request.ctx.
+   */
+  val Context: DynamicRecord = new DynamicRecord
 
   /** Decode a Request from a String */
   def decodeString(s: String): Request = {
