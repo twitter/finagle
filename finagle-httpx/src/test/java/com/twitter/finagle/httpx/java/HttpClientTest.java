@@ -1,18 +1,14 @@
-package com.twitter.finagle.javaapi;
+package com.twitter.finagle.httpx.java;
 
 import java.util.Collection;
 import java.util.List;
 
-import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-
 import com.twitter.finagle.Client;
 import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.ClientBuilder;
-import com.twitter.finagle.http.Http;
+import com.twitter.finagle.httpx.Http;
+import com.twitter.finagle.httpx.Request;
+import com.twitter.finagle.httpx.Response;
 import com.twitter.util.Future;
 import com.twitter.util.FutureEventListener;
 import com.twitter.util.Promise;
@@ -22,21 +18,23 @@ public final class HttpClientTest {
   private HttpClientTest() { }
 
   /**
-   * Runs the client with the given {@code args}.
+   * Rns the server with the given {@code args}.
+   *
+   * @param args the arguments array
    */
   public static void main(String[] args) {
-    Service<HttpRequest, HttpResponse> client =
+    Service<Request, Response> client =
       ClientBuilder.safeBuild(ClientBuilder.get()
         .codec(Http.get())
         .hosts("localhost:10000")
         .hostConnectionLimit(1));
 
-    HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");
+    Request request = Request.apply("/");
 
-    Future<HttpResponse> response = client.apply(request);
+    Future<Response> response = client.apply(request);
     response.addEventListener(
-      new FutureEventListener<HttpResponse>() {
-        public void onSuccess(HttpResponse response) {
+      new FutureEventListener<Response>() {
+        public void onSuccess(Response response) {
           System.out.println("received response: " + response);
           throw new RuntimeException();
         }
@@ -66,8 +64,8 @@ public final class HttpClientTest {
     */
 
     // New APIs
-    com.twitter.finagle.Http.newClient(":80");
-    Client<HttpRequest, HttpResponse> newStyleClient =
-      com.twitter.finagle.Http.client().withTls("foo.com");
+    com.twitter.finagle.Httpx.newClient(":80");
+    Client<Request, Response> newStyleClient =
+      com.twitter.finagle.Httpx.client().withTls("foo.com");
   }
 }

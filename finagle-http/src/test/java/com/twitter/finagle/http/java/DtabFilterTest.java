@@ -1,4 +1,4 @@
-package com.twitter.finagle.javaapi;
+package com.twitter.finagle.http.java;
 
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;

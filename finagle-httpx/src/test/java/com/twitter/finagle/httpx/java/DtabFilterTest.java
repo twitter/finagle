@@ -1,4 +1,4 @@
-package com.twitter.finagle.javaapi;
+package com.twitter.finagle.httpx.java;
 
 import org.junit.Assert;
 import org.junit.Test;

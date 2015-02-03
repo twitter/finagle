@@ -1,4 +1,4 @@
-package com.twitter.finagle.javaapi;
+package com.twitter.finagle.httpx.java;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
