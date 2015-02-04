@@ -77,7 +77,7 @@ object Netty3Listener {
       // ones.
       val snap = activeChannels.asScala
       val closing = new DefaultChannelGroupFuture(
-        activeChannels, snap map(_.getCloseFuture) asJava)
+        activeChannels, snap.map(_.getCloseFuture).asJava)
 
       val p = new Promise[Unit]
       closing.addListener(new ChannelGroupFutureListener {

@@ -83,16 +83,16 @@ trait Context {
    * An environment without `key`. Lookups for other keys
    * are forwarded to `next.
    */
-  case class Cleared(next: Env, key: Key[_]) extends Env {
-    def apply[A](key: Key[A]) =
+  case class Cleared[A](next: Env, key: Key[A]) extends Env {
+    def apply[B](key: Key[B]) =
       if (key == this.key) throw new NoSuchElementException
       else next(key)
 
-    def get[A](key: Key[A])  =
+    def get[B](key: Key[B])  =
       if (key == this.key) None
       else next.get(key)
 
-    def contains[A](key: Key[A]) =
+    def contains[B](key: Key[B]) =
       key != this.key && next.contains(key)
 
     override def toString = s"Clear($key) :: $next"

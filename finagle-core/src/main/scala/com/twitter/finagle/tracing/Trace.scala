@@ -21,7 +21,7 @@ import com.twitter.app.GlobalFlag
 import com.twitter.finagle.context.Contexts
 import com.twitter.io.Buf
 import com.twitter.finagle.util.ByteArrays
- 
+
 object debugTrace extends GlobalFlag(false, "Print all traces to the console.")
 
 /**
@@ -35,11 +35,11 @@ object debugTrace extends GlobalFlag(false, "Print all traces to the console.")
 object Trace {
   private case class TraceCtx(terminal: Boolean, tracers: List[Tracer]) {
     def withTracer(tracer: Tracer) = copy(tracers=tracer :: this.tracers)
-    def withTerminal(terminal: Boolean) = 
+    def withTerminal(terminal: Boolean) =
       if (terminal == this.terminal) this
       else copy(terminal=terminal)
   }
-  
+
   private object TraceCtx {
     val empty = TraceCtx(false, Nil)
   }
@@ -47,7 +47,7 @@ object Trace {
   private val traceCtx = new Contexts.local.Key[TraceCtx]
 
   private val someTrue = Some(true)
-  
+
   private[finagle] val idCtx = new Contexts.broadcast.Key[TraceId] {
     private val local = new ThreadLocal[Array[Byte]] {
       override def initialValue() = new Array[Byte](32)
@@ -56,7 +56,7 @@ object Trace {
     val marshalId = Buf.Utf8("com.twitter.finagle.tracing.TraceContext")
 
     def marshal(id: TraceId) =
-      Buf.ByteArray(TraceId.serialize(id))
+      Buf.ByteArray.Owned(TraceId.serialize(id))
 
     /**
      * The wire format is (big-endian):
@@ -73,19 +73,19 @@ object Trace {
       val parent64 = ByteArrays.get64be(bytes, 8)
       val trace64 = ByteArrays.get64be(bytes, 16)
       val flags64 = ByteArrays.get64be(bytes, 24)
-  
+
       val flags = Flags(flags64)
       val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
         Some(flags.isFlagSet(Flags.Sampled))
       } else None
-  
+
       val traceId = TraceId(
         if (trace64 == parent64) None else Some(SpanId(trace64)),
         if (parent64 == span64) None else Some(SpanId(parent64)),
         SpanId(span64),
         sampled,
         flags)
-      
+
       Return(traceId)
     }
   }
@@ -162,7 +162,7 @@ object Trace {
       }
     } else Contexts.broadcast.let(idCtx, traceId)(f)
   }
-  
+
   /**
    * A version of [com.twitter.finagle.tracing.Trace.letId] providing an
    * optional ID. If the argument is None, the computation `f` is run without
@@ -213,7 +213,7 @@ object Trace {
       }
     }
   }
-  
+
   /**
    * Run computation `f` with all tracing state (tracers, trace id)
    * cleared.
@@ -247,7 +247,7 @@ object Trace {
    * Returns true if tracing is enabled with a good tracer pushed and the current
    * trace is sampled
    */
-  def isActivelyTracing: Boolean = 
+  def isActivelyTracing: Boolean =
     tracingEnabled && (id match {
         case TraceId(_, _, _, Some(false), flags) if !flags.isDebug => false
         case TraceId(_, _, _, _, Flags(Flags.Debug)) => true

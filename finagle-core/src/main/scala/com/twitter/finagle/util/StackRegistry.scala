@@ -1,6 +1,7 @@
 package com.twitter.finagle.util
 
 import com.twitter.finagle.Stack
+import scala.language.existentials
 
 object StackRegistry {
   /** Represents an entry in the registry. */
