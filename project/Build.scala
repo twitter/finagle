@@ -6,9 +6,12 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
-  val libVersion = "6.24.0"
+  val branch = Process("git" :: "symbolic-ref" :: "--short" :: "HEAD" :: Nil).!!.trim
+  val suffix = if (branch == "master") "" else "-SNAPSHOT"
+
+  val libVersion = "6.24.0" + suffix
   val zkVersion = "3.3.4"
-  val utilVersion = "6.23.0"
+  val utilVersion = "6.23.0" + suffix
   val ostrichVersion = "9.7.0"
   val nettyLib = "io.netty" % "netty" % "3.10.0.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
