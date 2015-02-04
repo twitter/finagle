@@ -260,7 +260,20 @@ private trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, R
    */
   private[this] def adjustNode(node: Node, delta: Int) = {
     node.counter.addAndGet(delta)
-    val avg = ema.update(monoTime.nanos(), total.addAndGet(delta))
+
+    // this is synchronized so that sampling the monotonic time and updating
+    // based on that time are atomic, and we don't run into problems like:
+    //
+    // t1:
+    // sample (ts = 1)
+    // t2:
+    // sample (ts = 2)
+    // update (ts = 2)
+    // t1:
+    // update (ts = 1) // breaks monotonicity
+    val avg = synchronized {
+      ema.update(monoTime.nanos(), total.addAndGet(delta))
+    }
 
     // Compute the capacity-adjusted average load and adjust the
     // aperture accordingly. We make only directional adjustments as
