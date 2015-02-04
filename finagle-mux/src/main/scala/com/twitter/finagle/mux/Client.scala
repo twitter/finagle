@@ -9,7 +9,7 @@ import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Dtab, Service, WriteException, NoStacktrace, Status, Failure}
-import com.twitter.util.{Future, Promise, Time, Duration, Throw, Return}
+import com.twitter.util.{Future, Promise, Time, Duration, Throw, Try, Return, Updatable}
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.logging.Logger
@@ -81,7 +81,6 @@ private[twitter] object ClientDispatcher {
     def expired: Boolean = end < Time.now
   }
 
-
   // We reserve a tag for a default ping message to that we
   // can cache a full ping message and avoid encoding it
   // every time.
@@ -90,6 +89,8 @@ private[twitter] object ClientDispatcher {
   val MaxTag = Message.MaxTag
 
   val NackFailure = Failure.Rejected("The request was Nacked by the server")
+
+  val Empty: Updatable[Try[Response]] = Updatable.empty()
 }
 
 /**
@@ -104,7 +105,6 @@ private[twitter] class ClientDispatcher (
   import Message.{MinTag=>_, MaxTag=>_, _}
   
   private[this] implicit val timer = DefaultTimer.twitter
-  
   // Maintain the dispatcher's state, whose access is mediated
   // by the readLk and writeLk. 
   @volatile private[this] var state: State = Dispatching
@@ -132,7 +132,7 @@ private[twitter] class ClientDispatcher (
   private[this] val pingPromise = new AtomicReference[Promise[Unit]](null)
 
   private[this] val tags = TagSet(MinTag to MaxTag)
-  private[this] val reqs = TagMap[Promise[Response]](tags)
+  private[this] val reqs = TagMap[Updatable[Try[Response]]](tags)
   private[this] val log = Logger.getLogger(getClass.getName)
 
   private[this] val gauge = sr.addGauge("current_lease_ms") {
@@ -152,7 +152,7 @@ private[twitter] class ClientDispatcher (
       case _: Throwable =>
     }
 
-  private[this] def releaseTag(tag: Int): Option[Promise[Response]] =
+  private[this] def releaseTag(tag: Int): Option[Updatable[Try[Response]]] =
     reqs.unmap(tag) match {
       case None => None
       case some =>
@@ -168,33 +168,33 @@ private[twitter] class ClientDispatcher (
           readLk.unlock()
         }
     
-        some
+        if (some eq Empty) None else some
     }
 
   private[this] val receive: Message => Unit = {
     case RreqOk(tag, rep) =>
       for (p <- releaseTag(tag))
-        p.setValue(Response(ChannelBufferBuf.Owned(rep)))
+        p() = Return(Response(ChannelBufferBuf.Owned(rep)))
     case RreqError(tag, error) =>
       for (p <- releaseTag(tag))
-        p.setException(ServerApplicationError(error))
+        p() = Throw(ServerApplicationError(error))
     case RreqNack(tag) =>
       for (p <- releaseTag(tag))
-        p.setException(NackFailure)
+        p() = Throw(NackFailure)
 
     case RdispatchOk(tag, _, rep) =>
       for (p <- releaseTag(tag))
-        p.setValue(Response(ChannelBufferBuf.Owned(rep)))
+        p() = Return(Response(ChannelBufferBuf.Owned(rep)))
     case RdispatchError(tag, _, error) =>
       for (p <- releaseTag(tag))
-        p.setException(ServerApplicationError(error))
+        p() = Throw(ServerApplicationError(error))
     case RdispatchNack(tag, _) =>
       for (p <- releaseTag(tag))
-        p.setException(NackFailure)
+        p() = Throw(NackFailure)
 
     case Rerr(tag, error) =>
       for (p <- releaseTag(tag))
-        p.setException(ServerError(error))
+        p() = Throw(ServerError(error))
 
     case Rping(PingTag) =>
       val p = pingPromise.getAndSet(null)
@@ -203,7 +203,7 @@ private[twitter] class ClientDispatcher (
 
     case Rping(tag) =>
       for (p <- releaseTag(tag))
-        p.setValue(Response.empty)
+        p() = Return(Response.empty)
     case Tping(tag) =>
       trans.write(encode(Rping(tag)))
     case Tdrain(tag) =>
@@ -248,7 +248,7 @@ private[twitter] class ClientDispatcher (
       val what = "Did not understand Rmessage[tag=%d] %s".format(tag, m)
       log.warning(what)
       for (p <- releaseTag(tag))
-        p.setException(BadMessageException(what))
+        p() = Throw(BadMessageException(what))
   }
 
   private[this] val readAndAct: ChannelBuffer => Future[Nothing] =
@@ -266,8 +266,9 @@ private[twitter] class ClientDispatcher (
 
   loop() onFailure { case exc =>
     trans.close()
+    val result = Throw(exc)
     for ((tag, p) <- reqs)
-      p.setException(exc)
+      p() = result
   }
 
   def ping(): Future[Unit] = {
@@ -332,9 +333,12 @@ private[twitter] class ClientDispatcher (
       releaseTag(tag)
     } before {
       p.setInterruptHandler { case cause =>
-        for (reqP <- reqs.maybeRemap(tag, new Promise[Response])) {
+        // We replace the current Updatable, if any, with a stand-in to reserve
+        // the tag of discarded requests until Tdiscarded is acknowledged by the
+        // peer.
+        for (reqP <- reqs.maybeRemap(tag, Empty)) {
           trans.write(encode(Tdiscarded(tag, cause.toString)))
-          reqP.setException(cause)
+          reqP() = Throw(cause)
         }
       }
       p
