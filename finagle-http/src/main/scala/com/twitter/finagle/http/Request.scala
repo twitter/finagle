@@ -28,7 +28,8 @@ abstract class Request extends Message with HttpRequestProxy {
    * out-of-band mechanisms, to make the connection between the request and its
    * associated context explicit.
    */
-  val ctx: Request.Schema.Record = Request.Schema.newRecord()
+  def ctx: Request.Schema.Record = _ctx
+  private[this] val _ctx = Request.Schema.newRecord()
 
   def isRequest = true
 

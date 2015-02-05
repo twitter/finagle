@@ -8,6 +8,8 @@ abstract class RequestProxy extends Request {
   def request: Request
   def getRequest(): Request = request
 
+  override def ctx = request.ctx
+
   override def httpRequest = request
   override def httpMessage = request
 
