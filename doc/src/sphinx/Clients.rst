@@ -68,7 +68,7 @@ Observability
 ^^^^^^^^^^^^^
 
 The ``Observe``, ``Monitor``, and ``Trace`` modules export useful information about the internals and
-behavior of a Finagle client. Client metrics are exported using a :src:`StatsReceiver <com/twitter/finagle/stats/StatsReceiver>`
+behavior of a Finagle client. Client metrics are exported using a :src:`StatsReceiver <com/twitter/finagle/stats/StatsReceiver.scala>`
 (See the :ref:`metrics <public_stats>` section for more details). Generic exception handling can
 be installed via the :src:`MonitorFilter <com/twitter/finagle/filter/MonitorFilter.scala>`.
 Finally, clients have built-in support for `Zipkin <http://twitter.github.com/zipkin/>`_.
