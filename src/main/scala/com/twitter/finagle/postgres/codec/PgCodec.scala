@@ -29,7 +29,8 @@ class PgCodec(
     database: String,
     id: String,
     useSsl: Boolean,
-    trustManagerFactory: TrustManagerFactory = InsecureTrustManagerFactory.INSTANCE)
+    trustManagerFactory: TrustManagerFactory = InsecureTrustManagerFactory.INSTANCE,
+    customTypes: Boolean = false)
       extends CodecFactory[PgRequest, PgResponse] {
   def server = throw new UnsupportedOperationException("client only")
 
@@ -54,7 +55,15 @@ class PgCodec(
       }
 
       override def prepareServiceFactory(underlying: ServiceFactory[PgRequest, PgResponse]) = {
-        new CustomOIDProxy(underlying, id)
+        if (customTypes) {
+          // Make query to DB to get custom types in current context
+          new CustomOIDProxy(underlying, id)
+        } else {
+          // Use empty custom types map
+          CustomOIDProxy.serviceOIDMap += id -> Map()
+
+          super.prepareServiceFactory(underlying)
+        }
       }
     }
   }
@@ -176,7 +185,7 @@ class CustomOIDProxy(
   }
 
   def handleTypeResponse(response:PgResponse):Future[Unit] = {
-    val result:ResultSet = response match {
+    val result: ResultSet = response match {
       case SelectResult(fields, rows) => ResultSet(fields, rows, Map())
       case _ => throw Errors.client("Expected a SelectResult")
     }
@@ -269,7 +278,7 @@ class PgClientChannelHandler(val sslContext: SslContext, val useSsl: Boolean) ex
   override def channelDisconnected(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     logger.ifDebug("Detected channel disconnected!")
 
-    Channels.disconnect(ctx.getChannel)
+    super.channelDisconnected(ctx, e)
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {

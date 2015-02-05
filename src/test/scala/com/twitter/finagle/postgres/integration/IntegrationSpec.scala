@@ -44,8 +44,8 @@ class IntegrationSpec extends Spec {
       IntegrationSpec.pgHostPort,
       IntegrationSpec.pgUser,
       Some(IntegrationSpec.pgPassword),
-      IntegrationSpec.pgDbName
-      //useSsl = useSsl
+      IntegrationSpec.pgDbName,
+      useSsl = useSsl
     )
   }
 
@@ -94,7 +94,7 @@ class IntegrationSpec extends Spec {
 
         val selectQuery = client.select(
           "SELECT * FROM %s WHERE str_field='hello' ORDER BY timestamp_field".format(IntegrationSpec.pgTestTable)
-        )((r: Row) => r)
+        )(identity)
 
         val resultRows = Await.result(selectQuery, queryTimeout)
 
@@ -120,7 +120,7 @@ class IntegrationSpec extends Spec {
 
         val selectQuery = client.select(
           "SELECT * FROM %s WHERE str_field='xxxx' ORDER BY timestamp_field".format(IntegrationSpec.pgTestTable)
-        )((r: Row) => r)
+        )(identity)
 
         val resultRows = Await.result(selectQuery, queryTimeout)
 
@@ -144,7 +144,7 @@ class IntegrationSpec extends Spec {
 
         val selectQuery = client.select(
           "SELECT * FROM %s WHERE str_field='hello_updated'".format(IntegrationSpec.pgTestTable)
-        )((r: Row) => r)
+        )(identity)
 
         val resultRows = Await.result(selectQuery, queryTimeout)
 
@@ -169,7 +169,7 @@ class IntegrationSpec extends Spec {
 
         val selectQuery = client.select(
           "SELECT * FROM %s".format(IntegrationSpec.pgTestTable)
-        )((r: Row) => r)
+        )(identity)
 
         val resultRows = Await.result(selectQuery, queryTimeout)
 
@@ -184,13 +184,10 @@ class IntegrationSpec extends Spec {
         cleanDb(client)
         insertSampleData(client)
 
-        val preparedQuery = client.prepare("SELECT * FROM %s WHERE str_field=$1 AND bool_field=$2"
-          .format(IntegrationSpec.pgTestTable))
+        val preparedQuery = client.prepareAndQuery("SELECT * FROM %s WHERE str_field=$1 AND bool_field=$2"
+          .format(IntegrationSpec.pgTestTable), "hello", true)(identity)
         val resultRows = Await.result(
-          preparedQuery.flatMap {
-            preparedStatement =>
-              preparedStatement.select("hello", true)((r: Row) => r)
-          },
+          preparedQuery,
           queryTimeout
         )
 
@@ -211,7 +208,7 @@ class IntegrationSpec extends Spec {
 
           val selectQuery = client.select(
             "SELECT * FROM %s WHERE unknown_column='hello_updated'".format(IntegrationSpec.pgTestTable)
-          )((r: Row) => r)
+          )(identity)
 
           a[ServerError] must be thrownBy {
             Await.result(selectQuery, queryTimeout)
@@ -224,15 +221,12 @@ class IntegrationSpec extends Spec {
           val client = getClient
           cleanDb(client)
 
-          val preparedQuery = client.prepare("SELECT * FROM %s WHERE str_field=$1 AND bool_field=$2"
-            .format(IntegrationSpec.pgTestTable))
+          val preparedQuery = client.prepareAndQuery("SELECT * FROM %s WHERE str_field=$1 AND bool_field=$2"
+            .format(IntegrationSpec.pgTestTable), "hello")(identity)
 
           a [ServerError] must be thrownBy {
             Await.result(
-              preparedQuery.flatMap {
-                preparedStatement =>
-                  preparedStatement.select("hello")((r: Row) => r)
-              },
+              preparedQuery,
               queryTimeout
             )
           }

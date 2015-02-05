@@ -14,6 +14,13 @@ class Connection(startState: State = AuthenticationRequired) {
 
   def send(msg: FrontendMessage) {
     logger.ifDebug("Sent frontend message of type: %s".format(msg.getClass.getName))
+
+    msg match {
+      case q: Query =>
+        logger.ifDebug("Query: %s".format(q.str))
+      case _ =>
+    }
+
     val _ = stateMachine.onEvent(msg)
   }
 
