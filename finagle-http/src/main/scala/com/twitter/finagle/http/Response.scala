@@ -20,7 +20,7 @@ abstract class Response extends Message with HttpResponseProxy {
    * out-of-band mechanisms, to make the connection between the response and its
    * associated context explicit.
    */
-  val ctx: Response.Schema.Record = Response.Schema.newRecord
+  val ctx: Response.Schema.Record = Response.Schema.newRecord()
 
   def isRequest = false
 
