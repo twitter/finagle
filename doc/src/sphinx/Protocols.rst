@@ -20,7 +20,7 @@ to define schemas and expose network services that clients access using code
 generated for their preferred programming language.
 
 The IDL is the core of Thrift. IDLs provide clear service specifications that we
-can used to implement clients and servers. This means that different
+can use to implement clients and servers. This means that different
 implementations of servers can be swapped out transparently, since they all
 expose the same interface, regardless of language.
 
