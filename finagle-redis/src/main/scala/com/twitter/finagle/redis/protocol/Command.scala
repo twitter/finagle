@@ -459,8 +459,14 @@ class CommandCodec extends UnifiedProtocolCodec {
   }
 
   private[this] def splitUp(string: String): Seq[String] = {
-    string.split('"') flatMap { parts =>
-      parts.split(' ').filter(_.isEmpty)
+    val parts = string.split('"')
+    if (parts.length > 1) {
+      val head = parts.head
+      val last = parts.tail.last
+      val middle = parts.tail.init
+      (head.split(" ") ++ middle ++ last.split(" ")).filter(_.isEmpty)
+    } else {
+      string.split(" ")
     }
   }
 
