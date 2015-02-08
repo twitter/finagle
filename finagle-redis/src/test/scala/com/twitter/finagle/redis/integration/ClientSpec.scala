@@ -134,7 +134,7 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.del(Seq(foo)))
         Await.result(client.select(fromDb))
 
-        Await.result(client.move(foo, bar)) mustEqual false
+        Await.result(client.move(foo, StringToChannelBuffer(toDb.toString))) mustEqual false
         Await.result(client.set(foo, bar))
         Await.result(client.move(foo, StringToChannelBuffer(toDb.toString))) mustEqual true
         Await.result(client.del(Seq(foo)))
