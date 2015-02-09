@@ -28,6 +28,8 @@ object ThriftClientBufferedCodec {
    */
   def apply() = new ThriftClientBufferedCodecFactory
 
+  def get(): ThriftClientBufferedCodecFactory = apply()
+  
   def apply(protocolFactory: TProtocolFactory) =
     new ThriftClientBufferedCodecFactory(protocolFactory)
 
