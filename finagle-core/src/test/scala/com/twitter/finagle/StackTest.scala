@@ -18,15 +18,17 @@ class StackTest extends FunSuite {
     val parameters = Nil
   }
 
+  val empty = Stack.Params.empty
+
   def newStack() = {
-    val stack = new StackBuilder(testRole1, List(1,2,3,4))
+    val stack = new StackBuilder(testRole1, List(1, 2, 3, 4))
     stack.push(testRole2, (l: List[Int]) => 10 :: l)
     stack.push(testRole3, (l: List[Int]) => 20 :: l)
     stack.result
   }
 
   test("Stack.make") {
-    assert(newStack().make(Stack.Params.empty) === Seq(20,10,1,2,3,4))
+    assert(newStack().make(empty) === Seq(20, 10, 1, 2, 3, 4))
   }
 
   test("Stack.transform") {
@@ -38,29 +40,60 @@ class StackTest extends FunSuite {
       case other => other
     }
 
-    assert(stack.make(Stack.Params.empty) === Seq(30,1,2,3,4))
+    assert(stack.make(empty) === Seq(30, 1, 2, 3, 4))
+  }
+
+  test("Stack.insertAfter") {
+    val stack = newStack()
+    val module = new Stack.Module0[List[Int]] {
+      val role = testRole4
+      val description = testRole4.toString
+      def make(next: List[Int]): List[Int] = 100 :: next
+    }
+
+    assert(
+      stack.insertAfter(testRole4, module).make(empty) ===
+        Seq(20, 10, 1, 2, 3, 4))
+
+    assert(
+      stack.insertAfter(testRole2, module).make(empty) ===
+        Seq(20, 10, 100, 1, 2, 3, 4))
+
+    assert(
+      (stack ++ stack).insertAfter(testRole2, module).make(empty) ===
+        Seq(20, 10, 100, 20, 10, 100, 1, 2, 3, 4))
   }
 
   test("Stack.remove") {
     val stack = newStack()
-    val prms = Stack.Params.empty
-    assert(stack.remove(testRole2).make(prms) === Seq(20,1,2,3,4))
-    assert(stack.remove(testRole3).make(prms) === Seq(10,1,2,3,4))
+    assert(stack.remove(testRole4).make(empty) === Seq(20, 10, 1, 2, 3, 4))
+    assert(stack.remove(testRole2).make(empty) === Seq(20, 1, 2, 3, 4))
+    assert(stack.remove(testRole3).make(empty) === Seq(10, 1, 2, 3, 4))
+
+    assert(
+      (stack ++ stack).remove(testRole2).make(empty) ===
+        Seq(20, 20, 1, 2, 3, 4))
   }
 
   test("Stack.replace") {
-    val stack = newStack().replace(testRole2, new Stack.Module0[List[Int]] {
+    val stack = newStack()
+    val module = new Stack.Module0[List[Int]] {
       val role = testRole2
       val description = testRole2.toString
       def make(next: List[Int]): List[Int] = 100 :: next
-    })
+    }
 
-    assert(stack.make(Stack.Params.empty) === Seq(20,100,1,2,3,4))
+    assert(stack.replace(testRole4, module).make(empty) === Seq(20, 10, 1, 2, 3, 4))
+    assert(stack.replace(testRole2, module).make(empty) === Seq(20, 100, 1, 2, 3, 4))
+
+    assert(
+      (stack ++ stack).replace(testRole2, module).make(empty) ===
+        Seq(20, 100, 20, 100, 1, 2, 3, 4))
   }
 
   test("Stack.++") {
     val stack = newStack() ++ newStack()
-    assert(stack.make(Stack.Params.empty) === Seq(20,10,20,10,1,2,3,4))
+    assert(stack.make(empty) === Seq(20, 10, 20, 10, 1, 2, 3, 4))
   }
 
   case class TestParam(p1: Int) {
@@ -79,7 +112,7 @@ class StackTest extends FunSuite {
   }
 
   test("Params") {
-    val params = Stack.Params.empty
+    val params = empty
     val params2 = params + TestParam(999)
     val params3 = params2 + TestParam(100)
 

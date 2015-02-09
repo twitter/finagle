@@ -6,11 +6,10 @@ import scala.collection.mutable
 /**
  * Stacks represent stackable elements of type T. It is assumed that
  * T-typed elements can be stacked in some meaningful way; examples
- * are functions (function composition) [[com.twitter.finagle.Filter
- * Filters]] (chaining), and [[com.twitter.finagle.ServiceFactory
- * ServiceFactories]] (through transformers). T-typed values are also
- * meant to compose: the stack itself materializes into a T-typed
- * value.
+ * are functions (function composition) [[Filter Filters]] (chaining),
+ * and [[ServiceFactory ServiceFactories]] (through
+ * transformers). T-typed values are also meant to compose: the stack
+ * itself materializes into a T-typed value.
  *
  * Stacks are persistent, allowing for nondestructive
  * transformations; they are designed to represent 'template' stacks
@@ -28,7 +27,7 @@ sealed trait Stack[T] {
    * of the topmost element of the stack.
    *
    * @note `head` does not give access to the value `T`, use `make` instead.
-   * @see [[com.twitter.finagle.Stack.Head]]
+   * @see [[Stack.Head]]
    */
   val head: Stack.Head
 
@@ -51,6 +50,26 @@ sealed trait Stack[T] {
     }
 
   /**
+   * Insert the given [[Stackable]] after the stack elements matching
+   * the argument role. If no elements match the role, then an
+   * unmodified stack is returned.
+   */
+  def insertAfter(target: Role, insertion: Stackable[T]): Stack[T] = transform {
+    case Node(head, mk, next) if head.role == target =>
+      Node(head, mk, insertion +: next)
+    case stk => stk
+  }
+
+  /**
+   * Insert the given [[Stackable]] after the stack elements matching
+   * the argument role. If no elements match the role, then an
+   * unmodified stack is returned.  `insertion` must conform to
+   * typeclass [[CanStackFrom]].
+   */
+  def insertAfter[U](target: Role, insertion: U)(implicit csf: CanStackFrom[U, T]): Stack[T] =
+    insertAfter(target, csf.toStackable(target, insertion))
+
+  /**
    * Remove all nodes in the stack that match the `target` role.
    * Leaf nodes are not removable.
    */
@@ -63,9 +82,9 @@ sealed trait Stack[T] {
     }
 
   /**
-   * Replace any stack elements matching the argument role with a given
-   * [[com.twitter.finagle.Stackable Stackable]]. If no elements match the
-   * role, then an unmodified stack is returned.
+   * Replace any stack elements matching the argument role with a
+   * given [[Stackable]]. If no elements match the role, then an
+   * unmodified stack is returned.
    */
   def replace(target: Role, replacement: Stackable[T]): Stack[T] = transform {
     case n@Node(head, _, next) if head.role == target =>
@@ -74,10 +93,10 @@ sealed trait Stack[T] {
   }
 
   /**
-   * Replace any stack elements matching the argument role with a given
-   * [[com.twitter.finagle.Stackable]]. If no elements match the
-   * role, then an unmodified stack is returned. `replacement` must conform to
-   * typeclass [[com.twitter.finagle.CanStackFrom]].
+   * Replace any stack elements matching the argument role with a
+   * given [[Stackable]]. If no elements match the role, then an
+   * unmodified stack is returned. `replacement` must conform to
+   * typeclass [[CanStackFrom]].
    */
   def replace[U](target: Role, replacement: U)(implicit csf: CanStackFrom[U, T]): Stack[T] =
     replace(target, csf.toStackable(target, replacement))
@@ -182,11 +201,11 @@ object Stack {
 
   /**
    * Trait encompassing all associated metadata of a stack element.
-   * [[com.twitter.finagle.Stackable Stackables]] extend this trait.
+   * [[Stackable Stackables]] extend this trait.
    */
   trait Head {
     /**
-     * The [[com.twitter.finagle.Stack.Role Role]] that the element can serve.
+     * The [[Stack.Role Role]] that the element can serve.
      */
     def role: Stack.Role
 
@@ -196,7 +215,7 @@ object Stack {
     def description: String
 
     /**
-     * The [[com.twitter.finagle.Stack.Param Params]] that the element
+     * The [[Stack.Param Params]] that the element
      * is interested in.
      */
     def parameters: Seq[Stack.Param[_]]
@@ -444,8 +463,8 @@ trait Stackable[T] extends Stack.Head {
 
 /**
  * A typeclass for "stackable" items. This is used by the
- * [[com.twitter.finagle.StackBuilder StackBuilder]] to provide a
- * convenient interface for constructing Stacks.
+ * [[StackBuilder]] to provide a convenient interface for constructing
+ * Stacks.
  */
 @scala.annotation.implicitNotFound("${From} is not Stackable to ${To}")
 trait CanStackFrom[-From, To] {
@@ -480,7 +499,7 @@ class StackBuilder[T](init: Stack[T]) {
 
   /**
    * Push the stack element `el` onto the stack; el must conform to
-   * typeclass [[com.twitter.finagle.CanStackFrom CanStackFrom]].
+   * typeclass [[CanStackCanStackFrom]].
    */
   def push[U](role: Stack.Role, el: U)(implicit csf: CanStackFrom[U, T]): this.type = {
     stack = csf.toStackable(role, el) +: stack
@@ -488,8 +507,7 @@ class StackBuilder[T](init: Stack[T]) {
   }
 
   /**
-   * Push a [[com.twitter.finagle.Stackable Stackable]] module onto
-   * the stack.
+   * Push a [[Stackable]] module onto the stack.
    */
   def push(module: Stackable[T]): this.type = {
     stack = module +: stack
