@@ -176,15 +176,11 @@ private[builder] object ClientConfigEvidence {
 private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit]
 
 /**
- * Provides a class for building clients.  The main class to use is
- * [[com.twitter.finagle.builder.ClientBuilder]], as so
- *
-
- */
-
-
-/**
  * A builder of Finagle [[com.twitter.finagle.Client Clients]].
+ *
+ * Please see the
+ * [[http://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6 Finagle user guide]]
+ * for information on a newer set of client-construction APIs introduced in Finagle v6.
  *
  * {{{
  * val client = ClientBuilder()
@@ -234,35 +230,32 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  *
  * Commonly-configured options:
  *
- * - `connectTimeout`: [[com.twitter.util.Duration]].Top
- * - `tcpConnectTimeout`: 1 second
- * - `requestTimeout`: [[com.twitter.util.Duration]].Top
- * - `timeout`: [[com.twitter.util.Duration]].Top
- * - `hostConnectionLimit`: Int.MaxValue
- * - `hostConnectionCoresize`: 0
- * - `hostConnectionIdleTime`: [[com.twitter.util.Duration]].Top
- * - `hostConnectionMaxWaiters`: Int.MaxValue
- * - `failFast`: true
- * - `failureAccrualParams`, `failureAccrual`, `failureAccrualFactory`:
- *   `numFailures` = 5, `markDeadFor` = 5 seconds
+ *  - `connectTimeout`: [[com.twitter.util.Duration.Top Duration.Top]]
+ *  - `tcpConnectTimeout`: 1 second
+ *  - `requestTimeout`: [[com.twitter.util.Duration.Top Duration.Top]]
+ *  - `timeout`: [[com.twitter.util.Duration.Top Duration.Top]]
+ *  - `hostConnectionLimit`: `Int.MaxValue`
+ *  - `hostConnectionCoresize`: 0
+ *  - `hostConnectionIdleTime`: [[com.twitter.util.Duration.Top Duration.Top]]
+ *  - `hostConnectionMaxWaiters`: `Int.MaxValue`
+ *  - `failFast`: true
+ *  - `failureAccrualParams`, `failureAccrual`, `failureAccrualFactory`:
+ *    `numFailures` = 5, `markDeadFor` = 5 seconds
  *
  * Advanced options:
  *
- * *Before changing any of these, make sure that you know exactly how they will
+ * ''Before changing any of these, make sure that you know exactly how they will
  * affect your application -- these options are typically only changed by expert
- * users.*
+ * users.''
  *
- * - `keepAlive`: Unspecified, in which case the Java default of `false` is used
- *   (http://docs.oracle.com/javase/7/docs/api/java/net/StandardSocketOptions.html?is-external=true#SO_KEEPALIVE)
- * - `readerIdleTimeout`: [[com.twitter.util.Duration]].Top
- * - `writerIdleTimeout`: [[com.twitter.util.Duration]].Top
- * - `hostConnectionMaxIdleTime`: [[com.twitter.util.Duration]].Top
- * - `hostConnectionMaxLifeTime`: [[com.twitter.util.Duration]].Top
- * - `sendBufferSize`, `recvBufferSize`: OS-defined default value
- *
- * Please see the Finagle user guide for information on a newer set of
- * client-construction APIs introduced in Finagle v6:
- * http://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6
+ *  - `keepAlive`: Unspecified, in which case the
+ *    [[http://docs.oracle.com/javase/7/docs/api/java/net/StandardSocketOptions.html?is-external=true#SO_KEEPALIVE Java default]]
+ *    of `false` is used
+ *  - `readerIdleTimeout`: [[com.twitter.util.Duration.Top Duration.Top]]
+ *  - `writerIdleTimeout`: [[com.twitter.util.Duration.Top Duration.Top]]
+ *  - `hostConnectionMaxIdleTime`: [[com.twitter.util.Duration.Top Duration.Top]]
+ *  - `hostConnectionMaxLifeTime`: [[com.twitter.util.Duration.Top Duration.Top]]
+ *  - `sendBufferSize`, `recvBufferSize`: OS-defined default value
  */
 class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle](
   client: ClientBuilderClient[Req, Rep]
@@ -397,7 +390,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * Specify the codec. The codec implements the network protocol
-   * used by the client, and consequently determines the {{Req}} and {{Rep}}
+   * used by the client, and consequently determines the `Req` and `Rep`
    * type variables. One of the codec variations is required.
    */
   def codec[Req1, Rep1](
@@ -406,7 +399,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     this.codec(Function.const(codec)(_))
 
   /**
-   * A variation of {{codec}} that supports codec factories.  This is
+   * A variation of `codec` that supports codec factories.  This is
    * used by codecs that need dynamic construction, but should be
    * transparent to the user.
    */
@@ -488,27 +481,27 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   /**
    * The connect timeout is the timeout applied to the acquisition of
    * a Service.  This includes both queueing time (eg.  because we
-   * cannot create more connections due to {{hostConnectionLimit}} and
-   * there are more than {{hostConnectionLimit}} requests outstanding)
+   * cannot create more connections due to `hostConnectionLimit` and
+   * there are more than `hostConnectionLimit` requests outstanding)
    * as well as physical connection time.  Futures returned from
-   * {{factory()}} will always be satisfied within this timeout.
+   * `factory()` will always be satisfied within this timeout.
    */
   def connectTimeout(duration: Duration): This =
     configured(TimeoutFactory.Param(duration))
 
   /**
    * Total request timeout.  This timeout is applied from the issuance
-   * of a request (through {{service(request)}}) until the
+   * of a request (through `service(request)`) until the
    * satisfaction of that reply future.  No request will take longer
    * than this.
    *
-   * Applicable only to service-builds ({{build()}})
+   * Applicable only to service-builds (`build()`)
    */
   def timeout(duration: Duration): This =
     configured(GlobalTimeout(duration))
 
   /**
-   * Apply TCP keepAlive ({{SO_KEEPALIVE}} socket option).
+   * Apply TCP keepAlive (`SO_KEEPALIVE` socket option).
    */
   def keepAlive(value: Boolean): This =
     configured(params[Transport.Liveness].copy(keepAlive = Some(value)))
@@ -526,17 +519,19 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     configured(params[Transport.Liveness].copy(writeTimeout = duration))
 
   /**
-   * Report stats to the given {{StatsReceiver}}.  This will report
+   * Report stats to the given `StatsReceiver`.  This will report
    * verbose global statistics and counters, that in turn may be
    * exported to monitoring applications.
-   * NB: per hosts statistics will *NOT* be exported to this receiver
-   *     @see reportHostStats(receiver: StatsReceiver)
+   *
+   * @note Per hosts statistics will '''NOT''' be exported to this receiver
+   *
+   * @see [[ClientBuilder.reportHostStats]]
    */
   def reportTo(receiver: StatsReceiver): This =
     configured(Stats(receiver))
 
   /**
-   * Report per host stats to the given {{StatsReceiver}}.
+   * Report per host stats to the given `StatsReceiver`.
    * The statsReceiver will be scoped per client, like this:
    * client/connect_latency_ms_max/0.0.0.0:64754
    */
@@ -597,18 +592,46 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * power-of-twos may be faster due to the use of modular
    * arithmetic.
    *
-   * '''Note:''' This will be integrated into the mainline pool, at
+   * @note This will be integrated into the mainline pool, at
    * which time the experimental option will go away.
    */
   def expHostConnectionBufferSize(size: Int): This =
     configured(params[DefaultPool.Param].copy(bufferSize = size))
 
   /**
-   * The number of retries applied. Only applicable to service-builds ({{build()}})
+   * Retry (some) failed requests up to `value - 1` times.
+   *
+   * Retries are only done if the request failed with something
+   * known to be safe to retry. This includes [[WriteException WriteExceptions]]
+   * and [[Failure.Rejected rejected failures]].
+   *
+   * @param value the maximum number of attempts (including retries) that
+   *              can be made.
+   *               - A value of `1` means one attempt and no retries
+   *              on failure.
+   *               - A value of `2` means one attempt and then a
+   *              single retry if the failure is known to be safe to retry.
+   *
+   * @note The failures seen in the client will '''not include'''
+   *       application level failures. This is particularly important for
+   *       codecs that include exceptions, such as `Thrift`.
+   *
+   *       This is only applicable to service-builds (`build()`).
+   *
+   * @see [[com.twitter.finagle.service.RetryPolicy.tries]]
    */
   def retries(value: Int): This =
     retryPolicy(RetryPolicy.tries(value))
 
+  /**
+   * Retry failed requests according to the given [[RetryPolicy]].
+   *
+   * @note The failures seen in the client will '''not include'''
+   *       application level failures. This is particularly important for
+   *       codecs that include exceptions, such as `Thrift`.
+   *
+   *       This is only applicable to service-builds (`build()`).
+   */
   def retryPolicy(value: RetryPolicy[Try[Nothing]]): This =
     configured(Retries(value))
 
