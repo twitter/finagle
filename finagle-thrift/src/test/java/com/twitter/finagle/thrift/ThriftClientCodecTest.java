@@ -1,6 +1,3 @@
-/**
- * @copyright - Copyright (C) 2015 TellApart, Inc. All Rights Reserved.
- */
 package com.twitter.finagle.thrift;
 
 import com.twitter.finagle.stats.DefaultStatsReceiver;
