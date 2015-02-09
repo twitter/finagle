@@ -80,4 +80,28 @@ public class StackParamCompilationTest {
         new Transport.TLSClientEngine(Option.<scala.Function1<SocketAddress, Engine>>empty()).mk())
       .configured(new Transport.TLSServerEngine(Option.<scala.Function0<Engine>>empty()).mk());
   }
+
+  void testModule1() {
+    // or use FactoryToService.Enabled$.MODULE$.param
+    Stack.Param<FactoryToService.Enabled> param =
+      new FactoryToService.Enabled(true).mk()._2();
+
+    Stackable<Integer> module1 =
+      new Stack.Module1<FactoryToService.Enabled, Integer>(param) {
+        @Override
+        public Stack.Role role() {
+          return new Stack.Role("role");
+        }
+
+        @Override
+        public String description() {
+          return "description";
+        }
+
+        @Override
+        public Integer make(FactoryToService.Enabled p1, Integer next) {
+          return next;
+        }
+      };
+  }
 }

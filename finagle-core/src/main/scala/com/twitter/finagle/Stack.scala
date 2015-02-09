@@ -391,7 +391,8 @@ object Stack {
 
   /** A module of 1 parameter. */
   abstract class Module1[P1: Param, T] extends Stackable[T] {
-    final val parameters = Seq(implicitly[Param[P1]])
+    final val parameters: Seq[Stack.Param[_]] =
+      Seq(implicitly[Param[P1]])
     def make(p1: P1, next: T): T
     def toStack(next: Stack[T]) =
       Node(this, (prms, next) => Leaf(this, make(prms[P1], next.make(prms))), next)
@@ -399,7 +400,8 @@ object Stack {
 
   /** A module of 2 parameters. */
   abstract class Module2[P1: Param, P2: Param, T] extends Stackable[T] {
-    final val parameters = Seq(implicitly[Param[P1]], implicitly[Param[P2]])
+    final val parameters: Seq[Stack.Param[_]] =
+      Seq(implicitly[Param[P1]], implicitly[Param[P2]])
     def make(p1: P1, p2: P2, next: T): T
     def toStack(next: Stack[T]) =
       Node(this, (prms, next) => Leaf(this,
@@ -408,7 +410,7 @@ object Stack {
 
   /** A module of 3 parameters. */
   abstract class Module3[P1: Param, P2: Param, P3: Param, T] extends Stackable[T] {
-    final val parameters = Seq(
+    final val parameters: Seq[Stack.Param[_]] = Seq(
       implicitly[Param[P1]],
       implicitly[Param[P2]],
       implicitly[Param[P3]])
@@ -420,7 +422,7 @@ object Stack {
 
   /** A module of 4 parameters. */
   abstract class Module4[P1: Param, P2: Param, P3: Param, P4: Param, T] extends Stackable[T] {
-    final val parameters = Seq(
+    final val parameters: Seq[Stack.Param[_]] = Seq(
       implicitly[Param[P1]],
       implicitly[Param[P2]],
       implicitly[Param[P3]],
