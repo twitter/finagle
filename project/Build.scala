@@ -101,6 +101,8 @@ object Finagle extends Build {
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => false },
     publishMavenStyle := true,
+    autoAPIMappings := true,
+    apiURL := Some(url("https://twitter.github.io/finagle/docs/")),
     pomExtra := (
       <url>https://github.com/twitter/finagle</url>
       <licenses>
