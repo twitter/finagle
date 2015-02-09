@@ -2,7 +2,7 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle._
 import com.twitter.finagle.factory.{
-  BindingFactory, NamerTracingFilter, RefcountedFactory, StatsFactoryWrapper, TimeoutFactory}
+  BindingFactory, RefcountedFactory, StatsFactoryWrapper, TimeoutFactory}
 import com.twitter.finagle.filter.{DtabStatsFilter, ExceptionSourceFilter, MonitorFilter}
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.param._
@@ -85,7 +85,6 @@ object StackClient {
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
     val stk = new StackBuilder(endpointStack[Req, Rep])
     stk.push(LoadBalancerFactory.module)
-    stk.push(NamerTracingFilter.module)
     stk.push(BindingFactory.module)
     stk.push(Role.requestDraining, (fac: ServiceFactory[Req, Rep]) =>
       new RefcountedFactory(fac))

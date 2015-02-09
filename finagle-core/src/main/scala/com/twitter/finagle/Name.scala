@@ -71,7 +71,11 @@ object Name {
   implicit val showable: Showable[Name] = new Showable[Name] {
     def show(name: Name) = name match {
       case Path(path) => path.show
-      case bound@Bound(_) => bound.id.toString
+      case bound@Bound(_) =>
+        bound.id match {
+          case id: com.twitter.finagle.Path => id.show
+          case id => id.toString
+        }
     }
   }
 
@@ -141,7 +145,7 @@ object Name {
             case _ => Set.empty: Set[SocketAddress]
           }.toSet
           Addr.Bound(sockaddrs, Addr.Metadata.empty)
-          
+
         case addrs if addrs.forall(_ == Addr.Neg) => Addr.Neg
         case addrs if addrs.forall({case Addr.Failed(_) => true; case _ => false}) =>
           Addr.Failed(new Exception)

@@ -116,6 +116,7 @@ object Failure {
     val Rejected      = 1L << 2
     // Bits 32 to 63 are reserved for
     // flags private to finagle.
+    val Naming        = 1L << 32
   }
 
   private def isSet(x: Long, flags: Long) =
@@ -181,11 +182,19 @@ object Failure {
 
   /**
    * A rejected failure indicates that a corresponding dispatch was not
-   * accepted. These kinds of errors are handled by finagle and should 
+   * accepted. These kinds of errors are handled by finagle and should
    * not count against any user defined retry budget. Rejected dispatches
    * are by definition also [[Retryable]].
    */
   object Rejected extends Injections with Extractions {
     val flags = Flag.Rejected | Flag.Retryable
+  }
+
+  /**
+   * A naming failure is due to name resolution; we call it out to
+   * permit naming-specific tracing.
+   */
+  private[finagle] object Naming extends Injections with Extractions {
+    val flags = Flag.Naming
   }
 }

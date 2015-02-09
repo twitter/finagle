@@ -35,6 +35,14 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
   }
 
   trait Ctx {
+    var records = Seq.empty[(String, String)]
+    def record(key: String, value: String) {
+      records :+= key -> value
+    }
+    def expectTrace(expected: Seq[(String, String)]) {
+      expectResult(expected)(records)
+    }
+
     val imsr = new InMemoryStatsReceiver
 
     val path = Path.read("/foo/bar")
@@ -60,7 +68,8 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
       newFactory,
       statsReceiver = imsr,
       maxNamerCacheSize = 2,
-      maxNameCacheSize = 2)
+      maxNameCacheSize = 2,
+      record = record)
 
     def newWith(localDtab: Dtab): Service[Unit, Var[Addr]] = {
       Dtab.unwind {
@@ -134,6 +143,84 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     assert(noBrokers.name === "/foo/bar")
     assert(noBrokers.localDtab === localDtab)
   }
+
+  test("Trace on success") (new Ctx {
+    val n1 = Dtab.read("/foo/bar=>/test1010")
+    val s1 = newWith(n1)
+    val v1 = Await.result(s1(()))
+    s1.close()
+
+    expectTrace(Seq(
+      "namer.path" -> "/foo/bar",
+      "namer.dtab.base" -> "/=>/#/com.twitter.finagle.namer.global;/test1010=>/$/inet/0/1010",
+      "namer.tree" -> "/$/inet/0/1010",
+      "namer.name" -> "/$/inet/0/1010"
+    ))
+  })
+
+  test("Trace on exception") (new Ctx {
+    val exc = new RuntimeException
+
+    Dtab.base = new Dtab(Dtab.base) {
+      override def lookup(path: Path) =
+        Activity.exception(exc)
+    }
+
+    assert(intercept[Failure] {
+      Await.result(factory())
+    } match {
+      case Failure.Naming(`exc`) => true
+      case _ => false
+    })
+
+    expectTrace(Seq(
+      "namer.path" -> "/foo/bar",
+      "namer.dtab.base" -> "/=>/#/com.twitter.finagle.namer.global;/test1010=>/$/inet/0/1010",
+      "namer.failure" -> "java.lang.RuntimeException"
+    ))
+  })
+
+  test("Trace on naming failure") (new Ctx {
+    intercept[NoBrokersAvailableException] {
+      Await.result(factory())
+    }
+
+    expectTrace(Seq(
+      "namer.path" -> "/foo/bar",
+      "namer.dtab.base" -> "/=>/#/com.twitter.finagle.namer.global;/test1010=>/$/inet/0/1010",
+      "namer.tree" -> "~"
+    ))
+  })
+
+  test("Trace on service creation failure") (new Ctx {
+    val localDtab = Dtab.read("/foo/bar=>/test1010")
+
+    val f = new BindingFactory(
+      Path.read("/foo/bar"),
+      newFactory = { addr =>
+        new ServiceFactory[Unit, Unit] {
+          def apply(conn: ClientConnection) =
+            Future.exception(new NoBrokersAvailableException("/foo/bar"))
+
+          def close(deadline: Time) = Future.Done
+        }
+      },
+      record = record)
+
+    intercept[NoBrokersAvailableException] {
+      Dtab.unwind {
+        Dtab.local = localDtab
+        Await.result(f())
+      }
+    }
+
+    expectTrace(Seq(
+      "namer.path" -> "/foo/bar",
+      "namer.dtab.base" -> "/=>/#/com.twitter.finagle.namer.global;/test1010=>/$/inet/0/1010",
+      "namer.tree" -> "/$/inet/0/1010",
+      "namer.name" -> "/$/inet/0/1010"
+    ))
+  })
 
   test("Caches namers") (new Ctx {
     val n1 = Dtab.read("/foo/bar=>/$/inet/0/1")
@@ -225,87 +312,12 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
 }
 
 @RunWith(classOf[JUnitRunner])
-class NamerTracingFilterTest extends FunSuite {
-   private trait Ctx {
-    var records = Seq.empty[(String, String)]
-    def record(key: String, value: String) {
-      records :+= key -> value
-    }
-
-    val addr = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val path = Path.read("/foo")
-
-    val baseDtab = () => Dtab.read("/foo => /bar")
-    val localDtab = Dtab.read("/bar => /baz")
-
-    def mkName(id: Any) = Name.Bound(Var(Addr.Bound(addr)), id)
-
-    def run(f: => Unit) {
-      Dtab.unwind {
-        Dtab.local = localDtab
-        f
-      }
-    }
-
-    def verifyRecord(nameOrFailure: Either[String, String]) {
-      val expected = Seq(
-        "namer.path" -> "/foo",
-        "namer.dtab.base" -> "/foo=>/bar",
-        nameOrFailure match {
-          case Left(id) => "namer.name" -> id
-          case Right(failure) => "namer.failure" -> failure
-        }
-      )
-      expectResult(expected)(records)
-    }
-  }
-
-  test("NamerTracingFilter.trace with string id")(new Ctx {
-    run {
-      NamerTracingFilter.trace(path, baseDtab(), Return(mkName("dat-name")), record)
-      verifyRecord(Left("dat-name"))
-    }
-  })
-
-  test("NamerTracingFilter.trace name with path id")(new Ctx {
-    run {
-      NamerTracingFilter.trace(path, baseDtab(), Return(mkName(Path.read("/foo/bar/baz"))), record)
-      verifyRecord(Left("/foo/bar/baz"))
-    }
-  })
-
-  test("NamerTracingFilter.trace name with object id")(new Ctx {
-    run {
-      NamerTracingFilter.trace(path, baseDtab(), Return(mkName(Some("foo"))), record)
-      verifyRecord(Left("Some(foo)"))
-    }
-  })
-
-  test("NamerTracingFilter.trace throwable")(new Ctx {
-    run {
-      NamerTracingFilter.trace(path, baseDtab(), Throw(new RuntimeException), record)
-      verifyRecord(Right("java.lang.RuntimeException"))
-    }
-  })
-
-  test("NamerTracingFilter.apply trace path/name with string id")(new Ctx {
-    run {
-      val filter = new NamerTracingFilter[Int, Int](path, baseDtab, mkName("dat-name"), record)
-      val service = filter andThen Service.mk[Int, Int](Future.value(_))
-      Await.result(service(3))
-      verifyRecord(Left("dat-name"))
-    }
-  })
-}
-
-@RunWith(classOf[JUnitRunner])
 class DynNameFactoryTest extends FunSuite with MockitoSugar {
   private trait Ctx {
     val newService = mock[(NameTree[Name.Bound], ClientConnection) => Future[Service[String, String]]]
     val svc = mock[Service[String, String]]
     val (name, namew) = Activity[NameTree[Name.Bound]]()
-    val traceNamerFailure = mock[Throwable => Unit]
-    val dyn = new DynNameFactory[String, String](name, newService, traceNamerFailure)
+    val dyn = new DynNameFactory[String, String](name, newService)
   }
 
   test("queue requests until name is nonpending (ok)")(new Ctx {
@@ -323,8 +335,6 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
     Await.result(f1)("foo")
     Await.result(f1)("bar")
     Await.result(f2)("baz")
-
-    verify(traceNamerFailure, times(0))(any[Throwable])
   })
 
   test("queue requests until name is nonpending (fail)")(new Ctx {
@@ -337,9 +347,8 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
     val exc = new Exception
     namew.notify(Throw(exc))
 
-    assert(f1.poll === Some(Throw(exc)))
-    assert(f2.poll === Some(Throw(exc)))
-    verify(traceNamerFailure, times(2))(exc)
+    assert(f1.poll === Some(Throw(Failure.Naming(exc))))
+    assert(f2.poll === Some(Throw(Failure.Naming(exc))))
   })
 
   test("dequeue interrupted requests")(new Ctx {
@@ -355,8 +364,6 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
     f1.poll match {
       case Some(Throw(cce: CancelledConnectionException)) =>
         assert(cce.getCause === exc)
-        // no throw for cancel
-        verify(traceNamerFailure, times(0))(any[Throwable])
       case _ => fail()
     }
     assert(f2.poll === None)
