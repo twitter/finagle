@@ -97,6 +97,8 @@ New Features
     request timeouts.  This can be used, for instance, to account for speed-of-light latency
     between physical regions.
 
+  * finagle-core: A convenient method `Client.newService(dest: String, label: String)` was added.
+
   * finagle-mysql: Add support for MySQL transactions.
 
   * finagle-stats: A new HostStatsReceiver type is added and used for per host stats.

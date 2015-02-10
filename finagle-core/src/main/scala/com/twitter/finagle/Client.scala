@@ -52,6 +52,10 @@ trait Client[Req, Rep] {
     newService(n, l)
   }
 
+  /** $newService */
+  final def newService(dest: String, label: String): Service[Req, Rep] =
+    newService(Resolver.eval(dest), label)
+
   /** $newClient */
   final def newClient(dest: String): ServiceFactory[Req, Rep] = {
     val (n, l) = Resolver.evalLabeled(dest)
