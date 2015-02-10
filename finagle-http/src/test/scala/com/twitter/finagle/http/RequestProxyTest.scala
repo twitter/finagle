@@ -9,7 +9,7 @@ class RequestProxyTest extends FunSuite {
   test("request.ctx") {
     val field = Request.Schema.newField[Int]
     val request1 = Request()
-    request1.ctx.put(field, 42)
+    request1.ctx(field) = 42
     val request2 = new RequestProxy {
       override val request = request1
     }
