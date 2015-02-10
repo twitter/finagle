@@ -50,19 +50,41 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
       case _ => fail()
     }
   }
-  
+
   test("rejected failures") {
     val exc = new Exception
     val f = Failure.Rejected(exc)
-    
+
     f match {
       case Failure.Rejected(e) => assert(e == exc)
       case _ => fail()
     }
-    
+
     // Rejected is a subtype of retryable.
     f match {
       case Failure.Retryable(e) => assert(e == exc)
+      case _ => fail()
+    }
+  }
+
+  test("unwritten failures") {
+    val exc = new Exception
+    val f = Failure.Unwritten(exc)
+
+    f match {
+      case Failure.Unwritten(e) => assert(e == exc)
+      case _ => fail()
+    }
+
+    // Unwritten is a subtype of retryable.
+    f match {
+      case Failure.Retryable(e) => assert(e == exc)
+      case _ => fail()
+    }
+
+    // Unwritten is a subtype of rejected.
+    f match {
+      case Failure.Rejected(e) => assert(e == exc)
       case _ => fail()
     }
   }
@@ -74,19 +96,19 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
     val fa2: Failure = Failure.Retryable(ex_a)
     val fb: Failure = Failure.Retryable(ex_b)
     val faa: Failure = Failure.InterruptedBy(ex_a)
-    
+
     assert(fa1 === fa2)
     assert(fa1.hashCode === fa2.hashCode)
     assert(fa1 != fb)
     assert(fa2 != faa)
   }
-  
+
   test("equality (gen)") {
     forAll(failure) { f =>
       val e1, e2 = new Exception
       f(e1) == f(e1) && f(e1) != f(e2) && f(e1).hashCode == f(e1).hashCode
     }
-    
+
     val failure2 = for (f1 <- failure; f2 <- failure if f1 != f2) yield (f1, f2)
     forAll(failure2) { case (f1, f2) =>
       val e = new Exception

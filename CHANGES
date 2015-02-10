@@ -9,20 +9,28 @@ Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
   * finagle-http: deprecated methods in `c.t.f.http.HttpMessageProxy` have been removed.
+
   * finagle-core: `c.t.f.builder.Server` now implements `c.t.f.ListeningServer`.
+
   * finagle-core: `c.t.f.Server.serveAndAnnounce` with a `ServiceFactory` had
     its first argument renamed to `name` from `forum`.
+
   * finagle-core: Add an attribute map to `c.t.f.Addr.Bound`.
+
   * finagle-core: `c.t.f.builder.ClientConfig.FailFast` has moved to
     `c.t.f.FailFastFactory.FailFast`.
+
   * finagle-core: NoBrokersAvailableException now has two Dtab constructor
     arguments, both the base and local Dtabs.
+
   * finagle-memcached / finagle-memcachedx: move TwitterCacheResolver
     and related objects to new finagle-cacheresolver package.
+
   * finagle-memcached / finagle-memcachedx: failureAccrual param in ReplicationClient
     is changed from type (Int, Duration) to (Int, () => Duration), to allow flexibility
     to config duration. Also see `markDeadFor` change in finagle-core in the "New Features"
     section below.
+
   * finagle-mux: `c.t.f.mux.RequestNackedException` is removed in favor of a standard
     Failure (`c.t.f.Failure.Rejected`).
 
@@ -30,8 +38,22 @@ Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
   * finagle-core: `com.twitter.finagle.service.StatsFilter` no longer requires a
-    `com.twitter.finagle.stats.RollupStatsReceiver` for correct behaviour, and 
+    `com.twitter.finagle.stats.RollupStatsReceiver` for correct behaviour, and
     providing one will double count failures.
+
+  * finagle-core: `com.twitter.finagle.factory.TimeoutFactory` will fail with
+    a retryable `com.twitter.finagle.Failure` when it times out.
+
+  * finagle-core: `com.twitter.finagle.pool.WatermarkPool` will fail with
+    an interrupted `com.twitter.finagle.Failure` when it is interrupted while
+    waiting or trying to establish a connection.  It has previously failed with
+    a `com.twitter.finagle.WriteException` when trying to establish a
+    connection, but it's incorrect to retry on an interruption.
+
+  * finagle-core: `com.twitter.fiangle.RetryPolicy`'s `RetryableWriteException`
+    and `WriteExceptionsOnly` will not retry on `com.twitter.finagle.Failure`s
+    that are marked `InterruptedBy`, even if they are `Retryable`.
+
   * finagle-core: The error message provided by `c.t.f.NoBrokersAvailableException`
     prints both the base and local Dtabs.
 
@@ -48,8 +70,11 @@ New Features
     is now `configurable <https://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6>`_
     on Stack-based clients via the `com.twitter.finagle.FailFastFactory.FailFast` param.
 
-  * finagle-core: `com.twitter.finagle.service.StatsFilter` is now configurable with an 
+  * finagle-core: `com.twitter.finagle.service.StatsFilter` is now configurable with an
     `com.twitter.finagle.stats.ExceptionStatsHandler` to customize how failures are recorded.
+
+  * finagle-core: It should be safe to match on `com.twitter.finagle.Failure.InterruptedBy`
+    to tell if a `com.twitter.util.Future` failed due to being interrupted.
 
   * finagle-core: `markDeadFor` in c.t.f.service.FailureAccrualFactory.Param is changed from
     Duration type to () => Duration. So it's flexible for clients to pass in a function that

@@ -136,7 +136,11 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
         val cause = new Exception
         f1.raise(cause)
         assert(f1.isDefined)
-        intercept[CancelledConnectionException] { Await.result(f1) }
+        val failure = intercept[Failure] { Await.result(f1) }
+        intercept[CancelledConnectionException] {
+          val Failure.InterruptedBy(cause) = failure
+          throw cause
+        }
       }
     }
 

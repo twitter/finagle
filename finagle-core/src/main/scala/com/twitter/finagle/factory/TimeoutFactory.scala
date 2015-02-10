@@ -59,7 +59,7 @@ class TimeoutFactory[Req, Rep](
       case exc: java.util.concurrent.TimeoutException =>
         res.raise(exc)
         res onSuccess { _.close() }
-        Future.exception(exception)
+        Future.exception(Failure.Retryable(exception))
     }
   }
 }

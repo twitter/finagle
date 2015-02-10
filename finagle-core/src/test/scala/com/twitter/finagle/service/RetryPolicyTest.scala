@@ -38,7 +38,11 @@ class RetryPolicyTest extends FunSpec {
       assert(weo(Throw(new Exception)) === false)
       assert(weo(Throw(WriteException(new Exception))) === true)
       assert(weo(Throw(Failure.InterruptedBy(new Exception))) === false)
+      // it's important that this failure isn't retried, despite being "retryable".
+      // interrupted futures should never be retried.
+      assert(weo(Throw(Failure.InterruptedBy(new Exception).withRetryable(true))) === false)
       assert(weo(Throw(Failure.Rejected(new Exception))) === true)
+      assert(weo(Throw(Failure.Unwritten(new Exception))) === true)
       assert(weo(Throw(timeoutExc)) === false)
     }
 

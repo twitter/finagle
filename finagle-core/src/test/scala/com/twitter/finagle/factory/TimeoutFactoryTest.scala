@@ -1,8 +1,7 @@
 package com.twitter.finagle.factory
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{ClientConnection, MockTimer, Service, ServiceFactory,
-ServiceTimeoutException, TimeoutException}
+import com.twitter.finagle._
 import com.twitter.util.{Await, Future, Promise, Return, Time}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{verify, when}
@@ -43,8 +42,12 @@ class TimeoutFactoryTest extends FunSuite with MockitoSugar {
   test("TimeoutFactory after the timeout should fail the service acquisition") {
     new AfterHelper {
       assert(res.isDefined)
-      val e = intercept[TimeoutException] {
+      val failure = intercept[Failure] {
         Await.result(res)
+      }
+      val e = intercept[TimeoutException] {
+        val Failure.Retryable(cause) = failure
+        throw cause
       }
       assert(e === exception)
     }

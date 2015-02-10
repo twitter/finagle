@@ -120,7 +120,9 @@ class WatermarkPool[Req, Rep](
           waiters.addLast(p)
           p.setInterruptHandler { case _cause =>
             if (WatermarkPool.this.synchronized(waiters.remove(p)))
-              p.setException(new CancelledConnectionException(_cause))
+              p.setException(
+                Failure.Unwritten(new CancelledConnectionException(_cause)).withInterrupted(true)
+              )
           }
           return p
       }
@@ -138,7 +140,7 @@ class WatermarkPool[Req, Rep](
       }
     }
     p.setInterruptHandler { case e =>
-      if (p.updateIfEmpty(Throw(WriteException(e))))
+      if (p.updateIfEmpty(Throw(Failure.Unwritten(e).withInterrupted(true))))
         underlying onSuccess { _.close() }
     }
     p

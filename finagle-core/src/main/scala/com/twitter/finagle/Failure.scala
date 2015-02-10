@@ -48,9 +48,25 @@ final class Failure private[finagle](
   /**
    * Creates a new Failure that toggles retryable based on the given boolean.
    */
+  def withInterrupted(on: Boolean): Failure =
+    if (on == isSet(flags, Flag.Interrupted)) this else {
+      copy(flags = toggle(on, flags, Flag.Interrupted))
+    }
+
+  /**
+   * Creates a new Failure that toggles retryable based on the given boolean.
+   */
   def withRetryable(on: Boolean): Failure =
     if (on == isSet(flags, Flag.Retryable)) this else {
       copy(flags = toggle(on, flags, Flag.Retryable))
+    }
+
+  /**
+   * Creates a new Failure that toggles unwritten based on the given boolean.
+   */
+  def withUnwritten(on: Boolean): Failure =
+    if (on == isSet(flags, Unwritten.flags)) this else {
+      copy(flags = toggle(on, flags, Unwritten.flags))
     }
 
   /**
@@ -114,6 +130,7 @@ object Failure {
     val Retryable     = 1L << 0
     val Interrupted   = 1L << 1
     val Rejected      = 1L << 2
+    val Unwritten     = 1L << 3
     // Bits 32 to 63 are reserved for
     // flags private to finagle.
     val Naming        = 1L << 32
@@ -188,6 +205,15 @@ object Failure {
    */
   object Rejected extends Injections with Extractions {
     val flags = Flag.Rejected | Flag.Retryable
+  }
+
+  /**
+   * An unwritten failure indicates that finagle was unable to write a request
+   * to the wire.  Unwritten requests are by definition also [[Rejected]] and
+   * [[Retryable]].
+   */
+  object Unwritten extends Injections with Extractions {
+    val flags = Flag.Unwritten | Flag.Rejected | Flag.Retryable
   }
 
   /**
