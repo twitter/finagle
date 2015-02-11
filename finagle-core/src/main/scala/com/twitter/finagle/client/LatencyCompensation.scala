@@ -1,6 +1,6 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle.loadbalancer.LoadBalancerFactory.AddrMetadata
+import com.twitter.finagle.client.AddrMetadataExtraction.AddrMetadata
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.{Addr, Stack, Stackable, ServiceFactory}
 import com.twitter.util.Duration

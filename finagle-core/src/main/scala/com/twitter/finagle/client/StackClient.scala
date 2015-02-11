@@ -74,17 +74,22 @@ object StackClient {
    *
    * @see [[com.twitter.finagle.client.StackClient#endpointStack]]
    * @see [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]]
+   * @see [[com.twitter.finagle.client.StatsScoping]]
+   * @see [[com.twitter.finagle.client.AddrMetadataExtraction]]
    * @see [[com.twitter.finagle.factory.BindingFactory]]
    * @see [[com.twitter.finagle.factory.RefcountedFactory]]
    * @see [[com.twitter.finagle.factory.TimeoutFactory]]
    * @see [[com.twitter.finagle.factory.StatsFactoryWrapper]]
    * @see [[com.twitter.finagle.FactoryToService]]
+   * @see [[com.twitter.finagle.service.RequeueingFilter]]
    * @see [[com.twitter.finagle.tracing.ClientTracingFilter]]
    * @see [[com.twitter.finagle.tracing.TraceInitializerFilter]]
    */
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
     val stk = new StackBuilder(endpointStack[Req, Rep])
     stk.push(LoadBalancerFactory.module)
+    stk.push(StatsScoping.module)
+    stk.push(AddrMetadataExtraction.module)
     stk.push(BindingFactory.module)
     stk.push(Role.requestDraining, (fac: ServiceFactory[Req, Rep]) =>
       new RefcountedFactory(fac))

@@ -23,6 +23,7 @@ object Addr {
   /** Address metadata */
   type Metadata = Map[String, Any]
   object Metadata {
+    def apply(pairs: (String, Any)*): Metadata = Map(pairs:_*)
     val empty: Metadata = Map.empty
   }
 
@@ -33,7 +34,7 @@ object Addr {
    * Bound addresses include an arbitrary Map of metadata that
    * Namers or Resolvers may set to provide additional configuration
    * (e.g. geographical information) to client stacks.
-   * 
+   *
    * Note: This currently protects the underlying addresses
    * from access since we want to add partially resolved addresses
    * in the future. At this point, the API will be fixed.

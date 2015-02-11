@@ -101,7 +101,7 @@ class LatencyCompensationTest
 
   test("Latency compensator extends request timeout") {
     new Ctx {
-      metadata = Map("compensation" -> 2.seconds)
+      metadata = Addr.Metadata("compensation" -> 2.seconds)
 
       Time.withCurrentTimeFrozen { clock =>
         whileConnected { client =>
@@ -126,7 +126,7 @@ class LatencyCompensationTest
 
   test("Latency compensator still times out requests when compensating") {
     new Ctx {
-      metadata = Map("compensation" -> 2.seconds)
+      metadata = Addr.Metadata("compensation" -> 2.seconds)
 
       Time.withCurrentTimeFrozen { clock =>
         whileConnected { client =>
@@ -183,7 +183,7 @@ class LatencyCompensationTest
   test("Latency compensator doesn't apply if there's no base timeout") {
     new Ctx {
       baseTimeout = Duration.Top
-      metadata = Map("compensation" -> 2.seconds)
+      metadata = Addr.Metadata("compensation" -> 2.seconds)
 
       Time.withCurrentTimeFrozen { clock =>
         whileConnected { client =>
