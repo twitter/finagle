@@ -2,6 +2,7 @@ package com.twitter.finagle.serverset2.client.apache
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.serverset2.client._
+import com.twitter.util.Timer
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FlatSpec
@@ -15,7 +16,8 @@ class ClientBuilderTest extends FlatSpec {
     statsReceiver = DefaultStatsReceiver,
     readOnlyOK = false,
     sessionId = None,
-    password = None
+    password = None,
+    timer = Timer.Nil
   )
 
   "reader" should "return Apache ZK reader" in {
