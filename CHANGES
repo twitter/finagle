@@ -102,9 +102,17 @@ New Features
   * finagle-mysql: Add support for MySQL transactions.
 
   * finagle-stats: A new HostStatsReceiver type is added and used for per host stats.
-    It is loaded through LoadService and used by the Stack-based API as a default 
-    param. Per host stats can be turned on through `com.twitter.finagle.loadbalancer.perHostStats` 
+    It is loaded through LoadService and used by the Stack-based API as a default
+    param. Per host stats can be turned on through `com.twitter.finagle.loadbalancer.perHostStats`
     flag, and is exported to the "/admin/per_host_metrics.json" route in twitter-server.
+
+  * finagle-stats: Improved compatibility when migrating from
+    `Ostrich <https://github.com/twitter/ostrich/>`_ stats via two flags:
+    ``com.twitter.finagle.stats.useCounterDeltas=true`` and
+    ``com.twitter.finagle.stats.format=ostrich``. If these flags are both set,
+    HTTP requests to ``/admin/stats.json`` with the ``period=60`` query string
+    parameter will replicate Ostrich's behavior by computing deltas on counters
+    every minute and formatting histograms with the same labels Ostrich uses.
 
   * finagle-http(x): Two missing params were added: `Decompression` and `CompressionLevel`. Both
     client and server may be configured with either `configured` method or `withDecompression`/

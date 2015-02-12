@@ -1,16 +1,25 @@
 package com.twitter.finagle.stats
 
 import com.twitter.common.metrics.Metrics
+import com.twitter.conversions.time._
+import com.twitter.finagle.http.{MediaType, Response, Request}
+import com.twitter.util.{Time, MockTimer, Await}
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
+import org.scalatest.concurrent.{IntegrationPatience, Eventually}
+import org.scalatest.junit.JUnitRunner
 import scala.util.matching.Regex
-import com.twitter.finagle.http.{MediaType, Response, Request}
-import com.twitter.util.Await
 
 @RunWith(classOf[JUnitRunner])
-class JsonExporterTest extends FunSuite {
+class JsonExporterTest
+  extends FunSuite
+  with Eventually
+  with IntegrationPatience
+{
+
+  // 2015-02-05 20:05:00 +0000
+  private val zeroSecs = Time.fromSeconds(1423166700)
 
   test("samples can be filtered") {
     val registry = Metrics.createDetached()
@@ -55,4 +64,122 @@ class JsonExporterTest extends FunSuite {
     assert(responseUnfilteredContent.contains("views"), "'Views' should be present - 'vie' is not a match")
     assert(responseUnfilteredContent.contains("jvm_gcs"), "'jvm_gcs' should be present - jvm.* matches it")
   }
+
+  test("startOfNextMinute") {
+    Time.withTimeAt(zeroSecs) { tc =>
+      assert(JsonExporter.startOfNextMinute == zeroSecs + 1.minute)
+
+      tc.advance(1.second) // 01 second past the minute
+      assert(JsonExporter.startOfNextMinute == zeroSecs + 1.minute)
+
+      tc.advance(58.seconds) // 59 seconds past the minute
+      assert(JsonExporter.startOfNextMinute == zeroSecs + 1.minute)
+
+      tc.advance(1.second) // 60 seconds past the minute
+      assert(JsonExporter.startOfNextMinute == zeroSecs + 2.minutes)
+    }
+  }
+
+  test("useCounterDeltas flag enabled") {
+    val reqWithPeriod = Request("/admin/metrics.json?period=60")
+    val reqNoPeriod = Request("/admin/metrics.json")
+
+    val name = "anCounter"
+    val registry = Metrics.createDetached()
+    val counter = registry.createCounter(name)
+
+    val timer = new MockTimer()
+    val exporter = new JsonExporter(registry, timer)
+
+    useCounterDeltas.let(true) {
+      // start in the past so we are guaranteed a run immediately
+      Time.withTimeAt(zeroSecs) { control =>
+        def update() = {
+          control.advance(61.seconds)
+          timer.tick()
+        }
+
+        // we won't trigger an `update` until the first minute.
+        val emptyRes = Response(Await.result(exporter(reqWithPeriod))).contentString
+        assert(emptyRes == """{"anCounter":0}""")
+
+        // Note: the `CounterDeltas.update()`s happen async
+        update()
+        counter.add(11)
+        eventually {
+          // with the param
+          val res = Response(Await.result(exporter(reqWithPeriod))).contentString
+          assert(res == """{"anCounter":11}""")
+        }
+
+        update()
+        counter.add(5)
+        eventually {
+          // verify returning deltas, when param requested
+          val res = Response(Await.result(exporter(reqWithPeriod))).contentString
+          assert(res == """{"anCounter":5}""")
+        }
+
+        // verify totals returned when param omitted
+        val res3 = Response(Await.result(exporter(reqNoPeriod))).contentString
+        assert(res3 == """{"anCounter":16}""")
+        counter.add(5)
+        update() // should not matter when the param is omitted.
+        val res4 = Response(Await.result(exporter(reqNoPeriod))).contentString
+        assert(res4 == """{"anCounter":21}""")
+      }
+    }
+  }
+
+  test("useCounterDeltas flag disabled") {
+    val reqWithPeriod = Request("/admin/metrics.json?period=60")
+
+    val registry = Metrics.createDetached()
+    val counter = registry.createCounter("anCounter")
+    counter.add(11)
+
+    val timer = new MockTimer()
+    val exporter = new JsonExporter(registry, timer)
+
+    useCounterDeltas.let(false) {
+      Time.withCurrentTimeFrozen { control =>
+        def update() = {
+          control.advance(61.seconds)
+          timer.tick()
+        }
+
+        // with counterDeltas param
+        val res1 = Response(Await.result(exporter(reqWithPeriod))).contentString
+        assert(res1 == """{"anCounter":11}""")
+
+        // update should have no effect, even when param included
+        counter.add(5)
+        update()
+        val res2 = Response(Await.result(exporter(reqWithPeriod))).contentString
+        assert(res2 == """{"anCounter":16}""")
+      }
+    }
+  }
+
+  test("formatter flag") {
+    val registry = Metrics.createDetached()
+    val sr = new ImmediateMetricsStatsReceiver(registry)
+    val histo = sr.stat("anHisto")
+    histo.add(555)
+
+    val req = Request("/admin/metrics.json")
+
+    format.let(format.Ostrich) {
+      val exporter = new JsonExporter(registry)
+      val res = Response(Await.result(exporter(req))).contentString
+      assert(res.contains(""""anHisto.maximum":555"""))
+    }
+
+    format.let(format.CommonsMetrics) {
+      val exporter = new JsonExporter(registry)
+      val res = Response(Await.result(exporter(req))).contentString
+      assert(res.contains(""""anHisto.max":555"""))
+    }
+  }
+
 }

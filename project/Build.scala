@@ -226,7 +226,8 @@ object Finagle extends Build {
     name := "finagle-stats",
     libraryDependencies ++= Seq(
       "com.twitter.common" % "metrics" % "0.0.29",
-      util("events")
+      util("events"),
+      util("logging")
     ),
     libraryDependencies <++= scalaVersion(jacksonLibs(_))
   ).dependsOn(finagleCore, finagleHttp)
