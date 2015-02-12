@@ -402,7 +402,7 @@ object Stack {
 
   /** A module of 0 parameters. */
   abstract class Module0[T] extends Stackable[T] {
-    final val parameters = Nil
+    final val parameters: Seq[Stack.Param[_]] = Nil
     def make(next: T): T
     def toStack(next: Stack[T]) =
       Node(this, (prms, next) => Leaf(this, make(next.make(prms))), next)
