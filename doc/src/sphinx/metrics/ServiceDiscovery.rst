@@ -5,7 +5,7 @@ Finagle clients resolve :doc:`names <Names>` into sets of network
 addresses to which sockets can be opened. A number of the moving parts
 involved in this process are cached (i.e. `Dtab`\s, `Name`\s, and
 `NameTree`\s). The following stats are recorded under the
-`interpreter/{dtabcache,namecache,nametreecache}` scopes to provide
+`namer/{dtabcache,namecache,nametreecache}` scopes to provide
 visibility into this caching.
 
 **misses**
@@ -24,6 +24,9 @@ visibility into this caching.
 **oneshots**
   A counter of the number of "one-off" `ServiceFactory`\s that are
   created in the event that no idle `ServiceFactory`\s are cached
+
+The total time spent resolving Names is captured in the
+`namer/bind_latency_us` stat.
 
 Address Stabilization
 <<<<<<<<<<<<<<<<<<<<<

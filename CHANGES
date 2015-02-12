@@ -57,6 +57,16 @@ Runtime Behavior Changes
   * finagle-core: The error message provided by `c.t.f.NoBrokersAvailableException`
     prints both the base and local Dtabs.
 
+  * finagle-core: Stats produced by `com.twitter.finagle.factory.BindingFactory`
+    are now scoped with the "namer" prefix rather than "interpreter". The total
+    latency associated with Name binding is now recorded in the "bind_latency_ms"
+    stat.
+
+  * finagle-core: The "service_creation/service_acquisition_latency_ms" stat
+    produced by `com.twitter.finagle.factory.StatsFactoryWrapper` no longer
+    includes time spent in name resolution, which is now covered by
+    "namer/bind_latency_us" as discussed above.
+
 Deprecations
 ~~~~~~~~~~~~
 
@@ -92,10 +102,17 @@ New Features
 
   * finagle-core: improved Java compatiblity for `c.t.f.Stack.Params` / `c.t.f.Stack.Parameterized`.
 
+  * finagle-core: Introduce the ability to add metadata to bound `com.twitter.finagle.Addr`s.
+
   * finagle-core: Introduce per-address latency compensation.  Clients may be configured with
     a 'Compensator' function that uses the client's address metadata to adjust connection and
     request timeouts.  This can be used, for instance, to account for speed-of-light latency
     between physical regions.
+
+  * finagle-core: Introduce per-address stats scoping.  Clients may be configured with
+    a `com.twitter.finagle.client.StatsScoping.Scoper` function that uses the client's
+    address metadata to adjust the scope of client stats. This can be used, for instance,
+    to properly scope client stats for a Name that resolves to a Union of distinct clusters.
 
   * finagle-core: A convenient method `Client.newService(dest: String, label: String)` was added.
 

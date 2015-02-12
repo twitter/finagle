@@ -1,5 +1,6 @@
 package com.twitter.finagle.factory
 
+import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.Rng
@@ -50,12 +51,15 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     var news = 0
     var closes = 0
 
-    val newFactory: Name.Bound => ServiceFactory[Unit, Var[Addr]] =
+    val tcOpt: Option[TimeControl] = None
+
+    lazy val newFactory: Name.Bound => ServiceFactory[Unit, Var[Addr]] =
       bound => new ServiceFactory[Unit, Var[Addr]] {
         news += 1
-        def apply(conn: ClientConnection) = Future.value(new Service[Unit, Var[Addr]] {
-          def apply(_unit: Unit) = Future.value(bound.addr)
-        })
+        def apply(conn: ClientConnection) = {
+          tcOpt.foreach(_.advance(1234.microseconds))
+          Future.value(Service.mk { _ => Future.value(bound.addr) })
+        }
 
         def close(deadline: Time) = {
           closes += 1
@@ -63,7 +67,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
         }
       }
 
-    val factory = new BindingFactory(
+    lazy val factory = new BindingFactory(
       path,
       newFactory,
       statsReceiver = imsr,
@@ -78,6 +82,24 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
       }
     }
   }
+
+  test("stats") (Time.withCurrentTimeFrozen { tc =>
+    new Ctx {
+      override val tcOpt = Some(tc)
+
+      val n1 = Dtab.read("/foo/bar=>/test1010")
+      Await.result(newWith(n1).close() before newWith(n1).close())
+
+      val expected = Map(
+        Seq("bind_latency_us") -> Seq(1234.0, 1234.0),
+        Seq("dtabcache", "misstime_ms") -> Seq(1.0),
+        Seq("namecache", "misstime_ms") -> Seq(1.0),
+        Seq("nametreecache", "misstime_ms") -> Seq(1.0)
+      )
+
+      assert(imsr.stats == expected)
+    }
+  })
 
   test("Uses Dtab.base") (new Ctx {
     val n1 = Dtab.read("/foo/bar=>/test1010")

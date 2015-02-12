@@ -239,6 +239,8 @@ private[finagle] class BindingFactory[Req, Rep](
       maxNameTreeCacheSize)
 
   private[this] val dtabCache = {
+    val latencyStat = statsReceiver.stat("bind_latency_us")
+
     val newFactory: ((Dtab, Dtab)) => ServiceFactory[Req, Rep] = { case (baseDtab, localDtab) =>
       val factory = new DynNameFactory(
         (baseDtab ++ localDtab).bind(tree),
@@ -248,6 +250,7 @@ private[finagle] class BindingFactory[Req, Rep](
         private val pathShow = path.show
         private val baseDtabShow = baseDtab.show
         override def apply(conn: ClientConnection) = {
+          val elapsed = Stopwatch.start()
           record("namer.path", pathShow)
           record("namer.dtab.base", baseDtabShow)
           // dtab.local is annotated on the client & server tracers.
@@ -262,6 +265,8 @@ private[finagle] class BindingFactory[Req, Rep](
             // the exception; fill them in on the way out
             case e: NoBrokersAvailableException =>
               Future.exception(new NoBrokersAvailableException(e.name, baseDtab, localDtab))
+          } respond { _ =>
+            latencyStat.add(elapsed().inMicroseconds)
           }
         }
       }
@@ -361,7 +366,7 @@ object BindingFactory {
             boundPathFilter(bound.path) andThen client
           }
 
-          new BindingFactory(path, newStack, baseDtab, stats.scope("interpreter"))
+          new BindingFactory(path, newStack, baseDtab, stats.scope("namer"))
       }
 
       Stack.Leaf(role, factory)

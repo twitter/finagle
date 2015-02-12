@@ -74,12 +74,12 @@ object StackClient {
    *
    * @see [[com.twitter.finagle.client.StackClient#endpointStack]]
    * @see [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]]
+   * @see [[com.twitter.finagle.factory.StatsFactoryWrapper]]
    * @see [[com.twitter.finagle.client.StatsScoping]]
    * @see [[com.twitter.finagle.client.AddrMetadataExtraction]]
    * @see [[com.twitter.finagle.factory.BindingFactory]]
    * @see [[com.twitter.finagle.factory.RefcountedFactory]]
    * @see [[com.twitter.finagle.factory.TimeoutFactory]]
-   * @see [[com.twitter.finagle.factory.StatsFactoryWrapper]]
    * @see [[com.twitter.finagle.FactoryToService]]
    * @see [[com.twitter.finagle.service.RequeueingFilter]]
    * @see [[com.twitter.finagle.tracing.ClientTracingFilter]]
@@ -88,13 +88,26 @@ object StackClient {
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
     val stk = new StackBuilder(endpointStack[Req, Rep])
     stk.push(LoadBalancerFactory.module)
+    stk.push(StatsFactoryWrapper.module)
+    // These are sequenced very carefully based on data dependencies:
+    //
+    //   - BindingFactory translates a Path to a NameTree,
+    //     which can potentially be a union of several bound
+    //     Names, and then binds a particular Name.
+    //   - AddrMetadataExtraction extracts metadata from the
+    //     Bound Addr
+    //   - StatsScoping scopes subsequent stats based on this
+    //     metadata.
+    //
+    // It's important that all of this happen not only before the rest
+    // of the endpoint stack, but also ahead of StatsFactoryWrapper
+    // and LoadBalancerFactory.
     stk.push(StatsScoping.module)
     stk.push(AddrMetadataExtraction.module)
     stk.push(BindingFactory.module)
     stk.push(Role.requestDraining, (fac: ServiceFactory[Req, Rep]) =>
       new RefcountedFactory(fac))
     stk.push(TimeoutFactory.module)
-    stk.push(StatsFactoryWrapper.module)
     stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
     stk.push(FactoryToService.module)
     stk.push(RequeueingFilter.module)
