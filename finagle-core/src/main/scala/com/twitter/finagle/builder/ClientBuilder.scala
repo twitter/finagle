@@ -926,7 +926,12 @@ private case class ClientBuilderClient[Req, Rep](
 
   private val identityFilter = Filter.identity[Req, Rep]
 
-  override def newClient(dest: Name, label: String): ServiceFactory[Req, Rep] = {
+  def newClient(dest: Name, label: String): ServiceFactory[Req, Rep] = {
+    // need the label in statsReceiver
+    if (params[Label].label != label) {
+      return configured(Label(label)).newClient(dest, label);
+    }
+
     val Daemonize(daemon) = params[Daemonize]
     val Logger(logger) = params[Logger]
     val MonitorFactory(mFactory) = params[MonitorFactory]
@@ -954,6 +959,11 @@ private case class ClientBuilderClient[Req, Rep](
   }
 
   override def newService(dest: Name, label: String): Service[Req, Rep] = {
+    // need the label in statsReceiver
+    if (params[Label].label != label) {
+      return configured(Label(label)).newService(dest, label);
+    }
+
     val factory = configured(FactoryToService.Enabled(true)).newClient(dest, label)
     val service: Service[Req, Rep] = new FactoryToService[Req, Rep](factory)
 
