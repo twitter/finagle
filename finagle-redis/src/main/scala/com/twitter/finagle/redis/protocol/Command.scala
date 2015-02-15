@@ -464,7 +464,7 @@ class CommandCodec extends UnifiedProtocolCodec {
       val head = parts.head
       val last = parts.tail.last
       val middle = parts.tail.init
-      (head.split(" ") ++ middle ++ last.split(" ")).filter(_.isEmpty)
+      (head.split(" ") ++ middle ++ last.split(" ")).filter(_.nonEmpty)
     } else {
       string.split(" ")
     }
