@@ -710,15 +710,15 @@ class KetamaFailureAccrualFactory[Req, Rep](
   }
 
   override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
-    super.status match {
-      case Status.Open => super.apply(conn)
+    getState match {
+      case FailureAccrualFactory.Alive => super.apply(conn)
       // One finagle client presents one node on the Ketama ring,
       // the load balancer has one cache client. When the client
-      // is in a busy state, the c.t.f.FailureAccrualFactory continues
-      // to dispatch requests to that client. Here we want to fail
-      // immediately to give the busy client some chances to recover
-      // from failures.
-      case _           => failureAccrualEx
+      // is in a busy state, continuing to dispatch requests is likely
+      // to fail again. Thus we fail immediately if failureAccrualFactory
+      // is in a busy state, which is triggered when failureCount exceeds
+      // a threshold.
+      case _ => failureAccrualEx
     }
 }
 
@@ -896,6 +896,7 @@ case class KetamaClientBuilder private[memcached] (
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
   _failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds),
   _ejectFailedHost: Boolean = true,
+  _failFast: Boolean = false,
   oldLibMemcachedVersionComplianceMode: Boolean = false,
   numReps: Int = KetamaClient.DefaultNumReps
 ) {
@@ -963,6 +964,9 @@ case class KetamaClientBuilder private[memcached] (
   def ejectFailedHost(eject: Boolean): KetamaClientBuilder =
     copy(_ejectFailedHost = eject)
 
+  def failFast(shouldFail: Boolean): KetamaClientBuilder =
+    copy(_failFast = shouldFail)
+
   def build(): Client = {
     val builder =
       (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1).daemon(true))
@@ -973,6 +977,7 @@ case class KetamaClientBuilder private[memcached] (
     ) = {
       builder.hosts(new InetSocketAddress(node.host, node.port))
           .failureAccrualFactory(filter(key, broker, faParams, _ejectFailedHost) _)
+          .failFast(_failFast)
           .build()
     }
 

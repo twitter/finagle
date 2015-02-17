@@ -18,16 +18,17 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
   class Helper(
       ejectFailedHost: Boolean,
-      serviceRep: Future[Int] = Future.exception(new Exception))
+      serviceRep: Future[Int] = Future.exception(new Exception),
+      underlyingStatus: Status = Status.Open)
   {
     val underlyingService = mock[Service[Int, Int]]
     when(underlyingService.close(any[Time])) thenReturn Future.Done
-    when(underlyingService.status) thenReturn Status.Open
+    when(underlyingService.status) thenReturn underlyingStatus
     when(underlyingService(Matchers.anyInt)) thenReturn serviceRep
 
     val underlying = mock[ServiceFactory[Int, Int]]
     when(underlying.close(any[Time])) thenReturn Future.Done
-    when(underlying.status) thenReturn Status.Open
+    when(underlying.status) thenReturn underlyingStatus
     when(underlying()) thenReturn Future.value(underlyingService)
 
     val key = mock[KetamaClientKey]
@@ -42,7 +43,7 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     verify(underlying)()
   }
 
-  test("fails immediately after consecutive failures, revive after markDeadFor duration") {
+  test("fail immediately after consecutive failures, revive after markDeadFor duration") {
     val h = new Helper(false)
     import h._
 
@@ -93,6 +94,38 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     }
   }
 
+  test("busy state of the underlying serviceFactory does not trigger FailureAccrualException") {
+    val h = new Helper(false, Future.exception(new Exception), Status.Busy)
+    import h._
+
+    Time.withCurrentTimeFrozen { timeControl =>
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      assert(!factory.isAvailable)
+      assert(!service.isAvailable)
+      // still dispatches
+      verify(underlyingService, times(2))(123)
+
+      // triggers markDead by the 3rd failure
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      assert(!factory.isAvailable)
+      assert(!service.isAvailable)
+      assert(broker.recv.sync().isDefined === false)
+
+      // skips dispatch after consecutive failures
+      intercept[FailureAccrualException] {
+        Await.result(factory())
+      }
+      verify(underlyingService, times(3))(123)
+    }
+  }
+
   test("eject and revive failed host when ejectFailedHost=true") {
     val h = new Helper(true)
     import h._
@@ -130,7 +163,7 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("treats successful response and cancelled exceptions as success") {
+  test("treat successful response and cancelled exceptions as success") {
     val successes =
       Seq(
         Future.value(123),

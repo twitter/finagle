@@ -56,6 +56,7 @@ Runtime Behavior Changes
 
   * finagle-core: The error message provided by `c.t.f.NoBrokersAvailableException`
     prints both the base and local Dtabs.
+  * finagle-memcached(x): disable failFast by default in `c.t.f.memcached.KetamaClientBuilder`.
 
   * finagle-core: Stats produced by `com.twitter.finagle.factory.BindingFactory`
     are now scoped with the "namer" prefix rather than "interpreter". The total

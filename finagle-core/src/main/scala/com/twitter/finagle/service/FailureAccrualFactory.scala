@@ -67,9 +67,9 @@ object FailureAccrualFactory {
       }
     }
 
-  private sealed trait State
-  private case object Alive extends State
-  private case object Dead extends State
+  protected[finagle] sealed trait State
+  protected[finagle] case object Alive extends State
+  protected[finagle] case object Dead extends State
 }
 
 /**
@@ -157,6 +157,8 @@ class FailureAccrualFactory[Req, Rep](
     case Alive => underlying.status
     case Dead => Status.Busy
   }
+
+  protected[this] def getState: State = state
 
   def close(deadline: Time) = underlying.close(deadline) ensure {
     // We revive to make sure we've cancelled timer tasks, etc.
