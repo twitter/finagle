@@ -28,6 +28,11 @@ object ApertureBalancerFactory extends WeightedLoadBalancerFactory {
     new ApertureLoadBandBalancer(activity,
       statsReceiver = statsReceiver,
       emptyException = emptyException)
+  
+  /**
+   * Used for Java access.
+   */
+  def get() = this
 }
 
 
