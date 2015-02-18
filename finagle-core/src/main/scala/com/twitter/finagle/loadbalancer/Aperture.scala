@@ -5,7 +5,7 @@ import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.{Rng, Ring, Ema, DefaultTimer}
 import com.twitter.finagle.{
-  ClientConnection, NoBrokersAvailableException, ServiceFactory, ServiceFactoryProxy, 
+  ClientConnection, NoBrokersAvailableException, ServiceFactory, ServiceFactoryProxy,
   ServiceProxy, Status}
 import com.twitter.util.{Activity, Return, Future, Throw, Time, Var, Duration, Timer}
 import java.util.concurrent.atomic.AtomicInteger
@@ -17,7 +17,7 @@ object ApertureBalancerFactory extends WeightedLoadBalancerFactory {
     emptyException: NoBrokersAvailableException
   ): ServiceFactory[Req, Rep] =
     newWeightedLoadBalancer(
-      Activity(factories map(Activity.Ok(_))), 
+      Activity(factories map(Activity.Ok(_))),
       statsReceiver, emptyException)
 
   def newWeightedLoadBalancer[Req, Rep](
@@ -28,6 +28,11 @@ object ApertureBalancerFactory extends WeightedLoadBalancerFactory {
     new ApertureLoadBandBalancer(activity,
       statsReceiver = statsReceiver,
       emptyException = emptyException)
+
+  /**
+   * Used for Java access.
+   */
+  def get(): ApertureBalancerFactory.type = this
 }
 
 
@@ -56,12 +61,12 @@ object ApertureBalancerFactory extends WeightedLoadBalancerFactory {
  *
  *  1. A client uses resources commensurate to offered load. In particular,
  *     it does not have to open sessions with every service in a large cluster.
- *     This is especially important when offered load and cluster capacity 
+ *     This is especially important when offered load and cluster capacity
  *     are mismatched.
- *  1. It balances over fewer, and thus warmer, services. This enhances the 
+ *  1. It balances over fewer, and thus warmer, services. This enhances the
  *     efficacy of the fail-fast mechanisms, etc. This also means that clients pay
  *     the penalty of session establishment less frequently.
- *  1. It increases the efficacy of least-loaded balancing which, in order to 
+ *  1. It increases the efficacy of least-loaded balancing which, in order to
  *     work well, requires concurrent load. The load-band balancer effectively
  *     arranges load in a manner that ensures a higher level of per-service
  *     concurrency.
@@ -111,7 +116,7 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
 
   protected def rng: Rng
 
-  private[this] val nodeUp: Node => Boolean = 
+  private[this] val nodeUp: Node => Boolean =
     { node => node.status == Status.Open && node.weight > 0 }
 
   private[this] val gauge = statsReceiver.addGauge("aperture") { aperture }
@@ -127,7 +132,7 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
       case updown => updown
     }
 
-    private[this] val (ring, width, max) = 
+    private[this] val (ring, width, max) =
       if (up.isEmpty) {
         (Ring.fromWeights(Seq(1), W), W, W)
       } else {
@@ -151,17 +156,17 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
       aperture = math.max(1, math.min(max, aperture+n))
     }
 
-    def rebuild() = 
+    def rebuild() =
       new Distributor(vector, aperture)
 
-    def rebuild(vector: Vector[Node]) = 
+    def rebuild(vector: Vector[Node]) =
       new Distributor(vector.sortBy(_.token), aperture)
 
     /**
      * The number of available serving units.
      */
     def units = max
-    
+
     // We use power of two choices to pick nodes. This keeps things
     // simple, but we could reasonably use a heap here, too.
     def pick(): Node = {
@@ -195,23 +200,23 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
    * Adjust the aperture by `n` serving units.
    */
   protected def adjust(n: Int) = invoke(_.adjust(n))
-  
+
   /**
    * Widen the aperture by one serving unit.
    */
   protected def widen() = adjust(1)
-  
+
   /**
    * Narrow the aperture by one serving unit.
    */
   protected def narrow() = adjust(-1)
-  
+
   /**
    * The current aperture. This is never less than 1, or more
    * than `units`.
    */
   protected def aperture: Int = dist.aperture
-  
+
   /**
    * The number of available serving units.
    * The maximum aperture size.
@@ -238,13 +243,13 @@ private trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, R
    * seconds.
    */
   protected def smoothWin: Duration
-  
+
   /**
-   * The lower bound of the load band. 
+   * The lower bound of the load band.
    * Must be less than [[highLoad]].
    */
   protected def lowLoad: Double
-  
+
   /**
    * The upper bound of the load band.
    * Must be greater than [[lowLoad]].
@@ -291,10 +296,10 @@ private trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, R
   }
 
   protected case class Node(
-      factory: ServiceFactory[Req, Rep], 
-      weight: Double, 
+      factory: ServiceFactory[Req, Rep],
+      weight: Double,
       counter: AtomicInteger, token: Int)
-    extends ServiceFactoryProxy[Req, Rep](factory) 
+    extends ServiceFactoryProxy[Req, Rep](factory)
     with NodeT {
     type This = Node
 
@@ -307,7 +312,7 @@ private trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, R
       super.apply(conn) transform {
         case Return(svc) =>
           Future.value(new ServiceProxy(svc) {
-            override def close(deadline: Time) = 
+            override def close(deadline: Time) =
               super.close(deadline) ensure {
                 adjustNode(Node.this, -1)
               }
@@ -320,7 +325,7 @@ private trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, R
     }
   }
 
-  protected def newNode(factory: ServiceFactory[Req, Rep], weight: Double, statsReceiver: StatsReceiver) = 
+  protected def newNode(factory: ServiceFactory[Req, Rep], weight: Double, statsReceiver: StatsReceiver) =
     Node(factory, weight, new AtomicInteger(0), rng.nextInt())
 
   private[this] val failingLoad = new AtomicInteger(0)
