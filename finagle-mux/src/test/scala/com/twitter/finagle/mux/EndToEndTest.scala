@@ -152,6 +152,23 @@ class EndToEndTest extends FunSuite
     assert(Await.result(client(Request.empty), 30.seconds).body.isEmpty)
     assert(n.get == 2)
   }
+
+
+  test("gracefully reject sessions") {
+    val factory = new ServiceFactory[Request, Response] {
+      def apply(conn: ClientConnection): Future[Service[Request, Response]] =
+        Future.exception(new Exception)
+        
+      def close(deadline: Time): Future[Unit] = Future.Done
+    }
+    
+    val server = Mux.serve("localhost:*", factory)
+    val client = Mux.newService(server)
+    
+    // This will try until it exhausts its budget. That's o.k.
+    val Failure.Rejected(_) = intercept[Failure] { Await.result(client(Request.empty)) }
+  }
+
   
   private[this] def nextPort(): Int = {
     val s = new Socket()

@@ -1,5 +1,6 @@
 package com.twitter.finagle.server
 
+import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
@@ -9,7 +10,7 @@ import com.twitter.finagle.stats.ServerStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.jvm.Jvm
-import com.twitter.util.{Closable, CloseAwaitably, Return, Throw, Time}
+import com.twitter.util.{Closable, CloseAwaitably, Future, Return, Throw, Time}
 import java.net.SocketAddress
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
@@ -197,7 +198,18 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
             val d = server.newDispatcher(transport, service)
             connections.add(d)
             transport.onClose ensure connections.remove(d)
-          case Throw(_) => transport.close()
+          case Throw(exc) =>
+            // If we fail to create a new session locally, we continue establishing
+            // the session but (1) reject any incoming requests; (2) close it right
+            // away. This allows protocols that support graceful shutdown to 
+            // also gracefully deny new sessions.
+            val d = server.newDispatcher(
+              transport, Service.const(Future.exception(Failure.Rejected(exc))))
+            connections.add(d)
+            transport.onClose ensure connections.remove(d)
+            // We give it a generous amount of time to shut down the session to
+            // improve our chances of being able to do so gracefully.
+            d.close(10.seconds)
         }
       }
 

@@ -21,6 +21,12 @@ object Service {
   def mk[Req, Rep](f: Req => Future[Rep]): Service[Req, Rep] = new Service[Req, Rep] {
     def apply(req: Req) = f(req)
   }
+
+  /**
+   * A service with a constant reply. Always available; never closable.
+   */
+  def const[Rep](rep: Future[Rep]): Service[Any, Rep] =
+    new service.ConstantService(rep)
 }
 
 /**
