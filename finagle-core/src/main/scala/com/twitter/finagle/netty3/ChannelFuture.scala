@@ -89,7 +89,7 @@ private[finagle] class RichChannelFuture(val self: ChannelFuture) {
     future
   }
 
-  def map[T](f: Channel => Channel) = {
+  def map(f: Channel => Channel): ChannelFuture = {
     val future = new LatentChannelFuture
     future.setChannel(self.getChannel)
 

@@ -287,13 +287,26 @@ case class Netty3Transporter[In, Out](
       val engine = newEngine(addr)
       engine.self.setUseClientMode(true)
       engine.self.setEnableSessionCreation(true)
-      val sslHandler = new SslHandler(engine.self)
-      val verifier = verifyHost map {
-        SslConnectHandler.sessionHostnameVerifier(_) _
-      } getOrElse { Function.const(None) _ }
 
-      pipeline.addFirst("sslConnect", new SslConnectHandler(sslHandler, verifier))
+      val verifier = verifyHost.map(SslConnectHandler.sessionHostnameVerifier).getOrElse {
+        Function.const(None) _
+      }
+
+      val sslHandler = new SslHandler(engine.self)
+      val sslConnectHandler = new SslConnectHandler(sslHandler, verifier)
+
+      pipeline.addFirst("sslConnect", sslConnectHandler)
       pipeline.addFirst("ssl", sslHandler)
+
+      // We should close the channel if the remote peer closed TLS session [1] (i.e., sent "close_notify").
+      // While it's possible to restart [2] the TLS session we decided to close it instead, since this
+      // approach is safe and fits well into the Finagle infrastructure. Rather than tolerating the errors
+      // on the transport level, we fail (close the channel) instead and propagate the exception to the
+      // higher level (load balancing, connection pooling, etc.), so it can react on the failure.
+      //
+      // [1]: https://github.com/netty/netty/issues/137
+      // [2]: https://github.com/netty/netty/blob/3.10/src/main/java/org/jboss/netty/handler/ssl/SslHandler.java#L119
+      sslHandler.getSSLEngineInboundCloseFuture.addListener(ChannelFutureListener.CLOSE)
     }
 
     (socksProxy, addr) match {

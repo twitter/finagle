@@ -5,19 +5,26 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.param.Label
 import com.twitter.finagle.socks.SocksConnectHandler
 import com.twitter.finagle.Stack
+import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
 import java.net.InetSocketAddress
-import org.jboss.netty.channel.{Channels, ChannelPipeline, ChannelPipelineFactory}
+import javax.net.ssl.{SSLEngineResult, SSLEngine, SSLSession}
+import org.jboss.netty.channel._
+import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.timeout.IdleStateHandler
 import org.junit.runner.RunWith
+import org.mockito.Matchers._
+import org.mockito.Mockito._
 import org.scalatest.FunSpec
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
-class Netty3TransporterTest extends FunSpec {
+class Netty3TransporterTest extends FunSpec with MockitoSugar {
   describe("Netty3Transporter") {
     it("creates a Netty3Transporter instance based on Stack params") {
       val inputParams =
@@ -178,6 +185,55 @@ class Netty3TransporterTest extends FunSpec {
         val transporter = new Netty3Transporter[Int, Int]("name", pipelineFactory, socksProxy = Some(loopbackSockAddr))
         val pipeline = transporter.newPipeline(routableSockAddr, NullStatsReceiver)
         assert(hasSocksConnectHandler(pipeline))
+      }
+    }
+
+    describe("SslHandler") {
+      it ("should close the channel if the remote peer closed TLS session") {
+        val result = new SSLEngineResult(
+          SSLEngineResult.Status.CLOSED, SSLEngineResult.HandshakeStatus.NEED_UNWRAP, 0, 0
+        )
+
+        val session = mock[SSLSession]
+        val engine = mock[SSLEngine]
+        when(engine.getSession) thenReturn session
+        when(session.getApplicationBufferSize) thenReturn 1024
+        when(engine.unwrap(any[java.nio.ByteBuffer], any[java.nio.ByteBuffer])) thenReturn result
+        when(engine.getUseClientMode) thenReturn true
+        when(engine.getEnableSessionCreation) thenReturn true
+
+        val mockTlsConfig = Netty3TransporterTLSConfig(
+          Function.const(new Engine(engine)),
+          Some("localhost")
+        )
+
+        val pipelineFactory = Channels.pipelineFactory(Channels.pipeline())
+        val transporter = new Netty3Transporter[Int, Int](
+          "tls-enabled", pipelineFactory, tlsConfig = Some(mockTlsConfig)
+        )
+
+        // 21 - alert message, 3 - SSL3 major version,
+        // 0 - SSL3 minor version, 0 1 - package length, 0 - close_notify
+        val cb = ChannelBuffers.copiedBuffer(Array[Byte](21, 3, 0, 0, 1, 0))
+        cb.readerIndex(0)
+        cb.writerIndex(6)
+
+        val pipeline = transporter.newPipeline(null, NullStatsReceiver)
+        val channel = transporter.newChannel(pipeline)
+        val closeNotify = new UpstreamMessageEvent(channel, cb, null)
+
+        val ctx = mock[ChannelHandlerContext]
+        when(ctx.getChannel) thenReturn channel
+        when(ctx.getPipeline) thenReturn pipeline
+
+        val sslHandler = pipeline.get(classOf[SslHandler])
+
+        assert(channel.isOpen)
+        assert(sslHandler != null)
+
+        sslHandler.handleUpstream(ctx, closeNotify)
+
+        assert(!channel.isOpen)
       }
     }
   }
