@@ -1,7 +1,6 @@
 package com.twitter.finagle.memcached.integration
 
 import _root_.java.io.ByteArrayOutputStream
-import _root_.java.lang.{Boolean => JBoolean}
 import com.twitter.common.application.ShutdownRegistry.ShutdownRegistryImpl
 import com.twitter.common.zookeeper.ServerSet.EndpointStatus
 import com.twitter.common.zookeeper.testing.ZooKeeperTestServer
@@ -17,14 +16,19 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.finagle.{Name, Resolver}
 import com.twitter.io.Charsets
-import com.twitter.util.{Await, Duration, Future}
+import com.twitter.util.{FuturePool, Await, Duration, Future}
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
-class ClusterClientTest extends FunSuite with BeforeAndAfter {
+class ClusterClientTest
+  extends FunSuite
+  with BeforeAndAfter
+  with Eventually
+  with IntegrationPatience {
 
   /**
    * Note: This integration test requires a real Memcached server to run.
@@ -37,6 +41,10 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
   val zkPath = "/cache/test/silly-cache"
   var zookeeperServer: ZooKeeperTestServer = null
   var dest: Name = null
+  val pool = FuturePool.unboundedPool
+
+  val TimeOut = 15.seconds
+  def boundedWait[T](body: => T): T = Await.result(pool { body }, TimeOut)
 
   before {
     // start zookeeper server and create zookeeper client
@@ -45,29 +53,39 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
     zookeeperServer.startNetwork()
 
     // connect to zookeeper server
-    zookeeperClient = zookeeperServer.createClient(ZooKeeperClient.digestCredentials("user","pass"))
+    zookeeperClient = boundedWait(
+      zookeeperServer.createClient(ZooKeeperClient.digestCredentials("user","pass"))
+    )
 
     // create serverset
-    val serverSet = ServerSets.create(zookeeperClient, ZooKeeperUtils.EVERYONE_READ_CREATOR_ALL, zkPath)
+    val serverSet = boundedWait(
+      ServerSets.create(zookeeperClient, ZooKeeperUtils.EVERYONE_READ_CREATOR_ALL, zkPath)
+    )
     zkServerSetCluster = new ZookeeperServerSetCluster(serverSet)
 
     // start five memcached server and join the cluster
-    (0 to 4) foreach { _ =>
-      TestMemcachedServer.start() match {
-        case Some(server) =>
-          testServers :+= server
-          zkServerSetCluster.join(server.address)
-        case None =>
-          throw new Exception("could not start TestMemcachedServer")
-      }
-    }
+    Await.result(
+      Future.collect(
+        (0 to 4) map { _ =>
+          TestMemcachedServer.start() match {
+            case Some(server) =>
+              testServers :+= server
+              pool { zkServerSetCluster.join(server.address) }
+            case None =>
+              fail("could not start TestMemcachedServer")
+          }
+        }
+      ), TimeOut
+    )
+
 
     if (!testServers.isEmpty) {
       // set cache pool config node data
       val cachePoolConfig: CachePoolConfig = new CachePoolConfig(cachePoolSize = 5)
       val output: ByteArrayOutputStream = new ByteArrayOutputStream
       CachePoolConfig.jsonCodec.serialize(cachePoolConfig, output)
-      zookeeperClient.get().setData(zkPath, output.toByteArray, -1)
+      boundedWait(zookeeperClient.get().setData(zkPath, output.toByteArray, -1))
+
 
       // a separate client which only does zk discovery for integration test
       zookeeperClient = zookeeperServer.createClient(ZooKeeperClient.digestCredentials("user","pass"))
@@ -96,20 +114,21 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
     }
   }
 
+
   test("Simple ClusterClient using finagle load balancing - many keys") {
     // create simple cluster client
     val mycluster =
       new ZookeeperServerSetCluster(
         ServerSets.create(zookeeperClient, ZooKeeperUtils.EVERYONE_READ_CREATOR_ALL, zkPath))
-    Await.result(mycluster.ready) // give it sometime for the cluster to get the initial set of memberships
+    Await.result(mycluster.ready, TimeOut) // give it sometime for the cluster to get the initial set of memberships
     val client = Client(mycluster)
 
     val count = 100
-      (0 until count).foreach{
-        n => {
-          client.set("foo"+n, "bar"+n)
-        }
-      }
+    Await.result(
+      Future.collect((0 until count) map { n =>
+        client.set("foo"+n, "bar"+n)
+      }), TimeOut
+    )
 
     val tmpClients = testServers map {
       case(server) =>
@@ -127,7 +146,7 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
         var found = false
         tmpClients foreach {
           c =>
-          if (Await.result(c.get("foo"+n))!=None) {
+          if (Await.result(c.get("foo"+n), TimeOut)!=None) {
             assert(!found)
             found = true
           }
@@ -276,10 +295,10 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
         .dest(dest)
         .build()
 
-      client.delete("foo")()
-      assert(client.get("foo")() === None)
-      client.set("foo", "bar")()
-      assert(client.get("foo")().get.toString(Charsets.Utf8) === "bar")
+      Await.result(client.delete("foo"), TimeOut)
+      assert(Await.result(client.get("foo"), TimeOut) === None)
+      Await.result(client.set("foo", "bar"), TimeOut)
+      assert(Await.result(client.get("foo"), TimeOut).get.toString(Charsets.Utf8) === "bar")
     }
   }
 
@@ -293,16 +312,14 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
         .asInstanceOf[PartitionedClient]
 
       val count = 100
-      (0 until count).foreach {
-        n => {
-          client.set("foo" + n, "bar" + n)()
-        }
-      }
+      Await.result(Future.collect(
+        (0 until count) map { n => client.set("foo" + n, "bar" + n) }
+      ), TimeOut)
 
       (0 until count).foreach {
         n => {
           val c = client.clientOf("foo" + n)
-          assert(c.get("foo" + n)().get.toString(Charsets.Utf8) === "bar" + n)
+          assert(Await.result(c.get("foo" + n), TimeOut).get.toString(Charsets.Utf8) === "bar" + n)
         }
       }
     }
@@ -355,11 +372,7 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
       }
       catch { case _: Exception => fail("it shouldn't trown an exception") }
 
-      // Unlike CachePoolCluster, our KetamaClient doesn't have api to expose its internal state and
-      // it shouldn't, hence here I don't really have a better way to wait for the client's key ring
-      // redistribution to finish other than sleep for a while.
-      Thread.sleep(1000)
-      assert(trackCacheShards(client).size === 9)
+      eventually { assert(trackCacheShards(client).size === 9) }
 
       // remove 2 cache servers and update cache pool config data, now there should be 7 shards
       try {
@@ -371,8 +384,7 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
       }
       catch { case _: Exception => fail("it shouldn't trown an exception") }
 
-      Thread.sleep(1000)
-      assert(trackCacheShards(client).size === 7)
+      eventually { assert(trackCacheShards(client).size === 7) }
 
       // remove another 2 cache servers and update cache pool config data, now there should be 5 shards
       try {
@@ -384,8 +396,7 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
       }
       catch { case _: Exception => fail("it shouldn't trown an exception") }
 
-      Thread.sleep(1000)
-      assert(trackCacheShards(client).size === 5)
+      eventually { assert(trackCacheShards(client).size === 5) }
 
       // add 2 more cache servers and update cache pool config data, now there should be 7 shards
       try {
@@ -396,8 +407,7 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
       }
       catch { case _: Exception => fail("it shouldn't trown an exception") }
 
-      Thread.sleep(1000)
-      assert(trackCacheShards(client).size === 7)
+      eventually { assert(trackCacheShards(client).size === 7) }
 
       // add another 2 more cache servers and update cache pool config data, now there should be 9 shards
       try {
@@ -408,8 +418,7 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
       }
       catch { case _: Exception => fail("it shouldn't trown an exception") }
 
-      Thread.sleep(1000)
-      assert(trackCacheShards(client).size === 9)
+      eventually { assert(trackCacheShards(client).size === 9) }
 
       // remove 2 and add 2, now there should be still 9 shards
       try {
@@ -422,8 +431,7 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
       }
       catch { case _: Exception => fail("it shouldn't trown an exception") }
 
-      Thread.sleep(1000)
-      assert(trackCacheShards(client).size === 9)
+      eventually { assert(trackCacheShards(client).size === 9) }
     }
 
   if (!Option(System.getProperty("SKIP_FLAKY")).isDefined)
@@ -450,11 +458,7 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
       }
       catch { case _: Exception => fail("it shouldn't trown an exception") }
 
-      // Unlike CachePoolCluster, our KetamaClient doesn't have api to expose its internal state and
-      // it shouldn't, hence here I don't really have a better way to wait for the client's key ring
-      // redistribution to finish other than sleep for a while.
-      Thread.sleep(1000)
-      assert(trackCacheShards(client).size === 9)
+      eventually { assert(trackCacheShards(client).size === 9) }
 
       // remove 2 cache servers and update cache pool config data, now there should be 7 shards
       try {
@@ -465,13 +469,12 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
       }
       catch { case _: Exception => fail("it shouldn't trown an exception") }
 
-      Thread.sleep(1000)
-      assert(trackCacheShards(client).size === 7)
+      eventually { assert(trackCacheShards(client).size === 7) }
     }
 
   def updateCachePoolConfigData(size: Int) {
     val cachePoolConfig: CachePoolConfig = new CachePoolConfig(cachePoolSize = size)
-    var output: ByteArrayOutputStream = new ByteArrayOutputStream
+    val output = new ByteArrayOutputStream
     CachePoolConfig.jsonCodec.serialize(cachePoolConfig, output)
     zookeeperClient.get().setData(zkPath, output.toByteArray, -1)
   }
@@ -495,7 +498,7 @@ class ClusterClientTest extends FunSuite with BeforeAndAfter {
       if (! ignoreConfigData) CachePoolCluster.newZkCluster(zkPath, zookeeperClient, backupPool = backupPool)
       else CachePoolCluster.newUnmanagedZkCluster(zkPath, zookeeperClient)
 
-    Await.result(myCachePool.ready) // wait until the pool is ready
+    Await.result(myCachePool.ready, TimeOut) // wait until the pool is ready
     myCachePool.snap match {
       case (cachePool, changes) =>
         assert(cachePool.size === expectedSize)
