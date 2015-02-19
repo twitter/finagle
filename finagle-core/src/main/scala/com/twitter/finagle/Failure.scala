@@ -70,6 +70,26 @@ final class Failure private[finagle](
     }
 
   /**
+   * True when this failure is retryable.
+   */
+  def isRetryable: Boolean = isSet(flags, Flag.Retryable)
+
+  /**
+   * True when this failure occured due to an interrupt.
+   */
+  def isInterrupted: Boolean = isSet(flags, Flag.Interrupted)
+
+  /**
+   * True when this failure resulted from a rejection.
+   */
+  def isRejected: Boolean = isSet(flags, Flag.Rejected)
+
+  /**
+   * True when this failure resulted from a write failure.
+   */
+  def isUnwritten: Boolean = isSet(flags, Flag.Unwritten)
+
+  /**
    * Creates a new Failure with the given logging Level.
    *
    * Note: it is not guaranteed that all `Failure`s are logged

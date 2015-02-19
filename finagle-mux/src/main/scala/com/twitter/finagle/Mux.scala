@@ -6,6 +6,7 @@ import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
+import com.twitter.finagle.service.RequeueingFilter
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
@@ -51,6 +52,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackClient.newStack
       .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response])
       .replace(StackClient.Role.protoTracing, new ClientProtoTracing)
+      .replace(RequeueingFilter.role, mux.Requeue.module[mux.Request, mux.Response])
       .replace(BindingFactory.role, MuxBindingFactory)
   }
 

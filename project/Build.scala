@@ -479,7 +479,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-mux",
     libraryDependencies ++= Seq("com.twitter.common" % "stats-util" % "0.0.49")
-  ).dependsOn(finagleCore)
+  ).dependsOn(finagleCore, finagleExp)
 
   lazy val finagleThriftMux = Project(
     id = "finagle-thriftmux",
