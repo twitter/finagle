@@ -15,7 +15,7 @@ import scala.collection.immutable
  */
 private class DynNameFactory[Req, Rep](
     name: Activity[NameTree[Name.Bound]],
-    newService: (NameTree[Name.Bound], ClientConnection) => Future[Service[Req, Rep]])
+    cache: ServiceFactoryCache[NameTree[Name.Bound], Req, Rep])
   extends ServiceFactory[Req, Rep] {
 
   private sealed trait State
@@ -24,6 +24,12 @@ private class DynNameFactory[Req, Rep](
   private case class Named(name: NameTree[Name.Bound]) extends State
   private case class Failed(exc: Throwable) extends State
   private case class Closed() extends State
+
+  override def status = state match {
+    case Pending(_) => Status.Busy
+    case Named(name) => cache.status(name)
+    case Failed(_) | Closed() => Status.Closed
+  }
 
   @volatile private[this] var state: State = Pending(immutable.Queue.empty)
 
@@ -59,7 +65,7 @@ private class DynNameFactory[Req, Rep](
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
     state match {
-      case Named(name) => newService(name, conn)
+      case Named(name) => cache(name, conn)
 
       // wrap the exception in a Failure.Naming, so that it can
       // be identified for tracing
@@ -244,7 +250,7 @@ private[finagle] class BindingFactory[Req, Rep](
     val newFactory: ((Dtab, Dtab)) => ServiceFactory[Req, Rep] = { case (baseDtab, localDtab) =>
       val factory = new DynNameFactory(
         (baseDtab ++ localDtab).bind(tree),
-        nameTreeCache.apply)
+        nameTreeCache)
 
       new ServiceFactoryProxy(factory) {
         private val pathShow = path.show
@@ -284,7 +290,7 @@ private[finagle] class BindingFactory[Req, Rep](
   def close(deadline: Time) =
     Closable.sequence(dtabCache, nameTreeCache, nameCache).close(deadline)
 
-  override def status = dtabCache.status
+  override def status = dtabCache.status((baseDtab(), Dtab.local))
 }
 
 object BindingFactory {

@@ -5,10 +5,10 @@ import com.twitter.finagle._
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.Rng
 import com.twitter.util._
-import java.net.{InetAddress, InetSocketAddress}
+import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito.when
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite}
@@ -82,6 +82,30 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
       }
     }
   }
+
+  def mkFactory(st: Status) =
+    (bound: Name.Bound) => new ServiceFactory[Unit, Var[Addr]] {
+      def apply(conn: ClientConnection) =
+        Future.value(Service.mk { _ => Future.exception(new Exception("nup")) })
+      def close(deadline: Time) = Future.Done
+      override def status = st
+    }
+
+  test("BindingFactory reflects status of underlying cached service factory") (
+    for(status <- Seq(Status.Busy, Status.Open, Status.Closed)) {
+      new Ctx {
+        override lazy val newFactory = mkFactory(status)
+
+        // no binding yet
+        assert(factory.status === Status.Closed)
+
+        Dtab.unwind {
+          Dtab.local = Dtab.read("/foo/bar=>/test1010")
+          assert(factory.status === status)
+        }
+      }
+    }
+  )
 
   test("stats") (Time.withCurrentTimeFrozen { tc =>
     new Ctx {
@@ -336,14 +360,39 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
 @RunWith(classOf[JUnitRunner])
 class DynNameFactoryTest extends FunSuite with MockitoSugar {
   private trait Ctx {
-    val newService = mock[(NameTree[Name.Bound], ClientConnection) => Future[Service[String, String]]]
+    val cache = mock[ServiceFactoryCache[NameTree[Name.Bound], String,String]]
     val svc = mock[Service[String, String]]
     val (name, namew) = Activity[NameTree[Name.Bound]]()
-    val dyn = new DynNameFactory[String, String](name, newService)
+    val dyn = new DynNameFactory[String, String](name, cache)
   }
 
+  test("DynNameFactory is Busy when name is unresolved")(new Ctx {
+    intercept[IllegalStateException] { name.sample() }
+    assert(dyn.status === Status.Busy)
+  })
+
+  test("DynNameFactory is Closed when name resolution fails")(new Ctx {
+    assert(dyn.status === Status.Busy)
+    namew.notify(Throw(new Exception("boom")))
+    assert(dyn.status === Status.Closed)
+  })
+
+  test("DynNameFactory is Closed after closing")(new Ctx {
+    assert(dyn.status === Status.Busy)
+    Await.ready(dyn.close())
+    assert(dyn.status === Status.Closed)
+  })
+
+  test("DynNameFactory reflects status of underlying cached service factory")(
+    for(status <- Seq(Status.Closed, Status.Busy, Status.Open)) { new Ctx {
+      when(cache.status(any[NameTree[Name.Bound]])).thenReturn(status)
+      namew.notify(Return(NameTree.Leaf(Name.empty)))
+      assert(dyn.status === status)
+    }}
+  )
+
   test("queue requests until name is nonpending (ok)")(new Ctx {
-    when(newService(any[NameTree[Name.Bound]], any[ClientConnection])).thenReturn(Future.value(svc))
+    when(cache(any[NameTree[Name.Bound]], any[ClientConnection])).thenReturn(Future.value(svc))
 
     val f1, f2 = dyn()
     assert(!f1.isDefined)
@@ -360,7 +409,7 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
   })
 
   test("queue requests until name is nonpending (fail)")(new Ctx {
-    when(newService(any[NameTree[Name.Bound]], any[ClientConnection])).thenReturn(Future.never)
+    when(cache(any[NameTree[Name.Bound]], any[ClientConnection])).thenReturn(Future.never)
 
     val f1, f2 = dyn()
     assert(!f1.isDefined)
@@ -374,7 +423,7 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
   })
 
   test("dequeue interrupted requests")(new Ctx {
-    when(newService(any[NameTree[Name.Bound]], any[ClientConnection])).thenReturn(Future.never)
+    when(cache(any[NameTree[Name.Bound]], any[ClientConnection])).thenReturn(Future.never)
 
     val f1, f2 = dyn()
     assert(!f1.isDefined)
