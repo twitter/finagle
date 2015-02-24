@@ -169,7 +169,7 @@ object KetamaClientStress extends App {
       val replicationClient = ReplicationClient.newBaseReplicationClient(
         Seq(primaryPool, replicaPool),
         Some(builder),
-        None, (Int.MaxValue, Duration.Top))
+        None, (Int.MaxValue, () => Duration.Top))
 
       val operation = config.op() match {
         case "set" => () => {
