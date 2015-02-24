@@ -139,7 +139,7 @@ class EndToEndTest extends FunSuite
     val service = new Service[Request, Response] {
       def apply(req: Request): Future[Response] = {
         if (n.getAndIncrement() == 0)
-          Future.exception(Failure.Rejected("better luck next time"))
+          Future.exception(Failure.rejected("better luck next time"))
         else
           Future.value(Response.empty)
       }
@@ -166,9 +166,11 @@ class EndToEndTest extends FunSuite
     val client = Mux.newService(server)
     
     // This will try until it exhausts its budget. That's o.k.
-    val Failure.Rejected(_) = intercept[Failure] { Await.result(client(Request.empty)) }
-  }
+    val failure = intercept[Failure] { Await.result(client(Request.empty)) }
 
+    // Failure.Restartable is stripped.
+    assert(!failure.isFlagged(Failure.Restartable))
+  }
   
   private[this] def nextPort(): Int = {
     val s = new Socket()

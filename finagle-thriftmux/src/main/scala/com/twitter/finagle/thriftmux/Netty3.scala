@@ -35,7 +35,7 @@ private[finagle] class PipelineFactory(
 {
 
   def newUnexpectedRequestException(err: String): Failure =
-    Failure.Cause(err).withLogLevel(Level.DEBUG)
+    Failure(err).withLogLevel(Level.DEBUG)
 
   private object TTwitterToMux {
     private val responseHeader = ChannelBuffers.wrappedBuffer(

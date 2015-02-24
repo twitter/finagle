@@ -20,7 +20,7 @@ object SourcedException {
       if sourced.serviceName != SourcedException.UnspecifiedServiceName =>
       Some(sourced.serviceName)
     case sourced: Failure =>
-      sourced.getSource(Failure.Sources.ServiceName).map(_.toString)
+      sourced.getSource(Failure.Source.Service).map(_.toString)
     case _ =>
       None
   }

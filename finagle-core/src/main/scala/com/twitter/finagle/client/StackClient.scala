@@ -112,6 +112,7 @@ object StackClient {
     stk.push(FactoryToService.module)
     stk.push(RequeueingFilter.module)
     stk.push(Role.protoTracing, identity[ServiceFactory[Req, Rep]](_))
+    stk.push(Failure.module)
     stk.push(ClientTracingFilter.module)
     // The TraceInitializerFilter must be pushed after most other modules so that
     // any Tracing produced by those modules is enclosed in the appropriate

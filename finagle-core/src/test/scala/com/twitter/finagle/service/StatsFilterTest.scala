@@ -51,7 +51,7 @@ class StatsFilterTest extends FunSuite {
       sourceFunction = _ => Some("bogus"))
 
     val (promise, receiver, statsService) = getService(esh)
-    val e = new Failure("e").withSource(Failure.Sources.ServiceName, "bogus")
+    val e = new Failure("e").withSource(Failure.Source.Service, "bogus")
     promise.setException(e)
     val res = statsService("foo")
     assert(res.isDefined)

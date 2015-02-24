@@ -2,7 +2,6 @@ package com.twitter.finagle.factory
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.service.RetryPolicy
 import com.twitter.util.{Await, Future, Promise, Return, Time}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{verify, when}
@@ -46,14 +45,8 @@ class TimeoutFactoryTest extends FunSuite with MockitoSugar {
       val failure = intercept[Failure] {
         Await.result(res)
       }
-      val e = intercept[TimeoutException] {
-        val Failure.Unwritten(cause) = failure
-        throw cause
-      }
-
-      val RetryPolicy.RetryableWriteException(throwable) = e // will throw if not retryable
-
-      assert(e === exception)
+      assert(failure.getCause.isInstanceOf[TimeoutException])
+      assert(failure.getCause === exception)
     }
   }
 

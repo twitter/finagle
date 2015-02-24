@@ -212,12 +212,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
         Activity.exception(exc)
     }
 
-    assert(intercept[Failure] {
-      Await.result(factory())
-    } match {
-      case Failure.Naming(`exc`) => true
-      case _ => false
-    })
+    assert(intercept[Failure](Await.result(factory())).isFlagged(Failure.Naming))
 
     expectTrace(Seq(
       "namer.path" -> "/foo/bar",
@@ -418,8 +413,8 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
     val exc = new Exception
     namew.notify(Throw(exc))
 
-    assert(f1.poll === Some(Throw(Failure.Naming(exc))))
-    assert(f2.poll === Some(Throw(Failure.Naming(exc))))
+    assert(f1.poll === Some(Throw(Failure(exc, Failure.Naming))))
+    assert(f2.poll === Some(Throw(Failure(exc, Failure.Naming))))
   })
 
   test("dequeue interrupted requests")(new Ctx {

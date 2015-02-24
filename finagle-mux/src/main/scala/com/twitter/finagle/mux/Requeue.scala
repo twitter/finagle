@@ -63,7 +63,7 @@ private[finagle] object Requeue {
 
         def applyNext(conn: ClientConnection, n: Int): Future[Service[Req, Rep]] = {
           next.apply(conn) rescue {
-            case f: Failure if (f.isRejected || f.isUnwritten) && !f.isInterrupted && n > 0 => 
+            case f: Failure if f.isFlagged(Failure.Restartable) && !f.isFlagged(Failure.Interrupted) && n > 0 => 
               requeues.incr()
               applyNext(conn, n-1)
 

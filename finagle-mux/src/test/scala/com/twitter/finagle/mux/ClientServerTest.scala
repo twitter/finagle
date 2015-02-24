@@ -146,7 +146,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     assert(f1.poll === None)
     val req2 = Request(Path.empty, buf(2))
     client(req2).poll match {
-      case Some(Throw(Failure.Rejected(_))) => 
+      case Some(Throw(f: Failure)) => assert(f.isFlagged(Failure.Restartable))
       case _ => fail()
     }
     verify(service, never)(req2)
@@ -163,10 +163,10 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     val req1 = Request(Path.empty, buf(1))
     val p1 = new Promise[Response]
     when(service(req1)).thenReturn(Future.exception(
-      Failure.Rejected("come back tomorrow")))
+      Failure.rejected("come back tomorrow")))
 
     client(req1).poll match {
-      case Some(Throw(Failure.Rejected(_))) =>
+      case Some(Throw(f: Failure)) => assert(f.isFlagged(Failure.Restartable))
       case bad => fail(s"got $bad")
     }
   }

@@ -28,10 +28,8 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     val pool = new SingletonPool(underlying, NullStatsReceiver)
 
     def assertClosed() {
-      pool().poll match {
-        case Some(Throw(Failure.Cause(_: ServiceClosedException))) =>
-        case _ => fail()
-      }
+      val Some(Throw(Failure(Some(cause)))) = pool().poll
+      assert(cause.isInstanceOf[ServiceClosedException])
     }
   }
 

@@ -50,7 +50,7 @@ private class DynNameFactory[Req, Rep](
         case Pending(q) =>
           // wrap the exception in a Failure.Naming, so that it can
           // be identified for tracing
-          for ((_, p) <- q) p.setException(Failure.Naming(exc))
+          for ((_, p) <- q) p.setException(Failure.adapt(exc, Failure.Naming))
           state = Failed(exc)
         case Failed(_) =>
           // if already failed, just update the exception; the promises
@@ -69,7 +69,7 @@ private class DynNameFactory[Req, Rep](
 
       // wrap the exception in a Failure.Naming, so that it can
       // be identified for tracing
-      case Failed(exc) => Future.exception(Failure.Naming(exc))
+      case Failed(exc) => Future.exception(Failure.adapt(exc, Failure.Naming))
 
       // don't trace these, since they're not a namer failure
       case Closed() => Future.exception(new ServiceClosedException)
@@ -263,8 +263,8 @@ private[finagle] class BindingFactory[Req, Rep](
 
           super.apply(conn) rescue {
             // DynNameFactory wraps naming exceptions for tracing
-            case f@Failure.Naming(exc) =>
-              record("namer.failure", exc.getClass.getName)
+            case f@Failure(maybeExc) if f.isFlagged(Failure.Naming) =>
+              record("namer.failure", maybeExc.getOrElse(f.show).getClass.getName)
               Future.exception(f)
 
             // we don't have the dtabs handy at the point we throw

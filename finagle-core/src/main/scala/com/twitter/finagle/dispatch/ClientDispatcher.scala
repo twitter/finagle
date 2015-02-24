@@ -37,7 +37,7 @@ abstract class GenSerialClientDispatcher[Req, Rep, In, Out](trans: Transport[In,
   private[this] def tryDispatch(req: Req, p: Promise[Rep]): Future[Unit] =
     p.isInterrupted match {
       case Some(intr) =>
-        p.setException(Failure.InterruptedBy(intr))
+        p.setException(Failure.adapt(intr, Failure.Interrupted))
         Future.Done
       case None =>
         Trace.recordClientAddr(localAddress)

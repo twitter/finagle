@@ -68,11 +68,8 @@ class CancellationTest extends FunSuite with IntegrationBase with MockitoSugar {
     val failure = intercept[Failure] {
       Await.result(f1)
     }
-
-    intercept[CancelledConnectionException] {
-      val Failure.InterruptedBy(cause) = failure
-      throw cause
-    }
+    
+    assert(failure.getCause.isInstanceOf[CancelledConnectionException])
   }
 
 }

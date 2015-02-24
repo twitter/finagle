@@ -32,7 +32,7 @@ class ExceptionSourceFilter[Req, Rep](serviceName: String) extends SimpleFilter[
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] =
     service(req) rescue { case t: Throwable =>
       Future.exception(t match {
-        case f: Failure => f.withSource(Failure.Sources.ServiceName, serviceName)
+        case f: Failure => f.withSource(Failure.Source.Service, serviceName)
         case e: SourcedException =>
           e.serviceName = serviceName
           e

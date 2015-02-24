@@ -689,8 +689,8 @@ class KetamaFailureAccrualFactory[Req, Rep](
   // exclude CancelledRequestException and CancelledConnectionException for cache client failure accrual
   override def isSuccess(response: Try[Rep]): Boolean = response match {
     case Return(_) => true
-    case Throw(Failure.InterruptedBy(_: CancelledRequestException)) => true
-    case Throw(Failure.InterruptedBy(_: CancelledConnectionException)) => true
+    case Throw(f@Failure(_: CancelledRequestException)) if f.isFlagged(Failure.Interrupted) => true
+    case Throw(f@Failure(_: CancelledConnectionException))  if f.isFlagged(Failure.Interrupted) => true
       // Failure.InterruptedBy(_) would subsume all these eventually after rb/334371
     case Throw(WriteException(_: CancelledRequestException)) => true
     case Throw(_: CancelledRequestException) => true

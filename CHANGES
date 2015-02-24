@@ -33,6 +33,10 @@ Breaking API Changes
 
   * finagle-mux: `c.t.f.mux.RequestNackedException` is removed in favor of a standard
     Failure (`c.t.f.Failure.Rejected`).
+  
+  * finagle-core: `c.t.f.Failure` convenience constructors (e.g., `Failure.Cause`,
+    `Failure.Rejected`) were removed in favor of uniform flag treatment, and clean
+    separation of attributes from interpretation of those attributes.
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

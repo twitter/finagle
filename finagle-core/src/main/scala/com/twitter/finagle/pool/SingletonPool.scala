@@ -50,7 +50,7 @@ private[finagle] object SingletonPool {
         case n if n < 0 =>
           // This is technically an API usage error.
           count.incrementAndGet()
-          Future.exception(Failure.Cause(new ServiceClosedException))
+          Future.exception(Failure(new ServiceClosedException))
         case _ =>
           Future.Done
       }
@@ -109,8 +109,8 @@ extends ServiceFactory[Req, Rep] {
         complete(Idle)
         svc.close()
         Future.exception(
-          Failure.Cause("Returned unavailable service")
-            .withSource("Role", SingletonPool.role))
+          Failure("Returned unavailable service")
+            .withSource(Failure.Source.Role, SingletonPool.role))
 
       case Return(svc) =>
         if (!complete(Open(new RefcountedService(svc))))
@@ -152,7 +152,7 @@ extends ServiceFactory[Req, Rep] {
       awaitApply(done, conn)
 
     case Closed =>
-      Future.exception(Failure.Cause(new ServiceClosedException))
+      Future.exception(Failure(new ServiceClosedException))
   }
 
   /**

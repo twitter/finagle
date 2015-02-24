@@ -88,7 +88,7 @@ private[twitter] object ClientDispatcher {
   val MinTag = PingTag+1
   val MaxTag = Message.MaxTag
 
-  val NackFailure = Failure.Rejected("The request was Nacked by the server")
+  val NackFailure = Failure.rejected("The request was Nacked by the server")
 
   val Empty: Updatable[Try[Response]] = Updatable.empty()
 }

@@ -37,16 +37,16 @@ object HttpDtab {
     Try { Base64.decode(v) } map(new String(_, Utf8))
 
   private val unmatchedFailure =
-    Failure.Cause("Unmatched X-Dtab headers")
+    Failure("Unmatched X-Dtab headers")
 
   private def decodingFailure(value: String) =
-    Failure.Cause("Value not b64-encoded: "+value)
+    Failure("Value not b64-encoded: "+value)
 
   private def pathFailure(path: String, cause: IllegalArgumentException) =
-    Failure.Cause("Invalid path: "+path, cause)
+    Failure("Invalid path: "+path, cause)
 
   private def nameFailure(name: String, cause: IllegalArgumentException) =
-    Failure.Cause("Invalid name: "+name, cause)
+    Failure("Invalid name: "+name, cause)
 
   private def decodePath(b64path: String): Try[Path] =
     b64Decode(b64path) match {

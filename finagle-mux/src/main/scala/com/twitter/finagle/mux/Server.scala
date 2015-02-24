@@ -88,7 +88,7 @@ private[twitter] class ServerDispatcher private[twitter](
               lessor.observe(elapsed())
               trans.write(encode(RdispatchOk(tag, Seq.empty, BufChannelBuffer(rep.body))))
 
-            case Throw(Failure.Rejected(_)) =>
+            case Throw(f: Failure) if f.isFlagged(Failure.Restartable) =>
               trans.write(encode(RdispatchNack(tag, Nil)))
 
             case Throw(exc) =>
@@ -115,7 +115,7 @@ private[twitter] class ServerDispatcher private[twitter](
           lessor.observe(elapsed())
           trans.write(encode(RreqOk(tag, BufChannelBuffer(rep.body))))
 
-        case Throw(Failure.Rejected(_)) =>
+        case Throw(f: Failure) if f.isFlagged(Failure.Restartable) =>
           trans.write(encode(RdispatchNack(tag, Nil)))
 
         case Throw(exc) =>

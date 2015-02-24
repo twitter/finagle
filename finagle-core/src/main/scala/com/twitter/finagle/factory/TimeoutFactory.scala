@@ -51,15 +51,16 @@ class TimeoutFactory[Req, Rep](
     timeout: Duration,
     exception: ServiceTimeoutException,
     timer: Timer)
-  extends ServiceFactoryProxy[Req, Rep](self)
-{
+  extends ServiceFactoryProxy[Req, Rep](self) {
+  private[this] val failure = Future.exception(Failure.adapt(exception, Failure.Restartable))
+
   override def apply(conn: ClientConnection) = {
     val res = super.apply(conn)
     res.within(timer, timeout) rescue {
       case exc: java.util.concurrent.TimeoutException =>
         res.raise(exc)
         res onSuccess { _.close() }
-        Future.exception(Failure.Unwritten(exception))
+        failure
     }
   }
 }

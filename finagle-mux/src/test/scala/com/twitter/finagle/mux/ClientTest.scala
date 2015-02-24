@@ -94,8 +94,9 @@ class ClientTest extends FunSuite {
 
       val f2 = client(req)
       f2.poll match {
-        case Some(Throw(Failure.Rejected(cause))) =>
-          assert(cause.getMessage == "The request was Nacked by the server")
+        case Some(Throw(f: Failure)) => 
+          assert(f.isFlagged(Failure.Restartable))
+          assert(f.getMessage == "The request was Nacked by the server")
         case _ => fail()
       }
 

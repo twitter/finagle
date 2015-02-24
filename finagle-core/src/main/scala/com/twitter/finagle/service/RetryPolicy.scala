@@ -134,8 +134,8 @@ object RetryPolicy extends JavaSingleton {
     def unapply(thr: Throwable): Option[Throwable] = thr match {
       // We don't retry interruptions by default since they
       // indicate that the request was discarded.
-      case Failure.InterruptedBy(_) => None
-      case exc@Failure.Rejected(_) => Some(exc)
+      case f: Failure if f.isFlagged(Failure.Interrupted) => None
+      case f: Failure if f.isFlagged(Failure.Restartable) => Some(f.show)
       case WriteException(exc) => Some(exc)
       case _ => None
     }
@@ -151,8 +151,8 @@ object RetryPolicy extends JavaSingleton {
   }
 
   val TimeoutAndWriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = WriteExceptionsOnly orElse {
-    case Throw(Failure.Cause(_: TimeoutException)) => true
-    case Throw(Failure.Cause(_: UtilTimeoutException)) => true
+    case Throw(Failure(Some(_: TimeoutException))) => true
+    case Throw(Failure(Some(_: UtilTimeoutException))) => true
     case Throw(_: TimeoutException) => true
     case Throw(_: UtilTimeoutException) => true
   }

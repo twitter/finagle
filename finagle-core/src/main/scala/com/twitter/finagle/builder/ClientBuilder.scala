@@ -603,7 +603,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * Retries are only done if the request failed with something
    * known to be safe to retry. This includes [[WriteException WriteExceptions]]
-   * and [[Failure.Rejected rejected failures]].
+   * and [[Failure]]s that are marked [[Failure.Restartable restartable]].
    *
    * @param value the maximum number of attempts (including retries) that
    *              can be made.

@@ -96,11 +96,11 @@ class ExceptionsTest extends FunSuite with MockitoSugar {
   }
 
   test("SourcedException extractor understands Failure") {
-    val exc = Failure.Cause(new Exception(""))
+    val exc = Failure(new Exception(""))
 
     assert(SourcedException.unapply(exc) === None)
 
-    val finagleExc = exc.withSource(Failure.Sources.ServiceName, "finagle")
+    val finagleExc = exc.withSource(Failure.Source.Service, "finagle")
 
     assert(SourcedException.unapply(finagleExc) === Some("finagle"))
   }
