@@ -3,7 +3,9 @@ package com.twitter.finagle.client
 import com.twitter.finagle.Stack.Module0
 import com.twitter.finagle._
 import com.twitter.finagle.factory.BindingFactory
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.service.FailFastFactory.FailFast
+import com.twitter.finagle.service.RequeueingFilter.MaxTries
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.StackRegistry
 import com.twitter.finagle.{param, Name}
@@ -47,7 +49,7 @@ class StackClientTest extends FunSuite
     }
   })
 
-  test("Client added to client registry") (new Ctx {
+  test("Client added to client registry")(new Ctx {
     ClientRegistry.clear()
 
     val name = "testClient"
@@ -66,6 +68,7 @@ class StackClientTest extends FunSuite
     val alwaysFail = new Module0[ServiceFactory[String, String]] {
       val role = Stack.Role("lol")
       val description = "lool"
+
       def make(next: ServiceFactory[String, String]) =
         ServiceFactory.apply(() => Future.exception(ex))
     }
@@ -117,11 +120,13 @@ class StackClientTest extends FunSuite
     val underlyingFactory = new ServiceFactory[Unit, Unit] {
       def apply(conn: ClientConnection) = Future.value(new Service[Unit, Unit] {
         def apply(request: Unit): Future[Unit] = Future.Unit
+
         override def close(deadline: Time) = {
           closed = true
           Future.Done
         }
       })
+
       def close(deadline: Time) = Future.Done
     }
 
@@ -155,11 +160,13 @@ class StackClientTest extends FunSuite
     val underlyingFactory = new ServiceFactory[Unit, Unit] {
       def apply(conn: ClientConnection) = Future.value(new Service[Unit, Unit] {
         def apply(request: Unit): Future[Unit] = Future.Unit
+
         override def close(deadline: Time) = {
           closed = true
           Future.Done
         }
       })
+
       def close(deadline: Time) = Future.Done
     }
 
@@ -187,4 +194,68 @@ class StackClientTest extends FunSuite
 
     assert(!closed)
   }
+
+  trait RequeueCtx {
+    var count = 0
+    var _status: Status = Status.Open
+
+    var runSideEffect = (_: Int) => false
+    var sideEffect = () => ()
+
+    val stubLB = new ServiceFactory[String, String] {
+      def apply(conn: ClientConnection) = Future.value(new Service[String, String] {
+        def apply(request: String): Future[String] = {
+          count += 1
+          if (runSideEffect(count)) sideEffect()
+          Future.exception(WriteException(new Exception("boom")))
+        }
+
+        override def close(deadline: Time) = Future.Done
+      })
+
+      def close(deadline: Time) = Future.Done
+
+      override def status = _status
+    }
+
+    val sr = new InMemoryStatsReceiver
+    val client = stringClient.configured(param.Stats(sr))
+
+    val stk = client.stack.replace(
+      LoadBalancerFactory.role,
+      (_: ServiceFactory[String, String]) => stubLB
+    )
+
+    val cl = client
+      .withStack(stk)
+      .newClient("myclient=/$/inet/localhost/0")
+
+    def automaticRetries = sr.stats(Seq("myclient", "automatic", "retries"))
+  }
+
+  test("requeue failing requests when the stack is Open")(new RequeueCtx {
+      // failing request and Open load balancer => max requeues
+      Await.ready(cl().map(_("hi")))
+
+      // expect one less retry than requeue try limit
+      assert(automaticRetries === Seq(MaxTries - 1))
+  })
+
+  for (status <- Seq(Status.Busy, Status.Closed)) {
+    test(s"don't requeue failing requests when the stack is $status")(new RequeueCtx {
+      // failing request and Busy | Closed load balancer => zero requeues
+      _status = status
+      Await.ready(cl().map(_("hi")))
+      assert(automaticRetries === Seq(0))
+    })
+  }
+
+  test("dynamically stop requeuing")( new RequeueCtx {
+      // load balancer begins Open, becomes Busy after 10 requeues => 10 requeues
+      _status = Status.Open
+      runSideEffect = _ > 10
+      sideEffect = () => _status = Status.Busy
+      Await.ready(cl().map(_("hi")))
+      assert(automaticRetries === Seq(10))
+  })
 }

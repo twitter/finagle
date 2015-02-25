@@ -141,6 +141,13 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
    */
   protected def initDistributor(): Distributor
 
+  /**
+   * Balancer status is the best of its constituent nodes.
+   */
+  override def status = Status.bestOf(dist.vector, nodeStatus)
+
+  private[this] val nodeStatus: Node => Status = _.factory.status
+
   @volatile protected var dist: Distributor = initDistributor()
   
   protected def rebuild() {

@@ -50,16 +50,32 @@ object Status {
   /**
    * The status representing the worst of the given statuses
    * extracted by `status` on `ts`.
+   *
+   * @note this may terminate early so don't rely on this method
+   *       for running side effects on `ts`
    */
-  def worstOf[T](ts: Iterable[T], status: T => Status): Status =
-    ts.foldLeft(Open: Status)((a, e) => worst(a, status(e)))
+  def worstOf[T](ts: Iterable[T], status: T => Status): Status = {
+    var worst: Status = Status.Open
+    val itr = ts.iterator
+    while (itr.hasNext && worst != Status.Closed)
+      worst = Status.worst(worst, status(itr.next()))
+    worst
+  }
 
   /**
    * The status representing the best of the given statuses
    * extracted by `status` on `ts`.
+   *
+   * @note this may terminate early so don't rely on this method
+   *       for running side effects on `ts`
    */
-  def bestOf[T](ts: Iterable[T], status: T => Status): Status =
-    ts.foldLeft(Closed: Status)((a, e) => best(a, status(e)))
+  def bestOf[T](ts: Iterable[T], status: T => Status): Status = {
+    var best: Status = Status.Closed
+    val itr = ts.iterator
+    while (itr.hasNext && best != Status.Open)
+      best = Status.best(best, status(itr.next()))
+    best
+  }
 
   /**
    * Open returns a [[com.twitter.util.Future]] that is satisfied

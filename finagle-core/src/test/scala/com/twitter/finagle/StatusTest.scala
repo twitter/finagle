@@ -19,6 +19,22 @@ class StatusTest
   val status1 = Gen.oneOf(Status.Open, Status.Busy, Status.Closed)
   val status2 = for (left <- status1; right <- status1) yield (left, right)
 
+  test("Status.bestOf can terminate early") {
+    val res = Status.bestOf[Function0[Status]](
+      List(() => Status.Busy, () => Status.Open, () => fail("element should not be evaluated")),
+      _.apply
+    )
+    assert(res === Status.Open)
+  }
+
+  test("Status.worstOf can terminate early") {
+    val res = Status.worstOf[Function0[Status]](
+      List(() => Status.Busy, () => Status.Closed, () => fail("element should not be evaluated")),
+      _.apply
+    )
+    assert(res === Status.Closed)
+  }
+
   // This test is borderline silly.
   test("Status.worst") {
     forAll(status2) { case (left, right) =>

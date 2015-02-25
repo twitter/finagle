@@ -28,12 +28,17 @@ private[finagle] object Requeue {
    */
   private val Cost = 5
 
-  class RequeueFilter[Req, Rep](bucket: TokenBucket, requeueCost: Int, counter: Counter) 
+  class RequeueFilter[Req, Rep](
+      bucket: TokenBucket,
+      requeueCost: Int,
+      counter: Counter,
+      stackStatus: => Status)
     extends SimpleFilter[Req, Rep] {
+
     private[this] def applyService(req: Req, service: Service[Req, Rep]): Future[Rep] = {
       service(req) rescue {
         case exc@RetryPolicy.RetryableWriteException(_) =>
-          if (bucket.tryGet(requeueCost)) {
+          if (stackStatus == Status.Open && bucket.tryGet(requeueCost)) {
             counter.incr()
             applyService(req, service)
           } else {
@@ -59,7 +64,7 @@ private[finagle] object Requeue {
 
         val bucket = TokenBucket.newLeakyBucket(10.seconds, Cost*10*10)  // A reserve of 10/second
         val requeues = sr.counter("requeues")
-        val requeueFilter = new RequeueFilter[Req, Rep](bucket, Cost, requeues)
+        val requeueFilter = new RequeueFilter[Req, Rep](bucket, Cost, requeues, next.status)
 
         def applyNext(conn: ClientConnection, n: Int): Future[Service[Req, Rep]] = {
           next.apply(conn) rescue {

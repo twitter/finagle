@@ -260,6 +260,12 @@ class HeapBalancer[Req, Rep](
     Closable.sequence(observation, nodesClosable).close(deadline)
   }
 
-  override def status: Status = Status.Open
+  /**
+   * HeapBalancer status is the best of its constituent nodes.
+   */
+  override def status: Status = Status.bestOf(heap, nodeStatus)
+
+  private[this] val nodeStatus: Node => Status = _.factory.status
+
   override val toString = synchronized("HeapBalancer(%d)".format(size))
 }
