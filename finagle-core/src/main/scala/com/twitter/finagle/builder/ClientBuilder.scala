@@ -87,6 +87,9 @@ object ClientConfig {
   val DefaultName = "client"
 
   def nilClient[Req, Rep] = new Client[Req, Rep] {
+    def newService(dest: Name, label: String): Service[Req, Rep] =
+      newClient(dest, label).toService
+
     def newClient(dest: Name, label: String): ServiceFactory[Req, Rep] =
       ServiceFactory(() => Future.value(Service.mk[Req, Rep](_ => Future.exception(
         new Exception("unimplemented")))))

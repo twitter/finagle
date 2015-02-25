@@ -33,10 +33,7 @@ import java.net.SocketAddress
 trait Client[Req, Rep] {
 
   /** $newService $label */
-  def newService(dest: Name, label: String): Service[Req, Rep] = {
-    val client = newClient(dest, label)
-    new FactoryToService[Req, Rep](client)
-  }
+  def newService(dest: Name, label: String): Service[Req, Rep]
 
   @deprecated("Use destination names", "6.7.x")
   /** $newService */

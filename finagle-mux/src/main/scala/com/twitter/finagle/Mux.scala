@@ -80,6 +80,9 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
   }
 
   val client = Client()
+  
+  def newService(dest: Name, label: String): Service[mux.Request, mux.Response] =
+    client.newService(dest, label)
 
   def newClient(dest: Name, label: String): ServiceFactory[mux.Request, mux.Response] =
     client.newClient(dest, label)

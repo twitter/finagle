@@ -134,9 +134,13 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
   }
 
   val client = Client()
+  
+  def newService(dest: Name, label: String): Service[HttpRequest, HttpResponse] =
+    client.newService(dest, label)
 
   def newClient(dest: Name, label: String): ServiceFactory[HttpRequest, HttpResponse] =
     client.newClient(dest, label)
+
 
   case class Server(
     stack: Stack[ServiceFactory[HttpRequest, HttpResponse]] = StackServer.newStack

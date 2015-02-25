@@ -278,7 +278,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
 
       assert(Await.result(client.query("ok")) == "okok")
       Await.result(server.close())
-      intercept[ChannelWriteException] {
+      intercept[FailedFastException] {  // This is received due to requeues.
         Await.result(client.query("ok"))
       }
     }

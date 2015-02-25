@@ -30,4 +30,6 @@ object RedisClient extends DefaultClient[Command, Reply](
 object Redis extends Client[Command, Reply] with RedisRichClient {
   def newClient(dest: Name, label: String): ServiceFactory[Command, Reply] =
     RedisClient.newClient(dest, label)
+  def newService(dest: Name, label: String): Service[Command, Reply] =
+    RedisClient.newService(dest, label)
 }

@@ -69,6 +69,9 @@ class ThriftMuxClientLike private[finagle](client: ThriftMux.Client)
   def withProtocolFactory(pf: TProtocolFactory): ThriftMuxClientLike =
     new ThriftMuxClientLike(client.withProtocolFactory(pf))
 
+  def newService(dest: Name, label: String): Service[ThriftClientRequest, Array[Byte]] =
+    client.newService(dest, label)
+
   def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
     client.newClient(dest, label)
 }

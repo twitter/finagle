@@ -143,6 +143,9 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
 
   val client = Client()
 
+  def newService(dest: Name, label: String): Service[Request, Response] =
+    client.newService(dest, label)
+
   def newClient(dest: Name, label: String): ServiceFactory[Request, Response] =
     client.newClient(dest, label)
 

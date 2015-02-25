@@ -140,6 +140,9 @@ case class DefaultClient[Req, Rep](
   }
 
   private[this] val underlying = Client()
+  
+  def newService(dest: Name, label: String) =
+    underlying.newService(dest, label)
 
   def newClient(dest: Name, label: String) =
     underlying.newClient(dest, label)

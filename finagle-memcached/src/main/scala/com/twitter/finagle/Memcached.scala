@@ -180,6 +180,9 @@ object Memcached extends Client[Command, Response] with MemcachedRichClient with
   def newClient(dest: Name, label: String): ServiceFactory[Command, Response] =
     MemcachedClient.newClient(dest, label)
 
+  def newService(dest: Name, label: String): Service[Command, Response] =
+    MemcachedClient.newService(dest, label)
+    
   def serve(addr: SocketAddress, service: ServiceFactory[Command, Response]): ListeningServer =
     MemcachedServer.serve(addr, service)
 }

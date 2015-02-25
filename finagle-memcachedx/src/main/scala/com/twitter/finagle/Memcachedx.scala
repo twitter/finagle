@@ -178,6 +178,9 @@ object MemcachedxServer extends DefaultServer[Command, Response, Response, Comma
 object Memcachedx extends Client[Command, Response] with MemcachedxRichClient with MemcachedxKetamaClient with Server[Command, Response] {
   def newClient(dest: Name, label: String): ServiceFactory[Command, Response] =
     MemcachedxClient.newClient(dest, label)
+    
+  def newService(dest: Name, label: String): Service[Command, Response] =
+    MemcachedxClient.newService(dest, label)
 
   def serve(addr: SocketAddress, service: ServiceFactory[Command, Response]): ListeningServer =
     MemcachedxServer.serve(addr, service)

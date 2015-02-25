@@ -122,6 +122,9 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
   def newClient(dest: Name, label: String): ServiceFactory[Request, Result] =
     client.newClient(dest, label)
 
+  def newService(dest: Name, label: String): Service[Request, Result] =
+    client.newService(dest, label)
+
   /**
    * The credentials to use when authenticating a new session.
    */
