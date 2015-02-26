@@ -1,9 +1,54 @@
 package com.twitter.finagle.zipkin.thrift
 
 import com.twitter.finagle.stats.{DefaultStatsReceiver, NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.tracing.{TraceId, Record, Tracer}
+import com.twitter.finagle.tracing.{TraceId, Record, Tracer, Annotation}
 import com.twitter.finagle.zipkin.{host => Host, initialSampleRate => sampleRateFlag}
+import com.twitter.io.Buf
 import com.twitter.util.events.{Event, Sink}
+import com.twitter.util.{Time, Return, Throw, Try}
+
+private object Json {
+  import com.fasterxml.jackson.annotation.JsonTypeInfo
+  import com.fasterxml.jackson.core.`type`.TypeReference
+  import com.fasterxml.jackson.databind.{ObjectMapper, JavaType, JsonNode}
+  import com.fasterxml.jackson.module.scala.DefaultScalaModule
+  import java.lang.reflect.{Type, ParameterizedType}
+
+  val mapper = new ObjectMapper()
+  mapper.registerModule(DefaultScalaModule)
+
+  // Configures the mapper to include class information for Annotation.
+  object TypeResolverBuilder
+    extends ObjectMapper.DefaultTypeResolverBuilder(ObjectMapper.DefaultTyping.NON_FINAL) {
+    override def useForType(typ: JavaType) =
+      // Note: getRawClass would be an Object if not for `Envelope`.
+      typ.getRawClass == classOf[Annotation]
+  }
+
+  mapper.setDefaultTyping(
+    TypeResolverBuilder
+      .init(JsonTypeInfo.Id.CLASS, null)
+      .inclusion(JsonTypeInfo.As.WRAPPER_ARRAY))
+
+  def serialize(o: AnyRef): String = mapper.writeValueAsString(o)
+
+  def deserialize[T: Manifest](value: String): T =
+    mapper.readValue(value, typeReference[T])
+
+  def deserialize[T: Manifest](node: JsonNode): T =
+    mapper.readValue(node.traverse, typeReference[T])
+
+  private[this] def typeReference[T: Manifest] = new TypeReference[T] {
+    override def getType = typeFromManifest(manifest[T])
+  }
+
+  private[this] def typeFromManifest(m: Manifest[_]): Type =
+    if (m.typeArguments.isEmpty) m.runtimeClass else new ParameterizedType {
+      def getRawType = m.runtimeClass
+      def getActualTypeArguments = m.typeArguments.map(typeFromManifest).toArray
+      def getOwnerType = null
+    }
+}
 
 object ZipkinTracer {
 
@@ -12,7 +57,51 @@ object ZipkinTracer {
   /**
    * The [[com.twitter.util.events.Event.Type Event.Type]] for trace events.
    */
-  val Trace: Event.Type = new Event.Type { }
+  val Trace: Event.Type = {
+    // Note: This type is a just a convenience for deserialization in other
+    // other Event.Type constructions, but we actually require it for Trace
+    // because we're using Jackson's default typing mechanism for Annotation.
+    // If we use a Map, somewhere in Jackson's type resolution the type of
+    // Annotation is forgotten, and it is passed into the type resolver as an
+    // Object.  Defining this Envelope preserves the type information.
+    case class Envelope(id: String, when: Long, data: Annotation)
+
+    def quantize(value: Any): Any = value match {
+      case _: String | _: Int | _: Long | _: Double | _: Char => value
+      case _ => value.toString
+    }
+
+    new Event.Type {
+      val id = "Trace"
+
+      def serialize(event: Event) = event match {
+        case Event(etype, when, _, ann: Annotation.BinaryAnnotation, _) if etype eq this =>
+          // Special case BinaryAnnotation to constrain the type of value to
+          // primitives and Strings.
+          val ba = Annotation.BinaryAnnotation(ann.key, quantize(ann.value))
+          val data = Envelope(id, when.inMilliseconds, ba)
+          Try(Buf.Utf8(Json.serialize(data)))
+
+        case Event(etype, when, _, ann: Annotation, _) if etype eq this =>
+          val data = Envelope(id, when.inMilliseconds, ann)
+          Try(Buf.Utf8(Json.serialize(data)))
+
+        case _ =>
+          Throw(new IllegalArgumentException("unknown format: " + event))
+      }
+
+      def deserialize(buf: Buf) = for {
+        (idd, when, data) <- Buf.Utf8.unapply(buf) match {
+          case None => Throw(new IllegalArgumentException("unknown format"))
+          case Some(str) => Try {
+            val env = Json.deserialize[Envelope](str)
+            (env.id, Time.fromMilliseconds(env.when), env.data)
+          }
+        }
+        if idd == id
+      } yield Event(this, when, objectVal = data)
+    }
+  }
 
   /**
    * @param scribeHost Host to send trace data to

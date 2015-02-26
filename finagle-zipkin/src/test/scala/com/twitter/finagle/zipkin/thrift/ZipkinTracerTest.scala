@@ -1,15 +1,21 @@
 package com.twitter.finagle.zipkin.thrift
 
-import org.scalatest.mock.MockitoSugar
-import org.scalatest.FunSuite
-import org.mockito.Mockito.verify
-import com.twitter.util._
 import com.twitter.finagle.tracing._
-import org.scalatest.junit.JUnitRunner
+import com.twitter.util._
+import com.twitter.util.events
 import org.junit.runner.RunWith
+import org.mockito.Mockito.verify
+import org.scalacheck.{Gen, Arbitrary}
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import java.net.InetSocketAddress
 
 @RunWith(classOf[JUnitRunner])
-class ZipkinTracerTest extends FunSuite with MockitoSugar {
+class ZipkinTracerTest extends FunSuite with MockitoSugar with GeneratorDrivenPropertyChecks {
+  import ZipkinTracerTest._
+
   test("ZipkinTracer should handle sampling") {
     val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
 
@@ -30,4 +36,38 @@ class ZipkinTracerTest extends FunSuite with MockitoSugar {
     tracer.record(record)
     verify(underlying).record(record)
   }
+
+  test("serialize andThen deserialize = identity") {
+    import ZipkinTracer.Trace
+
+    def id(e: events.Event) = Trace.serialize(e).flatMap(Trace.deserialize).get
+    forAll(genEvent(Trace)) { event => assert(id(event) == event) }
+  }
+}
+
+private[twitter] object ZipkinTracerTest {
+  import Annotation._
+  import Arbitrary.arbitrary
+
+  val genAnnotation: Gen[Annotation] = Gen.oneOf(
+    Gen.oneOf(ClientSend(), ClientRecv(), ServerSend(), ServerRecv()),
+    Gen.oneOf(
+      ClientSendFragment(),
+      ClientRecvFragment(),
+      ServerSendFragment(),
+      ServerRecvFragment()),
+    for (s <- arbitrary[String]) yield Message(s),
+    for (s <- arbitrary[String]) yield ServiceName(s),
+    for (s <- arbitrary[String]) yield Rpc(s),
+    Gen.oneOf(
+      ClientAddr(new InetSocketAddress(0)),
+      ServerAddr(new InetSocketAddress(0)),
+      LocalAddr(new InetSocketAddress(0))),
+    // We only guarantee successful deserialization for primitive values and
+    // Strings, here we test String.
+    for (s <- arbitrary[String]) yield BinaryAnnotation("key", s)
+  )
+
+  def genEvent(etype: events.Event.Type): Gen[events.Event] =
+    for (ann <- genAnnotation) yield events.Event(etype, Time.now, objectVal = ann)
 }

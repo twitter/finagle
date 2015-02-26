@@ -1,12 +1,18 @@
 package com.twitter.finagle.stats
 
 import com.twitter.common.metrics.{MetricCollisionException, Metrics}
+import com.twitter.util.Time
+import com.twitter.util.events
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalacheck.{Gen, Arbitrary}
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
-class MetricsStatsReceiverTest extends FunSuite {
+class MetricsStatsReceiverTest extends FunSuite with GeneratorDrivenPropertyChecks {
+  import MetricsStatsReceiverTest._
+
   private[this] val rootReceiver = new MetricsStatsReceiver()
 
   private[this] def read(metrics: MetricsStatsReceiver, name: String): Number =
@@ -59,4 +65,31 @@ class MetricsStatsReceiverTest extends FunSuite {
     val g2 = rootReceiver.addGauge("xxx")(2.0f)
     assert(read(detachedReceiver, "xxx") != read(rootReceiver, "xxx"))
   }
+
+  test("CounterIncr: serialize andThen deserialize = identity") {
+    import MetricsStatsReceiver.CounterIncr
+    def id(e: events.Event) = CounterIncr.serialize(e).flatMap(CounterIncr.deserialize).get
+    forAll(genCounterIncr) { event => assert(id(event) == event) }
+  }
+
+  test("StatAdd: serialize andThen deserialize = identity") {
+    import MetricsStatsReceiver.StatAdd
+    def id(e: events.Event) = StatAdd.serialize(e).flatMap(StatAdd.deserialize).get
+    forAll(genStatAdd) { event => assert(id(event) == event) }
+  }
+}
+
+private[twitter] object MetricsStatsReceiverTest {
+  import MetricsStatsReceiver.{CounterIncr, StatAdd}
+  import Arbitrary.arbitrary
+
+  val genCounterIncr = for {
+    name <- Gen.alphaStr
+    value <- arbitrary[Long]
+  } yield events.Event(CounterIncr, Time.now, longVal = value, objectVal = name)
+
+  val genStatAdd = for {
+    name <- Gen.alphaStr
+    delta <- arbitrary[Long]
+  } yield events.Event(StatAdd, Time.now, longVal = delta, objectVal = name)
 }
