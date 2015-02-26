@@ -2,6 +2,7 @@ package com.twitter.finagle.factory
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
+import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.Rng
 import com.twitter.util._
@@ -41,7 +42,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
       records :+= key -> value
     }
     def expectTrace(expected: Seq[(String, String)]) {
-      expectResult(expected)(records)
+      assert(expected == records)
     }
 
     val imsr = new InMemoryStatsReceiver
@@ -349,6 +350,37 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     val service = Await.result(factory())
     val full = Await.result(service(Path.read("/omega")))
     assert(full === Path.read("/alpha/omega"))
+  }
+
+  test("BindingFactory.Module: replaces Dest for bound name") {
+    val unbound = Name.Path(Path.read("/foo"))
+    val baseDtab = () => Dtab.base ++ Dtab.read("/foo => /$/inet/0/1")
+
+    val verifyModule =
+      new Stack.Module1[BindingFactory.Dest, ServiceFactory[String, String]] {
+        val role = Stack.Role("verifyModule")
+        val description = "Verify that the dest was set properly"
+
+        def make(dest: BindingFactory.Dest, next: ServiceFactory[String, String]) = {
+          dest match {
+            case BindingFactory.Dest(bound: Name.Bound) =>
+              assert(bound.id == Path.read("/$/inet/0/1"))
+            case _ => fail()
+          }
+          ServiceFactory.const(Service.mk[String, String](Future.value))
+        }
+      }
+
+    val params =
+      Stack.Params.empty + BindingFactory.Dest(unbound) + BindingFactory.BaseDtab(baseDtab)
+
+    val factory = new StackBuilder[ServiceFactory[String, String]](nilStack[String, String])
+      .push(verifyModule)
+      .push(BindingFactory.module[String, String])
+      .make(params)
+
+    val service = Await.result(factory())
+    Await.result(service("foo"))
   }
 }
 

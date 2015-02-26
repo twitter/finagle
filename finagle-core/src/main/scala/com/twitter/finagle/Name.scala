@@ -50,6 +50,12 @@ object Name {
 
     // Workaround for https://issues.scala-lang.org/browse/SI-4807
     def canEqual(that: Any) = true
+
+    def idStr: String =
+      id match {
+        case path: com.twitter.finagle.Path => path.show
+        case _ => id.toString
+      }
   }
 
   object Bound {

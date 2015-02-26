@@ -355,24 +355,25 @@ object BindingFactory {
       val Stats(stats) = params[Stats]
       val Dest(dest) = params[Dest]
 
+      def newStack(errorLabel: String, bound: Name.Bound) = {
+        val client = next.make(
+          params +
+          // replace the possibly unbound Dest with the definitely bound
+          // Dest because (1) it's needed by AddrMetadataExtraction and
+          // (2) it seems disingenuous not to.
+          Dest(bound) +
+          LoadBalancerFactory.Dest(bound.addr) +
+          LoadBalancerFactory.ErrorLabel(errorLabel))
+
+        boundPathFilter(bound.path) andThen client
+      }
+
       val factory = dest match {
-        case bound@Name.Bound(addr) =>
-          val client = next.make(params +
-            LoadBalancerFactory.ErrorLabel(label) +
-            LoadBalancerFactory.Dest(addr))
-          boundPathFilter(bound.path) andThen client
+        case bound@Name.Bound(addr) => newStack(label, bound)
 
         case Name.Path(path) =>
           val BaseDtab(baseDtab) = params[BaseDtab]
-          val params1 = params + LoadBalancerFactory.ErrorLabel(path.show)
-
-          def newStack(bound: Name.Bound) = {
-            val client = next.make(params1 +
-              LoadBalancerFactory.Dest(bound.addr))
-            boundPathFilter(bound.path) andThen client
-          }
-
-          new BindingFactory(path, newStack, baseDtab, stats.scope("namer"))
+          new BindingFactory(path, newStack(path.show, _), baseDtab, stats.scope("namer"))
       }
 
       Stack.Leaf(role, factory)
