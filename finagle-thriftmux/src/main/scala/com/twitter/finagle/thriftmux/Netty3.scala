@@ -147,17 +147,8 @@ private[finagle] class PipelineFactory(
       }
     }
   }
-
-  private class TFramedToMux extends SimpleChannelHandler {
-    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent)  {
-      val buf = e.getMessage.asInstanceOf[ChannelBuffer]
-      super.messageReceived(ctx,
-        new UpstreamMessageEvent(
-          e.getChannel,
-          Message.encode(Message.Tdispatch(Message.MinTag, Seq.empty, Path.empty, Dtab.empty, buf)),
-          e.getRemoteAddress))
-    }
-
+  
+  private class TFramedWriteToMux extends SimpleChannelHandler {
     override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
       Message.decode(e.getMessage.asInstanceOf[ChannelBuffer]) match {
         case Message.RdispatchOk(_, _, rep) =>
@@ -212,6 +203,18 @@ private[finagle] class PipelineFactory(
     }
   }
 
+
+  private class TFramedToMux extends TFramedWriteToMux {
+    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent)  {
+      val buf = e.getMessage.asInstanceOf[ChannelBuffer]
+      super.messageReceived(ctx,
+        new UpstreamMessageEvent(
+          e.getChannel,
+          Message.encode(Message.Tdispatch(Message.MinTag, Seq.empty, Path.empty, Dtab.empty, buf)),
+          e.getRemoteAddress))
+    }
+  }
+
   class RequestSerializer(pendingReqs: Int = 0) extends SimpleChannelHandler {
     // Note: Since there can only be at most one pending request at any time,
     // the only race condition that needs to be handled is one thread (a
@@ -247,7 +250,7 @@ private[finagle] class PipelineFactory(
     }
   }
 
-  private class Upgrader extends SimpleChannelHandler {
+  private class Upgrader extends TFramedWriteToMux {
     import Upgrader._
 
     private[this] def isTTwitterUpNegotiation(req: ChannelBuffer): Boolean = {

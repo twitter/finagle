@@ -14,7 +14,7 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.context.Contexts
 import com.twitter.io.Buf
-import com.twitter.util.{Closable, Await, Future, Promise, Return}
+import com.twitter.util.{Closable, Await, Future, Promise, Return, Time}
 import java.net.{InetAddress, SocketAddress, InetSocketAddress}
 import org.apache.thrift.protocol._
 import org.junit.runner.RunWith
@@ -282,6 +282,19 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
         Await.result(client.query("ok"))
       }
     }
+  }
+
+  test("thriftmux server + Finagle thrift client: session rejection") {
+    val server = ThriftMux.serve(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+      new ServiceFactory {
+        def apply(conn: ClientConnection) = Future.exception(new Exception)
+        def close(deadline: Time) = Future.Done
+      }
+    )
+
+    val client = Thrift.newClient(server)
+    intercept[ChannelClosedException] { Await.result(client()) }
   }
 
   test("thriftmux server + thriftmux client: ClientId should not be overridable externally") {
