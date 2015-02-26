@@ -900,7 +900,7 @@ case class KetamaClientBuilder private[memcachedx] (
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
   _failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds),
   _ejectFailedHost: Boolean = true,
-  _failFast: Boolean = false,
+  
   oldLibMemcachedVersionComplianceMode: Boolean = false,
   numReps: Int = KetamaClient.DefaultNumReps
 ) {
@@ -968,9 +968,6 @@ case class KetamaClientBuilder private[memcachedx] (
   def ejectFailedHost(eject: Boolean): KetamaClientBuilder =
     copy(_ejectFailedHost = eject)
 
-  def failFast(shouldFail: Boolean): KetamaClientBuilder =
-    copy(_failFast = shouldFail)
-
   def build(): Client = {
     val builder =
       (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1).daemon(true))
@@ -981,7 +978,6 @@ case class KetamaClientBuilder private[memcachedx] (
     ) = {
       builder.hosts(new InetSocketAddress(node.host, node.port))
           .failureAccrualFactory(filter(key, broker, faParams, _ejectFailedHost) _)
-          .failFast(_failFast)
           .build()
     }
 
