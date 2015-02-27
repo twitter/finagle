@@ -3,7 +3,7 @@ package com.twitter.finagle.benchmark
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.Balancers
-import com.twitter.finagle.stats.{StatsReceiver, SummarizingStatsReceiver}
+import com.twitter.finagle.stats.{StatsReceiver, SummarizingStatsReceiver, Stat}
 import com.twitter.finagle.util.{Drv, Rng, DefaultTimer}
 import com.twitter.util.{Function => _, _}
 import java.util.concurrent.atomic.AtomicInteger
@@ -126,7 +126,7 @@ private[finagle] object P2CBenchmark extends com.twitter.app.App {
     val balancer = factory.toService
 
     val latstat = stats.stat("latency")
-    def call() = stats.timeFuture(TimeUnit.MILLISECONDS, latstat) { balancer(()) }
+    def call() = Stat.timeFuture(latstat, TimeUnit.MILLISECONDS) { balancer(()) }
 
     val stopWatch = Stopwatch.start()
     val p = new LatencyProfile(stopWatch)
