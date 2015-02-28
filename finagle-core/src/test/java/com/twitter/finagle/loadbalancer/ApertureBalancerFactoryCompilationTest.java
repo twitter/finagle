@@ -2,8 +2,8 @@
 package com.twitter.finagle.loadbalancer;
 
 import scala.Tuple2;
+import scala.collection.immutable.HashSet;
 import scala.collection.immutable.Set;
-import scala.collection.immutable.Set$;
 
 import org.junit.Test;
 
@@ -16,7 +16,8 @@ public class ApertureBalancerFactoryCompilationTest {
 
   @Test
   public void testGet() {
-    Set<Tuple2<ServiceFactory<String, String>, Object>> set = Set$.MODULE$.empty();
+    Set<Tuple2<ServiceFactory<String, String>, Object>> set =
+        new HashSet<Tuple2<ServiceFactory<String, String>, Object>>();
     ApertureBalancerFactory.get().newWeightedLoadBalancer(
         Activity.value(set),
         NullStatsReceiver$.MODULE$,
