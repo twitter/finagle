@@ -17,6 +17,9 @@ trait RedisRichClient { self: Client[Command, Reply] =>
 
   def newRichClient(dest: Name, label: String): redis.Client =
     redis.Client(newService(dest, label))
+    
+  def newRichClient(raw: Service[Command, Reply]): redis.Client =
+    redis.Client(raw)
 }
 
 object RedisTransporter extends Netty3Transporter[Command, Reply]("redis", redis.RedisClientPipelineFactory)
