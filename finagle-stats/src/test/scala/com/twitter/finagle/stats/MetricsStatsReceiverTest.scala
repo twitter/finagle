@@ -86,10 +86,20 @@ private[twitter] object MetricsStatsReceiverTest {
   val genCounterIncr = for {
     name <- Gen.alphaStr
     value <- arbitrary[Long]
-  } yield events.Event(CounterIncr, Time.now, longVal = value, objectVal = name)
+    tid <- arbitrary[Long]
+    sid <- arbitrary[Long]
+  } yield {
+    events.Event(CounterIncr, Time.now, longVal = value, objectVal = name,
+      traceIdVal = tid, spanIdVal = sid)
+  }
 
   val genStatAdd = for {
     name <- Gen.alphaStr
     delta <- arbitrary[Long]
-  } yield events.Event(StatAdd, Time.now, longVal = delta, objectVal = name)
+    tid <- arbitrary[Long]
+    sid <- arbitrary[Long]
+  } yield {
+    events.Event(StatAdd, Time.now, longVal = delta, objectVal = name,
+      traceIdVal = tid, spanIdVal = sid)
+  }
 }

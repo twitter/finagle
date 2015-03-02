@@ -2,16 +2,30 @@ package com.twitter.finagle.stats
 
 import com.twitter.common.metrics.{Histogram, HistogramInterface, AbstractGauge, Metrics}
 import com.twitter.finagle.http.HttpMuxHandler
+import com.twitter.finagle.tracing.Trace
 import com.twitter.io.{Reader, Buf}
-import com.twitter.util.{Time, Return, Throw, Try}
 import com.twitter.util.events.{Event, Sink}
+import com.twitter.util.{Time, Return, Throw, Try}
 import java.util.concurrent.ConcurrentHashMap
 
 private object Json {
+  import com.fasterxml.jackson.annotation.JsonInclude
   import com.fasterxml.jackson.core.`type`.TypeReference
   import com.fasterxml.jackson.databind.{ObjectMapper, JsonNode}
+  import com.fasterxml.jackson.databind.annotation.JsonDeserialize
   import com.fasterxml.jackson.module.scala.DefaultScalaModule
   import java.lang.reflect.{Type, ParameterizedType}
+
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  case class Envelope[A](
+      id: String,
+      when: Long,
+      // We require an annotation here, because for small numbers, this gets
+      // deserialized with a runtime type of int.
+      // See: https://github.com/FasterXML/jackson-module-scala/issues/106.
+      @JsonDeserialize(contentAs = classOf[java.lang.Long]) traceId: Option[Long],
+      @JsonDeserialize(contentAs = classOf[java.lang.Long]) spanId: Option[Long],
+      data: A)
 
   val mapper = new ObjectMapper()
   mapper.registerModule(DefaultScalaModule)
@@ -47,14 +61,14 @@ object MetricsStatsReceiver {
    */
   val CounterIncr: Event.Type = {
     case class Data(name: String, value: Long)
-    case class Envelope(id: String, when: Long, data: Data)
 
     new Event.Type {
       val id = "CounterIncr"
 
       def serialize(event: Event) = event match {
-        case Event(etype, when, value, name: String, _) if etype eq this =>
-          val env = Envelope(id, when.inMilliseconds, Data(name, value))
+        case Event(etype, when, value, name: String, _, tid, sid) if etype eq this =>
+          val (t, s) = serializeTrace(tid, sid)
+          val env = Json.Envelope(id, when.inMilliseconds, t, s, Data(name, value))
           Try(Buf.Utf8(Json.serialize(env)))
 
         case _ =>
@@ -62,15 +76,19 @@ object MetricsStatsReceiver {
       }
 
       def deserialize(buf: Buf) = for {
-        (idd, when, data) <- Buf.Utf8.unapply(buf) match {
+        env <- Buf.Utf8.unapply(buf) match {
           case None => Throw(new IllegalArgumentException("unknown format"))
-          case Some(str) => Try {
-            val env = Json.deserialize[Envelope](str)
-            (env.id, Time.fromMilliseconds(env.when), env.data)
-          }
+          case Some(str) => Try(Json.deserialize[Json.Envelope[Data]](str))
         }
-        if idd == id
-      } yield Event(this, when, objectVal = data.name, longVal = data.value)
+        if env.id == id
+      } yield {
+        val when = Time.fromMilliseconds(env.when)
+        // This line fails without the JsonDeserialize annotation in Envelope.
+        val tid = env.traceId.getOrElse(Event.NoTraceId)
+        val sid = env.spanId.getOrElse(Event.NoSpanId)
+        Event(this, when, longVal = env.data.value,
+          objectVal = env.data.name, traceIdVal = tid, spanIdVal = sid)
+      }
     }
   }
 
@@ -79,14 +97,14 @@ object MetricsStatsReceiver {
    */
   val StatAdd: Event.Type = {
     case class Data(name: String, delta: Long)
-    case class Envelope(id: String, when: Long, data: Data)
 
     new Event.Type {
       val id = "StatAdd"
 
       def serialize(event: Event) = event match {
-        case Event(etype, when, delta, name: String, _) if etype eq this =>
-          val env = Envelope(id, when.inMilliseconds, Data(name, delta))
+        case Event(etype, when, delta, name: String, _, tid, sid) if etype eq this =>
+          val (t, s) = serializeTrace(tid, sid)
+          val env = Json.Envelope(id, when.inMilliseconds, t, s, Data(name, delta))
           Try(Buf.Utf8(Json.serialize(env)))
 
         case _ =>
@@ -94,15 +112,19 @@ object MetricsStatsReceiver {
       }
 
       def deserialize(buf: Buf) = for {
-        (idd, when, data) <- Buf.Utf8.unapply(buf) match {
+        env <- Buf.Utf8.unapply(buf) match {
           case None => Throw(new IllegalArgumentException("unknown format"))
-          case Some(str) => Try {
-            val env = Json.deserialize[Envelope](str)
-            (env.id, Time.fromMilliseconds(env.when), env.data)
-          }
+          case Some(str) => Try(Json.deserialize[Json.Envelope[Data]](str))
         }
-        if idd == id
-      } yield Event(this, when, objectVal = data.name, longVal = data.delta)
+        if env.id == id
+      } yield {
+        val when = Time.fromMilliseconds(env.when)
+        // This line fails without the JsonDeserialize annotation in Envelope.
+        val tid = env.traceId.getOrElse(Event.NoTraceId)
+        val sid = env.spanId.getOrElse(Event.NoSpanId)
+        Event(this, when, longVal = env.data.delta,
+          objectVal = env.data.name, traceIdVal = tid, spanIdVal = sid)
+      }
     }
   }
 }
@@ -145,7 +167,8 @@ class MetricsStatsReceiver(
           val metricsCounter = registry.createCounter(format(names))
           def incr(delta: Int): Unit = {
             metricsCounter.add(delta)
-            sink.event(CounterIncr, objectVal = metricsCounter.getName(), longVal = delta)
+            sink.event(CounterIncr, objectVal = metricsCounter.getName(), longVal = delta,
+              traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
           }
         }
         counters.put(names, counter)
@@ -168,7 +191,8 @@ class MetricsStatsReceiver(
           def add(value: Float): Unit = {
             val asLong = value.toLong
             histogram.add(asLong)
-            sink.event(StatAdd, objectVal = histogram.getName(), longVal = asLong)
+            sink.event(StatAdd, objectVal = histogram.getName(), longVal = asLong,
+              traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
           }
         }
         stats.put(names, stat)

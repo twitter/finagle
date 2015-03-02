@@ -1,18 +1,36 @@
 package com.twitter.finagle.zipkin.thrift
 
 import com.twitter.finagle.stats.{DefaultStatsReceiver, NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.tracing.{TraceId, Record, Tracer, Annotation}
+import com.twitter.finagle.tracing.{TraceId, Record, Tracer, Annotation, Trace}
 import com.twitter.finagle.zipkin.{host => Host, initialSampleRate => sampleRateFlag}
 import com.twitter.io.Buf
 import com.twitter.util.events.{Event, Sink}
 import com.twitter.util.{Time, Return, Throw, Try}
 
 private object Json {
-  import com.fasterxml.jackson.annotation.JsonTypeInfo
+  import com.fasterxml.jackson.annotation.{JsonTypeInfo, JsonInclude}
   import com.fasterxml.jackson.core.`type`.TypeReference
   import com.fasterxml.jackson.databind.{ObjectMapper, JavaType, JsonNode}
+  import com.fasterxml.jackson.databind.annotation.JsonDeserialize
   import com.fasterxml.jackson.module.scala.DefaultScalaModule
   import java.lang.reflect.{Type, ParameterizedType}
+
+  // Note: This type is a just a convenience for deserialization in other
+  // other Event.Type constructions, but we actually require it for Trace
+  // because we're using Jackson's default typing mechanism for Annotation.
+  // If we use a Map, somewhere in Jackson's type resolution the type of
+  // Annotation is forgotten, and it is passed into the type resolver as an
+  // Object. Defining this Envelope preserves the type information.
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  case class Envelope(
+      id: String,
+      when: Long,
+      // We require an annotation here, because for small numbers, this gets
+      // deserialized with a runtime type of int.
+      // See: https://github.com/FasterXML/jackson-module-scala/issues/106.
+      @JsonDeserialize(contentAs=classOf[java.lang.Long]) traceId: Option[Long],
+      @JsonDeserialize(contentAs=classOf[java.lang.Long]) spanId: Option[Long],
+      data: Annotation)
 
   val mapper = new ObjectMapper()
   mapper.registerModule(DefaultScalaModule)
@@ -58,13 +76,6 @@ object ZipkinTracer {
    * The [[com.twitter.util.events.Event.Type Event.Type]] for trace events.
    */
   val Trace: Event.Type = {
-    // Note: This type is a just a convenience for deserialization in other
-    // other Event.Type constructions, but we actually require it for Trace
-    // because we're using Jackson's default typing mechanism for Annotation.
-    // If we use a Map, somewhere in Jackson's type resolution the type of
-    // Annotation is forgotten, and it is passed into the type resolver as an
-    // Object.  Defining this Envelope preserves the type information.
-    case class Envelope(id: String, when: Long, data: Annotation)
 
     def quantize(value: Any): Any = value match {
       case _: String | _: Int | _: Long | _: Double | _: Char => value
@@ -75,15 +86,17 @@ object ZipkinTracer {
       val id = "Trace"
 
       def serialize(event: Event) = event match {
-        case Event(etype, when, _, ann: Annotation.BinaryAnnotation, _) if etype eq this =>
+        case Event(etype, when, _, ann: Annotation.BinaryAnnotation, _, tid, sid) if etype eq this =>
           // Special case BinaryAnnotation to constrain the type of value to
           // primitives and Strings.
           val ba = Annotation.BinaryAnnotation(ann.key, quantize(ann.value))
-          val data = Envelope(id, when.inMilliseconds, ba)
+          val (t, s) = serializeTrace(tid, sid)
+          val data = Json.Envelope(id, when.inMilliseconds, t, s, ba)
           Try(Buf.Utf8(Json.serialize(data)))
 
-        case Event(etype, when, _, ann: Annotation, _) if etype eq this =>
-          val data = Envelope(id, when.inMilliseconds, ann)
+        case Event(etype, when, _, ann: Annotation, _, tid, sid) if etype eq this =>
+          val (t, s) = serializeTrace(tid, sid)
+          val data = Json.Envelope(id, when.inMilliseconds, t, s, ann)
           Try(Buf.Utf8(Json.serialize(data)))
 
         case _ =>
@@ -91,15 +104,18 @@ object ZipkinTracer {
       }
 
       def deserialize(buf: Buf) = for {
-        (idd, when, data) <- Buf.Utf8.unapply(buf) match {
+        env <- Buf.Utf8.unapply(buf) match {
           case None => Throw(new IllegalArgumentException("unknown format"))
-          case Some(str) => Try {
-            val env = Json.deserialize[Envelope](str)
-            (env.id, Time.fromMilliseconds(env.when), env.data)
-          }
+          case Some(str) => Try(Json.deserialize[Json.Envelope](str))
         }
-        if idd == id
-      } yield Event(this, when, objectVal = data)
+        if env.id == id
+      } yield {
+        val when = Time.fromMilliseconds(env.when)
+        // This line fails without the JsonDeserialize annotation in Envelope.
+        val tid = env.traceId.getOrElse(Event.NoTraceId)
+        val sid = env.spanId.getOrElse(Event.NoSpanId)
+        Event(this, when, objectVal = env.data, traceIdVal = tid, spanIdVal = sid)
+      }
     }
   }
 
@@ -190,7 +206,8 @@ class SamplingTracer(
   def record(record: Record) {
     if (sampler.sampleRecord(record)) {
       underlyingTracer.record(record)
-      sink.event(ZipkinTracer.Trace, objectVal = record.annotation)
+      sink.event(ZipkinTracer.Trace, objectVal = record.annotation,
+        traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
     }
   }
 }

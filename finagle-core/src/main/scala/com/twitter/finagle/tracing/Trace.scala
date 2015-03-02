@@ -104,10 +104,8 @@ object Trace {
    * pushed, a default one is provided.
    */
   def id: TraceId =
-    idOption match {
-      case Some(id) => id
-      case None => defaultId
-    }
+    if (Contexts.broadcast.contains(idCtx)) Contexts.broadcast(idCtx)
+    else defaultId
 
   /**
    * Get the current identifier, if it exists.
