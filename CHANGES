@@ -38,6 +38,8 @@ Breaking API Changes
     `Failure.Rejected`) were removed in favor of uniform flag treatment, and clean
     separation of attributes from interpretation of those attributes.
 
+  * finagle-core: `ExitGuard` usage is now private to finagle.
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -138,6 +140,9 @@ New Features
   * finagle-http(x): Two missing params were added: `Decompression` and `CompressionLevel`. Both
     client and server may be configured with either `configured` method or `withDecompression`/
     `withCompressionLevel`.
+
+  * finagle-core: ExitGuard now has an 'explainGuards' method to provide a human-readable
+    description of exit guards that are still active.
 
 Bug Fixes
 ~~~~~~~~~

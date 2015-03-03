@@ -1004,7 +1004,7 @@ private case class ClientBuilderClient[Req, Rep](
 
     val factory = mk(stack, clientParams).newClient(dest, label)
 
-    if (!daemon) ExitGuard.guard()
+    val exitGuard = if (!daemon) Some(ExitGuard.guard(s"client for '$label'")) else None
     new ServiceFactoryProxy[Req, Rep](factory) {
       private[this] val closed = new AtomicBoolean(false)
       override def close(deadline: Time): Future[Unit] = {
@@ -1015,7 +1015,7 @@ private case class ClientBuilderClient[Req, Rep](
         }
 
         super.close(deadline) ensure {
-          if (!daemon) ExitGuard.unguard()
+          exitGuard.foreach(_.unguard())
         }
       }
     }

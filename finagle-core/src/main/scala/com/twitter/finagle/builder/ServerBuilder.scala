@@ -465,7 +465,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
       val closed = new AtomicBoolean(false)
 
-      if (!daemon) ExitGuard.guard()
+      val exitGuard = if (!daemon) Some(ExitGuard.guard(s"server for '$label'")) else None
 
       override protected def closeServer(deadline: Time): Future[Unit] = closeAwaitably {
         if (!closed.compareAndSet(false, true)) {
@@ -475,7 +475,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         }
 
         listeningServer.close(deadline) ensure {
-          if (!daemon) ExitGuard.unguard()
+          exitGuard.foreach(_.unguard())
         }
       }
 
