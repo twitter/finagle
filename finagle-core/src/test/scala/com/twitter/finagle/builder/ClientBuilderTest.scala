@@ -86,6 +86,29 @@ class ClientBuilderTest extends FunSuite
     }
   }
 
+  test("ClientBuilder should collect stats on 'tries' with no retrypolicy") {
+    new ClientBuilderHelper {
+      val inMemory = new InMemoryStatsReceiver
+      val client = ClientBuilder()
+        .name("test")
+        .hostConnectionLimit(1)
+        .codec(m.codec)
+        .hosts(Seq(m.clientAddress))
+        .reportTo(inMemory)
+        .build()
+
+      val service = mock[Service[String, String]]
+      when(service("123")) thenReturn Future.exception(WriteException(new Exception()))
+      when(service.close(any[Time])) thenReturn Future.Done
+      preparedServicePromise() = Return(service)
+
+      val f = client("123")
+
+      assert(f.isDefined)
+      assert(inMemory.counters(Seq("test", "tries", "requests")) === 1)
+      assert(inMemory.counters(Seq("test", "requests")) === 1)
+    }
+  }
 
   /* TODO: Stopwatches eliminated mocking.
     "measure codec connection preparation latency" in {

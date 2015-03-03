@@ -161,6 +161,10 @@ object RetryPolicy extends JavaSingleton {
     case Throw(_: ChannelClosedException) => true
   }
 
+  val Never: RetryPolicy[Try[Nothing]] = new RetryPolicy[Try[Nothing]] {
+    def apply(t: Try[Nothing]) = None
+  }
+
   /**
    * Lifts a function of type `A => Option[(Duration, RetryPolicy[A])]` in the  `RetryPolicy` type.
    */

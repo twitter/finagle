@@ -50,6 +50,29 @@ sealed trait Stack[T] {
     }
 
   /**
+    * Insert the given [[Stackable]] before the stack elements matching
+    * the argument role. If no elements match the role, then an
+    * unmodified stack is returned.
+    */
+  def insertBefore(target: Role, insertion: Stackable[T]): Stack[T] =
+    this match {
+      case Node(head, mk, next) if head.role == target =>
+        insertion +: Node(head, mk, next.insertBefore(target, insertion))
+      case Node(head, mk, next) =>
+        Node(head, mk, next.insertBefore(target, insertion))
+      case leaf@Leaf(_, _) => leaf
+    }
+
+  /**
+    * Insert the given [[Stackable]] before the stack elements matching
+    * the argument role. If no elements match the role, then an
+    * unmodified stack is returned.  `insertion` must conform to
+    * typeclass [[CanStackFrom]].
+    */
+  def insertBefore[U](target: Role, insertion: U)(implicit csf: CanStackFrom[U, T]): Stack[T] =
+    insertBefore(target, csf.toStackable(target, insertion))
+
+  /**
    * Insert the given [[Stackable]] after the stack elements matching
    * the argument role. If no elements match the role, then an
    * unmodified stack is returned.

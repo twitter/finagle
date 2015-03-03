@@ -117,9 +117,7 @@ object ClientConfig {
       (this, Retries.param)
   }
   object Retries {
-    implicit val param = Stack.Param(Retries(new RetryPolicy[Try[Nothing]] {
-      def apply(t: Try[Nothing]) = None
-    }))
+    implicit val param = Stack.Param(Retries(RetryPolicy.Never))
   }
 
   case class Daemonize(onOrOff: Boolean) {
@@ -912,27 +910,84 @@ private case class ClientBuilderClient[Req, Rep](
     sr.scope(label)
   }
 
-  private def retryFilter(timer: util.Timer) =
-    params[Retries] match {
-      case Retries(policy) if params.contains[Retries] =>
-        val exceptions = params[ExceptionStatsHandler]
-        val stats = new StatsFilter[Req, Rep](statsReceiver.scope("tries"), exceptions.categorizer)
-        val retries = new RetryingFilter[Req, Rep](policy, timer, statsReceiver)
-        stats andThen retries
-      case _ => identityFilter
-    }
+  private object RetryingFilterModule
+      extends Stack.Module3[Stats, Retries, Timer, ServiceFactory[Req, Rep]] {
+    override val role = new Stack.Role("ClientBuilder RetryingFilter")
+    override val description = "Application-configured retries"
 
-  private def globalTimeoutFilter(timer: util.Timer) = {
-    val GlobalTimeout(timeout) = params[GlobalTimeout]
-    if (timeout < Duration.Top) {
-      val exception = new GlobalRequestTimeoutException(timeout)
-      new TimeoutFilter[Req, Rep](timeout, exception, timer)
-    } else {
-      identityFilter
+    override def make(
+      statsP: Stats,
+      retriesP: Retries,
+      timerP: Timer,
+      next: ServiceFactory[Req, Rep]
+    ) = {
+      val Stats(statsReceiver) = statsP
+      val Retries(policy) = retriesP
+      val Timer(timer) = timerP
+
+      if (policy eq RetryPolicy.Never) next
+      else {
+        val retries = new RetryingFilter[Req, Rep](policy, timer, statsReceiver)
+        retries andThen next
+      }
     }
   }
 
-  private val identityFilter = Filter.identity[Req, Rep]
+  private object StatsFilterModule
+      extends Stack.Module2[Stats, ExceptionStatsHandler, ServiceFactory[Req, Rep]] {
+    override val role = new Stack.Role("ClientBuilder StatsFilter")
+    override val description = "Record request stats scoped to 'tries'"
+
+    override def make(
+      statsP: Stats,
+      exceptionStatsHandlerP: ExceptionStatsHandler,
+      next: ServiceFactory[Req, Rep]
+    ) = {
+      val Stats(statsReceiver) = statsP
+      val ExceptionStatsHandler(categorizer) = exceptionStatsHandlerP
+
+      val stats = new StatsFilter[Req, Rep](statsReceiver.scope("tries"), categorizer)
+      stats andThen next
+    }
+  }
+
+  private object GlobalTimeoutModule
+      extends Stack.Module2[GlobalTimeout, Timer, ServiceFactory[Req, Rep]] {
+    override val role = new Stack.Role("ClientBuilder GlobalTimeoutFilter")
+    override val description = "Application-configured global timeout"
+
+    override def make(
+      globalTimeoutP: GlobalTimeout,
+      timerP: Timer,
+      next: ServiceFactory[Req, Rep]
+    ) = {
+      val GlobalTimeout(timeout) = globalTimeoutP
+      val Timer(timer) = timerP
+
+      if (timeout == Duration.Top) next
+      else {
+        val exception = new GlobalRequestTimeoutException(timeout)
+        val globalTimeout = new TimeoutFilter[Req, Rep](timeout, exception, timer)
+        globalTimeout andThen next
+      }
+    }
+  }
+
+  private object ExceptionSourceFilterModule
+      extends Stack.Module1[Label, ServiceFactory[Req, Rep]] {
+    override val role = new Stack.Role("ClientBuilder ExceptionSourceFilter")
+    override val description = "Exception source filter"
+
+    override def make(
+      labelP: Label,
+      next: ServiceFactory[Req, Rep]
+    ) = {
+      val Label(label) = labelP
+
+      val exceptionSource = new ExceptionSourceFilter[Req, Rep](label)
+      exceptionSource andThen next
+    }
+  }
 
   def newClient(dest: Name, label: String): ServiceFactory[Req, Rep] = {
     // need the label in statsReceiver
@@ -972,18 +1027,19 @@ private case class ClientBuilderClient[Req, Rep](
       return configured(Label(label)).newService(dest, label);
     }
 
-    val factory = configured(FactoryToService.Enabled(true)).newClient(dest, label)
+    val stackClient =
+      withStack(
+        stack
+          .insertBefore(RequeueingFilter.role, StatsFilterModule)
+          .insertBefore(RequeueingFilter.role, RetryingFilterModule)
+          .prepend(GlobalTimeoutModule)
+          .prepend(ExceptionSourceFilterModule))
+        .configured(FactoryToService.Enabled(true))
+
+    val factory = stackClient.newClient(dest, label)
     val service: Service[Req, Rep] = new FactoryToService[Req, Rep](factory)
 
-    val Timer(timer) = params[Timer]
-
-    val exceptionSourceFilter = new ExceptionSourceFilter[Req, Rep](label)
-    // We keep the retrying filter after the load balancer so we can
-    // retry across different hosts rather than the same one repeatedly.
-    val filter = exceptionSourceFilter andThen globalTimeoutFilter(timer) andThen retryFilter(timer)
-    val composed = filter andThen service
-
-    new ServiceProxy[Req, Rep](composed) {
+    new ServiceProxy[Req, Rep](service) {
       private[this] val released = new AtomicBoolean(false)
       override def close(deadline: Time): Future[Unit] = {
         if (!released.compareAndSet(false, true)) {
