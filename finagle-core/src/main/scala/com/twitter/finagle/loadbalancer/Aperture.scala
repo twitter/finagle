@@ -1,16 +1,24 @@
 package com.twitter.finagle.loadbalancer
 
+import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.{Rng, Ring, Ema, DefaultTimer}
 import com.twitter.finagle.{
-  ClientConnection, NoBrokersAvailableException, ServiceFactory, ServiceFactoryProxy,
+  ClientConnection, NoBrokersAvailableException, ServiceFactory, ServiceFactoryProxy, 
   ServiceProxy, Status}
 import com.twitter.util.{Activity, Return, Future, Throw, Time, Var, Duration, Timer}
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.logging.Logger
+
+object apertureParams extends GlobalFlag(
+  "5.seconds:0.5:2.0:1", 
+  "Aperture parameters: smoothWin:lowLoad:highLoad:minAperture")
 
 object ApertureBalancerFactory extends WeightedLoadBalancerFactory {
+  private val log = Logger.getLogger(getClass.getName)
+
   def newLoadBalancer[Req, Rep](
     factories: Var[Set[(ServiceFactory[Req, Rep], Double)]],
     statsReceiver: StatsReceiver,
@@ -24,10 +32,33 @@ object ApertureBalancerFactory extends WeightedLoadBalancerFactory {
     activity: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
     statsReceiver: StatsReceiver,
     emptyException: NoBrokersAvailableException
-  ): ServiceFactory[Req, Rep] =
-    new ApertureLoadBandBalancer(activity,
-      statsReceiver = statsReceiver,
-      emptyException = emptyException)
+  ): ServiceFactory[Req, Rep] = {
+    import com.twitter.finagle.util.parsers._
+
+    apertureParams() match {
+      case list(duration(smoothWin), double(lowLoad), double(highLoad), int(minAperture)) =>
+        log.info("Instantiating aperture balancer with params "+
+          s"smoothWin=$smoothWin; lowLoad=$lowLoad; "+
+          s"highLoad=$highLoad; minAperture=$minAperture")
+        require(lowLoad > 0, "lowLoad <= 0")
+        require(lowLoad <= highLoad, "highLoad < lowLoad")
+        require(smoothWin > 0.seconds, "smoothWin <= 0.seconds")
+        require(minAperture > 0, "minAperture <= 0")
+
+        new ApertureLoadBandBalancer(activity,
+          smoothWin=smoothWin,
+          lowLoad=lowLoad,
+          highLoad=highLoad,
+          minAperture=minAperture,
+          statsReceiver=statsReceiver,
+          emptyException=emptyException)
+      case bad =>
+        log.warning(s"Bad aperture parameters $bad; using system defaults.")
+        new ApertureLoadBandBalancer(activity,
+          statsReceiver = statsReceiver,
+          emptyException = emptyException)
+    }
+  }
 
   /**
    * Used for Java access.
@@ -76,6 +107,7 @@ private class ApertureLoadBandBalancer[Req, Rep](
     protected val smoothWin: Duration = 5.seconds,
     protected val lowLoad: Double = 0.5,
     protected val highLoad: Double = 2,
+    protected val minAperture: Int = 1,
     protected val maxEffort: Int = 5,
     protected val rng: Rng = Rng.threadLocal,
     protected implicit val timer: Timer = DefaultTimer.twitter,
@@ -115,6 +147,11 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
   import Aperture._
 
   protected def rng: Rng
+  
+  /**
+   * The minimum allowable aperture. Must be positive.
+   */
+  protected def minAperture: Int
 
   private[this] val nodeUp: Node => Boolean =
     { node => node.status == Status.Open && node.weight > 0 }
@@ -148,12 +185,14 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
         (ring, width, W/width)
       }
 
+    private[this] val minAperture = math.min(Aperture.this.minAperture, max)
+
     @volatile private[Aperture] var aperture = initAperture
     // Make sure the aperture is within bounds [1, max].
     adjust(0)
 
     protected[Aperture] def adjust(n: Int) {
-      aperture = math.max(1, math.min(max, aperture+n))
+      aperture = math.max(minAperture, math.min(max, aperture+n))
     }
 
     def rebuild() =
@@ -291,7 +330,7 @@ private trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, R
 
     if (a >= highLoad && aperture < units)
       widen()
-    else if (a <= lowLoad && aperture > 1)
+    else if (a <= lowLoad && aperture > minAperture)
       narrow()
   }
 

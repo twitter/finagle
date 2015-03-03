@@ -22,6 +22,7 @@ private trait ApertureTesting {
     protected val emptyException = new Empty
     protected val maxEffort = 10
     protected def statsReceiver = NullStatsReceiver
+    protected val minAperture = 1
 
     def applyn(n: Int): Unit = {
       val factories = Await.result(Future.collect(Seq.fill(n)(apply())))
