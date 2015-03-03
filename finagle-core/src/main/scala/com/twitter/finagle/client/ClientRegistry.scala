@@ -7,6 +7,9 @@ import com.twitter.util.Future
 import java.util.logging.Level
 
 private[twitter] object ClientRegistry extends StackRegistry {
+
+  def registryName: String = "client"
+
   /**
    * Get a Future which is satisfied when the dest of every currently
    * registered client is no longer pending.

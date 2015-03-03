@@ -3,6 +3,7 @@ package com.twitter.finagle.client
 import com.twitter.finagle._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Var, Return, Activity}
+import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry, Entry}
 
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite}
@@ -116,6 +117,28 @@ class ClientRegistryTest extends FunSuite
     crtnamer.va() = Addr.Bound(Set.empty[SocketAddress])
     eventually {
       assert(allResolved.poll === Some(Return(Set("foo"))))
+    }
+  })
+
+  test("ClientRegistry registers clients in registry")(new Ctx {
+    val path = Path.read("/$/com.twitter.finagle.client.crtnamer/foo")
+    val simple = new SimpleRegistry
+    GlobalRegistry.withRegistry(simple) {
+      val c = stackClient.newClient(Name.Path(path), "foo")
+      val prefix = Seq("client", "foo", "$com.twitter.finagle.client.crtnamerfoo", "Pool")
+      val filtered = GlobalRegistry.get.toSet.filter { e =>
+        e.key.startsWith(prefix)
+      }
+      val expected = Seq(
+        "high" -> "2147483647",
+        "low" -> "0",
+        "idleTime" -> "Duration.Top",
+        "maxWaiters" -> "2147483647"
+      ).map { case (key, value) => Entry(prefix :+ key, value) }
+
+      expected.foreach { entry =>
+        assert(filtered.contains(entry))
+      }
     }
   })
 }
