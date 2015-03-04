@@ -1,5 +1,6 @@
 package com.twitter.finagle.zipkin.thrift
 
+import com.twitter.finagle.NoStacktrace
 import com.twitter.finagle.stats.{DefaultStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{TraceId, Record, Tracer, Annotation, Trace}
 import com.twitter.finagle.zipkin.{host => Host, initialSampleRate => sampleRateFlag}
@@ -77,22 +78,12 @@ object ZipkinTracer {
    */
   val Trace: Event.Type = {
 
-    def quantize(value: Any): Any = value match {
-      case _: String | _: Int | _: Long | _: Double | _: Char => value
-      case _ => value.toString
-    }
-
     new Event.Type {
       val id = "Trace"
 
       def serialize(event: Event) = event match {
-        case Event(etype, when, _, ann: Annotation.BinaryAnnotation, _, tid, sid) if etype eq this =>
-          // Special case BinaryAnnotation to constrain the type of value to
-          // primitives and Strings.
-          val ba = Annotation.BinaryAnnotation(ann.key, quantize(ann.value))
-          val (t, s) = serializeTrace(tid, sid)
-          val data = Json.Envelope(id, when.inMilliseconds, t, s, ba)
-          Try(Buf.Utf8(Json.serialize(data)))
+        case Event(etype, _, _, _: Annotation.BinaryAnnotation, _, _, _) if etype eq this =>
+          Throw(new IllegalArgumentException("unsupported format: " + event) with NoStacktrace)
 
         case Event(etype, when, _, ann: Annotation, _, tid, sid) if etype eq this =>
           val (t, s) = serializeTrace(tid, sid)

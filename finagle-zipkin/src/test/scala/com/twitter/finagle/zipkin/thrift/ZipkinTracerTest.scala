@@ -41,7 +41,13 @@ class ZipkinTracerTest extends FunSuite with MockitoSugar with GeneratorDrivenPr
     import ZipkinTracer.Trace
 
     def id(e: events.Event) = Trace.serialize(e).flatMap(Trace.deserialize).get
-    forAll(genEvent(Trace)) { event => assert(id(event) == event) }
+    forAll(genEvent(Trace)) { event =>
+      event.objectVal match {
+        case _: Annotation.BinaryAnnotation =>
+          intercept[IllegalArgumentException] { id(event) }
+        case _ => assert(id(event) == event)
+      }
+    }
   }
 }
 
@@ -65,7 +71,7 @@ private[twitter] object ZipkinTracerTest {
       LocalAddr(new InetSocketAddress(0))),
     // We only guarantee successful deserialization for primitive values and
     // Strings, here we test String.
-    for (s <- arbitrary[String]) yield BinaryAnnotation("key", s)
+    for (v <- Gen.oneOf(arbitrary[AnyVal], arbitrary[String])) yield BinaryAnnotation("k", v)
   )
 
   def genEvent(etype: events.Event.Type): Gen[events.Event] = for {
