@@ -16,6 +16,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Gutefrage.net](http://www.gutefrage.net/)
   * ["Introducing Gutefrage.net's Service-Oriented Architecture"][2]
 * [Magine TV](https://magine.com/)
+* [National Center for Biotechnology Information (NCBI)](https://www.ncbi.nlm.nih.gov/)
 * [Nest](https://nest.com/)
 * The [New York Times](http://www.nytimes.com/)
 * [OpenAura](http://openaura.com/)
