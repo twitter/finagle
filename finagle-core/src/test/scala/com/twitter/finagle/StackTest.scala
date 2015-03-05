@@ -43,27 +43,6 @@ class StackTest extends FunSuite {
     assert(stack.make(empty) === Seq(30, 1, 2, 3, 4))
   }
 
-  test("Stack.insertBefore") {
-    val stack = newStack()
-    val module = new Stack.Module0[List[Int]] {
-      val role = testRole4
-      val description = testRole4.toString
-      def make(next: List[Int]): List[Int] = 100 :: next
-    }
-
-    assert(
-      stack.insertBefore(testRole4, module).make(empty) ===
-        Seq(20, 10, 1, 2, 3, 4))
-
-    assert(
-      stack.insertBefore(testRole2, module).make(empty) ===
-        Seq(20, 100, 10, 1, 2, 3, 4))
-
-    assert(
-      (stack ++ stack).insertBefore(testRole2, module).make(empty) ===
-        Seq(20, 100, 10, 20, 100, 10, 1, 2, 3, 4))
-  }
-
   test("Stack.insertAfter") {
     val stack = newStack()
     val module = new Stack.Module0[List[Int]] {

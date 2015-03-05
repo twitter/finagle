@@ -86,140 +86,37 @@ object StackClient {
    * @see [[com.twitter.finagle.tracing.TraceInitializerFilter]]
    */
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
-    /*
-     * NB on orientation: we here speak of "up" / "down" or "above" /
-     * "below" in terms of a request's traversal of the stack---a
-     * request starts at the top and goes down, a response returns
-     * back up. This is opposite to how modules are written on the
-     * page; a request starts at the bottom of the `newStack` method
-     * and goes up.
-     */
-
     val stk = new StackBuilder(endpointStack[Req, Rep])
-
-    /*
-     * These modules balance requests across cluster endpoints and
-     * handle automatic requeuing of failed requests.
-     *
-     *  * `LoadBalancerFactory` balances requests across the endpoints
-     *    of a cluster given by the `LoadBalancerFactory.Dest`
-     *    param. It must appear above the endpoint stack, and below
-     *    `BindingFactory` in order to satisfy the
-     *    `LoadBalancerFactory.Dest` param.
-     *
-     *  * `StatsFactoryWrapper` tracks the service acquisition latency
-     *    metric. It must appear above `LoadBalancerFactory` in order
-     *    to track service acquisition from the load balancer, and
-     *    below `FactoryToService` so that it is called on each
-     *    service acquisition.
-     *
-     *  * `Role.requestDraining` ensures that a service is not closed
-     *    until all outstanding requests on it have completed. It must
-     *    appear below `FactoryToService` so that services are not
-     *    prematurely closed by `FactoryToService`. (However it is
-     *    only effective for services which are called multiple times,
-     *    which is never the case when `FactoryToService` is enabled.)
-     *
-     *  * `TimeoutFactory` times out service acquisition from
-     *    `LoadBalancerFactory`. It must appear above
-     *    `LoadBalancerFactory` in order to time out service
-     *    acquisition from the load balancer, and below
-     *    `FactoryToService` so that it is called on each service
-     *    acquisition.
-     *
-     *  * `Role.prepFactory` is a hook used to inject codec-specific
-     *    behavior; it is used in the HTTP codec to avoid closing a
-     *    service while a chunked response is being read. It must
-     *    appear below `FactoryToService` so that services are not
-     *    prematurely closed by `FactoryToService`.
-     *
-     *  * `FactoryToService` acquires a new endpoint service from the
-     *    load balancer on each request (and closes it after the
-     *    response completes).
-     *
-     *  * `RequeuingFilter` retries `WriteException`s
-     *    automatically. It must appear above `FactoryToService` so
-     *    that service acquisition failures are retried.
-     */
     stk.push(LoadBalancerFactory.module)
     stk.push(StatsFactoryWrapper.module)
+    // These are sequenced very carefully based on data dependencies:
+    //
+    //   - BindingFactory translates a Path to a NameTree,
+    //     which can potentially be a union of several bound
+    //     Names, and then binds a particular Name.
+    //   - AddrMetadataExtraction extracts metadata from the
+    //     Bound Addr
+    //   - StatsScoping scopes subsequent stats based on this
+    //     metadata.
+    //
+    // It's important that all of this happen not only before the rest
+    // of the endpoint stack, but also ahead of StatsFactoryWrapper
+    // and LoadBalancerFactory.
+    stk.push(StatsScoping.module)
+    stk.push(AddrMetadataExtraction.module)
+    stk.push(BindingFactory.module)
     stk.push(Role.requestDraining, (fac: ServiceFactory[Req, Rep]) =>
       new RefcountedFactory(fac))
     stk.push(TimeoutFactory.module)
     stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
     stk.push(FactoryToService.module)
     stk.push(RequeueingFilter.module)
-
-    /*
-     * These modules deal with name resolution and request
-     * distribution (when a name resolves to a `Union` of clusters).
-     *
-     *  * `StatsScoping` modifies the `Stats` param based on the
-     *    `AddrMetadata` and `Scoper` params; it permits stats further
-     *    down the stack to be scoped according to the destination
-     *    cluster. It must appear below `AddrMetadataExtraction` to
-     *    satisfy the `AddrMetadata` param, and above
-     *    `RequeuingFilter` (and everything below it) which must have
-     *    stats scoped to the destination cluster.
-     *
-     *  * `AddrMetadataExtraction` extracts `Addr.Metadata` from the
-     *    `LoadBalancerFactory.Dest` param and puts it in the
-     *    `AddrMetadata` param. (Arguably this should happen directly
-     *    in `BindingFactory`.) It must appear below `BindingFactory`
-     *    to satisfy the `LoadBalanceFactory.Dest param`, and above
-     *    `StatsScoping` to provide the `AddrMetadata` param.
-     *
-     *  * `BindingFactory` resolves the destination `Name` into a
-     *    `NameTree`, and distributes requests to destination clusters
-     *    according to the resolved `NameTree`. Cluster endpoints are
-     *    passed down in the `LoadBalancerFactory.Dest` param. It must
-     *    appear above 'AddrMetadataExtraction' and
-     *    `LoadBalancerFactory` to provide the
-     *    `LoadBalancerFactory.Dest` param.
-     *
-     *  * `TimeoutFactory` times out name resolution, which happens in
-     *    the service acquisition phase in `BindingFactory`; once the
-     *    name is resolved, a service is acquired as soon as
-     *    processing hits the `FactoryToService` further down the
-     *    stack. It must appear above `BindingFactory` in order to
-     *    time out name resolution, and below `FactoryToService` so
-     *    that it is called on each service acquisition.
-     *
-     *  * `FactoryToService` acquires a new service on each request
-     *    (and closes it after the response completes). This has three
-     *    purposes: first, so that the per-request `Dtab.local` may be
-     *    taken into account in name resolution; second, so that each
-     *    request is distributed across the `NameTree`; and third, so
-     *    that name resolution and request distribution are included
-     *    in the request trace span. (Both name resolution and request
-     *    distribution are performed in the service acquisition
-     *    phase.) It must appear above `BindingFactory` and below
-     *    tracing setup.
-     */
-    stk.push(StatsScoping.module)
-    stk.push(AddrMetadataExtraction.module)
-    stk.push(BindingFactory.module)
-    stk.push(TimeoutFactory.module)
-    stk.push(FactoryToService.module)
-
-    /*
-     * These modules set up tracing for the request span:
-     *
-     *  * `Role.protoTracing` is a hook for protocol-specific tracing
-     *
-     *  * `ClientTracingFilter` traces request send / receive
-     *    events. It must appear above all other modules except
-     *    `TraceInitializerFilter` so it delimits all tracing in the
-     *    course of a request.
-     *
-     *  * `TraceInitializerFilter` allocates a new trace span per
-     *    request. It must appear above all other modules so the
-     *    request span encompasses all tracing in the course of a
-     *    request.
-     */
     stk.push(Role.protoTracing, identity[ServiceFactory[Req, Rep]](_))
     stk.push(Failure.module)
     stk.push(ClientTracingFilter.module)
+    // The TraceInitializerFilter must be pushed after most other modules so that
+    // any Tracing produced by those modules is enclosed in the appropriate
+    // span.
     stk.push(TraceInitializerFilter.clientModule)
     stk.result
   }
