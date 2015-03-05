@@ -109,7 +109,7 @@ extends ServiceFactory[Req, Rep] {
         complete(Idle)
         svc.close()
         Future.exception(
-          Failure("Returned unavailable service")
+          Failure("Returned unavailable service", Failure.Restartable)
             .withSource(Failure.Source.Role, SingletonPool.role))
 
       case Return(svc) =>
