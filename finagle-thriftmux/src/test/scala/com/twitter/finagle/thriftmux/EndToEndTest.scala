@@ -293,8 +293,8 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       }
     )
 
-    val client = Thrift.newClient(server)
-    intercept[ChannelClosedException] { Await.result(client()) }
+    val client = Thrift.newIface[TestService.FutureIface](server)
+    intercept[ChannelClosedException] { Await.result(client.query("ok")) }
   }
 
   test("thriftmux server + thriftmux client: ClientId should not be overridable externally") {
@@ -590,5 +590,30 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     response.setValue("done")
     assert(Await.result(close, 1.second) === ())
     assert(Await.result(f, 1.second) === "done")
+  }
+
+  test("gracefully reject sessions") {
+    @volatile var n = 0
+    val server = ThriftMux.serve(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0), 
+      new ServiceFactory {
+        def apply(conn: ClientConnection) = {
+          n += 1
+          Future.exception(new Exception)
+        }
+        def close(deadline: Time) = Future.Done
+      })
+
+    val client = ThriftMux.newIface[TestService.FutureIface](server)
+
+    val failure = intercept[Failure] {
+      Await.result(client.query("ok"))
+    }
+
+    // Failure.Restartable is stripped.
+    assert(!failure.isFlagged(Failure.Restartable))
+    
+    // Tried multiple times.
+    assert(n > 1)
   }
 }
