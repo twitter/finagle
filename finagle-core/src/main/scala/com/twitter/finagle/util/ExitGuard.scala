@@ -60,10 +60,7 @@ object ExitGuard {
     if (snap.isEmpty) {
       "There are no active guards."
     } else {
-      "${snap.size} active guard(s):" +
-        (snap.map { guard =>
-          "  " + guard.reason
-        }.mkString("\n"))
+      s"${snap.size} active guard(s):" + snap.map(_.reason).mkString(start="\n", sep="\n", end="")
     }
   }
 

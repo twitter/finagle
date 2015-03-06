@@ -1,15 +1,20 @@
 package com.twitter.finagle.util
 
 import org.junit.runner.RunWith
-import org.mockito.Mockito.{never, verify, when}
-import org.mockito.Matchers.any
 import org.scalatest.FunSuite
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.mock.MockitoSugar
 import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
-class ExitGuardTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
+class ExitGuardTest
+  extends FunSuite
+  with MockitoSugar
+  with AssertionsForJUnit
+  with Eventually
+  with IntegrationPatience {
+
   test("guard creates thread, unguard kills thread") {
     val guard = ExitGuard.guard("test")
     val threads = Thread.getAllStackTraces.keySet.asScala.find { thread =>
@@ -21,7 +26,7 @@ class ExitGuardTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     assert(!thread.isDaemon)
     assert(thread.isAlive)
     guard.unguard()
-    assert(thread.isInterrupted, ExitGuard.explainGuards())
+    eventually { assert(!thread.isAlive, ExitGuard.explainGuards()) }
   }
 
   test("explain shows reason") {
