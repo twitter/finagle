@@ -42,6 +42,23 @@ class ServiceTest extends FunSuite with MockitoSugar {
     verify(service)("ok")
   }
 
+  test("Service.rescue should wrap NonFatal exceptions in a failed Future") {
+    val exc = new IllegalArgumentException
+    val service = Service.mk[String, String] { _ => throw exc }
+    val rescuedService = Service.rescue(service)
+
+    val result = Await.result(rescuedService("ok").liftToTry)
+    assert(result.throwable === exc)
+
+    val fatalExc = new InterruptedException
+    val service2 = Service.mk[String, String] { _ => throw fatalExc }
+    val rescuedService2 = Service.rescue(service2)
+
+    intercept[InterruptedException] {
+      rescuedService2("fatal")
+    }
+  }
+
   test("ServiceFactory.const should resolve immediately to the given service" +
     "resolve immediately to the given service") {
     val service = mock[Service[String, String]]

@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import java.net.SocketAddress
-import com.twitter.util.{Closable, Future, Time}
+import com.twitter.util.{Closable, Future, NonFatal, Time}
 
 object Service {
   /**
@@ -13,7 +13,7 @@ object Service {
       try {
         service(request)
       } catch {
-        case e: Throwable => Future.exception(e)
+        case NonFatal(e) => Future.exception(e)
       }
     }
   }
