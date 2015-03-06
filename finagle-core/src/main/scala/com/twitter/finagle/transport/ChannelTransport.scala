@@ -109,7 +109,7 @@ class ChannelTransport[In, Out](ch: Channel)
     p
   }
 
-  def status: Status = 
+  def status: Status =
     if (failed.get || !ch.isOpen) Status.Closed
     else Status.Open
 
@@ -125,5 +125,5 @@ class ChannelTransport[In, Out](ch: Channel)
   private[this] val closep = new Promise[Throwable]
   val onClose: Future[Throwable] = closep
 
-  override def toString = "Transport<%s>".format(ch)
+  override def toString = s"Transport<channel=$ch, onClose=$closep>"
 }

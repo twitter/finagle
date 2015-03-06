@@ -52,7 +52,7 @@ class StreamingTest extends FunSuite with Eventually {
     val fail = new Promise[Unit]
 
     val server = startServer(echo, identity)
-    val client = connect(server.boundAddress, transport => {
+    val client = newClient(server.boundAddress, transport => {
       if (!fail.isDefined) fail ensure transport.close()
       transport
     })
@@ -144,13 +144,16 @@ class StreamingTest extends FunSuite with Eventually {
       if (!setFail.getAndSet(true)) fail ensure transport.close()
       transport
     })
-    val client1 = connect(server.boundAddress, identity, "client1")
-    val client2 = connect(server.boundAddress, identity, "client2")
+    val client1 = newClient(server.boundAddress, identity, "client1")
+    val client2 = newClient(server.boundAddress, identity, "client2")
 
     val req1 = get("/")
     val req2 = get("abc")
     val f1 = client1(req1)
-    val f2 = client2(req2)
+    // note: while the server is configured with a max concurrency of 1,
+    // the requests flow through the transport before that. this means
+    // that these requests must be sequenced.
+    val f2 = f1.flatMap { _ => client2(req2) }
 
     val res = await(f1)
 
@@ -192,13 +195,16 @@ class StreamingTest extends FunSuite with Eventually {
       if (!setFail.getAndSet(true)) fail ensure transport.close()
       transport
     })
-    val client1 = connect(server.boundAddress, identity, "client1")
-    val client2 = connect(server.boundAddress, identity, "client2")
+    val client1 = newClient(server.boundAddress, identity, "client1")
+    val client2 = newClient(server.boundAddress, identity, "client2")
 
     val req1 = get("/")
     val req2 = get("abc")
     val f1 = client1(req1)
-    val f2 = client2(req2)
+    // note: while the server is configured with a max concurrency of 1,
+    // the requests flow through the transport before that. this means
+    // that these requests must be sequenced.
+    val f2 = f1.flatMap { _ => client2(req2) }
 
     val res = await(f1)
 
@@ -234,13 +240,13 @@ class StreamingTest extends FunSuite with Eventually {
     }
 
     val server = startServer(service, identity)
-    val client1 = connect(server.boundAddress, identity, "client1")
-    val client2 = connect(server.boundAddress, identity, "client2")
+    val client1 = newClient(server.boundAddress, identity, "client1")
+    val client2 = newClient(server.boundAddress, identity, "client2")
 
     val req1 = get("/")
     val req2 = get("abc")
     val f1 = client1(req1)
-    val f2 = client2(req2)
+    val f2 = f1.flatMap { _ => client2(req2) }
 
     val res = await(f1)
 
@@ -273,13 +279,13 @@ class StreamingTest extends FunSuite with Eventually {
     }
 
     val server = startServer(service, identity)
-    val client1 = connect(server.boundAddress, identity, "client1")
-    val client2 = connect(server.boundAddress, identity, "client2")
+    val client1 = newClient(server.boundAddress, identity, "client1")
+    val client2 = newClient(server.boundAddress, identity, "client2")
 
     val req1 = get("/")
     val req2 = get("abc")
     val f1 = client1(req1)
-    val f2 = client2(req2)
+    val f2 = f1.flatMap { _ => client2(req2) }
 
     val res = await(f1)
 
@@ -325,7 +331,7 @@ object StreamingTest {
       .name("server")
       .build(service)
 
-  def connect(addr: SocketAddress, mod: Modifier, name: String = "client") =
+  def newClient(addr: SocketAddress, mod: Modifier, name: String = "client") =
     ClientBuilder()
       .codec(new Custom(mod, identity))
       .hosts(Seq(addr))

@@ -64,6 +64,7 @@ trait Transport[In, Out] extends Closable { self =>
     def localAddress = self.localAddress
     def remoteAddress = self.remoteAddress
     def close(deadline: Time) = self.close(deadline)
+    override def toString: String = self.toString
   }
 }
 
@@ -170,7 +171,7 @@ object Transport {
    *
    * @param trans The source Transport.
    *
-   * @param writer The destination [[com.twitter.io.Writer]].
+   * @param w The destination [[com.twitter.io.Writer]].
    *
    * @param f A mapping from `A` to `Future[Option[Buf]]`.
    */
@@ -206,7 +207,7 @@ object Transport {
 
     def read(n: Int) = rw.read(n)
 
-    def discard() {
+    def discard(): Unit = {
       rw.discard()
       raise(new Reader.ReaderDiscarded)
     }
