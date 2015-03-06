@@ -3,6 +3,8 @@ package com.twitter.finagle.postgres.protocol
 import org.specs2.specification.Example
 import org.specs2.mutable.{ArgumentsArgs, FragmentsBuilder}
 
+import scala.language.implicitConversions
+
 trait ConnectionSpec {
   this: FragmentsBuilder with ArgumentsArgs =>
 
