@@ -92,6 +92,7 @@ trait IntegrationBase extends FunSuite with MockitoSugar {
       .name(name)
       .codec(codecFactory)
       .channelFactory(channelFactory)
+      .daemon(true) // don't create an exit guard
       .hosts(Seq(clientAddress))
       .reportTo(statsReceiver)
       .hostConnectionLimit(1)
