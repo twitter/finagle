@@ -1,8 +1,8 @@
 package com.twitter.finagle.postgres
 
+import com.twitter.finagle.postgres.codec.ServerError
 import com.twitter.logging.Logger
 import com.twitter.util.{Future, Await}
-import protocol.ServerError
 
 //import com.twitter.util.Future
 //import protocol.Communication
@@ -25,10 +25,7 @@ object Main {
 
     val client = Client("localhost:5432", "mkhadikov", Some("pass"), "contacts")
 
-    val f: Future[QueryResponse] = client.prepare("select * from users where email = $1").flatMap {
-      ps =>
-        ps.fire()
-    }
+    val f: Future[QueryResponse] = client.query("select * from users where email = $1")
     try {
       logger.ifDebug("Rows " + Await.result(f))
     }
