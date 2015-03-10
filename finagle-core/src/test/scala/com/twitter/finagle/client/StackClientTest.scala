@@ -258,4 +258,72 @@ class StackClientTest extends FunSuite
       Await.ready(cl().map(_("hi")))
       assert(automaticRetries === Seq(10))
   })
+
+  test("Requeues all go to the same cluster in a Union") {
+    /*
+     * Once we have distributed a request to a particular cluster (in
+     * BindingFactory), retries should go to the same cluster rather
+     * than being redistributed (possibly to a different cluster).
+     */
+
+    class CountFactory extends ServiceFactory[Unit, Unit] {
+      var count = 0
+
+      val service = new Service[Unit, Unit] {
+        def apply(request: Unit): Future[Unit] = {
+          count = count + 1
+          Future.exception(WriteException(null))
+        }
+      }
+
+      def apply(conn: ClientConnection) = Future.value(service)
+      def close(deadline: Time) = Future.Done
+    }
+
+    val fac1 = new CountFactory
+    val fac2 = new CountFactory
+
+    val addr1 = new InetSocketAddress(1729)
+    val addr2 = new InetSocketAddress(1730)
+
+    // override name resolution to a Union of two addresses
+    val dtab = new Dtab(Dtab.base) {
+      override def lookup(path: Path): Activity[NameTree[Name]] =
+        Activity.value(NameTree.Union(
+          NameTree.Weighted(1D, NameTree.Leaf(Name.bound(addr1))),
+          NameTree.Weighted(1D, NameTree.Leaf(Name.bound(addr2)))))
+    }
+
+    val stack = StackClient.newStack[Unit, Unit]
+
+      // direct the two addresses to the two service factories instead
+      // of trying to connect to them
+      .replace(LoadBalancerFactory.role,
+        new Stack.Module1[LoadBalancerFactory.Dest, ServiceFactory[Unit, Unit]] {
+          val role = new Stack.Role("role")
+          val description = "description"
+          def make(dest: LoadBalancerFactory.Dest, next: ServiceFactory[Unit, Unit]) = {
+            val LoadBalancerFactory.Dest(va) = dest
+            va.sample match {
+              case Addr.Bound(addrs, _) if addrs == Set(addr1) => fac1
+              case Addr.Bound(addrs, _) if addrs == Set(addr2) => fac2
+              case _ => throw new IllegalArgumentException("wat")
+            }
+          }
+        })
+
+    val service =
+      new FactoryToService(stack.make(Stack.Params.empty +
+        FactoryToService.Enabled(true) +
+        BindingFactory.BaseDtab(() => dtab)))
+
+    intercept[ChannelWriteException] {
+      Await.result(service(()))
+    }
+
+    // all retries go to one service
+    assert(
+      (fac1.count == MaxTries && fac2.count == 0) ||
+        (fac2.count == MaxTries && fac1.count == 0))
+  }
 }

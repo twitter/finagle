@@ -472,6 +472,11 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * there are more than `hostConnectionLimit` requests outstanding)
    * as well as physical connection time.  Futures returned from
    * `factory()` will always be satisfied within this timeout.
+   *
+   * This timeout is also used for name resolution, separately from
+   * queueing and physical connection time, so in the worst case the
+   * time to acquire a service may be double the given duration before
+   * timing out.
    */
   def connectTimeout(duration: Duration): This =
     configured(TimeoutFactory.Param(duration))
