@@ -32,6 +32,8 @@ URLs if possible) and [submit a pull request][1]!
 * [Sabre Labs](http://sabrelabs.com)
 * [Sharethrough](https://www.sharethrough.com/)
   * ["Finagle @ Sharethrough: Twitter #Conf Presentation"][5]
+* [SmartNews](https://www.smartnews.com/en/)
+  * ["Scala (Finagle) @ SmartNews"][12]
 * [SoundCloud](https://soundcloud.com/)
   * ["Building Products at SoundCloud—Part III: Microservices in Scala and
     Finagle"][6]
@@ -61,3 +63,4 @@ URLs if possible) and [submit a pull request][1]!
 [9]: https://typesafe.com/blog/tapad_turns_to_typesafe_platform
 [10]: https://typesafe.com/
 [11]: https://blog.twitter.com/2011/finagle-a-protocol-agnostic-rpc-system
+[12]: https://www.slideshare.net/ShigekazuTakei/scalafinaglesmartnewsenglish
