@@ -82,10 +82,82 @@ class ClientBuilderTest extends FunSuite
 
       assert(f.isDefined)
       assert(inMemory.counters(Seq("test", "tries", "requests")) === 1)
-      assert(inMemory.counters(Seq("test", "requests")) === 2)
+      assert(inMemory.counters(Seq("test", "requests")) === 50)
     }
   }
 
+  test("ClientBuilder should collect stats on 'tries' with no retrypolicy") {
+    new ClientBuilderHelper {
+      val inMemory = new InMemoryStatsReceiver
+      val client = ClientBuilder()
+        .name("test")
+        .hostConnectionLimit(1)
+        .codec(m.codec)
+        .hosts(Seq(m.clientAddress))
+        .reportTo(inMemory)
+        .build()
+
+      val service = mock[Service[String, String]]
+      when(service("123")) thenReturn Future.exception(WriteException(new Exception()))
+      when(service.close(any[Time])) thenReturn Future.Done
+      preparedServicePromise() = Return(service)
+
+      val f = client("123")
+
+      assert(f.isDefined)
+      assert(inMemory.counters(Seq("test", "tries", "requests")) === 1)
+      assert(inMemory.counters(Seq("test", "requests")) === 25)
+    }
+  }
+
+  test("ClientBuilder with stack should collect stats on 'tries' for retrypolicy") {
+    new ClientBuilderHelper {
+      val inMemory = new InMemoryStatsReceiver
+      val client = ClientBuilder()
+        .name("test")
+        .hostConnectionLimit(1)
+        .stack(m.client)
+        .hosts(Seq(m.clientAddress))
+        .retries(2) // retries === total attempts :(
+        .reportTo(inMemory)
+        .build()
+
+      val service = mock[Service[String, String]]
+      when(service("123")) thenReturn Future.exception(WriteException(new Exception()))
+      when(service.close(any[Time])) thenReturn Future.Done
+      preparedServicePromise() = Return(service)
+
+      val f = client("123")
+
+      assert(f.isDefined)
+      assert(inMemory.counters(Seq("test", "tries", "requests")) === 1)
+      assert(inMemory.counters(Seq("test", "requests")) === 50)
+    }
+  }
+
+  test("ClientBuilder with stack should collect stats on 'tries' with no retrypolicy") {
+    new ClientBuilderHelper {
+      val inMemory = new InMemoryStatsReceiver
+      val client = ClientBuilder()
+        .name("test")
+        .hostConnectionLimit(1)
+        .stack(m.client)
+        .hosts(Seq(m.clientAddress))
+        .reportTo(inMemory)
+        .build()
+
+      val service = mock[Service[String, String]]
+      when(service("123")) thenReturn Future.exception(WriteException(new Exception()))
+      when(service.close(any[Time])) thenReturn Future.Done
+      preparedServicePromise() = Return(service)
+
+      val f = client("123")
+
+      assert(f.isDefined)
+      assert(inMemory.counters(Seq("test", "tries", "requests")) === 1)
+      assert(inMemory.counters(Seq("test", "requests")) === 25)
+    }
+  }
 
   /* TODO: Stopwatches eliminated mocking.
     "measure codec connection preparation latency" in {
