@@ -101,19 +101,25 @@ class JsonExporterTest
 
         // we won't trigger an `update` until the first minute.
         val emptyRes = Response(Await.result(exporter(reqWithPeriod))).contentString
-        assert(emptyRes == """{"anCounter":0}""")
+        assert(emptyRes == "{}")
+
+        update()
+        eventually {
+          val res = Response(Await.result(exporter(reqWithPeriod))).contentString
+          assert(res == """{"anCounter":0}""")
+        }
 
         // Note: the `CounterDeltas.update()`s happen async
-        update()
         counter.add(11)
+        update()
         eventually {
           // with the param
           val res = Response(Await.result(exporter(reqWithPeriod))).contentString
           assert(res == """{"anCounter":11}""")
         }
 
-        update()
         counter.add(5)
+        update()
         eventually {
           // verify returning deltas, when param requested
           val res = Response(Await.result(exporter(reqWithPeriod))).contentString

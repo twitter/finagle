@@ -119,11 +119,10 @@ class JsonExporter(
   ): String = {
     val gauges = registry.sampleGauges().asScala
     val histos = registry.sampleHistograms().asScala
-    val cs = registry.sampleCounters()
     val counters = if (counterDeltasOn && useCounterDeltas()) {
-      getOrRegisterLatchedStats().deltas(cs)
+      getOrRegisterLatchedStats().deltas
     } else {
-      cs.asScala
+      registry.sampleCounters().asScala
     }
     val values = SampledValues(gauges, counters, histos)
 

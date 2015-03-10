@@ -1,6 +1,6 @@
 package com.twitter.finagle.stats
 
-import java.util.{Collections, Map => JMap}
+import java.util.{Collections, Map => JMap, HashMap => JHashMap}
 import scala.collection.JavaConverters._
 
 /**
@@ -11,45 +11,46 @@ import scala.collection.JavaConverters._
 private[stats] class CounterDeltas {
 
   /**
-   * Last absolute values recorded for the counters.
+   * @param abs the last absolute value seen
+   * @param delta the last delta computed
+   */
+  private class Last(val abs: Long, val delta: Long)
+
+  /**
+   * Last values recorded for the counters.
    *
    * thread safety provided by synchronization on `this`
    */
-  private[this] var lastCounters = Collections.emptyMap[String, Number]
+  private[this] var lasts = Collections.emptyMap[String, Last]
 
   /**
-   * Return the deltas as seen by the last call to `update()`.
-   *
-   * @param newCounters the new absolute values for the counters.
+   * Return the deltas as seen by the last call to [[update]].
    */
-  def deltas(newCounters: JMap[String, Number]): Map[String, Number] =
-    computeDeltas(newCounters)
+  def deltas: Map[String, Number] = {
+    val prevs = synchronized(lasts)
+    prevs.asScala.map { case (key, pd) =>
+      key -> Long.box(pd.delta)
+    }.toMap
+  }
+
 
   /**
-   * Updates the absolute values to be used for future calls
-   * to `deltas`.
+   * Updates the values to be used for future calls
+   * to [[deltas]].
    *
    * @param newCounters the new absolute values for the counters.
    */
   def update(newCounters: JMap[String, Number]): Unit = synchronized {
-    lastCounters = Collections.unmodifiableMap(newCounters)
-  }
-
-  private[this] def computeDeltas(
-    newCounters: JMap[String, Number]
-  ): Map[String, Number] = {
-    val prevCounters = synchronized { lastCounters }
-    val counters = newCounters.asScala
-    var next = Map.empty[String, Number]
-    counters.foreach { case (k, v) =>
-      val prev = prevCounters.get(k)
-      val newVal: Number = if (prev == null) v else {
-        // note: this should handle overflowing Long.MaxValue fine.
-        v.longValue() - prev.longValue()
+    val next = new JHashMap[String, Last](newCounters.size)
+    newCounters.asScala.foreach { case (k, v) =>
+      val last = lasts.get(k)
+      val current = v.longValue
+      val delta = if (last == null) current else {
+        current - last.abs
       }
-      next += k -> newVal
+      next.put(k, new Last(current, delta))
     }
-    next
+    lasts = next
   }
 
 }
