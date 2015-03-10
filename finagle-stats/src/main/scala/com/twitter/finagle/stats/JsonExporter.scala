@@ -63,8 +63,6 @@ class JsonExporter(
     mkRegex(regexesString)
   }
 
-  private[this] val formatter = StatsFormatter.default
-
   // thread-safety provided by synchronization on `this`
   private[this] var deltas: Option[CounterDeltas] = None
 
@@ -129,7 +127,7 @@ class JsonExporter(
     }
     val values = SampledValues(gauges, counters, histos)
 
-    val formatted = formatter(values)
+    val formatted = StatsFormatter.default(values)
 
     val sampleFiltered = if (filtered) filterSample(formatted) else formatted
 

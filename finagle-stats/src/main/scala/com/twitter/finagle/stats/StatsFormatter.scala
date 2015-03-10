@@ -110,6 +110,7 @@ private[stats] object StatsFormatter {
       p match {
         case 0.5d => "p50"
         case 0.9d => "p90"
+        case 0.95d => "p95"
         case 0.99d => "p99"
         case 0.999d => "p999"
         case 0.9999d => "p9999"
