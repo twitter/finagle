@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.client.{StackTransformableClient, StackTransformer}
 import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest}
 import org.apache.thrift.protocol.TProtocolFactory
@@ -11,8 +12,8 @@ import org.apache.thrift.protocol.TProtocolFactory
  */
 @deprecated("Use object ThriftMux", "7.0.0")
 class ThriftMuxClientLike private[finagle](client: ThriftMux.Client)
-  extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
-  with (Stack.Params => Client[ThriftClientRequest, Array[Byte]])
+  extends StackTransformableClient[ThriftClientRequest, Array[Byte]]
+    with ThriftRichClient
 {
   /**
    * Used for Java access.
@@ -52,8 +53,14 @@ class ThriftMuxClientLike private[finagle](client: ThriftMux.Client)
    * Create a new ThriftMuxClientLike with `p` added to the
    * parameters used to configure the `muxer`.
    */
-  def configured[P: Stack.Param](p: P): ThriftMuxClientLike =
+  override def configured[P: Stack.Param](p: P): ThriftMuxClientLike =
     new ThriftMuxClientLike(client.configured(p))
+
+  def withParams(ps: Stack.Params): ThriftMuxClientLike =
+    new ThriftMuxClientLike(client.withParams(ps))
+
+  def transformed(t: StackTransformer): ThriftMuxClientLike =
+    new ThriftMuxClientLike(client.transformed(t))
 
   /**
    * Produce a [[com.twitter.finagle.ThriftMuxClientLike]] using the provided

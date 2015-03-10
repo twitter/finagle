@@ -201,7 +201,7 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
           case Throw(exc) =>
             // If we fail to create a new session locally, we continue establishing
             // the session but (1) reject any incoming requests; (2) close it right
-            // away. This allows protocols that support graceful shutdown to 
+            // away. This allows protocols that support graceful shutdown to
             // also gracefully deny new sessions.
             val d = server.newDispatcher(
               transport, Service.const(Future.exception(Failure.rejected(exc))))

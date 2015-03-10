@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client.StackClient
+import com.twitter.finagle.client.{StackClient, StackTransformableClient, StackTransformer}
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
@@ -94,8 +94,8 @@ object ThriftMux
 
   case class Client(
     muxer: StackClient[mux.Request, mux.Response] = Mux.client.copy(stack = BaseClientStack)
-  ) extends com.twitter.finagle.Client[ThriftClientRequest, Array[Byte]]
-      with ThriftRichClient with Stack.Parameterized[Client] {
+  ) extends StackTransformableClient[ThriftClientRequest, Array[Byte]]
+      with ThriftRichClient {
     def stack = muxer.stack
     def params: Stack.Params = muxer.params
 
@@ -106,8 +106,14 @@ object ThriftMux
     protected val Thrift.param.ProtocolFactory(protocolFactory) =
       params[Thrift.param.ProtocolFactory]
 
+    override def configured[P: Stack.Param](p: P): Client =
+      withParams(params + p)
+
     def withParams(ps: Stack.Params): Client =
       copy(muxer = muxer.withParams(ps))
+
+    def transformed(t: StackTransformer): Client =
+      copy(muxer = muxer.transformed(t))
 
     /**
      * Produce a [[com.twitter.finagle.ThriftMux.Client]] using the provided
@@ -129,7 +135,7 @@ object ThriftMux
       def apply(req: ThriftClientRequest, service: Service[mux.Request, mux.Response]): Future[Array[Byte]] = {
         if (req.oneway) return Future.exception(
           new Exception("ThriftMux does not support one-way messages"))
-  
+
         // We do a dance here to ensure that the proper ClientId is set when
         // `service` is applied because Mux relies on
         // com.twitter.finagle.thrift.ClientIdContext to propagate ClientIds.
@@ -233,7 +239,7 @@ object ThriftMux
       val param.Tracer(tracer) = params[param.Tracer]
       def ping() = Future.Done
       new mux.ServerDispatcher(
-        transport, service, true, 
+        transport, service, true,
         mux.lease.exp.ClockedDrainer.flagged,
         tracer, ping)
     }

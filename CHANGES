@@ -40,6 +40,9 @@ Breaking API Changes
 
   * finagle-core: `ExitGuard` usage is now private to finagle.
 
+  * finagle-core: remove deprecated `c.t.f.builder.ClientBuilder.stack` taking a
+    `Stack.Params => Client[Req1, Rep1]`.
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
