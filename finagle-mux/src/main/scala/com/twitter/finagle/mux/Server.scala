@@ -242,6 +242,10 @@ private[twitter] class ServerDispatcher private[twitter](
             lessor.unregister(this)
             trans.close()
           }
+        } handle {
+          case _: ChannelClosedException =>
+            // the channel died before we could close it nicely, but that's OK
+            Future.Done
         }
       } else {
         closep.setDone()
