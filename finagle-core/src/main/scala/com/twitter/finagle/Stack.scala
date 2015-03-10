@@ -399,6 +399,23 @@ object Stack {
   }
 
   /**
+   * Encodes transformations for stacks of
+   * [[com.twitter.finagle.ServiceFactory ServiceFactories]] of
+   * arbitrary `Req` and `Rep` types. Such transformations must be
+   * indifferent to these types in order to typecheck.
+   */
+  trait Transformer {
+    def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]): Stack[ServiceFactory[Req, Rep]]
+  }
+
+  trait Transformable[+T] {
+    /**
+     * Transform the stack using the given `Transformer`.
+     */
+    def transformed(t: Transformer): T
+  }
+
+  /**
    * A convenience class to construct stackable modules. This variant
    * operates over stacks and the entire parameter map. The `ModuleN` variants
    * may be more convenient for most definitions as they operate over `T` types

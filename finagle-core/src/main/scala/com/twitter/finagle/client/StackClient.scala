@@ -234,47 +234,32 @@ object StackClient {
 }
 
 /**
- * Encodes transformations for stacks of
- * [[com.twitter.finagle.ServiceFactory ServiceFactories]] of
- * arbitrary `Req` and `Rep` types. Such transformations must be
- * indifferent to these types in order to typecheck.
- */
-trait StackTransformer {
-  def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]): Stack[ServiceFactory[Req, Rep]]
-}
-
-/**
  * A [[com.twitter.finagle.Client Client]] that may have its
  * [[com.twitter.finagle.Stack Stack]] transformed.
  *
- * A `StackTransformableClient` is weaker than a `StackClient` in that the
+ * A `StackBasedClient` is weaker than a `StackClient` in that the
  * specific `Req`, `Rep` types of its stack are not exposed.
  */
-trait StackTransformableClient[Req, Rep]
-  extends Client[Req, Rep]
-    with Stack.Parameterized[StackTransformableClient[Req, Rep]] {
-
-  /**
-   * Transform the stack using the given `StackTransformer`.
-   */
-  def transformed(t: StackTransformer): StackTransformableClient[Req, Rep]
-}
+trait StackBasedClient[Req, Rep] extends Client[Req, Rep]
+  with Stack.Parameterized[StackBasedClient[Req, Rep]]
+  with Stack.Transformable[StackBasedClient[Req, Rep]]
 
 /**
  * A [[com.twitter.finagle.Client Client]] that composes a
  * [[com.twitter.finagle.Stack Stack]].
  */
-trait StackClient[Req, Rep] extends StackTransformableClient[Req, Rep] {
+trait StackClient[Req, Rep] extends StackBasedClient[Req, Rep]
+  with Stack.Parameterized[StackClient[Req, Rep]]
+  with Stack.Transformable[StackClient[Req, Rep]] {
+
   /** The current stack. */
   def stack: Stack[ServiceFactory[Req, Rep]]
   /** The current parameter map. */
   def params: Stack.Params
-  /** A new StackClient with the provided params. */
-  def withParams(ps: Stack.Params): StackClient[Req, Rep]
   /** A new StackClient with the provided stack. */
   def withStack(stack: Stack[ServiceFactory[Req, Rep]]): StackClient[Req, Rep]
 
-  def transformed(t: StackTransformer): StackClient[Req, Rep] =
+  def transformed(t: Stack.Transformer): StackClient[Req, Rep] =
     withStack(t(stack))
 }
 

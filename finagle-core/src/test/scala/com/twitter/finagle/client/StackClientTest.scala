@@ -326,4 +326,22 @@ class StackClientTest extends FunSuite
       (fac1.count == MaxTries && fac2.count == 0) ||
         (fac2.count == MaxTries && fac1.count == 0))
   }
+
+  test("StackBasedClient.configured is a StackClient") {
+    // compilation test
+    val client: StackBasedClient[String, String] = stringClient
+    val client2: StackBasedClient[String, String] =
+      client.configured(param.Label("foo"))
+    val client3: StackBasedClient[String, String] =
+      client.configured[param.Label]((param.Label("foo"), param.Label.param))
+  }
+
+  test("StackClient.configured is a StackClient") {
+    // compilation test
+    val client: StackClient[String, String] = stringClient
+    val client2: StackClient[String, String] =
+      client.configured(param.Label("foo"))
+    val client3: StackClient[String, String] =
+      client.configured[param.Label]((param.Label("foo"), param.Label.param))
+  }
 }

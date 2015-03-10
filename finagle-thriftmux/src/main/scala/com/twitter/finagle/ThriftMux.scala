@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client.{StackClient, StackTransformableClient, StackTransformer}
+import com.twitter.finagle.client.{StackClient, StackBasedClient}
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
@@ -94,7 +94,9 @@ object ThriftMux
 
   case class Client(
     muxer: StackClient[mux.Request, mux.Response] = Mux.client.copy(stack = BaseClientStack)
-  ) extends StackTransformableClient[ThriftClientRequest, Array[Byte]]
+  ) extends StackBasedClient[ThriftClientRequest, Array[Byte]]
+      with Stack.Parameterized[Client]
+      with Stack.Transformable[Client]
       with ThriftRichClient {
     def stack = muxer.stack
     def params: Stack.Params = muxer.params
@@ -106,13 +108,10 @@ object ThriftMux
     protected val Thrift.param.ProtocolFactory(protocolFactory) =
       params[Thrift.param.ProtocolFactory]
 
-    override def configured[P: Stack.Param](p: P): Client =
-      withParams(params + p)
-
     def withParams(ps: Stack.Params): Client =
       copy(muxer = muxer.withParams(ps))
 
-    def transformed(t: StackTransformer): Client =
+    def transformed(t: Stack.Transformer): Client =
       copy(muxer = muxer.transformed(t))
 
     /**

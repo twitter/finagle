@@ -2,8 +2,8 @@ package com.twitter.finagle.builder
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.client.{DefaultPool, StackClient, StackTransformer, StdStackClient}
-import com.twitter.finagle.client.{StackTransformableClient, Transporter}
+import com.twitter.finagle.client.{DefaultPool, StackBasedClient, StackClient, StdStackClient}
+import com.twitter.finagle.client.{StackBasedClient, Transporter}
 import com.twitter.finagle.factory.{BindingFactory, TimeoutFactory}
 import com.twitter.finagle.filter.ExceptionSourceFilter
 import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, WeightedLoadBalancerFactory}
@@ -90,10 +90,10 @@ object ClientConfig {
   private case class NilClient[Req, Rep](
     stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
     params: Stack.Params = DefaultParams
-  ) extends StackTransformableClient[Req, Rep] {
+  ) extends StackBasedClient[Req, Rep] {
 
     def withParams(ps: Stack.Params) = copy(params = ps)
-    def transformed(t: StackTransformer) = copy(stack = t(stack))
+    def transformed(t: Stack.Transformer) = copy(stack = t(stack))
 
     def newService(dest: Name, label: String): Service[Req, Rep] =
       newClient(dest, label).toService
@@ -103,7 +103,7 @@ object ClientConfig {
         new Exception("unimplemented")))))
   }
 
-  def nilClient[Req, Rep]: StackTransformableClient[Req, Rep] = NilClient[Req, Rep]()
+  def nilClient[Req, Rep]: StackBasedClient[Req, Rep] = NilClient[Req, Rep]()
 
   // params specific to ClientBuilder
   case class DestName(name: Name) {
@@ -269,7 +269,7 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  *  - `sendBufferSize`, `recvBufferSize`: OS-defined default value
  */
 class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle](
-  client: StackTransformableClient[Req, Rep]
+  client: StackBasedClient[Req, Rep]
 ) {
   import ClientConfig._
   import com.twitter.finagle.param._
@@ -284,7 +284,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   override def toString() = "ClientBuilder(%s)".format(params)
 
   private def copy[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1](
-    client: StackTransformableClient[Req1, Rep1]
+    client: StackBasedClient[Req1, Rep1]
   ): ClientBuilder[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1] =
     new ClientBuilder(client)
 
@@ -428,7 +428,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Overrides the stack and [[com.twitter.finagle.Client]] that will be used
    * by this builder.
    *
-   * @param client A `StackTransformableClient` representation of a
+   * @param client A `StackBasedClient` representation of a
    * [[com.twitter.finagle.Client]]. `client` is materialized with the state of
    * configuration when `build` is called. There is no guarantee that all
    * builder parameters will be used by the resultant `Client`; it is up to the
@@ -439,7 +439,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * such connection pool parameters will not be applied.
    */
   def stack[Req1, Rep1](
-    client: StackTransformableClient[Req1, Rep1]
+    client: StackBasedClient[Req1, Rep1]
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, Yes] = {
     copy(client.withParams(client.params ++ params))
   }
@@ -974,7 +974,7 @@ private object ClientBuilderClient {
   }
 
   def newClient[Req, Rep](
-    client: StackTransformableClient[Req, Rep],
+    client: StackBasedClient[Req, Rep],
     dest: Name,
     label: String
   ): ServiceFactory[Req, Rep] = {
@@ -1005,13 +1005,13 @@ private object ClientBuilderClient {
   }
 
   def newService[Req, Rep](
-    client0: StackTransformableClient[Req, Rep],
+    client0: StackBasedClient[Req, Rep],
     dest: Name,
     label: String
   ): Service[Req, Rep] = {
     val client =
       client0
-        .transformed(new StackTransformer {
+        .transformed(new Stack.Transformer {
           def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]) =
             stack
               .insertBefore(RequeueingFilter.role, new StatsFilterModule[Req, Rep])
