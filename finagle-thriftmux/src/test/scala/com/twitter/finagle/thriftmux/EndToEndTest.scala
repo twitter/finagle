@@ -40,11 +40,16 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.FutureIface {
         def query(x: String) =
-          Contexts.broadcast.get(testContext) match {
-            case None => Future.value(x+x)
-            case Some(TestContext(buf)) =>
+          (Contexts.broadcast.get(testContext), Dtab.local) match {
+            case (None, Dtab.empty) =>
+              Future.value(x+x)
+
+            case (Some(TestContext(buf)), _) =>
               val Buf.Utf8(str) = buf
               Future.value(str)
+
+            case (_, dtab) =>
+              Future.value(dtab.show)
           }
       })
   }
@@ -68,11 +73,49 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     }
   }
 
+  test("end-to-end thriftmux: propagate Dtab.local") {
+    new ThriftMuxTestServer {
+      val client = ThriftMux.newIface[TestService.FutureIface](server)
+
+      assert(Await.result(client.query("ok")) === "okok")
+
+      Dtab.unwind {
+        Dtab.local = Dtab.read("/foo=>/bar")
+        assert(Await.result(client.query("ok")) === "/foo=>/bar")
+      }
+    }
+  }
+
   test("thriftmux server + Finagle thrift client") {
     new ThriftMuxTestServer {
       val client = Thrift.newIface[TestService.FutureIface](server)
       1 to 5 foreach { _ =>
         assert(Await.result(client.query("ok")) === "okok")
+      }
+    }
+  }
+
+  test("end-to-end thriftmux server + Finagle thrift client: propagate Contexts") {
+    new ThriftMuxTestServer {
+      val client = Thrift.newIface[TestService.FutureIface](server)
+
+      assert(Await.result(client.query("ok")) === "okok")
+
+      Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
+        assert(Await.result(client.query("ok")) === "hello context world")
+      }
+    }
+  }
+
+  test("end-to-end thriftmux server + Finagle thrift client: propagate Dtab.local") {
+    new ThriftMuxTestServer {
+      val client = Thrift.newIface[TestService.FutureIface](server)
+
+      assert(Await.result(client.query("ok")) === "okok")
+
+      Dtab.unwind {
+        Dtab.local = Dtab.read("/foo=>/bar")
+        assert(Await.result(client.query("ok")) === "/foo=>/bar")
       }
     }
   }
@@ -595,7 +638,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
   test("gracefully reject sessions") {
     @volatile var n = 0
     val server = ThriftMux.serve(
-      new InetSocketAddress(InetAddress.getLoopbackAddress, 0), 
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new ServiceFactory {
         def apply(conn: ClientConnection) = {
           n += 1
@@ -612,7 +655,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
 
     // Failure.Restartable is stripped.
     assert(!failure.isFlagged(Failure.Restartable))
-    
+
     // Tried multiple times.
     assert(n > 1)
   }

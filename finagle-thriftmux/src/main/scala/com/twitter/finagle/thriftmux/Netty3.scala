@@ -1,6 +1,6 @@
 package com.twitter.finagle.thriftmux
 
-import com.twitter.finagle.{Path, Failure, mux, Dtab, ThriftMuxUtil}
+import com.twitter.finagle.{Path, Failure, mux, Dtab, Dentry, NameTree, ThriftMuxUtil}
 import com.twitter.finagle.mux.{BadMessageException, Message}
 import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.finagle.netty3.Conversions._
@@ -86,8 +86,24 @@ private[finagle] class PipelineFactory(
         }
       }
 
-      Message.Tdispatch(Message.MinTag, contextBuf.toSeq, Path.empty, Dtab.empty,
-        ChannelBuffers.wrappedBuffer(request_))
+      var dtab = Dtab.empty
+      if (header.getDelegationsSize() > 0) {
+        val ds = header.getDelegationsIterator()
+        while (ds.hasNext()) {
+          val d = ds.next()
+          if (d.src != null && d.dst != null) {
+            val src = Path.read(d.src)
+            val dst = NameTree.read(d.dst)
+            dtab += Dentry(src, dst)
+          }
+        }
+      }
+
+      val dest = if (header.dest == null) Path.empty else Path.read(header.dest)
+
+      val requestBuf = ChannelBuffers.wrappedBuffer(request_)
+
+      Message.Tdispatch(Message.MinTag, contextBuf.toSeq, dest, dtab, requestBuf)
     }
 
     override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent)  {
@@ -148,7 +164,7 @@ private[finagle] class PipelineFactory(
       }
     }
   }
-  
+
   private class TFramedToMux extends SimpleChannelHandler {
     override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
       Message.decode(e.getMessage.asInstanceOf[ChannelBuffer]) match {
@@ -247,7 +263,7 @@ private[finagle] class PipelineFactory(
       ChannelBuffers.copiedBuffer(buffer.toArray)
     }
   }
-  
+
   private class DrainQueue[T] {
     private[this] var q = new mutable.Queue[T]
 
@@ -256,7 +272,7 @@ private[finagle] class PipelineFactory(
         q.enqueue(e)
       q != null
     }
-    
+
     def drain(): Iterable[T] = {
       synchronized {
         assert(q != null, "Can't drain queue more than once")
@@ -269,7 +285,7 @@ private[finagle] class PipelineFactory(
 
   private class Upgrader extends SimpleChannelHandler {
     import Upgrader._
-    
+
     // Queue writes until we know what protocol we are speaking.
     private[this] var writeq = new DrainQueue[MessageEvent]
 
