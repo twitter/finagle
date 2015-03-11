@@ -1,5 +1,6 @@
 package com.twitter.finagle.netty3
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.channel.{ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.httpproxy.HttpConnectHandler
@@ -123,6 +124,7 @@ object Netty3Transporter {
     val ChannelFactory(cf) = params[ChannelFactory]
     val TransportFactory(newTransport) = params[TransportFactory]
     val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
+    val Transporter.SSLHandshakeTimeout(sslHandshakeTimeout) = params[Transporter.SSLHandshakeTimeout]
     val Transporter.TLSHostname(tlsHostname) = params[Transporter.TLSHostname]
     val Transporter.HttpProxy(httpProxy) = params[Transporter.HttpProxy]
     val Transporter.SocksProxy(socksProxy, credentials) = params[Transporter.SocksProxy]
@@ -139,7 +141,9 @@ object Netty3Transporter {
       pipelineFactory,
       newChannel = cf.newChannel(_),
       newTransport = (ch: Channel) => newTransport(ch).cast[In, Out],
-      tlsConfig = tls map { case engine => Netty3TransporterTLSConfig(engine, tlsHostname) },
+      tlsConfig = tls map { engine =>
+        Netty3TransporterTLSConfig(engine, tlsHostname, sslHandshakeTimeout)
+      },
       httpProxy = httpProxy,
       socksProxy = socksProxy,
       socksUsernameAndPassword = credentials,
@@ -191,7 +195,7 @@ object Netty3Transporter {
  * against the given value.
  */
 case class Netty3TransporterTLSConfig(
-  newEngine: SocketAddress => Engine, verifyHost: Option[String])
+  newEngine: SocketAddress => Engine, verifyHost: Option[String], handshakeTimeout: Duration = 10.seconds)
 
 /**
  * A transporter for netty3 which, given an endpoint name (socket
@@ -281,7 +285,7 @@ case class Netty3Transporter[In, Out](
         new IdleStateHandler(DefaultTimer, rms, wms, 0, TimeUnit.MILLISECONDS))
     }
 
-    for (Netty3TransporterTLSConfig(newEngine, verifyHost) <- tlsConfig) {
+    for (Netty3TransporterTLSConfig(newEngine, verifyHost, handshakeTimeout) <- tlsConfig) {
       import org.jboss.netty.handler.ssl._
 
       val engine = newEngine(addr)
@@ -292,7 +296,15 @@ case class Netty3Transporter[In, Out](
         Function.const(None) _
       }
 
-      val sslHandler = new SslHandler(engine.self)
+      val sslHandler = {
+        val startTls = false
+        new SslHandler(
+          engine.self,
+          SslHandler.getDefaultBufferPool,
+          startTls,
+          DefaultTimer,
+          handshakeTimeout.inMillis)
+      }
       val sslConnectHandler = new SslConnectHandler(sslHandler, verifier)
 
       pipeline.addFirst("sslConnect", sslConnectHandler)

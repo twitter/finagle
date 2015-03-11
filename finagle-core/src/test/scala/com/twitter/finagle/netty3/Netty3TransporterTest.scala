@@ -236,6 +236,29 @@ class Netty3TransporterTest extends FunSpec with MockitoSugar {
 
         assert(!channel.isOpen)
       }
+
+      describe ("handshake timeout") {
+        val pipelineFactory = Channels.pipelineFactory(Channels.pipeline())
+        val tlsParams = Stack.Params.empty + Transport.TLSClientEngine(Some(_ => Engine(mock[SSLEngine])))
+
+        it ("should be finite by default") {
+          val transporter = Netty3Transporter.make[Int, Int](pipelineFactory, tlsParams)
+          val pipeline = transporter.newPipeline(null, NullStatsReceiver)
+          val sslHandler = pipeline.get(classOf[SslHandler])
+
+          assert(sslHandler.getHandshakeTimeout > 0)
+        }
+
+        it ("should be configurable with stack params") {
+          val timeout = 1.second
+          val customParams = tlsParams + Transporter.SSLHandshakeTimeout(timeout)
+          val transporter = Netty3Transporter.make[Int, Int](pipelineFactory, customParams)
+          val pipeline = transporter.newPipeline(null, NullStatsReceiver)
+          val sslHandler = pipeline.get(classOf[SslHandler])
+
+          assert(sslHandler.getHandshakeTimeout == timeout.inMillis)
+        }
+      }
     }
   }
 }

@@ -73,6 +73,10 @@ Runtime Behavior Changes
     includes time spent in name resolution, which is now covered by
     "namer/bind_latency_us" as discussed above.
 
+  * finagle-core: `com.twitter.finagle.netty3.Netty3Transporter` now sets a 10 second
+    SSL handshake timeout to avoid getting stuck in "connecting" state. This timeout
+    may be reconfigured using `c.t.f.client.Transporter.SSLHandshakeTimeout` stack param.
+
 Deprecations
 ~~~~~~~~~~~~
 

@@ -54,6 +54,17 @@ object Transporter {
   }
 
   /**
+   * $param SSL handshake timeout, if TLS is enabled.
+   */
+  case class SSLHandshakeTimeout(howlong: Duration) {
+    def mk(): (SSLHandshakeTimeout, Stack.Param[SSLHandshakeTimeout]) =
+      (this, SSLHandshakeTimeout.param)
+  }
+  object SSLHandshakeTimeout {
+    implicit val param = Stack.Param(SSLHandshakeTimeout(10.seconds))
+  }
+
+  /**
    * $param hostname verification, if TLS is enabled.
    * @see [[com.twitter.finagle.transport.Transport#TLSEngine]]
    */
