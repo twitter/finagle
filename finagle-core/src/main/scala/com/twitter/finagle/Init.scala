@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.concurrent.Once
 import com.twitter.finagle.exp.FinagleScheduler
 import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util.NonFatal
@@ -11,7 +12,6 @@ import java.util.logging.Level
  * Global initialization of Finagle.
  */
 private[twitter] object Init {
-  private val inited = new AtomicBoolean(false)
   private val log = DefaultLogger
 
   // Used to record Finagle versioning in trace info.
@@ -19,10 +19,7 @@ private[twitter] object Init {
   private val _finagleVersion = new AtomicReference[String](unknownVersion)
   def finagleVersion = _finagleVersion.get
 
-  def apply() {
-    if (!inited.compareAndSet(false, true))
-      return
-
+  private[this] val once = Once {
     FinagleScheduler.init()
 
     val p = new Properties
@@ -45,4 +42,6 @@ private[twitter] object Init {
       p.getProperty("build_name", "?")
     ))
   }
+
+  def apply(): Unit = once()
 }
