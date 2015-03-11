@@ -261,6 +261,11 @@ trait StackClient[Req, Rep] extends StackBasedClient[Req, Rep]
 
   def transformed(t: Stack.Transformer): StackClient[Req, Rep] =
     withStack(t(stack))
+
+  // these are necessary to have the right types from Java
+  def withParams(ps: Stack.Params): StackClient[Req, Rep]
+  def configured[P: Stack.Param](p: P): StackClient[Req, Rep]
+  def configured[P](psp: (P, Stack.Param[P])): StackClient[Req, Rep]
 }
 
 /**

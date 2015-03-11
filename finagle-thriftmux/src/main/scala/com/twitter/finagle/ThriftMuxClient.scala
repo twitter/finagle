@@ -55,8 +55,8 @@ class ThriftMuxClientLike private[finagle](client: ThriftMux.Client)
    * Create a new ThriftMuxClientLike with `p` added to the
    * parameters used to configure the `muxer`.
    */
-  override def configured[P: Stack.Param](p: P): ThriftMuxClientLike =
-    super.configured(p)
+  override def configured[P: Stack.Param](p: P): ThriftMuxClientLike = super.configured(p)
+  override def configured[P](psp: (P, Stack.Param[P])): ThriftMuxClientLike = super.configured(psp)
 
   def withParams(ps: Stack.Params): ThriftMuxClientLike =
     new ThriftMuxClientLike(client.withParams(ps))

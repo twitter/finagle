@@ -151,6 +151,10 @@ object ThriftMux
 
     def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
       ThriftMuxToMux andThen muxer.newClient(dest, label)
+
+    // these are necessary to have the right types from Java
+    override def configured[P: Stack.Param](p: P): Client = super.configured(p)
+    override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
   }
 
   val client = Client()

@@ -8,6 +8,7 @@ import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.channel.IdleConnectionFilter;
 import com.twitter.finagle.channel.OpenConnectionsThresholds;
 import com.twitter.finagle.client.DefaultPool;
+import com.twitter.finagle.client.StackClient;
 import com.twitter.finagle.client.Transporter;
 import com.twitter.finagle.factory.BindingFactory;
 import com.twitter.finagle.factory.TimeoutFactory;
@@ -38,47 +39,50 @@ import com.twitter.util.Function0;
 
 public class StackParamCompilationTest {
   void testParams() {
-    ClientBuilder.<String, String>stackClientOfCodec(null)
-      .configured(new Label("").mk())
-      .configured(new Timer(com.twitter.finagle.util.DefaultTimer.twitter()).mk())
-      .configured(new Logger(java.util.logging.Logger.getLogger("com.twitter.finagle")).mk())
-      .configured(new Stats(com.twitter.finagle.stats.DefaultStatsReceiver.get()).mk())
-      .configured(new Monitor(com.twitter.finagle.util.DefaultMonitor.get()).mk())
-      .configured(new Reporter(com.twitter.finagle.util.LoadedReporterFactory.get()).mk())
-      .configured(new Tracer(com.twitter.finagle.tracing.DefaultTracer.get()).mk())
-      .configured(new FactoryToService.Enabled(true).mk())
-      .configured(new IdleConnectionFilter.Param(Option.<OpenConnectionsThresholds>empty()).mk())
-      .configured(
-        new DefaultPool.Param(0, Integer.MAX_VALUE, 0, Duration.Top(), Integer.MAX_VALUE).mk())
-      .configured(new Transporter.ConnectTimeout(Duration.Top()).mk())
-      .configured(new Transporter.TLSHostname(Option.<String>empty()).mk())
-      .configured(
-        new Transporter.SocksProxy(
-          SocksProxyFlags.socksProxy(),
-          SocksProxyFlags.socksUsernameAndPassword()).mk())
-      .configured(new Transporter.HttpProxy(Option.<SocketAddress>empty()).mk())
-      .configured(
-        new BindingFactory.BaseDtab(new Function0<Dtab>() {
-            public Dtab apply() { return Dtab.empty(); }
-        }).mk())
-      .configured(new TimeoutFactory.Param(Duration.Top()).mk())
-      .configured(new MaskCancelFilter.Param(false).mk())
-      .configured(new RequestSemaphoreFilter.Param(Integer.MAX_VALUE).mk())
-      .configured(new LoadBalancerFactory.HostStats(new NullStatsReceiver()).mk())
-      .configured(new LoadBalancerFactory.Param(DefaultBalancerFactory.get()).mk())
-      .configured(new Netty3Transporter.ChannelFactory(null).mk())
-      .configured(new Netty3Timer(com.twitter.finagle.util.DefaultTimer.get()).mk())
-      .configured(new Listener.Backlog(Option.empty()).mk())
-      .configured(new ExpiringService.Param(Duration.Top(), Duration.Top()).mk())
-      .configured(new FailFastFactory.FailFast(true).mk())
-      .configured(new FailureAccrualFactory.Param(0, Duration.Top()).mk())
-      .configured(new TimeoutFilter.Param(Duration.Top()).mk())
-      .configured(new Transport.BufferSizes(Option.empty(), Option.empty()).mk())
-      .configured(new Transport.Liveness(Duration.Top(), Duration.Top(), Option.empty()).mk())
-      .configured(new Transport.Verbose(false).mk())
-      .configured(
-        new Transport.TLSClientEngine(Option.<scala.Function1<SocketAddress, Engine>>empty()).mk())
-      .configured(new Transport.TLSServerEngine(Option.<scala.Function0<Engine>>empty()).mk());
+    StackClient<String, String> client =
+      ClientBuilder.<String, String>stackClientOfCodec(null)
+        .configured(new Label("").mk())
+        .configured(new Timer(com.twitter.finagle.util.DefaultTimer.twitter()).mk())
+        .configured(new Logger(java.util.logging.Logger.getLogger("com.twitter.finagle")).mk())
+        .configured(new Stats(com.twitter.finagle.stats.DefaultStatsReceiver.get()).mk())
+        .configured(new Monitor(com.twitter.finagle.util.DefaultMonitor.get()).mk())
+        .configured(new Reporter(com.twitter.finagle.util.LoadedReporterFactory.get()).mk())
+        .configured(new Tracer(com.twitter.finagle.tracing.DefaultTracer.get()).mk())
+        .configured(new FactoryToService.Enabled(true).mk())
+        .configured(new IdleConnectionFilter.Param(Option.<OpenConnectionsThresholds>empty()).mk())
+        .configured(
+          new DefaultPool.Param(0, Integer.MAX_VALUE, 0, Duration.Top(), Integer.MAX_VALUE).mk())
+        .configured(new Transporter.ConnectTimeout(Duration.Top()).mk())
+        .configured(new Transporter.TLSHostname(Option.<String>empty()).mk())
+        .configured(
+          new Transporter.SocksProxy(
+            SocksProxyFlags.socksProxy(),
+            SocksProxyFlags.socksUsernameAndPassword()).mk())
+        .configured(new Transporter.HttpProxy(Option.<SocketAddress>empty()).mk())
+        .configured(
+          new BindingFactory.BaseDtab(new Function0<Dtab>() {
+              public Dtab apply() { return Dtab.empty(); }
+          }).mk())
+        .configured(new TimeoutFactory.Param(Duration.Top()).mk())
+        .configured(new MaskCancelFilter.Param(false).mk())
+        .configured(new RequestSemaphoreFilter.Param(Integer.MAX_VALUE).mk())
+        .configured(new LoadBalancerFactory.HostStats(new NullStatsReceiver()).mk())
+        .configured(new LoadBalancerFactory.Param(DefaultBalancerFactory.get()).mk())
+        .configured(new Netty3Transporter.ChannelFactory(null).mk())
+        .configured(new Netty3Timer(com.twitter.finagle.util.DefaultTimer.get()).mk())
+        .configured(new Listener.Backlog(Option.empty()).mk())
+        .configured(new ExpiringService.Param(Duration.Top(), Duration.Top()).mk())
+        .configured(new FailFastFactory.FailFast(true).mk())
+        .configured(new FailureAccrualFactory.Param(0, Duration.Top()).mk())
+        .configured(new TimeoutFilter.Param(Duration.Top()).mk())
+        .configured(new Transport.BufferSizes(Option.empty(), Option.empty()).mk())
+        .configured(new Transport.Liveness(Duration.Top(), Duration.Top(), Option.empty()).mk())
+        .configured(new Transport.Verbose(false).mk())
+        .configured(
+          new Transport.TLSClientEngine(
+            Option.<scala.Function1<SocketAddress, Engine>>empty()
+          ).mk())
+        .configured(new Transport.TLSServerEngine(Option.<scala.Function0<Engine>>empty()).mk());
   }
 
   void testModule1() {
