@@ -167,8 +167,12 @@ class MetricsStatsReceiver(
           val metricsCounter = registry.createCounter(format(names))
           def incr(delta: Int): Unit = {
             metricsCounter.add(delta)
-            sink.event(CounterIncr, objectVal = metricsCounter.getName(), longVal = delta,
-              traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
+            if (Trace.hasId) {
+              sink.event(CounterIncr, objectVal = metricsCounter.getName(), longVal = delta,
+                traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
+            } else {
+              sink.event(CounterIncr, objectVal = metricsCounter.getName(), longVal = delta)
+            }
           }
         }
         counters.put(names, counter)
@@ -191,8 +195,12 @@ class MetricsStatsReceiver(
           def add(value: Float): Unit = {
             val asLong = value.toLong
             histogram.add(asLong)
-            sink.event(StatAdd, objectVal = histogram.getName(), longVal = asLong,
-              traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
+            if (Trace.hasId) {
+              sink.event(StatAdd, objectVal = histogram.getName(), longVal = asLong,
+                traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
+            } else {
+              sink.event(StatAdd, objectVal = histogram.getName(), longVal = asLong)
+            }
           }
         }
         stats.put(names, stat)

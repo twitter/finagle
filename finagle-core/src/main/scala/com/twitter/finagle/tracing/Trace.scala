@@ -100,12 +100,16 @@ object Trace {
   }
 
   /**
+   * True if there is an identifier for the current trace.
+   */
+  def hasId: Boolean = Contexts.broadcast.contains(idCtx)
+
+  /**
    * Get the current trace identifier.  If no identifiers have been
    * pushed, a default one is provided.
    */
   def id: TraceId =
-    if (Contexts.broadcast.contains(idCtx)) Contexts.broadcast(idCtx)
-    else defaultId
+    if (hasId) Contexts.broadcast(idCtx) else defaultId
 
   /**
    * Get the current identifier, if it exists.
