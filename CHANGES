@@ -8,8 +8,6 @@
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
-  * finagle-http: deprecated methods in `c.t.f.http.HttpMessageProxy` have been removed.
-
   * finagle-core: `c.t.f.builder.Server` now implements `c.t.f.ListeningServer`.
 
   * finagle-core: `c.t.f.Server.serveAndAnnounce` with a `ServiceFactory` had
@@ -23,6 +21,14 @@ Breaking API Changes
   * finagle-core: NoBrokersAvailableException now has two Dtab constructor
     arguments, both the base and local Dtabs.
 
+  * finagle-core: `c.t.f.Failure` convenience constructors (e.g., `Failure.Cause`,
+    `Failure.Rejected`) were removed in favor of uniform flag treatment, and clean
+    separation of attributes from interpretation of those attributes.
+
+  * finagle-core: `ExitGuard` usage is now private to finagle.
+
+  * finagle-http: deprecated methods in `c.t.f.http.HttpMessageProxy` have been removed.
+
   * finagle-memcached / finagle-memcachedx: move TwitterCacheResolver
     and related objects to new finagle-cacheresolver package.
 
@@ -33,12 +39,10 @@ Breaking API Changes
 
   * finagle-mux: `c.t.f.mux.RequestNackedException` is removed in favor of a standard
     Failure (`c.t.f.Failure.Rejected`).
-  
-  * finagle-core: `c.t.f.Failure` convenience constructors (e.g., `Failure.Cause`,
-    `Failure.Rejected`) were removed in favor of uniform flag treatment, and clean
-    separation of attributes from interpretation of those attributes.
 
-  * finagle-core: `ExitGuard` usage is now private to finagle.
+  * finagle-ostrich4: Switched dependency to finagle-httpx from finagle-http.
+
+  * finagle-stats: Switched dependency to finagle-httpx from finagle-http.
 
   * finagle-core: remove deprecated `c.t.f.builder.ClientBuilder.stack` taking a
     `Stack.Params => Client[Req1, Rep1]`.
@@ -65,7 +69,7 @@ Runtime Behavior Changes
 
   * finagle-core: The error message provided by `c.t.f.NoBrokersAvailableException`
     prints both the base and local Dtabs.
-  
+
   * finagle-core: Stats produced by `com.twitter.finagle.factory.BindingFactory`
     are now scoped with the "namer" prefix rather than "interpreter". The total
     latency associated with Name binding is now recorded in the "bind_latency_ms"
@@ -125,6 +129,13 @@ New Features
 
   * finagle-core: A convenient method `Client.newService(dest: String, label: String)` was added.
 
+  * finagle-core: ExitGuard now has an 'explainGuards' method to provide a human-readable
+    description of exit guards that are still active.
+
+  * finagle-http(x): Two missing params were added: `Decompression` and `CompressionLevel`. Both
+    client and server may be configured with either `configured` method or `withDecompression`/
+    `withCompressionLevel`.
+
   * finagle-mysql: Add support for MySQL transactions.
 
   * finagle-stats: A new HostStatsReceiver type is added and used for per host stats.
@@ -139,13 +150,6 @@ New Features
     HTTP requests to ``/admin/stats.json`` with the ``period=60`` query string
     parameter will replicate Ostrich's behavior by computing deltas on counters
     every minute and formatting histograms with the same labels Ostrich uses.
-
-  * finagle-http(x): Two missing params were added: `Decompression` and `CompressionLevel`. Both
-    client and server may be configured with either `configured` method or `withDecompression`/
-    `withCompressionLevel`.
-
-  * finagle-core: ExitGuard now has an 'explainGuards' method to provide a human-readable
-    description of exit guards that are still active.
 
 Bug Fixes
 ~~~~~~~~~

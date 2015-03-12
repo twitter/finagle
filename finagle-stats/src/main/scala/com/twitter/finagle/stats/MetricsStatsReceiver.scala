@@ -1,11 +1,11 @@
 package com.twitter.finagle.stats
 
 import com.twitter.common.metrics.{Histogram, HistogramInterface, AbstractGauge, Metrics}
-import com.twitter.finagle.http.HttpMuxHandler
+import com.twitter.finagle.httpx.HttpMuxHandler
 import com.twitter.finagle.tracing.Trace
-import com.twitter.io.{Reader, Buf}
+import com.twitter.io.Buf
 import com.twitter.util.events.{Event, Sink}
-import com.twitter.util.{Time, Return, Throw, Try}
+import com.twitter.util.{Time, Throw, Try}
 import java.util.concurrent.ConcurrentHashMap
 
 private object Json {

@@ -8,14 +8,11 @@ import com.twitter.app.GlobalFlag
 import com.twitter.common.metrics.Metrics
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
-import com.twitter.finagle.http.MediaType
+import com.twitter.finagle.httpx.{RequestParamMap, Response, Request, MediaType}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.io.Charsets
+import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util._
-import java.util.{Map => JMap, List => JList}
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http._
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.collection.immutable
 import scala.util.matching.Regex
@@ -47,7 +44,7 @@ object JsonExporter {
 class JsonExporter(
     registry: Metrics,
     timer: Timer)
-  extends Service[HttpRequest, HttpResponse] { self =>
+  extends Service[Request, Response] { self =>
 
   import JsonExporter._
 
@@ -66,36 +63,41 @@ class JsonExporter(
   // thread-safety provided by synchronization on `this`
   private[this] var deltas: Option[CounterDeltas] = None
 
-  def apply(request: HttpRequest): Future[HttpResponse] = {
-    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-    response.headers.add(HttpHeaders.Names.CONTENT_TYPE, MediaType.Json)
+  def apply(request: Request): Future[Response] = {
+    val response = Response()
+    response.contentType = MediaType.Json
 
-    val params = new QueryStringDecoder(request.getUri).getParameters
+    val params = new RequestParamMap(request)
     val pretty = readBooleanParam(params, name = "pretty", default = false)
     val filtered = readBooleanParam(params, name = "filtered", default = false)
-    val counterDeltasOn = Option(params.get("period")) match {
-      case Some(p) =>
-        if (p.contains("60")) true else {
-          log.warning(s"${getClass.getName} request ignored due to unsupported period: '$p'")
+    val counterDeltasOn = {
+      val vals = params.getAll("period")
+      if (vals.isEmpty) {
+        false
+      } else {
+        if (vals.exists(_ == "60")) true else {
+          log.warning(s"${getClass.getName} request ignored due to unsupported period: '${vals.mkString(",")}'")
           false
         }
-      case _ => false
+      }
     }
 
-    val bytes = json(pretty, filtered, counterDeltasOn).getBytes(Charsets.Utf8)
-    response.setContent(ChannelBuffers.wrappedBuffer(bytes))
+    val asJson = json(pretty, filtered, counterDeltasOn)
+    response.content = Buf.Utf8(asJson)
     Future.value(response)
   }
 
-  private[this] def readBooleanParam(
-    params: JMap[String, JList[String]],
+  // package protected for testing
+  private[stats] def readBooleanParam(
+    params: RequestParamMap,
     name: String,
     default: Boolean
   ): Boolean = {
-    Option(params.get(name)) match {
-      case Some(p) => p.contains("1") || p.contains("true")
-      case _ => default
-    }
+    val vals = params.getAll(name)
+    if (vals.nonEmpty)
+      vals.exists { v => v == "1" || v == "true" }
+    else
+      default
   }
 
   private[this] def getOrRegisterLatchedStats(): CounterDeltas = synchronized {

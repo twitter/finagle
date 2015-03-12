@@ -1,7 +1,7 @@
 package com.twitter.finagle.stats
 
 import com.twitter.common.metrics.Metrics
-import com.twitter.finagle.http.HttpMuxHandler
+import com.twitter.finagle.httpx.HttpMuxHandler
 
 class MetricsHostStatsReceiver(val registry: Metrics) extends HostStatsReceiver {
   def this() = this(MetricsStatsReceiver.defaultHostRegistry)

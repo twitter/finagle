@@ -216,7 +216,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-ostrich4",
     libraryDependencies ++= Seq(ostrichLib)
-  ).dependsOn(finagleCore, finagleHttp)
+  ).dependsOn(finagleCore, finagleHttpX)
 
   lazy val finagleStats = Project(
     id = "finagle-stats",
@@ -231,7 +231,7 @@ object Finagle extends Build {
       util("logging")
     ),
     libraryDependencies <++= scalaVersion(jacksonLibs(_))
-  ).dependsOn(finagleCore, finagleHttp)
+  ).dependsOn(finagleCore, finagleHttpX)
 
   lazy val finagleZipkin = Project(
     id = "finagle-zipkin",

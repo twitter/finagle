@@ -2,9 +2,8 @@ package com.twitter.finagle.stats
 
 import com.twitter.common.metrics.Metrics
 import com.twitter.conversions.time._
-import com.twitter.finagle.http.{MediaType, Response, Request}
+import com.twitter.finagle.httpx.{RequestParamMap, MediaType, Request}
 import com.twitter.util.{Time, MockTimer, Await}
-import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{IntegrationPatience, Eventually}
@@ -20,6 +19,30 @@ class JsonExporterTest
 
   // 2015-02-05 20:05:00 +0000
   private val zeroSecs = Time.fromSeconds(1423166700)
+
+  test("readBooleanParam") {
+    val exporter = new JsonExporter(Metrics.createDetached())
+    val r = Request()
+
+    def assertParam(r: Request, expected: Boolean, default: Boolean): Unit =
+      withClue(s"params=${r.params}") {
+        assert(expected == exporter.readBooleanParam(new RequestParamMap(r), "hi", default))
+      }
+
+    // param doesn't exist so uses default
+    assertParam(Request(), expected = false, default = false)
+    assertParam(Request(), expected = true, default = true)
+
+    // param exists but value not true, so always false
+    assertParam(Request(("hi", "")), expected = false, default = false)
+    assertParam(Request(("hi", "")), expected = false, default = true)
+    assertParam(Request(("hi", ""), ("hi", "nope")), expected = false, default = true)
+
+    // param exists and value is true, so always true
+    assertParam(Request(("hi", "1")), expected = true, default = false)
+    assertParam(Request(("hi", "true")), expected = true, default = true)
+    assertParam(Request(("hi", "no"), ("hi", "true")), expected = true, default = true)
+  }
 
   test("samples can be filtered") {
     val registry = Metrics.createDetached()
@@ -52,13 +75,13 @@ class JsonExporterTest
       override lazy val statsFilterRegex: Option[Regex] = mkRegex("jvm.*,vie")
     }
     val requestFiltered = Request("/admin/metrics.json?filtered=1&pretty=0")
-    val responseFiltered = Response(Await.result(exporter.apply(requestFiltered))).contentString
+    val responseFiltered = Await.result(exporter.apply(requestFiltered)).contentString
     assert(responseFiltered.contains("views"), "'Views' should be present - 'vie' is not a match")
     assert(! responseFiltered.contains("jvm_gcs"), "'jvm_gcs' should be present - jvm.* matches it")
 
     val requestUnfiltered = Request("/admin/metrics.json")
-    val responseUnfiltered = Response(Await.result(exporter.apply(requestUnfiltered)))
-    assert(MediaType.Json.equals(responseUnfiltered.headers().get(HttpHeaders.Names.CONTENT_TYPE)))
+    val responseUnfiltered = Await.result(exporter.apply(requestUnfiltered))
+    assert(Some(MediaType.Json) == responseUnfiltered.contentType)
 
     val responseUnfilteredContent = responseUnfiltered.contentString
     assert(responseUnfilteredContent.contains("views"), "'Views' should be present - 'vie' is not a match")
@@ -100,12 +123,12 @@ class JsonExporterTest
         }
 
         // we won't trigger an `update` until the first minute.
-        val emptyRes = Response(Await.result(exporter(reqWithPeriod))).contentString
+        val emptyRes = Await.result(exporter(reqWithPeriod)).contentString
         assert(emptyRes == "{}")
 
         update()
         eventually {
-          val res = Response(Await.result(exporter(reqWithPeriod))).contentString
+          val res = Await.result(exporter(reqWithPeriod)).contentString
           assert(res == """{"anCounter":0}""")
         }
 
@@ -114,7 +137,7 @@ class JsonExporterTest
         update()
         eventually {
           // with the param
-          val res = Response(Await.result(exporter(reqWithPeriod))).contentString
+          val res = Await.result(exporter(reqWithPeriod)).contentString
           assert(res == """{"anCounter":11}""")
         }
 
@@ -122,16 +145,16 @@ class JsonExporterTest
         update()
         eventually {
           // verify returning deltas, when param requested
-          val res = Response(Await.result(exporter(reqWithPeriod))).contentString
+          val res = Await.result(exporter(reqWithPeriod)).contentString
           assert(res == """{"anCounter":5}""")
         }
 
         // verify totals returned when param omitted
-        val res3 = Response(Await.result(exporter(reqNoPeriod))).contentString
+        val res3 = Await.result(exporter(reqNoPeriod)).contentString
         assert(res3 == """{"anCounter":16}""")
         counter.add(5)
         update() // should not matter when the param is omitted.
-        val res4 = Response(Await.result(exporter(reqNoPeriod))).contentString
+        val res4 = Await.result(exporter(reqNoPeriod)).contentString
         assert(res4 == """{"anCounter":21}""")
       }
     }
@@ -155,13 +178,13 @@ class JsonExporterTest
         }
 
         // with counterDeltas param
-        val res1 = Response(Await.result(exporter(reqWithPeriod))).contentString
+        val res1 = Await.result(exporter(reqWithPeriod)).contentString
         assert(res1 == """{"anCounter":11}""")
 
         // update should have no effect, even when param included
         counter.add(5)
         update()
-        val res2 = Response(Await.result(exporter(reqWithPeriod))).contentString
+        val res2 = Await.result(exporter(reqWithPeriod)).contentString
         assert(res2 == """{"anCounter":16}""")
       }
     }
@@ -177,13 +200,13 @@ class JsonExporterTest
 
     format.let(format.Ostrich) {
       val exporter = new JsonExporter(registry)
-      val res = Response(Await.result(exporter(req))).contentString
+      val res = Await.result(exporter(req)).contentString
       assert(res.contains(""""anHisto.maximum":555"""))
     }
 
     format.let(format.CommonsMetrics) {
       val exporter = new JsonExporter(registry)
-      val res = Response(Await.result(exporter(req))).contentString
+      val res = Await.result(exporter(req)).contentString
       assert(res.contains(""""anHisto.max":555"""))
     }
   }

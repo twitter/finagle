@@ -7,7 +7,7 @@ scala_library(name='scala',
   dependencies=[
     '3rdparty/jvm/io/netty',
     'finagle/finagle-core',
-    'finagle/finagle-http',
+    'finagle/finagle-httpx',
     'ostrich',
     'util/util-core'
   ],
