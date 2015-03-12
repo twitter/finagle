@@ -5,7 +5,6 @@ import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.{MockTimer => _, _}
 import com.twitter.util._
-import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
@@ -21,31 +20,32 @@ class LatencyCompensationTest
   with Eventually
   with IntegrationPatience
 {
-
-  test("modifies connect & request timeout parameters") {
-    val verify = new Stack.Module[ServiceFactory[String, String]] {
+  def verifyCompensationModule(expected: Duration) =
+    new Stack.Module[ServiceFactory[String, String]] {
       val role = Stack.Role("verify")
       val description = "Verify stack behavior"
       val parameters = Seq(
-        implicitly[Stack.Param[LatencyCompensation.Compensator]],
-        implicitly[Stack.Param[TimeoutFilter.Param]],
-        implicitly[Stack.Param[Transporter.ConnectTimeout]])
+        implicitly[Stack.Param[LatencyCompensation.Compensator]])
       def make(prms: Stack.Params, next: Stack[ServiceFactory[String, String]]) = {
-        val Transporter.ConnectTimeout(connect) = prms[Transporter.ConnectTimeout]
-        assert(connect === 110.millis)
-        val TimeoutFilter.Param(request) = prms[TimeoutFilter.Param]
-        assert(request === 4100.millis)
+        val LatencyCompensation.Compensation(compensation) = prms[LatencyCompensation.Compensation]
+        assert(expected === compensation)
+
         Stack.Leaf(this, ServiceFactory.const(Service.mk[String, String](Future.value)))
       }
     }
+
+  test("Sets Compensation param") {
     val stk = new StackBuilder[ServiceFactory[String, String]](nilStack[String, String])
-    stk.push(verify)
+    stk.push(verifyCompensationModule(100.millis))
     stk.push(LatencyCompensation.module)
-    stk.result.make(
-      Stack.Params.empty +
-        Transporter.ConnectTimeout(10.millis) +
-        TimeoutFilter.Param(4.seconds) +
-        LatencyCompensation.Compensator(_ => 100.millis))
+    stk.result.make(Stack.Params.empty + LatencyCompensation.Compensator(_ => 100.millis))
+  }
+
+  test("Defaults to zero") {
+    val stk = new StackBuilder[ServiceFactory[String, String]](nilStack[String, String])
+    stk.push(verifyCompensationModule(0.second))
+    stk.push(LatencyCompensation.module)
+    stk.result.make(Stack.Params.empty)
   }
 
   class Ctx {
@@ -99,7 +99,8 @@ class LatencyCompensationTest
     }
   }
 
-  test("Latency compensator extends request timeout") {
+
+  test("TimeoutFilter.module accomodates latency compensation") {
     new Ctx {
       metadata = Addr.Metadata("compensation" -> 2.seconds)
 
@@ -124,7 +125,7 @@ class LatencyCompensationTest
     }
   }
 
-  test("Latency compensator still times out requests when compensating") {
+  test("TimeoutFilter.module still times out requests when compensating") {
     new Ctx {
       metadata = Addr.Metadata("compensation" -> 2.seconds)
 

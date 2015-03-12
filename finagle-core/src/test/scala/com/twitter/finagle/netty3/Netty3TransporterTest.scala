@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty3
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.param.Label
 import com.twitter.finagle.socks.SocksConnectHandler
 import com.twitter.finagle.Stack
@@ -32,6 +32,7 @@ class Netty3TransporterTest extends FunSpec with MockitoSugar {
           Label("test") +
           Netty3Transporter.TransportFactory.param.default +
           Transporter.ConnectTimeout(1.seconds) +
+          LatencyCompensation.Compensation(12.millis) +
           Transporter.TLSHostname(Some("tls.host")) +
           Transporter.HttpProxy(Some(new InetSocketAddress(0))) +
           Transporter.SocksProxy(Some(new InetSocketAddress(0)), Some("user", "pw")) +
@@ -56,7 +57,9 @@ class Netty3TransporterTest extends FunSpec with MockitoSugar {
       assert(transporter.channelOptions.get("sendBufferSize") == inputParams[Transport.BufferSizes].send)
       assert(transporter.channelOptions.get("receiveBufferSize") == inputParams[Transport.BufferSizes].recv)
       assert(transporter.channelOptions.get("keepAlive") == inputParams[Transport.Liveness].keepAlive)
-      assert(transporter.channelOptions.get("connectTimeoutMillis").get == inputParams[Transporter.ConnectTimeout].howlong.inMilliseconds)
+      assert(transporter.channelOptions.get("connectTimeoutMillis").get ==
+        inputParams[Transporter.ConnectTimeout].howlong.inMilliseconds +
+        inputParams[LatencyCompensation.Compensation].howlong.inMilliseconds)
       assert(transporter.channelSnooper.nonEmpty == inputParams[Transport.Verbose].b)
     }
 

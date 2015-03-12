@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty3
 
 import com.twitter.finagle.channel.{ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler}
-import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.httpproxy.HttpConnectHandler
 import com.twitter.finagle.socks.{SocksProxyFlags, SocksConnectHandler, Unauthenticated, UsernamePassAuthenticationSetting}
 import com.twitter.finagle.ssl.{Engine, SslConnectHandler}
@@ -123,6 +123,7 @@ object Netty3Transporter {
     val ChannelFactory(cf) = params[ChannelFactory]
     val TransportFactory(newTransport) = params[TransportFactory]
     val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
+    val LatencyCompensation.Compensation(compensation) = params[LatencyCompensation.Compensation]
     val Transporter.TLSHostname(tlsHostname) = params[Transporter.TLSHostname]
     val Transporter.HttpProxy(httpProxy) = params[Transporter.HttpProxy]
     val Transporter.SocksProxy(socksProxy, credentials) = params[Transporter.SocksProxy]
@@ -148,7 +149,7 @@ object Netty3Transporter {
       channelSnooper = snooper,
       channelOptions = {
         val o = new scala.collection.mutable.MapBuilder[String, Object, Map[String, Object]](Map())
-        o += "connectTimeoutMillis" -> (connectTimeout.inMilliseconds: java.lang.Long)
+        o += "connectTimeoutMillis" -> ((connectTimeout + compensation).inMilliseconds: java.lang.Long)
         o += "tcpNoDelay" -> java.lang.Boolean.TRUE
         o += "reuseAddress" -> java.lang.Boolean.TRUE
         for (v <- keepAlive) o += "keepAlive" -> (v: java.lang.Boolean)

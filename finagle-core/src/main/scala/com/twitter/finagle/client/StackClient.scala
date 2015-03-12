@@ -32,7 +32,6 @@ object StackClient {
    * Note that this is terminated by a [[com.twitter.finagle.service.FailingFactory]]:
    * users are expected to terminate it with a concrete service factory.
    *
-   * @see [[com.twitter.finagle.client.LatencyCompensation]]
    * @see [[com.twitter.finagle.service.ExpiringService]]
    * @see [[com.twitter.finagle.service.FailFastFactory]]
    * @see [[com.twitter.finagle.client.DefaultPool]]
@@ -44,6 +43,7 @@ object StackClient {
    * @see [[com.twitter.finagle.tracing.ClientDestTracingFilter]]
    * @see [[com.twitter.finagle.filter.MonitorFilter]]
    * @see [[com.twitter.finagle.filter.ExceptionSourceFilter]]
+   * @see [[com.twitter.finagle.client.LatencyCompensation]]
    */
   def endpointStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
     // Ensure that we have performed global initialization.

@@ -1,6 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle._
+import com.twitter.finagle.client.LatencyCompensation
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util.{Future, Duration, Timer}
 
@@ -25,15 +26,23 @@ object TimeoutFilter {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.TimeoutFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module2[TimeoutFilter.Param, param.Timer, ServiceFactory[Req, Rep]] {
+    new Stack.Module3[
+        TimeoutFilter.Param,
+        LatencyCompensation.Compensation,
+        param.Timer,
+        ServiceFactory[Req, Rep]] {
       val role = TimeoutFilter.role
       val description = "Apply a timeout to requests"
-      def make(_param: Param, _timer: param.Timer, next: ServiceFactory[Req, Rep]) = {
+      def make(
+          _param: Param, _compensation: LatencyCompensation.Compensation,
+          _timer: param.Timer, next: ServiceFactory[Req, Rep]
+      ) = {
         val Param(timeout) = _param
         val param.Timer(timer) = _timer
         if (!timeout.isFinite) next else {
           val exc = new IndividualRequestTimeoutException(timeout)
-          new TimeoutFilter(timeout, exc, timer) andThen next
+          val LatencyCompensation.Compensation(compensation) = _compensation
+          new TimeoutFilter(timeout + compensation, exc, timer) andThen next
         }
       }
     }
