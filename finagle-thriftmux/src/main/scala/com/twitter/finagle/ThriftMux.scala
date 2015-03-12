@@ -1,15 +1,16 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.Stack.Param
 import com.twitter.finagle.client.{StackClient, StackBasedClient}
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.param.{Label, Stats}
-import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
+import com.twitter.finagle.server.{StackBasedServer, Listener, StackServer, StdStackServer}
 import com.twitter.finagle.stats.{ClientStatsReceiver, ServerStatsReceiver}
 import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest, UncaughtAppExceptionFilter}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
-import com.twitter.util.{Future, Local, NonFatal, Time}
+import com.twitter.util.{Future, NonFatal}
 import java.net.SocketAddress
 import org.apache.thrift.TException
 import org.apache.thrift.protocol.TProtocolFactory
@@ -93,12 +94,15 @@ object ThriftMux
   }
 
   case class Client(
-    muxer: StackClient[mux.Request, mux.Response] = Mux.client.copy(stack = BaseClientStack)
-  ) extends StackBasedClient[ThriftClientRequest, Array[Byte]]
-      with Stack.Parameterized[Client]
-      with Stack.Transformable[Client]
-      with ThriftRichClient {
-    def stack = muxer.stack
+      muxer: StackClient[mux.Request, mux.Response] = Mux.client.copy(stack = BaseClientStack))
+    extends StackBasedClient[ThriftClientRequest, Array[Byte]]
+    with Stack.Parameterized[Client]
+    with Stack.Transformable[Client]
+    with ThriftRichClient {
+
+    def stack: Stack[ServiceFactory[mux.Request, mux.Response]] =
+      muxer.stack
+
     def params: Stack.Params = muxer.params
 
     protected lazy val Label(defaultClientName) = params[Label]
@@ -297,13 +301,22 @@ object ThriftMux
 
   case class Server(
       muxer: StackServer[mux.Request, mux.Response] = serverMuxer)
-    extends com.twitter.finagle.Server[Array[Byte], Array[Byte]]
-    with ThriftRichServer with Stack.Parameterized[Server]
+    extends StackBasedServer[Array[Byte], Array[Byte]]
+    with ThriftRichServer
+    with Stack.Parameterized[Server]
   {
     import Server.MuxToArrayFilter
 
-    def stack = muxer.stack
-    def params = muxer.params
+    def stack: Stack[ServiceFactory[mux.Request, mux.Response]] =
+      muxer.stack
+
+    def params: Stack.Params = muxer.params
+
+    override def configured[P](psp: (P, Param[P])): Server =
+      super.configured(psp)
+
+    override def configured[P: Param](p: P): Server =
+      super.configured(p)
 
     protected val Thrift.param.ProtocolFactory(protocolFactory) =
       params[Thrift.param.ProtocolFactory]

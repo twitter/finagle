@@ -1,6 +1,7 @@
 package com.twitter.finagle.server
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.Stack.Param
 import com.twitter.finagle._
 import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
@@ -81,12 +82,21 @@ object StackServer {
 }
 
 /**
+ * A [[com.twitter.finagle.Server Server]] that is
+ * parameterized.
+ */
+trait StackBasedServer[Req, Rep]
+  extends Server[Req, Rep]
+  with Stack.Parameterized[StackBasedServer[Req, Rep]]
+
+/**
  * A [[com.twitter.finagle.Server]] that composes a
  * [[com.twitter.finagle.Stack]].
  */
 trait StackServer[Req, Rep]
-    extends Server[Req, Rep]
-    with Stack.Parameterized[StackServer[Req, Rep]] {
+  extends StackBasedServer[Req, Rep]
+  with Stack.Parameterized[StackServer[Req, Rep]] {
+
   /** The current stack used in this StackServer. */
   def stack: Stack[ServiceFactory[Req, Rep]]
   /** The current parameter map used in this StackServer */
@@ -94,6 +104,11 @@ trait StackServer[Req, Rep]
   /** A new StackServer with the provided Stack. */
   def withStack(stack: Stack[ServiceFactory[Req, Rep]]): StackServer[Req, Rep]
 
+  def withParams(ps: Stack.Params): StackServer[Req, Rep]
+
+  override def configured[P: Param](p: P): StackServer[Req, Rep]
+
+  override def configured[P](psp: (P, Param[P])): StackServer[Req, Rep]
 }
 
 /**
@@ -101,7 +116,7 @@ trait StackServer[Req, Rep]
  * [[com.twitter.finagle.server.StackServer]].
  */
 trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
-    extends StackServer[Req, Rep] { self =>
+  extends StackServer[Req, Rep] { self =>
 
   protected type In
   protected type Out

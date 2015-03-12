@@ -8,11 +8,13 @@ import org.junit.Test;
 
 import com.twitter.finagle.ListeningServer;
 import com.twitter.finagle.Service;
+import com.twitter.finagle.Stack;
 import com.twitter.finagle.ThriftMux;
 import com.twitter.finagle.ThriftMuxClient;
 import com.twitter.finagle.ThriftMuxServer;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.builder.ServerBuilder;
+import com.twitter.finagle.param.Label;
 import com.twitter.finagle.thrift.ClientId;
 import com.twitter.finagle.thriftmux.thriftscala.TestService;
 import com.twitter.finagle.thriftmux.thriftscala.TestService$FinagleService;
@@ -57,7 +59,7 @@ public class EndToEndTest {
       new TBinaryProtocol.Factory()
     );
 
-   ServerBuilder.safeBuild(
+    ServerBuilder.safeBuild(
       service,
       ServerBuilder.get()
         .name("java-test-server")
@@ -65,11 +67,29 @@ public class EndToEndTest {
         .stack(ThriftMuxServer.get())
     );
 
-   ClientBuilder.safeBuild(
-     ClientBuilder.get()
-       .name("java-test-client")
-       .hosts(addr)
-       .stack(ThriftMuxClient.withClientId(new ClientId("java-test-client")))
-   );
+    ServerBuilder.get().stack(ThriftMux.server());
+
+    ThriftMux.Server withParams = ThriftMux.server()
+      .withParams(Stack.Params$.MODULE$.empty());
+    ServerBuilder.get().stack(withParams);
+
+    ThriftMux.Server configured = ThriftMux.server()
+      .configured(new Label("hi").mk());
+    ServerBuilder.get().stack(configured);
+
+    ThriftMux.Server withParamsAndConfigured = ThriftMux.server()
+      .withParams(Stack.Params$.MODULE$.empty())
+      .configured(new Label("hi").mk());
+    ServerBuilder.get().stack(withParamsAndConfigured);
+
+    ClientBuilder.safeBuild(
+      ClientBuilder.get()
+        .name("java-test-client")
+        .hosts(addr)
+        .stack(ThriftMuxClient.withClientId(new ClientId("java-test-client")))
+    );
+
+    ClientBuilder.get()
+      .stack(ThriftMux.client());
   }
 }

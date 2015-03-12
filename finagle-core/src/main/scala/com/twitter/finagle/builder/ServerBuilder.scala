@@ -5,7 +5,7 @@ import com.twitter.finagle.channel.IdleConnectionFilter
 import com.twitter.finagle.channel.OpenConnectionsThresholds
 import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter}
 import com.twitter.finagle.netty3.Netty3Listener
-import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
+import com.twitter.finagle.server.{StackBasedServer, Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service.ExpiringService
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.ssl.{Ssl, Engine}
@@ -264,7 +264,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * created by `mk`; it is up to the discretion of the server and protocol
    * implementation.
    */
-  @deprecated("Use stack(server: Stack.Parameterized)", "7.0.0")
+  @deprecated("Use stack(server: StackBasedServer)", "7.0.0")
   def stack[Req1, Rep1](
     mk: Stack.Params => FinagleServer[Req1, Rep1]
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
@@ -274,14 +274,14 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * Overrides the stack and [[com.twitter.finagle.Server]] that will be used
    * by this builder.
    *
-   * @param server A `Parameterized` representation of a
+   * @param server A [[StackBasedServer]] representation of a
    * [[com.twitter.finagle.Server]]. `server` is materialized with the state of
    * configuration when `build` is called. There is no guarantee that all
    * builder parameters will be used by the resultant `Server`; it is up to the
    * discretion of `server` itself and the protocol implementation.
    */
   def stack[Req1, Rep1](
-    server: Stack.Parameterized[FinagleServer[Req1, Rep1]]
+    server: StackBasedServer[Req1, Rep1]
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] = {
     val withParams: Stack.Params => FinagleServer[Req1, Rep1] = { ps =>
       server.withParams(server.params ++ ps)
