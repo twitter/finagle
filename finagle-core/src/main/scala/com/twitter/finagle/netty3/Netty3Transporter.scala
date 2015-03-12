@@ -15,7 +15,8 @@ import java.util.concurrent.TimeUnit
 import java.util.IdentityHashMap
 import java.util.logging.Level
 import org.jboss.netty.channel.ChannelHandler
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
+import org.jboss.netty.channel.socket.ChannelRunnableWrapper
+import org.jboss.netty.channel.socket.nio.{NioSocketChannel, NioClientSocketChannelFactory}
 import org.jboss.netty.channel.{ChannelFactory => NettyChannelFactory, _}
 import org.jboss.netty.handler.timeout.IdleStateHandler
 import scala.collection.JavaConverters._
@@ -195,6 +196,26 @@ case class Netty3TransporterTLSConfig(
   newEngine: SocketAddress => Engine, verifyHost: Option[String])
 
 /**
+ * A [[ChannelFutureListener]] instance that fires "channelClosed" upstream event to the
+ * pipeline. It maintains events in order by running the task in the I/O thread.
+ */
+private[netty3] object FireChannelClosedLater extends ChannelFutureListener {
+  override def operationComplete(future: ChannelFuture): Unit = {
+    future.getChannel match {
+      case nioChannel: NioSocketChannel =>
+        val channelClosed = new ChannelRunnableWrapper(nioChannel, new Runnable() {
+          override def run(): Unit =
+            Channels.fireChannelClosed(nioChannel)
+        })
+        nioChannel.getWorker.executeInIoThread(channelClosed, /* alwaysAsync */ true)
+
+      case channel =>
+        Channels.fireChannelClosedLater(channel)
+    }
+ }
+}
+
+/**
  * A transporter for netty3 which, given an endpoint name (socket
  * address), provides a typed transport for communicating with this
  * endpoint.
@@ -305,9 +326,12 @@ case class Netty3Transporter[In, Out](
       // on the transport level, we fail (close the channel) instead and propagate the exception to the
       // higher level (load balancing, connection pooling, etc.), so it can react on the failure.
       //
+      // In order to close the channel, we simply fire the upstream "channelClosed" event in the pipeline.
+      // To maintain events in order, the upstream event should be fired in the I/O thread.
+      //
       // [1]: https://github.com/netty/netty/issues/137
       // [2]: https://github.com/netty/netty/blob/3.10/src/main/java/org/jboss/netty/handler/ssl/SslHandler.java#L119
-      sslHandler.getSSLEngineInboundCloseFuture.addListener(ChannelFutureListener.CLOSE)
+      sslHandler.getSSLEngineInboundCloseFuture.addListener(FireChannelClosedLater)
     }
 
     (socksProxy, addr) match {

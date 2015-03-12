@@ -7,13 +7,12 @@ import com.twitter.finagle.socks.SocksConnectHandler
 import com.twitter.finagle.Stack
 import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{ChannelTransport, Transport}
 import com.twitter.util.Duration
 import java.net.InetSocketAddress
 import javax.net.ssl.{SSLEngineResult, SSLEngine, SSLSession}
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.timeout.IdleStateHandler
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
@@ -224,20 +223,15 @@ class Netty3TransporterTest extends FunSpec with MockitoSugar {
 
         val pipeline = transporter.newPipeline(null, NullStatsReceiver)
         val channel = transporter.newChannel(pipeline)
+        new ChannelTransport[Any, Any](channel) // adds itself to the channel's pipeline
         val closeNotify = new UpstreamMessageEvent(channel, cb, null)
 
-        val ctx = mock[ChannelHandlerContext]
-        when(ctx.getChannel) thenReturn channel
-        when(ctx.getPipeline) thenReturn pipeline
-
-        val sslHandler = pipeline.get(classOf[SslHandler])
-
         assert(channel.isOpen)
-        assert(sslHandler != null)
 
-        sslHandler.handleUpstream(ctx, closeNotify)
+        pipeline.sendUpstream(closeNotify)
 
-        assert(!channel.isOpen)
+        // We wait for I/O thread closing the channel
+        assert(channel.getCloseFuture.await(3000)) // timeout 3s
       }
     }
   }
