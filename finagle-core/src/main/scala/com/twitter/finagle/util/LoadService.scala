@@ -2,6 +2,7 @@ package com.twitter.finagle.util
 
 import com.twitter.logging.Level
 import com.twitter.util.NonFatal
+import com.twitter.util.registry.GlobalRegistry
 import java.io.{File, IOException}
 import java.net.{URI, URISyntaxException, URLClassLoader}
 import java.nio.charset.MalformedInputException
@@ -175,12 +176,13 @@ object LoadService {
       className <- info.lines
     } yield className
 
-    val classNamesFromRessources = for {
+    val classNamesFromResources = for {
       rsc <- loader.getResources("META-INF/services/" + ifaceName).asScala
       line <- ClassPath.readLines(Source.fromURL(rsc))
     } yield line
 
-    (classNames ++ classNamesFromRessources).distinct flatMap { className =>
+    val buffer = mutable.ListBuffer.empty[String]
+    val result = (classNames ++ classNamesFromResources).distinct.flatMap { className =>
       val cls = Class.forName(className)
       if (!(iface isAssignableFrom cls))
         throw new ServiceConfigurationError(s"$className not a subclass of $ifaceName")
@@ -192,6 +194,7 @@ object LoadService {
 
       try {
         val instance = cls.newInstance().asInstanceOf[T]
+        buffer += className
         Some(instance)
       } catch {
         case NonFatal(ex) =>
@@ -204,5 +207,7 @@ object LoadService {
           None
       }
     }
+    GlobalRegistry.get.put(Seq("loadservice", ifaceName), buffer.mkString(","))
+    result
   }
 }
