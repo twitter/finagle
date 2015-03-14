@@ -125,7 +125,7 @@ class ClientRegistryTest extends FunSuite
     val simple = new SimpleRegistry
     GlobalRegistry.withRegistry(simple) {
       val c = stackClient.newClient(Name.Path(path), "foo")
-      val prefix = Seq("client", "foo", "$com.twitter.finagle.client.crtnamerfoo", "Pool")
+      val prefix = Seq("client", "foo", "/$/com.twitter.finagle.client.crtnamer/foo", "Pool")
       val filtered = GlobalRegistry.get.toSet.filter { e =>
         e.key.startsWith(prefix)
       }
