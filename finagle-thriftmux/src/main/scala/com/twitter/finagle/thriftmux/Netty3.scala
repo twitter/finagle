@@ -1,6 +1,6 @@
 package com.twitter.finagle.thriftmux
 
-import com.twitter.finagle.{Path, Failure, mux, Dtab, Dentry, NameTree, ThriftMuxUtil}
+import com.twitter.finagle.{Path, Failure, mux, Dtab, ThriftMuxUtil}
 import com.twitter.finagle.mux.{BadMessageException, Message}
 import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.finagle.netty3.Conversions._
@@ -8,8 +8,7 @@ import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.thrift.thrift.{
   RequestContext, RequestHeader, ResponseHeader, UpgradeReply}
-import com.twitter.finagle.tracing.{Trace, Flags, SpanId, TraceId}
-import com.twitter.finagle.{Failure, mux, Dtab, ThriftMuxUtil}
+import com.twitter.finagle.tracing.Trace
 import com.twitter.logging.Level
 import com.twitter.util.{Try, Return, Throw, NonFatal}
 import java.util.concurrent.LinkedBlockingDeque
@@ -18,7 +17,6 @@ import org.apache.thrift.protocol.{TProtocolFactory, TMessage, TMessageType}
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.jboss.netty.channel._
 import scala.collection.mutable
-
 
 /**
  * A [[org.jboss.netty.channel.ChannelPipelineFactory]] that manages the downgrading
@@ -56,24 +54,16 @@ private[finagle] class PipelineFactory(
         header,
         protocolFactory
       )
-      val sampled = if (header.isSetSampled) Some(header.isSampled) else None
-      val traceId = TraceId(
-        if (header.isSetTrace_id) Some(SpanId(header.getTrace_id)) else None,
-        if (header.isSetParent_span_id) Some(SpanId(header.getParent_span_id)) else None,
-        SpanId(header.getSpan_id),
-        sampled,
-        if (header.isSetFlags) Flags(header.getFlags) else Flags()
-      )
+      val richHeader = new RichRequestHeader(header)
 
       val contextBuf = mutable.ArrayBuffer.empty[(ChannelBuffer, ChannelBuffer)]
 
       contextBuf += (
         BufChannelBuffer(Trace.idCtx.marshalId) ->
-        BufChannelBuffer(Trace.idCtx.marshal(traceId)))
+        BufChannelBuffer(Trace.idCtx.marshal(richHeader.traceId)))
 
-      if (header.client_id != null) {
-        val clientIdBuf =
-          ClientId.clientIdCtx.marshal(Some(ClientId(header.client_id.name)))
+      richHeader.clientId foreach { clientId =>
+        val clientIdBuf = ClientId.clientIdCtx.marshal(Some(clientId))
         contextBuf += (
           BufChannelBuffer(ClientId.clientIdCtx.marshalId) ->
           BufChannelBuffer(clientIdBuf))
@@ -86,24 +76,10 @@ private[finagle] class PipelineFactory(
         }
       }
 
-      var dtab = Dtab.empty
-      if (header.getDelegationsSize() > 0) {
-        val ds = header.getDelegationsIterator()
-        while (ds.hasNext()) {
-          val d = ds.next()
-          if (d.src != null && d.dst != null) {
-            val src = Path.read(d.src)
-            val dst = NameTree.read(d.dst)
-            dtab += Dentry(src, dst)
-          }
-        }
-      }
-
-      val dest = if (header.dest == null) Path.empty else Path.read(header.dest)
-
       val requestBuf = ChannelBuffers.wrappedBuffer(request_)
 
-      Message.Tdispatch(Message.MinTag, contextBuf.toSeq, dest, dtab, requestBuf)
+      Message.Tdispatch(
+        Message.MinTag, contextBuf.toSeq, richHeader.dest, richHeader.dtab, requestBuf)
     }
 
     override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent)  {

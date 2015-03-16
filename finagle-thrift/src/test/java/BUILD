@@ -1,5 +1,6 @@
 junit_tests(name='java',
   dependencies=[
+    '3rdparty/jvm/junit',
     '3rdparty/jvm/org/scala-lang:scala-library',
     '3rdparty/jvm/org/slf4j:slf4j-api',
     '3rdparty/jvm/org/apache/thrift:thrift-0.5.0',
