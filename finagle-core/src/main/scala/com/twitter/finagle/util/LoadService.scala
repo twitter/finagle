@@ -22,9 +22,16 @@ import scala.reflect.ClassTag
  */
 private object ClassPath {
 
-  private val ignoredPackages = Seq(
+  private var ignoredPackages = Seq(
     "apple/", "ch/epfl/", "com/apple/", "com/oracle/",
     "com/sun/", "java/", "javax/", "scala/", "sun/", "sunw/")
+
+  /**
+   * Adding additional packages to be ignored.
+   */
+  def addIgnoredPackages(packages: String*) = {
+    ignoredPackages = ignoredPackages ++ packages
+  }
 
   /**
    * Information about a classpath entry.
@@ -184,6 +191,11 @@ object LoadService {
 
   def apply[T: ClassTag](): Seq[T] = synchronized {
     val iface = implicitly[ClassTag[T]].runtimeClass.asInstanceOf[Class[T]]
+
+  def addIgnoredPaths(paths: String*) = {
+    ClassPath.addIgnoredPackages(paths: _*)
+  }
+
     val ifaceName = iface.getName
     val loader = iface.getClassLoader
 
