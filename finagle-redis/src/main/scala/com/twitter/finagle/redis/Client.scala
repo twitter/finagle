@@ -65,6 +65,11 @@ class BaseClient(service: Service[Command, Reply]) {
     }
 
   /**
+   * Deletes all keys in all databases
+   */
+   def flushAll(): Future[Unit] = doRequest(FlushAll) {case StatusReply(_) => Future.Unit}
+
+  /**
    * Deletes all keys in current DB
    */
   def flushDB(): Future[Unit] =
