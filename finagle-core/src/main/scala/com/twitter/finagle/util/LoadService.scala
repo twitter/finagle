@@ -7,11 +7,18 @@ import java.io.{File, IOException}
 import java.net.{URI, URISyntaxException, URLClassLoader}
 import java.nio.charset.MalformedInputException
 import java.util.ServiceConfigurationError
+<<<<<<< HEAD
 import java.util.jar.JarFile
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.io.Source
 import scala.reflect.ClassTag
+=======
+import scala.collection.JavaConverters._
+import scala.collection.mutable
+import scala.io.Source
+import com.twitter.app.GlobalFlag
+>>>>>>> added ignoredPaths GlobalFlag and unit test
 
 /**
  * Inspect and load the classpath. Inspired by Guava's ClassPath
@@ -22,7 +29,7 @@ import scala.reflect.ClassTag
  */
 private object ClassPath {
 
-  private var ignoredPackages = Seq(
+  private[util] var ignoredPackages = Seq(
     "apple/", "ch/epfl/", "com/apple/", "com/oracle/",
     "com/sun/", "java/", "javax/", "scala/", "sun/", "sunw/")
 
@@ -181,6 +188,8 @@ private object ClassPath {
   }
 }
 
+object ignoredPaths extends GlobalFlag("", "Additional packages to be excluded from recursive directory scan")
+
 /**
  * Load a singleton class in the manner of [[java.util.ServiceLoader]]. It is
  * more resilient to varying Java packaging configurations than ServiceLoader.
@@ -194,7 +203,14 @@ object LoadService {
 
   def addIgnoredPaths(paths: String*) = {
     ClassPath.addIgnoredPackages(paths: _*)
+
+  private[util] def updateIgnoredPackages = {
+    Option(ignoredPaths()) filter (_.trim.nonEmpty) foreach { ips =>
+      val packages = ips.split(',') map(_.trim)
+      ClassPath.addIgnoredPackages(packages: _*)
+    }
   }
+  updateIgnoredPackages
 
     val ifaceName = iface.getName
     val loader = iface.getClassLoader
@@ -240,3 +256,4 @@ object LoadService {
     result
   }
 }
+

@@ -158,6 +158,15 @@ class LoadServiceTest extends FunSuite with MockitoSugar {
       jar2.delete
     }
   }
+
+  test("LoadService should ignore packages according to ignoredPaths GlobalFlag") {
+    val ips = ClassPath.ignoredPackages
+    ignoredPaths.let("foo/ , /bar "){
+      LoadService.updateIgnoredPackages
+      assert(ClassPath.ignoredPackages.takeRight(2) == Seq("foo/", "/bar"))
+    }
+    ClassPath.ignoredPackages = ips
+  }
 }
 
 class LoadServiceCallable extends Callable[Seq[Any]] {
@@ -199,3 +208,4 @@ class FooAnnouncer extends Announcer {
 
   override def announce(addr: InetSocketAddress, name: String): Future[Announcement] = null
 }
+
