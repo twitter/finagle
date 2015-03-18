@@ -29,16 +29,13 @@ import com.twitter.app.GlobalFlag
  */
 private object ClassPath {
 
-  private[util] var ignoredPackages = Seq(
+  private val defaultIgnoredPackages = Seq(
     "apple/", "ch/epfl/", "com/apple/", "com/oracle/",
     "com/sun/", "java/", "javax/", "scala/", "sun/", "sunw/")
 
-  /**
-   * Adding additional packages to be ignored.
-   */
-  def addIgnoredPackages(packages: String*) = {
-    ignoredPackages = ignoredPackages ++ packages
-  }
+  private[util] def ignoredPackages =
+    if (ignoredPaths.isDefined) defaultIgnoredPackages ++ ignoredPaths()
+    else defaultIgnoredPackages
 
   /**
    * Information about a classpath entry.
@@ -188,7 +185,8 @@ private object ClassPath {
   }
 }
 
-object ignoredPaths extends GlobalFlag("", "Additional packages to be excluded from recursive directory scan")
+object ignoredPaths extends GlobalFlag(Seq.empty[String],
+    "Additional packages to be excluded from recursive directory scan")
 
 /**
  * Load a singleton class in the manner of [[java.util.ServiceLoader]]. It is

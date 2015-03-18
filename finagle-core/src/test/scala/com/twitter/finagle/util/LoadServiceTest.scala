@@ -15,6 +15,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import scala.collection.mutable
 import scala.util.Random
+import com.twitter.app.GlobalFlag
 
 trait LoadServiceRandomInterface
 
@@ -160,12 +161,9 @@ class LoadServiceTest extends FunSuite with MockitoSugar {
   }
 
   test("LoadService should ignore packages according to ignoredPaths GlobalFlag") {
-    val ips = ClassPath.ignoredPackages
-    ignoredPaths.let("foo/ , /bar "){
-      LoadService.updateIgnoredPackages
+    ignoredPaths.let(Seq("foo/", "/bar")){
       assert(ClassPath.ignoredPackages.takeRight(2) == Seq("foo/", "/bar"))
     }
-    ClassPath.ignoredPackages = ips
   }
 }
 
