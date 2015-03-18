@@ -31,7 +31,8 @@ junit_tests(name='scala',
     'finagle/finagle-memcachedx',
     'finagle/finagle-serversets',
     'util/util-core',
-    'util/util-hashing'
+    'util/util-hashing',
+    'util/util-zk-test'
   ],
   sources=rglobs('*.scala') - EXTERNAL_SOURCES,
   resources=[

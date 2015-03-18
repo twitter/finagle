@@ -47,6 +47,14 @@ Breaking API Changes
   * finagle-core: remove deprecated `c.t.f.builder.ClientBuilder.stack` taking a
     `Stack.Params => Client[Req1, Rep1]`.
 
+  * finagle-memcached / finagle-memcachedx: MigrationClientTest now uses
+    ServerCnxnFactory from com.twitter.zk rather than NIOServerCnxn.Factory from
+    org.apache.zookeeper.server.
+
+  * finagle-serversets: ZkInstance in tests now uses ServerCnxnFactory from
+    com.twitter.zk rather than NIOServerCnxn.Factory from
+    org.apache.zookeeper.server.
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

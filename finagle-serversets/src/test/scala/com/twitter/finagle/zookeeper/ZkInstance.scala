@@ -2,14 +2,15 @@ package com.twitter.finagle.zookeeper
 
 import java.net.{InetAddress, InetSocketAddress}
 
-import org.apache.zookeeper.server.{ZKDatabase, NIOServerCnxn, ZooKeeperServer}
+import org.apache.zookeeper.server.{ZKDatabase, ZooKeeperServer}
 import com.twitter.common.zookeeper.ZooKeeperClient
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog
 import com.twitter.common.io.FileUtils.createTempDir
 import com.twitter.common.quantity.{Amount, Time}
+import com.twitter.zk.ServerCnxnFactory
 
 class ZkInstance {
-  var connectionFactory: NIOServerCnxn.Factory = null
+  var connectionFactory: ServerCnxnFactory = null
   var zookeeperServer: ZooKeeperServer = null
   var zookeeperClient: ZooKeeperClient = null
   var started = false
@@ -34,7 +35,7 @@ class ZkInstance {
       new ZooKeeperServer.BasicDataTreeBuilder,
       zkdb
       )
-    connectionFactory = new NIOServerCnxn.Factory(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
+    connectionFactory = ServerCnxnFactory(InetAddress.getLoopbackAddress)
     connectionFactory.startup(zookeeperServer)
     zookeeperClient = new ZooKeeperClient(
       Amount.of(10, Time.MILLISECONDS),

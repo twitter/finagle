@@ -21,7 +21,8 @@ target(name='core',
     'finagle/finagle-core',
     'finagle/finagle-serversets',
     'finagle/finagle-test',
-    'util/util-core'
+    'util/util-core',
+    'util/util-zk-test'
   ],
 )
 

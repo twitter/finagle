@@ -280,6 +280,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       "commons-codec" % "commons-codec" % "1.6",
       util("zk-common"),
+      util("zk-test") % "test",
       "com.twitter.common.zookeeper" % "server-set" % "1.0.83",
       "com.google.guava" % "guava" % "16.0.1"
     ),
@@ -394,6 +395,7 @@ object Finagle extends Build {
     name := "finagle-memcached",
     libraryDependencies ++= Seq(
       util("hashing"),
+      util("zk-test") % "test",
       "com.google.guava" % "guava" % "16.0.1",
       "com.twitter.common" % "zookeeper-testing" % "0.0.46" % "test"
     ),
@@ -409,6 +411,7 @@ object Finagle extends Build {
     name := "finagle-memcachedx",
     libraryDependencies ++= Seq(
       util("hashing"),
+      util("zk-test") % "test",
       "com.google.guava" % "guava" % "16.0.1",
       "com.twitter.common" % "zookeeper-testing" % "0.0.46" % "test"
     ),
