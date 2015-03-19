@@ -165,6 +165,12 @@ Bug Fixes
   * finagle-core: `c.t.f.Server.serveAndAnnounce` for a `Service` had its usage
     of `name` and `addr` transposed.
 
+Miscellaneous Cleanup
+~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-protobuf: Move entire unused subproject to the `Finagle
+    organization on GitHub <https://github.com/finagle/finagle-protobuf>`_.
+
 
 6.24.0
 ------

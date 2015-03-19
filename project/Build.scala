@@ -440,22 +440,6 @@ object Finagle extends Build {
     libraryDependencies ++= scroogeLibs
   ).dependsOn(finagleCore, finagleMemcachedX, finagleThrift)
 
-/*  notyet
-  lazy val finagleProtobuf = Project(
-    id = "finagle-protobuf",
-    base = file("finagle-protobuf"),
-    settings = Project.defaultSettings ++
-      sharedSettings
-  ).settings(
-    name := "finagle-protobuf",
-    libraryDependencies ++= Seq(
-      "junit" % "junit" % "4.10",
-      "com.google.protobuf" % "protobuf-java" % "2.4.1",
-      "org.slf4j" % "slf4j-nop" % "1.5.8" % "provided"
-    )
-  ).dependsOn(finagleCore)
-*/
-
   lazy val finagleRedis = Project(
     id = "finagle-redis",
     base = file("finagle-redis"),
