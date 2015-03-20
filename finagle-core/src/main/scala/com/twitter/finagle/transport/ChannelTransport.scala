@@ -83,7 +83,8 @@ class ChannelTransport[In, Out](ch: Channel)
   def write(msg: In): Future[Unit] = {
     val p = new Promise[Unit]
 
-    Channels.write(ch, msg).addListener(new ChannelFutureListener {
+    val op = Channels.write(ch, msg)
+    op.addListener(new ChannelFutureListener {
       def operationComplete(f: ChannelFuture) {
         if (f.isSuccess)
           p.setDone()
@@ -94,6 +95,7 @@ class ChannelTransport[In, Out](ch: Channel)
       }
     })
 
+    p.setInterruptHandler { case _ => op.cancel() }
     p
   }
 
@@ -104,7 +106,16 @@ class ChannelTransport[In, Out](ch: Channel)
     // here. For example, if a read behind another read interrupts, perhaps the
     // transport shouldn’t be failed, only the read dequeued.
     val p = new Promise[Out]
+
+    // Note: We use become instead of proxyTo here even though become is
+    // recommended when `p` has interrupt handlers. `become` merges the
+    // listeners of two promises, which continue to share state via Linked and
+    // is a gain in space-efficiency.
     p.become(readq.poll())
+
+    // Note: We don't raise on readq.poll's future, because it doesn't set an
+    // interrupt handler, but perhaps we should; and perhaps we should always
+    // raise on the "other" side of the become indiscriminately in all cases.
     p setInterruptHandler { case intr => fail(intr) }
     p
   }
