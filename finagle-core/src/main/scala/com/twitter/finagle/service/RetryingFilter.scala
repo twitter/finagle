@@ -55,7 +55,7 @@ class RetryingFilter[Req, Rep](
     } else f
   }
 
-  private[this] def dispatch(
+  protected def dispatch(
     req: Req,
     service: Service[Req, Rep],
     policy: RetryPolicy[Try[Nothing]],
