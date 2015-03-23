@@ -189,7 +189,10 @@ class ReplyCastException extends RequestException
  * connected have been marked as failed. See FailFastFactory for details on
  * this behavior.
  */
-class FailedFastException(message: String) extends RequestException(message, cause = null) {
+class FailedFastException(message: String)
+  extends RequestException(message, cause = null)
+  with WriteException
+{
   def this() = this(null)
 }
 

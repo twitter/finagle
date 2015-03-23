@@ -5,7 +5,7 @@ import com.twitter.finagle.{FailedFastException, IndividualRequestTimeoutExcepti
 import com.twitter.finagle.client.DefaultPool
 import com.twitter.finagle.integration.{DynamicCluster, StringCodec}
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.service.{RetryPolicy, TimeoutFilter}
+import com.twitter.finagle.service.{RetryPolicy, RequeueingFilter, TimeoutFilter}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, CountDownLatch, Duration, Future, Promise}
 import java.net.{InetAddress, SocketAddress, InetSocketAddress}
@@ -122,11 +122,14 @@ class EndToEndTest extends FunSuite {
     val automaticRetries =
       mem.stats(Seq("client", "automatic", "retries"))
 
+    // timeouts are not requeued by default
     assert(requestFailures === 1)
 
-    // write exception, then failedfastexception
-    assert(serviceCreationFailures === 2)
-    assert(automaticRetries === Seq(0.0f, 1.0f))
+    // failedfastexceptions are requeued
+    assert(serviceCreationFailures === RequeueingFilter.MaxTries) 
+
+    // zero requeues on timeout, then max requeues on fail fast
+    assert(automaticRetries === Seq(0.0f, RequeueingFilter.MaxTries-1))
   }
 
   test("ClientBuilder should be properly instrumented on success") {
