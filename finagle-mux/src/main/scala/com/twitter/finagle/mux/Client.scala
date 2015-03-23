@@ -5,7 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.tracing.{Trace, Annotation}
+import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Dtab, Service, WriteException, NoStacktrace, Status, Failure}
@@ -18,8 +18,9 @@ import org.jboss.netty.buffer.{ChannelBuffer, ReadOnlyChannelBuffer}
 // We can't name this 'failureDetector' because it won't
 // build on the Mac, due to its case-insensitive file system.
 object sessionFailureDetector extends GlobalFlag(
-  "none", 
-  "The failure detector used to determine session liveness [none|threshold:minPeriod:threshold:win]")
+  "none",
+  "The failure detector used to determine session liveness " +
+    "[none|threshold:minPeriod:threshold:win:closeThreshold]")
 
 /**
  * Indicates that the server failed to interpret or act on the request. This
@@ -50,14 +51,14 @@ private[twitter] object ClientDispatcher {
   /**
    * The client dispatcher can be in one of 4 states,
    * independent from its transport.
-   * 
+   *
    *  - [[Dispatching]] is the stable operating state of a Dispatcher.
-   *    Requests are dispatched, and the dispatcher's status is 
+   *    Requests are dispatched, and the dispatcher's status is
    *    [[com.twitter.finagle.Status.Open]].
    *  - A dispatcher is [[Draining]] when it has received a `Tdrain`
    *    message from its peer, but still has outstanding requests.
    *    In this state, we have promised our peer not to send any more
-   *    requests, thus the dispatcher's status is 
+   *    requests, thus the dispatcher's status is
    *    [[com.twitter.finagle.Status.Busy]], and requests for service are
    *    denied.
    *  - When a dispatcher is fully drained; that is, it has received a
@@ -68,7 +69,7 @@ private[twitter] object ClientDispatcher {
    *  - Finally, if a server has issued the client a lease, its state is
    *    set to [[Leasing]] which composes the lease expiry time. This state
    *    is equivalent to [[Dispatching]] except if the lease has expired.
-   *    At this time, the dispatcher's status is set to 
+   *    At this time, the dispatcher's status is set to
    *    [[com.twitter.finagle.Status.Busy]]; however, leases are advisory
    *    and requests are still admitted.
    */
@@ -103,10 +104,10 @@ private[twitter] class ClientDispatcher (
 ) extends Service[Request, Response] {
   import ClientDispatcher._
   import Message.{MinTag=>_, MaxTag=>_, _}
-  
+
   private[this] implicit val timer = DefaultTimer.twitter
   // Maintain the dispatcher's state, whose access is mediated
-  // by the readLk and writeLk. 
+  // by the readLk and writeLk.
   @volatile private[this] var state: State = Dispatching
   private[this] val (readLk, writeLk) = {
     val lk = new ReentrantReadWriteLock
@@ -142,7 +143,7 @@ private[twitter] class ClientDispatcher (
     }
   }
   private[this] val leaseCounter = sr.counter("leased")
-  
+
   // We're extra paranoid about logging. The log handler is,
   // after all, outside of our control.
   private[this] def safeLog(msg: String): Unit =
@@ -167,7 +168,7 @@ private[twitter] class ClientDispatcher (
         } else {
           readLk.unlock()
         }
-    
+
         if (some eq Empty) None else some
     }
 
@@ -276,7 +277,7 @@ private[twitter] class ClientDispatcher (
     if (pingPromise.compareAndSet(null, done)) {
       pingMessage.resetReaderIndex()
       // Note that we ignore any errors here. In practice this is fine
-      // as (1) this will only happen when the session has anyway 
+      // as (1) this will only happen when the session has anyway
       // died; (2) subsequent pings will use freshly allocated tags.
       trans.write(pingMessage) before done
     } else {
@@ -291,7 +292,7 @@ private[twitter] class ClientDispatcher (
             case t@Throw(_) =>
               releaseTag(tag)
               Future.const(t)
-              
+
           }
       }
     }
@@ -357,19 +358,24 @@ private[twitter] class ClientDispatcher (
       }
     } else p
   }
-  
+
   private[this] val detector = {
     import com.twitter.finagle.util.parsers._
+    val close = () => trans.close(Time.now)
+    val dsr = sr.scope("failuredetector")
 
     sessionFailureDetector() match {
+      case list("threshold", duration(min), double(threshold), int(win), int(closeThreshold)) =>
+        new ThresholdFailureDetector(
+          ping, close, min, threshold, win, closeThreshold, statsReceiver = dsr)
       case list("threshold", duration(min), double(threshold), int(win)) =>
-        new ThresholdFailureDetector(ping, min, threshold, win)
+        new ThresholdFailureDetector(ping, close, min, threshold, win, statsReceiver = dsr)
       case list("threshold", duration(min), double(threshold)) =>
-        new ThresholdFailureDetector(ping, min, threshold)
+        new ThresholdFailureDetector(ping, close, min, threshold, statsReceiver = dsr)
       case list("threshold", duration(min)) =>
-        new ThresholdFailureDetector(ping, min)
+        new ThresholdFailureDetector(ping, close, min, statsReceiver = dsr)
       case list("threshold") =>
-        new ThresholdFailureDetector(ping)
+        new ThresholdFailureDetector(ping, close, statsReceiver = dsr)
 
       case list("none") =>
         NullFailureDetector

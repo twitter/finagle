@@ -10,31 +10,43 @@ import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 
 @RunWith(classOf[JUnitRunner])
-class ThresholdFailureDetectorTest extends FunSuite 
+class ThresholdFailureDetectorTest extends FunSuite
   with AssertionsForJUnit
-  with Eventually 
+  with Eventually
   with IntegrationPatience {
   def testt(desc: String)(f: TimeControl => Unit): Unit =
     test(desc) { Time.withCurrentTimeFrozen(f) }
 
-  private class Ctx {
+  private class Ctx(closeThreshold: Int = 1000) {
     val n = new AtomicInteger(0)
     val latch = new Latch
     def ping() = {
       n.incrementAndGet()
       latch.get
     }
+    val p = new AtomicInteger(0)
+    def close() = {
+      p.incrementAndGet()
+      Future.Done
+    }
     def nanoTime() = Time.now.inNanoseconds
     val timer = new MockTimer
     val d = new ThresholdFailureDetector(
-      ping, minPeriod=10.milliseconds, threshold=2, windowSize=5,
-      nanoTime=nanoTime, timer=timer)
+      ping,
+      close,
+      minPeriod = 10.milliseconds,
+      threshold = 2,
+      windowSize = 5,
+      closeThreshold = closeThreshold,
+      nanoTime = nanoTime,
+      timer = timer
+    )
   }
 
   testt("pings every minPeriod") { tc =>
     val ctx = new Ctx
     import ctx._
-    
+
     assert(d.status == Status.Busy)
 
     for (i <- Seq.range(1, 10)) {
@@ -45,16 +57,16 @@ class ThresholdFailureDetectorTest extends FunSuite
       assert(d.status === Status.Open)
     }
   }
-  
+
   testt("delays pings until reply") { tc =>
-    val ctx = new Ctx 
+    val ctx = new Ctx(-1)
     import ctx._
-    
+
     assert(n.get === 1)
     tc.advance(1.second)
     timer.tick()
     assert(n.get === 1)
-    
+
     // Now immediately schedules the next one
     latch.flip()
     assert(n.get === 2)
@@ -64,11 +76,11 @@ class ThresholdFailureDetectorTest extends FunSuite
     timer.tick()
     assert(n.get === 3)
   }
-  
+
   testt("mark suspect when reaching threshold; recover") { tc =>
     val ctx = new Ctx
     import ctx._
-    
+
     assert(n.get === 1)
     tc.advance(2.milliseconds)
     latch.flip()
@@ -79,14 +91,14 @@ class ThresholdFailureDetectorTest extends FunSuite
     tc.advance(5.milliseconds)
     timer.tick()
     assert(d.status === Status.Open)
-    
+
     tc.advance(10.milliseconds)
 
     // One more ping; we're not going to reply for a little while.
     assert(n.get === 1)
     timer.tick()
     assert(n.get === 2)
-    
+
     tc.advance(2.milliseconds)
     assert(d.status === Status.Open)
     // This crosses the 2x threshold
@@ -97,19 +109,19 @@ class ThresholdFailureDetectorTest extends FunSuite
 
     timer.tick()
     assert(n.get === 2)
-    
-    tc.advance(5.milliseconds)    
+
+    tc.advance(5.milliseconds)
     latch.flip()
-    
-    eventually { 
+
+    eventually {
       assert(until.isDone)
     }
 
     assert(d.status === Status.Open)
-    
+
     timer.tick()
     assert(n.get === 3)
-    
+
     // With this ping, we've increased our EMA (a little)
     // to about 3.45ms, so the threshold is
     // about 6.9ms.
@@ -122,9 +134,34 @@ class ThresholdFailureDetectorTest extends FunSuite
     assert(d.status === Status.Open)
     tc.advance(100.microseconds)
     assert(d.status == Status.Busy)
-    
+
     // Recover again.
     latch.flip()
     assert(d.status === Status.Open)
+  }
+
+  testt("close the connection if it becomes unresponsive for too long") { tc =>
+    val ctx = new Ctx
+    import ctx._
+
+    assert(d.status === Status.Busy)
+    tc.advance(1.milliseconds)
+    latch.flip()
+    assert(n.get === 1)
+    assert(p.get === 0)
+    assert(d.status === Status.Open)
+    tc.advance(10.milliseconds)
+    timer.tick()
+    assert(d.status === Status.Open)
+    tc.advance(10.milliseconds)
+    timer.tick()
+    assert(d.status === Status.Busy)
+    (1 to 1000) foreach { _ =>
+      tc.advance(10.milliseconds)
+      timer.tick()
+      assert(d.status === Status.Busy)
+    }
+
+    assert(p.get === 1)
   }
 }

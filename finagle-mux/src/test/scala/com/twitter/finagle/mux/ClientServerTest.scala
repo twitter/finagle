@@ -32,17 +32,17 @@ private object TestContext {
 }
 
 private[mux] class ClientServerTest(canDispatch: Boolean)
-  extends FunSuite 
-  with OneInstancePerTest 
-  with MockitoSugar 
-  with AssertionsForJUnit 
-  with Eventually 
+  extends FunSuite
+  with OneInstancePerTest
+  with MockitoSugar
+  with AssertionsForJUnit
+  with Eventually
   with IntegrationPatience {
   import TestContext._
   val tracer = new BufferingTracer
 
   class Ctx {
-  
+
     val clientToServer = new AsyncQueue[ChannelBuffer]
     val serverToClient = new AsyncQueue[ChannelBuffer]
     val serverTransport =
@@ -59,16 +59,16 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       pingReq.flip()
       f
     }
-  
+
     val server = new ServerDispatcher(
-      serverTransport, service, canDispatch, 
+      serverTransport, service, canDispatch,
       Lessor.nil, tracer, ping)
   }
 
   // Push a tracer for the client.
   override def test(testName: String, testTags: Tag*)(f: => Unit): Unit =
     super.test(testName, testTags:_*) {
-      Trace.letTracer(tracer)(f)      
+      Trace.letTracer(tracer)(f)
     }
 
   def buf(b: Byte*) = Buf.ByteArray(b:_*)
@@ -124,7 +124,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   test("concurrent pings") {
     val ctx = new Ctx
     import ctx._
-    
+
     val pinged = (client.ping() join client.ping()).unit
     assert(!pinged.isDefined)
     assert(nping.get === 2)
@@ -247,7 +247,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     val respFlags = Flags(respCb.readLong())
     assert(respFlags === flags)
   }
-  
+
   test("failure detection") {
     sessionFailureDetector.let("threshold:10.milliseconds:2") {
       val ctx = new Ctx
@@ -270,7 +270,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
         f before loop()
       }
       loop()
-      eventually { 
+      eventually {
         assert(client.status === Status.Open)
       }
     }
