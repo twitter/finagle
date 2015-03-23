@@ -4,6 +4,7 @@ import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.memcached._
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.{Await, Time, Future, MockTimer}
 import org.junit.runner.RunWith
 import org.mockito.Mockito.{times, verify, when}
@@ -37,7 +38,7 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     val timer = new MockTimer
     val factory =
       new KetamaFailureAccrualFactory[Int, Int](
-        underlying, 3, () => 10.seconds, timer, key, broker, ejectFailedHost)
+        underlying, 3, () => 10.seconds, timer, key, broker, ejectFailedHost, NullStatsReceiver)
 
     val service = Await.result(factory())
     verify(underlying)()

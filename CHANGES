@@ -159,6 +159,9 @@ New Features
     parameter will replicate Ostrich's behavior by computing deltas on counters
     every minute and formatting histograms with the same labels Ostrich uses.
 
+  * finagle-memcached(x): Add `c.t.f.memcached.Memcached` which provides a Stack
+    based Memcache client that uses pipelining.
+
 Bug Fixes
 ~~~~~~~~~
 

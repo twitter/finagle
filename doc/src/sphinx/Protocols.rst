@@ -138,7 +138,7 @@ transactions while taking advantage of Finagle's :ref:`client stack <client_modu
 connection pooling. The implementation supports both the MySQL binary and string protocols.
 
 A client can be constructed using the
-:api:`Mysql <com.twitter.finagle.exp.Mysql$>`_ protocol object:
+:api:`Mysql <com.twitter.finagle.exp.Mysql$>` protocol object:
 
 .. includecode:: code/protocols/mysql.scala#client
 

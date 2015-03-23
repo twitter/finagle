@@ -82,16 +82,15 @@ trait MemcachedKetamaClient {
     group: Group[SocketAddress],
     keyHasher: KeyHasher,
     ejectFailedHost: Boolean
-  ): memcached.Client = {
+  ): memcached.Client =
     new KetamaClient(
-      CacheNodeGroup(group),
-      keyHasher,
-      KetamaClient.DefaultNumReps,
-      faParams(ejectFailedHost),
-      None,
-      ClientStatsReceiver.scope("memcached_client")
+      initialServices       = CacheNodeGroup(group),
+      keyHasher             = keyHasher,
+      numReps               = KetamaClient.DefaultNumReps,
+      failureAccrualParams  = faParams(ejectFailedHost),
+      legacyFAClientBuilder = None,
+      statsReceiver         = ClientStatsReceiver.scope("memcached_client")
     )
-  }
 
   def newTwemcacheKetamaClient(
     dest: String, keyHasher: KeyHasher = KeyHasher.KETAMA, ejectFailedHost: Boolean = true
@@ -105,16 +104,15 @@ trait MemcachedKetamaClient {
     group: Group[SocketAddress],
     keyHasher: KeyHasher,
     ejectFailedHost: Boolean
-  ): memcached.TwemcacheClient = {
+  ): memcached.TwemcacheClient =
     new KetamaClient(
-      CacheNodeGroup(group),
-      keyHasher,
-      KetamaClient.DefaultNumReps,
-      faParams(ejectFailedHost),
-      None,
-      ClientStatsReceiver.scope("twemcache_client")
+      initialServices       = CacheNodeGroup(group),
+      keyHasher             = keyHasher,
+      numReps               = KetamaClient.DefaultNumReps,
+      failureAccrualParams  = faParams(ejectFailedHost),
+      legacyFAClientBuilder = None,
+      statsReceiver         = ClientStatsReceiver.scope("twemcache_client")
     ) with TwemcachePartitionedClient
-  }
 
   private def faParams(ejectFailedHost: Boolean) = {
     if (ejectFailedHost) MemcachedFailureAccrualClient.DefaultFailureAccrualParams
@@ -125,6 +123,7 @@ trait MemcachedKetamaClient {
 object MemcachedTransporter extends Netty3Transporter[Command, Response](
   "memcached", MemcachedClientPipelineFactory)
 
+// deprecated, in favor of `c.t.f.memcached.Memcached`, 2015-02-22
 object MemcachedClient extends DefaultClient[Command, Response](
   name = "memcached",
   endpointer = Bridge[Command, Response, Command, Response](
@@ -147,7 +146,8 @@ private[finagle] object MemcachedFailureAccrualClient {
 private[finagle] class MemcachedFailureAccrualClient(
   key: KetamaClientKey,
   broker: Broker[NodeHealth],
-  failureAccrualParams: (Int, () => Duration)
+  failureAccrualParams: (Int, () => Duration),
+  statsReceiver: StatsReceiver = ClientStatsReceiver
 ) extends DefaultClient[Command, Response](
   name = "memcached",
   endpointer = Bridge[Command, Response, Command, Response](
@@ -165,7 +165,8 @@ private[finagle] class MemcachedFailureAccrualClient(
       // This is ok, since ejections is triggered only when failureAccrual
       // is enabled. With `DefaultFailureAccrualParams`, ejections will never
       // be triggered.
-      ejectFailedHost = true)
+      ejectFailedHost = true,
+      statsReceiver   = statsReceiver)
   },
   newTraceInitializer = MemcachedTraceInitializer.Module
 ) with MemcachedRichClient
