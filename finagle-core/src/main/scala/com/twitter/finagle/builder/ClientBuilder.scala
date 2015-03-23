@@ -406,14 +406,21 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
             codec.prepareServiceFactory(next))
           .replace(TraceInitializerFilter.role, codec.newTraceInitializer)
 
+        val updatedStack = codec.stackRolesToReplace.foldLeft(stack)(
+          (aStack, roleAndStackable) =>
+            roleAndStackable match {
+              case (role, stackable) => aStack.replace(role, stackable)
+            }
+        )
+
         // transform stack wrt. failure accrual
         val newStack =
           if (prms.contains[FailureAccrualFac]) {
             val FailureAccrualFac(fac) = prms[FailureAccrualFac]
-            stack.replace(FailureAccrualFactory.role, (next: ServiceFactory[Req1, Rep1]) =>
+            updatedStack.replace(FailureAccrualFactory.role, (next: ServiceFactory[Req1, Rep1]) =>
               fac(timer) andThen next)
           } else {
-            stack
+            updatedStack
           }
 
         // disable failFast if the codec requests it or it is

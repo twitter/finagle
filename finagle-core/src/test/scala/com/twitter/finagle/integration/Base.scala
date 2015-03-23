@@ -60,6 +60,7 @@ trait IntegrationBase extends FunSuite with MockitoSugar {
     }
 
     when(codec.newTraceInitializer) thenReturn TraceInitializerFilter.clientModule[String, String]
+    when(codec.stackRolesToReplace) thenReturn Map[Stack.Role, Stackable[ServiceFactory[String, String]]]()
 
     val clientAddress = new SocketAddress {}
 
