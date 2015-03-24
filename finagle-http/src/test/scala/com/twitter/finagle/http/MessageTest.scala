@@ -29,6 +29,21 @@ class MessageTest extends FunSuite {
     assert(response.acceptMediaTypes.toList === "a" :: "c" :: Nil)
   }
 
+  test("ascii encoding protects against header injection") {
+    // A request with a "Foo" key, containing the injected header "Bar".
+    val req = Request("/?Foo=%E5%98%8D%E5%98%8ABar:%20injection")
+    val (fooKey, fooVal) = req.params.toList.head
+    // We encode the response to a string containing raw HTTP. HTTP is
+    // delimited by CRLF, which we exploit to crudely (but effectively) extract
+    // HTTP header lines. Because we set only one header for "Foo" we should
+    // not also see a header "Bar".
+    val res = Response()
+    res.headers.set(fooKey, fooVal)
+    val lines = res.encodeString.split("\r\n")
+    assert(lines.exists(_.startsWith("Foo:")))
+    assert(!lines.exists(_.startsWith("Bar:")))
+  }
+
   test("charset") {
     val tests = Map(
       "x; charset=a" -> "a",
