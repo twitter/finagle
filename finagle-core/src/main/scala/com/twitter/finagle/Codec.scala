@@ -73,7 +73,15 @@ trait Codec[Req, Rep] {
    * A hack to allow for overriding the TraceInitializerFilter when using
    * Client/Server Builders rather than stacks.
    */
+  @deprecated(message="Replaced by stackRolesToReplace which is more generic.", since = "6.26.0")
   def newTraceInitializer: Stackable[ServiceFactory[Req, Rep]] = TraceInitializerFilter.clientModule[Req, Rep]
+
+  /**
+   * Supports overriding Stack roles when using Client/Server Builders
+   * rather than stacks.
+   */
+  def stackRolesToReplace: Map[Stack.Role, Stackable[ServiceFactory[Req, Rep]]] = Map()
+
 }
 
 /**

@@ -66,45 +66,52 @@ class Memcached(stats: StatsReceiver) extends CodecFactory[Command, Response] {
       override def prepareConnFactory(underlying: ServiceFactory[Command, Response]) =
         new MemcachedLoggingFilter(stats) andThen underlying
 
-      override def newTraceInitializer = MemcachedTraceInitializer.Module
+      override def stackRolesToReplace = Map(ClientTracingFilter.role -> MemcachedTracingFilter.Module)
     }
   }
 }
 
-/**
- * Adds tracing information for each memcached request.
- * Including command name, when request was sent and when it was received.
- */
-private class MemcachedTracingFilter extends SimpleFilter[Command, Response] {
-  def apply(command: Command, service: Service[Command, Response]) = {
-    Trace.recordServiceName("memcached")
-    Trace.recordRpc(command.name)
-    Trace.record(Annotation.ClientSend())
-
-    val response = service(command)
-    if (Trace.isActivelyTracing) {
-      response onSuccess  {
-        case Values(values) =>
-          command match {
-            case cmd: RetrievalCommand =>
-              val keys = immutable.Set(cmd.keys map { _.toString(Utf8) }: _*)
-              val hits = values.map {
-                case value =>
-                  Trace.recordBinary(value.key.toString(Utf8), "Hit")
-                  value.key.toString(Utf8)
-              }
-              val misses = keys -- hits
-              misses foreach { k =>
-                Trace.recordBinary(k.toString(Utf8), "Miss")
-              }
-              case _ =>
-          }
-        case _  =>
-      } ensure {
-        Trace.record(Annotation.ClientRecv())
-      }
+private[text] object MemcachedTracingFilter {
+  object Module extends Stack.Module1[param.Tracer, ServiceFactory[Command, Response]] {
+    val role = ClientTracingFilter.role
+    val description = "Submits cs + cr annotations and cache hits or miss annotations"
+    def make(_tracer: param.Tracer, next: ServiceFactory[Command, Response]) = {
+      val filter = new Filter
+      filter andThen next
     }
-    response
+  }
+
+  private class Filter extends SimpleFilter[Command, Response] {
+    def apply(command: Command, service: Service[Command, Response]) = {
+      Trace.recordServiceName("memcached")
+      Trace.recordRpc(command.name)
+      Trace.record(Annotation.ClientSend())
+
+      val response = service(command)
+      if (Trace.isActivelyTracing) {
+        response onSuccess  {
+          case Values(values) =>
+            command match {
+              case cmd: RetrievalCommand =>
+                val keys = immutable.Set(cmd.keys map { _.toString(Utf8) }: _*)
+                val hits = values.map {
+                  case value =>
+                    Trace.recordBinary(value.key.toString(Utf8), "Hit")
+                    value.key.toString(Utf8)
+                }
+                val misses = keys -- hits
+                misses foreach { k =>
+                  Trace.recordBinary(k.toString(Utf8), "Miss")
+                }
+              case _ =>
+            }
+          case _  =>
+        } ensure {
+          Trace.record(Annotation.ClientRecv())
+        }
+      }
+      response
+    }
   }
 }
 
