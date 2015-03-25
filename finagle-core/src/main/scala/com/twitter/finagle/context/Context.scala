@@ -186,13 +186,14 @@ final class MarshalledContext extends Context {
    * Keys in MarshalledContext must provide a marshaller
    * and unmarshaller.
    */
-  abstract class Key[A] {
+
+  abstract class Key[A](id: String) {
     /**
      * A unique identifier defining this marshaller. This is
      * transmitted together with marshalled values in order to
      * pick the the appropriate unmarshaller for a given value.
      */
-    def marshalId: Buf
+    final val marshalId: Buf = Buf.ByteBuffer.coerce(Buf.Utf8(id))
 
     /**
      * Marshal an A-typed value into a Buf.
@@ -212,7 +213,7 @@ final class MarshalledContext extends Context {
   case class Translucent(next: Env, marshalId: Buf, marshalled: Buf) extends Env {
     @volatile private var cachedEnv: Env = null
 
-    private def env[A](key: Key[A]): Env =
+    private def env[A](key: Key[A]): Env = {
       if (cachedEnv != null) cachedEnv
       else if (key.marshalId != marshalId) next
       else (key.tryUnmarshal(marshalled): Try[A]) match {
@@ -224,6 +225,7 @@ final class MarshalledContext extends Context {
           // Should we log some warnings?
           next
       }
+    }
 
     def apply[A](key: Key[A]): A = env(key).apply(key)
     def get[A](key: Key[A]): Option[A] = env(key).get(key)

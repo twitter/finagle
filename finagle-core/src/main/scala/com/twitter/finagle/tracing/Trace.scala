@@ -48,12 +48,10 @@ object Trace {
 
   private val someTrue = Some(true)
 
-  private[finagle] val idCtx = new Contexts.broadcast.Key[TraceId] {
+  private[finagle] val idCtx = new Contexts.broadcast.Key[TraceId]("com.twitter.finagle.tracing.TraceContext") {
     private val local = new ThreadLocal[Array[Byte]] {
       override def initialValue() = new Array[Byte](32)
     }
-
-    val marshalId = Buf.Utf8("com.twitter.finagle.tracing.TraceContext")
 
     def marshal(id: TraceId) =
       Buf.ByteArray.Owned(TraceId.serialize(id))

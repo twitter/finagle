@@ -24,8 +24,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatest.{OneInstancePerTest, FunSuite, Tag}
 
 private object TestContext {
-  val testContext = new Contexts.broadcast.Key[Buf] {
-    val marshalId = Buf.Utf8("com.twitter.finagle.mux.MuxContext")
+  val testContext = new Contexts.broadcast.Key[Buf]("com.twitter.finagle.mux.MuxContext") {
     def marshal(buf: Buf) = buf
     def tryUnmarshal(buf: Buf) = Return(buf)
   }

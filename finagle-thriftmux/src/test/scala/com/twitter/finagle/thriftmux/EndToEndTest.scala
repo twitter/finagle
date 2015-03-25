@@ -29,8 +29,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
   // test package in Maven.
   case class TestContext(buf: Buf)
 
-  val testContext = new Contexts.broadcast.Key[TestContext] {
-    val marshalId = Buf.Utf8("com.twitter.finagle.mux.MuxContext")
+  val testContext = new Contexts.broadcast.Key[TestContext]("com.twitter.finagle.mux.MuxContext") {
     def marshal(tc: TestContext) = tc.buf
     def tryUnmarshal(buf: Buf) = Return(TestContext(buf))
   }
