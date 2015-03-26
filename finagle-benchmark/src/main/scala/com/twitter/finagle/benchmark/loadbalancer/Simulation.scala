@@ -1,4 +1,4 @@
-package com.twitter.finagle.benchmark
+package com.twitter.finagle.benchmark.loadbalancer
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
@@ -94,7 +94,7 @@ private[finagle] class LatencyFactory(sr: StatsReceiver) {
   }
 }
 
-private[finagle] object P2CBenchmark extends com.twitter.app.App {
+private[finagle] object Simulation extends com.twitter.app.App {
   val qps = flag("qps", 1250, "QPS at which to run the benchmark")
   val dur = flag("dur", 45.seconds, "Benchmark duration")
   val nstable = flag("stable", 10, "Number of stable hosts")
@@ -116,7 +116,7 @@ private[finagle] object P2CBenchmark extends com.twitter.app.App {
       case "p2c" => Balancers.newP2C[Unit, Unit](
         Activity(underlying map { facs => Activity.Ok(facs map { fac => (fac, 1D) }) }),
         statsReceiver=stats.scope("p2c"))
-      
+
       case "aperture" =>
         Balancers.newAperture[Unit, Unit](
           Activity(underlying map { facs => Activity.Ok(facs map { fac => (fac, 1D) }) }),

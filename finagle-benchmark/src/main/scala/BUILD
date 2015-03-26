@@ -22,7 +22,7 @@ jar_library(name='metrics-samples',
 )
 
 jvm_binary(
-  name='p2cbench',
-  main='com.twitter.finagle.benchmark.P2CBenchmark',
+  name='p2csim',
+  main='com.twitter.finagle.benchmark.loadbalancer.Simulation',
   dependencies=[':scala', ':metrics-samples']
 )
