@@ -1,7 +1,6 @@
-package com.twitter.finagle.benchmark.loadbalancer
+package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import com.twitter.finagle.loadbalancer._
 import com.twitter.finagle.NoBrokersAvailableException
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.{Service, ServiceFactory}
