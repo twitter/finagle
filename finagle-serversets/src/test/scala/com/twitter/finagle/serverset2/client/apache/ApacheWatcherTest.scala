@@ -28,7 +28,9 @@ class ApacheWatcherTest extends FlatSpec
     (KeeperState.Disconnected, SessionState.Disconnected),
     (KeeperState.Expired, SessionState.Expired),
     (KeeperState.NoSyncConnected, SessionState.NoSyncConnected),
-    (KeeperState.SyncConnected, SessionState.SyncConnected))
+    (KeeperState.SyncConnected, SessionState.SyncConnected),
+    (KeeperState.SaslAuthenticated, SessionState.SaslAuthenticated),
+    (KeeperState.ConnectedReadOnly, SessionState.ConnectedReadOnly))
 
   val nodeEvents = Map(
     (EventType.NodeChildrenChanged, NodeEvent.ChildrenChanged),

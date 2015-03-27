@@ -35,7 +35,9 @@ private[serverset2] object ApacheSessionState {
     KeeperState.Disconnected -> SessionState.Disconnected,
     KeeperState.Expired -> SessionState.Expired,
     KeeperState.NoSyncConnected -> SessionState.NoSyncConnected,
-    KeeperState.SyncConnected -> SessionState.SyncConnected
+    KeeperState.SyncConnected -> SessionState.SyncConnected,
+    KeeperState.SaslAuthenticated -> SessionState.SaslAuthenticated,
+    KeeperState.ConnectedReadOnly -> SessionState.ConnectedReadOnly
   )
 
   def apply(state: KeeperState): SessionState = map(state)
