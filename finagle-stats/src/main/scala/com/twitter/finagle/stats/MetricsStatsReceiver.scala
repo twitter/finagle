@@ -1,9 +1,11 @@
 package com.twitter.finagle.stats
 
-import com.twitter.common.metrics.{Histogram, HistogramInterface, AbstractGauge, Metrics}
+import com.twitter.app.GlobalFlag
+import com.twitter.common.metrics.{HistogramInterface, AbstractGauge, Metrics}
 import com.twitter.finagle.httpx.HttpMuxHandler
 import com.twitter.finagle.tracing.Trace
 import com.twitter.io.Buf
+import com.twitter.logging.Logger
 import com.twitter.util.events.{Event, Sink}
 import com.twitter.util.{Time, Throw, Try}
 import java.util.concurrent.ConcurrentHashMap
@@ -50,11 +52,23 @@ private object Json {
     }
 }
 
+// The ordering issue is that LoadService is run early in the startup
+// lifecycle, typically before Flags are loaded. By using a system
+// property you can avoid that brittleness.
+object debugLoggedStatNames extends GlobalFlag[Set[String]](
+    Set.empty,
+    "Comma separated stat names for logging observed values" +
+      " (set via a -D system property to avoid load ordering issues)")
+
 object MetricsStatsReceiver {
   val defaultRegistry = Metrics.root()
   private[this] val _defaultHostRegistry = Metrics.createDetached()
   val defaultHostRegistry = _defaultHostRegistry
-  private def defaultFactory(name: String): HistogramInterface = new Histogram(name)
+
+  private[this] val log = Logger.get()
+
+  private def defaultFactory(name: String): HistogramInterface =
+    new MetricsBucketedHistogram(name)
 
   /**
    * The [[com.twitter.util.events.Event.Type Event.Type]] for counter increment events.
@@ -155,6 +169,10 @@ class MetricsStatsReceiver(
   private[this] val counters = new ConcurrentHashMap[Seq[String], Counter]
   private[this] val stats = new ConcurrentHashMap[Seq[String], Stat]
 
+  private[this] val log = Logger.get()
+
+  private[this] val loggedStats: Set[String] = debugLoggedStatNames()
+
   /**
    * Create and register a counter inside the underlying Metrics library
    */
@@ -189,10 +207,12 @@ class MetricsStatsReceiver(
     if (stat == null) stats.synchronized {
       stat = stats.get(names)
       if (stat == null) {
+        val doLog = loggedStats.contains(format(names))
         stat = new Stat {
           val histogram = histogramFactory(format(names))
           registry.registerHistogram(histogram)
           def add(value: Float): Unit = {
+            if (doLog) log.info(s"Stat ${histogram.getName()} observed $value")
             val asLong = value.toLong
             histogram.add(asLong)
             if (Trace.hasId) {

@@ -1,4 +1,4 @@
-benchmark(name='scala',
+scala_library(name='scala',
   dependencies=[
     '3rdparty/jvm/com/google/caliper',
     '3rdparty/jvm/org/openjdk/jmh:jmh-core',
