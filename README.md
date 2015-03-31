@@ -36,4 +36,8 @@ us a pull request!
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/twitter/finagle/blob/master/CONTRIBUTING.md)
+The `master` branch of this repository contains the latest stable release of
+Finagle, and weekly snapshots are published to the `develop` branch. In general
+pull requests should be submitted against `develop`. See
+[CONTRIBUTING.md](https://github.com/twitter/finagle/blob/master/CONTRIBUTING.md)
+for more details about how to contribute.
