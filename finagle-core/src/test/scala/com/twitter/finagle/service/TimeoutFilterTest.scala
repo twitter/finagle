@@ -2,6 +2,8 @@ package com.twitter.finagle.service
 
 import com.twitter.util.TimeConversions._
 import com.twitter.util._
+import com.twitter.finagle.Deadline
+import com.twitter.finagle.context.Contexts
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
@@ -60,4 +62,44 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
     }
   }
 
+  class DeadlineCtx(val timeout: Duration) {
+    val service = new Service[Unit, Option[Deadline]] {
+      def apply(req: Unit) = Future.value(Contexts.broadcast.get(Deadline))
+    }
+
+    val timer = new MockTimer
+    val exception = new IndividualRequestTimeoutException(timeout)
+    val timeoutFilter = new TimeoutFilter[Unit, Option[Deadline]](timeout, exception, timer)
+    val timeoutService = timeoutFilter andThen service
+  }
+
+  test("deadlines, finite timeout") {
+    val ctx = new DeadlineCtx(1.second)
+    import ctx._
+
+    Time.withCurrentTimeFrozen { tc =>
+      assert(Await.result(timeoutService()) == Some(Deadline(Time.now, Time.now+1.second)))
+      
+      // Adjust existing ones.
+      val f = Contexts.broadcast.let(Deadline, Deadline(Time.now-1.second, Time.now+200.milliseconds)) {
+        timeoutService()
+      }
+      assert(Await.result(f) == Some(Deadline(Time.now, Time.now+200.milliseconds)))
+    }
+  }
+
+  test("deadlines, infinite timeout") {
+    val ctx = new DeadlineCtx(Duration.Top)
+    import ctx._
+
+    Time.withCurrentTimeFrozen { tc =>
+      assert(Await.result(timeoutService()) == Some(Deadline(Time.now, Time.Top)))
+      
+      // Adjust existing ones
+      val f = Contexts.broadcast.let(Deadline, Deadline(Time.now-1.second, Time.now+1.second)) {
+        timeoutService()
+      }
+      assert(Await.result(f) == Some(Deadline(Time.now, Time.now+1.second)))
+    }
+  }
 }

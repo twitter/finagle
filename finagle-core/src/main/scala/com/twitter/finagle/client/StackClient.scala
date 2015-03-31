@@ -54,7 +54,7 @@ object StackClient {
     stk.push(ExpiringService.module)
     stk.push(FailFastFactory.module)
     stk.push(DefaultPool.module)
-    stk.push(TimeoutFilter.module)
+    stk.push(TimeoutFilter.clientModule)
     stk.push(FailureAccrualFactory.module)
     stk.push(StatsServiceFactory.module)
     stk.push(StatsFilter.module)

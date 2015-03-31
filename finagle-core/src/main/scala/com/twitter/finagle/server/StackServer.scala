@@ -54,7 +54,7 @@ object StackServer {
 
     stk.push(Role.serverDestTracing, ((next: ServiceFactory[Req, Rep]) =>
       new ServerDestTracingProxy[Req, Rep](next)))
-    stk.push(TimeoutFilter.module)
+    stk.push(TimeoutFilter.serverModule)
     stk.push(DtabStatsFilter.module)
     stk.push(StatsFilter.module)
     stk.push(RequestSemaphoreFilter.module)

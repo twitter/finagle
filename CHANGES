@@ -26,6 +26,9 @@ Breaking API Changes
     separation of attributes from interpretation of those attributes.
 
   * finagle-core: `ExitGuard` usage is now private to finagle.
+  
+  * finagle-core: `c.t.f.service.TimeoutFilter.module` is now split into 
+    `TimeoutFilter.clientModule` and `TimeoutFilter.serverModule`.
 
   * finagle-http: deprecated methods in `c.t.f.http.HttpMessageProxy` have been removed.
 
