@@ -261,9 +261,10 @@ class HeapBalancer[Req, Rep](
   }
 
   /**
-   * HeapBalancer status is the best of its constituent nodes.
+   * HeapBalancer status is the best of its constituent nodes, excluding
+   * the heap(0) node because our implementation is 1-indexed.
    */
-  override def status: Status = Status.bestOf(heap, nodeStatus)
+  override def status: Status = Status.bestOf(heap.drop(1), nodeStatus)
 
   private[this] val nodeStatus: Node => Status = _.factory.status
 

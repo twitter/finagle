@@ -1,5 +1,11 @@
 package com.twitter.finagle.builder
 
+import com.twitter.finagle.{Status, Service, ServiceFactory, WriteException}
+import com.twitter.finagle.integration.IntegrationBase
+import com.twitter.finagle.service.FailureAccrualFactory
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.util._
+import org.junit.runner.RunWith
 import org.mockito.Mockito.{verify, when}
 import org.mockito.Matchers
 import org.mockito.Matchers._
@@ -7,11 +13,6 @@ import org.scalatest.FunSuite
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.junit.runner.RunWith
-import com.twitter.finagle.integration.IntegrationBase
-import com.twitter.finagle.{WriteException, Service, ServiceFactory}
-import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util._
 
 @RunWith(classOf[JUnitRunner])
 class ClientBuilderTest extends FunSuite
@@ -23,6 +24,7 @@ class ClientBuilderTest extends FunSuite
   trait ClientBuilderHelper {
     val preparedFactory = mock[ServiceFactory[String, String]]
     val preparedServicePromise = new Promise[Service[String, String]]
+    when(preparedFactory.status) thenReturn Status.Open
     when(preparedFactory()) thenReturn preparedServicePromise
     when(preparedFactory.close(any[Time])) thenReturn Future.Done
     when(preparedFactory.map(Matchers.any())) thenReturn
@@ -64,14 +66,16 @@ class ClientBuilderTest extends FunSuite
   test("ClientBuilder should collect stats on 'tries' for retrypolicy") {
     new ClientBuilderHelper {
       val inMemory = new InMemoryStatsReceiver
-      val client = ClientBuilder()
+      val builder = ClientBuilder()
         .name("test")
         .hostConnectionLimit(1)
         .codec(m.codec)
         .hosts(Seq(m.clientAddress))
         .retries(2) // retries === total attempts :(
         .reportTo(inMemory)
-        .build()
+      val client = builder.build()
+
+      val FailureAccrualFactory.Param(numFailures, _) = builder.params(FailureAccrualFactory.Param.param)
 
       val service = mock[Service[String, String]]
       when(service("123")) thenReturn Future.exception(WriteException(new Exception()))
@@ -82,20 +86,26 @@ class ClientBuilderTest extends FunSuite
 
       assert(f.isDefined)
       assert(inMemory.counters(Seq("test", "tries", "requests")) === 1)
-      assert(inMemory.counters(Seq("test", "requests")) === 50)
+      assert(
+        // one request which requeues until failure accrual limit + one retry
+        inMemory.counters(Seq("test", "requests")) === 1 + numFailures
+      )
     }
   }
 
   test("ClientBuilder should collect stats on 'tries' with no retrypolicy") {
     new ClientBuilderHelper {
       val inMemory = new InMemoryStatsReceiver
-      val client = ClientBuilder()
+      val builder = ClientBuilder()
         .name("test")
         .hostConnectionLimit(1)
         .codec(m.codec)
         .hosts(Seq(m.clientAddress))
         .reportTo(inMemory)
-        .build()
+
+      val client = builder.build()
+
+      val FailureAccrualFactory.Param(numFailures, _) = builder.params(FailureAccrualFactory.Param.param)
 
       val service = mock[Service[String, String]]
       when(service("123")) thenReturn Future.exception(WriteException(new Exception()))
@@ -106,22 +116,25 @@ class ClientBuilderTest extends FunSuite
 
       assert(f.isDefined)
       assert(inMemory.counters(Seq("test", "tries", "requests")) === 1)
-      assert(inMemory.counters(Seq("test", "requests")) === 25)
+
+      // failure accrual marks the only node in the balancer as Busy which in turn caps requeues
+      assert(inMemory.counters(Seq("test", "requests")) === numFailures)
     }
   }
 
   test("ClientBuilder with stack should collect stats on 'tries' for retrypolicy") {
     new ClientBuilderHelper {
       val inMemory = new InMemoryStatsReceiver
-      val client = ClientBuilder()
+      val builder = ClientBuilder()
         .name("test")
         .hostConnectionLimit(1)
         .stack(m.client)
         .hosts(Seq(m.clientAddress))
         .retries(2) // retries === total attempts :(
         .reportTo(inMemory)
-        .build()
+      val client = builder.build()
 
+      val FailureAccrualFactory.Param(numFailures, _) = builder.params(FailureAccrualFactory.Param.param)
       val service = mock[Service[String, String]]
       when(service("123")) thenReturn Future.exception(WriteException(new Exception()))
       when(service.close(any[Time])) thenReturn Future.Done
@@ -131,20 +144,25 @@ class ClientBuilderTest extends FunSuite
 
       assert(f.isDefined)
       assert(inMemory.counters(Seq("test", "tries", "requests")) === 1)
-      assert(inMemory.counters(Seq("test", "requests")) === 50)
+
+      // failure accrual limited requeues + one retry which is not requeued
+      assert(inMemory.counters(Seq("test", "requests")) === 1 + numFailures)
     }
   }
 
   test("ClientBuilder with stack should collect stats on 'tries' with no retrypolicy") {
     new ClientBuilderHelper {
       val inMemory = new InMemoryStatsReceiver
-      val client = ClientBuilder()
+      val builder = ClientBuilder()
         .name("test")
         .hostConnectionLimit(1)
         .stack(m.client)
         .hosts(Seq(m.clientAddress))
         .reportTo(inMemory)
-        .build()
+
+      val client = builder.build()
+
+      val FailureAccrualFactory.Param(numFailures, _) = builder.params(FailureAccrualFactory.Param.param)
 
       val service = mock[Service[String, String]]
       when(service("123")) thenReturn Future.exception(WriteException(new Exception()))
@@ -155,7 +173,7 @@ class ClientBuilderTest extends FunSuite
 
       assert(f.isDefined)
       assert(inMemory.counters(Seq("test", "tries", "requests")) === 1)
-      assert(inMemory.counters(Seq("test", "requests")) === 25)
+      assert(inMemory.counters(Seq("test", "requests")) === numFailures)
     }
   }
 

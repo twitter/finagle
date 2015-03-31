@@ -1,13 +1,13 @@
 package com.twitter.finagle.builder
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{FailedFastException, IndividualRequestTimeoutException, Name, Service}
+import com.twitter.finagle._
 import com.twitter.finagle.client.DefaultPool
 import com.twitter.finagle.integration.{DynamicCluster, StringCodec}
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.service.{RetryPolicy, RequeueingFilter, TimeoutFilter}
+import com.twitter.finagle.service.{RetryPolicy, TimeoutFilter}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, CountDownLatch, Duration, Future, Promise}
+import com.twitter.util.{Await, CountDownLatch, Future, Promise}
 import java.net.{InetAddress, SocketAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -113,8 +113,8 @@ class EndToEndTest extends FunSuite {
     // generate com.twitter.finagle.IndividualRequestTimeoutException
     intercept[IndividualRequestTimeoutException] { Await.result(client("hi"), 1.second) }
     Await.ready(server.close())
-    // generate com.twitter.finagle.FailedFastException
-    intercept[FailedFastException] { Await.result(client("hi"), 1.second) }
+    // generate com.twitter.finagle.ChannelWriteException
+    intercept[ChannelWriteException] { Await.result(client("hi"), 1.second) }
 
     val requestFailures = mem.counters(Seq("client", "failures"))
     val serviceCreationFailures =
@@ -122,14 +122,11 @@ class EndToEndTest extends FunSuite {
     val automaticRetries =
       mem.stats(Seq("client", "automatic", "retries"))
 
-    // timeouts are not requeued by default
     assert(requestFailures === 1)
 
-    // failedfastexceptions are requeued
-    assert(serviceCreationFailures === RequeueingFilter.MaxTries) 
-
-    // zero requeues on timeout, then max requeues on fail fast
-    assert(automaticRetries === Seq(0.0f, RequeueingFilter.MaxTries-1))
+    // initial write exception and no requeues
+    assert(serviceCreationFailures === 1)
+    assert(automaticRetries === Seq(0.0f, 0.0f))
   }
 
   test("ClientBuilder should be properly instrumented on success") {

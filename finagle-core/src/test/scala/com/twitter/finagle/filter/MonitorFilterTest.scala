@@ -7,7 +7,7 @@ import org.scalatest.mock.MockitoSugar
 import org.mockito.{Matchers, Mockito}
 import org.mockito.Matchers._
 import org.mockito.Mockito.{times, verify, when}
-import com.twitter.finagle.{ServiceFactory, ChannelException, SourcedException, Service}
+import com.twitter.finagle.{ServiceFactory, ChannelException, SourcedException, Service, Status}
 import com.twitter.finagle.integration.{StringCodec, IntegrationBase}
 import com.twitter.util._
 import java.util.logging.{Level, StreamHandler, Logger}
@@ -122,6 +122,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase 
     when(preparedFactory.close(any[Time])) thenReturn Future.Done
     when(preparedFactory.map(Matchers.any())) thenReturn
       preparedFactory.asInstanceOf[ServiceFactory[Any, Nothing]]
+    when(preparedFactory.status) thenReturn(Status.Open)
 
     val m = new MockChannel
     when(m.codec.prepareConnFactory(any[ServiceFactory[String, String]])) thenReturn preparedFactory

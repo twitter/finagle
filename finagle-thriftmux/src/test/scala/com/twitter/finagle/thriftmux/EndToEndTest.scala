@@ -320,7 +320,17 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
 
       assert(Await.result(client.query("ok")) == "okok")
       Await.result(server.close())
-      intercept[FailedFastException] {  // This is received due to requeues.
+
+      // This request fails and is not requeued because there are
+      // no Open service factories in the load balancer.
+      intercept[ChannelWriteException] {
+        Await.result(client.query("ok"))
+      }
+
+      // Subsequent requests are failed fast since there are (still) no
+      // Open service factories in the load balancer. Again, no requeues
+      // are attempted.
+      intercept[FailedFastException] {
         Await.result(client.query("ok"))
       }
     }
@@ -377,7 +387,11 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
 
       assert(Await.result(client.query("ok")) == "okok")
       Await.result(server.close())
-      intercept[FailedFastException] { // will automatically requeue while trying to connect
+      intercept[ChannelWriteException] {
+        Await.result(client.query("ok"))
+      }
+
+      intercept[FailedFastException] {
         Await.result(client.query("ok"))
       }
     }
