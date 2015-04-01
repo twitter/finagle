@@ -47,8 +47,7 @@ class EndToEndTest extends FunSuite
     val clientTrans = new QueueTransport[ChannelBuffer, ChannelBuffer](q0, q1)
     val serverTrans = new QueueTransport[ChannelBuffer, ChannelBuffer](q1, q0)
 
-    def ping() = Future.Done
-    val server = new ServerDispatcher(serverTrans, svc, true, Lessor.nil, NullTracer, ping)
+    val server = ServerDispatcher.newRequestResponse(serverTrans, svc)
     val client = new ClientDispatcher("test", clientTrans, NullStatsReceiver)
 
     val f = client(Request(Path.empty, Buf.Empty))

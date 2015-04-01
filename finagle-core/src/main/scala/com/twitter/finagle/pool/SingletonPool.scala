@@ -1,6 +1,7 @@
 package com.twitter.finagle.pool
 
 import com.twitter.finagle._
+import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.util.{Future, Return, Throw, Time, Promise}
@@ -9,7 +10,7 @@ import scala.annotation.tailrec
 import scala.collection.immutable
 
 private[finagle] object SingletonPool {
-  val role = Stack.Role("SingletonPool")
+  val role = StackClient.Role.pool
 
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.pool.SingletonPool]].

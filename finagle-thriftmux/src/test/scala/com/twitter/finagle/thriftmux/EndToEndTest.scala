@@ -644,8 +644,10 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     intercept[Exception] { Await.result(close, 1.second) }
 
     response.setValue("done")
+
     assert(Await.result(close, 1.second) === ())
     assert(Await.result(f, 1.second) === "done")
+
   }
 
   test("gracefully reject sessions") {

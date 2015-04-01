@@ -214,6 +214,11 @@ object ThriftMux
   ) extends StdStackServer[mux.Request, mux.Response, ServerMuxer] {
     protected type In = CB
     protected type Out = CB
+    
+    private[this] val muxStatsReceiver = {
+      val Stats(statsReceiver) = params[Stats]
+      statsReceiver.scope("mux")
+    }
 
     protected def copy1(
       stack: Stack[ServiceFactory[mux.Request, mux.Response]] = this.stack,
@@ -244,11 +249,10 @@ object ThriftMux
       service: Service[mux.Request, mux.Response]
     ) = {
       val param.Tracer(tracer) = params[param.Tracer]
-      def ping() = Future.Done
-      new mux.ServerDispatcher(
-        transport, service, true,
+      mux.ServerDispatcher.newRequestResponse(
+        transport, service, 
         mux.lease.exp.ClockedDrainer.flagged,
-        tracer, ping)
+        tracer, muxStatsReceiver)
     }
   }
 

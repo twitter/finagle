@@ -102,6 +102,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     protected type In = CB
     protected type Out = CB
+    
+    private[this] val statsReceiver = {
+      val param.Stats(statsReceiver) = params[param.Stats]
+      statsReceiver.scope("mux")
+    }
 
     protected def newListener(): Listener[In, Out] =
       Netty3Listener(mux.PipelineFactory, params)
@@ -111,8 +116,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     ) = {
       val param.Tracer(tracer) = params[param.Tracer]
       val Lessor.Param(lessor) = params[Lessor.Param]
-      def ping() = Future.Done
-      new mux.ServerDispatcher(transport, service, true, lessor, tracer, ping)
+      
+      mux.ServerDispatcher.newRequestResponse(transport, service, lessor, tracer, statsReceiver)
     }
   }
 

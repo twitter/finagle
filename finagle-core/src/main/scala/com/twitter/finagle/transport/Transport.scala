@@ -235,14 +235,16 @@ class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
     writeq.offer(input)
     Future.Done
   }
+
   def read(): Future[Out] =
     readq.poll() onFailure { exc =>
-      closep.setValue(exc)
+      closep.updateIfEmpty(Throw(exc))
     }
+
   def status = if (closep.isDefined) Status.Closed else Status.Open
   def close(deadline: Time) = {
     val ex = new IllegalStateException("close() is undefined on QueueTransport")
-    closep.updateIfEmpty(Throw(ex))
+    closep.updateIfEmpty(Return(ex))
     Future.exception(ex)
   }
 
