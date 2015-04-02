@@ -11,7 +11,6 @@ object Finagle extends Build {
   val suffix = if (branch == "master") "" else "-SNAPSHOT"
 
   val libVersion = "6.24.0" + suffix
-  val zkVersion = "3.3.4"
   val utilVersion = "6.23.0" + suffix
   val ostrichVersion = "9.7.0"
   val nettyLib = "io.netty" % "netty" % "3.10.1.Final"
@@ -551,8 +550,6 @@ object Finagle extends Build {
       sharedSettings ++ jmhSettings
   ).settings(
     name := "finagle-benchmark",
-    // include again when we can properly depend on finagleSwift
-    excludeFilter in Compile := "ThriftDispatch.scala",
     libraryDependencies ++= Seq(
       util("codec"),
       "com.google.caliper" % "caliper" % "0.5-rc1",
