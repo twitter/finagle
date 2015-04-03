@@ -5,19 +5,17 @@ import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import org.jboss.netty.buffer.ChannelBuffers;
-
 import com.twitter.finagle.ServiceFactory;
 import com.twitter.finagle.builder.ClientBuilder;
-import com.twitter.finagle.kestrel.MultiReader;
-import com.twitter.finagle.kestrel.ReadHandle;
-import com.twitter.finagle.kestrel.ReadMessage;
-import com.twitter.finagle.kestrel.java.Client;
-import com.twitter.finagle.kestrel.protocol.Command;
-import com.twitter.finagle.kestrel.protocol.Kestrel;
-import com.twitter.finagle.kestrel.protocol.Response;
+import com.twitter.finagle.kestrelx.MultiReader;
+import com.twitter.finagle.kestrelx.ReadHandle;
+import com.twitter.finagle.kestrelx.ReadMessage;
+import com.twitter.finagle.kestrelx.java.Client;
+import com.twitter.finagle.kestrelx.protocol.Command;
+import com.twitter.finagle.kestrelx.protocol.Kestrel;
+import com.twitter.finagle.kestrelx.protocol.Response;
 import com.twitter.finagle.service.Backoff;
-import com.twitter.io.Charsets;
+import com.twitter.io.Bufs;
 import com.twitter.util.Duration;
 import com.twitter.util.JavaTimer;
 
@@ -67,8 +65,8 @@ public final class GrabbyHands {
 
       while (true) {
         ReadMessage m = handle.messages().syncWait();
-        System.out.println(m.bytes().toString(Charsets.Utf8()));
-        System.out.println(ChannelBuffers.hexDump(m.bytes()));
+        System.out.println(Bufs.asUtf8String(m.bytes()));
+        System.out.println(Bufs.slowHexString(m.bytes()));
         m.ack().sync();
       }
     }
