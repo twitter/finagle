@@ -2,6 +2,7 @@ package com.twitter.finagle.redis.protocol
 
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.redis.protocol.commands.{PFMerge, PFCount, PFAdd}
 import com.twitter.finagle.redis.{ClientError, ServerError}
 import com.twitter.finagle.redis.naggati.test._
 import com.twitter.finagle.redis.util._
@@ -641,7 +642,63 @@ class NaggatiSpec extends SpecificationWithJUnit {
               }
             }
           }
-        }
+        } // set commands
+        "hyperloglog commands" >> {
+          "PFADD" >> {
+            codec(wrap("PFADD\r\n")) must throwA[ClientError]
+
+            unwrap(codec(wrap("PFADD foo bar\r\n"))) {
+              case PFAdd(key, List(element)) => {
+                CBToString(key) mustEqual "foo"
+                CBToString(element) mustEqual "bar"
+              }
+            }
+
+            unwrap(codec(wrap("PFADD foo bar baz\r\n"))) {
+              case PFAdd(key, elements) => {
+                CBToString(key) mustEqual "foo"
+                CBToString(elements(0)) mustEqual "bar"
+                CBToString(elements(1)) mustEqual "baz"
+              }
+            }
+          }
+          "PFCOUNT" >> {
+            codec(wrap("PFCOUNT\r\n")) must throwA[ClientError]
+
+            unwrap(codec(wrap("PFCOUNT foo\r\n"))){
+              case PFCount(List(key)) => {
+                CBToString(key) mustEqual "foo"
+              }
+            }
+
+            unwrap(codec(wrap("PFCOUNT foo bar\r\n"))){
+              case PFCount(keys) => {
+                CBToString(keys(0)) mustEqual "foo"
+                CBToString(keys(1)) mustEqual "bar"
+              }
+            }
+          }
+          "PFMERGE" >> {
+            codec(wrap("PFMERGE\r\n")) must throwA[ClientError]
+
+            codec(wrap("PFMERGE foo\r\n")) must throwA[ClientError]
+
+            unwrap(codec(wrap("PFMERGE foo bar\r\n"))){
+              case PFMerge(destKey, List(srcKey)) => {
+                CBToString(destKey) mustEqual "foo"
+                CBToString(srcKey) mustEqual "bar"
+              }
+            }
+
+            unwrap(codec(wrap("PFMERGE foo bar baz\r\n"))){
+              case PFMerge(destKey, srcKeys) => {
+                CBToString(destKey) mustEqual "foo"
+                CBToString(srcKeys(0)) mustEqual "bar"
+                CBToString(srcKeys(1)) mustEqual "baz"
+              }
+            }
+          }
+        } //hyperloglog commands
       } // inline
 
       def unwrap(list: Seq[AnyRef])(fn: PartialFunction[Command,Unit]) = list.toList match {
