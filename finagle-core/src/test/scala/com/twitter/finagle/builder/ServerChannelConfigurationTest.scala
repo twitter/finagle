@@ -69,6 +69,7 @@ class ServerChannelConfigurationTest extends FunSuite {
 
     val client: Service[String, String] = ClientBuilder()
       .codec(ServerChannelConfigCodec)
+      .daemon(true) // don't create an exit guard
       .hosts(server.boundAddress)
       .hostConnectionLimit(1)
       .build()
@@ -93,6 +94,7 @@ class ServerChannelConfigurationTest extends FunSuite {
 
     val client: Service[String, String] = ClientBuilder()
       .codec(ServerChannelConfigCodec)
+      .daemon(true) // don't create an exit guard
       .hosts(server.boundAddress)
       .hostConnectionLimit(1)
       .build()

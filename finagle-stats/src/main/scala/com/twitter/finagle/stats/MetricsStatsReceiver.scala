@@ -70,19 +70,20 @@ object MetricsStatsReceiver {
   private def defaultFactory(name: String): HistogramInterface =
     new MetricsBucketedHistogram(name)
 
+  private[this] case class CounterIncrData(name: String, value: Long)
+  private[this] case class StatAddData(name: String, delta: Long)
+
   /**
    * The [[com.twitter.util.events.Event.Type Event.Type]] for counter increment events.
    */
   val CounterIncr: Event.Type = {
-    case class Data(name: String, value: Long)
-
     new Event.Type {
       val id = "CounterIncr"
 
       def serialize(event: Event) = event match {
         case Event(etype, when, value, name: String, _, tid, sid) if etype eq this =>
           val (t, s) = serializeTrace(tid, sid)
-          val env = Json.Envelope(id, when.inMilliseconds, t, s, Data(name, value))
+          val env = Json.Envelope(id, when.inMilliseconds, t, s, CounterIncrData(name, value))
           Try(Buf.Utf8(Json.serialize(env)))
 
         case _ =>
@@ -92,7 +93,7 @@ object MetricsStatsReceiver {
       def deserialize(buf: Buf) = for {
         env <- Buf.Utf8.unapply(buf) match {
           case None => Throw(new IllegalArgumentException("unknown format"))
-          case Some(str) => Try(Json.deserialize[Json.Envelope[Data]](str))
+          case Some(str) => Try(Json.deserialize[Json.Envelope[CounterIncrData]](str))
         }
         if env.id == id
       } yield {
@@ -110,15 +111,13 @@ object MetricsStatsReceiver {
    * The [[com.twitter.util.events.Event.Type Event.Type]] for stat add events.
    */
   val StatAdd: Event.Type = {
-    case class Data(name: String, delta: Long)
-
     new Event.Type {
       val id = "StatAdd"
 
       def serialize(event: Event) = event match {
         case Event(etype, when, delta, name: String, _, tid, sid) if etype eq this =>
           val (t, s) = serializeTrace(tid, sid)
-          val env = Json.Envelope(id, when.inMilliseconds, t, s, Data(name, delta))
+          val env = Json.Envelope(id, when.inMilliseconds, t, s, StatAddData(name, delta))
           Try(Buf.Utf8(Json.serialize(env)))
 
         case _ =>
@@ -128,7 +127,7 @@ object MetricsStatsReceiver {
       def deserialize(buf: Buf) = for {
         env <- Buf.Utf8.unapply(buf) match {
           case None => Throw(new IllegalArgumentException("unknown format"))
-          case Some(str) => Try(Json.deserialize[Json.Envelope[Data]](str))
+          case Some(str) => Try(Json.deserialize[Json.Envelope[StatAddData]](str))
         }
         if env.id == id
       } yield {

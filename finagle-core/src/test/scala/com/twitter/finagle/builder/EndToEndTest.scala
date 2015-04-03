@@ -35,6 +35,7 @@ class EndToEndTest extends FunSuite {
     val client = ClientBuilder()
       .cluster(cluster)
       .codec(StringCodec)
+      .daemon(true) // don't create an exit guard
       .hostConnectionLimit(1)
       .build()
 
@@ -64,6 +65,7 @@ class EndToEndTest extends FunSuite {
     val client = ClientBuilder()
       .cluster(cluster)
       .codec(StringCodec)
+      .daemon(true) // don't create an exit guard
       .hostConnectionLimit(1)
       .hostConnectionMaxWaiters(5)
       .build()
@@ -104,6 +106,7 @@ class EndToEndTest extends FunSuite {
       .name("client")
       .hosts(server.boundAddress)
       .codec(StringCodec)
+      .daemon(true) // don't create an exit guard
       .requestTimeout(10.millisecond)
       .hostConnectionLimit(1)
       .hostConnectionMaxWaiters(1)

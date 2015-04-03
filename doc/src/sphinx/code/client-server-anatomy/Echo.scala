@@ -38,6 +38,9 @@ object Echo extends Client[String, String] with Server[String, String] {
 
   val client = Client()
 
+  def newService(dest: Name, label: String): Service[String, String] =
+    client.newService(dest, label)
+
   def newClient(dest: Name, label: String): ServiceFactory[String, String] =
     client.newClient(dest, label)
 

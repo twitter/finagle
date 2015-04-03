@@ -70,6 +70,7 @@ class ClientBuilderTest extends FunSuite
         .name("test")
         .hostConnectionLimit(1)
         .codec(m.codec)
+        .daemon(true) // don't create an exit guard
         .hosts(Seq(m.clientAddress))
         .retries(2) // retries === total attempts :(
         .reportTo(inMemory)
@@ -100,6 +101,7 @@ class ClientBuilderTest extends FunSuite
         .name("test")
         .hostConnectionLimit(1)
         .codec(m.codec)
+        .daemon(true) // don't create an exit guard
         .hosts(Seq(m.clientAddress))
         .reportTo(inMemory)
 
@@ -129,6 +131,7 @@ class ClientBuilderTest extends FunSuite
         .name("test")
         .hostConnectionLimit(1)
         .stack(m.client)
+        .daemon(true) // don't create an exit guard
         .hosts(Seq(m.clientAddress))
         .retries(2) // retries === total attempts :(
         .reportTo(inMemory)
@@ -157,6 +160,7 @@ class ClientBuilderTest extends FunSuite
         .name("test")
         .hostConnectionLimit(1)
         .stack(m.client)
+        .daemon(true) // don't create an exit guard
         .hosts(Seq(m.clientAddress))
         .reportTo(inMemory)
 

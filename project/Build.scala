@@ -12,19 +12,14 @@ object Finagle extends Build {
 
   val libVersion = "6.24.0" + suffix
   val utilVersion = "6.23.0" + suffix
-  val ostrichVersion = "9.7.0"
+  val ostrichVersion = "9.7.0" + suffix
   val nettyLib = "io.netty" % "netty" % "3.10.1.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
-  // The following won't be necessary once we've upgraded internally to 2.4.
-  def jacksonVersion(scalaVersion: String) =
-    CrossVersion.partialVersion(scalaVersion) match {
-      case Some((2, 11)) => "2.4.4"
-      case _ => "2.3.1"
-    }
-  def jacksonLibs(scalaVersion: String) = Seq(
-    "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion(scalaVersion),
-    "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion(scalaVersion),
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion(scalaVersion) exclude("com.google.guava", "guava"),
+  val jacksonVersion = "2.4.4"
+  val jacksonLibs = Seq(
+    "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
+    "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion exclude("com.google.guava", "guava"),
     "com.google.guava" % "guava" % "16.0.1"
   )
   val thriftLibs = Seq(
@@ -55,8 +50,8 @@ object Finagle extends Build {
   val sharedSettings = Seq(
     version := libVersion,
     organization := "com.twitter",
-    crossScalaVersions := Seq("2.10.4", "2.11.4"),
-    scalaVersion := "2.10.4",
+    crossScalaVersions := Seq("2.10.5", "2.11.6"),
+    scalaVersion := "2.10.5",
     libraryDependencies ++= Seq(
       "org.scalacheck" %% "scalacheck" % "1.11.3" % "test",
       "org.scalatest" %% "scalatest" % "2.2.2" % "test",
@@ -229,7 +224,7 @@ object Finagle extends Build {
       util("events"),
       util("logging")
     ),
-    libraryDependencies <++= scalaVersion(jacksonLibs(_))
+    libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCore, finagleHttpX)
 
   lazy val finagleZipkin = Project(
@@ -241,7 +236,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-zipkin",
     libraryDependencies ++= Seq(util("codec"), util("events")) ++ scroogeLibs,
-    libraryDependencies <++= scalaVersion(jacksonLibs(_))
+    libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCore, finagleThrift, finagleTest % "test")
 
   lazy val finagleException = Project(
@@ -255,7 +250,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("codec")
     ) ++ scroogeLibs,
-    libraryDependencies <++= scalaVersion(jacksonLibs(_))
+    libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCore, finagleThrift)
 
   lazy val finagleCommonsStats = Project(
@@ -283,7 +278,7 @@ object Finagle extends Build {
       "com.twitter.common.zookeeper" % "server-set" % "1.0.83",
       "com.google.guava" % "guava" % "16.0.1"
     ),
-    libraryDependencies <++= scalaVersion(jacksonLibs(_)),
+    libraryDependencies ++= jacksonLibs,
     excludeFilter in unmanagedSources := "ZkTest.scala",
     ivyXML :=
       <dependencies>
@@ -382,7 +377,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       "com.twitter.common" % "zookeeper-testing" % "0.0.46" % "test"
     ),
-    libraryDependencies <++= scalaVersion(jacksonLibs(_))
+    libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCore, finagleServersets)
 
   lazy val finagleMemcached = Project(
@@ -398,7 +393,7 @@ object Finagle extends Build {
       "com.google.guava" % "guava" % "16.0.1",
       "com.twitter.common" % "zookeeper-testing" % "0.0.46" % "test"
     ),
-    libraryDependencies <++= scalaVersion(jacksonLibs(_))
+    libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCacheResolver, finagleCore, finagleServersets)
 
   lazy val finagleMemcachedX = Project(
@@ -414,7 +409,7 @@ object Finagle extends Build {
       "com.google.guava" % "guava" % "16.0.1",
       "com.twitter.common" % "zookeeper-testing" % "0.0.46" % "test"
     ),
-    libraryDependencies <++= scalaVersion(jacksonLibs(_))
+    libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCacheResolver, finagleCore, finagleServersets)
 
   lazy val finagleKestrel = Project(
