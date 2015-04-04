@@ -1,4 +1,4 @@
-package com.twitter.finagle.redis.protocol.commands
+package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.protocol._
