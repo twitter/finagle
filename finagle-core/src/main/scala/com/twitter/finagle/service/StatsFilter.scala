@@ -1,8 +1,10 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle._
-import com.twitter.finagle.stats.{CategorizingExceptionStatsHandler, ExceptionStatsHandler, StatsReceiver}
-import com.twitter.util.{Future, Stopwatch, Throw, Return}
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.stats.{
+  CategorizingExceptionStatsHandler, ExceptionStatsHandler, StatsReceiver}
+import com.twitter.util.{Future, Stopwatch, Throw, Return, Time}
 import java.util.concurrent.atomic.AtomicInteger
 
 object StatsFilter {
@@ -53,9 +55,19 @@ class StatsFilter[Req, Rep](
   private[this] val loadGauge = statsReceiver.addGauge("load") { outstandingRequestCount.get }
   private[this] val outstandingRequestCountGauge =
     statsReceiver.addGauge("pending") { outstandingRequestCount.get }
+  private[this] val transitTimeStat = statsReceiver.stat("transit_latency_ms")
+  private[this] val budgetTimeStat = statsReceiver.stat("deadline_budget_ms")
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val elapsed = Stopwatch.start()
+    
+    Contexts.broadcast.get(Deadline) match {
+      case None =>
+      case Some(Deadline(timestamp, deadline)) =>
+        val now = Time.now
+        transitTimeStat.add((now-timestamp).inMilliseconds)
+        budgetTimeStat.add((deadline-now).inMilliseconds)
+    }
 
     outstandingRequestCount.incrementAndGet()
     service(request) respond { response =>

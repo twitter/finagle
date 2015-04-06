@@ -91,6 +91,8 @@ Runtime Behavior Changes
     includes time spent in name resolution, which is now covered by
     "namer/bind_latency_us" as discussed above.
 
+  * finagle-core: added transit_latency_ms and deadline_budget_ms stats.
+
 Deprecations
 ~~~~~~~~~~~~
 

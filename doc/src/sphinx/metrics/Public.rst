@@ -34,6 +34,14 @@ StatsFilter
   a counter of the number of times any SourcedException or sourced Failure has
   been thrown
 
+**transit_latency_ms**
+  a stat that attempts to measure (walltime) transit times between hops, e.g.,
+  from client to server. Not supported by all protocols.
+  
+**deadline_budget_ms**
+  a stat accounting for the (implied) amount of time remaining for this request, 
+  for example from a deadline or timeout. Not supported by all protocols.
+
 StatsFactoryWrapper
 <<<<<<<<<<<<<<<<<<<
 
