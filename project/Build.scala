@@ -5,6 +5,8 @@ import com.twitter.scrooge.ScroogeSBT
 import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 import pl.project13.scala.sbt.SbtJmh.jmhSettings
+import sbtunidoc.Plugin.UnidocKeys._
+import sbtunidoc.Plugin.{ScalaUnidoc, unidocSettings}
 
 object Finagle extends Build {
   val branch = Process("git" :: "rev-parse" :: "--abbrev-ref" :: "HEAD" :: Nil).!!.trim
@@ -153,11 +155,12 @@ object Finagle extends Build {
     base = file("."),
     settings = Project.defaultSettings ++
       sharedSettings ++
-      Unidoc.settings ++ Seq(
+      unidocSettings ++ Seq(
         // NB: KestrelX defines thrift structs which collide with Kestrel.
         // We can remove this exception after the -x modules are deleted
         // post netty4 migration.
-        Unidoc.unidocExclude := Seq(finagleExample.id, finagleKestrelX.id)
+        unidocProjectFilter in (ScalaUnidoc, unidoc) :=
+          inAnyProject -- inProjects(finagleExample, finagleKestrelX)
       )
   ) aggregate(
     // Core, support.
