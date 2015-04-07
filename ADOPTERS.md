@@ -6,6 +6,7 @@ or if you'd like us to feature a link to a blog post or article about how
 you're using Finagle. Or even better, add the links yourself (please use HTTPS
 URLs if possible) and [submit a pull request][1]!
 
+* [Attendify](https://attendify.com)
 * [Box](https://www.box.com/)
 * [Chartboost](https://www.chartboost.com/)
 * [Crimson Hexagon](http://www.crimsonhexagon.com/)
