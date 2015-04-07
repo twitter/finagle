@@ -37,6 +37,7 @@ URLs if possible) and [submit a pull request][1]!
   * ["Trendy Engineering: How We Built the Twitter Trends Report"][7]
 * [Strava](http://www.strava.com/)
   * ["Introducing Routemaster"][8]
+* [Spright](http://spright.com/)
 * [StumbleUpon](https://www.stumbleupon.com/)
 * [Tapad](http://www.tapad.com/)
   * [Case study][9] by [Typesafe][10]
