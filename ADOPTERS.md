@@ -39,6 +39,7 @@ URLs if possible) and [submit a pull request][1]!
 * [SoundCloud](https://soundcloud.com/)
   * ["Building Products at SoundCloud—Part III: Microservices in Scala and
     Finagle"][6]
+* [Spright](https://spright.com/)
 * [SproutSocial](https://www.sproutsocial.com)
   * ["Trendy Engineering: How We Built the Twitter Trends Report"][7]
 * [Strava](http://www.strava.com/)
