@@ -136,6 +136,11 @@ object Commands {
   val UNWATCH           = "UNWATCH"
   val WATCH             = "WATCH"
 
+  // HyperLogLogs
+  val PFADD             = "PFADD"
+  val PFCOUNT           = "PFCOUNT"
+  val PFMERGE           = "PFMERGE"
+
   val commandMap: Map[String, Function1[List[Array[Byte]],Command]] = Map(
     // key commands
     DEL               -> {Del(_)},
@@ -255,7 +260,12 @@ object Commands {
     EXEC              -> {_ => Exec},
     MULTI             -> {_ => Multi},
     UNWATCH           -> {_ => UnWatch},
-    WATCH             -> {Watch(_)}
+    WATCH             -> {Watch(_)},
+
+    // HyperLogLogs
+    PFADD             -> {PFAdd(_)},
+    PFCOUNT           -> {PFCount(_)},
+    PFMERGE           -> {PFMerge(_)}
 
   )
 
@@ -395,6 +405,11 @@ object CommandBytes {
   val MULTI             = StringToChannelBuffer("MULTI")
   val UNWATCH           = StringToChannelBuffer("UNWATCH")
   val WATCH             = StringToChannelBuffer("WATCH")
+
+  // HyperLogLogs
+  val PFADD             = StringToChannelBuffer("PFADD")
+  val PFCOUNT           = StringToChannelBuffer("PFCOUNT")
+  val PFMERGE           = StringToChannelBuffer("PFMERGE")
 }
 
 
