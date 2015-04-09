@@ -148,7 +148,6 @@ class EndToEndTest extends FunSuite {
       .name("testClient")
       .hosts(server.boundAddress)
       .codec(StringCodec)
-      .requestTimeout(10.millisecond)
       .hostConnectionLimit(1)
       .hostConnectionMaxWaiters(1)
       .reportTo(mem)
@@ -178,7 +177,6 @@ class EndToEndTest extends FunSuite {
 
     val mem = new InMemoryStatsReceiver
     val client = ClientBuilder.stackClientOfCodec(StringCodec.client)
-      .configured(TimeoutFilter.Param(10.millisecond))
       .configured(DefaultPool.Param(
         /* low        */ 1,
         /* high       */ 1,
