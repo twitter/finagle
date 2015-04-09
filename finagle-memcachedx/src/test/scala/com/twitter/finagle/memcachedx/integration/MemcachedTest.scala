@@ -8,16 +8,18 @@ import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
 import com.twitter.finagle.memcachedx.{Client, Memcached, PartitionedClient}
 import com.twitter.finagle.service.FailureAccrualFactory
 import com.twitter.io.Buf
-import com.twitter.util.Await
+import com.twitter.util.{Await, Future}
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class MemcachedTest extends FunSuite with BeforeAndAfter {
   var server1: Option[TestMemcachedServer] = None
   var server2: Option[TestMemcachedServer] = None
   var client: Client = null
+
+  val TimeOut = 15.seconds
 
   before {
     server1 = TestMemcachedServer.start()
@@ -167,26 +169,24 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
   test("re-hash when a bad host is ejected") {
     client =
       Memcached("memcache")
-        .configured(FailureAccrualFactory.Param(5, () => 10.minutes))
+        .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
         .configured(EjectFailedHost(true))
         .newClient(Name.bound(server1.get.address, server2.get.address))
     val partitionedClient = client.asInstanceOf[PartitionedClient]
 
     // set values
-    for (i <- 0 to 20) {
-      client.set(s"foo$i", Buf.Utf8(s"bar$i"))
-    }
-
-    val keys = (0 to 20).map(i => s"foo$i")
+    Await.result(Future.collect(
+      (0 to 20).map { i =>
+        client.set(s"foo$i", Buf.Utf8(s"bar$i"))
+      }
+    ), TimeOut)
 
     // shutdown one memcache host
     server2.foreach(_.stop())
 
-    //trigger ejection
+    // trigger ejection
     for (i <- 0 to 20) {
-      try {
-        Await.result(client.get(s"foo$i"))
-      } catch { case _ => () }
+      Await.ready(client.get(s"foo$i"), TimeOut)
     }
 
     // one memcache host alive
@@ -200,7 +200,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     // previously set values have cache misses
     var cacheMisses = 0
     for (i <- 0 to 20) {
-      if (Await.result(client.get(s"foo$i")) == None) cacheMisses = cacheMisses + 1
+      if (Await.result(client.get(s"foo$i"), TimeOut) == None) cacheMisses = cacheMisses + 1
     }
     assert(cacheMisses > 0)
   }
