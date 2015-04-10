@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.{
   CategorizingExceptionStatsHandler, ExceptionStatsHandler, StatsReceiver}
-import com.twitter.util.{Future, Stopwatch, Throw, Return, Time}
+import com.twitter.util.{Future, Stopwatch, Throw, Return, Time, Duration}
 import java.util.concurrent.atomic.AtomicInteger
 
 object StatsFilter {
@@ -65,8 +65,8 @@ class StatsFilter[Req, Rep](
       case None =>
       case Some(Deadline(timestamp, deadline)) =>
         val now = Time.now
-        transitTimeStat.add((now-timestamp).inMilliseconds)
-        budgetTimeStat.add((deadline-now).inMilliseconds)
+        transitTimeStat.add(((now-timestamp) max Duration.Zero).inMilliseconds)
+        budgetTimeStat.add(((deadline-now) max Duration.Zero).inMilliseconds)
     }
 
     outstandingRequestCount.incrementAndGet()
