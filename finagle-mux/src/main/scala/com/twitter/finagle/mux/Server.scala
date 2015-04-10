@@ -44,7 +44,7 @@ private class Tracker[T] {
   private[this] val state = new AtomicInteger(1)
 
   /**
-   * Try to enter a transaction, returning false if the 
+   * Try to enter a transaction, returning false if the
    * tracker is draining.
    */
   @tailrec
@@ -56,7 +56,7 @@ private class Tracker[T] {
   }
 
   /**
-   * Exit an entered transaction. 
+   * Exit an entered transaction.
    */
   @tailrec
   private[this] def exit(): Unit = {
@@ -75,11 +75,11 @@ private class Tracker[T] {
    * The ordering here is important: the tag is relinquished after
    * `reply` is satisfied but before `process` is invoked, but is still
    * considered pending until `process` completes. This is because:
-   * (1) the tag is freed once a client receives the reply, and, since 
+   * (1) the tag is freed once a client receives the reply, and, since
    * write completion is not synchronous with processing the next
-   * request, there is a race between acknowledging the write and 
+   * request, there is a race between acknowledging the write and
    * receiving the next request from the client (which may then reuse
-   * the tag); (2) we can't complete draining until we've acknowledged 
+   * the tag); (2) we can't complete draining until we've acknowledged
    * the write for the last request processed.
    */
   def track(tag: Int, reply: Future[T])(process: Try[T] => Future[Unit]): Future[Unit] = {
@@ -95,7 +95,7 @@ private class Tracker[T] {
   /**
    * Retrieve the value for the pending request matching `tag`.
    */
-  def get(tag: Int): Option[Future[T]] = 
+  def get(tag: Int): Option[Future[T]] =
     Option(pending.get(tag))
 
   /**
@@ -105,7 +105,7 @@ private class Tracker[T] {
     pending.keySet.asScala.toSet
 
   /**
-   * Initiate the draining protocol. After `drain` is called, future 
+   * Initiate the draining protocol. After `drain` is called, future
    * requests for tracking are dropped. [[drained]] is satisified
    * when the number of pending requests reaches 0.
    */
@@ -122,7 +122,7 @@ private class Tracker[T] {
    * True when the tracker is in draining state.
    */
   def isDraining: Boolean = state.get < 0
-  
+
   /**
    * Satisifed when the tracker has completed the draining protocol,
    * as described in [[drain]].
@@ -133,7 +133,7 @@ private class Tracker[T] {
    * Tests whether the given tag is actively tracked.
    */
   def isTracking(tag: Int): Boolean = pending.containsKey(tag)
-  
+
   /**
    * The number of tracked tags.
    */
@@ -151,21 +151,21 @@ private[twitter] object ServerDispatcher {
     lessor: Lessor,
     tracer: Tracer,
     statsReceiver: StatsReceiver
-  ): ServerDispatcher = 
+  ): ServerDispatcher =
     new ServerDispatcher(trans, Processor andThen service, lessor, tracer, statsReceiver)
 
   /**
-   * Construct a new request-response dispatcher with a 
+   * Construct a new request-response dispatcher with a
    * null lessor, tracer, and statsReceiver.
    */
   def newRequestResponse(
     trans: Transport[ChannelBuffer, ChannelBuffer],
     service: Service[Request, Response]
-  ): ServerDispatcher = 
+  ): ServerDispatcher =
     newRequestResponse(trans, service, Lessor.nil, NullTracer, NullStatsReceiver)
 
   val Epsilon = 1.second
-  
+
   object State extends Enumeration {
     val Open, Draining, Closed = Value
   }
@@ -184,22 +184,22 @@ private[twitter] class ServerDispatcher(
 ) extends Closable with Lessee {
   import Message._
   import ServerDispatcher.State
-  
+
   private[this] implicit val injectTimer = DefaultTimer.twitter
   private[this] val tracker = new Tracker[Message]
   private[this] val log = Logger.getLogger(getClass.getName)
-  
-  private[this] val state: AtomicReference[State.Value] = 
+
+  private[this] val state: AtomicReference[State.Value] =
     new AtomicReference(State.Open)
 
   @volatile private[this] var lease = Tlease.MaxLease
-  @volatile private[this] var curElapsed = NilStopwatch.start()  
+  @volatile private[this] var curElapsed = NilStopwatch.start()
   lessor.register(this)
-  
-  private[this] def write(m: Message): Future[Unit] = 
+
+  private[this] def write(m: Message): Future[Unit] =
     trans.write(encode(m))
 
-  private[this] def isAccepting: Boolean = 
+  private[this] def isAccepting: Boolean =
     !tracker.isDraining && (!nackOnExpiredLease() || (lease > Duration.Zero))
 
   private[this] def process(m: Message): Unit = m match {
@@ -211,7 +211,7 @@ private[twitter] class ServerDispatcher(
       // we should terminate the session in this case.
       //
       // TODO: introduce uniform handling of tag tracking
-      // (across all request types), and also uniform handling 
+      // (across all request types), and also uniform handling
       // (e.g., session termination).
       if (tracker.isTracking(m.tag)) {
         log.warning(s"Received duplicate tag ${m.tag} from client ${trans.remoteAddress}")
@@ -225,7 +225,7 @@ private[twitter] class ServerDispatcher(
         case Return(rep) =>
           lessor.observe(elapsed())
           write(rep)
-        case Throw(exc) => 
+        case Throw(exc) =>
           log.log(Level.WARNING, s"Error processing message $m", exc)
           write(Rerr(m.tag, exc.toString))
       }
@@ -233,7 +233,7 @@ private[twitter] class ServerDispatcher(
     // Dispatch when !isAccepting
     case d: Tdispatch =>
       write(RdispatchNack(d.tag, Nil))
-    case r: Treq => 
+    case r: Treq =>
       write(RreqNack(r.tag))
 
     case _: Tping =>
@@ -244,7 +244,7 @@ private[twitter] class ServerDispatcher(
 
     case Tdiscarded(tag, why) =>
       tracker.get(tag) match {
-        case Some(reply) => 
+        case Some(reply) =>
           reply.raise(new ClientDiscardedRequestException(why))
         case None =>
       }
@@ -259,7 +259,7 @@ private[twitter] class ServerDispatcher(
 
   Local.letClear {
     Trace.letTracer(tracer) {
-      Future.each(trans.read) { buf => 
+      Future.each(trans.read) { buf =>
         val save = Local.save()
         process(decode(buf))
         Local.restore(save)
@@ -278,7 +278,7 @@ private[twitter] class ServerDispatcher(
 
     service.close()
     lessor.unregister(this)
-    
+
     state.get match {
       case State.Open =>
         statsReceiver.counter("clienthangup").incr()
@@ -312,7 +312,7 @@ private[twitter] class ServerDispatcher(
       tracker.drained.within(deadline-Time.now) before
       trans.close(deadline)
     done transform {
-      case Return(_) => 
+      case Return(_) =>
         statsReceiver.counter("drained").incr()
         Future.Done
       case Throw(_: ChannelClosedException) =>
@@ -349,7 +349,7 @@ private[twitter] class ServerDispatcher(
  * Processor handles request, dispatch, and ping messages. Request
  * and dispatch messages are passed onto the request-response in the
  * filter chain. Pings are answered immediately in the affirmative.
- * 
+ *
  * (This arrangement permits interpositioning other filters to modify ping
  * or dispatch behavior, e.g., for testing.)
  */
@@ -367,13 +367,13 @@ private object Processor extends Filter[Message, Message, Request, Response] {
         Dtab.local ++= dtab
       service(Request(dst, ChannelBufferBuf.Owned(bytes))) transform {
         case Return(rep) =>
-          Future.value(RdispatchOk(tag, Seq.empty, BufChannelBuffer(rep.body)))
+          Future.value(RdispatchOk(tag, Nil, BufChannelBuffer(rep.body)))
 
         case Throw(f: Failure) if f.isFlagged(Failure.Restartable) =>
           Future.value(RdispatchNack(tag, Nil))
 
         case Throw(exc) =>
-          Future.value(RdispatchError(tag, Seq.empty, exc.toString))
+          Future.value(RdispatchError(tag, Nil, exc.toString))
       }
     }
   }

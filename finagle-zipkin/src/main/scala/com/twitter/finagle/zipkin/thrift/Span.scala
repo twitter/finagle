@@ -80,5 +80,5 @@ case class Span(
 }
 
 object Span {
-  def apply(traceId: TraceId): Span = Span(traceId, None, None, Seq(), Seq(), Endpoint.Unknown)
+  def apply(traceId: TraceId): Span = Span(traceId, None, None, Nil, Nil, Endpoint.Unknown)
 }

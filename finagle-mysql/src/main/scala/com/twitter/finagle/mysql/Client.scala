@@ -105,7 +105,7 @@ private[mysql] class StdClient(factory: ServiceFactory[Request, Result])
   def select[T](sql: String)(f: Row => T): Future[Seq[T]] =
     query(sql) map {
       case rs: ResultSet => rs.rows.map(f)
-      case _ => Seq.empty
+      case _ => Nil
     }
 
   def prepare(sql: String): PreparedStatement = new PreparedStatement {

@@ -8,7 +8,7 @@ package com.twitter.finagle.stats
 import com.google.common.util.concurrent.AtomicLongMap
 import com.google.common.cache.{CacheBuilder, CacheLoader}
 import scala.collection.JavaConverters._
-import scala.collection.mutable.{ArrayBuffer, SynchronizedBuffer}
+import scala.collection.mutable.ArrayBuffer
 
 class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
   val repr = this
@@ -30,7 +30,7 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
   }
 
   def stat(name: String*) = new Stat {
-    def add(value: Float) = SummarizingStatsReceiver.this.synchronized { 
+    def add(value: Float) = SummarizingStatsReceiver.this.synchronized {
       stats.get(name) += value
     }
   }
@@ -67,14 +67,14 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
 
     val counterLines = (counterValues map { case (k, v) => (variableName(k), v.toString) }).toSeq
     val statLines = (statValues map { case (k, xs) =>
-      val n = xs.size
+      val n = xs.length
       def idx(ptile: Double) = math.floor(ptile*n).toInt
       (variableName(k), "n=%d min=%.1f med=%.1f p90=%.1f p95=%.1f p99=%.1f p999=%.1f p9999=%.1f max=%.1f".format(
         n, xs(0), xs(n/2), xs(idx(.9D)), xs(idx(.95D)), xs(idx(.99D)), xs(idx(.999D)), xs(idx(.9999D)), xs(n-1)))
     }).toSeq
 
     lazy val tailValues = (statValues map { case (k, xs) =>
-      val n = xs.size
+      val n = xs.length
       def slice(ptile: Double) = {
         val end = math.floor(ptile*n).toInt
         val start = math.ceil(end-((1.0-ptile)*n)).toInt

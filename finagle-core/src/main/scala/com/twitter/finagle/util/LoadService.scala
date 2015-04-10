@@ -147,10 +147,10 @@ private object ClassPath {
         val commentIdx = line.indexOf('#')
         val end = if (commentIdx != -1) commentIdx else line.length
         val str = line.substring(0, end).trim
-        if (str.isEmpty) Seq.empty else Seq(str)
+        if (str.isEmpty) Nil else Seq(str)
       }
     } catch {
-      case ex: MalformedInputException => Seq.empty /* skip malformed files (e.g. non UTF-8) */
+      case ex: MalformedInputException => Nil /* skip malformed files (e.g. non UTF-8) */
     } finally {
       source.close()
     }

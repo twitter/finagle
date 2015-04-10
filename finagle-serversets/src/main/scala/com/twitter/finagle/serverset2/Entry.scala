@@ -50,7 +50,7 @@ object Entry {
     if (basename startsWith EndpointPrefix)
       Endpoint.parseJson(json) map(_.copy(memberId=basename))
     else
-      Seq.empty
+      Nil
   }
 }
 

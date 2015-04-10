@@ -69,10 +69,10 @@ object HttpDtab {
     }
 
   private def validHeaderPair(aKey: String, bKey: String): Boolean =
-    aKey.size == bKey.size &&
-    aKey.substring(0, aKey.size-1) == bKey.substring(0, bKey.size-1) &&
-    aKey(aKey.size-1) == 'a' &&
-    bKey(bKey.size-1) == 'b'
+    aKey.length == bKey.length &&
+    aKey.charAt(aKey.length - 1) == 'a' &&
+    bKey.charAt(bKey.length - 1) == 'b' &&
+    aKey.substring(0, aKey.length - 1) == bKey.substring(0, bKey.length - 1)
 
   private val EmptyReturn = Return(Dtab.empty)
 
@@ -99,7 +99,7 @@ object HttpDtab {
       // TODO: now that we have a proper Dtab grammar,
       // should just embed this directly instead.
       msg.headers.set(Prefix+indexstr(i)+"-A", b64Encode(prefix.show))
-      msg.headers.set(Prefix+indexstr(i)+"-B".format(i), b64Encode(dst.show))
+      msg.headers.set(Prefix+indexstr(i)+"-B", b64Encode(dst.show))
     }
   }
 

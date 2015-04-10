@@ -193,7 +193,7 @@ private[finagle] object Message {
       }
 
       val dstbytes = if (dst.isEmpty) noBytes else dst.show.getBytes(Charsets.Utf8)
-      n += 2 + dstbytes.size
+      n += 2 + dstbytes.length
       n += 2
 
       val dtabbytes = new Array[(Array[Byte], Array[Byte])](dtab.size)
@@ -204,7 +204,7 @@ private[finagle] object Message {
         val srcbytes = src.show.getBytes(Charsets.Utf8)
         val treebytes = tree.show.getBytes(Charsets.Utf8)
 
-        n += srcbytes.size + 2 + treebytes.size + 2
+        n += srcbytes.length + 2 + treebytes.length + 2
 
         dtabbytes(dtabidx) = (srcbytes, treebytes)
         dtabidx += 1
@@ -225,16 +225,16 @@ private[finagle] object Message {
         seq = seq.tail
       }
 
-      hd.writeShort(dstbytes.size)
+      hd.writeShort(dstbytes.length)
       hd.writeBytes(dstbytes)
 
       hd.writeShort(dtab.size)
       dtabidx = 0
-      while (dtabidx != dtabbytes.size) {
+      while (dtabidx != dtabbytes.length) {
         val (srcbytes, treebytes) = dtabbytes(dtabidx)
-        hd.writeShort(srcbytes.size)
+        hd.writeShort(srcbytes.length)
         hd.writeBytes(srcbytes)
-        hd.writeShort(treebytes.size)
+        hd.writeShort(treebytes.length)
         hd.writeBytes(treebytes)
         dtabidx += 1
       }
@@ -439,8 +439,10 @@ private[finagle] object Message {
       nkeys -= 1
     }
 
-    val id = trace3 map { case (spanId, parentId, traceId) =>
-      TraceId(Some(traceId), Some(parentId), spanId, None, Flags(traceFlags))
+    val id = trace3 match {
+      case Some((spanId, parentId, traceId)) =>
+        Some(TraceId(Some(traceId), Some(parentId), spanId, None, Flags(traceFlags)))
+      case None => None
     }
 
     Treq(tag, id, buf.slice())
@@ -449,7 +451,7 @@ private[finagle] object Message {
   private def decodeContexts(buf: ChannelBuffer): Seq[(ChannelBuffer, ChannelBuffer)] = {
     val n = buf.readUnsignedShort()
     if (n == 0)
-      return Seq.empty
+      return Nil
 
     val contexts = new Array[(ChannelBuffer, ChannelBuffer)](n)
     var i = 0

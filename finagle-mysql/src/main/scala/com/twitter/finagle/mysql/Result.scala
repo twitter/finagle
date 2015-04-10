@@ -259,5 +259,5 @@ object ResultSet {
 }
 
 case class ResultSet(fields: Seq[Field], rows: Seq[Row]) extends Result {
-  override def toString = "ResultSet(%d, %d)".format(fields.size, rows.size)
+  override def toString = s"ResultSet(${fields.size}, ${rows.size})"
 }

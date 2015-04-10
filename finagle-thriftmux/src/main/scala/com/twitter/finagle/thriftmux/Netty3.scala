@@ -56,17 +56,21 @@ private[finagle] class PipelineFactory(
       )
       val richHeader = new RichRequestHeader(header)
 
-      val contextBuf = mutable.ArrayBuffer.empty[(ChannelBuffer, ChannelBuffer)]
+      val contextBuf =
+        new mutable.ArrayBuffer[(ChannelBuffer, ChannelBuffer)](
+          2 + (if (header.contexts == null) 0 else header.contexts.size))
 
       contextBuf += (
         BufChannelBuffer(Trace.idCtx.marshalId) ->
         BufChannelBuffer(Trace.idCtx.marshal(richHeader.traceId)))
 
-      richHeader.clientId foreach { clientId =>
-        val clientIdBuf = ClientId.clientIdCtx.marshal(Some(clientId))
-        contextBuf += (
-          BufChannelBuffer(ClientId.clientIdCtx.marshalId) ->
-          BufChannelBuffer(clientIdBuf))
+      richHeader.clientId match {
+        case Some(clientId) =>
+          val clientIdBuf = ClientId.clientIdCtx.marshal(Some(clientId))
+          contextBuf += (
+            BufChannelBuffer(ClientId.clientIdCtx.marshalId) ->
+            BufChannelBuffer(clientIdBuf))
+        case None =>
       }
 
       if (header.contexts != null) {
@@ -82,13 +86,13 @@ private[finagle] class PipelineFactory(
         Message.MinTag, contextBuf.toSeq, richHeader.dest, richHeader.dtab, requestBuf)
     }
 
-    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent)  {
+    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent): Unit =  {
       val buf = e.getMessage.asInstanceOf[ChannelBuffer]
       super.messageReceived(ctx, new UpstreamMessageEvent(
         e.getChannel, Message.encode(thriftToMux(buf)), e.getRemoteAddress))
     }
 
-    override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+    override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent): Unit = {
       Message.decode(e.getMessage.asInstanceOf[ChannelBuffer]) match {
         case Message.RdispatchOk(_, _, rep) =>
           super.writeRequested(ctx,
@@ -142,7 +146,7 @@ private[finagle] class PipelineFactory(
   }
 
   private class TFramedToMux extends SimpleChannelHandler {
-    override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+    override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent): Unit = {
       Message.decode(e.getMessage.asInstanceOf[ChannelBuffer]) match {
         case Message.RdispatchOk(_, _, rep) =>
           super.writeRequested(ctx,
@@ -195,12 +199,12 @@ private[finagle] class PipelineFactory(
       }
     }
 
-    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent)  {
+    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent): Unit = {
       val buf = e.getMessage.asInstanceOf[ChannelBuffer]
       super.messageReceived(ctx,
         new UpstreamMessageEvent(
           e.getChannel,
-          Message.encode(Message.Tdispatch(Message.MinTag, Seq.empty, Path.empty, Dtab.empty, buf)),
+          Message.encode(Message.Tdispatch(Message.MinTag, Nil, Path.empty, Dtab.empty, buf)),
           e.getRemoteAddress))
     }
   }
@@ -213,12 +217,12 @@ private[finagle] class PipelineFactory(
     private[this] val q = new LinkedBlockingDeque[MessageEvent]
     private[this] val n = new AtomicInteger(pendingReqs)
 
-    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent): Unit = {
       if (n.incrementAndGet() > 1) q.offer(e)
       else super.messageReceived(ctx, e)
     }
 
-    override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+    override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent): Unit = {
       super.writeRequested(ctx, e)
       if (n.decrementAndGet() > 0) {
         // Need to call q.take() Since incrementing n and enqueueing the
@@ -263,7 +267,7 @@ private[finagle] class PipelineFactory(
     import Upgrader._
 
     // Queue writes until we know what protocol we are speaking.
-    private[this] var writeq = new DrainQueue[MessageEvent]
+    private[this] val writeq = new DrainQueue[MessageEvent]
 
     private[this] def isTTwitterUpNegotiation(req: ChannelBuffer): Boolean = {
       try {
@@ -276,12 +280,12 @@ private[finagle] class PipelineFactory(
       }
     }
 
-    override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+    override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent): Unit = {
       if (!writeq.offer(e))
         super.writeRequested(ctx, e)
     }
 
-    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent): Unit = {
       val buf = e.getMessage.asInstanceOf[ChannelBuffer]
       val pipeline = ctx.getPipeline
       Try { Message.decode(buf.duplicate()) } match {
@@ -333,7 +337,7 @@ private[finagle] class PipelineFactory(
               new UpstreamMessageEvent(
                 e.getChannel,
                 Message.encode(
-                  Message.Tdispatch(Message.MinTag, Seq.empty, Path.empty, Dtab.empty, buf)),
+                  Message.Tdispatch(Message.MinTag, Nil, Path.empty, Dtab.empty, buf)),
                 e.getRemoteAddress))
           }
 
@@ -377,7 +381,7 @@ private[finagle] class PipelineFactory(
   private[this] val thriftmuxConnectionGauge =
     statsReceiver.addGauge("connections") { thriftMuxConnectionCount.get() }
 
-  def getPipeline() = {
+  def getPipeline(): ChannelPipeline = {
     val pipeline = mux.PipelineFactory.getPipeline()
     pipeline.addLast("upgrader", new Upgrader)
     pipeline
