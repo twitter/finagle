@@ -8,21 +8,21 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class ParameterTest extends FunSuite {
-  test("Parameter coercion") {
-    locally {
-      val x: Parameter = null
-      assert(x == null)
-    }
+  test("null, when directly given a type Parameter, stays unchanged") {
+    val x: Parameter = null
+    assert(x == null)
+  }
 
-    locally {
-      val y: String = null
-      val x: Parameter = y
-      assert(x == NullParameter)
-    }
+  test("null with a static type that is coercible to Parameter, " +
+    "when given a type Parameter, coerces to NullParameter") {
+    val y: String = null
+    val x: Parameter = y
+    assert(x == NullParameter)
+  }
 
-    locally {
-      val x: Parameter = "Howdy"
-      assert(x.value == "Howdy")
-    }
+  test("A value with a static type that is coercible to Parameter, " +
+    "when given a type Parameter, coerces while preserving original value internally") {
+    val x: Parameter = "Howdy"
+    assert(x.value == "Howdy")
   }
 }

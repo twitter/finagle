@@ -23,7 +23,7 @@ object Client {
 
     def prepare(sql: String): PreparedStatement = new PreparedStatement {
       def apply(ps: Parameter*): Future[Result] = factory() flatMap { svc =>
-        svc(PrepareRequest(sql)) flatMap {
+        svc(PrepareRequest(sql)).flatMap {
           case ok: PrepareOK => svc(ExecuteRequest(ok.id, ps.toIndexedSeq))
           case r => Future.exception(new Exception("Unexpected result %s when preparing %s"
             .format(r, sql)))

@@ -1,12 +1,13 @@
 package com.twitter.finagle.exp.mysql
 
+import com.twitter.finagle.exp.mysql.Parameter.NullParameter
+import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader}
+
 import java.sql.{Timestamp, Date => SQLDate}
 import java.util.{Calendar, Date, TimeZone}
-import com.twitter.finagle.exp.mysql.Parameter.NullParameter
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader}
 
 @RunWith(classOf[JUnitRunner])
 class SimpleCommandRequestTest extends FunSuite {

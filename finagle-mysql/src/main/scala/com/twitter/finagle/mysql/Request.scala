@@ -151,7 +151,7 @@ case class HandshakeResponse(
  * a prepared statement.
  * [[http://dev.mysql.com/doc/internals/en/com-stmt-execute.html]]
  */
-class ExecuteRequest(
+class ExecuteRequest private(
   val stmtId: Int,
   val params: IndexedSeq[Parameter],
   val hasNewParams: Boolean,
@@ -162,7 +162,7 @@ class ExecuteRequest(
     private[this] def makeNullBitmap(parameters: IndexedSeq[Parameter]): Array[Byte] = {
       val bitmap = new Array[Byte]((parameters.size + 7) / 8)
       val ps = parameters.zipWithIndex
-      ps foreach {
+      ps.foreach {
         case (Parameter.NullParameter, idx) =>
           val bytePos = idx / 8
           val bitPos = idx % 8
@@ -201,7 +201,7 @@ class ExecuteRequest(
       writer
     }
 
-    def toPacket = {
+    def toPacket: Packet = {
       val bw = BufferWriter(new Array[Byte](10))
       bw.writeByte(cmd)
       bw.writeInt(stmtId)
@@ -232,7 +232,11 @@ class ExecuteRequest(
 }
 
 object ExecuteRequest {
-  def apply(stmtId: Int, params: IndexedSeq[Parameter] = IndexedSeq.empty, hasNewParams: Boolean = true, flags: Byte = 0) = {
+  def apply(stmtId: Int,
+            params: IndexedSeq[Parameter] = IndexedSeq.empty,
+            hasNewParams: Boolean = true,
+            flags: Byte = 0): ExecuteRequest = {
+
     val sanitizedParams = params.map {
       case null  => Parameter.NullParameter
       case other => other

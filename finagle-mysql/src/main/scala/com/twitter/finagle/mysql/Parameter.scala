@@ -17,14 +17,14 @@ trait Parameter {
 }
 
 object Parameter {
-  implicit def wrap[_A](_value: _A)(implicit _evidence: CanBeParameter[_A]): Parameter = {
-    if (_value == null) {
+  implicit def wrap[A0](value0: A0)(implicit evidence0: CanBeParameter[A0]): Parameter = {
+    if (value0 == null) {
       NullParameter
     } else {
       new Parameter {
-        type A = _A
-        def value: A = _value
-        def evidence: CanBeParameter[A] = _evidence
+        type A = A0
+        def value: A = value0
+        def evidence: CanBeParameter[A] = evidence0
       }
     }
   }
