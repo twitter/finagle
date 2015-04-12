@@ -2,15 +2,15 @@ package com.twitter.finagle.exp.mysql
 
 import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferWriter}
 
-trait CanBeParameter[A] { outer =>
+trait CanBeParameter[-A] { outer =>
   /**
    * Returns the size of the given parameter in its MySQL binary representation.
-   **/
+   */
   def sizeOf(param: A): Int
 
   /**
    * Retrieves the MySQL type code for the given parameter.
-   * */
+   */
   def typeCode(param: A): Short
 
   def write(writer: BufferWriter, param: A): BufferWriter

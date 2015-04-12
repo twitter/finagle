@@ -232,10 +232,12 @@ class ExecuteRequest private(
 }
 
 object ExecuteRequest {
-  def apply(stmtId: Int,
-            params: IndexedSeq[Parameter] = IndexedSeq.empty,
-            hasNewParams: Boolean = true,
-            flags: Byte = 0): ExecuteRequest = {
+  def apply(
+    stmtId: Int,
+    params: IndexedSeq[Parameter] = IndexedSeq.empty,
+    hasNewParams: Boolean = true,
+    flags: Byte = 0
+  ): ExecuteRequest = {
 
     val sanitizedParams = params.map {
       case null  => Parameter.NullParameter
