@@ -134,6 +134,9 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
     def withMaxResponseSize(size: StorageUnit): Client =
       configured(param.MaxResponseSize(size))
 
+    def withStreaming(enabled: Boolean): Client =
+      configured(param.Streaming(enabled))
+
     def withDecompression(enabled: Boolean): Client =
       configured(param.Decompression(enabled))
 
@@ -189,6 +192,9 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
 
     def withMaxResponseSize(size: StorageUnit): Server =
       configured(param.MaxResponseSize(size))
+
+    def withStreaming(enabled: Boolean): Server =
+      configured(param.Streaming(enabled))
 
     def withDecompression(enabled: Boolean): Server =
       configured(param.Decompression(enabled))
