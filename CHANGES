@@ -26,9 +26,17 @@ Breaking API Changes
     separation of attributes from interpretation of those attributes.
 
   * finagle-core: `ExitGuard` usage is now private to finagle.
-  
-  * finagle-core: `c.t.f.service.TimeoutFilter.module` is now split into 
+
+  * finagle-core: `c.t.f.service.TimeoutFilter.module` is now split into
     `TimeoutFilter.clientModule` and `TimeoutFilter.serverModule`.
+
+  * finagle-core: remove deprecated `c.t.f.builder.ClientBuilder.stack` taking a
+    `Stack.Params => Client[Req1, Rep1]`.
+
+  * finagle-core: StackRegistry.Entry takes different constructor arguments, and the
+    name has been bundled in with the Stack.Params.  StackRegistry.Entry is only used
+    internally, so this should be relatively inexpensive.  Similarly, StackRegister#register
+    has also had a small change to its method signature along the same lines.
 
   * finagle-http: deprecated methods in `c.t.f.http.HttpMessageProxy` have been removed.
 
@@ -40,23 +48,20 @@ Breaking API Changes
     to config duration. Also see `markDeadFor` change in finagle-core in the "New Features"
     section below.
 
+  * finagle-memcached / finagle-memcachedx: MigrationClientTest now uses
+    ServerCnxnFactory from com.twitter.zk rather than NIOServerCnxn.Factory from
+    org.apache.zookeeper.server.
+
   * finagle-mux: `c.t.f.mux.RequestNackedException` is removed in favor of a standard
     Failure (`c.t.f.Failure.Rejected`).
 
   * finagle-ostrich4: Switched dependency to finagle-httpx from finagle-http.
 
-  * finagle-stats: Switched dependency to finagle-httpx from finagle-http.
-
-  * finagle-core: remove deprecated `c.t.f.builder.ClientBuilder.stack` taking a
-    `Stack.Params => Client[Req1, Rep1]`.
-
-  * finagle-memcached / finagle-memcachedx: MigrationClientTest now uses
-    ServerCnxnFactory from com.twitter.zk rather than NIOServerCnxn.Factory from
-    org.apache.zookeeper.server.
-
   * finagle-serversets: ZkInstance in tests now uses ServerCnxnFactory from
     com.twitter.zk rather than NIOServerCnxn.Factory from
     org.apache.zookeeper.server.
+
+  * finagle-stats: Switched dependency to finagle-httpx from finagle-http.
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

@@ -2,13 +2,19 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Var, Return, Activity}
+import com.twitter.finagle.util.{TestParam, TestParam2}
+import com.twitter.util.{Var, Return, Activity, Future, Await}
 import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry, Entry}
+import com.twitter.conversions.time.intToTimeableNumber
 
 import org.junit.runner.RunWith
+import org.mockito.Matchers.anyObject
+import org.mockito.Mockito
+import org.mockito.Mockito.{never, times, verify, when}
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 
 import java.net.SocketAddress
 
@@ -31,7 +37,8 @@ class ClientRegistryTest extends FunSuite
   with StringClient
   with Eventually
   with IntegrationPatience
-  with BeforeAndAfter {
+  with BeforeAndAfter
+  with MockitoSugar {
 
   trait Ctx {
     val sr = new InMemoryStatsReceiver
@@ -141,4 +148,52 @@ class ClientRegistryTest extends FunSuite
       }
     }
   })
+
+  // copied from StackRegistryTest
+  val headRole = Stack.Role("head")
+  val nameRole = Stack.Role("name")
+
+  val param1 = TestParam(999)
+
+
+  def newStack(): Stack[ServiceFactory[Int, Int]] = {
+    val mockSvc = mock[Service[Int, Int]]
+    when(mockSvc.apply(anyObject[Int])).thenReturn(Future.value(10))
+
+    val factory = ServiceFactory.const(mockSvc)
+
+    val stack = new StackBuilder(Stack.Leaf(new Stack.Head {
+      def role: Stack.Role = headRole
+      def description: String = "the head!!"
+      def parameters: Seq[Stack.Param[_]] = Seq(TestParam2.param)
+    }, factory))
+    val stackable: Stackable[ServiceFactory[Int, Int]] = new Stack.Module1[TestParam, ServiceFactory[Int, Int]] {
+      def make(p: TestParam, l: ServiceFactory[Int, Int]): ServiceFactory[Int, Int] = l.map { _.map { _ + p.p1 }}
+
+      val description: String = "description"
+      val role: Stack.Role = nameRole
+    }
+    stack.push(stackable)
+
+    stack.result
+  }
+
+  test("RegistryEntryLifecycle module registers a Stack and then deregisters it") {
+    val stk = newStack()
+    val params = Stack.Params.empty + param1 + param.Label("foo")
+    val simple = new SimpleRegistry()
+    GlobalRegistry.withRegistry(simple) {
+      val factory = (RegistryEntryLifecycle.module[Int, Int] +: stk).make(params)
+      val expected = {
+        Set(
+          Entry(Seq("client", "foo", "/$/fail", "name", "p1"), "999"),
+          Entry(Seq("client", "foo", "/$/fail", "head", "p2"), "1")
+        )
+      }
+      assert(GlobalRegistry.get.toSet == expected)
+      Await.result(factory.close())
+
+      assert(GlobalRegistry.get.isEmpty)
+    }
+  }
 }

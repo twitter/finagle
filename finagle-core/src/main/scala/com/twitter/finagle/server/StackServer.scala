@@ -228,7 +228,7 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
         }
       }
 
-      ServerRegistry.register(serverLabel, addr.toString, server.stack, server.params)
+      ServerRegistry.register(addr.toString, server.stack, server.params)
 
       protected def closeServer(deadline: Time) = closeAwaitably {
         // Here be dragons

@@ -221,6 +221,7 @@ object StackClient {
     stk.push(Failure.module)
     stk.push(ClientTracingFilter.module)
     stk.push(TraceInitializerFilter.clientModule)
+    stk.push(RegistryEntryLifecycle.module)
     stk.result
   }
 
@@ -360,17 +361,6 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
       Label(clientLabel) +
       Stats(stats.scope(clientLabel)) +
       BindingFactory.Dest(dest))
-
-    // for the benefit of ClientRegistry.expAllRegisteredClientsResolved
-    // which waits for these to become non-Pending
-    val va =
-      dest match {
-        case Name.Bound(va) => va
-        case Name.Path(path) => Namer.resolve(path)
-      }
-
-    ClientRegistry.register(clientLabel, Showable.show(dest), clientStack,
-      clientParams + LoadBalancerFactory.Dest(va))
 
     val finalStack =
       if (!clientStack.contains(FailFastFactory.role)) clientStack.remove(RequeueingFilter.role)

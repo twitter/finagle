@@ -24,6 +24,15 @@ object DefaultStatsReceiver extends {
 }
 
 /**
+ * A global StatsReceiver for generic finagle metrics.
+ */
+private[finagle] object FinagleStatsReceiver extends {
+  val self: StatsReceiver = LoadedStatsReceiver.scope("finagle")
+} with StatsReceiverProxy {
+  val get: StatsReceiver = this
+}
+
+/**
  * A client-specific StatsReceiver. All stats recorded using this receiver
  * are prefixed with the string "clnt" by default.
  */

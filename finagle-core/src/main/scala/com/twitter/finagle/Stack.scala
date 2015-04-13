@@ -539,7 +539,7 @@ class StackBuilder[T](init: Stack[T]) {
 
   /**
    * Push the stack element `el` onto the stack; el must conform to
-   * typeclass [[CanStackCanStackFrom]].
+   * typeclass [[CanStackFrom]].
    */
   def push[U](role: Stack.Role, el: U)(implicit csf: CanStackFrom[U, T]): this.type = {
     stack = csf.toStackable(role, el) +: stack

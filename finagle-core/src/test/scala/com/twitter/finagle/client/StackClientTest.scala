@@ -56,8 +56,9 @@ class StackClientTest extends FunSuite
     client.newClient(Name.bound(new InetSocketAddress(8080)), name)
     client.newClient(Name.bound(new InetSocketAddress(8080)), name)
 
-    assert(ClientRegistry.registrants.count {
-      e: StackRegistry.Entry => name == e.name
+    assert(ClientRegistry.registrants.count { e: StackRegistry.Entry =>
+      val param.Label(actual) = e.params[param.Label]
+      name == actual
     } === 1)
   })
 

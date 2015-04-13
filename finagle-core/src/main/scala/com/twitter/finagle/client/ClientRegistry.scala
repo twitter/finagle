@@ -1,12 +1,17 @@
 package com.twitter.finagle.client
 
+import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
-import com.twitter.finagle.util.StackRegistry
-import com.twitter.finagle.{Addr, param}
-import com.twitter.util.Future
+import com.twitter.finagle.stats.FinagleStatsReceiver
+import com.twitter.finagle.util.{StackRegistry, Showable}
+import com.twitter.finagle._
+import com.twitter.util.{Future, Time}
 import java.util.logging.Level
 
 private[twitter] object ClientRegistry extends StackRegistry {
+
+  private[this] val sr = FinagleStatsReceiver.scope("clientregistry")
+  private[this] val clientRegistrySize = sr.addGauge("size") { size }
 
   def registryName: String = "client"
 
@@ -20,12 +25,13 @@ private[twitter] object ClientRegistry extends StackRegistry {
    *       availability as a Var.
    */
   def expAllRegisteredClientsResolved(): Future[Set[String]] = synchronized {
-    val fs = registrants map { case StackRegistry.Entry(name, _, _, params) =>
+    val fs: Iterable[Future[String]] = registrants.map { case StackRegistry.Entry(_, _, params) =>
+      val param.Label(name) = params[param.Label]
       val LoadBalancerFactory.Dest(va) = params[LoadBalancerFactory.Dest]
       val param.Logger(log) = params[param.Logger]
 
       val resolved = va.changes.filter(_ != Addr.Pending).toFuture()
-      resolved map { resolution =>
+      resolved.map { resolution =>
         // the full resolution can be rather verbose for large clusters,
         // so be stingy with our output
         log.fine(s"${name} params ${params}")
@@ -45,5 +51,43 @@ private[twitter] object ClientRegistry extends StackRegistry {
     }
 
     Future.collect(fs.toSeq).map(_.toSet)
+  }
+}
+
+private[finagle] object RegistryEntryLifecycle {
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = new Stack.Module[ServiceFactory[Req, Rep]] {
+    val role = Stack.Role("RegistryEntryLifecycle")
+
+    val description: String = "Maintains the ClientRegistry for the stack"
+    def parameters: Seq[Stack.Param[_]] = Seq(
+      implicitly[Stack.Param[BindingFactory.Dest]]
+    )
+
+    def make(
+      params: Stack.Params,
+      next: Stack[ServiceFactory[Req, Rep]]
+    ): Stack[ServiceFactory[Req, Rep]] = {
+      val BindingFactory.Dest(dest) = params[BindingFactory.Dest]
+
+      // for the benefit of ClientRegistry.expAllRegisteredClientsResolved
+      // which waits for these to become non-Pending
+      val va = dest match {
+        case Name.Bound(va) => va
+        case Name.Path(path) => Namer.resolve(path)
+      }
+
+      val shown = Showable.show(dest)
+      val registeredParams = params + LoadBalancerFactory.Dest(va)
+      ClientRegistry.register(shown, next, registeredParams)
+
+      CanStackFrom.fromFun[ServiceFactory[Req, Rep]].toStackable(role, { factory: ServiceFactory[Req, Rep] =>
+        new ServiceFactoryProxy[Req, Rep](factory) {
+          override def close(deadline: Time): Future[Unit] = {
+            ClientRegistry.unregister(shown, next, params)
+            self.close(deadline)
+          }
+        }
+      }) +: next
+    }
   }
 }

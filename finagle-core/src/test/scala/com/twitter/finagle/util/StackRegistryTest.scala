@@ -1,6 +1,6 @@
 package com.twitter.finagle.util
 
-import com.twitter.finagle.{Stack, StackBuilder, Stackable}
+import com.twitter.finagle.{Stack, StackBuilder, Stackable, param}
 import com.twitter.util.registry.{SimpleRegistry, GlobalRegistry, Entry}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -49,10 +49,10 @@ class StackRegistryTest extends FunSuite {
   test("StackRegistry should register stacks and params properly") {
     val reg = new StackRegistry { def registryName: String = "test" }
     val stk = newStack()
-    val params = Stack.Params.empty + param1
+    val params = Stack.Params.empty + param1 + param.Label("foo")
     val simple = new SimpleRegistry()
     GlobalRegistry.withRegistry(simple) {
-      reg.register("foo", "bar", stk, params)
+      reg.register("bar", stk, params)
       val expected = {
         Set(
           Entry(Seq("test", "foo", "bar", "name", "p1"), "999"),
@@ -60,6 +60,46 @@ class StackRegistryTest extends FunSuite {
         )
       }
       assert(GlobalRegistry.get.toSet == expected)
+    }
+  }
+
+  test("StackRegistry should unregister stacks and params properly") {
+    val reg = new StackRegistry { def registryName: String = "test" }
+    val stk = newStack()
+    val params = Stack.Params.empty + param1 + param.Label("foo")
+    val simple = new SimpleRegistry()
+    GlobalRegistry.withRegistry(simple) {
+      reg.register("bar", stk, params)
+      val expected = {
+        Set(
+          Entry(Seq("test", "foo", "bar", "name", "p1"), "999"),
+          Entry(Seq("test", "foo", "bar", "head", "p2"), "1")
+        )
+      }
+      assert(GlobalRegistry.get.toSet == expected)
+
+      reg.unregister("bar", stk, params)
+      assert(GlobalRegistry.get.toSet.isEmpty)
+    }
+  }
+
+  test("StackRegistry keeps track of the number of GlobalRegistry entries it enters") {
+    val reg = new StackRegistry { def registryName: String = "test" }
+    val stk = newStack()
+    val params = Stack.Params.empty + param1 + param.Label("foo")
+    val simple = new SimpleRegistry()
+    GlobalRegistry.withRegistry(simple) {
+      reg.register("bar", stk, params)
+      val expected = {
+        Set(
+          Entry(Seq("test", "foo", "bar", "name", "p1"), "999"),
+          Entry(Seq("test", "foo", "bar", "head", "p2"), "1")
+        )
+      }
+      assert(GlobalRegistry.get.size == reg.size)
+
+      reg.unregister("bar", stk, params)
+      assert(GlobalRegistry.get.size == reg.size)
     }
   }
 }

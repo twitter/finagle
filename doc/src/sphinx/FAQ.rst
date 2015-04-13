@@ -130,7 +130,7 @@ users.
 
 We're encouraging users to avoid encoding application requirements in Finagle,
 which was previously too easy to do via methods like `ClientBuilder#retries`, or
-`ClientBuilder#timeout`.  These are fundamentally application-level concerns--
+`ClientBuilder#timeout`.  These are fundamentally application-level concerns–
 you're trying to meet an SLA, etc.  In general, in order to do what Finagle is
 for, which is to deliver an rpc message to a cluster, we don't think you should
 need a lot of configuration at all.  You should need to specify your protocol,
@@ -171,6 +171,18 @@ Disabling fail fast can be done with ``ClientBuilder``:
   clientBuilder.failFast(false)
 
 Refer to the :ref:`fail fast <client_fail_fast>` section for further context.
+
+How long should my Clients live?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+One client should be made per set of fungible services.  You should not be reinstantiating
+your client on every request, and you should not have a different client per instance--finagle
+can handle load-balancing for you.
+
+There are a few use cases, like link shortening, or web crawling, where a service must communicate
+with many other non-fungible services, in which it makes sense to proliferate clients that are
+created, used, and thrown away, but in the vast majority of cases, clients should be persistent,
+not ephemeral.
 
 Mux-specific FAQ
 ----------------
