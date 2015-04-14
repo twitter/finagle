@@ -498,6 +498,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1731
   test("base replication client replica down") {
     // create my cluster client solely based on a zk client and a path
     val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
@@ -674,6 +675,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1731
   test("simple replication client delete") {
     // create my cluster client solely based on a zk client and a path
     val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
@@ -776,6 +778,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1731
   test("simple replication client incr & decr") {
     // create my cluster client solely based on a zk client and a path
     val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
@@ -818,6 +821,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1731
   test("simple replication client many keys") {
     // create my cluster client solely based on a zk client and a path
     val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)

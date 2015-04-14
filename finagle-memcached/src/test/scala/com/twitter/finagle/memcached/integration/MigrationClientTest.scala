@@ -141,6 +141,7 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1731
   test("dark read w/ read repair") {
     val migrationConfig = MigrationConstants.MigrationConfig("Warming", true, false)
     val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
@@ -165,6 +166,7 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     eventually { assert(Await.result(client2.get("foo")).map(_.toString(Charsets.Utf8)) === Some("bar")) }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1731
   test("use new pool with fallback to old pool") {
     val migrationConfig = MigrationConstants.MigrationConfig("Verifying", false, false)
     val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
@@ -189,6 +191,7 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     eventually { assert(Await.result(client2.get("foo")) === None) }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1731
   test("use new pool with fallback to old pool and readrepair") {
     val migrationConfig = MigrationConstants.MigrationConfig("Verifying", false, true)
     val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
