@@ -3,7 +3,7 @@ package com.twitter.finagle
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
-import org.mockito.Mockito.{never, spy, verify}
+import org.mockito.Mockito.{never, spy, times, verify}
 import org.mockito.Matchers._
 import com.twitter.finagle.service.{ConstantService, NilService}
 import com.twitter.util.{Await, Future, Time}
@@ -78,5 +78,18 @@ class FilterTest extends FunSuite {
     val svc = (new PassThruFilter).andThenIf((false, spied)).andThen(constSvc)
     Await.result(svc(4))
     verify(spied, never).apply(any[Int], any[Service[Int, Int]])
+  }
+
+  test("Filter.choose: apply the underlying filter to certain requests") {
+    val spied = spy(new PassThruFilter)
+    val svc = Filter.choose[Int, Int] {
+      case req if req > 0 => spied
+    }.andThen(constSvc)
+
+    assert(Await.result(svc(100)) == 2)
+    verify(spied, times(1)).apply(any[Int], any[Service[Int, Int]])
+
+    assert(Await.result(svc(-99)) == 2)
+    verify(spied, times(1)).apply(any[Int], any[Service[Int, Int]])
   }
 }

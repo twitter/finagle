@@ -142,4 +142,22 @@ object Filter {
   ): Filter[ReqIn, RepOut, ReqOut, RepIn] = new Filter[ReqIn, RepOut, ReqOut, RepIn] {
     def apply(request: ReqIn, service: Service[ReqOut, RepIn]) = f(request, service)
   }
+
+  /**
+   * Chooses a filter to apply based on incoming requests. If the given partial
+   * function is not defined at the request, then the request goes directly to
+   * the next service.
+   *
+   * @param  pf  a partial function mapping requests to Filters that should
+   *             be applied
+   */
+  def choose[Req, Rep](
+    pf: PartialFunction[Req, Filter[Req, Rep, Req, Rep]]
+  ): Filter[Req, Rep, Req, Rep] = new Filter[Req, Rep, Req, Rep] {
+    private[this] val const: (Req => SimpleFilter[Req, Rep]) =
+      Function.const(Filter.identity[Req, Rep])
+
+    def apply(request: Req, service: Service[Req, Rep]): Future[Rep] =
+      pf.applyOrElse(request, const)(request, service)
+  }
 }
