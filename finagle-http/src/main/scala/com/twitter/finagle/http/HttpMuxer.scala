@@ -3,7 +3,6 @@ package com.twitter.finagle.http
 import com.twitter.finagle.util.LoadService
 import com.twitter.finagle.{Filter, Service}
 import com.twitter.util.Future
-import java.net.URI
 import java.util.logging.Logger
 import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders,
   HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
@@ -49,12 +48,11 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpRequest, 
    * HttpRequest to the registered service; otherwise create a NOT_FOUND response
    */
   def apply(request: HttpRequest): Future[HttpResponse] = {
-    val u = request.getUri
-    val uri = u.indexOf('?') match {
-      case -1 => u
-      case n  => u.substring(0, n)
-    }
-    val path = normalize(new URI(uri).getPath)
+    val uri = request.getUri
+    val path = normalize(uri.indexOf('?') match {
+      case -1 => uri
+      case n => uri.substring(0, n)
+    })
 
     // find the longest pattern that matches (the patterns are already sorted)
     val matching = sorted.find { case (pattern, _) =>
@@ -83,7 +81,7 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpRequest, 
    */
   private[this] def normalize(path: String) = {
     val suffix = if (path.endsWith("/")) "/" else ""
-    val p = path.split("/") filterNot(_.isEmpty) mkString "/"
+    val p = path.split("/").filterNot(_.isEmpty).mkString("/")
     if (p == "") suffix else "/" + p + suffix
   }
 }

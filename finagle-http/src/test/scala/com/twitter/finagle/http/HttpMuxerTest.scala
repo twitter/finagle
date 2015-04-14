@@ -19,25 +19,30 @@ class HttpMuxerTest extends FunSuite {
     }
   }
 
-  val (fooBarPrefix, fooBarExact, fooBooBaz, exactMatch, specialCase) =
-      ("fooBarPrefix", "fooBarExact", "fooBooBaz", "exactMatch", "specialCase")
+  val (fooBarPrefix, fooBarExact, fooBooBaz, exactMatch, specialCase, percentEncode) =
+      ("fooBarPrefix", "fooBarExact", "fooBooBaz", "exactMatch", "specialCase", "percentEncode")
 
   val muxService = new HttpMuxer()
     .withHandler("foo/bar/", new DummyService(fooBarPrefix)) // prefix match
     .withHandler("foo/bar", new DummyService(fooBarExact))  // exact match -- not shadowed by foo/bar/
     .withHandler("foo/boo/baz/", new DummyService(fooBooBaz))
     .withHandler("exact/match", new DummyService(exactMatch)) // exact match
+    .withHandler("foo/<a>", new DummyService(percentEncode))
 
   test("handles params properly") {
     assert(Response(Await.result(muxService(Request("/foo/bar/blah?j={}")))).contentString === fooBarPrefix)
   }
 
   test("prefix matching is handled correctly") {
+    assert(Response(Await.result(muxService(Request("/foo/<a>")))).contentString === percentEncode)
+
     assert(Response(Await.result(muxService(Request("/fooblah")))).status === HttpResponseStatus.NOT_FOUND)
 
     assert(Response(Await.result(muxService(Request("/foo/bar/blah")))).contentString === fooBarPrefix)
 
-    assert(Response(Await.result(muxService(Request("/foo//bar/blah")))).contentString === fooBarPrefix)
+    assert(Response(Await.result(muxService(Request("/foo/bar/blah")))).contentString === fooBarPrefix)
+
+    assert(Response(Await.result(muxService(Request("/foo//bar/<a>")))).contentString === fooBarPrefix)
 
     assert(Response(Await.result(muxService(Request("/foo/bar")))).contentString === fooBarExact)
 

@@ -47,12 +47,7 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[Request, Resp
    * Request to the registered service; otherwise create a NOT_FOUND response
    */
   def apply(request: Request): Future[Response] = {
-    val u = request.getUri
-    val uri = u.indexOf('?') match {
-      case -1 => u
-      case n  => u.substring(0, n)
-    }
-    val path = normalize(new URI(uri).getPath)
+    val path = normalize(request.path)
 
     // find the longest pattern that matches (the patterns are already sorted)
     val matching = sorted.find { case (pattern, _) =>
@@ -78,7 +73,7 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[Request, Resp
    */
   private[this] def normalize(path: String) = {
     val suffix = if (path.endsWith("/")) "/" else ""
-    val p = path.split("/") filterNot(_.isEmpty) mkString "/"
+    val p = path.split("/").filterNot(_.isEmpty).mkString("/")
     if (p == "") suffix else "/" + p + suffix
   }
 }
