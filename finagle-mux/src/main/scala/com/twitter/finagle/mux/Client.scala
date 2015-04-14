@@ -12,7 +12,7 @@ import com.twitter.finagle.{Dtab, Service, WriteException, NoStacktrace, Status,
 import com.twitter.util.{Future, Promise, Time, Duration, Throw, Try, Return, Updatable}
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantReadWriteLock
-import java.util.logging.Logger
+import java.util.logging.{Level, Logger}
 import org.jboss.netty.buffer.{ChannelBuffer, ReadOnlyChannelBuffer}
 
 // We can't name this 'failureDetector' because it won't
@@ -146,9 +146,9 @@ private[twitter] class ClientDispatcher (
 
   // We're extra paranoid about logging. The log handler is,
   // after all, outside of our control.
-  private[this] def safeLog(msg: String): Unit =
+  private[this] def safeLog(msg: String, level: Level = Level.INFO): Unit =
     try {
-      log.info(msg)
+      log.log(level, msg)
     } catch {
       case _: Throwable =>
     }
@@ -159,7 +159,7 @@ private[twitter] class ClientDispatcher (
       case some =>
         readLk.lock()
         if (state == Draining && tags.isEmpty) {
-          safeLog(s"Finished draining a connection to $name")
+          safeLog(s"Finished draining a connection to $name", Level.FINE)
           readLk.unlock()
 
           writeLk.lock()
@@ -209,14 +209,13 @@ private[twitter] class ClientDispatcher (
       trans.write(encode(Rping(tag)))
     case Tdrain(tag) =>
       // must be synchronized to avoid writing after Rdrain has been sent
-      safeLog(s"Started draining a connection to $name")
+      safeLog(s"Started draining a connection to $name", Level.FINE)
       writeLk.lockInterruptibly()
       try {
         state = if (tags.nonEmpty) Draining else {
-          safeLog(s"Finished draining a connection to $name")
+          safeLog(s"Finished draining a connection to $name", Level.FINE)
           Drained
         }
-
         trans.write(encode(Rdrain(tag)))
       } finally {
         writeLk.unlock()
