@@ -55,8 +55,8 @@ object Finagle extends Build {
     crossScalaVersions := Seq("2.10.5", "2.11.6"),
     scalaVersion := "2.10.5",
     libraryDependencies ++= Seq(
-      "org.scalacheck" %% "scalacheck" % "1.11.3" % "test",
-      "org.scalatest" %% "scalatest" % "2.2.2" % "test",
+      "org.scalacheck" %% "scalacheck" % "1.12.2" % "test",
+      "org.scalatest" %% "scalatest" % "2.2.4" % "test",
       "junit" % "junit" % "4.10" % "test",
       "org.mockito" % "mockito-all" % "1.9.5" % "test"
     ),
