@@ -2,7 +2,7 @@ package com.twitter.finagle.exp.mysql
 
 import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.util.{Closable, Future, Time}
+import com.twitter.util.{Closable, Future, Time, Throw, Return}
 import java.util.logging.Level
 
 object Client {
@@ -32,6 +32,23 @@ object Client {
         }
       }
     }
+
+    def transactional[R](f: Client => Future[R]): Future[R] = 
+      factory().flatMap { svc =>
+        val client = apply(ServiceFactory.const(svc))
+        client.query("BEGIN").flatMap { _ =>
+          f(client).liftToTry.flatMap {
+            case Return(value) => 
+              client.query("COMMIT").map(_ => value)
+            case Throw(exception) => 
+              client.query("ROLLBACK").flatMap { _ =>
+                Future.exception(exception)
+              }
+          }.ensure {
+            svc.close()
+          }
+        }
+      }
 
     def close(deadline: Time): Future[Unit] = factory.close(deadline)
   }
@@ -88,6 +105,17 @@ trait Client extends Closable {
    * outstanding PreparedStatements.
    */
   def prepare(sql: String): PreparedStatement
+
+  /**
+  * Executes a function within a transaction. The function's input is a 
+  * client that has only one underlying database connection with an open
+  * transaction. The provided client instance must be used for all database
+  * interactions and never leak to outside the transactional block scope.
+  * 
+  * The transaction is automatically committed in case of a success and 
+  * automatically rolled back in case of a failure.
+  */
+  def transactional[R](f: Client => Future[R]): Future[R]
 
   /**
    * Returns the result of pinging the server.

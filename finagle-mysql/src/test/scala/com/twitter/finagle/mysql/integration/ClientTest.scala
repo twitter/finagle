@@ -106,5 +106,33 @@ class ClientTest extends FunSuite with IntegrationClient {
         assert(row("numRecords").get === expectedRes)
       }
     }
+
+    def selectTimes = c.select(""" SELECT `time` FROM `finagle-mysql-test` """)(_("time").get.asInstanceOf[FloatValue].f)
+
+    test("transactional: success") {
+      val inserts =
+        c.transactional { transaction =>
+          transaction.query(""" UPDATE `finagle-mysql-test` SET `time` = `time` + 10 WHERE `name` = "Cesar Cielo" """).flatMap { _ =>
+            transaction.query(""" UPDATE `finagle-mysql-test` SET `time` = `time` - 10 WHERE `name` = "Aaron Peirsol" """)
+          }
+        }
+      Await.result(inserts)
+      assert(Await.result(selectTimes) === List(30.91F, 56.91F, 24.04F, 41.94F, 22.43F, 49.82F))
+    }
+
+    test("transactional: failure") {
+      val inserts =
+        c.transactional { transaction =>
+          transaction.query(""" UPDATE `finagle-mysql-test` SET time = time + 10 WHERE name = "Cesar Cielo" """).flatMap { _ =>
+            transaction.query(""" UPDATE `finagle-mysql-test` SET time = time - 10 WHERE name = "Aaron Peirsol" """).map {
+              throw new IllegalStateException
+            }
+          }
+        }
+      intercept[IllegalStateException] {
+        Await.result(inserts)
+      }
+      assert(Await.result(selectTimes) === List(30.91F, 56.91F, 24.04F, 41.94F, 22.43F, 49.82F))
+    }
   }
 }
