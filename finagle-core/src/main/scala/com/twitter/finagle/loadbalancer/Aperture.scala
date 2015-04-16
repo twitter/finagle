@@ -67,7 +67,6 @@ object ApertureBalancerFactory extends WeightedLoadBalancerFactory {
 }
 
 
-
 /**
  * The aperture load-band balancer balances load to the smallest
  * subset ("aperture") of services so that:
@@ -102,7 +101,7 @@ object ApertureBalancerFactory extends WeightedLoadBalancerFactory {
  *     arranges load in a manner that ensures a higher level of per-service
  *     concurrency.
  */
-private class ApertureLoadBandBalancer[Req, Rep](
+class ApertureLoadBandBalancer[Req, Rep](
     protected val activity: Activity[Traversable[(ServiceFactory[Req, Rep], Double)]],
     protected val smoothWin: Duration = 5.seconds,
     protected val lowLoad: Double = 0.5,
@@ -143,7 +142,7 @@ object Aperture {
  * harmless to adjust apertures frequently, since underlying nodes
  * are typically backed by pools, and will be warm on average.
  */
-private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
+trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
   import Aperture._
 
   protected def rng: Rng
