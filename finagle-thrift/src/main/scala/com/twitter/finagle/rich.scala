@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
+import com.twitter.finagle.server.StackBasedServer
+import com.twitter.finagle.stats.{LoadedStatsReceiver, ClientStatsReceiver, ServerStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.ThriftClientRequest
 import com.twitter.finagle.util.Showable
 import com.twitter.util.NonFatal
@@ -135,9 +136,14 @@ private[twitter] object ThriftUtil {
 
   /**
    * Construct a binary [[com.twitter.finagle.Service]] for a given Thrift
-   * interfaceusing whichever Thrift code-generation toolchain is available.
+   * interface using whichever Thrift code-generation toolchain is available.
    */
-  def serverFromIface(impl: AnyRef, protocolFactory: TProtocolFactory): BinaryService = {
+  def serverFromIface(
+    impl: AnyRef,
+    protocolFactory: TProtocolFactory,
+    stats: StatsReceiver,
+    maxThriftBufferSize: Int
+  ): BinaryService = {
     def tryThriftFinagleService(iface: Class[_]): Option[BinaryService] =
       for {
         baseName   <- findRootWithSuffix(iface.getName, "$ServiceIface")
@@ -145,7 +151,17 @@ private[twitter] object ThriftUtil {
         cons       <- findConstructor(serviceCls, iface, classOf[TProtocolFactory])
       } yield cons.newInstance(impl, protocolFactory)
 
-    def tryScroogeFinagledService(iface: Class[_]): Option[BinaryService] =
+    def tryScroogeFinagleService(iface: Class[_]): Option[BinaryService] =
+      for {
+        baseName   <- findRootWithSuffix(iface.getName, "$FutureIface") orElse
+          Some(iface.getName)
+        serviceCls <- findClass[BinaryService](baseName + "$FinagleService") orElse
+          findClass[BinaryService](baseName + "$FinagledService")
+        cons       <- findConstructor(serviceCls, iface, classOf[TProtocolFactory], classOf[StatsReceiver], Integer.TYPE)
+      } yield cons.newInstance(impl, protocolFactory, stats, Int.box(maxThriftBufferSize))
+
+    // The legacy $FinagleService that doesn't take stats.
+    def tryLegacyScroogeFinagleService(iface: Class[_]): Option[BinaryService] =
       for {
         baseName   <- findRootWithSuffix(iface.getName, "$FutureIface") orElse
           Some(iface.getName)
@@ -163,13 +179,23 @@ private[twitter] object ThriftUtil {
 
     def tryClass(cls: Class[_]): Option[BinaryService] =
       tryThriftFinagleService(cls) orElse
-      tryScroogeFinagledService(cls) orElse
+      tryScroogeFinagleService(cls) orElse
+      tryLegacyScroogeFinagleService(cls) orElse
       trySwiftService(cls) orElse
       (Option(cls.getSuperclass) ++ cls.getInterfaces).view.flatMap(tryClass).headOption
 
     tryClass(impl.getClass).getOrElse {
       throw new IllegalArgumentException("argument implements no candidate ifaces")
     }
+  }
+
+  /**
+   * Construct a binary [[com.twitter.finagle.Service]] for a given Thrift
+   * interface using whichever Thrift code-generation toolchain is available.
+   * (Legacy version for backward-compatibility).
+   */
+  def serverFromIface(impl: AnyRef, protocolFactory: TProtocolFactory): BinaryService = {
+    serverFromIface(impl, protocolFactory, LoadedStatsReceiver, Thrift.maxThriftBufferSize)
   }
 }
 
@@ -353,15 +379,22 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
 
   protected val protocolFactory: TProtocolFactory
 
+  val maxThriftBufferSize: Int = 16 * 1024
+
+  protected val serverLabel = "thrift"
+
+  protected lazy val serverStats: StatsReceiver = ServerStatsReceiver.scope(serverLabel)
+
+  private lazy val scoped = serverStats.scope(serverLabel)
   /**
    * $serveIface
    */
   def serveIface(addr: String, iface: AnyRef): ListeningServer =
-    serve(addr, serverFromIface(iface, protocolFactory))
+    serve(addr, serverFromIface(iface, protocolFactory, scoped, maxThriftBufferSize))
 
   /**
    * $serveIface
    */
   def serveIface(addr: SocketAddress, iface: AnyRef): ListeningServer =
-    serve(addr, serverFromIface(iface, protocolFactory))
+    serve(addr, serverFromIface(iface, protocolFactory, scoped, maxThriftBufferSize))
 }

@@ -314,6 +314,10 @@ object ThriftMux
     def stack: Stack[ServiceFactory[mux.Request, mux.Response]] =
       muxer.stack
 
+    override protected val Label(serverLabel) = params[Label]
+
+    override protected lazy val Stats(serverStats) = params[Stats]
+
     def params: Stack.Params = muxer.params
 
     override def configured[P](psp: (P, Param[P])): Server =
@@ -325,12 +329,25 @@ object ThriftMux
     protected val Thrift.param.ProtocolFactory(protocolFactory) =
       params[Thrift.param.ProtocolFactory]
 
+    override val Thrift.param.MaxReusableBufferSize(maxThriftBufferSize) =
+      params[Thrift.param.MaxReusableBufferSize]
+
     /**
      * Produce a [[com.twitter.finagle.Thrift.Server]] using the provided
      * `TProtocolFactory`.
      */
     def withProtocolFactory(pf: TProtocolFactory): Server =
       configured(Thrift.param.ProtocolFactory(pf))
+
+    /**
+     * Produce a [[com.twitter.finagle.Thrift.Server]] with the specified max
+     * size of the reusable buffer for thrift responses. If this size
+     * is exceeded, the buffer is not reused and a new buffer is
+     * allocated for the next thrift response.
+     * @param size Max size of the reusable buffer for thrift responses in bytes.
+     */
+    def withMaxReusableBufferSize(size: Int): Server =
+      configured(Thrift.param.MaxReusableBufferSize(size))
 
     def withParams(ps: Stack.Params): Server =
       copy(muxer = muxer.withParams(ps))

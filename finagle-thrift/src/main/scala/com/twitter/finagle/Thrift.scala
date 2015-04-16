@@ -69,6 +69,17 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     implicit object ProtocolFactory extends Stack.Param[ProtocolFactory] {
       val default = ProtocolFactory(Protocols.binaryFactory())
     }
+
+    /**
+     * A `Param` to set the max size of a reusable buffer for the thrift response.
+     * If the buffer size exceeds the specified value, the buffer is not reused,
+     * and a new buffer is used for the next thrift response.
+     * @param maxReusableBufferSize Max buffer size in bytes.
+     */
+    case class MaxReusableBufferSize(maxReusableBufferSize: Int)
+    implicit object MaxReusableBufferSize extends Stack.Param[MaxReusableBufferSize] {
+      val default = MaxReusableBufferSize(maxThriftBufferSize)
+    }
   }
 
   object Client {
