@@ -22,12 +22,12 @@ class FixedNumReadsTransport[In, Out](readVal: Out, nReadsAllowed: Int) extends 
   private[this] val closep = new Promise[Throwable]
 
   def write(input: In) = {
-    if (!isOpen) Future.exception(Await.result(closep))
+    if (status == Status.Closed) Future.exception(Await.result(closep))
     else Future.Done
   }
 
   def read(): Future[Out] = {
-    if (!isOpen) Future.exception(Await.result(closep))
+    if (status == Status.Closed) Future.exception(Await.result(closep))
     else synchronized {
       nReads += 1
       if (nReads <= nReadsAllowed) Future.value(readVal)
@@ -41,7 +41,7 @@ class FixedNumReadsTransport[In, Out](readVal: Out, nReadsAllowed: Int) extends 
   def status: Status = if (closep.isDefined) Status.Closed else Status.Open
 
   def close(deadline: Time) = {
-    if (!isOpen)
+    if (status == Status.Closed)
       closep.setException(new ChannelClosedException)
     closep map { _ => () }
   }

@@ -7,6 +7,7 @@ import scala.util.Random
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig}
+import com.twitter.finagle.cacheresolver.CacheNode
 import com.twitter.finagle.Group
 import com.twitter.finagle.memcachedx._
 import com.twitter.finagle.memcachedx.protocol.Value
@@ -49,7 +50,7 @@ object ReplicationClient {
     pools: Seq[Cluster[CacheNode]],
     clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]] = None,
     hashName: Option[String] = None,
-    failureAccrualParams: (Int, Duration) = (5, 30.seconds)
+    failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds)
   ) = {
     val underlyingClients = pools map { pool =>
       Await.result(pool.ready)
@@ -64,7 +65,7 @@ object ReplicationClient {
     pools: Seq[Cluster[CacheNode]],
     clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]] = None,
     hashName: Option[String] = None,
-    failureAccrualParams: (Int, Duration) = (5, 30.seconds)
+    failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds)
   ) = {
     new SimpleReplicationClient(newBaseReplicationClient(pools, clientBuilder, hashName, failureAccrualParams))
   }

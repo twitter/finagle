@@ -1,50 +1,81 @@
 package com.twitter.finagle.util
 
+
 /**
  * ExitGuard prevents the process from exiting normally by use of a
  * nondaemon thread whenever there is at least one guarder.
  */
 object ExitGuard {
-  private var pending: Option[(Int, Thread)] = None
+  private var guards: Option[(Thread, List[Guard])] = None
+
+  private[finagle] case class Guard(reason: String) {
+    def unguard() {
+      ExitGuard.synchronized {
+        guards match {
+          case Some((thread, gs)) =>
+            val newGs = gs.filterNot(_ eq this)
+            guards = Some((thread, newGs))
+            if (newGs.isEmpty) {
+              guards = None
+              thread.interrupt()
+            } else updateName()
+          case None => ()
+        }
+      }
+    }
+  }
 
   private def updateName() {
-    for ((n, t) <- pending)
-      t.setName("Finagle ExitGuard count=%d".format(n))
+    for ((t, gs) <- guards)
+      t.setName("Finagle ExitGuard count=%d".format(gs.size))
   }
 
-  /** Prevent the process from exiting normally */
-  def guard(): Unit = synchronized {
-    pending = pending match {
-      case None =>
-        val t = new Thread {
-          setDaemon(false)
-          start()
+/**
+ * Prevent the process from exiting normally. You must retain the returned ExitGuard and call
+ * `release` to remove the guard.
+ */
+  private[finagle] def guard(reason: String): Guard = {
+    val guard = Guard(reason)
+    addGuard(guard)
+    guard
+  }
 
-          override def run() {
-            while (true) {
-              try Thread.sleep(Long.MaxValue) catch {
-                case _: InterruptedException => return
-              }
-            }
+  private[this] def addGuard(guard: Guard) {
+    synchronized {
+      guards match {
+        case Some((thread, gs)) =>
+          guards = Some(thread, guard :: gs)
+        case None =>
+          guards = Some(startGuardThread(), List(guard))
+      }
+      updateName()
+    }
+  }
+
+  def explainGuards(): String = {
+    val snap = synchronized {
+      guards.collect { case((_, gs)) => gs }.getOrElse(Nil)
+    }
+
+    if (snap.isEmpty) {
+      "There are no active guards."
+    } else {
+      s"${snap.size} active guard(s):" + snap.map(_.reason).mkString(start="\n", sep="\n", end="")
+    }
+  }
+
+  private[this] def startGuardThread(): Thread = {
+    new Thread {
+      setDaemon(false)
+      start()
+
+      override def run() {
+        while (true) {
+          try Thread.sleep(Long.MaxValue) catch {
+            case _: InterruptedException => return
           }
         }
-        Some(1, t)
-      case Some((n, t)) =>
-        Some((n+1, t))
+      }
     }
-    updateName()
-  }
-
-  /** Undo a call to guard */
-  def unguard(): Unit = synchronized {
-    pending = pending match {
-      case None => throw new IllegalStateException("unguard() called too many times")
-      case Some((1, t)) =>
-        t.interrupt()
-        None
-      case Some((n, t)) =>
-        Some((n-1, t))
-    }
-    updateName()
   }
 }

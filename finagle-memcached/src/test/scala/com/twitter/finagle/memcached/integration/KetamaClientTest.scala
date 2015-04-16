@@ -2,7 +2,9 @@ package com.twitter.finagle.memcached.integration
 
 import _root_.java.lang.{Boolean => JBoolean}
 import java.net.{InetAddress, SocketAddress, InetSocketAddress}
-import com.twitter.finagle.memcached.{CacheNodeGroup, KetamaClientBuilder}
+import java.net.{SocketAddress, InetSocketAddress}
+import com.twitter.finagle.cacheresolver.CacheNodeGroup
+import com.twitter.finagle.memcached.KetamaClientBuilder
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.{Group, Name}
 import com.twitter.io.Charsets
@@ -24,9 +26,9 @@ class KetamaClientTest extends FunSuite with BeforeAndAfter {
 
   before {
     server1 = new InProcessMemcached(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-    address1 = server1.start().localAddress.asInstanceOf[InetSocketAddress]
+    address1 = server1.start().boundAddress.asInstanceOf[InetSocketAddress]
     server2 = new InProcessMemcached(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-    address2 = server2.start().localAddress.asInstanceOf[InetSocketAddress]
+    address2 = server2.start().boundAddress.asInstanceOf[InetSocketAddress]
   }
 
   after {

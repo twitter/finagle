@@ -32,6 +32,12 @@ class ChannelBufferBuf(protected val underlying: ChannelBuffer) extends Buf {
     else if (i == 0 && j >= length) this
     else new ChannelBufferBuf(underlying.slice(i, (j-i) min (length-i)))
   }
+  
+  override def equals(other: Any): Boolean = other match {
+    case ChannelBufferBuf(otherCB) => underlying.equals(otherCB)
+    case other: Buf =>  Buf.equals(this, other)
+    case _ => false
+  }
 
   protected def unsafeByteArrayBuf: Option[Buf.ByteArray] =
     if (underlying.hasArray) {

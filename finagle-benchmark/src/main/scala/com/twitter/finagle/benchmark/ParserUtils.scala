@@ -8,7 +8,7 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.util.ParserUtils
 
 // From $BIRDCAGE_HOME run:
-// ./pants goal bench finagle/finagle-benchmark: --bench-target=com.twitter.finagle.benchmark.ParserUtils --bench-memory
+// ./pants bench finagle/finagle-benchmark: --bench-target=com.twitter.finagle.benchmark.ParserUtils --bench-memory
 class ParserUtils extends SimpleBenchmark {
 
   private val size = 100000

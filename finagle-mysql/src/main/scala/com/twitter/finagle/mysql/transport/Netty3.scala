@@ -27,7 +27,7 @@ class PacketFrameDecoder extends FrameDecoder {
     buffer.readBytes(header)
     val br = BufferReader(header)
 
-    val length = br.readInt24()
+    val length = br.readUnsignedInt24()
     val seq  = br.readUnsignedByte()
 
     if (buffer.readableBytes < length) {

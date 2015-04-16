@@ -6,6 +6,7 @@ or if you'd like us to feature a link to a blog post or article about how
 you're using Finagle. Or even better, add the links yourself (please use HTTPS
 URLs if possible) and [submit a pull request][1]!
 
+* [Attendify](https://attendify.com)
 * [Box](https://www.box.com/)
 * [Chartboost](https://www.chartboost.com/)
 * [Crimson Hexagon](http://www.crimsonhexagon.com/)
@@ -15,7 +16,9 @@ URLs if possible) and [submit a pull request][1]!
 * [Green Man Gaming](http://www.greenmangaming.com/)
 * [Gutefrage.net](http://www.gutefrage.net/)
   * ["Introducing Gutefrage.net's Service-Oriented Architecture"][2]
+* [JusBrasil](http://www.jusbrasil.com.br)
 * [Magine TV](https://magine.com/)
+* [National Center for Biotechnology Information (NCBI)](https://www.ncbi.nlm.nih.gov/)
 * [Nest](https://nest.com/)
 * The [New York Times](http://www.nytimes.com/)
 * [OpenAura](http://openaura.com/)
@@ -28,16 +31,21 @@ URLs if possible) and [submit a pull request][1]!
 * [Rdio](https://www.rdio.com/)
   * [Thor, a Finagle-based image processor][4]
 * [Reputation.com](https://www.reputation.com/)
+* [Sabre Labs](http://sabrelabs.com)
 * [Sharethrough](https://www.sharethrough.com/)
   * ["Finagle @ Sharethrough: Twitter #Conf Presentation"][5]
+* [SmartNews](https://www.smartnews.com/en/)
+  * ["Scala (Finagle) @ SmartNews"][12]
 * [SoundCloud](https://soundcloud.com/)
   * ["Building Products at SoundCloud—Part III: Microservices in Scala and
     Finagle"][6]
+* [Spright](https://spright.com/)
 * [SproutSocial](https://www.sproutsocial.com)
   * ["Trendy Engineering: How We Built the Twitter Trends Report"][7]
 * [Strava](http://www.strava.com/)
   * ["Introducing Routemaster"][8]
 * [StumbleUpon](https://www.stumbleupon.com/)
+* [Talenteca](https://www.talenteca.com/)
 * [Tapad](http://www.tapad.com/)
   * [Case study][9] by [Typesafe][10]
 * [Teads.tv](https://teads.tv/)
@@ -59,3 +67,4 @@ URLs if possible) and [submit a pull request][1]!
 [9]: https://typesafe.com/blog/tapad_turns_to_typesafe_platform
 [10]: https://typesafe.com/
 [11]: https://blog.twitter.com/2011/finagle-a-protocol-agnostic-rpc-system
+[12]: https://www.slideshare.net/ShigekazuTakei/scalafinaglesmartnewsenglish

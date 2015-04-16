@@ -6,7 +6,7 @@ import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.{Codec, CodecFactory, ChannelClosedException}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.io.{Buf, Reader}
+import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.{Await, Closable, Future, Promise}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
@@ -43,11 +43,16 @@ class StreamingTest extends FunSuite with Eventually {
 
   def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
 
+  // We call write repeatedly for `streamChunks` to *be sure* to notice
+  // transport failure.
+  def writeLots(writer: Writer, buf: Buf): Future[Unit] =
+    writer.write(buf) before writeLots(writer, buf)
+
   class ClientCtx {
     val fail = new Promise[Unit]
 
     val server = startServer(echo, identity)
-    val client = connect(server.localAddress, transport => {
+    val client = newClient(server.boundAddress, transport => {
       if (!fail.isDefined) fail ensure transport.close()
       transport
     })
@@ -79,10 +84,7 @@ class StreamingTest extends FunSuite with Eventually {
     // Simulate network failure by closing the transport.
     fail.setDone()
 
-    intercept[Reader.ReaderDiscarded] {
-      // We call write twice for `streamChunks` to notice transport failure.
-      await(req.writer.write(buf) before req.writer.write(buf))
-    }
+    intercept[Reader.ReaderDiscarded] { await(writeLots(req.writer, buf)) }
     // We call read for the collating function to notice transport failure.
     intercept[ChannelClosedException] { await(res.reader.read(1)) }
 
@@ -99,10 +101,7 @@ class StreamingTest extends FunSuite with Eventually {
 
     // Assert reading state suspension is interrupted by transport closure.
     intercept[ChannelClosedException] { await(f) }
-    intercept[Reader.ReaderDiscarded] {
-      // We call write twice for `streamChunks` to notice transport failure.
-      await(req.writer.write(buf) before req.writer.write(buf))
-    }
+    intercept[Reader.ReaderDiscarded] { await(writeLots(req.writer, buf)) }
 
     assertSecondRequestOk()
   })
@@ -145,25 +144,25 @@ class StreamingTest extends FunSuite with Eventually {
       if (!setFail.getAndSet(true)) fail ensure transport.close()
       transport
     })
-    val client1 = connect(server.localAddress, identity, "client1")
-    val client2 = connect(server.localAddress, identity, "client2")
+    val client1 = newClient(server.boundAddress, identity, "client1")
+    val client2 = newClient(server.boundAddress, identity, "client2")
 
     val req1 = get("/")
     val req2 = get("abc")
     val f1 = client1(req1)
-    val f2 = client2(req2)
+    // note: while the server is configured with a max concurrency of 1,
+    // the requests flow through the transport before that. this means
+    // that these requests must be sequenced.
+    val f2 = f1.flatMap { _ => client2(req2) }
 
     val res = await(f1)
 
     fail.setDone()
     intercept[ChannelClosedException] { await(readp) }
-    intercept[Reader.ReaderDiscarded] {
-      // We call write twice for `streamChunks` to notice transport failure.
-      await(writer.write(buf) before writer.write(buf))
-    }
+    intercept[Reader.ReaderDiscarded] { await(writeLots(writer, buf)) }
 
     intercept[ChannelClosedException] { await(res.reader.read(1)) }
-    intercept[Reader.ReaderDiscarded] { await(req1.writer.write(buf)) }
+    intercept[Reader.ReaderDiscarded] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))
@@ -178,8 +177,7 @@ class StreamingTest extends FunSuite with Eventually {
     val readp = new Promise[Unit]
     val writer = Reader.writable()
     val writep = new Promise[Unit]
-    // We call write twice for `streamChunks` to notice transport failure.
-    (fail ensure writer.write(buf) before writer.write(buf)) proxyTo writep
+    (fail before writeLots(writer, buf)) proxyTo writep
 
     val service = new Service[Request, Response] {
       def apply(req: Request) = n.getAndIncrement() match {
@@ -197,13 +195,16 @@ class StreamingTest extends FunSuite with Eventually {
       if (!setFail.getAndSet(true)) fail ensure transport.close()
       transport
     })
-    val client1 = connect(server.localAddress, identity, "client1")
-    val client2 = connect(server.localAddress, identity, "client2")
+    val client1 = newClient(server.boundAddress, identity, "client1")
+    val client2 = newClient(server.boundAddress, identity, "client2")
 
     val req1 = get("/")
     val req2 = get("abc")
     val f1 = client1(req1)
-    val f2 = client2(req2)
+    // note: while the server is configured with a max concurrency of 1,
+    // the requests flow through the transport before that. this means
+    // that these requests must be sequenced.
+    val f2 = f1.flatMap { _ => client2(req2) }
 
     val res = await(f1)
 
@@ -213,7 +214,7 @@ class StreamingTest extends FunSuite with Eventually {
     // indiscriminatory by calling discard on any error in the dispatcher.
     intercept[Reader.ReaderDiscarded] { await(readp) }
     intercept[ChannelClosedException] { await(res.reader.read(1)) }
-    intercept[Reader.ReaderDiscarded] { await(req1.writer.write(buf)) }
+    intercept[Reader.ReaderDiscarded] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))
@@ -239,22 +240,19 @@ class StreamingTest extends FunSuite with Eventually {
     }
 
     val server = startServer(service, identity)
-    val client1 = connect(server.localAddress, identity, "client1")
-    val client2 = connect(server.localAddress, identity, "client2")
+    val client1 = newClient(server.boundAddress, identity, "client1")
+    val client2 = newClient(server.boundAddress, identity, "client2")
 
     val req1 = get("/")
     val req2 = get("abc")
     val f1 = client1(req1)
-    val f2 = client2(req2)
+    val f2 = f1.flatMap { _ => client2(req2) }
 
     val res = await(f1)
 
     fail.setDone()
     intercept[ChannelClosedException] { await(res.reader.read(1)) }
-    intercept[Reader.ReaderDiscarded] {
-      // We call write twice for `streamChunks` to notice transport failure.
-      await(req1.writer.write(buf) before req1.writer.write(buf))
-    }
+    intercept[Reader.ReaderDiscarded] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))
@@ -281,19 +279,19 @@ class StreamingTest extends FunSuite with Eventually {
     }
 
     val server = startServer(service, identity)
-    val client1 = connect(server.localAddress, identity, "client1")
-    val client2 = connect(server.localAddress, identity, "client2")
+    val client1 = newClient(server.boundAddress, identity, "client1")
+    val client2 = newClient(server.boundAddress, identity, "client2")
 
     val req1 = get("/")
     val req2 = get("abc")
     val f1 = client1(req1)
-    val f2 = client2(req2)
+    val f2 = f1.flatMap { _ => client2(req2) }
 
     val res = await(f1)
 
     fail.setDone()
     intercept[ChannelClosedException] { await(res.reader.read(1)) }
-    intercept[Reader.ReaderDiscarded] { await(req1.writer.write(buf)) }
+    intercept[Reader.ReaderDiscarded] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))
@@ -333,7 +331,7 @@ object StreamingTest {
       .name("server")
       .build(service)
 
-  def connect(addr: SocketAddress, mod: Modifier, name: String = "client") =
+  def newClient(addr: SocketAddress, mod: Modifier, name: String = "client") =
     ClientBuilder()
       .codec(new Custom(mod, identity))
       .hosts(Seq(addr))

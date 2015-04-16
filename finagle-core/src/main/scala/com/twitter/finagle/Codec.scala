@@ -57,6 +57,9 @@ trait Codec[Req, Rep] {
   def newClientDispatcher(transport: Transport[Any, Any]): Service[Req, Rep] =
     new SerialClientDispatcher(transport.cast[Req, Rep])
 
+  def newClientDispatcher(transport: Transport[Any, Any], params: Stack.Params): Service[Req, Rep] =
+    newClientDispatcher(transport)
+
   def newServerDispatcher(
     transport: Transport[Any, Any],
     service: Service[Req, Rep]

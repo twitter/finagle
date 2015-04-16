@@ -2,11 +2,11 @@ package com.twitter.finagle
 
 import com.twitter.finagle.client._
 import com.twitter.finagle.factory.BindingFactory
-import com.twitter.finagle.mux.lease.Acting
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
+import com.twitter.finagle.service.RequeueingFilter
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
@@ -51,8 +51,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
   object Client {
     val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackClient.newStack
       .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response])
-      .replace(StackClient.Role.prepConn, mux.lease.LeasedFactory.module[mux.Request, mux.Response])
       .replace(StackClient.Role.protoTracing, new ClientProtoTracing)
+      .replace(RequeueingFilter.role, mux.Requeue.module[mux.Request, mux.Response])
       .replace(BindingFactory.role, MuxBindingFactory)
   }
 
@@ -72,7 +72,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       Netty3Transporter(mux.PipelineFactory, params)
     override protected def newDispatcher(
       transport: Transport[CB, CB]
-    ): Service[mux.Request, mux.Response] with Acting = {
+    ): Service[mux.Request, mux.Response] = {
       val param.Stats(sr) = params[param.Stats]
       val param.Label(name) = params[param.Label]
       new mux.ClientDispatcher(name, transport, sr)
@@ -80,6 +80,9 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
   }
 
   val client = Client()
+  
+  def newService(dest: Name, label: String): Service[mux.Request, mux.Response] =
+    client.newService(dest, label)
 
   def newClient(dest: Name, label: String): ServiceFactory[mux.Request, mux.Response] =
     client.newClient(dest, label)
@@ -99,6 +102,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     protected type In = CB
     protected type Out = CB
+    
+    private[this] val statsReceiver = {
+      val param.Stats(statsReceiver) = params[param.Stats]
+      statsReceiver.scope("mux")
+    }
 
     protected def newListener(): Listener[In, Out] =
       Netty3Listener(mux.PipelineFactory, params)
@@ -108,7 +116,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     ) = {
       val param.Tracer(tracer) = params[param.Tracer]
       val Lessor.Param(lessor) = params[Lessor.Param]
-      new mux.ServerDispatcher(transport, service, true, lessor, tracer)
+      
+      mux.ServerDispatcher.newRequestResponse(transport, service, lessor, tracer, statsReceiver)
     }
   }
 

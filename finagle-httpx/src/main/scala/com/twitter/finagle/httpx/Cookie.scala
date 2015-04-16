@@ -2,7 +2,6 @@ package com.twitter.finagle.httpx
 
 import com.twitter.conversions.time._
 import com.twitter.util.Duration
-import java.lang.Integer
 import org.jboss.netty.handler.codec.http.{Cookie => NettyCookie, DefaultCookie}
 import scala.collection.JavaConverters._
 
@@ -36,4 +35,11 @@ class Cookie(private[httpx] val underlying: NettyCookie) {
   def httpOnly_=(httpOnly: Boolean)    { underlying.setHttpOnly(httpOnly) }
   def isDiscard_=(discard: Boolean)    { underlying.setDiscard(discard) }
   def isSecure_=(secure: Boolean)      { underlying.setSecure(secure) }
+
+  override def equals(obj: Any): Boolean = obj match {
+    case c: Cookie => underlying.equals(c.underlying)
+    case _ => false
+  }
+
+  override def hashCode(): Int = underlying.hashCode()
 }

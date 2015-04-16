@@ -2,17 +2,20 @@ package com.twitter.finagle.mux
 
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
+import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.mux.lease.exp.{Lessor, Lessee, nackOnExpiredLease}
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, Trace, Tracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
-import com.twitter.finagle.{CancelledRequestException, Dtab, Service, Path}
 import com.twitter.util._
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.{AtomicReference, AtomicInteger}
+import java.util.logging.{Level, Logger}
 import org.jboss.netty.buffer.ChannelBuffer
+import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
 /**
@@ -23,222 +26,307 @@ import scala.collection.JavaConverters._
  */
 case class ClientDiscardedRequestException(why: String) extends Exception(why)
 
-object ServerDispatcher {
-  val Epsilon = 1.second // TODO decide whether this should be hard coded or not
-}
-
-object gracefulShutdownEnabled extends GlobalFlag(true, "Graceful shutdown enabled.  Temporary measure to allow servers to deploy without hurting clients.")
+object gracefulShutdownEnabled extends GlobalFlag(true, "Graceful shutdown enabled. " +
+  "Temporary measure to allow servers to deploy without hurting clients.")
 
 /**
- * A ServerDispatcher for the mux protocol.
+ * A tracker is responsible for tracking pending transactions
+ * and coordinating draining.
  */
-private[finagle] class ServerDispatcher private[finagle](
+private class Tracker[T] {
+  private[this] val pending = new ConcurrentHashMap[Int, Future[T]]
+  private[this] val _drained: Promise[Unit] = new Promise
+
+  // The state of a tracker is a single integer. Its absolute
+  // value minus one indicates the number of pending requests.
+  // A negative value indicates that the tracker is draining.
+  // Negative values cannot transition to positive values.
+  private[this] val state = new AtomicInteger(1)
+
+  /**
+   * Try to enter a transaction, returning false if the
+   * tracker is draining.
+   */
+  @tailrec
+  private[this] def enter(): Boolean = {
+    val n = state.get
+    if (n <= 0) false
+    else if (!state.compareAndSet(n, n+1)) enter()
+    else true
+  }
+
+  /**
+   * Exit an entered transaction.
+   */
+  @tailrec
+  private[this] def exit(): Unit = {
+    val n = state.get
+    if (n < 0) {
+      if (state.incrementAndGet() == -1)
+        _drained.setDone()
+    } else if (!state.compareAndSet(n, n-1)) exit()
+  }
+
+  private[this] val closedExit = (_: Try[Unit]) => exit()
+
+  /**
+   * Track a transaction. `track` manages the lifetime of a tag
+   * and its reply. Function `process` handles the result of `reply`.
+   * The ordering here is important: the tag is relinquished after
+   * `reply` is satisfied but before `process` is invoked, but is still
+   * considered pending until `process` completes. This is because:
+   * (1) the tag is freed once a client receives the reply, and, since
+   * write completion is not synchronous with processing the next
+   * request, there is a race between acknowledging the write and
+   * receiving the next request from the client (which may then reuse
+   * the tag); (2) we can't complete draining until we've acknowledged
+   * the write for the last request processed.
+   */
+  def track(tag: Int, reply: Future[T])(process: Try[T] => Future[Unit]): Future[Unit] = {
+    if (!enter()) return reply.transform(process)
+
+    pending.put(tag, reply)
+    reply transform { r =>
+      pending.remove(tag)
+      process(r).respond(closedExit)
+    }
+  }
+
+  /**
+   * Retrieve the value for the pending request matching `tag`.
+   */
+  def get(tag: Int): Option[Future[T]] =
+    Option(pending.get(tag))
+
+  /**
+   * Returns the set of current tags.
+   */
+  def tags: Set[Int] =
+    pending.keySet.asScala.toSet
+
+  /**
+   * Initiate the draining protocol. After `drain` is called, future
+   * requests for tracking are dropped. [[drained]] is satisified
+   * when the number of pending requests reaches 0.
+   */
+  @tailrec
+  final def drain(): Unit = {
+    val n = state.get
+    if (n < 0) return
+
+    if (!state.compareAndSet(n, -n)) drain()
+    else if (n == 1) _drained.setDone()
+  }
+
+  /**
+   * True when the tracker is in draining state.
+   */
+  def isDraining: Boolean = state.get < 0
+
+  /**
+   * Satisifed when the tracker has completed the draining protocol,
+   * as described in [[drain]].
+   */
+  def drained: Future[Unit] = _drained
+
+  /**
+   * Tests whether the given tag is actively tracked.
+   */
+  def isTracking(tag: Int): Boolean = pending.containsKey(tag)
+
+  /**
+   * The number of tracked tags.
+   */
+  def npending: Int =
+    math.abs(state.get)-1
+}
+
+private[twitter] object ServerDispatcher {
+  /**
+   * Construct a new request-response dispatcher.
+   */
+  def newRequestResponse(
     trans: Transport[ChannelBuffer, ChannelBuffer],
     service: Service[Request, Response],
-    canDispatch: Boolean, // XXX: a hack to indicate whether a server understands {T,R}Dispatch
+    lessor: Lessor,
+    tracer: Tracer,
+    statsReceiver: StatsReceiver
+  ): ServerDispatcher =
+    new ServerDispatcher(trans, Processor andThen service, lessor, tracer, statsReceiver)
+
+  /**
+   * Construct a new request-response dispatcher with a
+   * null lessor, tracer, and statsReceiver.
+   */
+  def newRequestResponse(
+    trans: Transport[ChannelBuffer, ChannelBuffer],
+    service: Service[Request, Response]
+  ): ServerDispatcher =
+    newRequestResponse(trans, service, Lessor.nil, NullTracer, NullStatsReceiver)
+
+  val Epsilon = 1.second
+
+  object State extends Enumeration {
+    val Open, Draining, Closed = Value
+  }
+}
+
+/**
+ * A dispatcher for the Mux protocol. In addition to multiplexing, the dispatcher
+ * handles concerns of leasing and draining.
+ */
+private[twitter] class ServerDispatcher(
+    trans: Transport[ChannelBuffer, ChannelBuffer],
+    service: Service[Message, Message],
     lessor: Lessor, // the lessor that the dispatcher should register with in order to get leases
-    tracer: Tracer
+    tracer: Tracer,
+    statsReceiver: StatsReceiver
 ) extends Closable with Lessee {
-
   import Message._
+  import ServerDispatcher.State
 
-  lessor.register(this)
+  private[this] implicit val injectTimer = DefaultTimer.twitter
+  private[this] val tracker = new Tracker[Message]
+  private[this] val log = Logger.getLogger(getClass.getName)
+
+  private[this] val state: AtomicReference[State.Value] =
+    new AtomicReference(State.Open)
 
   @volatile private[this] var lease = Tlease.MaxLease
   @volatile private[this] var curElapsed = NilStopwatch.start()
+  lessor.register(this)
 
-  // Used to buffer requests with in-progress local service invocation.
-  private[this] val pending = new ConcurrentHashMap[Int, Future[_]]
+  private[this] def write(m: Message): Future[Unit] =
+    trans.write(encode(m))
 
-  private[this] val log = DefaultLogger
+  private[this] def isAccepting: Boolean =
+    !tracker.isDraining && (!nackOnExpiredLease() || (lease > Duration.Zero))
 
-  //// TODO: rewrite Treqs into Tdispatches?
-  private[this] def dispatch(tdispatch: Tdispatch): Unit = {
-    val Tdispatch(tag, contexts, dst, dtab, bytes) = tdispatch
-    if (nackOnExpiredLease() && (lease <= Duration.Zero))
-      trans.write(encode(RdispatchNack(tag, Seq.empty)))
-    else {
+  private[this] def process(m: Message): Unit = m match {
+    case (_: Tdispatch | _: Treq) if isAccepting =>
+      // A misbehaving client is sending duplicate pending tags.
+      // Note that, since the client is managing multiple outstanding
+      // requests for this tag, and we're returning an Rerr here, there
+      // are no guarantees about client behavior in this case. Possibly
+      // we should terminate the session in this case.
+      //
+      // TODO: introduce uniform handling of tag tracking
+      // (across all request types), and also uniform handling
+      // (e.g., session termination).
+      if (tracker.isTracking(m.tag)) {
+        log.warning(s"Received duplicate tag ${m.tag} from client ${trans.remoteAddress}")
+        write(Rerr(m.tag, s"Duplicate tag ${m.tag}"))
+        return
+      }
+
       lessor.observeArrival()
-      if (!canDispatch) {
-        // There seems to be a bug in the Scala pattern matcher:
-        // 	case Tdispatch(..) if canDispatch => ..
-        // results in a match error. Somehow the clause
-        // 	case m@Tmessage(tag) =>
-        // doesn't seem to be evaluated.
-        val msg = Rerr(tag, "Tdispatch not enabled")
-        trans.write(encode(msg))
-      } else {
-        val contextBufs = contexts map { case (k, v) =>
-          ChannelBufferBuf(k) -> ChannelBufferBuf(v)
-        }
-        Contexts.broadcast.letUnmarshal(contextBufs) {
-          if (dtab.length > 0)
-            Dtab.local ++= dtab
-          val elapsed = Stopwatch.start()
-          val f = service(Request(dst, ChannelBufferBuf.Owned(bytes)))
-          pending.put(tag, f)
-          f respond { tr =>
-            removeTag(tag)
-            tr match {
-              case Return(rep) =>
-                lessor.observe(elapsed())
-                trans.write(encode(RdispatchOk(tag, Seq.empty, BufChannelBuffer(rep.body))))
-              case Throw(exc) =>
-                trans.write(encode(RdispatchError(tag, Seq.empty, exc.toString)))
-            }
-          }
-        }
-      }
-    }
-  }
-
-  private[this] def dispatchTreq(treq: Treq): Unit = {
-    val Treq(tag, traceId, bytes) = treq
-    lessor.observeArrival()
-    Trace.letIdOption(traceId) {
       val elapsed = Stopwatch.start()
-      val f = service(Request(Path.empty, ChannelBufferBuf.Owned(bytes)))
-      pending.put(tag, f)
-      f respond { tr =>
-        removeTag(tag)
-        tr match {
-          case Return(rep) =>
-            lessor.observe(elapsed())
-            trans.write(encode(RreqOk(tag, BufChannelBuffer(rep.body))))
-          case Throw(exc) =>
-            trans.write(encode(RreqError(tag, exc.toString)))
-        }
+      tracker.track(m.tag, service(m)) {
+        case Return(rep) =>
+          lessor.observe(elapsed())
+          write(rep)
+        case Throw(exc) =>
+          log.log(Level.WARNING, s"Error processing message $m", exc)
+          write(Rerr(m.tag, exc.toString))
       }
-    }
-  }
 
-  // TODO: rewrite Treqs into Tdispatches?
-  private[this] val handle: PartialFunction[Message, Unit] = {
-    case tdispatch: Tdispatch => dispatch(tdispatch)
-    case treq: Treq => dispatchTreq(treq)
-    case Tdiscarded(tag, why) =>
-      pending.get(tag) match {
-        case null => ()
-        case f => f.raise(new ClientDiscardedRequestException(why))
+    // Dispatch when !isAccepting
+    case d: Tdispatch =>
+      write(RdispatchNack(d.tag, Nil))
+    case r: Treq =>
+      write(RreqNack(r.tag))
+
+    case _: Tping =>
+      service(m) respond {
+        case Return(rep) => write(rep)
+        case Throw(exc) => write(Rerr(m.tag, exc.toString))
       }
-    case Tping(tag) =>
-      trans.write(encode(Rping(tag)))
+
+    case Tdiscarded(tag, why) =>
+      tracker.get(tag) match {
+        case Some(reply) =>
+          reply.raise(new ClientDiscardedRequestException(why))
+        case None =>
+      }
+
+    case Rdrain(1) if state.get == State.Draining =>
+      tracker.drain()
+
     case m@Tmessage(tag) =>
       val msg = Rerr(tag, f"Did not understand Tmessage ${m.typ}%d")
-      trans.write(encode(msg))
+      write(msg)
   }
 
-  private[this] val nackRequests: Message => Unit = {
-    case tdispatch: Tdispatch =>
-      trans.write(encode(RdispatchNack(tdispatch.tag, Nil)))
-    case treq: Treq =>
-      trans.write(encode(RreqNack(treq.tag)))
-    case Rerr(tag, error) =>
-      log.warning(f"Error received for tag=$tag%d after server close: $error%s")
-    case Tping(tag) => // swallow pings
-    case unexpected =>
-      val name = unexpected.getClass.getName
-      trans.write(encode(Rerr(
-        unexpected.tag,
-        s"Unexpected message of type $name received after server shutdown"
-      )))
-  }
-
-  private[this] val readyToDrain: PartialFunction[Message, Unit] = {
-    case Rdrain(1) =>
-      draining = true
-      receive = nackRequests
-      if (pending.isEmpty) {
-        log.info("Finished draining a connection")
-        closep.setDone()
-      } // OK because calls to receive are serial
-  }
-
-  // handle is a PartialFunction for the API, but is actually total
-  @volatile protected var receive: Message => Unit = handle
-
-  private[this] def removeTag(tag: Int): Unit = {
-    pending.remove(tag)
-    if (draining && pending.isEmpty) {
-      log.info("Finished draining a connection")
-      closep.setDone()
+  Local.letClear {
+    Trace.letTracer(tracer) {
+      Future.each(trans.read) { buf =>
+        val save = Local.save()
+        process(decode(buf))
+        Local.restore(save)
+      } ensure { hangup(Time.now) }
     }
   }
 
-  private[this] def loop(): Future[Nothing] =
-    trans.read() flatMap { buf =>
-      val save = Local.save()
-      val m = try decode(buf) catch {
-        case exc: BadMessageException =>
-          // We could just ignore this message, but in reality it
-          // probably means something is really FUBARd.
-          return Future.exception(exc)
-      }
-
-      receive(m)
-      Local.restore(save)
-      loop()
+  trans.onClose respond { res =>
+    val exc = res match {
+      case Return(exc) => exc
+      case Throw(exc) => exc
     }
+    val cancelledExc = new CancelledRequestException(exc)
+    for (tag <- tracker.tags; f <- tracker.get(tag))
+      f.raise(cancelledExc)
 
-  Local.letClear { 
-    Trace.letTracer(tracer) { loop() }
-  } onFailure { case cause =>
-    // We know that if we have a failure, we cannot from this point forward
-    // insert new entries in the pending map.
-    val exc = new CancelledRequestException(cause)
-    pending.asScala.foreach { case (tag, f) =>
-      removeTag(tag)
-      f.raise(exc)
-    }
-
-    lessor.unregister(this)
-    trans.close()
-  }
-
-  trans.onClose ensure {
     service.close()
+    lessor.unregister(this)
+
+    state.get match {
+      case State.Open =>
+        statsReceiver.counter("clienthangup").incr()
+      case (State.Draining | State.Closed) =>
+        statsReceiver.counter("serverhangup").incr()
+    }
   }
 
-  private[this] val closing = new AtomicBoolean(false)
-  @volatile private[this] var draining = false
-  private[this] val closep = new Promise[Unit]
-
-  /**
-   * Close the mux Server. Any further messages received will be either ignored
-   * or else responded to with the message type's corresponding Nack message.
-   * A drainage message is issued to the client. The Future result of this
-   * method is not satisfied until a closure acknowledgement is received from
-   * the client.
-   */
-  def close(deadline: Time): Future[Unit] = {
-    if (!closing.compareAndSet(false, true))
-      closep
-    else {
-      receive = readyToDrain orElse handle
-
-      if (gracefulShutdownEnabled()) {
-        // Tdrain is the only T-typed message that servers ever send, so we don't
-        // need to allocate a distinct tag to differentiate messages.
-        log.info("Started draining a connection")
-        trans.write(encode(Tdrain(1))) before {
-          closep.within(DefaultTimer.twitter, deadline - Time.now) transform { _ =>
-            lessor.unregister(this)
-            trans.close()
-          }
-        }
-      } else {
-        closep.setDone
-        lessor.unregister(this)
-        trans.close()
+  @tailrec
+  private[this] def hangup(deadline: Time): Future[Unit] = state.get match {
+    case State.Closed => Future.Done
+    case s@(State.Draining | State.Open) =>
+      if (!state.compareAndSet(s, State.Closed)) hangup(deadline) else {
+        trans.close(deadline)
       }
+    }
+
+  def close(deadline: Time): Future[Unit] = {
+    if (!state.compareAndSet(State.Open, State.Draining))
+      return trans.onClose.unit
+
+    if (!gracefulShutdownEnabled()) {
+      // In theory, we can do slightly better here.
+      // (i.e., at least try to wait for requests to drain)
+      // but instead we should just disable this flag.
+      return hangup(deadline)
+    }
+
+    statsReceiver.counter("draining").incr()
+    val done = write(Tdrain(1)) before
+      tracker.drained.within(deadline-Time.now) before
+      trans.close(deadline)
+    done transform {
+      case Return(_) =>
+        statsReceiver.counter("drained").incr()
+        Future.Done
+      case Throw(_: ChannelClosedException) =>
+        Future.Done
+      case Throw(_) =>
+        hangup(deadline)
     }
   }
 
   /**
-   * Emit a lease to the clients of this server.  If howlong is less than or
-   * equal to 0, also nack all requests until a new lease is issued.
-   */
-  def issue(howlong: Duration) {
+    * Emit a lease to the clients of this server.  If howlong is less than or
+    * equal to 0, also nack all requests until a new lease is issued.
+    */
+  def issue(howlong: Duration): Unit = {
     require(howlong >= Tlease.MinLease)
 
     synchronized {
@@ -246,7 +334,7 @@ private[finagle] class ServerDispatcher private[finagle](
       if (diff > ServerDispatcher.Epsilon) {
         curElapsed = Stopwatch.start()
         lease = howlong
-        trans.write(encode(Tlease(howlong min Tlease.MaxLease)))
+        write(Tlease(howlong min Tlease.MaxLease))
       } else if ((howlong < Duration.Zero) && (lease > Duration.Zero)) {
         curElapsed = Stopwatch.start()
         lease = howlong
@@ -254,5 +342,62 @@ private[finagle] class ServerDispatcher private[finagle](
     }
   }
 
-  def npending(): Int = pending.size
+  def npending: Int = tracker.npending
+}
+
+/**
+ * Processor handles request, dispatch, and ping messages. Request
+ * and dispatch messages are passed onto the request-response in the
+ * filter chain. Pings are answered immediately in the affirmative.
+ *
+ * (This arrangement permits interpositioning other filters to modify ping
+ * or dispatch behavior, e.g., for testing.)
+ */
+private object Processor extends Filter[Message, Message, Request, Response] {
+  import Message._
+
+  private[this] def dispatch(tdispatch: Tdispatch, service: Service[Request, Response]): Future[Message] = {
+    val Tdispatch(tag, contexts, dst, dtab, bytes) = tdispatch
+
+    val contextBufs = contexts map { case (k, v) =>
+      ChannelBufferBuf(k) -> ChannelBufferBuf(v)
+    }
+    Contexts.broadcast.letUnmarshal(contextBufs) {
+      if (dtab.length > 0)
+        Dtab.local ++= dtab
+      service(Request(dst, ChannelBufferBuf.Owned(bytes))) transform {
+        case Return(rep) =>
+          Future.value(RdispatchOk(tag, Nil, BufChannelBuffer(rep.body)))
+
+        case Throw(f: Failure) if f.isFlagged(Failure.Restartable) =>
+          Future.value(RdispatchNack(tag, Nil))
+
+        case Throw(exc) =>
+          Future.value(RdispatchError(tag, Nil, exc.toString))
+      }
+    }
+  }
+
+  private[this] def dispatch(treq: Treq, service: Service[Request, Response]): Future[Message] = {
+    val Treq(tag, traceId, bytes) = treq
+    Trace.letIdOption(traceId) {
+      service(Request(Path.empty, ChannelBufferBuf.Owned(bytes))) transform {
+        case Return(rep) =>
+          Future.value(RreqOk(tag, BufChannelBuffer(rep.body)))
+
+        case Throw(f: Failure) if f.isFlagged(Failure.Restartable) =>
+          Future.value(RreqNack(tag))
+
+        case Throw(exc) =>
+          Future.value(RreqError(tag, exc.toString))
+      }
+    }
+  }
+
+  def apply(req: Message, service: Service[Request, Response]): Future[Message] = req match {
+    case d: Tdispatch => dispatch(d, service)
+    case r: Treq => dispatch(r, service)
+    case Tping(tag) => Future.value(Rping(tag))
+    case m => Future.exception(new IllegalArgumentException(s"Cannot process message $m"))
+  }
 }

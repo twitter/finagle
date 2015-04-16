@@ -1,7 +1,8 @@
 package com.twitter.finagle.util
 
-import com.twitter.finagle.{Announcement, Announcer}
+import com.twitter.finagle.{Announcement, Announcer, Resolver}
 import com.twitter.util.Future
+import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry, Entry}
 import java.io.{File, InputStream}
 import java.net.{InetSocketAddress, URL}
 import java.util
@@ -33,6 +34,16 @@ class LoadServiceTest extends FunSuite with MockitoSugar {
     assert(LoadService[Announcer]().nonEmpty)
   }
 
+  test("LoadService should apply[T] and generate the right registry entries") {
+    val simple = new SimpleRegistry
+    GlobalRegistry.withRegistry(simple) {
+      assert(LoadService[Resolver]().nonEmpty)
+      assert(GlobalRegistry.get.toSet == Set(
+        Entry(Seq("loadservice", "com.twitter.finagle.Resolver"), "com.twitter.finagle.TestResolver,com.twitter.finagle.TestAsyncInetResolver")
+      ))
+    }
+  }
+
   test("LoadService should only load 1 instance of T, even when there's multiple occurence of T") {
     val randomIfaces = LoadService[LoadServiceRandomInterface]()
     assert(randomIfaces.size == 1)
@@ -41,6 +52,16 @@ class LoadServiceTest extends FunSuite with MockitoSugar {
   test("LoadService should recover when seeing an initialization exception") {
     val randomIfaces = LoadService[LoadServiceMaybeInterface]()
     assert(randomIfaces.size == 1)
+  }
+
+  test("LoadService should only register successfully initialized classes") {
+    val simple = new SimpleRegistry
+    GlobalRegistry.withRegistry(simple) {
+      val randomIfaces = LoadService[LoadServiceMaybeInterface]()
+      assert(GlobalRegistry.get.toSet == Set(
+        Entry(Seq("loadservice", "com.twitter.finagle.util.LoadServiceMaybeInterface"), "com.twitter.finagle.util.LoadServiceGoodClass")
+      ))
+    }
   }
 
   test("LoadService shouldn't fail on un-readable dir") {

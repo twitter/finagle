@@ -2,13 +2,14 @@ package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Path, Status}
+import com.twitter.finagle.{Path, Status, Failure}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.{Transport, QueueTransport}
 import com.twitter.io.{Buf, Charsets}
 import com.twitter.logging.{Logger, StringHandler, BareFormatter, Level}
 import com.twitter.util.{Return, Throw, Time, TimeControl, Duration, Future}
+import java.nio.charset.Charset
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -16,7 +17,6 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class ClientTest extends FunSuite {
-
   def leaseClient(
     fn: (
       ClientDispatcher,
@@ -40,18 +40,18 @@ class ClientTest extends FunSuite {
     }
   }
 
-
   test("responds to leases") {
     import Message._
 
     leaseClient { (client, transport, issue, ctl) =>
       assert(transport.status == Status.Open)
-      assert(client.isAvailable)
+      assert(client.status === Status.Open)
       issue(1.millisecond)
       ctl.advance(2.milliseconds)
-      assert(!client.isActive && transport.status == Status.Open)
+      assert(client.status == Status.Busy)
+      assert(transport.status == Status.Open)
       issue(Tlease.MaxLease)
-      assert(client.isActive)
+      assert(client.status === Status.Open)
     }
   }
 
@@ -83,23 +83,31 @@ class ClientTest extends FunSuite {
       val Some(Return(rdrain)) = drained.poll
       val Rdrain(newTag) = Message.decode(rdrain)
 
-      assert(!client.client.isActive)
+      assert(client.client.status == Status.Busy)
       assert(newTag === tag + 1)
 
-      client.respond(encode(RdispatchOk(tag, contexts, ChannelBuffers.copiedBuffer(buf.toString("UTF-8").reverse, Charsets.Utf8))))
+      client.respond(encode(RdispatchOk(tag, contexts,
+        ChannelBuffers.copiedBuffer(buf.toString(Charset.forName("UTF-8")).reverse, Charsets.Utf8))))
 
       val Some(Return(result)) = f.poll
       assert(result === Response(Buf.Utf8("KO")))
 
       val f2 = client(req)
-      val Some(Throw(nack)) = f2.poll
-      assert(nack === RequestNackedException)
+      f2.poll match {
+        case Some(Throw(f: Failure)) => 
+          assert(f.isFlagged(Failure.Restartable))
+          assert(f.getMessage == "The request was Nacked by the server")
+        case _ => fail()
+      }
 
       assert(client.read().poll === None)
+      
+      // At this point, we're fully drained.
+      assert(client.client.status === Status.Closed)
     }
   }
-
-  test("isAvailable after sending rdrain") {
+  
+  test("Busy after sending rdrain") {
     Time.withCurrentTimeFrozen { ctl =>
       import Message._
       val buf = ChannelBuffers.copiedBuffer("OK", Charsets.Utf8)
@@ -110,6 +118,8 @@ class ClientTest extends FunSuite {
       val f = client(req)
       val Some(Return(treq)) = client.read().poll
       val Tdispatch(tag, _, _, _, _) = decode(treq)
+
+      assert(client.client.status === Status.Open)
       client.respond(encode(Tdrain(tag + 1)))
 
       val drained = client.read()
@@ -118,7 +128,7 @@ class ClientTest extends FunSuite {
       val Rdrain(newTag) = Message.decode(rdrain)
 
       assert(newTag === tag + 1)
-      assert(client.client.isAvailable)
+      assert(client.client.status == Status.Busy)
     }
   }
 
@@ -157,7 +167,9 @@ class ClientTest extends FunSuite {
       accumulated += started
       assert(handler.get === accumulated)
 
-      client1.respond(encode(RdispatchOk(tag, contexts, ChannelBuffers.copiedBuffer(buf.toString("UTF-8").reverse, Charsets.Utf8))))
+      client1.respond(encode(
+        RdispatchOk(tag, contexts,
+          ChannelBuffers.copiedBuffer(buf.toString(Charset.forName("UTF-8")).reverse, Charsets.Utf8))))
       // outstanding finished
 
       accumulated += finished

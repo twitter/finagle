@@ -18,14 +18,15 @@ trait HexDump {
 }
 
 @RunWith(classOf[JUnitRunner])
-class HandshakeInitTest extends FunSuite with HexDump {
-  // Initial Handshake Packet - protocol version 10
-  val hex =
-    """36 00 00 00 0a 35 2e 35    2e 32 2d 6d 32 00 0b 00
-      |00 00 64 76 48 40 49 2d    43 4a 00 ff f7 21 02 00
-      |00 00 00 00 00 00 00 00    00 00 00 00 00 2a 34 64
-      |7c 63 5a 77 6b 34 5e 5d    3a 00"""
-  test("decode") {
+class HandshakeInitTest extends FunSuite {
+  val authPluginHex =
+
+  test("decode protocol version 10") (new HexDump {
+    val hex =
+      """36 00 00 00 0a 35 2e 35    2e 32 2d 6d 32 00 0b 00
+        |00 00 64 76 48 40 49 2d    43 4a 00 ff f7 21 02 00
+        |00 00 00 00 00 00 00 00    00 00 00 00 00 2a 34 64
+        |7c 63 5a 77 6b 34 5e 5d    3a 00"""
     assert(packets.size > 0)
     val h = HandshakeInit.decode(packets(0))
     assert(h.protocol === 10)
@@ -39,7 +40,28 @@ class HandshakeInitTest extends FunSuite with HexDump {
       100, 118, 72, 64, 73, 45, 67, 74,
       42, 52, 100, 124, 99, 90, 119, 107,
       52, 94, 93, 58))
-  }
+  })
+
+  test("decode protocol version 10 with auth plugin name") (new HexDump {
+    val hex =
+      """50 00 00 00 0a 35 2e 36    2e 34 2d 6d 37 2d 6c 6f
+        |67 00 56 0a 00 00 52 42    33 76 7a 26 47 72 00 ff
+        |ff 08 02 00 0f c0 15 00    00 00 00 00 00 00 00 00
+        |00 2b 79 44 26 2f 5a 5a    33 30 35 5a 47 00 6d 79
+        |73 71 6c 5f 6e 61 74 69    76 65 5f 70 61 73 73 77
+        |6f 72 64 00"""
+    assert(packets.size > 0)
+    val h = HandshakeInit.decode(packets(0))
+    assert(h.protocol === 10)
+    assert(h.version === "5.6.4-m7-log")
+    assert(h.threadId === 2646)
+    assert(Charset.isLatin1(h.charset))
+    assert(h.serverCap.has(Capability.Protocol41))
+    assert(h.serverCap.has(Capability.PluginAuth))
+    assert(h.serverCap.has(Capability.SecureConnection))
+    assert(h.status === 2)
+    assert(h.salt.length === 20)
+  })
 }
 
 @RunWith(classOf[JUnitRunner])
@@ -118,6 +140,7 @@ class PrepareOKTest extends FunSuite with HexDump {
     assert(col.name === "col1")
   }
 }
+
 @RunWith(classOf[JUnitRunner])
 class BinaryResultSetTest extends FunSuite with HexDump {
   // SELECT CONCAT(?, ?) AS col1

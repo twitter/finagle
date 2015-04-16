@@ -6,13 +6,15 @@ import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.util.{Future, Time}
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
+import org.scalacheck.{Arbitrary, Gen}
 import org.scalactic.Tolerance
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.concurrent.Conductors
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
-private class BalancerTest extends FunSuite with Conductors {
+private class BalancerTest extends FunSuite with Conductors with GeneratorDrivenPropertyChecks {
 
   private class TestBalancer extends Balancer[Unit, Unit] {
     def maxEffort: Int = ???
@@ -66,8 +68,10 @@ private class BalancerTest extends FunSuite with Conductors {
     protected def initDistributor(): Distributor = Distributor(Vector.empty)
   }
   
-  def newFac() = new ServiceFactory[Unit, Unit] {
+  def newFac(_status: Status = Status.Open) = new ServiceFactory[Unit, Unit] {
     def apply(conn: ClientConnection) = Future.never
+
+    override def status = _status
     
     @volatile var ncloses = 0
 
@@ -76,6 +80,50 @@ private class BalancerTest extends FunSuite with Conductors {
       Future.Done
     }
   }
+
+  val genStatus = Gen.oneOf(Status.Open, Status.Busy, Status.Closed)
+  val genSvcFac = genStatus.map(newFac)
+  val genLoadedNode =
+    for {
+      fac  <- genSvcFac
+      load <- Gen.chooseNum(Int.MinValue, Int.MaxValue).map(_.toDouble)
+    } yield fac -> load
+
+  val genNodes = Gen.containerOf[List,(ServiceFactory[Unit,Unit],Double)](genLoadedNode)
+
+  test("status: balancer with no nodes is Closed") {
+    val bal = new TestBalancer
+    assert(bal.nodes.isEmpty)
+    assert(bal.status === Status.Closed)
+  }
+
+  test("status: balancer status is bestOf underlying nodes") {
+    forAll(genNodes) { loadedNodes =>
+      val bal = new TestBalancer
+      bal.update(loadedNodes)
+      val best = Status.bestOf[ServiceFactory[Unit,Unit]](loadedNodes.map(_._1), _.status)
+      assert(bal.status === best)
+    }
+  }
+
+  test("status: balancer with at least one Open node is Open") {
+    val bal = new TestBalancer
+    val f1, f2 = newFac(Status.Closed)
+    val f3 = newFac(Status.Open)
+    bal.update(Seq(f1->1, f2->1, f3->1))
+
+    assert(bal.status === Status.Open)
+
+    // all closed
+    bal.update(Seq(f1->1, f2->1))
+    assert(bal.status === Status.Closed)
+
+    // one busy, remainder closed
+    val busy = newFac(Status.Busy)
+    bal.update(Seq(f1->1, f2->1, busy->1))
+    assert(bal.status === Status.Busy)
+  }
+
 
   test("updater: keeps nodes up to date") {
     val bal = new TestBalancer
@@ -126,8 +174,6 @@ private class BalancerTest extends FunSuite with Conductors {
     }
 
     thread("updater2") {
-      println(s"updater 2 ${Thread.currentThread.getId}")
-      println(s"2 beat is $beat")
       waitForBeat(1)
       bal._rebuild()
       bal.update(Seq(f1->1))

@@ -8,12 +8,11 @@ import com.twitter.conversions.time._
 
 @RunWith(classOf[JUnitRunner])
 class WindowedAdderTest extends FunSuite {
-  private trait AdderHelper {
-    val adder = new WindowedAdder(3.seconds, 3)
-  }
+  private def newAdder() = new WindowedAdder(3.seconds, 3)
 
   test("sums things up when time stands still") {
-    new AdderHelper {
+    Time.withCurrentTimeFrozen { tc =>
+      val adder = newAdder()
       adder.add(1)
       assert(adder.sum() === 1)
       adder.add(1)
@@ -25,51 +24,84 @@ class WindowedAdderTest extends FunSuite {
 
   test("maintains a sliding window") {
     Time.withCurrentTimeFrozen { tc =>
-      new AdderHelper {
-        adder.add(1)
-        assert(adder.sum() === 1)
-        tc.advance(1.second)
-        assert(adder.sum() === 1)
-        adder.add(2)
-        assert(adder.sum() === 3)
-        tc.advance(1.second)
-        assert(adder.sum() === 3)
-        tc.advance(1.second)
-        assert(adder.sum() === 2)
-        tc.advance(1.second)
-        assert(adder.sum() === 0)
-      }
+      val adder = newAdder()
+      adder.add(1)
+      assert(adder.sum() === 1)
+      tc.advance(1.second)
+      assert(adder.sum() === 1)
+      adder.add(2)
+      assert(adder.sum() === 3)
+      tc.advance(1.second)
+      assert(adder.sum() === 3)
+      tc.advance(1.second)
+      assert(adder.sum() === 2)
+      tc.advance(1.second)
+      assert(adder.sum() === 0)
     }
   }
 
   test("maintains a sliding window when slices are skipped") {
     Time.withCurrentTimeFrozen { tc =>
-      new AdderHelper {
-        adder.incr()
-        assert(adder.sum() === 1)
-        tc.advance(1.seconds)
-        adder.add(2)
-        assert(adder.sum() === 3)
-        tc.advance(1.second)
-        adder.incr()
-        assert(adder.sum() === 4)
+      val adder = newAdder()
+      adder.incr()
+      assert(adder.sum() === 1)
+      tc.advance(1.seconds)
+      adder.add(2)
+      assert(adder.sum() === 3)
+      tc.advance(1.second)
+      adder.incr()
+      assert(adder.sum() === 4)
 
-        tc.advance(2.seconds)
-        assert(adder.sum() === 1)
+      tc.advance(2.seconds)
+      assert(adder.sum() === 1)
 
-        tc.advance(100.seconds)
-        assert(adder.sum() === 0)
+      tc.advance(100.seconds)
+      assert(adder.sum() === 0)
 
-        adder.add(100)
-        tc.advance(1.second)
-        assert(adder.sum() === 100)
-        adder.add(100)
-        tc.advance(1.second)
-        adder.add(100)
-        assert(adder.sum() === 300)
-        tc.advance(100.seconds)
-        assert(adder.sum() === 0)
-      }
+      adder.add(100)
+      tc.advance(1.second)
+      assert(adder.sum() === 100)
+      adder.add(100)
+      tc.advance(1.second)
+      adder.add(100)
+      assert(adder.sum() === 300)
+      tc.advance(100.seconds)
+      assert(adder.sum() === 0)
+    }
+  }
+  
+  test("maintains negative sums") {
+    Time.withCurrentTimeFrozen { tc =>
+      val adder = newAdder()
+      // net: 2
+      adder.add(-2)
+      assert(adder.sum() == -2)
+      adder.add(4)
+      assert(adder.sum() == 2)
+
+      // net: -4
+      tc.advance(1.second)
+      adder.add(-2)
+      assert(adder.sum() == 0)
+      adder.add(-2)
+      assert(adder.sum() == -2)
+
+      // net: -2
+      tc.advance(1.second)
+      adder.add(-2)
+      assert(adder.sum() == -4)
+
+      tc.advance(1.second)
+      assert(adder.sum() == -6)
+
+      tc.advance(1.second)
+      assert(adder.sum() == -2)
+
+      tc.advance(1.second)
+      assert(adder.sum() == 0)
+
+      tc.advance(100.seconds)
+      assert(adder.sum() == 0)
     }
   }
 }

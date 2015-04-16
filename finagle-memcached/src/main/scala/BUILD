@@ -13,16 +13,14 @@ scala_library(name='scala',
     '3rdparty/jvm/com/twitter/common/zookeeper:server-set',
     '3rdparty/jvm/com/twitter/common:io',
     '3rdparty/jvm/com/twitter/common:quantity',
-    '3rdparty:gson',
-    '3rdparty:netty',
-    '3rdparty:zookeeper',
+    '3rdparty/jvm/org/apache/zookeeper',
+    '3rdparty/jvm/com/google/code/gson',
+    '3rdparty/jvm/io/netty',
+    'finagle/finagle-cacheresolver',
     'finagle/finagle-core',
     'finagle/finagle-serversets',
     'util/util-core',
     'util/util-hashing',
   ],
-  sources=rglobs('*.scala'),
-  resources=[
-    'finagle/finagle-memcached/src/main/resources'
-  ],
+  sources=rglobs('*.scala')
 )

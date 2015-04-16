@@ -34,7 +34,7 @@ public abstract class Client {
    * @param waitFor if the queue is empty, wait up to this duration for an item to arrive.
    * @return A Future<ChannelBuffer>
    */
-  abstract public Future<ChannelBuffer> get(String key, Duration waitFor);
+  public abstract Future<ChannelBuffer> get(String key, Duration waitFor);
 
   /**
    * Enqueue an item.
@@ -44,15 +44,16 @@ public abstract class Client {
    * @param expiry indicates to Kestrel to discard the item if it isn't dequeued in time.
    * @return a Future<Response> indicating success for failure.
    */
-  abstract public Future<Response> set(String key, ChannelBuffer value, Time expiry);
+  public abstract Future<Response> set(String key, ChannelBuffer value, Time expiry);
 
   /**
-   * Delete a queue. Kestrel will actually delete the queue's journal file and all items in the queue.
+   * Delete a queue. Kestrel will actually delete the queue's journal file and all
+   * items in the queue.
    *
    * @param key the queue name.
    * @return a Future<Response> indicating success if the queue already exists
    */
-  abstract public Future<Response> delete(String key);
+  public abstract Future<Response> delete(String key);
 
   /**
    * Flush/empty a queue. The journal file is preserved
@@ -60,7 +61,7 @@ public abstract class Client {
    * @param key the queue name
    * @return a Future<Response> indicating success if the queue already exists
    */
-  abstract public Future<Response> flush(String key);
+  public abstract Future<Response> flush(String key);
 
   /**
    * Write indefinitely to the given queue.  The given offer is
@@ -70,7 +71,7 @@ public abstract class Client {
    *
    * @return a Future indicating client failure.
    */
-  abstract public Future<Throwable> write(String queueName, Offer<ChannelBuffer> offer);
+  public abstract Future<Throwable> write(String queueName, Offer<ChannelBuffer> offer);
 
   /**
    * Read indefinitely from the given queue with transactions.  Note
@@ -81,7 +82,7 @@ public abstract class Client {
    *
    * @return A read handle.
    */
-  abstract public ReadHandle read(String queueName);
+  public abstract ReadHandle read(String queueName);
 
   /**
    * Read from a queue reliably: retry streaming reads on failure
@@ -91,20 +92,21 @@ public abstract class Client {
    *
    * @param queueName the queue to read from
    * @param timer a timer used to delay retries
-   * @param retryBackoffs a (possibly infinite) stream of durations
+   * @param backoffs a (possibly infinite) stream of durations
    * comprising a backoff policy
    */
-  abstract public ReadHandle readReliably(String queueName, Timer timer, Callable<Iterator<Duration>> backoffs);
+  public abstract ReadHandle readReliably(String queueName,
+                                          Timer timer, Callable<Iterator<Duration>> backoffs);
 
   /**
    * {{readReliably}} with infinite, 0-second backoff retries.
    */
-  abstract public ReadHandle readReliably(String queueName);
+  public abstract ReadHandle readReliably(String queueName);
 
   /**
    * Release any resources (like threadpools) used by this client.
    */
-  abstract public void close();
+  public abstract void close();
 
   /**
    * Dequeue an item

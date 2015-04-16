@@ -60,7 +60,7 @@ private[serverset2] object Stabilizer {
           case Addr.Failed(_) =>
             State(Set.empty, active++limbo, addr)
 
-          case Addr.Bound(bound) =>
+          case Addr.Bound(bound, _) =>
             State(limbo, merge(active, bound), addr)
 
           case addr =>
@@ -74,7 +74,7 @@ private[serverset2] object Stabilizer {
       // The epoch turned
       case (st@State(limbo, active, last), Right(())) =>
         last match {
-          case Addr.Bound(bound) =>
+          case Addr.Bound(bound, _) =>
             State(active, bound, last)
 
           case Addr.Neg =>

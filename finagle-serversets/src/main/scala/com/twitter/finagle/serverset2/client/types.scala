@@ -38,15 +38,15 @@ private[serverset2] object Node {
   case class Data(data: Option[Buf], stat: com.twitter.finagle.serverset2.client.Data.Stat) extends Node
 }
 
-private[serverset2] sealed trait NodeEvent
+private[serverset2] sealed abstract class NodeEvent(val name: String)
 
 private[serverset2] object NodeEvent {
-  object Created extends NodeEvent
-  object DataChanged extends NodeEvent
-  object Deleted extends NodeEvent
-  object ChildrenChanged extends NodeEvent
-  object DataWatchRemoved extends NodeEvent
-  object ChildWatchRemoved extends NodeEvent
+  object Created extends NodeEvent("node_created")
+  object DataChanged extends NodeEvent("node_data_changed")
+  object Deleted extends NodeEvent("node_deleted")
+  object ChildrenChanged extends NodeEvent("node_children_changed")
+  object DataWatchRemoved extends NodeEvent("node_data_watch_removed")
+  object ChildWatchRemoved extends NodeEvent("node_child_watch_removed")
 }
 
 private[serverset2] sealed trait Op
@@ -69,17 +69,17 @@ private[serverset2] object OpResult {
   case class ErrorResult(exc: KeeperException) extends OpResult
 }
 
-private[serverset2] sealed trait SessionState
+private[serverset2] sealed abstract class SessionState(val name: String)
 
 private[serverset2] object SessionState {
-  object Unknown extends SessionState
-  object AuthFailed extends SessionState
-  object Disconnected extends SessionState
-  object Expired extends SessionState
-  object NoSyncConnected extends SessionState
-  object SyncConnected extends SessionState
-  object ConnectedReadOnly extends SessionState
-  object SaslAuthenticated extends SessionState
+  object Unknown extends SessionState("session_unknown")
+  object AuthFailed extends SessionState("session_auth_failed")
+  object Disconnected extends SessionState("session_disconnected")
+  object Expired extends SessionState("session_expired")
+  object NoSyncConnected extends SessionState("session_no_sync_connected")
+  object SyncConnected extends SessionState("session_sync_connected")
+  object ConnectedReadOnly extends SessionState("session_connected_read_only")
+  object SaslAuthenticated extends SessionState("session_sasl_authenticated")
 }
 
 private[serverset2] sealed trait WatchState

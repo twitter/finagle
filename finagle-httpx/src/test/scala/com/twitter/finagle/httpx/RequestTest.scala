@@ -17,8 +17,6 @@ class RequestTest extends FunSuite {
       assert(request.version    === Version.Http11)
       assert(request.method     === Method.Get)
       assert(request.path       === "/")
-      assert(request.remoteHost === "127.0.0.1")
-      assert(request.remotePort === 12345)
     }
   }
 

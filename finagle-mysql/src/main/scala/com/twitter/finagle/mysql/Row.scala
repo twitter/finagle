@@ -3,8 +3,9 @@ package com.twitter.finagle.exp.mysql
 import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader, Packet}
 
 /**
- * Defines an interface that allows for easily
- * reading the values in a mysql row.
+ * A `Row` makes it easy to extract [[Value]]'s from a mysql row.
+ * Specific [[Value]]'s based on mysql column name can be accessed
+ * via the `apply` method.
  */
 trait Row {
   /**

@@ -34,7 +34,7 @@ private[finagle] object StringClientPipeline extends ChannelPipelineFactory {
 
 private[finagle] trait StringClient {
   case class Client(stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
-      params: Stack.Params = StackClient.defaultParams)
+      params: Stack.Params = Stack.Params.empty)
    extends StdStackClient[String, String, Client] {
     protected def copy1(
       stack: Stack[ServiceFactory[String, String]] = this.stack,

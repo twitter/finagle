@@ -7,15 +7,16 @@ import com.twitter.common.quantity.{Time, Amount}
 import com.twitter.common.zookeeper.{ZooKeeperUtils, ServerSets, ZooKeeperClient}
 import com.twitter.conversions.time._
 import com.twitter.finagle.MemcachedClient
-import com.twitter.finagle.memcached.CachePoolConfig
+import com.twitter.finagle.cacheresolver.CachePoolConfig
 import com.twitter.finagle.memcached.migration._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.io.Charsets
 import com.twitter.util._
+import com.twitter.zk.ServerCnxnFactory
 import java.io.ByteArrayOutputStream
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog
-import org.apache.zookeeper.server.{NIOServerCnxn, ZooKeeperServer}
+import org.apache.zookeeper.server.ZooKeeperServer
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{IntegrationPatience, Eventually}
 import org.scalatest.junit.JUnitRunner
@@ -33,7 +34,7 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
   var zookeeperServer: ZooKeeperServer = null
   var zookeeperServerPort: Int = 0
   var zookeeperClient: ZooKeeperClient = null
-  var connectionFactory: NIOServerCnxn.Factory = null
+  var connectionFactory: ServerCnxnFactory = null
 
   var testServers: List[TestMemcachedServer] = List()
   val TIMEOUT = 15.seconds
@@ -45,7 +46,7 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     zookeeperServer = new ZooKeeperServer(
       new FileTxnSnapLog(createTempDir(), createTempDir()),
       new ZooKeeperServer.BasicDataTreeBuilder)
-    connectionFactory = new NIOServerCnxn.Factory(new InetSocketAddress(loopback, 0))
+    connectionFactory = ServerCnxnFactory(loopback)
     connectionFactory.startup(zookeeperServer)
     zookeeperServerPort = zookeeperServer.getClientPort
 

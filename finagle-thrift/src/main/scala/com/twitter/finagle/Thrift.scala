@@ -152,6 +152,12 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
 
   val client = Client()
+  
+  def newService(
+    dest: Name,
+    label: String
+  ): Service[ThriftClientRequest, Array[Byte]] = 
+    client.newService(dest, label)
 
   def newClient(
     dest: Name,

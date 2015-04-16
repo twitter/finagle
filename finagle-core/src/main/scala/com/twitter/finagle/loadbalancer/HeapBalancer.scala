@@ -129,7 +129,7 @@ class HeapBalancer[Req, Rep](
 
   private[this] val availableGauge = statsReceiver.addGauge("available") {
     val nodes = synchronized { heap.drop(1) }
-    nodes.count(_.factory.isAvailable)
+    nodes.count(_.factory.status == Status.Open)
   }
 
   private[this] val loadGauge = statsReceiver.addGauge("load") {
@@ -198,7 +198,7 @@ class HeapBalancer[Req, Rep](
         n = n.downq
         if (m == null) downq = n
         else m.downq = n
-      } else if (n.factory.isAvailable) {  // revived node
+      } else if (n.factory.status == Status.Open) {  // revived node
         n.load -= Penalty
         fixUp(heap, n.index)
         val o = n.downq
@@ -213,7 +213,7 @@ class HeapBalancer[Req, Rep](
     }
 
     n = heap(1)
-    if (n.factory.isAvailable || n.load >= 0) n else {
+    if (n.factory.status == Status.Open || n.load >= 0) n else {
       // Mark as down.
       n.downq = downq
       downq = n
@@ -260,6 +260,13 @@ class HeapBalancer[Req, Rep](
     Closable.sequence(observation, nodesClosable).close(deadline)
   }
 
-  override def status: Status = Status.Open
+  /**
+   * HeapBalancer status is the best of its constituent nodes, excluding
+   * the heap(0) node because our implementation is 1-indexed.
+   */
+  override def status: Status = Status.bestOf(heap.drop(1), nodeStatus)
+
+  private[this] val nodeStatus: Node => Status = _.factory.status
+
   override val toString = synchronized("HeapBalancer(%d)".format(size))
 }

@@ -23,6 +23,6 @@ trait PreparedStatement {
   def select[T](params: Any*)(f: Row => T): Future[Seq[T]] =
     apply(params:_*) map {
       case rs: ResultSet => rs.rows.map(f)
-      case _ => Seq.empty
+      case _ => Nil
     }
 }

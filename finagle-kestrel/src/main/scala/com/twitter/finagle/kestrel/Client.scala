@@ -262,14 +262,18 @@ trait Client {
     val close = new Broker[Unit]
 
     def loop(handle: ReadHandle, backoffs: Stream[Duration]) {
-      Offer.select(
+      // proxy the close, and close our reliable channel
+      Offer.prioritize(
+        close.recv { _ =>
+          handle.close()
+          error ! ReadClosedException
+        },
         // proxy messages
         handle.messages { m =>
           messages ! m
           // a succesful read always resets the backoffs
           loop(handle, retryBackoffs)
         },
-
         // retry on error
         handle.error { t =>
           backoffs match {
@@ -278,14 +282,8 @@ trait Client {
             case _ =>
               error ! OutOfRetriesException
           }
-        },
-
-        // proxy the close, and close our reliable channel
-        close.recv { _=>
-          handle.close()
-          error ! ReadClosedException
         }
-      )
+      ).sync()
     }
 
     loop(read(queueName), retryBackoffs)
@@ -365,19 +363,23 @@ abstract protected[kestrel] class ClientBase[CommandExecutor <: Closable, Reply,
 
     def recv(service: CommandExecutor, command: CommandExecutor => Future[Reply]) {
       val reply = command(service)
-      Offer.select(
+      Offer.prioritize(
+        close.recv { _ =>
+          service.close()
+          reply.raise(ReadClosedException)
+          error ! ReadClosedException
+        },
         reply.toOffer {
           case Return(r: Reply) =>
             processResponse(r) match {
               case Return(Some((data, id))) =>
                 val ack = new Broker[ItemId]
                 messages ! ReadMessage(data, ack.send(id), abort.send(id))
-
-                Offer.select(
-                  ack.recv { id => recv(service, closeAndOpenCommand(id)) },
+                Offer.prioritize(
                   close.recv { t => service.close(); error ! ReadClosedException },
+                  ack.recv { id => recv(service, closeAndOpenCommand(id)) },
                   abort.recv { id => recv(service, abortCommand(id)) }
-                )
+                ).sync()
 
               case Return(None) =>
                 recv(service, openCommand)
@@ -394,14 +396,8 @@ abstract protected[kestrel] class ClientBase[CommandExecutor <: Closable, Reply,
           case Throw(t) =>
             service.close()
             error ! t
-        },
-
-        close.recv { _ =>
-          service.close()
-          reply.raise(ReadClosedException)
-          error ! ReadClosedException
         }
-      )
+      ).sync()
     }
 
     underlying() respond {

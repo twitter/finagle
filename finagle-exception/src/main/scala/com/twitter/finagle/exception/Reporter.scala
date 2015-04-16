@@ -10,7 +10,6 @@ import com.twitter.util.GZIPStringEncoder
 import com.twitter.util.{Future, Time, Monitor, NullMonitor}
 
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.core.util.InetAddressUtil
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.ThriftClientFramedCodec
 import com.twitter.finagle.tracing.Trace
@@ -119,7 +118,7 @@ sealed case class Reporter(
   client: Scribe[Future],
   serviceName: String,
   statsReceiver: StatsReceiver = NullStatsReceiver,
-  private val sourceAddress: Option[String] = Some(InetAddressUtil.Loopback.getHostName),
+  private val sourceAddress: Option[String] = Some(InetAddress.getLoopbackAddress.getHostName),
   private val clientAddress: Option[String] = None) extends Monitor {
 
   private[this] val okCounter = statsReceiver.counter("report_exception_ok")
@@ -130,7 +129,7 @@ sealed case class Reporter(
    *
    * The endpoint string is the ip address of the host (e.g. "127.0.0.1").
    */
-  def withClient(address: InetAddress = InetAddressUtil.Loopback) =
+  def withClient(address: InetAddress = InetAddress.getLoopbackAddress) =
     copy(clientAddress = Some(address.getHostAddress))
 
   /**

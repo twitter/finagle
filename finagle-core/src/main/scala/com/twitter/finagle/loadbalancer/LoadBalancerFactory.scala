@@ -9,6 +9,7 @@ import com.twitter.finagle.util.OnReady
 import com.twitter.util.{Activity, Future, Var}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.logging.{Level, Logger}
+import scala.collection.mutable
 
 object defaultBalancer extends GlobalFlag("heap", "Default load balancer")
 object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n" +
@@ -18,6 +19,20 @@ object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n"
   "\tor the NullStatsReceiver if none given.")
 
 object LoadBalancerFactory {
+  /**
+   * A class eligible for configuring a client's load balancer probation setting.
+   */
+  case class EnableProbation(enable: Boolean)
+  implicit object EnableProbation extends Stack.Param[EnableProbation] {
+    val default = EnableProbation(false)
+  }
+
+  /**
+   * A tuple containing a [[com.twitter.finagle.ServiceFactory]] and its
+   * associated weight.
+   */
+  private[loadbalancer] type WeightedFactory[Req, Rep] = (ServiceFactory[Req, Rep], Double)
+
   val role = Stack.Role("LoadBalancer")
 
   /**
@@ -29,9 +44,12 @@ object LoadBalancerFactory {
    * large host sets in their destination, this can cause unmanageable
    * memory pressure.
    */
-  case class HostStats(hostStatsReceiver: StatsReceiver)
-  implicit object HostStats extends Stack.Param[HostStats] {
-    val default = HostStats(NullStatsReceiver)
+  case class HostStats(hostStatsReceiver: StatsReceiver) {
+    def mk(): (HostStats, Stack.Param[HostStats]) =
+      (this, HostStats.param)
+  }
+  object HostStats {
+    implicit val param = Stack.Param(HostStats(NullStatsReceiver))
   }
 
   /**
@@ -39,9 +57,12 @@ object LoadBalancerFactory {
    * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] with a collection
    * of addrs to load balance.
    */
-  case class Dest(va: Var[Addr])
-  implicit object Dest extends Stack.Param[Dest] {
-    val default = Dest(Var.value(Addr.Neg))
+  case class Dest(va: Var[Addr]) {
+    def mk(): (Dest, Stack.Param[Dest]) =
+      (this, Dest.param)
+  }
+  object Dest {
+    implicit val param = Stack.Param(Dest(Var.value(Addr.Neg)))
   }
 
   /**
@@ -49,18 +70,60 @@ object LoadBalancerFactory {
     * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] with a label
     * for use in error messages.
     */
-  case class ErrorLabel(label: String)
-  implicit object ErrorLabel extends Stack.Param[ErrorLabel] {
-    val default = ErrorLabel("unknown")
+  case class ErrorLabel(label: String) {
+    def mk(): (ErrorLabel, Stack.Param[ErrorLabel]) =
+      (this, ErrorLabel.param)
+  }
+  object ErrorLabel {
+    implicit val param = Stack.Param(ErrorLabel("unknown"))
   }
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]].
    */
-  case class Param(loadBalancerFactory: WeightedLoadBalancerFactory)
-  implicit object Param extends Stack.Param[Param] {
-    val default = Param(DefaultBalancerFactory)
+  case class Param(loadBalancerFactory: WeightedLoadBalancerFactory) {
+    def mk(): (Param, Stack.Param[Param]) =
+      (this, Param.param)
+  }
+  object Param {
+    implicit val param = Stack.Param(Param(DefaultBalancerFactory))
+  }
+
+  /**
+   * Update a mutable Map of `WeightedFactory`s according to a set of
+   * active SocketAddresses and a factory construction function.
+   *
+   * Ensures that at most one WeightedFactory is built for each
+   * distinct SocketAddress.
+   *
+   * When `probationEnabled` is true, `ServiceFactory`s for addresses
+   * not present in `activeAddrs` are put "on probation". A
+   * `ServiceFactory` that is on probation will continue to be issued
+   * requests until it becomes unavailable
+   * (i.e. `factory.status != Status.Open`), at which point it is removed.
+   */
+  private[loadbalancer] def updateFactories[Req, Rep](
+    activeAddrs: Set[SocketAddress],
+    activeFactories: mutable.Map[SocketAddress, WeightedFactory[Req, Rep]],
+    mkFactory: SocketAddress => WeightedFactory[Req, Rep],
+    probationEnabled: Boolean
+  ): Unit = activeFactories.synchronized {
+    // Add new hosts.
+    (activeAddrs &~ activeFactories.keySet) foreach { sa =>
+      activeFactories += sa -> mkFactory(sa)
+    }
+
+    // Put hosts that have disappeared on probation.
+    (activeFactories.keySet &~ activeAddrs) foreach { sa =>
+      activeFactories.get(sa) match {
+        case Some((factory, _)) if !probationEnabled || factory.status != Status.Open =>
+          factory.close()
+          activeFactories -= sa
+
+        case _ => // nothing to do
+      }
+    }
   }
 
   /**
@@ -86,15 +149,24 @@ object LoadBalancerFactory {
         val ErrorLabel(errorLabel) = params[ErrorLabel]
         val Dest(dest) = params[Dest]
         val Param(loadBalancerFactory) = params[Param]
+        val EnableProbation(probationEnabled) = params[EnableProbation]
 
         // Determine which stats receiver to use based on the flag
         // 'com.twitter.finagle.loadbalancer.perHostStats'
-        // and the configured per-host stats receiver
-        // If the per-host stats receiver is set, ignore the flag
+        // and the configured per-host stats receiver.
+        // if 'HostStats' param is not set, use LoadedHostStatsReceiver when flag is set.
+        // if 'HostStats' param is an instance of HostStatsReceiver, need the flag for it
+        // to take effect.
         val hostStatsReceiver =
           if (!params.contains[HostStats]) {
-            if (perHostStats()) LoadedStatsReceiver else NullStatsReceiver
-          } else params[HostStats].hostStatsReceiver
+            if (perHostStats()) LoadedHostStatsReceiver else NullStatsReceiver
+          } else {
+            params[HostStats].hostStatsReceiver match {
+              case _: HostStatsReceiver if !perHostStats() => NullStatsReceiver
+              case paramStats => paramStats
+            }
+          }
+
         val param.Stats(statsReceiver) = params[param.Stats]
         val param.Logger(log) = params[param.Logger]
         val param.Label(label) = params[param.Label]
@@ -103,9 +175,7 @@ object LoadBalancerFactory {
 
         val noBrokersException = new NoBrokersAvailableException(errorLabel)
 
-        type WeightedFactory = (ServiceFactory[Req, Rep], Double)
-
-        def mkFactory(sockaddr: SocketAddress): WeightedFactory = {
+        def mkFactory(sockaddr: SocketAddress): WeightedFactory[Req, Rep] = {
           val stats = if (hostStatsReceiver.isNull) statsReceiver else {
             val scope = sockaddr match {
               case WeightedInetSocketAddress(addr, _) =>
@@ -121,11 +191,12 @@ object LoadBalancerFactory {
           val endpointStack: SocketAddress => ServiceFactory[Req, Rep] =
             (sa: SocketAddress) => {
               val underlying = next.make(params +
-                  Transporter.EndpointAddr(sa) +
-                  param.Stats(stats) +
-                  param.Monitor(composite))
+                Transporter.EndpointAddr(sa) +
+                param.Stats(stats) +
+                param.Monitor(composite))
+
               new ServiceFactoryProxy(underlying) {
-                override def toString = sa.toString + "_" + underlying.toString
+                override def toString = sa.toString
               }
             }
 
@@ -135,28 +206,19 @@ object LoadBalancerFactory {
           }
         }
 
-        // Ensure that at most one WeightedFactory is built for each SocketAddress.
-        var cachedFactories = Map[SocketAddress, WeightedFactory]()
-        var lastAddrs = Set[SocketAddress]()
-        def mkFactories(sockaddrs: Set[SocketAddress]): Set[WeightedFactory] =
-          synchronized {
-            cachedFactories ++= (sockaddrs &~ lastAddrs) map { sa =>
-              sa -> mkFactory(sa)
-            }
-            cachedFactories --= lastAddrs &~ sockaddrs
-            lastAddrs = sockaddrs
-            cachedFactories.values.toSet
-          }
-
+        val cachedFactories = mutable.Map.empty[SocketAddress, WeightedFactory[Req, Rep]]
         val endpoints = Activity(dest map {
-          case Addr.Bound(sockaddrs) =>
-            Activity.Ok(mkFactories(sockaddrs))
+          case Addr.Bound(sockaddrs, metadata) =>
+            updateFactories(sockaddrs, cachedFactories, mkFactory, probationEnabled)
+            Activity.Ok(cachedFactories.values.toSet)
 
           case Addr.Neg =>
             if (log.isLoggable(Level.WARNING)) {
               log.warning("%s: name resolution is negative".format(label))
             }
-            Activity.Ok(mkFactories(Set.empty))
+            updateFactories(
+              Set.empty, cachedFactories, mkFactory, probationEnabled)
+            Activity.Ok(cachedFactories.values.toSet)
 
           case Addr.Failed(e) =>
             if (log.isLoggable(Level.WARNING)) {
@@ -286,4 +348,6 @@ object DefaultBalancerFactory extends WeightedLoadBalancerFactory {
     emptyException: NoBrokersAvailableException
   ): ServiceFactory[Req, Rep] =
     underlying.newWeightedLoadBalancer(weighted, statsReceiver, emptyException)
+
+  val get = this
 }

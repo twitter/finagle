@@ -37,7 +37,7 @@ here_, or:
 
 ::
 
-	$ curl https://raw.github.com/twitter/finagle/master/doc/src/sphinx/code/quickstart/sbt > code/sbt
+	$ curl https://raw.githubusercontent.com/twitter/finagle/master/doc/src/sphinx/code/quickstart/sbt > code/sbt
 	$ chmod u+rx code/sbt
 
 .. _here: https://raw.github.com/twitter/finagle/master/doc/src/sphinx/code/quickstart/sbt

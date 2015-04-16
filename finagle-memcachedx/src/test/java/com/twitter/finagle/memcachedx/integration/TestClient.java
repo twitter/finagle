@@ -27,6 +27,9 @@ public class TestClient {
     Assume.assumeTrue(server.isDefined());
   }
 
+  /**
+   * Tests Get/Set commands.
+   */
   @Test
   public void testGetAndSet() throws Exception {
     Service<Command, Response> service =

@@ -4,10 +4,10 @@ import java.util.Arrays;
 
 import scala.runtime.BoxedUnit;
 
-import org.junit.Assert;
-import org.junit.Test;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.junit.Assert;
+import org.junit.Test;
 
 import com.twitter.concurrent.Broker;
 import com.twitter.concurrent.Offer;
@@ -17,12 +17,16 @@ public class ReadHandleCompilationTest {
   static final Broker<Throwable> ERROR = new Broker<Throwable>();
   static final Broker<BoxedUnit> CLOSER = new Broker<BoxedUnit>();
 
+  /**
+   * Tests read message.
+   */
   @Test
   public void testReadMessage() {
     ChannelBuffer buffer = ChannelBuffers.wrappedBuffer("abc".getBytes());
     Broker<BoxedUnit> ack = new Broker<BoxedUnit>();
     Broker<BoxedUnit> abort = new Broker<BoxedUnit>();
-    ReadMessage message = new ReadMessage(buffer, ack.send(BoxedUnit.UNIT), abort.send(BoxedUnit.UNIT));
+    ReadMessage message =
+      new ReadMessage(buffer, ack.send(BoxedUnit.UNIT), abort.send(BoxedUnit.UNIT));
 
     Assert.assertNotNull(message);
   }
@@ -60,6 +64,9 @@ public class ReadHandleCompilationTest {
     Assert.assertNotNull(handle);
   }
 
+  /**
+   * Tests {@code ReadHandle} merging.
+   */
   @Test
   public void testReadHandleMerge() {
     ReadHandle a = ReadHandle.fromOffers(MESSAGES.recv(), ERROR.recv(), CLOSER.recv());

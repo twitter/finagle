@@ -4,16 +4,18 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.mux.Message.Treq
 import com.twitter.finagle.mux.lease.exp.{Lessor, nackOnExpiredLease}
-import com.twitter.finagle.stats.{StatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.finagle.tracing.NullTracer
 import com.twitter.finagle.transport.{Transport, QueueTransport}
 import com.twitter.finagle.{Path, Dtab, Service}
 import com.twitter.io.{Buf, Charsets}
 import com.twitter.logging.{Logger, BareFormatter, StringHandler, Level}
+import com.twitter.util.Throw
 import com.twitter.util.{Return, Future, Time, Duration, Promise}
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.junit.runner.RunWith
 import org.mockito.Mockito.{never, verify, when}
+import org.mockito.Matchers.any
 import org.scalatest.FunSuite
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.mock.MockitoSugar
@@ -27,7 +29,8 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
     val service = mock[Service[Request, Response]]
     val lessor = mock[Lessor]
-    val server = new ServerDispatcher(transport, service, true, lessor, NullTracer)
+    val server = ServerDispatcher.newRequestResponse(
+      transport, service, lessor, NullTracer, NullStatsReceiver)
 
     def issue(lease: Duration) {
       val m = serverToClient.poll()
@@ -135,16 +138,22 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
       Treq(tag = 9, traceId = None, ChannelBuffers.EMPTY_BUFFER))
 
     val trans = mock[Transport[ChannelBuffer, ChannelBuffer]]
-    when(trans.onClose).thenReturn(new Promise[Throwable])
+
+    when(trans.onClose)
+      .thenReturn(new Promise[Throwable])
+
     when(trans.read())
       .thenReturn(Future.value(encodedMsg))
       .thenReturn(Future.never)
 
-    val dispatcher = new ServerDispatcher(trans, svc, true, lessor, NullTracer)
+    when(trans.write(any[ChannelBuffer]))
+      .thenReturn(Future.Done)
+
+    val dispatcher = ServerDispatcher.newRequestResponse(
+      trans, svc, lessor, NullTracer, NullStatsReceiver)
     assert(dispatcher.npending() === 1)
 
-    // fulfill the promise with a failure
-    p.setException(new RuntimeException("welp"))
+    p.updateIfEmpty(Throw(new RuntimeException("welp")))
 
     assert(dispatcher.npending() === 0)
   }
@@ -159,15 +168,12 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
 
       val p = Promise[Response]
       var req: Request = null
-      val server = new ServerDispatcher(
+      val server = ServerDispatcher.newRequestResponse(
         transport,
         Service.mk { _req: Request =>
           req = _req
           p
-        },
-        true,
-        Lessor.nil,
-        NullTracer
+        }
       )
 
       clientToServer.offer(encode(Tdispatch(0, Seq.empty, Path.empty, Dtab.empty, buf)))
@@ -193,11 +199,12 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
       val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
 
       var promises: List[Promise[Response]] = Nil
-      val server = new ServerDispatcher(transport, Service.mk { _: Request =>
+      val server = ServerDispatcher.newRequestResponse(
+        transport, Service.mk { _: Request =>
         val p = Promise[Response]()
         promises ::= p
         p
-      }, true, Lessor.nil, NullTracer)
+      })
 
       clientToServer.offer(encode(
         Tdispatch(0, Seq.empty, Path.empty, Dtab.empty, ChannelBuffers.EMPTY_BUFFER)))
@@ -233,9 +240,8 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
       val clientToServer = new AsyncQueue[ChannelBuffer]
       val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
 
-      val server = new ServerDispatcher(transport, Service.mk { _: Request =>
-        Future { ??? }
-      }, true, Lessor.nil, NullTracer)
+      val server = ServerDispatcher.newRequestResponse(
+        transport, Service.mk(req => Future.???))
 
       val drain = server.close(Time.Top) // synchronously sends drain request to client
 
@@ -252,14 +258,9 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     val serverToClient = new AsyncQueue[ChannelBuffer]
     val clientToServer = new AsyncQueue[ChannelBuffer]
     val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
+    def ping() = Future.Done
 
-    val server = new ServerDispatcher(
-      transport,
-      svc,
-      true,
-      Lessor.nil,
-      NullTracer
-    )
+    val server = ServerDispatcher.newRequestResponse(transport, svc)
 
     def request(req: ChannelBuffer): Unit = clientToServer.offer(req)
     def read(): Future[ChannelBuffer] = serverToClient.poll
@@ -295,57 +296,6 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
         Message.Tdispatch(0, Seq.empty, Path.empty, Dtab.empty, ChannelBuffers.EMPTY_BUFFER)))
       val Some(Return(rdrain)) = server.read().poll
       assert(decode(rdrain).isInstanceOf[RdispatchNack])
-    }
-  }
-
-  test("logs while draining") {
-    Time.withCurrentTimeFrozen { ctl =>
-      import Message._
-
-      val log = Logger.get("")
-      val handler = new StringHandler(BareFormatter, None)
-      log.setLevel(Level.DEBUG)
-      log.addHandler(handler)
-
-      var accumulated: String = ""
-      val started = "Started draining a connection\n"
-      val finished = "Finished draining a connection\n"
-
-      val p = Promise[Response]
-      val server1 = new Server(Service.mk { buf: Request =>
-        p
-      })
-      val server2 = new Server(Service.mk { buf: Request =>
-        Future.value(Response.empty)
-      })
-      server1.request(Message.encode( // request before closing
-        Message.Tdispatch(0, Seq.empty, Path.empty, Dtab.empty, ChannelBuffers.EMPTY_BUFFER)))
-
-      assert(handler.get === accumulated)
-
-      server2.server.close(Time.Top) // synchronously sends drain request to client2
-
-      accumulated += started
-      assert(handler.get === accumulated)
-
-      server2.request(encode(Rdrain(1))) // client draining, 0 outstanding
-
-      accumulated += finished
-      assert(handler.get === accumulated)
-
-      server1.server.close(Time.Top) // synchronously sends drain request to client1
-
-      accumulated += started
-      assert(handler.get === accumulated)
-
-      server1.request(encode(Rdrain(1))) // client draining, one still outstanding
-
-      assert(handler.get === accumulated)
-
-      p.setValue(Response.empty)
-
-      accumulated += finished
-      assert(handler.get === accumulated)
     }
   }
 }

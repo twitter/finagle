@@ -8,10 +8,11 @@ import com.twitter.common.zookeeper.{ZooKeeperUtils, ServerSets, ZooKeeperClient
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Group, WriteException}
 import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.cacheresolver.{CachePoolCluster, CachePoolConfig}
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.replication._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.memcached.{CachePoolCluster, CachePoolConfig, KetamaClientBuilder}
+import com.twitter.finagle.memcached.KetamaClientBuilder
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.util.{Await, Return, Throw}
 import org.junit.runner.RunWith

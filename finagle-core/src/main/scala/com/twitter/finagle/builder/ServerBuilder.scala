@@ -5,7 +5,7 @@ import com.twitter.finagle.channel.IdleConnectionFilter
 import com.twitter.finagle.channel.OpenConnectionsThresholds
 import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter}
 import com.twitter.finagle.netty3.Netty3Listener
-import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
+import com.twitter.finagle.server.{StackBasedServer, Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service.ExpiringService
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.ssl.{Ssl, Engine}
@@ -13,7 +13,8 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.util._
-import com.twitter.util.{Closable, Duration, Future, NullMonitor, Time}
+import com.twitter.util
+import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Time}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Level
@@ -22,14 +23,17 @@ import org.jboss.netty.channel.ServerChannelFactory
 import scala.annotation.implicitNotFound
 
 /**
- * A listening server.
+ * A listening server. This is for compatibility with older code that is
+ * using builder.Server. New code should use the ListeningServer trait.
  */
-trait Server extends Closable {
+trait Server extends ListeningServer {
+
   /**
    * When a server is bound to an ephemeral port, gets back the address
    * with concrete listening port picked.
    */
-  def localAddress: SocketAddress
+  @deprecated("Use boundAddress", "2014-12-19")
+  final def localAddress: SocketAddress = boundAddress
 }
 
 /**
@@ -70,21 +74,30 @@ object ServerConfig {
   }
 
   // params specific to ServerBuilder
-  case class BindTo(addr: SocketAddress)
-  implicit object BindTo extends Stack.Param[BindTo] {
-    val default = BindTo(new SocketAddress {
+  case class BindTo(addr: SocketAddress) {
+    def mk(): (BindTo, Stack.Param[BindTo]) =
+      (this, BindTo.param)
+  }
+  object BindTo {
+    implicit val param = Stack.Param(BindTo(new SocketAddress {
       override val toString = "unknown"
-    })
+    }))
   }
 
-  case class MonitorFactory(mFactory: (String, SocketAddress) => com.twitter.util.Monitor)
-  implicit object MonitorFactory extends Stack.Param[MonitorFactory] {
-    val default = MonitorFactory((_, _) => NullMonitor)
+  case class MonitorFactory(mFactory: (String, SocketAddress) => util.Monitor) {
+    def mk(): (MonitorFactory, Stack.Param[MonitorFactory]) =
+      (this, MonitorFactory.param)
+  }
+  object MonitorFactory {
+    implicit val param = Stack.Param(MonitorFactory((_, _) => NullMonitor))
   }
 
-  case class Daemonize(onOrOff: Boolean)
-  implicit object Daemonize extends Stack.Param[Daemonize] {
-    val default = Daemonize(false)
+  case class Daemonize(onOrOff: Boolean) {
+    def mk(): (Daemonize, Stack.Param[Daemonize]) =
+      (this, Daemonize.param)
+  }
+  object Daemonize {
+    implicit val param = Stack.Param(Daemonize(false))
   }
 }
 
@@ -251,7 +264,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * created by `mk`; it is up to the discretion of the server and protocol
    * implementation.
    */
-  @deprecated("Use stack(server: Stack.Parameterized)", "7.0.0")
+  @deprecated("Use stack(server: StackBasedServer)", "7.0.0")
   def stack[Req1, Rep1](
     mk: Stack.Params => FinagleServer[Req1, Rep1]
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
@@ -261,14 +274,14 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * Overrides the stack and [[com.twitter.finagle.Server]] that will be used
    * by this builder.
    *
-   * @param server A `Parameterized` representation of a
+   * @param server A [[StackBasedServer]] representation of a
    * [[com.twitter.finagle.Server]]. `server` is materialized with the state of
    * configuration when `build` is called. There is no guarantee that all
    * builder parameters will be used by the resultant `Server`; it is up to the
    * discretion of `server` itself and the protocol implementation.
    */
   def stack[Req1, Rep1](
-    server: Stack.Parameterized[FinagleServer[Req1, Rep1]]
+    server: StackBasedServer[Req1, Rep1]
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] = {
     val withParams: Stack.Params => FinagleServer[Req1, Rep1] = { ps =>
       server.withParams(server.params ++ ps)
@@ -331,7 +344,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def writeCompletionTimeout(howlong: Duration): This =
     configured(params[Transport.Liveness].copy(writeTimeout = howlong))
 
-  def monitor(mFactory: (String, SocketAddress) => com.twitter.util.Monitor): This =
+  def monitor(mFactory: (String, SocketAddress) => util.Monitor): This =
     configured(MonitorFactory(mFactory))
 
   @deprecated("Use tracer() instead", "7.0.0")
@@ -372,6 +385,17 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    */
   def daemon(daemonize: Boolean): This =
     configured(Daemonize(daemonize))
+
+  /**
+   * Provide an alternative to putting all request exceptions under
+   * a "failures" stat.  Typical implementations may report any
+   * cancellations or validation errors separately so success rate
+   * considers only valid non cancelled requests.
+   *
+   * @param exceptionStatsHandler function to record failure details.
+   */
+  def exceptionCategorizer(exceptionStatsHandler: stats.ExceptionStatsHandler): This =
+    configured(ExceptionStatsHandler(exceptionStatsHandler))
 
   /* Builder methods follow */
 
@@ -420,7 +444,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def build(serviceFactory: ServiceFactory[Req, Rep])(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
       ServerConfigEvidence[HasCodec, HasBindTo, HasName]
-  ): Server = new Server {
+  ): Server = {
+
     val Label(label) = params[Label]
     val BindTo(addr) = params[BindTo]
     val Logger(logger) = params[Logger]
@@ -436,22 +461,26 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
     val listeningServer = mk(serverParams).serve(addr, serviceFactory)
 
-    val closed = new AtomicBoolean(false)
+    new Server with CloseAwaitably {
 
-    if (!daemon) ExitGuard.guard()
-    def close(deadline: Time): Future[Unit] = {
-      if (!closed.compareAndSet(false, true)) {
-        logger.log(Level.WARNING, "Server closed multiple times!",
-          new Exception/*stack trace please*/)
-        return Future.exception(new IllegalStateException)
+      val closed = new AtomicBoolean(false)
+
+      val exitGuard = if (!daemon) Some(ExitGuard.guard(s"server for '$label'")) else None
+
+      override protected def closeServer(deadline: Time): Future[Unit] = closeAwaitably {
+        if (!closed.compareAndSet(false, true)) {
+          logger.log(Level.WARNING, "Server closed multiple times!",
+            new Exception /*stack trace please*/)
+          return Future.exception(new IllegalStateException)
+        }
+
+        listeningServer.close(deadline) ensure {
+          exitGuard.foreach(_.unguard())
+        }
       }
 
-      listeningServer.close(deadline) ensure {
-        if (!daemon) ExitGuard.unguard()
-      }
+      override def boundAddress: SocketAddress = listeningServer.boundAddress
     }
-
-    val localAddress = listeningServer.boundAddress
   }
 
   @deprecated("Used for ABI compat", "5.0.1")

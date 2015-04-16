@@ -1,22 +1,22 @@
 package com.twitter.finagle.netty3
 
 import com.twitter.finagle.channel.{ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler}
-import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.httpproxy.HttpConnectHandler
 import com.twitter.finagle.socks.{SocksProxyFlags, SocksConnectHandler, Unauthenticated, UsernamePassAuthenticationSetting}
 import com.twitter.finagle.ssl.{Engine, SslConnectHandler}
-import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.{ChannelTransport, Transport}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{Stack, Service, ServiceFactory, WriteException, CancelledConnectionException}
-import com.twitter.util.TimeConversions._
+import com.twitter.finagle.{Stack, WriteException, CancelledConnectionException}
 import com.twitter.util.{Future, Promise, Duration, NonFatal, Stopwatch}
 import java.net.{InetSocketAddress, SocketAddress}
-import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.TimeUnit
 import java.util.IdentityHashMap
+import java.util.logging.Level
 import org.jboss.netty.channel.ChannelHandler
-import org.jboss.netty.channel.socket.nio.{NioWorkerPool, NioClientSocketChannelFactory}
+import org.jboss.netty.channel.socket.ChannelRunnableWrapper
+import org.jboss.netty.channel.socket.nio.{NioSocketChannel, NioClientSocketChannelFactory}
 import org.jboss.netty.channel.{ChannelFactory => NettyChannelFactory, _}
 import org.jboss.netty.handler.timeout.IdleStateHandler
 import scala.collection.JavaConverters._
@@ -74,7 +74,6 @@ private[netty3] class ChannelConnector[In, Out](
 
 object Netty3Transporter {
   import com.twitter.finagle.param._
-  import param._
 
   val defaultChannelOptions: Map[String, Object] = Map(
     "tcpNoDelay" -> java.lang.Boolean.TRUE,
@@ -91,18 +90,75 @@ object Netty3Transporter {
    * A [[com.twitter.finagle.Stack.Param]] used to configure a netty3
    * ChannelFactory.
    */
-  case class ChannelFactory(cf: NettyChannelFactory)
-  implicit object ChannelFactory extends Stack.Param[ChannelFactory] {
-    val default = ChannelFactory(channelFactory)
+  case class ChannelFactory(cf: NettyChannelFactory) {
+    def mk(): (ChannelFactory, Stack.Param[ChannelFactory]) =
+      (this, ChannelFactory.param)
+  }
+  object ChannelFactory {
+    implicit val param = Stack.Param(ChannelFactory(channelFactory))
   }
 
   /**
    * A [[com.twitter.finagle.Stack.Param]] used to configure a transport
    * factory, a function from a netty3 channel to a finagle Transport.
    */
-  case class TransportFactory(newTransport: Channel => Transport[Any, Any])
-  implicit object TransportFactory extends Stack.Param[TransportFactory] {
-    val default = TransportFactory(new ChannelTransport(_))
+  case class TransportFactory(newTransport: Channel => Transport[Any, Any]) {
+    def mk(): (TransportFactory, Stack.Param[TransportFactory]) =
+      (this, TransportFactory.param)
+  }
+  object TransportFactory {
+    implicit val param = Stack.Param(TransportFactory(new ChannelTransport(_)))
+  }
+
+  /**
+   * Constructs a `Netty3Transporter` given a netty3 `ChannelPipelineFactory`
+   * `Stack.Params`.
+   */
+  private[netty3] def make[In, Out](
+    pipelineFactory: ChannelPipelineFactory,
+    params: Stack.Params
+  ): Netty3Transporter[In, Out] = {
+    val Label(label) = params[Label]
+    val Logger(logger) = params[Logger]
+    // transport and transporter params
+    val ChannelFactory(cf) = params[ChannelFactory]
+    val TransportFactory(newTransport) = params[TransportFactory]
+    val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
+    val LatencyCompensation.Compensation(compensation) = params[LatencyCompensation.Compensation]
+    val Transporter.TLSHostname(tlsHostname) = params[Transporter.TLSHostname]
+    val Transporter.HttpProxy(httpProxy) = params[Transporter.HttpProxy]
+    val Transporter.SocksProxy(socksProxy, credentials) = params[Transporter.SocksProxy]
+    val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
+    val Transport.TLSClientEngine(tls) = params[Transport.TLSClientEngine]
+    val Transport.Liveness(readerTimeout, writerTimeout, keepAlive) = params[Transport.Liveness]
+    val snooper = params[Transport.Verbose] match {
+      case Transport.Verbose(true) => Some(ChannelSnooper(label)(logger.log(Level.INFO, _, _)))
+      case _ => None
+    }
+
+    Netty3Transporter[In, Out](
+      label,
+      pipelineFactory,
+      newChannel = cf.newChannel(_),
+      newTransport = (ch: Channel) => newTransport(ch).cast[In, Out],
+      tlsConfig = tls map { case engine => Netty3TransporterTLSConfig(engine, tlsHostname) },
+      httpProxy = httpProxy,
+      socksProxy = socksProxy,
+      socksUsernameAndPassword = credentials,
+      channelReaderTimeout = readerTimeout,
+      channelWriterTimeout = writerTimeout,
+      channelSnooper = snooper,
+      channelOptions = {
+        val o = new scala.collection.mutable.MapBuilder[String, Object, Map[String, Object]](Map())
+        o += "connectTimeoutMillis" -> ((connectTimeout + compensation).inMilliseconds: java.lang.Long)
+        o += "tcpNoDelay" -> java.lang.Boolean.TRUE
+        o += "reuseAddress" -> java.lang.Boolean.TRUE
+        for (v <- keepAlive) o += "keepAlive" -> (v: java.lang.Boolean)
+        for (s <- sendBufSize) o += "sendBufferSize" -> (s: java.lang.Integer)
+        for (s <- recvBufSize) o += "receiveBufferSize" -> (s: java.lang.Integer)
+        o.result()
+      }
+    )
   }
 
   /**
@@ -118,42 +174,9 @@ object Netty3Transporter {
     pipelineFactory: ChannelPipelineFactory,
     params: Stack.Params
   ): Transporter[In, Out] = {
-    val Label(label) = params[Label]
     val Stats(stats) = params[Stats]
+    val transporter = make[In, Out](pipelineFactory, params)
 
-    // transport and transporter params
-    val ChannelFactory(cf) = params[ChannelFactory]
-    val TransportFactory(newTransport) = params[TransportFactory]
-    val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
-    val Transporter.TLSHostname(tlsHostname) = params[Transporter.TLSHostname]
-    val Transporter.HttpProxy(httpProxy) = params[Transporter.HttpProxy]
-    val Transporter.SocksProxy(socksProxy, credentials) = params[Transporter.SocksProxy]
-    val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
-    val Transport.TLSClientEngine(tls) = params[Transport.TLSClientEngine]
-    val Transport.Liveness(readerTimeout, writerTimeout, keepAlive) = params[Transport.Liveness]
-
-    val transporter = Netty3Transporter[In, Out](
-      label,
-      pipelineFactory,
-      newChannel = cf.newChannel(_),
-      newTransport = (ch: Channel) => newTransport(ch).cast[In, Out],
-      tlsConfig = tls map { case engine => Netty3TransporterTLSConfig(engine, tlsHostname) },
-      httpProxy = httpProxy,
-      socksProxy = socksProxy,
-      socksUsernameAndPassword = credentials,
-      channelReaderTimeout = readerTimeout,
-      channelWriterTimeout = writerTimeout,
-      channelOptions = {
-        val o = new scala.collection.mutable.MapBuilder[String, Object, Map[String, Object]](Map())
-        o += "connectTimeoutMillis" -> (connectTimeout.inMilliseconds: java.lang.Long)
-        o += "tcpNoDelay" -> java.lang.Boolean.TRUE
-        o += "reuseAddress" -> java.lang.Boolean.TRUE
-        for (v <- keepAlive) o += "keepAlive" -> (v: java.lang.Boolean)
-        for (s <- sendBufSize) o += "sendBufferSize" -> (s: java.lang.Integer)
-        for (s <- recvBufSize) o += "receiveBufferSize" -> (s: java.lang.Integer)
-        o.result()
-      }
-    )
     new Transporter[In, Out] {
       def apply(sa: SocketAddress): Future[Transport[In, Out]] =
         transporter(sa, stats)
@@ -171,6 +194,26 @@ object Netty3Transporter {
  */
 case class Netty3TransporterTLSConfig(
   newEngine: SocketAddress => Engine, verifyHost: Option[String])
+
+/**
+ * A [[ChannelFutureListener]] instance that fires "channelClosed" upstream event to the
+ * pipeline. It maintains events in order by running the task in the I/O thread.
+ */
+private[netty3] object FireChannelClosedLater extends ChannelFutureListener {
+  override def operationComplete(future: ChannelFuture): Unit = {
+    future.getChannel match {
+      case nioChannel: NioSocketChannel =>
+        val channelClosed = new ChannelRunnableWrapper(nioChannel, new Runnable() {
+          override def run(): Unit =
+            Channels.fireChannelClosed(nioChannel)
+        })
+        nioChannel.getWorker.executeInIoThread(channelClosed, /* alwaysAsync */ true)
+
+      case channel =>
+        Channels.fireChannelClosedLater(channel)
+    }
+ }
+}
 
 /**
  * A transporter for netty3 which, given an endpoint name (socket
@@ -232,7 +275,10 @@ case class Netty3Transporter[In, Out](
     statsHandlers.get(statsReceiver)
   }
 
-  private[netty3] def newPipeline(addr: SocketAddress, statsReceiver: StatsReceiver) = {
+  private[netty3] def newPipeline(
+    addr: SocketAddress,
+    statsReceiver: StatsReceiver
+  ): ChannelPipeline = {
     val pipeline = pipelineFactory.getPipeline()
 
     pipeline.addFirst("channelStatsHandler", channelStatsHandler(statsReceiver))
@@ -240,15 +286,14 @@ case class Netty3Transporter[In, Out](
       new ChannelRequestStatsHandler(statsReceiver)
     )
 
-    if (channelReaderTimeout < Duration.Top
-      || channelWriterTimeout < Duration.Top) {
+    if (channelReaderTimeout.isFinite || channelWriterTimeout.isFinite) {
       val rms =
-        if (channelReaderTimeout < Duration.Top)
+        if (channelReaderTimeout.isFinite)
           channelReaderTimeout.inMilliseconds
         else
           0L
       val wms =
-        if (channelWriterTimeout < Duration.Top)
+        if (channelWriterTimeout.isFinite)
           channelWriterTimeout.inMilliseconds
         else
           0L
@@ -264,17 +309,33 @@ case class Netty3Transporter[In, Out](
       val engine = newEngine(addr)
       engine.self.setUseClientMode(true)
       engine.self.setEnableSessionCreation(true)
-      val sslHandler = new SslHandler(engine.self)
-      val verifier = verifyHost map {
-        SslConnectHandler.sessionHostnameVerifier(_) _
-      } getOrElse { Function.const(None) _ }
 
-      pipeline.addFirst("sslConnect", new SslConnectHandler(sslHandler, verifier))
+      val verifier = verifyHost.map(SslConnectHandler.sessionHostnameVerifier).getOrElse {
+        Function.const(None) _
+      }
+
+      val sslHandler = new SslHandler(engine.self)
+      val sslConnectHandler = new SslConnectHandler(sslHandler, verifier)
+
+      pipeline.addFirst("sslConnect", sslConnectHandler)
       pipeline.addFirst("ssl", sslHandler)
+
+      // We should close the channel if the remote peer closed TLS session [1] (i.e., sent "close_notify").
+      // While it's possible to restart [2] the TLS session we decided to close it instead, since this
+      // approach is safe and fits well into the Finagle infrastructure. Rather than tolerating the errors
+      // on the transport level, we fail (close the channel) instead and propagate the exception to the
+      // higher level (load balancing, connection pooling, etc.), so it can react on the failure.
+      //
+      // In order to close the channel, we simply fire the upstream "channelClosed" event in the pipeline.
+      // To maintain events in order, the upstream event should be fired in the I/O thread.
+      //
+      // [1]: https://github.com/netty/netty/issues/137
+      // [2]: https://github.com/netty/netty/blob/3.10/src/main/java/org/jboss/netty/handler/ssl/SslHandler.java#L119
+      sslHandler.getSSLEngineInboundCloseFuture.addListener(FireChannelClosedLater)
     }
 
     (socksProxy, addr) match {
-      case (Some(proxyAddr), (inetSockAddr : InetSocketAddress)) =>
+      case (Some(proxyAddr), inetSockAddr: InetSocketAddress) if !inetSockAddr.isUnresolved =>
         val inetAddr = inetSockAddr.getAddress
         if (!inetAddr.isLoopbackAddress && !inetAddr.isLinkLocalAddress) {
           val authentication = socksUsernameAndPassword match {
@@ -289,7 +350,7 @@ case class Netty3Transporter[In, Out](
     }
 
     (httpProxy, addr) match {
-      case (Some(proxyAddr), (inetAddr : InetSocketAddress)) =>
+      case (Some(proxyAddr), inetAddr: InetSocketAddress) if !inetAddr.isUnresolved =>
         HttpConnectHandler.addHandler(proxyAddr, inetAddr, pipeline)
       case _ =>
     }

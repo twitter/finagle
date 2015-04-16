@@ -97,12 +97,13 @@ object Balancers {
     smoothWin: Duration = 5.seconds,
     lowLoad: Double = 0.5,
     highLoad: Double = 2,
+    minAperture: Int = 1,
     maxEffort: Int = 5,
     rng: Rng = Rng.threadLocal,
     timer: Timer = DefaultTimer.twitter,
     statsReceiver: StatsReceiver = NullStatsReceiver,
     emptyException: NoBrokersAvailableException = new NoBrokersAvailableException
   ): ServiceFactory[Req, Rep] = new ApertureLoadBandBalancer(
-      activity, smoothWin, lowLoad, highLoad, maxEffort, rng,
+      activity, smoothWin, lowLoad, highLoad, minAperture, maxEffort, rng,
       timer, statsReceiver, emptyException)
 }

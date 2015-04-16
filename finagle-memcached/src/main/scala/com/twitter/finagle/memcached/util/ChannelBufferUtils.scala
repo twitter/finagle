@@ -42,7 +42,7 @@ private[finagle] object ChannelBufferUtils {
       split(FIND_SPACE, 1)
 
     def split(delimiter: String): Seq[ChannelBuffer] =
-      split(stringToChannelBufferIndexFinder(delimiter), delimiter.size)
+      split(stringToChannelBufferIndexFinder(delimiter), delimiter.length)
 
     def split(indexFinder: ChannelBufferIndexFinder, delimiterLength: Int): Seq[ChannelBuffer] = {
       val tokens = new ArrayBuffer[ChannelBuffer]
@@ -101,14 +101,13 @@ private[finagle] object ChannelBufferUtils {
   implicit def stringToChannelBufferIndexFinder(string: String): ChannelBufferIndexFinder =
     new ChannelBufferIndexFinder {
       def find(buffer: ChannelBuffer, guessedIndex: Int): Boolean = {
-        val array = string.toArray
-        var i: Int = 0
-        while (i < string.size) {
-          if (buffer.getByte(guessedIndex + i) != array(i).toByte)
+        var i = 0
+        while (i < string.length) {
+          if (buffer.getByte(guessedIndex + i) != string.charAt(i).toByte)
             return false
           i += 1
         }
-        return true
+        true
       }
     }
 }

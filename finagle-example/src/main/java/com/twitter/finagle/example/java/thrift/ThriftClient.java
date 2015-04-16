@@ -1,15 +1,23 @@
 package com.twitter.finagle.example.java.thrift;
 
+import scala.runtime.BoxedUnit;
+
 import com.twitter.finagle.Thrift;
 import com.twitter.finagle.example.thriftscala.Hello;
 import com.twitter.util.Await;
 import com.twitter.util.Function;
 import com.twitter.util.Future;
-import java.lang.Exception;
-import scala.runtime.BoxedUnit;
 
-public class ThriftClient {
-  public static void main(String args[]) throws Exception {
+public final class ThriftClient {
+
+  private ThriftClient() { }
+
+  /**
+   * Runs the example with given {@code args}.
+   *
+   * @param args the argument list
+   */
+  public static void main(String[] args) throws Exception {
     //#thriftclientapi
     Hello.FutureIface client = Thrift.newIface("localhost:8080", Hello.FutureIface.class);
     Future<String> response = client.hi().onSuccess(new Function<String, BoxedUnit>() {

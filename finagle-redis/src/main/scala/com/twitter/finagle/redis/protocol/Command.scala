@@ -82,6 +82,7 @@ object Commands {
   val BRANGE            = "BRANGE"
 
   // Miscellaneous
+  val FLUSHALL          = "FLUSHALL"
   val FLUSHDB           = "FLUSHDB"
   val SELECT            = "SELECT"
   val AUTH              = "AUTH"
@@ -134,6 +135,11 @@ object Commands {
   val MULTI             = "MULTI"
   val UNWATCH           = "UNWATCH"
   val WATCH             = "WATCH"
+
+  // HyperLogLogs
+  val PFADD             = "PFADD"
+  val PFCOUNT           = "PFCOUNT"
+  val PFMERGE           = "PFMERGE"
 
   val commandMap: Map[String, Function1[List[Array[Byte]],Command]] = Map(
     // key commands
@@ -203,6 +209,7 @@ object Commands {
     BGET              -> {BGet(_)},
 
     // miscellaneous
+    FLUSHALL          -> {_ => FlushAll},
     FLUSHDB           -> {_ => FlushDB},
     SELECT            -> {Select(_)},
     AUTH              -> {Auth(_)},
@@ -253,7 +260,12 @@ object Commands {
     EXEC              -> {_ => Exec},
     MULTI             -> {_ => Multi},
     UNWATCH           -> {_ => UnWatch},
-    WATCH             -> {Watch(_)}
+    WATCH             -> {Watch(_)},
+
+    // HyperLogLogs
+    PFADD             -> {PFAdd(_)},
+    PFCOUNT           -> {PFCount(_)},
+    PFMERGE           -> {PFMerge(_)}
 
   )
 
@@ -341,6 +353,7 @@ object CommandBytes {
   val BRANGE            = StringToChannelBuffer("BRANGE")
 
   // Miscellaneous
+  val FLUSHALL          = StringToChannelBuffer("FLUSHALL")
   val FLUSHDB           = StringToChannelBuffer("FLUSHDB")
   val SELECT            = StringToChannelBuffer("SELECT")
   val AUTH              = StringToChannelBuffer("AUTH")
@@ -392,6 +405,11 @@ object CommandBytes {
   val MULTI             = StringToChannelBuffer("MULTI")
   val UNWATCH           = StringToChannelBuffer("UNWATCH")
   val WATCH             = StringToChannelBuffer("WATCH")
+
+  // HyperLogLogs
+  val PFADD             = StringToChannelBuffer("PFADD")
+  val PFCOUNT           = StringToChannelBuffer("PFCOUNT")
+  val PFMERGE           = StringToChannelBuffer("PFMERGE")
 }
 
 

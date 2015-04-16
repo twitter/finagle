@@ -1,5 +1,7 @@
 package com.twitter.finagle
 
+import com.twitter.conversions.time._
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Await, Future}
 import scala.math.Ordering
 
@@ -23,11 +25,13 @@ sealed trait Status
  * (An [[scala.math.Ordering]] is defined in these terms.)
  */
 object Status {
+  private implicit val timer = DefaultTimer.twitter
+
   class ClosedException extends Exception("Status was Closed; expected Open")
 
   implicit val StatusOrdering: Ordering[Status] = Ordering.by({
     case Open => 3
-    case Busy(_) => 2
+    case Busy => 2
     case Closed => 1
   })
 
@@ -35,46 +39,62 @@ object Status {
    * A composite status indicating the least healthy of the two.
    */
   def worst(left: Status, right: Status): Status =
-    (left, right) match {
-      case (Busy(f1), Busy(f2)) => Busy(f1.join(f2).unit)
-      case (left, right) => StatusOrdering.min(left, right)
-    }
+    StatusOrdering.min(left, right)
 
   /**
    * A composite status indicating the most healthy of the two.   
    */
   def best(left: Status, right: Status): Status =
-    (left, right) match {
-      case (Busy(f1), Busy(f2)) => Busy(f1.or(f2))
-      case (left, right) => StatusOrdering.max(left, right)
-    }
-  
+    StatusOrdering.max(left, right)
+
   /**
    * The status representing the worst of the given statuses
    * extracted by `status` on `ts`.
+   *
+   * @note this may terminate early so don't rely on this method
+   *       for running side effects on `ts`
    */
-  def worstOf[T](ts: Iterable[T], status: T => Status): Status =
-    ts.foldLeft(Open: Status)((a, e) => worst(a, status(e)))
+  def worstOf[T](ts: Iterable[T], status: T => Status): Status = {
+    var worst: Status = Status.Open
+    val itr = ts.iterator
+    while (itr.hasNext && worst != Status.Closed)
+      worst = Status.worst(worst, status(itr.next()))
+    worst
+  }
 
   /**
    * The status representing the best of the given statuses
    * extracted by `status` on `ts`.
+   *
+   * @note this may terminate early so don't rely on this method
+   *       for running side effects on `ts`
    */
-  def bestOf[T](ts: Iterable[T], status: T => Status): Status =
-    ts.foldLeft(Closed: Status)((a, e) => best(a, status(e)))
+  def bestOf[T](ts: Iterable[T], status: T => Status): Status = {
+    var best: Status = Status.Closed
+    val itr = ts.iterator
+    while (itr.hasNext && best != Status.Open)
+      best = Status.best(best, status(itr.next()))
+    best
+  }
 
   /**
    * Open returns a [[com.twitter.util.Future]] that is satisfied
    * when the status returned by `get` is [[Open]]. It returns
    * an exceptional [[com.twitter.util.Future]] should it be
    * [[Closed]].
+   *
+   * `whenOpen` polls the underlying status, using 
+   * exponential backoffs from 1ms to around 1s.
    */
-  def whenOpen(get: => Status): Future[Unit] = 
-    get match {
+  def whenOpen(get: => Status): Future[Unit] = {
+    def go(n: Int): Future[Unit] = get match {
       case Open => Future.Done
-      case Busy(p) => p before whenOpen(get)
       case Closed => Future.exception(new ClosedException)
+      case Busy => Future.sleep((1<<n).milliseconds) before go(math.min(n+1, 10))
     }
+
+    go(0)
+  }
   
   /**
    * A blocking version of [[whenOpen]]; this method returns 
@@ -96,11 +116,9 @@ object Status {
   /**
    * A busy [[Service]] or [[ServiceFactory]] is transiently
    * unavailable. A Busy [[Service]] or [[ServiceFactory]] can be
-   * used, but may not provide service immediately. Busy carries a
-   * [[com.twitter.util.Future]] that is used as a hint for when the
-   * [[Service]] or [[ServiceFactory]] becomes idle again.
+   * used, but may not provide service immediately. 
    */
-  case class Busy(until: Future[Unit]) extends Status
+  case object Busy extends Status
 
   /**
    * The [[Service]] or [[ServiceFactory]] is closed. It will never

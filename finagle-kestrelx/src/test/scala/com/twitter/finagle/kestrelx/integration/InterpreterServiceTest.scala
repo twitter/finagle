@@ -21,7 +21,7 @@ class InterpreterServiceTest extends FunSuite {
 
   def exec(fn: (Server, Service[Command, Response]) => Unit) {
     val server: Server = new Server(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-    val address: InetSocketAddress = server.start().localAddress.asInstanceOf[InetSocketAddress]
+    val address: InetSocketAddress = server.start().boundAddress.asInstanceOf[InetSocketAddress]
     val client: Service[Command, Response] = ClientBuilder()
       .hosts(address)
       .codec(Kestrel())

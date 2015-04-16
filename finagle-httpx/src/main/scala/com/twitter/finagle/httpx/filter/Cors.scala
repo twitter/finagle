@@ -36,7 +36,7 @@ object Cors {
     allowsOrigin: String => Option[String],
     allowsMethods: String => Option[Seq[String]],
     allowsHeaders: Seq[String] => Option[Seq[String]],
-    exposedHeaders: Seq[String] = Seq.empty,
+    exposedHeaders: Seq[String] = Nil,
     supportsCredentials: Boolean = false,
     maxAge: Option[Duration] = None)
 

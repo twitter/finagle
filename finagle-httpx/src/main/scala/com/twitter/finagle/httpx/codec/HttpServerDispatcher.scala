@@ -7,10 +7,9 @@ import com.twitter.finagle.httpx.netty.Bijections._
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.stats.{StatsReceiver, DefaultStatsReceiver, RollupStatsReceiver}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.Throwables
 import com.twitter.io.{Reader, Buf, BufReader}
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Promise, Throw, Return, NonFatal}
+import com.twitter.util.{Future, NonFatal, Promise, Return, Throw, Throwables}
 import java.net.InetSocketAddress
 import org.jboss.netty.handler.codec.frame.TooLongFrameException
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpHeaders}
@@ -65,26 +64,21 @@ class HttpServerDispatcher(
       Future.value(response)
 
     case reqIn: HttpRequest =>
-      val req = new Request {
-        val httpRequest = reqIn
-        override val httpMessage = reqIn
-        lazy val remoteSocketAddress = trans.remoteAddress match {
-          case ia: InetSocketAddress => ia
-          case _ => new InetSocketAddress(0)
-        }
-
-        override val reader =
-          if (reqIn.isChunked) {
-            val coll = Transport.collate(trans, readChunk)
-            coll.proxyTo(eos)
-            coll: Reader
-          } else {
-            eos.setDone()
-            BufReader(ChannelBufferBuf.Owned(reqIn.getContent))
-          }
-
+      val reader = if (reqIn.isChunked) {
+        val coll = Transport.collate(trans, readChunk)
+        coll.proxyTo(eos)
+        coll: Reader
+      } else {
+        eos.setDone()
+        BufReader(ChannelBufferBuf.Owned(reqIn.getContent))
       }
 
+      val addr = trans.remoteAddress match {
+        case ia: InetSocketAddress => ia
+        case _ => new InetSocketAddress(0)
+      }
+
+      val req = Request(reqIn, reader, addr)
       service(req)
 
     case invalid =>
@@ -105,15 +99,19 @@ class HttpServerDispatcher(
       val p = new Promise[Unit]
       val f = trans.write(from[Response, HttpResponse](rep)) before
         streamChunks(trans, rep.reader)
+      f.proxyTo(p)
       // This awkwardness is unfortunate but necessary for now as you may be
       // interrupted in the middle of a write, or when there otherwise isn’t
       // an outstanding read (e.g. read-write race).
-      p.become(f onFailure { case t: Throwable =>
+      f.onFailure { t =>
         Logger.get(this.getClass.getName).debug(t, "Failed mid-stream. Terminating stream, closing connection")
         failureReceiver.counter(Throwables.mkString(t): _*).incr()
         rep.reader.discard()
-      })
-      p setInterruptHandler { case intr => rep.reader.discard() }
+      }
+      p.setInterruptHandler { case intr =>
+        rep.reader.discard()
+        f.raise(intr)
+      }
       p
     } else {
       // Ensure Content-Length is set if not chunked

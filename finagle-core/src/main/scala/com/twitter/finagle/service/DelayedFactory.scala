@@ -35,7 +35,7 @@ class DelayedFactory[Req, Rep](
     p setInterruptHandler { case t: Throwable =>
       if (p.detach()) {
         q.remove(p)
-        p.setException(Failure.InterruptedBy(t))
+        p.setException(Failure.adapt(t, Failure.Interrupted))
       }
     }
     q.add(p)
@@ -60,7 +60,7 @@ class DelayedFactory[Req, Rep](
 
   override def status: Status =
     if (underlyingF.isDefined) Await.result(underlyingF).status
-    else Status.Busy(underlyingF.unit)
+    else Status.Busy
 
   private[finagle] def numWaiters(): Int = q.size()
 }

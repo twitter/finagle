@@ -6,10 +6,9 @@ import com.twitter.finagle.http._
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.stats.{StatsReceiver, DefaultStatsReceiver, RollupStatsReceiver}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.Throwables
 import com.twitter.io.{Reader, Buf, BufReader}
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Promise, Throw, Return, NonFatal}
+import com.twitter.util.{Future, Promise, Throw, Return, NonFatal, Throwables}
 import java.net.InetSocketAddress
 import org.jboss.netty.handler.codec.frame.TooLongFrameException
 import org.jboss.netty.handler.codec.http._
@@ -104,15 +103,19 @@ class HttpServerDispatcher[REQUEST <: Request](
 
         val p = new Promise[Unit]
         val f = trans.write(rep) before streamChunks(trans, rep.reader)
+        f.proxyTo(p)
         // This awkwardness is unfortunate but necessary for now as you may be
         // interrupted in the middle of a write, or when there otherwise isn’t
         // an outstanding read (e.g. read-write race).
-        p.become(f onFailure { case t: Throwable =>
+        f.onFailure { t =>
           Logger.get(this.getClass.getName).debug(t, "Failed mid-stream. Terminating stream, closing connection")
           failureReceiver.counter(Throwables.mkString(t): _*).incr()
           rep.reader.discard()
-        })
-        p setInterruptHandler { case _ => rep.reader.discard() }
+        }
+        p.setInterruptHandler { case intr =>
+          rep.reader.discard()
+          f.raise(intr)
+        }
         p
       case rep: Response =>
         // Ensure Content-Length is set if not chunked

@@ -57,6 +57,28 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
       assert(statsReceiver.counters(Seq(name)) === value.toFloat)
   }
 
+  test("balancer with empty cluster has Closed status"){
+    val emptyCluster = Group.empty[ServiceFactory[Unit, LoadedFactory]]
+    val b = new HeapBalancer[Unit, LoadedFactory](
+      Activity(emptyCluster.set map(Activity.Ok(_)))
+    )
+    assert(b.status === Status.Closed)
+  }
+
+  for(status <- Seq(Status.Closed, Status.Busy, Status.Open)) {
+    test(s"balancer with entirely $status cluster has $status status") {
+      val node = new LoadedFactory("1")
+      node._status = status
+
+      val cluster = Group.mutable[ServiceFactory[Unit, LoadedFactory]](node)
+
+      val b = new HeapBalancer[Unit, LoadedFactory](
+        Activity(cluster.set map (Activity.Ok(_)))
+      )
+      assert(b.status === status)
+    }
+  }
+
   test("least-loaded balancing") {
     val ctx = new Ctx
     import ctx._

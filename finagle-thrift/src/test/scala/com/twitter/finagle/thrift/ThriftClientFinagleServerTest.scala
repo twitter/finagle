@@ -44,7 +44,7 @@ class ThriftClientFinagleServerTest extends FunSuite with BeforeAndAfter with On
     .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
     .name("ThriftServer")
     .build(new B.Service(processor, new TBinaryProtocol.Factory()))
-  val serverAddr = server.localAddress.asInstanceOf[InetSocketAddress]
+  val serverAddr = server.boundAddress.asInstanceOf[InetSocketAddress]
 
   val (client, transport) = {
     val socket = new TSocket(serverAddr.getHostName, serverAddr.getPort, 1000/*ms*/)

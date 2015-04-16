@@ -8,14 +8,176 @@
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: `c.t.f.builder.Server` now implements `c.t.f.ListeningServer`.
+
+  * finagle-core: `c.t.f.Server.serveAndAnnounce` with a `ServiceFactory` had
+    its first argument renamed to `name` from `forum`.
+
+  * finagle-core: Add an attribute map to `c.t.f.Addr.Bound`.
+
+  * finagle-core: `c.t.f.builder.ClientConfig.FailFast` has moved to
+    `c.t.f.FailFastFactory.FailFast`.
+
+  * finagle-core: NoBrokersAvailableException now has two Dtab constructor
+    arguments, both the base and local Dtabs.
+
+  * finagle-core: `c.t.f.Failure` convenience constructors (e.g., `Failure.Cause`,
+    `Failure.Rejected`) were removed in favor of uniform flag treatment, and clean
+    separation of attributes from interpretation of those attributes.
+
+  * finagle-core: `ExitGuard` usage is now private to finagle.
+  
+  * finagle-core: `c.t.f.service.TimeoutFilter.module` is now split into 
+    `TimeoutFilter.clientModule` and `TimeoutFilter.serverModule`.
+
+  * finagle-http: deprecated methods in `c.t.f.http.HttpMessageProxy` have been removed.
+
+  * finagle-memcached / finagle-memcachedx: move TwitterCacheResolver
+    and related objects to new finagle-cacheresolver package.
+
+  * finagle-memcached / finagle-memcachedx: failureAccrual param in ReplicationClient
+    is changed from type (Int, Duration) to (Int, () => Duration), to allow flexibility
+    to config duration. Also see `markDeadFor` change in finagle-core in the "New Features"
+    section below.
+
+  * finagle-mux: `c.t.f.mux.RequestNackedException` is removed in favor of a standard
+    Failure (`c.t.f.Failure.Rejected`).
+
+  * finagle-ostrich4: Switched dependency to finagle-httpx from finagle-http.
+
+  * finagle-stats: Switched dependency to finagle-httpx from finagle-http.
+
+  * finagle-core: remove deprecated `c.t.f.builder.ClientBuilder.stack` taking a
+    `Stack.Params => Client[Req1, Rep1]`.
+
+  * finagle-memcached / finagle-memcachedx: MigrationClientTest now uses
+    ServerCnxnFactory from com.twitter.zk rather than NIOServerCnxn.Factory from
+    org.apache.zookeeper.server.
+
+  * finagle-serversets: ZkInstance in tests now uses ServerCnxnFactory from
+    com.twitter.zk rather than NIOServerCnxn.Factory from
+    org.apache.zookeeper.server.
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: `com.twitter.finagle.service.StatsFilter` no longer requires a
+    `com.twitter.finagle.stats.RollupStatsReceiver` for correct behaviour, and
+    providing one will double count failures.
+
+  * finagle-core: `com.twitter.finagle.factory.TimeoutFactory` will fail with
+    a retryable `com.twitter.finagle.Failure` when it times out.
+
+  * finagle-core: `com.twitter.finagle.pool.WatermarkPool` will fail with
+    an interrupted `com.twitter.finagle.Failure` when it is interrupted while
+    waiting or trying to establish a connection.  It has previously failed with
+    a `com.twitter.finagle.WriteException` when trying to establish a
+    connection, but it's incorrect to retry on an interruption.
+
+  * finagle-core: `com.twitter.fiangle.RetryPolicy`'s `RetryableWriteException`
+    and `WriteExceptionsOnly` will not retry on `com.twitter.finagle.Failure`s
+    that are marked `InterruptedBy`, even if they are `Retryable`.
+
+  * finagle-core: The error message provided by `c.t.f.NoBrokersAvailableException`
+    prints both the base and local Dtabs.
+
+  * finagle-core: Stats produced by `com.twitter.finagle.factory.BindingFactory`
+    are now scoped with the "namer" prefix rather than "interpreter". The total
+    latency associated with Name binding is now recorded in the "bind_latency_ms"
+    stat.
+
+  * finagle-core: The "service_creation/service_acquisition_latency_ms" stat
+    produced by `com.twitter.finagle.factory.StatsFactoryWrapper` no longer
+    includes time spent in name resolution, which is now covered by
+    "namer/bind_latency_us" as discussed above.
+
+  * finagle-core: added transit_latency_ms and deadline_budget_ms stats.
 
 Deprecations
 ~~~~~~~~~~~~
 
+  * finagle-core: `c.t.f.builder.Server.localAddress` is deprecated in favor of
+    `c.t.f.ListeningServer.boundAddress`.
+
 New Features
 ~~~~~~~~~~~~
+
+  * finagle-core: `Fail fast <https://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s>`_
+    is now `configurable <https://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6>`_
+    on Stack-based clients via the `com.twitter.finagle.FailFastFactory.FailFast` param.
+
+  * finagle-core: `com.twitter.finagle.service.StatsFilter` is now configurable with an
+    `com.twitter.finagle.stats.ExceptionStatsHandler` to customize how failures are recorded.
+
+  * finagle-core: It should be safe to match on `com.twitter.finagle.Failure.InterruptedBy`
+    to tell if a `com.twitter.util.Future` failed due to being interrupted.
+
+  * finagle-core: `markDeadFor` in c.t.f.service.FailureAccrualFactory.Param is changed from
+    Duration type to () => Duration. So it's flexible for clients to pass in a function that
+    specifies Duration. For example, c.t.f.service.FailureAccrualFactory provides a function
+    that adds perturbation in durations. Stack-based API and c.t.f.builder.ClientBuilder
+    support both types for client configuration. For example,
+
+    ::
+
+      Thrift.client.configured(FailureAccrualFactory(5, () => 1.seconds))
+      // or
+      Thrift.client.configured(new FailureAccrualFactory(5, 1.seconds)).
+
+    c.t.f.client.DefaultClient does not support Duration type in failureAccrual anymore.
+
+  * finagle-core: improved Java compatiblity for `c.t.f.Stack.Params` / `c.t.f.Stack.Parameterized`.
+
+  * finagle-core: Introduce the ability to add metadata to bound `com.twitter.finagle.Addr`s.
+
+  * finagle-core: Introduce per-address latency compensation.  Clients may be configured with
+    a 'Compensator' function that uses the client's address metadata to adjust connection and
+    request timeouts.  This can be used, for instance, to account for speed-of-light latency
+    between physical regions.
+
+  * finagle-core: Introduce per-address stats scoping.  Clients may be configured with
+    a `com.twitter.finagle.client.StatsScoping.Scoper` function that uses the client's
+    address metadata to adjust the scope of client stats. This can be used, for instance,
+    to properly scope client stats for a Name that resolves to a Union of distinct clusters.
+
+  * finagle-core: A convenient method `Client.newService(dest: String, label: String)` was added.
+
+  * finagle-core: ExitGuard now has an 'explainGuards' method to provide a human-readable
+    description of exit guards that are still active.
+
+  * finagle-http(x): Two missing params were added: `Decompression` and `CompressionLevel`. Both
+    client and server may be configured with either `configured` method or `withDecompression`/
+    `withCompressionLevel`.
+
+  * finagle-mysql: Add support for MySQL transactions.
+
+  * finagle-stats: A new HostStatsReceiver type is added and used for per host stats.
+    It is loaded through LoadService and used by the Stack-based API as a default
+    param. Per host stats can be turned on through `com.twitter.finagle.loadbalancer.perHostStats`
+    flag, and is exported to the "/admin/per_host_metrics.json" route in twitter-server.
+
+  * finagle-stats: Improved compatibility when migrating from
+    `Ostrich <https://github.com/twitter/ostrich/>`_ stats via two flags:
+    ``com.twitter.finagle.stats.useCounterDeltas=true`` and
+    ``com.twitter.finagle.stats.format=ostrich``. If these flags are both set,
+    HTTP requests to ``/admin/stats.json`` with the ``period=60`` query string
+    parameter will replicate Ostrich's behavior by computing deltas on counters
+    every minute and formatting histograms with the same labels Ostrich uses.
+
+  * finagle-memcached(x): Add `c.t.f.memcached.Memcached` which provides a Stack
+    based Memcache client that uses pipelining.
+
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-core: `c.t.f.Server.serveAndAnnounce` for a `Service` had its usage
+    of `name` and `addr` transposed.
+
+Miscellaneous Cleanup
+~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-protobuf: Move entire unused subproject to the `Finagle
+    organization on GitHub <https://github.com/finagle/finagle-protobuf>`_.
 
 
 6.24.0
@@ -38,6 +200,9 @@ Breaking API Changes
     added to `c.t.f.http.codec.HttpServerDispatcher`. In addition,
     the codecError in `c.t.f.http.BadHttpRequest` has been replaced
     with the exception thrown by the HttpServerCodec.
+
+  * finagle-httpx: Remove deprecated code, limited scope of access on internal
+    classes.
 
   * finagle-mux: `c.t.f.mux.lease.exp.WindowedByteCounter` no longer
     calls `Thread.start()` in its constructor. This should be now be
@@ -116,7 +281,6 @@ Breaking API Changes
           // Try to marshal 'body' into a trace id.
         }
       }
-
 
 
 Runtime Behavior Changes

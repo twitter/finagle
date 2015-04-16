@@ -12,13 +12,17 @@ object Sampler {
    * By giving each system a random salt, it is less likely that two
    * processes will sample the same subset of trace ids.
    */
-  private val salt = (new Random()).nextLong()
+  private val salt = new Random().nextLong()
+
+  private val SomeTrue = Some(true)
+  private val SomeFalse = Some(false)
 }
 
 /**
  * Decide if we should sample a particular trace or not.
  */
 class Sampler {
+  @volatile
   private[this] var sr = Sampler.DefaultSampleRate
 
   /**
@@ -61,7 +65,10 @@ class Sampler {
   def sampleTrace(traceId: TraceId, sampleRate: Float): Option[Boolean] = {
     traceId.sampled match {
       case None =>
-        Some(math.abs(traceId.traceId.toLong^Sampler.salt)%10000 < sampleRate*10000)
+        if (math.abs(traceId.traceId.toLong^Sampler.salt)%10000 < sampleRate*10000)
+          Sampler.SomeTrue
+        else
+          Sampler.SomeFalse
       case sample @ Some(_) =>
         sample
     }

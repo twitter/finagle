@@ -2,7 +2,7 @@ scala_library(name='testing',
   dependencies=[
     '3rdparty/jvm/mysql:mysql-connector-mxj-gpl',
     '3rdparty/jvm/mysql:mysql-connector-mxj-gpl-db-files',
-    '3rdparty:mysql-connector-java',
+    '3rdparty/jvm/mysql:mysql-connector-java',
     'finagle/finagle-mysql'
   ],
   sources=rglobs('*.scala')
@@ -10,11 +10,11 @@ scala_library(name='testing',
 
 junit_tests(name='scala',
   dependencies=[
-    '3rdparty:junit',
-    '3rdparty:mockito-all',
-    '3rdparty:netty',
-    '3rdparty:specs',
-    '3rdparty:scalatest',
+    '3rdparty/jvm/junit',
+    '3rdparty/jvm/org/mockito:mockito-all',
+    '3rdparty/jvm/io/netty',
+    '3rdparty/jvm/org/scala-tools/testing:specs',
+    '3rdparty/jvm/org/scalatest',
     ':testing',
     'util/util-core'
   ],

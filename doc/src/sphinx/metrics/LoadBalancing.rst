@@ -5,7 +5,16 @@ All Balancers
   A gauge of the number of nodes being balanced across
 
 **available**
-  A gauge of the number of *available* nodes being balanced across
+  A gauge of the number of *available* nodes as seen by the load balancer.
+  These nodes are ready to receive traffic.
+
+**busy**
+  A gauge of the number of *busy* nodes as seen by the load balancer.
+  These nodes are current unavailable for service.
+
+**closed**
+  A gauge of the number of *closed* nodes as seen by the load balancer.
+  These nodes will never be available for service.
 
 **load**
   A gauge of the total load over all nodes being balanced across

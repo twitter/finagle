@@ -18,7 +18,7 @@ import java.net.{SocketAddress, InetSocketAddress}
 
 object DefaultClient {
   private def defaultFailureAccrual(sr: StatsReceiver): ServiceFactoryWrapper =
-    FailureAccrualFactory.wrapper(sr, 5, 5.seconds)(DefaultTimer.twitter)
+    FailureAccrualFactory.wrapper(sr, 5, () => 5.seconds)(DefaultTimer.twitter)
 
   /** marker trait for uninitialized failure accrual */
   private[finagle] trait UninitializedFailureAccrual
@@ -140,6 +140,9 @@ case class DefaultClient[Req, Rep](
   }
 
   private[this] val underlying = Client()
+  
+  def newService(dest: Name, label: String) =
+    underlying.newService(dest, label)
 
   def newClient(dest: Name, label: String) =
     underlying.newClient(dest, label)

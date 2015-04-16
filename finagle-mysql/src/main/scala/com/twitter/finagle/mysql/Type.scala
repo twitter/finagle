@@ -54,14 +54,14 @@ object Type {
     case d: java.util.Date        => 12
     case s: String =>
       val bytes = s.getBytes(Charset.defaultCharset)
-      Buffer.sizeOfLen(bytes.size) + bytes.size
+      Buffer.sizeOfLen(bytes.length) + bytes.length
     case b: Array[Byte] =>
-      Buffer.sizeOfLen(b.size) + b.size
+      Buffer.sizeOfLen(b.length) + b.length
     case RawValue(_, _, true, b)  =>
-      Buffer.sizeOfLen(b.size) + b.size
+      Buffer.sizeOfLen(b.length) + b.length
     case StringValue(s) =>
       val bytes = s.getBytes(Charset.defaultCharset)
-      Buffer.sizeOfLen(bytes.size) + bytes.size
+      Buffer.sizeOfLen(bytes.length) + bytes.length
     case ByteValue(_) => 1
     case ShortValue(_) => 2
     case IntValue(_) => 4
@@ -92,9 +92,9 @@ object Type {
     case d: Double  => Double
     case null       => Null
     // blobs
-    case b: Array[Byte] if b.size <= 255         => TinyBlob
-    case b: Array[Byte] if b.size <= 65535       => Blob
-    case b: Array[Byte] if b.size <= 16777215    => MediumBlob
+    case b: Array[Byte] if b.length <= 255         => TinyBlob
+    case b: Array[Byte] if b.length <= 65535       => Blob
+    case b: Array[Byte] if b.length <= 16777215    => MediumBlob
     // Date and Time
     case t: java.sql.Timestamp => Timestamp
     case d: java.sql.Date => Date

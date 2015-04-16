@@ -11,7 +11,7 @@ scala_library(name='scala',
     '3rdparty/jvm/com/twitter/common/zookeeper:client',
     '3rdparty/jvm/com/twitter/common/zookeeper:server-set',
     '3rdparty/jvm/com/twitter/common:service-thrift',
-    '3rdparty:slf4j-api',
+    '3rdparty/jvm/org/slf4j:slf4j-api',
     'finagle/finagle-core',
     'util/util-core',
     'util/util-zk-common'

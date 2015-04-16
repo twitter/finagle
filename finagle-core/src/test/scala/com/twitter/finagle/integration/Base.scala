@@ -2,7 +2,10 @@ package com.twitter.finagle.integration
 
 import com.twitter.finagle._
 import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.client.{StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.SerialClientDispatcher
+import com.twitter.finagle.netty3.Netty3Transporter
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.transport.{ChannelTransport, Transport}
@@ -50,7 +53,7 @@ trait IntegrationBase extends FunSuite with MockitoSugar {
         }
       }
     }
-    when(codec.newClientDispatcher(any[Transport[Any, Any]])) thenAnswer {
+    when(codec.newClientDispatcher(any[Transport[Any, Any]], any[Stack.Params])) thenAnswer {
       new Answer[SerialClientDispatcher[String, String]] {
         def answer(invocation: InvocationOnMock): SerialClientDispatcher[String, String] = {
           val arg = invocation.getArguments.head
@@ -60,6 +63,8 @@ trait IntegrationBase extends FunSuite with MockitoSugar {
     }
 
     when(codec.newTraceInitializer) thenReturn TraceInitializerFilter.clientModule[String, String]
+
+    when(codec.failFastOk) thenReturn true
 
     val clientAddress = new SocketAddress {}
 
@@ -92,11 +97,39 @@ trait IntegrationBase extends FunSuite with MockitoSugar {
       .name(name)
       .codec(codecFactory)
       .channelFactory(channelFactory)
+      .daemon(true) // don't create an exit guard
       .hosts(Seq(clientAddress))
       .reportTo(statsReceiver)
       .hostConnectionLimit(1)
 
     def build() = clientBuilder.build()
     def buildFactory() = clientBuilder.buildFactory()
+
+    case class Client(
+      stack: Stack[ServiceFactory[String, String]] = StackClient.newStack[String, String],
+      params: Stack.Params = StackClient.defaultParams
+    ) extends StdStackClient[String, String, Client] {
+      def copy1(
+        stack: Stack[ServiceFactory[String, String]] = this.stack,
+        params: Stack.Params = this.params): Client = copy(stack, params)
+
+      type In = String
+      type Out = String
+
+      def newTransporter(): Transporter[String, String] = {
+        Netty3Transporter[String, String](clientPipelineFactory, params)
+      }
+
+      def newDispatcher(transport: Transport[In, Out]): Service[String, String] =
+        new SerialClientDispatcher(transport)
+    }
+
+    def client = {
+      val client = Client()
+      client.withStack(
+        // needed for ClientBuilderTest.ClientBuilderHelper
+        client.stack.replace(StackClient.Role.prepConn, (next: ServiceFactory[String, String]) =>
+          codec.prepareConnFactory(next)))
+    }
   }
 }

@@ -5,7 +5,7 @@ scala_library(name='scala',
     repo = artifactory,
   ),
   dependencies=[
-    '3rdparty:jsr166e',
+    '3rdparty/jvm/com/twitter:jsr166e',
     'finagle/finagle-core',
     'finagle/finagle-thrift',
     'util/util-core',
@@ -16,7 +16,7 @@ scala_library(name='scala',
 benchmark(name='benchmark',
   dependencies=[
     ':scala',
-    '3rdparty:caliper',
+    '3rdparty/jvm/com/google/caliper',
     'util/util-core',
   ],
   sources=rglobs('com/twitter/finagle/benchmark/*.scala')

@@ -86,7 +86,7 @@ class SocksConnectHandler(
   private[this] def writeInit(ctx: ChannelHandlerContext) {
     val buf = ChannelBuffers.dynamicBuffer(1024)
     buf.writeByte(Version5)
-    buf.writeByte(supportedTypes.size.toByte)
+    buf.writeByte(supportedTypes.length.toByte)
     buf.writeBytes(supportedTypes)
 
     write(ctx, buf)
@@ -117,7 +117,7 @@ class SocksConnectHandler(
       case _ => // unresolved host
         buf.writeByte(HostnameIndicator)
         val hostnameBytes = addr.getHostName.getBytes(Charsets.UsAscii)
-        buf.writeByte(hostnameBytes.size)
+        buf.writeByte(hostnameBytes.length)
         buf.writeBytes(hostnameBytes)
     }
 
@@ -132,11 +132,11 @@ class SocksConnectHandler(
 
     // RFC does not specify an encoding. Assume UTF8
     val usernameBytes = username.getBytes(Charsets.Utf8)
-    buf.writeByte(usernameBytes.size.toByte)
+    buf.writeByte(usernameBytes.length.toByte)
     buf.writeBytes(usernameBytes)
 
     val passBytes = pass.getBytes(Charsets.Utf8)
-    buf.writeByte(passBytes.size.toByte)
+    buf.writeByte(passBytes.length.toByte)
     buf.writeBytes(passBytes)
 
     write(ctx, buf)

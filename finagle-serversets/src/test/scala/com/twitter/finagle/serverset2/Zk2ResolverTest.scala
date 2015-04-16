@@ -3,12 +3,12 @@ package com.twitter.finagle.serverset2
 import com.twitter.common.zookeeper.ServerSetImpl
 import com.twitter.finagle.zookeeper.ZkInstance
 import com.twitter.finagle.{Addr, Resolver, Name, WeightedSocketAddress}
-import com.twitter.util.{Duration, RandomSocket, Var}
+import com.twitter.util.RandomSocket
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.Eventually
 import org.scalatest.concurrent.PatienceConfiguration
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.time.{Span, SpanSugar}
 import org.scalatest.{FunSuite, BeforeAndAfter, Tag}
 import scala.collection.JavaConverters.mapAsJavaMapConverter
@@ -53,7 +53,7 @@ class Zk2ResolverTest
   }
 
   private[this] def zk2resolve(path: String): Name =
-    Resolver.eval("zk2!"+inst.zookeeperConnectstring+"!"+path)
+    Resolver.eval("zk2!"+inst.zookeeperConnectString+"!"+path)
 
   test("end-to-end: service endpoint") {
     val Name.Bound(va) = zk2resolve("/foo/bar")

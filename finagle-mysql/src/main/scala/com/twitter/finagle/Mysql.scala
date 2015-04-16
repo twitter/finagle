@@ -1,7 +1,7 @@
 package com.twitter.finagle.exp
 
 import com.twitter.finagle._
-import com.twitter.finagle.client.{StackClient, StdStackClient, DefaultPool, Transporter}
+import com.twitter.finagle.client.{StackClient, StdStackClient, DefaultPool}
 import com.twitter.finagle.exp.mysql._
 import com.twitter.finagle.exp.mysql.transport.{MysqlTransporter, Packet}
 import com.twitter.finagle.tracing._
@@ -18,14 +18,14 @@ trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
    * destination described by `dest` with the assigned
    * `label`. The `label` is used to scope client stats.
    */
-  def newRichClient(dest: Name, label: String): mysql.Client =
+  def newRichClient(dest: Name, label: String): mysql.Client with mysql.Transactions =
     mysql.Client(newClient(dest, label))
 
   /**
    * Creates a new `RichClient` connected to the logical
    * destination described by `dest`.
    */
-  def newRichClient(dest: String): mysql.Client =
+  def newRichClient(dest: String): mysql.Client with mysql.Transactions =
     mysql.Client(newClient(dest))
 }
 
@@ -121,6 +121,9 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
 
   def newClient(dest: Name, label: String): ServiceFactory[Request, Result] =
     client.newClient(dest, label)
+
+  def newService(dest: Name, label: String): Service[Request, Result] =
+    client.newService(dest, label)
 
   /**
    * The credentials to use when authenticating a new session.

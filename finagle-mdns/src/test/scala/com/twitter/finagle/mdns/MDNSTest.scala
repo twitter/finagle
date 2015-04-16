@@ -1,14 +1,14 @@
 package com.twitter.finagle.mdns
 
 import com.twitter.finagle.{Announcer, Resolver, Addr}
-import com.twitter.util.{Await, RandomSocket, Var}
+import com.twitter.util.{Await, Var}
 import java.net.{InetSocketAddress, InetAddress, Socket}
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.concurrent.Timeouts._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.time.SpanSugar._
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.FunSuite
 
 @RunWith(classOf[JUnitRunner])
 class MdnsTest extends FunSuite with Eventually with IntegrationPatience {
@@ -42,7 +42,7 @@ class MdnsTest extends FunSuite with Eventually with IntegrationPatience {
 
       eventually(timeout(5 seconds)) {
         Var.sample(addr) match {
-          case Addr.Bound(sockaddrs) =>
+          case Addr.Bound(sockaddrs, _) =>
             assert(sockaddrs exists {
               case ia1: InetSocketAddress => ia1.getPort == ia.getPort
             })

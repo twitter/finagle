@@ -3,15 +3,16 @@ package com.twitter.finagle.thrift
 import com.twitter.conversions.time._
 import com.twitter.finagle.CodecFactory
 import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.loadbalancer.defaultBalancer
 import com.twitter.test.{AnException, B, SomeStruct}
-import com.twitter.util.{Await, Future, Promise, Return}
+import com.twitter.util.{Await, Promise, Return}
 import java.net.{ServerSocket, SocketAddress, InetAddress}
 import java.util.concurrent.CyclicBarrier
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.server.TSimpleServer
 import org.apache.thrift.transport.{TFramedTransport, TServerSocket, TTransportFactory}
 import org.junit.runner.RunWith
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
@@ -146,7 +147,9 @@ class FinagleClientThriftServerTest extends FunSuite {
       testServer.shutdown
     }
 
-    test("%s:finagle client vs. synchronous thrift server should talk to multiple servers".format(named)) {
+    // this test assumes that N requests will be evenly distributed to N hosts.
+    if (defaultBalancer() == "heap")
+    test(s"$named:finagle client vs. synchronous thrift server should talk to multiple servers") {
       val somewayPromise = new Promise[Unit]
       val NumParties = 10
       val barrier = new CyclicBarrier(NumParties)
@@ -166,7 +169,7 @@ class FinagleClientThriftServerTest extends FunSuite {
 
       {
         val futures = 0 until NumParties map { _ => client.multiply(1, 2) }
-        val resolved = futures map(Await.result(_, 5.seconds))
+        val resolved = futures map (Await.result(_, 5.seconds))
         resolved foreach { r => assert(r === (3)) }
       }
 

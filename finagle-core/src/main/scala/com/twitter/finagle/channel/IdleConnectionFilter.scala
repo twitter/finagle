@@ -23,9 +23,12 @@ object IdleConnectionFilter {
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.channel.IdleConnectionFilter]].
    */
-  case class Param(thres: Option[OpenConnectionsThresholds])
-  implicit object Param extends Stack.Param[Param] {
-    val default = Param(None)
+  case class Param(thres: Option[OpenConnectionsThresholds]) {
+    def mk(): (Param, Stack.Param[Param]) =
+      (this, Param.param)
+  }
+  object Param {
+    implicit val param = Stack.Param(Param(None))
   }
 
   /**

@@ -36,8 +36,11 @@ object Listener {
    * @param value An option indicating the backlog size. If None,
    * the implementation default is used.
    */
-  case class Backlog(value: Option[Int])
-  implicit object Backlog extends Stack.Param[Backlog] {
-    val default = Backlog(None)
+  case class Backlog(value: Option[Int]) {
+    def mk(): (Backlog, Stack.Param[Backlog]) =
+      (this, Backlog.param)
+  }
+  object Backlog {
+    implicit val param = Stack.Param(Backlog(None))
   }
 }

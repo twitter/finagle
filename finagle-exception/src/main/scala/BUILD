@@ -7,7 +7,7 @@ scala_library(name='scala',
   dependencies=[
     '3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind',
     '3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala',
-    '3rdparty:thrift-0.5.0',
+    '3rdparty/jvm/org/apache/thrift:thrift-0.5.0',
     'finagle/finagle-core',
     'finagle/finagle-thrift',
     'util/util-app',

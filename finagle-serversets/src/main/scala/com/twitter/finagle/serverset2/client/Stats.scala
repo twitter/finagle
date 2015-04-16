@@ -2,21 +2,21 @@ package com.twitter.finagle.serverset2.client
 
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.Buf
-import com.twitter.util.{Stopwatch, Duration, Future, Time}
+import com.twitter.util._
 
 private[serverset2] trait StatsClient extends ZooKeeperClient {
   sealed trait StatFilter {
     val name: String
-    lazy val failure = stats.counter("%s_failures".format(name))
-    lazy val latency = stats.stat("%s_latency_ms".format(name))
-    lazy val success = stats.counter("%s_successes".format(name))
+    lazy val failure = stats.counter(s"${name}_failures")
+    lazy val latency = stats.stat(s"${name}_latency_ms")
+    lazy val success = stats.counter(s"${name}_successes")
 
     def apply[T](result: Future[T]): Future[T] = {
-      val elapsed = Stopwatch.start()
-      result respond { rv =>
-        if (rv.isReturn) success.incr()
-        else failure.incr()
-        latency.add(elapsed().inMilliseconds)
+      stats.timeFuture(s"${name}_latency_ms")(result).onSuccess { _ =>
+        success.incr()
+      }.onFailure {
+        case ke: KeeperException => stats.counter(ke.name).incr()
+        case _ => failure.incr()
       }
       result
     }
@@ -47,7 +47,7 @@ private[serverset2] trait StatsClient extends ZooKeeperClient {
 
   def addAuthInfo(scheme: String, auth: Buf): Future[Unit] = underlying.addAuthInfo(scheme, auth)
   def close(deadline: Time): Future[Unit] = underlying.close()
-  def getEphemerals(): Future[Seq[String]] = underlying.getEphemerals()
+  def getEphemerals(): Future[Seq[String]] = EphemeralFilter(underlying.getEphemerals())
   def sessionId: Long = underlying.sessionId
   def sessionPasswd: Buf = underlying.sessionPasswd
   def sessionTimeout: Duration = underlying.sessionTimeout
@@ -100,18 +100,35 @@ private[serverset2] trait StatsRWMulti extends ZooKeeperRWMulti with StatsReader
   protected val underlying: ZooKeeperRWMulti
 }
 
-private[serverset2] trait SessionStats {
+private[serverset2] trait EventStats {
   protected val stats: StatsReceiver
 
-  protected def SessionStateFilter(state: SessionState): SessionState = {
-    state match {
-      case SessionState.AuthFailed => stats.counter("session_auth_failures").incr()
-      case SessionState.SyncConnected => stats.counter("session_connects").incr()
-      case SessionState.ConnectedReadOnly => stats.counter("session_connects_readonly").incr()
-      case SessionState.Disconnected => stats.counter("session_disconnects").incr()
-      case SessionState.Expired => stats.counter("session_expirations").incr()
-      case _ => Unit
+  protected def EventFilter(event: NodeEvent): NodeEvent = {
+    stats.counter(event.name).incr()
+    event
+  }
+}
+
+object SessionStats {
+  def watcher(
+    underlying: Var[WatchState],
+    statsReceiver: StatsReceiver,
+    interval: Duration,
+    timer: Timer
+  ) = Var.async[WatchState](WatchState.Pending) { v =>
+
+    val stateTracker = new StateTracker(statsReceiver, interval, timer)
+
+    underlying.changes respond { w: WatchState =>
+      w match {
+        case WatchState.SessionState(newState) =>
+          stateTracker.transition(newState)
+          statsReceiver.counter(newState.name).incr()
+        case _ => ()
+      }
+      v() = w
     }
-    state
+
+    Closable.all(stateTracker)
   }
 }

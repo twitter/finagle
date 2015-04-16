@@ -51,22 +51,13 @@ class HttpClientDispatcher(trans: Transport[Any, Any])
         // 2. Drain the Transport into Response body.
         trans.read() flatMap {
           case res: HttpResponse if !res.isChunked =>
-            val response = new Response {
-              final val httpResponse = res
-              override val reader = BufReader(ChannelBufferBuf.Owned(res.getContent))
-            }
-
+            val response = Response(res, BufReader(ChannelBufferBuf.Owned(res.getContent)))
             p.updateIfEmpty(Return(response))
             Future.Done
 
           case res: HttpResponse =>
             val coll = Transport.collate(trans, readChunk)
-
-            p.updateIfEmpty(Return(new Response {
-              final val httpResponse = res
-              override val reader = coll
-            }))
-
+            p.updateIfEmpty(Return(Response(res, coll)))
             coll
 
           case invalid =>

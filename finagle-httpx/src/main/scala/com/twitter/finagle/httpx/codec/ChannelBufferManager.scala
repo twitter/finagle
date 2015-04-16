@@ -62,6 +62,7 @@ class ChannelBufferUsageTracker(
   }
 }
 
+private[httpx]
 class ChannelBufferManager(usageTracker: ChannelBufferUsageTracker)
   extends SimpleChannelHandler
 {

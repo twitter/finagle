@@ -1,0 +1,8 @@
+This is a transitional package to support the migration to Netty4.
+It separates the duplicated TwitterCacheResolver from finagle-memcached
+and finagle-memcachedx.
+
+Once the Netty4 migration is complete and we again have only one
+implementation of finagle-memcached this package can be deleted and
+the TwitterCacheResolver moved back into the unified finagle-memcached
+package.

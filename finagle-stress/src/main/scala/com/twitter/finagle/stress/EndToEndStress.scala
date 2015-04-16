@@ -75,7 +75,7 @@ object EndToEndStress {
     val elapsed = Stopwatch.start()
 
     val server = buildServer()
-    val client = buildClient(concurrency, server.localAddress)
+    val client = buildClient(concurrency, server.boundAddress)
 
     DefaultTimer.twitter.schedule(10.seconds) {
       println("@@ %ds".format(elapsed().inSeconds))

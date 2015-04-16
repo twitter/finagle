@@ -37,6 +37,7 @@ class Client(service: Service[Command, Reply])
   with Lists
   with Sets
   with BtreeSortedSetCommands
+  with HyperLogLogs
 
 /**
  * Connects to a single Redis host
@@ -62,6 +63,14 @@ class BaseClient(service: Service[Command, Reply]) {
     doRequest(Info(section)) {
       case BulkReply(message) => Future.value(Some(message))
       case EmptyBulkReply() => Future.value(None)
+    }
+
+  /**
+   * Deletes all keys in all databases
+   */
+  def flushAll(): Future[Unit] =
+    doRequest(FlushAll) {
+      case StatusReply(_) => Future.Unit
     }
 
   /**

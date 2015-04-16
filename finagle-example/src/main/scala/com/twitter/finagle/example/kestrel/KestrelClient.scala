@@ -2,9 +2,9 @@ package com.twitter.finagle.example.kestrel
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.kestrel.protocol.Kestrel
-import com.twitter.finagle.kestrel.{ReadHandle, Client}
-import com.twitter.io.Charsets
+import com.twitter.finagle.kestrelx.protocol.Kestrel
+import com.twitter.finagle.kestrelx.{ReadHandle, Client}
+import com.twitter.io.{Buf, Charsets}
 import com.twitter.util.JavaTimer
 import com.twitter.finagle.service.Backoff
 import java.util.concurrent.atomic.AtomicBoolean
@@ -53,7 +53,8 @@ object KestrelClient {
     // Attach an async message handler that prints the messages to stdout
     readHandle.messages foreach { msg =>
       try {
-        println(msg.bytes.toString(Charsets.Utf8))
+        val Buf.Utf8(str) = msg.bytes 
+        println(str)
       } finally {
         msg.ack.sync() // if we don't do this, no more msgs will come to us
       }

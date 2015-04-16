@@ -28,6 +28,18 @@ object ThriftClientBufferedCodec {
    */
   def apply() = new ThriftClientBufferedCodecFactory
 
+  /**
+   * Helpful from Java.
+   */
+  def get(): ThriftClientBufferedCodecFactory = {
+    // This is here to avoid a pitfall from java. Because the ThriftClientBufferedCodec
+    // class extends from ThriftClientFramedCodec and scala generates static forwarding
+    // methods. Without this, if you call `ThriftClientBufferedCodec.get()` from java,
+    // it would end up calling through to `ThriftClientFramedCodec.get()` which would
+    // be quite a surprise and the wrong type. Ick.
+    apply()
+  }
+
   def apply(protocolFactory: TProtocolFactory) =
     new ThriftClientBufferedCodecFactory(protocolFactory)
 

@@ -83,7 +83,12 @@ case class Http(
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
           val pipeline = Channels.pipeline()
-          pipeline.addLast("httpCodec", new HttpClientCodec())
+          val maxInitialLineLengthInBytes = _maxInitialLineLength.inBytes.toInt
+          val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt
+          val maxChunkSize = 8192
+          pipeline.addLast(
+            "httpCodec", new HttpClientCodec(
+              maxInitialLineLengthInBytes, maxHeaderSizeInBytes, maxChunkSize))
           pipeline.addLast(
             "httpDechunker",
             new HttpChunkAggregator(_maxResponseSize.inBytes.toInt))

@@ -1,7 +1,6 @@
 package com.twitter.finagle.exception
 
 import com.twitter.util._
-import com.twitter.finagle.core.util.InetAddressUtil
 import com.twitter.finagle.util.LoadedReporterFactory
 import java.net.{InetAddress, InetSocketAddress}
 import com.twitter.finagle.exception.thriftscala.{ResultCode, LogEntry, Scribe}
@@ -47,7 +46,7 @@ class ClientReporterTest extends FunSuite with MockitoSugar {
   val reporter = Reporter(logger, "service16").withClient()
 
   val tse = new TestServiceException("service16", "my cool message",
-    clientAddress = Some(InetAddressUtil.Loopback.getHostAddress))
+    clientAddress = Some(InetAddress.getLoopbackAddress.getHostAddress))
 
   test("log entries to a client once upon receive") {
     reporter.handle(tse.throwable)
@@ -69,13 +68,13 @@ class SourceClientReporterTest extends FunSuite with MockitoSugar {
 
   val captor = ArgumentCaptor.forClass(classOf[Seq[LogEntry]])
 
-  val socket = new InetSocketAddress("localhost", RandomSocket.nextPort())
+  val socket = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
   val reporter = Reporter(logger, "service16")
     .withSource(socket)
     .withClient()
 
   val tse = new TestServiceException("service16", "my cool message",
-    clientAddress = Some(InetAddressUtil.Loopback.getHostAddress), sourceAddress = Some(socket.getAddress.getHostName))
+    clientAddress = Some(InetAddress.getLoopbackAddress.getHostAddress), sourceAddress = Some(socket.getAddress.getHostName))
 
   test("log entries to a client once upon receive") {
     reporter.handle(tse.throwable)
@@ -108,7 +107,7 @@ class ExceptionReporterTest extends FunSuite with MockitoSugar {
     val logger = mock[Scribe.FutureIface]
     when(logger.log(anyObject())) thenReturn(Future.value(ResultCode.Ok))
     val captor = ArgumentCaptor.forClass(classOf[Seq[LogEntry]])
-    val socket = new InetSocketAddress("localhost", RandomSocket.nextPort())
+    val socket = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val tse = new TestServiceException("service", "my cool message",
       clientAddress = Some(socket.getAddress.getHostName))
 

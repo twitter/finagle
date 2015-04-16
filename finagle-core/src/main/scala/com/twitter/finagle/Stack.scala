@@ -1,15 +1,15 @@
 package com.twitter.finagle
 
+import scala.annotation.tailrec
 import scala.collection.mutable
 
 /**
  * Stacks represent stackable elements of type T. It is assumed that
  * T-typed elements can be stacked in some meaningful way; examples
- * are functions (function composition) [[com.twitter.finagle.Filter
- * Filters]] (chaining), and [[com.twitter.finagle.ServiceFactory
- * ServiceFactories]] (through transformers). T-typed values are also
- * meant to compose: the stack itself materializes into a T-typed
- * value.
+ * are functions (function composition) [[Filter Filters]] (chaining),
+ * and [[ServiceFactory ServiceFactories]] (through
+ * transformers). T-typed values are also meant to compose: the stack
+ * itself materializes into a T-typed value.
  *
  * Stacks are persistent, allowing for nondestructive
  * transformations; they are designed to represent 'template' stacks
@@ -27,7 +27,7 @@ sealed trait Stack[T] {
    * of the topmost element of the stack.
    *
    * @note `head` does not give access to the value `T`, use `make` instead.
-   * @see [[com.twitter.finagle.Stack.Head]]
+   * @see [[Stack.Head]]
    */
   val head: Stack.Head
 
@@ -50,6 +50,49 @@ sealed trait Stack[T] {
     }
 
   /**
+    * Insert the given [[Stackable]] before the stack elements matching
+    * the argument role. If no elements match the role, then an
+    * unmodified stack is returned.
+    */
+  def insertBefore(target: Role, insertion: Stackable[T]): Stack[T] =
+    this match {
+      case Node(head, mk, next) if head.role == target =>
+        insertion +: Node(head, mk, next.insertBefore(target, insertion))
+      case Node(head, mk, next) =>
+        Node(head, mk, next.insertBefore(target, insertion))
+      case leaf@Leaf(_, _) => leaf
+    }
+
+  /**
+    * Insert the given [[Stackable]] before the stack elements matching
+    * the argument role. If no elements match the role, then an
+    * unmodified stack is returned.  `insertion` must conform to
+    * typeclass [[CanStackFrom]].
+    */
+  def insertBefore[U](target: Role, insertion: U)(implicit csf: CanStackFrom[U, T]): Stack[T] =
+    insertBefore(target, csf.toStackable(target, insertion))
+
+  /**
+   * Insert the given [[Stackable]] after the stack elements matching
+   * the argument role. If no elements match the role, then an
+   * unmodified stack is returned.
+   */
+  def insertAfter(target: Role, insertion: Stackable[T]): Stack[T] = transform {
+    case Node(head, mk, next) if head.role == target =>
+      Node(head, mk, insertion +: next)
+    case stk => stk
+  }
+
+  /**
+   * Insert the given [[Stackable]] after the stack elements matching
+   * the argument role. If no elements match the role, then an
+   * unmodified stack is returned.  `insertion` must conform to
+   * typeclass [[CanStackFrom]].
+   */
+  def insertAfter[U](target: Role, insertion: U)(implicit csf: CanStackFrom[U, T]): Stack[T] =
+    insertAfter(target, csf.toStackable(target, insertion))
+
+  /**
    * Remove all nodes in the stack that match the `target` role.
    * Leaf nodes are not removable.
    */
@@ -62,9 +105,9 @@ sealed trait Stack[T] {
     }
 
   /**
-   * Replace any stack elements matching the argument role with a given
-   * [[com.twitter.finagle.Stackable Stackable]]. If no elements match the
-   * role, then an unmodified stack is returned.
+   * Replace any stack elements matching the argument role with a
+   * given [[Stackable]]. If no elements match the role, then an
+   * unmodified stack is returned.
    */
   def replace(target: Role, replacement: Stackable[T]): Stack[T] = transform {
     case n@Node(head, _, next) if head.role == target =>
@@ -73,10 +116,10 @@ sealed trait Stack[T] {
   }
 
   /**
-   * Replace any stack elements matching the argument role with a given
-   * [[com.twitter.finagle.Stackable]]. If no elements match the
-   * role, then an unmodified stack is returned. `replacement` must conform to
-   * typeclass [[com.twitter.finagle.CanStackFrom]].
+   * Replace any stack elements matching the argument role with a
+   * given [[Stackable]]. If no elements match the role, then an
+   * unmodified stack is returned. `replacement` must conform to
+   * typeclass [[CanStackFrom]].
    */
   def replace[U](target: Role, replacement: U)(implicit csf: CanStackFrom[U, T]): Stack[T] =
     replace(target, csf.toStackable(target, replacement))
@@ -84,13 +127,30 @@ sealed trait Stack[T] {
   /**
    * Traverse the stack, invoking `fn` on each element.
    */
-  def foreach(fn: Stack[T] => Unit) {
+  @tailrec
+  final def foreach(fn: Stack[T] => Unit): Unit = {
     fn(this)
     this match {
       case Node(_, _, next) => next.foreach(fn)
       case Leaf(_, _) =>
     }
   }
+
+  /**
+   * Traverse the stack, until you find that pred has been evaluated to true.
+   * If `pred` finds an element, return true, otherwise, false.
+   */
+  @tailrec
+  final def exists(pred: Stack[T] => Boolean): Boolean = this match {
+    case _ if pred(this) => true
+    case Node(_, _, next) => next.exists(pred)
+    case Leaf(_, _) => false
+  }
+
+  /**
+   * Returns whether the stack contains a given role or not.
+   */
+  def contains(role: Stack.Role): Boolean = exists(_.head.role == role)
 
   /**
    * Enumerate each well-formed stack contained within this stack.
@@ -105,11 +165,29 @@ sealed trait Stack[T] {
    * Produce a new stack representing the concatenation of `this`
    * with `right`. Note that this replaces the terminating element of
    * `this`.
+   *
+   * Alias for [[Stack.++]].
+   */
+  def concat(right: Stack[T]): Stack[T] =
+    this ++ right
+
+  /**
+   * Produce a new stack representing the concatenation of `this`
+   * with `right`. Note that this replaces the terminating element of
+   * `this`.
    */
   def ++(right: Stack[T]): Stack[T] = this match {
     case Node(head, mk, left) => Node(head, mk, left++right)
     case Leaf(_, _) => right
   }
+
+  /**
+   * A copy of this Stack with `stk` prepended.
+   *
+   * An alias for [[Stack.+:]].
+   */
+  def prepend(stk: Stackable[T]): Stack[T] =
+    stk +: this
 
   /**
    * A copy of this Stack with `stk` prepended.
@@ -126,6 +204,10 @@ sealed trait Stack[T] {
   }
 }
 
+/**
+ * @see [[stack.nilStack]] for starting construction of an
+ * empty stack for [[ServiceFactory]]s.
+ */
 object Stack {
   /**
    * Base trait for Stack roles. A stack's role is indicative of its
@@ -142,11 +224,11 @@ object Stack {
 
   /**
    * Trait encompassing all associated metadata of a stack element.
-   * [[com.twitter.finagle.Stackable Stackables]] extend this trait.
+   * [[Stackable Stackables]] extend this trait.
    */
   trait Head {
     /**
-     * The [[com.twitter.finagle.Stack.Role Role]] that the element can serve.
+     * The [[Stack.Role Role]] that the element can serve.
      */
     def role: Stack.Role
 
@@ -156,7 +238,7 @@ object Stack {
     def description: String
 
     /**
-     * The [[com.twitter.finagle.Stack.Param Params]] that the element
+     * The [[Stack.Param Params]] that the element
      * is interested in.
      */
     def parameters: Seq[Stack.Param[_]]
@@ -209,14 +291,27 @@ object Stack {
    * typeclasses should be persistent:
    *
    * {{{
-   * case class Multiplier(i: Int)
-   * implicit object Multiplier extends Stack.Param[Multiplier] {
-   *   val default = Multiplier(123)
+   * case class Multiplier(i: Int) {
+   *   def mk(): (Multipler, Stack.Param[Multipler]) =
+   *     (this, Multiplier.param)
+   * }
+   * object Multiplier {
+   *   implicit val param = Stack.Param(Multiplier(123))
    * }
    * }}}
+   *
+   * The `mk()` function together with `Parameterized.configured`
+   * provides a convenient Java interface.
    */
   trait Param[P] {
     def default: P
+  }
+  object Param {
+    def apply[T](t: => T): Param[T] = new Param[T] {
+      // Note, this is lazy to avoid potential failures during
+      // static initialization.
+      lazy val default = t
+    }
   }
 
   /**
@@ -295,14 +390,36 @@ object Stack {
     def configured[P: Stack.Param](p: P): T =
       withParams(params+p)
 
+    def configured[P](psp: (P, Stack.Param[P])): T = {
+      val (p, sp) = psp
+      configured(p)(sp)
+    }
+
     def withParams(ps: Stack.Params): T
+  }
+
+  /**
+   * Encodes transformations for stacks of
+   * [[com.twitter.finagle.ServiceFactory ServiceFactories]] of
+   * arbitrary `Req` and `Rep` types. Such transformations must be
+   * indifferent to these types in order to typecheck.
+   */
+  trait Transformer {
+    def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]): Stack[ServiceFactory[Req, Rep]]
+  }
+
+  trait Transformable[+T] {
+    /**
+     * Transform the stack using the given `Transformer`.
+     */
+    def transformed(t: Transformer): T
   }
 
   /**
    * A convenience class to construct stackable modules. This variant
    * operates over stacks and the entire parameter map. The `ModuleN` variants
    * may be more convenient for most definitions as they operate over `T` types
-   * and the paramater extraction is derived from type parameters.
+   * and the parameter extraction is derived from type parameters.
    *
    * {{{
    * def myNode = new Module[Int=>Int]("myelem") {
@@ -325,7 +442,7 @@ object Stack {
 
   /** A module of 0 parameters. */
   abstract class Module0[T] extends Stackable[T] {
-    final val parameters = Nil
+    final val parameters: Seq[Stack.Param[_]] = Nil
     def make(next: T): T
     def toStack(next: Stack[T]) =
       Node(this, (prms, next) => Leaf(this, make(next.make(prms))), next)
@@ -333,7 +450,8 @@ object Stack {
 
   /** A module of 1 parameter. */
   abstract class Module1[P1: Param, T] extends Stackable[T] {
-    final val parameters = Seq(implicitly[Param[P1]])
+    final val parameters: Seq[Stack.Param[_]] =
+      Seq(implicitly[Param[P1]])
     def make(p1: P1, next: T): T
     def toStack(next: Stack[T]) =
       Node(this, (prms, next) => Leaf(this, make(prms[P1], next.make(prms))), next)
@@ -341,7 +459,8 @@ object Stack {
 
   /** A module of 2 parameters. */
   abstract class Module2[P1: Param, P2: Param, T] extends Stackable[T] {
-    final val parameters = Seq(implicitly[Param[P1]], implicitly[Param[P2]])
+    final val parameters: Seq[Stack.Param[_]] =
+      Seq(implicitly[Param[P1]], implicitly[Param[P2]])
     def make(p1: P1, p2: P2, next: T): T
     def toStack(next: Stack[T]) =
       Node(this, (prms, next) => Leaf(this,
@@ -350,7 +469,7 @@ object Stack {
 
   /** A module of 3 parameters. */
   abstract class Module3[P1: Param, P2: Param, P3: Param, T] extends Stackable[T] {
-    final val parameters = Seq(
+    final val parameters: Seq[Stack.Param[_]] = Seq(
       implicitly[Param[P1]],
       implicitly[Param[P2]],
       implicitly[Param[P3]])
@@ -362,7 +481,7 @@ object Stack {
 
   /** A module of 4 parameters. */
   abstract class Module4[P1: Param, P2: Param, P3: Param, P4: Param, T] extends Stackable[T] {
-    final val parameters = Seq(
+    final val parameters: Seq[Stack.Param[_]] = Seq(
       implicitly[Param[P1]],
       implicitly[Param[P2]],
       implicitly[Param[P3]],
@@ -384,8 +503,8 @@ trait Stackable[T] extends Stack.Head {
 
 /**
  * A typeclass for "stackable" items. This is used by the
- * [[com.twitter.finagle.StackBuilder StackBuilder]] to provide a
- * convenient interface for constructing Stacks.
+ * [[StackBuilder]] to provide a convenient interface for constructing
+ * Stacks.
  */
 @scala.annotation.implicitNotFound("${From} is not Stackable to ${To}")
 trait CanStackFrom[-From, To] {
@@ -409,6 +528,9 @@ object CanStackFrom {
  * StackBuilders are imperative-style builders for Stacks. It
  * maintains a stack onto which new elements can be pushed (defining
  * a new stack).
+ *
+ * @see [[stack.nilStack]] for starting construction of an
+ * empty stack for [[ServiceFactory]]s.
  */
 class StackBuilder[T](init: Stack[T]) {
   def this(role: Stack.Role, end: T) = this(Stack.Leaf(role, end))
@@ -417,7 +539,7 @@ class StackBuilder[T](init: Stack[T]) {
 
   /**
    * Push the stack element `el` onto the stack; el must conform to
-   * typeclass [[com.twitter.finagle.CanStackFrom CanStackFrom]].
+   * typeclass [[CanStackCanStackFrom]].
    */
   def push[U](role: Stack.Role, el: U)(implicit csf: CanStackFrom[U, T]): this.type = {
     stack = csf.toStackable(role, el) +: stack
@@ -425,8 +547,7 @@ class StackBuilder[T](init: Stack[T]) {
   }
 
   /**
-   * Push a [[com.twitter.finagle.Stackable Stackable]] module onto
-   * the stack.
+   * Push a [[Stackable]] module onto the stack.
    */
   def push(module: Stackable[T]): this.type = {
     stack = module +: stack

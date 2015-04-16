@@ -27,7 +27,7 @@ private[serverset2] object Zk2Resolver {
 
   /** Compute the size of an Addr, where non-bound equates to a size of zero. */
   def sizeOf(addr: Addr): Int = addr match {
-    case Addr.Bound(set) => set.size
+    case Addr.Bound(set, _) => set.size
     case _ => 0
   }
 }

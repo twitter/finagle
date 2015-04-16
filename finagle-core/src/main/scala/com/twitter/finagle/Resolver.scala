@@ -324,28 +324,21 @@ object FailResolver extends Resolver {
 private[finagle] abstract class BaseResolver(f: () => Seq[Resolver]) {
   private[this] val inetResolver = InetResolver()
 
-  // TODO(dschobel): remove duplicate whitelisting logic after we have a mono-twcache resolver
-  private[this] val dupCheckWhitelist = Set("twcache")
-
   private[this] lazy val resolvers = {
     val rs = f()
     val log = Logger.getLogger(getClass.getName)
     val resolvers = Seq(inetResolver, NegResolver, NilResolver, FailResolver) ++ rs
 
     val dups = resolvers
-      .filterNot(resolver => dupCheckWhitelist(resolver.scheme))
       .groupBy(_.scheme)
       .filter { case (_, rs) => rs.size > 1 }
 
     if (dups.size > 0) throw new MultipleResolversPerSchemeException(dups)
 
-    // another distinctness pass to account for whitelisted schemes
-    val distinctByScheme = resolvers.groupBy(_.scheme).map { case (_, rs) => rs.head }
-
-    for (r <- distinctByScheme)
+    for (r <- resolvers)
       log.info("Resolver[%s] = %s(%s)".format(r.scheme, r.getClass.getName, r))
 
-    distinctByScheme
+    resolvers
   }
 
   def get[T <: Resolver](clazz: Class[T]): Option[T] =

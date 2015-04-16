@@ -1,11 +1,13 @@
 language: scala
 
 scala:
-  - 2.10.4
+  - 2.10.5
+  - 2.11.6
 
 jdk:
   - oraclejdk7
-  - openjdk6
+  # Note: not currently testing on JDK 8 internally
+  - oraclejdk8
   - openjdk7
 
 before_script:
@@ -18,8 +20,8 @@ script:
   - echo skip ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test
   - echo skip ./sbt ++$TRAVIS_SCALA_VERSION finagle-mux/test
 
-  # run conditinally because they don't pass with openjdks
-  - if [ "$TRAVIS_JDK_VERSION" = "oraclejdk7" ]; then ./sbt ++$TRAVIS_SCALA_VERSION finagle-native/test; fi
+  # run conditionally because they don't pass with openjdks
+  - if [[ "$TRAVIS_JDK_VERSION" = oraclejdk* ]]; then ./sbt ++$TRAVIS_SCALA_VERSION finagle-native/test; fi
 
   # run for all environments
   - ./sbt ++$TRAVIS_SCALA_VERSION finagle-commons-stats/test

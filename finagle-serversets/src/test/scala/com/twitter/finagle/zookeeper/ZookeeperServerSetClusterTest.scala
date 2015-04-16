@@ -6,12 +6,12 @@ import com.twitter.common.zookeeper.ServerSet
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.Cluster
 import com.twitter.thrift.{Endpoint, ServiceInstance, Status}
-import com.twitter.util.{Await, RandomSocket}
+import com.twitter.util.Await
 import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.anyObject
-import org.mockito.Mockito.{doNothing, when, verify}
+import org.mockito.Mockito.{when, verify}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
@@ -19,8 +19,8 @@ import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class ZookeeperServerSetClusterSpec extends FunSuite with MockitoSugar {
-  val port1 = RandomSocket.nextPort()
-  val port2 = RandomSocket.nextPort()
+  val port1 = 80 // not bound
+  val port2 = 53 // ditto
 
   type EndpointMap = Map[String, InetSocketAddress]
   val EmptyEndpointMap = Map.empty[String, InetSocketAddress]

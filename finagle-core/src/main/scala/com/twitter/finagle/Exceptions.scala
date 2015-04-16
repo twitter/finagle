@@ -14,6 +14,16 @@ trait SourcedException extends Exception {
 
 object SourcedException {
   val UnspecifiedServiceName = "unspecified"
+
+  def unapply(t: Throwable): Option[String] = t match {
+    case sourced: SourcedException
+      if sourced.serviceName != SourcedException.UnspecifiedServiceName =>
+      Some(sourced.serviceName)
+    case sourced: Failure =>
+      sourced.getSource(Failure.Source.Service).map(_.toString)
+    case _ =>
+      None
+  }
 }
 
 /**
@@ -119,14 +129,13 @@ class GlobalRequestTimeoutException(timeout: Duration)
  */
 class NoBrokersAvailableException(
   val name: String,
+  val baseDtab: Dtab,
   val localDtab: Dtab
 ) extends RequestException {
-  def this(name: String = "unknown") = this(name, Dtab.empty)
+  def this(name: String = "unknown") = this(name, Dtab.empty, Dtab.empty)
 
   override def getMessage =
-    "No hosts are available for " +
-      (if (localDtab.isEmpty) name
-      else name + " [" + localDtab.show + "]")
+    s"No hosts are available for $name, Dtab.base=[${baseDtab.show}], Dtab.local=[${localDtab.show}]"
 }
 
 @deprecated("no longer used by com.twitter.finagle.service.RetryingFilter", "7.0.0")
@@ -180,7 +189,10 @@ class ReplyCastException extends RequestException
  * connected have been marked as failed. See FailFastFactory for details on
  * this behavior.
  */
-class FailedFastException(message: String) extends RequestException(message, cause = null) {
+class FailedFastException(message: String)
+  extends RequestException(message, cause = null)
+  with WriteException
+{
   def this() = this(null)
 }
 
@@ -213,6 +225,8 @@ object ChannelException {
       case _: java.nio.channels.ClosedChannelException     => new ChannelClosedException(cause, remoteAddress)
       case e: java.io.IOException
         if "Connection reset by peer" == e.getMessage      => new ChannelClosedException(cause, remoteAddress)
+      case e: java.io.IOException
+        if "Broken pipe" == e.getMessage                   => new ChannelClosedException(cause, remoteAddress)
       case e: java.io.IOException
         if "Connection timed out" == e.getMessage          => new ConnectionFailedException(cause, remoteAddress)
       case e                                               => new UnknownChannelException(cause, remoteAddress)

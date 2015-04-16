@@ -1,23 +1,24 @@
 package com.twitter.finagle.exp.mysql
 
 object Capability {
-  val LongPassword     = 0x0001 // new more secure passwords
-  val FoundRows        = 0x0002 // Found instead of affected rows
-  val LongFlag         = 0x0004 // Get all column flags
-  val ConnectWithDB    = 0x0008 // One can specify db on connect
-  val NoSchema         = 0x0010 // Don't allow database.table.column
-  val Compress         = 0x0020 // Can use compression protocol
-  val ODBC             = 0x0040 // Odbc client
-  val LocalFiles       = 0x0080 // Can use LOAD DATA LOCAL
-  val IgnoreSpace      = 0x0100 // Ignore spaces before '('
-  val Protocol41       = 0x0200 // New 4.1 protocol
-  val Interactive      = 0x0400 // This is an interactive client
-  val SSL              = 0x0800 // Switch to SSL after handshake
-  val IgnoreSigPipe    = 0x1000 // IGNORE sigpipes
-  val Transactions     = 0x2000 // Client knows about transactions
-  val SecureConnection = 0x8000 // New 4.1 authentication
-  val MultiStatements  = 0x10000 // Enable/disable multi-stmt support
-  val MultiResults     = 0x20000 // Enable/disable multi-results */
+  val LongPassword     = 0x1      // new more secure passwords
+  val FoundRows        = 0x2      // Found instead of affected rows
+  val LongFlag         = 0x4      // Get all column flags
+  val ConnectWithDB    = 0x8      // One can specify db on connect
+  val NoSchema         = 0x10     // Don't allow database.table.column
+  val Compress         = 0x20     // Can use compression protocol
+  val ODBC             = 0x40     // Odbc client
+  val LocalFiles       = 0x80     // Can use LOAD DATA LOCAL
+  val IgnoreSpace      = 0x100    // Ignore spaces before '('
+  val Protocol41       = 0x200    // New 4.1 protocol
+  val Interactive      = 0x400    // This is an interactive client
+  val SSL              = 0x800    // Switch to SSL after handshake
+  val IgnoreSigPipe    = 0x1000   // IGNORE sigpipes
+  val Transactions     = 0x2000   // Client knows about transactions
+  val SecureConnection = 0x8000   // New 4.1 authentication
+  val MultiStatements  = 0x10000  // Enable/disable multi-stmt support
+  val MultiResults     = 0x20000  // Enable/disable multi-results
+  val PluginAuth       = 0x80000  // supports auth plugins
 
   val CapabilityMap = Map(
     "CLIENT_LONG_PASSWORD"     -> LongPassword,

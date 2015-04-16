@@ -30,13 +30,13 @@ abstract class Message extends HttpMessageProxy {
 
   /**
    * A read-only handle to the internal stream of bytes, representing the
-   * message body. See [[com.twitter.util.Reader]] for more information.
+   * message body. See [[com.twitter.io.Reader]] for more information.
    **/
   def reader: BufReader = readerWriter
 
   /**
    * A write-only handle to the internal stream of bytes, representing the
-   * message body. See [[com.twitter.util.Writer]] for more information.
+   * message body. See [[com.twitter.io.Writer]] for more information.
    **/
   def writer: BufWriter with Closable = readerWriter
 
@@ -364,7 +364,7 @@ abstract class Message extends HttpMessageProxy {
    * `flatMap` to have the appropriate backpressure semantics.
    *
    * Attempting to `write` after calling `close` will result in a thrown
-   * [[com.twitter.util.Reader.ReaderDiscarded]].
+   * [[com.twitter.io.Reader.ReaderDiscarded]].
    */
   @throws(classOf[BufReader.ReaderDiscarded])
   @throws(classOf[IllegalStateException])
@@ -425,12 +425,6 @@ abstract class Message extends HttpMessageProxy {
 
 object Message {
   private[httpx] val Utf8          = Charset.forName("UTF-8")
-  @deprecated("Use MediaType.Json", "6.1.5")
-  val MediaTypeJson         = "application/json"
-  @deprecated("Use MediaType.Javascript", "6.1.5")
-  val MediaTypeJavascript   = "application/javascript"
-  @deprecated("Use MediaType.WwwForm", "6.1.5")
-  val MediaTypeWwwForm      = "application/x-www-form-urlencoded"
   val CharsetUtf8           = "charset=utf-8"
   val ContentTypeJson       = MediaType.Json + ";" + CharsetUtf8
   val ContentTypeJavascript = MediaType.Javascript + ";" + CharsetUtf8

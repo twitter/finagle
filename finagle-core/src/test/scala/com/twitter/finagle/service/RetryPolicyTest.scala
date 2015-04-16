@@ -37,8 +37,11 @@ class RetryPolicyTest extends FunSpec {
 
       assert(weo(Throw(new Exception)) === false)
       assert(weo(Throw(WriteException(new Exception))) === true)
-      assert(weo(Throw(Failure.InterruptedBy(new Exception))) === false)
-      assert(weo(Throw(Failure.InterruptedBy(new Exception).withRetryable(true))) === true)
+      assert(weo(Throw(Failure(new Exception, Failure.Interrupted))) === false)
+      // it's important that this failure isn't retried, despite being "restartable".
+      // interrupted futures should never be retried.
+      assert(weo(Throw(Failure(new Exception, Failure.Interrupted|Failure.Restartable))) === false)
+      assert(weo(Throw(Failure(new Exception, Failure.Restartable))) === true)
       assert(weo(Throw(timeoutExc)) === false)
     }
 
@@ -47,8 +50,8 @@ class RetryPolicyTest extends FunSpec {
 
       assert(taweo(Throw(new Exception)) === false)
       assert(taweo(Throw(WriteException(new Exception))) === true)
-      assert(taweo(Throw(Failure.InterruptedBy(new Exception))) === false)
-      assert(taweo(Throw(Failure.InterruptedBy(timeoutExc))) === true)
+      assert(taweo(Throw(Failure(new Exception, Failure.Interrupted))) === false)
+      assert(taweo(Throw(Failure(timeoutExc, Failure.Interrupted))) === true)
       assert(taweo(Throw(timeoutExc)) === true)
       assert(taweo(Throw(new com.twitter.util.TimeoutException(""))) === true)
     }

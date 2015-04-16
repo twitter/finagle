@@ -31,9 +31,9 @@ object HosebirdClient {
 
     val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path)
     val userpass = username + ":" + password
-    request.setHeader("Authorization", "Basic " + Base64.encode(userpass.getBytes("UTF-8")))
-    request.setHeader("User-Agent", "Finagle 0.0")
-    request.setHeader("Host", hostAndPort)
+    request.headers.set("Authorization", "Basic " + Base64.encode(userpass.getBytes("UTF-8")))
+    request.headers.set("User-Agent", "Finagle 0.0")
+    request.headers.set("Host", hostAndPort)
     println(request)
     for {
       client <- clientFactory()

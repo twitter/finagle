@@ -16,7 +16,7 @@ import com.twitter.util.Duration
  * The lessee provides an interface that lets the lessor notify the lessee about
  * lease information, and lets the lessor query the lessee for draining info.
  */
-private[finagle] trait Lessee {
+private[twitter] trait Lessee {
   /**
    * The Lessee is given the lease for d, starting now.
    */
@@ -31,7 +31,7 @@ private[finagle] trait Lessee {
 /**
  * The Lessor is the entity that gives leases.
  */
-private[finagle] trait Lessor {
+private[twitter] trait Lessor {
 
   /**
    * The lessor will notify all lessees that have been registered and have not
@@ -56,7 +56,7 @@ private[finagle] trait Lessor {
   def observeArrival()
 }
 
-private[finagle] object Lessor {
+private[twitter] object Lessor {
   case class Param(lessor: Lessor)
   implicit object Param extends Stack.Param[Param] {
     val default = Param(ClockedDrainer.flagged)

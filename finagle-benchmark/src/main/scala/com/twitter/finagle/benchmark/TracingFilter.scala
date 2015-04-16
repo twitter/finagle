@@ -11,7 +11,7 @@ import com.twitter.util.{Future, MockTimer}
 import java.net.InetSocketAddress
 
 // From $BIRDCAGE_HOME run:
-// ./pants goal bench finagle/finagle-benchmark --bench-target=com.twitter.finagle.benchmark.TracingFilterBenchmark
+// ./pants bench finagle/finagle-benchmark --bench-target=com.twitter.finagle.benchmark.TracingFilterBenchmark
 class TracingFilterBenchmark extends SimpleBenchmark {
   val addr = new InetSocketAddress("127.0.0.1", 8080)
 

@@ -1,42 +1,36 @@
 package com.twitter.finagle
 
 import com.twitter.logging.Level
+import com.twitter.util.Future
+import scala.annotation.tailrec
 
 /**
  * Base exception for all Finagle originated failures. These are
- * Exceptions, but with additional `sources` and `flags`.
- * Sources describe the origins of the failure to aid in debugging
- * and flags mark attributes of the Failure (e.g. Retryable).
- * Failures are constructed and extracted using the Failure
- * companion object.
- *
- * {{{
- * val failure = Failure.InterruptedBy(cause).withRetryable(true)
- * val shouldRetry = failure match {
- *  case Failure.Retryable(_) => true
- *  case _ => false
- * }
- * }}}
+ * Exceptions, but with additional `sources` and `flags`. Sources
+ * describe the origins of the failure to aid in debugging and flags
+ * mark attributes of the Failure (e.g. Restartable).
  */
 final class Failure private[finagle](
   private[finagle] val why: String,
-  val cause: Throwable = null,
-  val flags: Long = Failure.Flag.None,
-  sources: Map[String, Object] = Map(),
+  val cause: Option[Throwable] = None,
+  val flags: Long = 0L,
+  protected val sources: Map[Failure.Source.Value, Object] = Map.empty,
   val stacktrace: Array[StackTraceElement] = Failure.NoStacktrace,
   val logLevel: Level = Level.WARNING
-) extends Exception(why, cause) with NoStacktrace {
+) extends Exception(why, cause.getOrElse(null)) with NoStacktrace {
   import Failure._
+
+  require(!isFlagged(Wrapped) || cause.isDefined)
 
   /**
    * Returns a source for a given key, if it exists.
    */
-  def getSource(key: String): Option[Object] = sources.get(key)
+  def getSource(key: Failure.Source.Value): Option[Object] = sources.get(key)
 
   /**
    * Creates a new Failure with the given key value pair prepended to sources.
    */
-  def withSource(key: String, value: Object): Failure =
+  def withSource(key: Failure.Source.Value, value: Object): Failure =
     copy(sources = sources + (key -> value))
 
   /**
@@ -46,12 +40,44 @@ final class Failure private[finagle](
     copy(stacktrace = Thread.currentThread.getStackTrace())
 
   /**
-   * Creates a new Failure that toggles retryable based on the given boolean.
+   * This failure with the given flags added. 
+   *
+   * See [[Failure$ Failure]] for flag definitions.
    */
-  def withRetryable(on: Boolean): Failure =
-    if (on == isSet(flags, Flag.Retryable)) this else {
-      copy(flags = toggle(on, flags, Flag.Retryable))
-    }
+  def flagged(addFlags: Long): Failure =
+    if ((flags & addFlags ) == addFlags) this else 
+      copy(flags = flags | addFlags)
+
+  /**
+   * This failure with the given flags removed.
+   *
+   * See [[Failure$ Failure]] forflag definitions.
+   */  
+  def unflagged(delFlags: Long): Failure =
+    if ((flags & delFlags) == 0) this else
+      copy(flags = flags & ~delFlags)
+
+  /**
+   * Apply the given flags mask.
+   *
+   * See [[Failure$ Failure]] forflag definitions.
+   */
+  def masked(mask: Long): Failure =
+    if ((flags & mask) == flags) this else
+      copy(flags = flags & mask)
+
+  /**
+   * Test whether the given flags are set.
+   *
+   * See [[Failure$ Failure]] flag definitions.
+   */
+  def isFlagged(which: Long): Boolean =
+    (flags & which) == which
+
+  /**
+   * A new failure with the current [[Failure]] as cause.
+   */
+  def chained: Failure = copy(cause=Some(this))
 
   /**
    * Creates a new Failure with the given logging Level.
@@ -61,6 +87,14 @@ final class Failure private[finagle](
    */
   def withLogLevel(level: Level): Failure =
     copy(logLevel = level)
+
+  /**
+   * A [[Throwable]] appropriate for user presentation (e.g., for stats,
+   * or to return from a user's [[Service]].)
+   *
+   * Show may return `this`.
+   */
+  def show: Throwable = Failure.show(this)
 
   override def toString: String =
     "Failure(%s, flags=0x%02x)\n\twith %s".format(why, flags,
@@ -75,122 +109,199 @@ final class Failure private[finagle](
 
   override def equals(a: Any) = {
     a match {
-      case Failure(cause, flags) => this.cause == cause && this.flags == flags
+      case that: Failure =>
+        this.why.equals(that.why) &&
+        this.cause.equals(that.cause) &&
+        this.flags.equals(that.flags) &&
+        this.sources.equals(that.sources)
       case _ => false
     }
   }
 
-  override def hashCode = cause.hashCode ^ flags.hashCode
+  override def hashCode = 
+    why.hashCode ^
+    cause.hashCode ^
+    flags.hashCode ^
+    sources.hashCode
 
   private[this] def copy(
     why: String = why,
-    cause: Throwable = cause,
+    cause: Option[Throwable] = cause,
     flags: Long = flags,
-    sources: Map[String, Object] = sources,
+    sources: Map[Failure.Source.Value, Object] = sources,
     stacktrace: Array[StackTraceElement] = stacktrace,
     logLevel: Level = logLevel
   ): Failure = new Failure(why, cause, flags, sources, stacktrace, logLevel)
 }
 
-/**
- * Defines convenient methods for contructing and extracting failures.
- */
 object Failure {
   private val NoStacktrace =
     Array(new StackTraceElement("com.twitter.finagle", "NoStacktrace", null, -1))
 
-  object Sources {
-    val ServiceName = "service name"
-  }
-
-  def unapply(exc: Failure): Option[(Throwable, Long)] = Some((exc.cause, exc.flags))
-
-  /**
-   * Failure attributes are distinguished by flags.
-   * Flags should be a power of 2.
-   */
-  private object Flag {
-    val None          = 0L
-    val Retryable     = 1L << 0
-    val Interrupted   = 1L << 1
-    // Bits 32 to 63 are reserved for
-    // flags private to finagle.
-    val Requeueable    = 1L << 32
-  }
-
-  private[this] def validate(flag: Long) =
-    require((flag & flag-1) == 0, "flag should be a power of 2")
-
-  private def isSet(flags: Long, flag: Long) = {
-    validate(flag)
-    (flags & flag) != 0
-  }
-
-  private def toggle(on: Boolean, flags: Long, flag: Long) = {
-    validate(flag)
-    if (on) flags | flag else flags & (~flag)
+  object Source extends Enumeration {
+    val Service, Role = Value
   }
 
   /**
-   * Defines methods to create a Failure type with the given `flag` bit.
+   * Flag restartable indicates that the action that caused the failure
+   * is ''restartable'' -- that is, it is safe to simply re-issue the action.
    */
-  trait Injections {
-    val flag: Long
-    def apply(why: String, cause: Throwable = null): Failure = new Failure(why, cause, flag)
-    def apply(cause: Throwable): Failure =
-      if (cause == null) apply("unknown cause")
-      else if (cause.getMessage == null) apply(cause.getClass.getName, cause)
-      else apply(cause.getMessage, cause)
-  }
+  val Restartable: Long = 1L << 0
+  
+  /**
+   * Flag interrupted indicates that the error was caused due to an
+   * interruption. (e.g., by invoking [[Future.raise]].)
+   */
+  val Interrupted: Long = 1L << 1
 
   /**
-   * Defines methods to extract a Failure based on the `flag` bit. Note that if
-   * an underlying cause is set, the underlying exception is extracted.
+   * Flag wrapped indicates that this failure was wrapped, and should
+   * not be presented to the user (directly, or via stats). Rather, it must
+   * first be unwrapped: the inner cause is the presentable failure.
    */
-  trait Extractions {
-    val flag: Long
-    def unapply(exc: Throwable): Option[Throwable] = exc match {
-      case f@Failure(null, fs) if isSet(fs, flag) => Some(f)
-      case Failure(cause, fs) if isSet(fs, flag) => Some(cause)
-      case _ => None
+  val Wrapped: Long = 1L << 2
+
+  /**
+   * Flag naming indicates a naming failure. This is Finagle-internal.
+   */
+  private[finagle] val Naming: Long = 1L << 32
+  
+  // Flags that are showable to a user.
+  private val ShowMask: Long = Interrupted
+
+  /**
+   * Create a new failure with the given cause and flags.
+   */
+  def apply(cause: Throwable, flags: Long): Failure =
+    if (cause == null)
+      new Failure("unknown", None, flags)
+    else if (cause.getMessage == null)
+      new Failure(cause.getClass.getName, Some(cause), flags)
+    else 
+      new Failure(cause.getMessage, Some(cause), flags)
+
+  /**
+   * Create a new failure with the given cause; no flags.
+   */
+  def apply(cause: Throwable): Failure =
+    apply(cause, 0L)
+
+  /**
+   * Create a new failure with the given message, cause, and flags.
+   */
+  def apply(why: String, cause: Throwable, flags: Long): Failure =
+    new Failure(why, Option(cause), flags)
+
+  /**
+   * Create a new failure with the given message and cause; no flags.
+   */
+  def apply(why: String, cause: Throwable): Failure =
+    apply(why, cause, 0L)
+
+  /**
+   * Create a new failure with the given message and flags.
+   */
+  def apply(why: String, flags: Long): Failure =
+    new Failure(why, None, flags)
+
+  /**
+   * Create a new failure with the given message; no flags.
+   */
+  def apply(why: String): Failure =
+    new Failure(why, None, 0L)
+
+  /**
+   * Extractor for [[Failure]]; returns its cause.
+   */
+  def unapply(exc: Failure): Option[Option[Throwable]] = Some(exc.cause)
+
+  /**
+   * Adapt an exception. If the passed-in exception is already a failure,
+   * this returns a chained failure with the assigned flags. If it is not, 
+   * it returns a new failure with the given flags.
+   */
+  def adapt(exc: Throwable, flags: Long): Failure = exc match {
+    case f: Failure => f.chained.flagged(flags)
+    case exc => Failure(exc, flags)
+  }
+  
+  /**
+   * Create a new wrapped Failure with the given flags. If the passed-in exception
+   * is a failure, it is simply extended, otherwise a new Failure is created.
+   */
+  def wrap(exc: Throwable, flags: Long): Failure = {
+    require(exc != null)
+    exc match {
+      case f: Failure => f.flagged(flags|Failure.Wrapped)
+      case exc => Failure(exc, flags|Failure.Wrapped)
     }
   }
 
   /**
-   * A Failure with a throwable cause.
+   * Create a new wrapped Failure with no flags. If the passed-in exception
+   * is a failure, it is simply extended, otherwise a new Failure is created.
    */
-  object Cause extends Injections {
-    val flag = Flag.None
-    def unapply(exc: Throwable): Option[Throwable] = exc match {
-      case Failure(cause, _) if cause != null => Some(cause)
-      case _ => None
+  def wrap(exc: Throwable): Failure =
+    wrap(exc, 0L)
+
+  /**
+   * Create a new [[Restartable]] failure with the given message.
+   */
+  def rejected(why: String): Failure = Failure(why, Failure.Restartable)
+
+  /**
+   * Create a new [[Restartable]] failure with the given cause.
+   */
+  def rejected(cause: Throwable): Failure = Failure(cause, Failure.Restartable)
+
+  /**
+   * A default [[Restartable]] failure.
+   */
+  val rejected: Failure = rejected("The request was rejected")
+
+  @tailrec
+  private def show(f: Failure): Throwable = {
+    if (!f.isFlagged(Failure.Wrapped)) f.masked(ShowMask)
+    else f.cause match {
+      case Some(inner: Failure) => show(inner)
+      case Some(inner: Throwable) => inner
+      case None => 
+        throw new IllegalArgumentException("Wrapped failure without a cause")
     }
   }
 
   /**
-   * A Failure indicating that the corresponding request future has been interrupted.
-   * Note, this does does not guarantee that the request was not dispatched.
+   * Process failures for external presentation. Specifically, this converts
+   * failures to their "showable" form. See [[Failure.show]].
+   *
+   * This filter strips out [[Failure.Restartable]] from being presented to users.
+   * This can be dangerous when such failures are passed back to Finagle
+   * servers: in this case, while an individual client's request is restartable,
+   * the same is not automatically true of the server request on whose behalf
+   * the client is working. (For example, it may have performed some side
+   * effect before issuing the client call.)
    */
-  object InterruptedBy extends Injections with Extractions {
-    val flag = Flag.Interrupted
+  private[finagle] class ProcessFailures[Req, Rep] extends SimpleFilter[Req, Rep] {
+    private[this] val Process: PartialFunction[Throwable, Future[Rep]] = {
+      case f: Failure => Future.exception(f.show)
+    }
+
+    def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = 
+      service(req).rescue(Process)
   }
 
-  /**
-   * A retryable failure indicates that thw corresponding dispatch has failed and
-   * is eligible for a retry. These types of failures should count against a retry
-   * budget.
-   */
-  object Retryable extends Injections with Extractions {
-    val flag = Flag.Retryable
-  }
+  val role = Stack.Role("ProcessFailure")
 
   /**
-   * A requeueable failure indicates that a corresponding dispatch has failed
-   * and finagle can safely attempt to redispatch. These failures should be
-   * handled by finagle and should not count against any user defined retry
-   * budget.
+   * A module to strip out dangerous flags; more coming soon.
    */
-  private[finagle] object Requeueable extends Injections with Extractions {
-    val flag = Flag.Requeueable
-  }
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = 
+    new Stack.Module0[ServiceFactory[Req, Rep]] {
+      val role = Failure.role
+      val description = "process failures"
+      
+      private[this] val filter = new ProcessFailures[Req, Rep]
+
+      def make(next: ServiceFactory[Req, Rep]) = filter andThen next
+    }
 }

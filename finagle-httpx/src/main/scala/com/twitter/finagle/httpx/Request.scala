@@ -1,16 +1,16 @@
 package com.twitter.finagle.httpx
 
 import com.twitter.finagle.httpx.netty.{HttpRequestProxy, Bijections}
-import com.twitter.io.Charsets
-import java.net.{InetAddress, InetSocketAddress}
+import com.twitter.io.{Charsets, Reader}
 import java.io.ByteArrayOutputStream
+import java.net.{InetAddress, InetSocketAddress}
 import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
 import org.jboss.netty.handler.codec.http._
-import scala.collection.JavaConverters._
 import scala.beans.BeanProperty
+import scala.collection.JavaConverters._
 
 import Bijections._
 
@@ -182,28 +182,20 @@ object Request {
     }
   }
 
-  private[httpx] def apply(
-    method: Method,
-    uri: String,
-    version: Version = Version.Http11,
-    headers: Map[String, Seq[String]] = Map.empty
-  ): Request = {
-    val req = new DefaultHttpRequest(from(version), from(method), uri)
-    headers foreach { case (field, values) =>
-      values foreach { v => req.headers.add(field, v) }
-    }
-    new Request {
-      val httpRequest = req
-      lazy val remoteSocketAddress = new InetSocketAddress(0)
-    }
-  }
-
-  /** Create Request from parameters.  Convenience method for testing. */
-  def apply(params: Tuple2[String, String]*): MockRequest =
+  /**
+   * Create an HTTP/1.1 GET Request from query string parameters.
+   *
+   * @params params a list of key-value pairs representing the query string.
+   */
+  def apply(params: Tuple2[String, String]*): Request =
     apply("/", params:_*)
 
-  /** Create Request from URI and parameters.  Convenience method for testing. */
-  def apply(uri: String, params: Tuple2[String, String]*): MockRequest = {
+  /**
+   * Create an HTTP/1.1 GET Request from URI and query string parameters.
+   *
+   * @params params a list of key-value pairs representing the query string.
+   */
+  def apply(uri: String, params: Tuple2[String, String]*): Request = {
     val encoder = new QueryStringEncoder(uri)
     params.foreach { case (key, value) =>
       encoder.addParam(key, value)
@@ -211,21 +203,66 @@ object Request {
     apply(Method.Get, encoder.toString)
   }
 
-  /** Create Request from URI string.  Convenience method for testing. */
-  def apply(uri: String): MockRequest =
+  /**
+   * Create an HTTP/1.1 GET Request from URI string.
+   * */
+  def apply(uri: String): Request =
     apply(Method.Get, uri)
 
-  /** Create Request from method and URI string.  Convenience method for testing. */
-  def apply(method: Method, uri: String): MockRequest =
+  /**
+   * Create an HTTP/1.1 GET Request from method and URI string.
+   */
+  def apply(method: Method, uri: String): Request =
     apply(Version.Http11, method, uri)
 
-  /** Create Request from version, method, and URI string.  Convenience method for testing. */
-  def apply(version: Version, method: Method, uri: String): MockRequest = {
-    val req = new DefaultHttpRequest(from(version), from(method), uri)
-    new MockRequest {
-      override val httpRequest = req
-      override val remoteSocketAddress = new InetSocketAddress("127.0.0.1", 12345)
+  /**
+   * Create an HTTP/1.1 GET Request from version, method, and URI string.
+   */
+  def apply(version: Version, method: Method, uri: String): Request = {
+    val reqIn = new DefaultHttpRequest(from(version), from(method), uri)
+    new Request {
+      val httpRequest = reqIn
+      lazy val remoteSocketAddress = new InetSocketAddress(0)
     }
+  }
+
+  /**
+   * Create an HTTP/1.1 GET Request from Version, Method, URI, and Reader.
+   *
+   * A [[com.twitter.io.Reader]] is a stream of bytes serialized to HTTP chunks.
+   * `Reader`s are useful for representing streaming data in the body of the
+   * request (e.g. a large file, or long lived computation that produces results
+   * incrementally).
+   *
+   * {{{
+   * val data = Reader.fromStream(File.open("data.txt"))
+   * val post = Request(Http11, Post, "/upload", data)
+   *
+   * client(post) onSuccess {
+   *   case r if r.status == Ok => println("Success!")
+   *   case _                   => println("Something went wrong...")
+   * }
+   * }}}
+   */
+  def apply(
+    version: Version,
+    method: Method,
+    uri: String,
+    reader: Reader
+  ): Request = {
+    val httpReq = new DefaultHttpRequest(from(version), from(method), uri)
+    httpReq.setChunked(true)
+    apply(httpReq, reader, new InetSocketAddress(0))
+  }
+
+  private[httpx] def apply(
+    reqIn: HttpRequest,
+    readerIn: Reader,
+    remoteAddr: InetSocketAddress
+  ): Request = new Request {
+    override val reader = readerIn
+    val httpRequest = reqIn
+    lazy val remoteSocketAddress = remoteAddr
   }
 
   /** Create Request from HttpRequest and Channel.  Used by Codec. */
@@ -234,25 +271,6 @@ object Request {
       val httpRequest = httpRequestArg
       lazy val remoteSocketAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
     }
-
-  // for testing
-  protected class MockRequest extends Request {
-    val httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
-    val remoteSocketAddress = new InetSocketAddress("127.0.0.1", 12345)
-
-    // Create a MockRequest with a specific IP
-    def withIp(ip: String) =
-      new MockRequest {
-        override val httpRequest = MockRequest.this.httpRequest
-        override val remoteSocketAddress = new InetSocketAddress(ip, 12345)
-      }
-
-    // Create an internal MockRequest
-    def internal = withIp("10.0.0.1")
-
-    // Create an external MockRequest
-    def external = withIp("8.8.8.8")
-  }
 
   /** Create a query string from URI and parameters. */
   def queryString(uri: String, params: Tuple2[String, String]*): String = {

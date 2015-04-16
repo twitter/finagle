@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.client.StackBasedClient
 import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest}
 import org.apache.thrift.protocol.TProtocolFactory
@@ -11,8 +12,10 @@ import org.apache.thrift.protocol.TProtocolFactory
  */
 @deprecated("Use object ThriftMux", "7.0.0")
 class ThriftMuxClientLike private[finagle](client: ThriftMux.Client)
-  extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
-  with (Stack.Params => Client[ThriftClientRequest, Array[Byte]])
+  extends StackBasedClient[ThriftClientRequest, Array[Byte]]
+    with Stack.Parameterized[ThriftMuxClientLike]
+    with Stack.Transformable[ThriftMuxClientLike]
+    with ThriftRichClient
 {
   /**
    * Used for Java access.
@@ -52,8 +55,14 @@ class ThriftMuxClientLike private[finagle](client: ThriftMux.Client)
    * Create a new ThriftMuxClientLike with `p` added to the
    * parameters used to configure the `muxer`.
    */
-  def configured[P: Stack.Param](p: P): ThriftMuxClientLike =
-    new ThriftMuxClientLike(client.configured(p))
+  override def configured[P: Stack.Param](p: P): ThriftMuxClientLike = super.configured(p)
+  override def configured[P](psp: (P, Stack.Param[P])): ThriftMuxClientLike = super.configured(psp)
+
+  def withParams(ps: Stack.Params): ThriftMuxClientLike =
+    new ThriftMuxClientLike(client.withParams(ps))
+
+  def transformed(t: Stack.Transformer): ThriftMuxClientLike =
+    new ThriftMuxClientLike(client.transformed(t))
 
   /**
    * Produce a [[com.twitter.finagle.ThriftMuxClientLike]] using the provided
@@ -68,6 +77,9 @@ class ThriftMuxClientLike private[finagle](client: ThriftMux.Client)
    */
   def withProtocolFactory(pf: TProtocolFactory): ThriftMuxClientLike =
     new ThriftMuxClientLike(client.withProtocolFactory(pf))
+
+  def newService(dest: Name, label: String): Service[ThriftClientRequest, Array[Byte]] =
+    client.newService(dest, label)
 
   def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
     client.newClient(dest, label)

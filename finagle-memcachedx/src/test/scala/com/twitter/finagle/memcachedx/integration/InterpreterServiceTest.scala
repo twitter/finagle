@@ -21,7 +21,7 @@ class InterpreterServiceTest extends FunSuite with BeforeAndAfter {
 
   before {
     server = new InProcessMemcached(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-    val address = server.start().localAddress
+    val address = server.start().boundAddress
     client = ClientBuilder()
       .hosts(address)
       .codec(new Memcached)

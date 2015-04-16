@@ -110,7 +110,7 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
 
       ClientBuilder()
         .name("theClient")
-        .hosts(svc.localAddress)
+        .hosts(svc.boundAddress)
         .codec(StringClientCodec)
         .hostConnectionLimit(1)
         .tracer(clientTracer)

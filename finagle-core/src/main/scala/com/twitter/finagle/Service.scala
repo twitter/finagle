@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import java.net.SocketAddress
-import com.twitter.util.{Closable, Future, Time}
+import com.twitter.util.{Closable, Future, NonFatal, Time}
 
 object Service {
   /**
@@ -13,7 +13,7 @@ object Service {
       try {
         service(request)
       } catch {
-        case e: Throwable => Future.exception(e)
+        case NonFatal(e) => Future.exception(e)
       }
     }
   }
@@ -21,6 +21,12 @@ object Service {
   def mk[Req, Rep](f: Req => Future[Rep]): Service[Req, Rep] = new Service[Req, Rep] {
     def apply(req: Req) = f(req)
   }
+
+  /**
+   * A service with a constant reply. Always available; never closable.
+   */
+  def const[Rep](rep: Future[Rep]): Service[Any, Rep] =
+    new service.ConstantService(rep)
 }
 
 /**
@@ -50,7 +56,7 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) with Closable {
   final def release() { close() }
 
   def close(deadline: Time) = Future.Done
-  
+
   /**
    * The current availability [[Status]] of this Service.
    */
@@ -174,7 +180,7 @@ abstract class ServiceFactory[-Req, +Rep]
    * releases the service.
    */
   final def toService: Service[Req, Rep] = new FactoryToService(this)
-  
+
   /**
    * The current availability [[Status]] of this ServiceFactory
    */
@@ -240,9 +246,12 @@ object FactoryToService {
 
   // TODO: we should simply transform the stack for boolean
   // stackables like this.
-  case class Enabled(enabled: Boolean)
-  implicit object Enabled extends Stack.Param[Enabled] {
-    val default = Enabled(false)
+  case class Enabled(enabled: Boolean) {
+    def mk(): (Enabled, Stack.Param[Enabled]) =
+      (this, Enabled.param)
+  }
+  object Enabled {
+    implicit val param = Stack.Param(Enabled(false))
   }
 
   /**
@@ -300,17 +309,17 @@ object FactoryToService {
 class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
   extends Service[Req, Rep]
 {
-  def apply(request: Req) =
+  def apply(request: Req): Future[Rep] =
     factory() flatMap { service =>
       service(request) ensure {
         service.close()
       }
     }
 
-  override def close(deadline: Time) = factory.close(deadline)
-  override def status = factory.status
+  override def close(deadline: Time): Future[Unit] = factory.close(deadline)
+  override def status: Status = factory.status
   // TODO(CSL-1336): Finalize isAvailable
-  override def isAvailable = factory.isAvailable
+  override def isAvailable: Boolean = factory.isAvailable
 }
 
 /**

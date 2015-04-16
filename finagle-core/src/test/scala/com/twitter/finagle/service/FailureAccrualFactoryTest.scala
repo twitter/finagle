@@ -1,17 +1,18 @@
 package com.twitter.finagle.service
 
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
-import org.scalatest.mock.MockitoSugar
-import org.mockito.Mockito.{times, verify, when}
-import org.mockito.Matchers
-import org.mockito.Matchers._
+import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.finagle.{Status, MockTimer, ServiceFactory, Service}
 import com.twitter.util._
-import com.twitter.conversions.time._
-import com.twitter.util.Throw
+import java.util.concurrent.TimeUnit
+import org.junit.runner.RunWith
+import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Matchers
+import org.mockito.Matchers._
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
+import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
 class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
@@ -96,6 +97,32 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       assert(statsReceiver.counters.get(List("removals")) === Some(2))
       assert(!factory.isAvailable)
       assert(!service.isAvailable)
+    }
+  }
+  
+  test("a failing factory should be busy; done when revived") {
+    Time.withCurrentTimeFrozen { tc =>
+      val h = new Helper
+      import h._
+      
+      assert(factory.status === Status.Open)
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      assert(factory.status === Status.Open)
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      
+      assert(factory.status == Status.Busy)
+
+      tc.advance(10.seconds)
+      timer.tick()
+      
+      assert(factory.status === Status.Open)
     }
   }
 
@@ -198,6 +225,10 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
     // This propagates to the service as well.
     assert(!service.isAvailable)
+    
+    when(underlying.status) thenReturn Status.Busy
+
+    assert(service.status === Status.Busy)
   }
 
   class BrokenFactoryHelper {
@@ -279,6 +310,18 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       assert(!service.isAvailable)
 
       verify(underlyingService, times(3))(123)
+    }
+  }
+
+  test("perturbs") {
+    val perturbation = 0.2f
+    val duration = 1.seconds
+    val rand = new Random(1)
+    for (_ <- 1 to 50) {
+      val d = FailureAccrualFactory.perturb(duration, perturbation, rand)()
+      val diff = d.diff(duration).inUnit(TimeUnit.MILLISECONDS)
+      assert(diff >= 0)
+      assert(diff < 200)
     }
   }
 }

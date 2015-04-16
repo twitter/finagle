@@ -28,10 +28,8 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     val pool = new SingletonPool(underlying, NullStatsReceiver)
 
     def assertClosed() {
-      pool().poll match {
-        case Some(Throw(Failure.Cause(_: ServiceClosedException))) =>
-        case _ => fail()
-      }
+      val Some(Throw(Failure(Some(cause)))) = pool().poll
+      assert(cause.isInstanceOf[ServiceClosedException])
     }
   }
 
@@ -241,5 +239,53 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
 
     verify(underlying, times(1)).apply(any[ClientConnection])
     verify(service, never).close(any[Time])
+  }
+
+  test("composes pool and service status") {
+    val ctx = new Ctx
+    import ctx._
+    
+    // Not yet initialized.
+    assert(pool.status === Status.Open)
+    verify(underlying, times(1)).status
+    when(underlying.status).thenReturn(Status.Closed)
+    assert(pool.status === Status.Closed)
+
+    when(underlying.status).thenReturn(Status.Open)
+    underlyingP.setValue(service)
+
+    val s = Await.result(pool())
+    assert(pool.status === Status.Open)
+    when(service.status).thenReturn(Status.Busy)
+    assert(pool.status === Status.Busy)
+    when(underlying.status).thenReturn(Status.Closed)
+    assert(pool.status === Status.Closed)
+    when(underlying.status).thenReturn(Status.Busy)
+    
+    when(service.status).thenReturn(Status.Open)
+    assert(pool.status === Status.Busy)
+    when(pool.status).thenReturn(Status.Open)
+    assert(pool.status === Status.Open)
+    
+    // After close, we're forever Closed.
+    pool.close()
+    assert(pool.status === Status.Closed)
+  }
+
+  test("ignore cached but Closed service status") {
+    val ctx = new Ctx
+    import ctx._
+    
+    underlyingP.setValue(service)
+    val s = Await.result(pool())
+    
+    // We're checked out; reflect the service status
+    when(service.status).thenReturn(Status.Busy)
+    assert(pool.status === Status.Busy)
+    
+    when(service.status).thenReturn(Status.Closed)
+    assert(pool.status === Status.Open)
+    when(underlying.status).thenReturn(Status.Closed)
+    assert(pool.status === Status.Closed)
   }
 }

@@ -6,7 +6,8 @@ import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.{
   CancelledRequestException, ChannelClosedException, Dtab, Service, ServiceProxy}
 import com.twitter.io.{Buf, Reader, Writer}
-import com.twitter.util.{Await, Closable, Future, Promise, Time, JavaTimer}
+import com.twitter.util.{
+  Await, Closable, Future, Promise, Time, JavaTimer, Return, Throw}
 import java.io.{StringWriter, PrintWriter}
 import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
@@ -47,6 +48,30 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
   }
 
   def go(name: String)(connect: HttpService => HttpService) {
+
+    test(name + ": client stack observes max header size") {
+      import scala.collection.JavaConverters._
+      val service = new HttpService {
+        def apply(req: Request) = {
+          val res = Response()
+          res.headers.set("Foo", ("*" * 8192) + "Bar: a")
+          Future.value(res)
+        }
+      }
+      val client = connect(service)
+      // Whether this fails or not, which determined by configuration of max
+      // header size in client configuration, there should definitely be no
+      // "Bar" header.
+      val hasBar = client(Request()).transform {
+        case Throw(_) => Future.False
+        case Return(res) =>
+          val names = res.headers.names().asScala
+          Future.value(names.exists(_.contains("Bar")))
+      }
+      assert(!Await.result(hasBar))
+      client.close()
+    }
+
     test(name + ": echo") {
       val service = new HttpService {
         def apply(request: Request) = {
@@ -382,7 +407,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
       val client = ClientBuilder()
         .codec(Http().enableTracing(true))
-        .hosts(Seq(server.localAddress))
+        .hosts(Seq(server.boundAddress))
         .hostConnectionLimit(1)
         .name("client")
         .build()
@@ -403,7 +428,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
       val client = ClientBuilder()
         .codec(Http())
-        .hosts(Seq(server.localAddress))
+        .hosts(Seq(server.boundAddress))
         .hostConnectionLimit(1)
         .name("client")
         .build()
@@ -436,7 +461,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
       val client = ClientBuilder()
         .codec(Http().streaming(true))
-        .hosts(Seq(server.localAddress))
+        .hosts(Seq(server.boundAddress))
         .hostConnectionLimit(1)
         .name("client")
         .build()

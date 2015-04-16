@@ -50,6 +50,6 @@ private[http] object ReaderUtils {
         trans.write(HttpChunk.LAST_CHUNK)
       case Some(buf) =>
         trans.write(chunkOfBuf(buf)) before 
-          streamChunks(trans, r)
+          streamChunks(trans, r, bufSize)
     }
 }

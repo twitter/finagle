@@ -132,10 +132,10 @@ abstract class SimpleRetryPolicy[A](i: Int) extends RetryPolicy[A]
 object RetryPolicy extends JavaSingleton {
   object RetryableWriteException {
     def unapply(thr: Throwable): Option[Throwable] = thr match {
-      case exc@Failure.Retryable(_) => Some(exc)
       // We don't retry interruptions by default since they
       // indicate that the request was discarded.
-      case Failure.InterruptedBy(_) => None
+      case f: Failure if f.isFlagged(Failure.Interrupted) => None
+      case f: Failure if f.isFlagged(Failure.Restartable) => Some(f.show)
       case WriteException(exc) => Some(exc)
       case _ => None
     }
@@ -151,14 +151,18 @@ object RetryPolicy extends JavaSingleton {
   }
 
   val TimeoutAndWriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = WriteExceptionsOnly orElse {
-    case Throw(Failure.Cause(_: TimeoutException)) => true
-    case Throw(Failure.Cause(_: UtilTimeoutException)) => true
+    case Throw(Failure(Some(_: TimeoutException))) => true
+    case Throw(Failure(Some(_: UtilTimeoutException))) => true
     case Throw(_: TimeoutException) => true
     case Throw(_: UtilTimeoutException) => true
   }
 
   val ChannelClosedExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
     case Throw(_: ChannelClosedException) => true
+  }
+
+  val Never: RetryPolicy[Try[Nothing]] = new RetryPolicy[Try[Nothing]] {
+    def apply(t: Try[Nothing]) = None
   }
 
   /**

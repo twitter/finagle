@@ -4,8 +4,8 @@ import java.util.{Calendar, TimeZone}
 import java.util.logging.Logger
 import java.sql.{Date, Timestamp, Time}
 import java.text.ParsePosition
-import java.text.SimpleDateFormat
 import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader, BufferWriter}
+import com.twitter.util.TwitterDateFormat
 
 
 /**
@@ -134,7 +134,7 @@ class TimestampValue(
     }
     
     val parsePosition = new ParsePosition(0)
-    val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    val format = TwitterDateFormat("yyyy-MM-dd HH:mm:ss")
     format.setTimeZone(extractionTimeZone)
     val timeInMillis = format.parse(str, parsePosition).getTime
         

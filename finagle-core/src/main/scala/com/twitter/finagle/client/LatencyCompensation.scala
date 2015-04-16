@@ -1,0 +1,65 @@
+package com.twitter.finagle.client
+
+import com.twitter.finagle.client.AddrMetadataExtraction.AddrMetadata
+import com.twitter.finagle.{Addr, Stack, Stackable, ServiceFactory}
+import com.twitter.util.Duration
+
+/**
+ * Latency compensation enables the modification of connection and
+ * request timeouts on a per-endpoint basis.  For instance, if a
+ * client has both network-local and trans-continental endpoints, a
+ * reasonable latency compensator might add the speed-of-light penalty
+ * when communicating with distant endpoints.
+ */
+object LatencyCompensation {
+
+  object Role extends Stack.Role("LatencyCompensation")
+
+  /**
+   * A compensator is a function that takes an arbitrary address metadata map
+   * and computes a latency compensation. This compensation can be added to
+   * connection and request timeouts. Latency compensation is exposed to the
+   * stack via a Stack.Param LatencyCompensation.Compensation.
+   */
+  case class Compensator(compensator: Addr.Metadata => Duration) {
+    def mk(): (Compensator, Stack.Param[Compensator]) =
+      (this, Compensator.param)
+  }
+  object Compensator {
+    implicit val param =
+      Stack.Param(Compensator(_ => Duration.Zero))
+  }
+
+  /**
+   * Set by LatencyCompensation for consumption by other modules.
+   * Do not set this Param. Instead configure a Compensator.
+   */
+  private[finagle] case class Compensation(howlong: Duration) {
+    def mk(): (Compensation, Stack.Param[Compensation]) =
+      (this, Compensation.param)
+  }
+  private[finagle] object Compensation {
+    implicit val param =
+      Stack.Param(Compensation(Duration.Zero))
+  }
+
+
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Module[ServiceFactory[Req, Rep]] {
+      val role = Role
+      val description = "Sets a latency compensation to be added based on the destination address"
+      val parameters = Seq(
+        implicitly[Stack.Param[AddrMetadata]],
+        implicitly[Stack.Param[Compensator]]
+      )
+      def make(prms: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
+        val AddrMetadata(metadata) = prms[AddrMetadata]
+        val Compensator(compensate) = prms[Compensator]
+        val compensation = compensate(metadata)
+        
+        val compensated = next.make(prms + Compensation(compensation))
+        Stack.Leaf(this, compensated)
+      }
+    }
+
+}

@@ -1,7 +1,6 @@
 package com.twitter.finagle.util
 
 import com.twitter.finagle.WeightedSocketAddress
-import com.twitter.finagle.core.util.InetAddressUtil
 import com.twitter.util.{Future, FuturePool, Return, Throw}
 import com.twitter.concurrent.AsyncSemaphore
 import com.google.common.cache.{Cache => GCache}
@@ -20,7 +19,7 @@ object InetSocketAddressUtil {
     bound match {
       case addr: InetSocketAddress if addr.getAddress().isAnyLocalAddress() =>
         val host = try InetAddress.getLocalHost() catch {
-          case _: UnknownHostException => InetAddressUtil.Loopback
+          case _: UnknownHostException => InetAddress.getLoopbackAddress
         }
         new InetSocketAddress(host, addr.getPort())
       case _ => bound
@@ -39,7 +38,7 @@ object InetSocketAddressUtil {
    */
   def parseHostPorts(hosts: String): Seq[HostPort] =
     hosts split Array(' ', ',') filter (_.nonEmpty) map (_.split(":")) map { hp =>
-      require(hp.size == 2, "You must specify host and port")
+      require(hp.length == 2, "You must specify host and port")
       hp match {
         case Array(host, "*") => (host, 0)
         case Array(host, portStr) => (host, portStr.toInt)

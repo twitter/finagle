@@ -3,7 +3,6 @@ package com.twitter.finagle.exp.mysql
 import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferWriter, Packet}
 import java.security.MessageDigest
 import java.util.logging.Logger
-import scala.annotation.tailrec
 
 object Command {
   val COM_NO_OP               = -1.toByte   // used internall by this client
@@ -114,8 +113,9 @@ case class HandshakeResponse(
 
   def toPacket = {
     val fixedBodySize = 34
-    val dbStrSize = database map { _.size + 1 } getOrElse(0)
-    val packetBodySize = username.getOrElse("").size + hashPassword.size + dbStrSize + fixedBodySize
+    val dbStrSize = database.map { _.length + 1 }.getOrElse(0)
+    val packetBodySize =
+      username.getOrElse("").length + hashPassword.length + dbStrSize + fixedBodySize
     val bw = BufferWriter(new Array[Byte](packetBodySize))
     bw.writeInt(clientCap.mask)
     bw.writeInt(maxPacketSize)

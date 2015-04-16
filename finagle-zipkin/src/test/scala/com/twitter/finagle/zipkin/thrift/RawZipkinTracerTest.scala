@@ -69,8 +69,8 @@ class RawZipkinTracerTest extends FunSuite {
 
     val localAddress = InetAddress.getByAddress(Array.fill(4) { 1 })
     val remoteAddress = InetAddress.getByAddress(Array.fill(4) { 10 })
-    val port1 = RandomSocket.nextPort()
-    val port2 = RandomSocket.nextPort()
+    val port1 = 80 // never bound
+    val port2 = 53 // ditto
     tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientAddr(new InetSocketAddress(localAddress, port1))))
     tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.LocalAddr(new InetSocketAddress(localAddress, port1))))
     tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ServerAddr(new InetSocketAddress(remoteAddress, port2))))

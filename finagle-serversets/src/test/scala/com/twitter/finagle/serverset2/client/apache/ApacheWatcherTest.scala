@@ -1,7 +1,9 @@
 package com.twitter.finagle.serverset2.client.apache
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.serverset2.client._
+import com.twitter.finagle.util.DefaultTimer
 import org.apache.zookeeper.WatchedEvent
 import org.apache.zookeeper.Watcher.Event.{EventType, KeeperState}
 import org.junit.runner.RunWith
@@ -26,7 +28,9 @@ class ApacheWatcherTest extends FlatSpec
     (KeeperState.Disconnected, SessionState.Disconnected),
     (KeeperState.Expired, SessionState.Expired),
     (KeeperState.NoSyncConnected, SessionState.NoSyncConnected),
-    (KeeperState.SyncConnected, SessionState.SyncConnected))
+    (KeeperState.SyncConnected, SessionState.SyncConnected),
+    (KeeperState.SaslAuthenticated, SessionState.SaslAuthenticated),
+    (KeeperState.ConnectedReadOnly, SessionState.ConnectedReadOnly))
 
   val nodeEvents = Map(
     (EventType.NodeChildrenChanged, NodeEvent.ChildrenChanged),
@@ -39,21 +43,17 @@ class ApacheWatcherTest extends FlatSpec
   }
 
   if(!sys.props.contains("SKIP_FLAKY")) {
-  "ApacheWatcher" should "handle session events" in {
-    for (ks <- KeeperState.values) {
-      watcher.process(new WatchedEvent(EventType.None, ks, path))
-      eventually {
-        assert(watcher.state() === WatchState.SessionState(sessionEvents(ks)))
-      }
+    "ApacheWatcher" should "handle session events" in {
+      for (ks <- KeeperState.values) {
+        watcher.process(new WatchedEvent(EventType.None, ks, path))
+        eventually {
+          assert(watcher.state() === WatchState.SessionState(sessionEvents(ks)))
+        }
     }
-    assert(statsReceiver.counter("session_auth_failures")() === 1)
-    assert(statsReceiver.counter("session_connects")() === 1)
-    assert(statsReceiver.counter("session_disconnects")() === 1)
-    assert(statsReceiver.counter("session_expirations")() === 1)
   }
   }
 
-  "ApacheWatcher" should "handle node events" in {
+  "ApacheWatcher" should "handle and count node events" in {
     for (ev <- EventType.values) {
       watcher.process(new WatchedEvent(ev, KeeperState.SyncConnected, path))
       if (ev == EventType.None) {
@@ -65,7 +65,23 @@ class ApacheWatcherTest extends FlatSpec
         eventually {
           assert(watcher.state() === WatchState.Determined(nodeEvents(ev)))
         }
+        assert(statsReceiver.counter(ApacheNodeEvent(ev).name)() === 1)
       }
+    }
+  }
+
+  "StatsWatcher" should "count session events" in {
+    val statsWatcher = SessionStats.watcher(watcher.state, statsReceiver, 5.seconds, DefaultTimer.twitter)
+    for (ks <- KeeperState.values) {
+      watcher.process(new WatchedEvent(EventType.None, ks, path))
+      var currentState: WatchState = WatchState.Pending
+      statsWatcher.changes respond { s: WatchState =>
+        currentState = s
+      }
+      eventually {
+        assert(currentState === WatchState.SessionState(sessionEvents(ks)))
+      }
+      assert(statsReceiver.counter(ApacheSessionState(ks).name)() === 1)
     }
   }
 }

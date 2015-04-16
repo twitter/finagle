@@ -10,8 +10,7 @@ import com.twitter.io.Buf
 class MarshalledContextTest extends FunSuite with AssertionsForJUnit {
   val ctx = new MarshalledContext
 
-  val a = new ctx.Key[String] {
-    val marshalId = Buf.Utf8("a.key")
+  val a = new ctx.Key[String]("a.key") {
     def marshal(value: String) = Buf.Utf8(value)
     def tryUnmarshal(buf: Buf) = buf match {
       case Buf.Utf8(value) => Return(value)
@@ -19,8 +18,7 @@ class MarshalledContextTest extends FunSuite with AssertionsForJUnit {
     }
   }
 
-  val b = new ctx.Key[Int] {
-    val marshalId = Buf.Utf8("b.key")
+  val b = new ctx.Key[Int]("b.key") {
     def marshal(value: Int) = Buf.U32BE(value)
     def tryUnmarshal(buf: Buf) = buf match {
       case Buf.U32BE(value, Buf.Empty) => Return(value)
@@ -38,8 +36,25 @@ class MarshalledContextTest extends FunSuite with AssertionsForJUnit {
    assert(ctx.marshal(env).toMap === Map(
      Buf.Utf8("a.key") -> Buf.Utf8("ok"),
      Buf.Utf8("b.key") -> Buf.U32BE(123)))
+
    env = env.bound(b, 321)
    assert(ctx.marshal(env).toMap === Map(
+     Buf.Utf8("a.key") -> Buf.Utf8("ok"),
+     Buf.Utf8("b.key") -> Buf.U32BE(321)))
+
+   assert(ctx.marshal(ctx.OrElse(env, ctx.Empty)).toMap === Map(
+     Buf.Utf8("a.key") -> Buf.Utf8("ok"),
+     Buf.Utf8("b.key") -> Buf.U32BE(321)))
+  }
+
+  test("Only marshal the most recent binding for a given key (OrElse)") {
+   val env1 = ctx.Empty.bound(a, "ok").bound(b, 123)
+   assert(ctx.marshal(env1).toMap === Map(
+     Buf.Utf8("a.key") -> Buf.Utf8("ok"),
+     Buf.Utf8("b.key") -> Buf.U32BE(123)))
+     
+   val env2 = ctx.Empty.bound(b, 321)
+   assert(ctx.marshal(ctx.OrElse(env2, env1)).toMap === Map(
      Buf.Utf8("a.key") -> Buf.Utf8("ok"),
      Buf.Utf8("b.key") -> Buf.U32BE(321)))
   }
@@ -60,6 +75,7 @@ class MarshalledContextTest extends FunSuite with AssertionsForJUnit {
       Buf.Utf8("bleep") -> Buf.Utf8("NOPE")))
   }
   
+
   test("Translucency: convert ok") {
     var env = ctx.Empty: ctx.Env
     

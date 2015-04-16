@@ -8,20 +8,21 @@ target(name='scala',
 
 target(name='core',
   dependencies=[
-    '3rdparty:junit',
-    '3rdparty:mockito-all',
-    '3rdparty:netty',
-    '3rdparty:scalatest',
-    '3rdparty:specs',
-    '3rdparty:zookeeper',
-    '3rdparty/jvm/com/twitter/common:io',
-    '3rdparty/jvm/com/twitter/common:quantity',
     '3rdparty/jvm/com/twitter/common/zookeeper:client',
     '3rdparty/jvm/com/twitter/common/zookeeper:server-set',
+    '3rdparty/jvm/com/twitter/common:io',
+    '3rdparty/jvm/com/twitter/common:quantity',
+    '3rdparty/jvm/org/apache/zookeeper',
+    '3rdparty/jvm/junit',
+    '3rdparty/jvm/org/mockito:mockito-all',
+    '3rdparty/jvm/io/netty',
+    '3rdparty/jvm/org/scalatest',
+    '3rdparty/jvm/org/scala-tools/testing:specs',
     'finagle/finagle-core',
-    'finagle/finagle-test',
     'finagle/finagle-serversets',
-    'util/util-core'
+    'finagle/finagle-test',
+    'util/util-core',
+    'util/util-zk-test'
   ],
 )
 
@@ -41,6 +42,7 @@ junit_tests(name='serversets',
     'finagle/finagle-serversets/src/test/resources'
   ],
   sources=globs(
+    'com/twitter/finagle/*.scala',
     'com/twitter/finagle/serverset2/*.scala',
     'com/twitter/finagle/zookeeper/*.scala',
   )

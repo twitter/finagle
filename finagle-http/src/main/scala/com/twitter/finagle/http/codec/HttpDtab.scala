@@ -37,16 +37,16 @@ object HttpDtab {
     Try { Base64.decode(v) } map(new String(_, Utf8))
 
   private val unmatchedFailure =
-    Failure.Cause("Unmatched X-Dtab headers")
+    Failure("Unmatched X-Dtab headers")
 
   private def decodingFailure(value: String) =
-    Failure.Cause("Value not b64-encoded: "+value)
+    Failure("Value not b64-encoded: "+value)
 
   private def pathFailure(path: String, cause: IllegalArgumentException) =
-    Failure.Cause("Invalid path: "+path, cause)
+    Failure("Invalid path: "+path, cause)
 
   private def nameFailure(name: String, cause: IllegalArgumentException) =
-    Failure.Cause("Invalid name: "+name, cause)
+    Failure("Invalid name: "+name, cause)
 
   private def decodePath(b64path: String): Try[Path] =
     b64Decode(b64path) match {
@@ -69,10 +69,10 @@ object HttpDtab {
     }
 
   private def validHeaderPair(aKey: String, bKey: String): Boolean =
-    aKey.size == bKey.size &&
-    aKey.substring(0, aKey.size-1) == bKey.substring(0, bKey.size-1) &&
-    aKey(aKey.size-1) == 'a' &&
-    bKey(bKey.size-1) == 'b'
+    aKey.length == bKey.length &&
+    aKey.charAt(aKey.length - 1) == 'a' &&
+    bKey.charAt(bKey.length - 1) == 'b' &&
+    aKey.substring(0, aKey.length - 1) == bKey.substring(0, bKey.length - 1)
 
   private val EmptyReturn = Return(Dtab.empty)
 
@@ -99,7 +99,7 @@ object HttpDtab {
       // TODO: now that we have a proper Dtab grammar,
       // should just embed this directly instead.
       msg.headers.set(Prefix+indexstr(i)+"-A", b64Encode(prefix.show))
-      msg.headers.set(Prefix+indexstr(i)+"-B".format(i), b64Encode(dst.show))
+      msg.headers.set(Prefix+indexstr(i)+"-B", b64Encode(dst.show))
     }
   }
 

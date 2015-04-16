@@ -10,9 +10,12 @@ object RequestSemaphoreFilter {
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.filter.RequestSemaphoreFilter]] module.
    */
-  case class Param(max: Int)
-  implicit object Param extends Stack.Param[Param] {
-    val default = Param(Int.MaxValue)
+  case class Param(max: Int) {
+    def mk(): (Param, Stack.Param[Param]) =
+      (this, Param.param)
+  }
+  object Param {
+    implicit val param = Stack.Param(Param(Int.MaxValue))
   }
 
   /**

@@ -1,24 +1,26 @@
 package com.twitter.finagle.mux
 
+import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.mux.lease.Acting
 import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.tracing.{Trace, Annotation}
+import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Dtab, Service, WriteException, NoStacktrace, Status}
-import com.twitter.util.{Future, Promise, Time, Duration}
+import com.twitter.finagle.util.DefaultTimer
+import com.twitter.finagle.{Dtab, Service, WriteException, NoStacktrace, Status, Failure}
+import com.twitter.util.{Future, Promise, Time, Duration, Throw, Try, Return, Updatable}
+import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.logging.Logger
-import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.{ChannelBuffer, ReadOnlyChannelBuffer}
 
-/**
- * Indicates that a client request was denied by the server.
- */
-object RequestNackedException
-  extends Exception("The request was nackd by the server")
-  with WriteException with NoStacktrace
+// We can't name this 'failureDetector' because it won't
+// build on the Mac, due to its case-insensitive file system.
+object sessionFailureDetector extends GlobalFlag(
+  "none",
+  "The failure detector used to determine session liveness " +
+    "[none|threshold:minPeriod:threshold:win:closeThreshold]")
 
 /**
  * Indicates that the server failed to interpret or act on the request. This
@@ -39,114 +41,207 @@ case class ServerApplicationError(what: String)
   extends Exception(what)
   with NoStacktrace
 
-private case class Lease(end: Time) {
-  def remaining: Duration = end.sinceNow
-  def expired: Boolean = end < Time.now
-}
-
-private object Lease {
-  import Message.Tlease
-
-  def parse(unit: Byte, howMuch: Long): Option[Lease] = unit match {
-    case Tlease.MillisDuration => Some(new Lease(howMuch.milliseconds.fromNow))
-    case _ => None
-  }
-}
-
 private object Cap extends Enumeration {
   type State = Value
   val Unknown, Yes, No = Value
 }
 
+private[twitter] object ClientDispatcher {
+
+  /**
+   * The client dispatcher can be in one of 4 states,
+   * independent from its transport.
+   *
+   *  - [[Dispatching]] is the stable operating state of a Dispatcher.
+   *    Requests are dispatched, and the dispatcher's status is
+   *    [[com.twitter.finagle.Status.Open]].
+   *  - A dispatcher is [[Draining]] when it has received a `Tdrain`
+   *    message from its peer, but still has outstanding requests.
+   *    In this state, we have promised our peer not to send any more
+   *    requests, thus the dispatcher's status is
+   *    [[com.twitter.finagle.Status.Busy]], and requests for service are
+   *    denied.
+   *  - When a dispatcher is fully drained; that is, it has received a
+   *    `Tdrain` and there are no more pending requests, the dispatcher's
+   *    state is set to [[Drained]]. In this state, no more requests are
+   *    admitted, and they never will be. The dispatcher is useless. It is
+   *    dead. Its status is set to [[com.twitter.finagle.Status.Closed]].
+   *  - Finally, if a server has issued the client a lease, its state is
+   *    set to [[Leasing]] which composes the lease expiry time. This state
+   *    is equivalent to [[Dispatching]] except if the lease has expired.
+   *    At this time, the dispatcher's status is set to
+   *    [[com.twitter.finagle.Status.Busy]]; however, leases are advisory
+   *    and requests are still admitted.
+   */
+  sealed trait State
+  case object Dispatching extends State
+  case object Draining extends State
+  case object Drained extends State
+  case class Leasing(end: Time) extends State {
+    def remaining: Duration = end.sinceNow
+    def expired: Boolean = end < Time.now
+  }
+
+  // We reserve a tag for a default ping message to that we
+  // can cache a full ping message and avoid encoding it
+  // every time.
+  val PingTag = Message.MinTag
+  val MinTag = PingTag+1
+  val MaxTag = Message.MaxTag
+
+  val NackFailure = Failure.rejected("The request was Nacked by the server")
+
+  val Empty: Updatable[Try[Response]] = Updatable.empty()
+}
+
 /**
  * A ClientDispatcher for the mux protocol.
  */
-private[finagle] class ClientDispatcher (
+private[twitter] class ClientDispatcher (
   name: String,
   trans: Transport[ChannelBuffer, ChannelBuffer],
   sr: StatsReceiver
-) extends Service[Request, Response] with Acting {
-  // protects the "drained" field, so that we don't send a request
-  // after sending an Rdrain message
-  private[this] val drainLock = new ReentrantReadWriteLock
-  private[this] val checkDrained = drainLock.readLock
-  private[this] val setDrained = drainLock.writeLock
+) extends Service[Request, Response] {
+  import ClientDispatcher._
+  import Message.{MinTag=>_, MaxTag=>_, _}
 
-  import Message._
+  private[this] implicit val timer = DefaultTimer.twitter
+  // Maintain the dispatcher's state, whose access is mediated
+  // by the readLk and writeLk.
+  @volatile private[this] var state: State = Dispatching
+  private[this] val (readLk, writeLk) = {
+    val lk = new ReentrantReadWriteLock
+    (lk.readLock, lk.writeLock)
+  }
 
   @volatile private[this] var canDispatch: Cap.State = Cap.Unknown
-  @volatile private[this] var drained = false
 
-  private[this] val futureNackedException = Future.exception(RequestNackedException)
-  private[this] val tags = TagSet()
-  private[this] val reqs = TagMap[Promise[Response]](tags)
+  private[this] val futureNackedException = Future.exception(NackFailure)
+
+  // We pre-encode a ping message with the reserved ping tag
+  // (PingTag) in order to avoid re-encoding this frequently sent
+  // message. Since it uses ChannelBuffers, it maintains a read
+  // cursor, and thus it is important that it is not used
+  // concurrently. This happens to agree with the natural way you'd
+  // use it, since a client can only have one outstanding ping per
+  // tag.
+  private[this] val pingMessage = {
+    val buf = new ReadOnlyChannelBuffer(encode(Tping(PingTag)))
+    buf.markReaderIndex()
+    buf
+  }
+  private[this] val pingPromise = new AtomicReference[Promise[Unit]](null)
+
+  private[this] val tags = TagSet(MinTag to MaxTag)
+  private[this] val reqs = TagMap[Updatable[Try[Response]]](tags)
   private[this] val log = Logger.getLogger(getClass.getName)
 
-  @volatile private[this] var lease = new Lease(Time.Top)
-
   private[this] val gauge = sr.addGauge("current_lease_ms") {
-    lease.remaining.inMilliseconds
+    state match {
+      case l: Leasing => l.remaining.inMilliseconds
+      case _ => (Time.Top - Time.now).inMilliseconds
+    }
   }
   private[this] val leaseCounter = sr.counter("leased")
 
-  private[this] def releaseTag(tag: Int): Option[Promise[Response]] = {
-    val result = reqs.unmap(tag)
-    checkDrained.lockInterruptibly()
+  // We're extra paranoid about logging. The log handler is,
+  // after all, outside of our control.
+  private[this] def safeLog(msg: String): Unit =
     try {
-      if (drained && tags.isEmpty) log.info(s"Finished draining a connection to $name")
-    } finally {
-      checkDrained.unlock()
+      log.info(msg)
+    } catch {
+      case _: Throwable =>
     }
-    result
-  }
+
+  private[this] def releaseTag(tag: Int): Option[Updatable[Try[Response]]] =
+    reqs.unmap(tag) match {
+      case None => None
+      case some =>
+        readLk.lock()
+        if (state == Draining && tags.isEmpty) {
+          safeLog(s"Finished draining a connection to $name")
+          readLk.unlock()
+
+          writeLk.lock()
+          state = Drained
+          writeLk.unlock()
+        } else {
+          readLk.unlock()
+        }
+
+        if (some eq Empty) None else some
+    }
 
   private[this] val receive: Message => Unit = {
     case RreqOk(tag, rep) =>
       for (p <- releaseTag(tag))
-        p.setValue(Response(ChannelBufferBuf.Owned(rep)))
+        p() = Return(Response(ChannelBufferBuf.Owned(rep)))
     case RreqError(tag, error) =>
       for (p <- releaseTag(tag))
-        p.setException(ServerApplicationError(error))
+        p() = Throw(ServerApplicationError(error))
     case RreqNack(tag) =>
       for (p <- releaseTag(tag))
-        p.setException(RequestNackedException)
+        p() = Throw(NackFailure)
 
     case RdispatchOk(tag, _, rep) =>
       for (p <- releaseTag(tag))
-        p.setValue(Response(ChannelBufferBuf.Owned(rep)))
+        p() = Return(Response(ChannelBufferBuf.Owned(rep)))
     case RdispatchError(tag, _, error) =>
       for (p <- releaseTag(tag))
-        p.setException(ServerApplicationError(error))
+        p() = Throw(ServerApplicationError(error))
     case RdispatchNack(tag, _) =>
       for (p <- releaseTag(tag))
-        p.setException(RequestNackedException)
+        p() = Throw(NackFailure)
 
     case Rerr(tag, error) =>
       for (p <- releaseTag(tag))
-        p.setException(ServerError(error))
+        p() = Throw(ServerError(error))
+
+    case Rping(PingTag) =>
+      val p = pingPromise.getAndSet(null)
+      if (p != null)
+        p.setDone()
 
     case Rping(tag) =>
       for (p <- releaseTag(tag))
-        p.setValue(Response.empty)
+        p() = Return(Response.empty)
     case Tping(tag) =>
       trans.write(encode(Rping(tag)))
     case Tdrain(tag) =>
       // must be synchronized to avoid writing after Rdrain has been sent
-      log.info(s"Started draining a connection to $name")
-      setDrained.lockInterruptibly()
-      if (tags.isEmpty) log.info(s"Finished draining a connection to $name")
+      safeLog(s"Started draining a connection to $name")
+      writeLk.lockInterruptibly()
       try {
-        drained = true
+        state = if (tags.nonEmpty) Draining else {
+          safeLog(s"Finished draining a connection to $name")
+          Drained
+        }
+
         trans.write(encode(Rdrain(tag)))
       } finally {
-        setDrained.unlock()
+        writeLk.unlock()
       }
-    case Tlease(unit, howMuch) =>
-      Lease.parse(unit, howMuch) foreach { newLease =>
-        log.fine("leased for " + newLease + " to " + trans.remoteAddress)
-        leaseCounter.incr()
-        lease = newLease
-      }
+
+    case Tlease(Message.Tlease.MillisDuration, millis) =>
+      writeLk.lock()
+
+      try {
+        state match {
+          case Leasing(_) | Dispatching =>
+            state = Leasing(Time.now + millis.milliseconds)
+            log.fine(s"leased for ${millis.milliseconds} to ${trans.remoteAddress}")
+            leaseCounter.incr()
+         case Drained | Draining =>
+           // Ignore the lease if we're in the process of draining, since
+           // these are anyway irrecoverable states.
+       }
+     } finally {
+       writeLk.unlock()
+     }
+
+    // Ignore lease types we don't understand. (They are advisory.)
+    case Tlease(_, _) =>
+
     case m@Tmessage(tag) =>
       log.warning("Did not understand Tmessage[tag=%d] %s".format(tag, m))
       trans.write(encode(Rerr(tag, "badmessage")))
@@ -154,7 +249,7 @@ private[finagle] class ClientDispatcher (
       val what = "Did not understand Rmessage[tag=%d] %s".format(tag, m)
       log.warning(what)
       for (p <- releaseTag(tag))
-        p.setException(BadMessageException(what))
+        p() = Throw(BadMessageException(what))
   }
 
   private[this] val readAndAct: ChannelBuffer => Future[Nothing] =
@@ -172,32 +267,43 @@ private[finagle] class ClientDispatcher (
 
   loop() onFailure { case exc =>
     trans.close()
+    val result = Throw(exc)
     for ((tag, p) <- reqs)
-      p.setException(exc)
+      p() = result
   }
 
   def ping(): Future[Unit] = {
-    val p = new Promise[Response]
-    reqs.map(p) match {
-      case None =>
-        Future.exception(WriteException(new Exception("Exhausted tags")))
-      case Some(tag) =>
-        trans.write(encode(Tping(tag))).onFailure { case exc =>
-          releaseTag(tag)
-        }.flatMap(Function.const(p)).unit
+    val done = new Promise[Unit]
+    if (pingPromise.compareAndSet(null, done)) {
+      pingMessage.resetReaderIndex()
+      // Note that we ignore any errors here. In practice this is fine
+      // as (1) this will only happen when the session has anyway
+      // died; (2) subsequent pings will use freshly allocated tags.
+      trans.write(pingMessage) before done
+    } else {
+      val p = new Promise[Response]
+      reqs.map(p) match {
+        case None =>
+          Future.exception(WriteException(new Exception("Exhausted tags")))
+        case Some(tag) =>
+          trans.write(encode(Tping(tag))) transform {
+            case Return(()) =>
+              p.unit
+            case t@Throw(_) =>
+              releaseTag(tag)
+              Future.const(t)
+
+          }
+      }
     }
   }
 
   def apply(req: Request): Future[Response] = {
-    checkDrained.lockInterruptibly()
-    try {
-      if (drained)
-        futureNackedException
-      else
-        dispatch(req)
-    } finally {
-      checkDrained.unlock()
-    }
+    readLk.lock()
+    try state match {
+      case Dispatching | Leasing(_) => dispatch(req)
+      case Draining | Drained => futureNackedException
+    } finally readLk.unlock()
   }
 
   /**
@@ -228,9 +334,12 @@ private[finagle] class ClientDispatcher (
       releaseTag(tag)
     } before {
       p.setInterruptHandler { case cause =>
-        for (reqP <- reqs.maybeRemap(tag, new Promise[Response])) {
+        // We replace the current Updatable, if any, with a stand-in to reserve
+        // the tag of discarded requests until Tdiscarded is acknowledged by the
+        // peer.
+        for (reqP <- reqs.maybeRemap(tag, Empty)) {
           trans.write(encode(Tdiscarded(tag, cause.toString)))
-          reqP.setException(cause)
+          reqP() = Throw(cause)
         }
       }
       p
@@ -250,9 +359,48 @@ private[finagle] class ClientDispatcher (
     } else p
   }
 
-  override def status: Status = trans.status
+  private[this] val detector = {
+    import com.twitter.finagle.util.parsers._
+    val close = () => trans.close(Time.now)
+    val dsr = sr.scope("failuredetector")
 
-  def isActive: Boolean = !lease.expired && !drained
+    sessionFailureDetector() match {
+      case list("threshold", duration(min), double(threshold), int(win), int(closeThreshold)) =>
+        new ThresholdFailureDetector(
+          ping, close, min, threshold, win, closeThreshold, statsReceiver = dsr)
+      case list("threshold", duration(min), double(threshold), int(win)) =>
+        new ThresholdFailureDetector(ping, close, min, threshold, win, statsReceiver = dsr)
+      case list("threshold", duration(min), double(threshold)) =>
+        new ThresholdFailureDetector(ping, close, min, threshold, statsReceiver = dsr)
+      case list("threshold", duration(min)) =>
+        new ThresholdFailureDetector(ping, close, min, statsReceiver = dsr)
+      case list("threshold") =>
+        new ThresholdFailureDetector(ping, close, statsReceiver = dsr)
+
+      case list("none") =>
+        NullFailureDetector
+
+      case list(_*) =>
+        log.warning(s"unknown failure detector ${sessionFailureDetector()} specified")
+        NullFailureDetector
+    }
+  }
+
+  override def status: Status =
+    Status.worst(detector.status,
+      trans.status match {
+        case Status.Closed => Status.Closed
+        case Status.Busy => Status.Busy
+        case Status.Open =>
+          readLk.lock()
+          try state match {
+            case Draining => Status.Busy
+            case Drained => Status.Closed
+            case leased@Leasing(_) if leased.expired => Status.Busy
+            case Leasing(_) | Dispatching => Status.Open
+          } finally readLk.unlock()
+      }
+    )
 
   override def close(deadline: Time): Future[Unit] = trans.close(deadline)
 }

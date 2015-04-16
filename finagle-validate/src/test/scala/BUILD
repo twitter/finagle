@@ -1,8 +1,8 @@
 junit_tests(name='scala',
   dependencies=[
     '3rdparty/jvm/com/twitter/common:metrics-data-sample',
-    '3rdparty:junit',
-    '3rdparty:scalatest',
+    '3rdparty/jvm/junit',
+    '3rdparty/jvm/org/scalatest',
     'finagle/finagle-testers'
   ],
   sources=rglobs('*.scala')

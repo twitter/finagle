@@ -1,5 +1,7 @@
 package com.twitter.finagle.server
 
+import com.twitter.conversions.time._
+import com.twitter.finagle.Stack.Param
 import com.twitter.finagle._
 import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
@@ -9,7 +11,7 @@ import com.twitter.finagle.stats.ServerStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.jvm.Jvm
-import com.twitter.util.{Closable, CloseAwaitably, Return, Throw, Time}
+import com.twitter.util.{Closable, CloseAwaitably, Future, Return, Throw, Time}
 import java.net.SocketAddress
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
@@ -52,7 +54,7 @@ object StackServer {
 
     stk.push(Role.serverDestTracing, ((next: ServiceFactory[Req, Rep]) =>
       new ServerDestTracingProxy[Req, Rep](next)))
-    stk.push(TimeoutFilter.module)
+    stk.push(TimeoutFilter.serverModule)
     stk.push(DtabStatsFilter.module)
     stk.push(StatsFilter.module)
     stk.push(RequestSemaphoreFilter.module)
@@ -80,12 +82,21 @@ object StackServer {
 }
 
 /**
+ * A [[com.twitter.finagle.Server Server]] that is
+ * parameterized.
+ */
+trait StackBasedServer[Req, Rep]
+  extends Server[Req, Rep]
+  with Stack.Parameterized[StackBasedServer[Req, Rep]]
+
+/**
  * A [[com.twitter.finagle.Server]] that composes a
  * [[com.twitter.finagle.Stack]].
  */
 trait StackServer[Req, Rep]
-    extends Server[Req, Rep]
-    with Stack.Parameterized[StackServer[Req, Rep]] {
+  extends StackBasedServer[Req, Rep]
+  with Stack.Parameterized[StackServer[Req, Rep]] {
+
   /** The current stack used in this StackServer. */
   def stack: Stack[ServiceFactory[Req, Rep]]
   /** The current parameter map used in this StackServer */
@@ -93,6 +104,11 @@ trait StackServer[Req, Rep]
   /** A new StackServer with the provided Stack. */
   def withStack(stack: Stack[ServiceFactory[Req, Rep]]): StackServer[Req, Rep]
 
+  def withParams(ps: Stack.Params): StackServer[Req, Rep]
+
+  override def configured[P: Param](p: P): StackServer[Req, Rep]
+
+  override def configured[P](psp: (P, Param[P])): StackServer[Req, Rep]
 }
 
 /**
@@ -100,7 +116,7 @@ trait StackServer[Req, Rep]
  * [[com.twitter.finagle.server.StackServer]].
  */
 trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
-    extends StackServer[Req, Rep] { self =>
+  extends StackServer[Req, Rep] { self =>
 
   protected type In
   protected type Out
@@ -197,7 +213,18 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
             val d = server.newDispatcher(transport, service)
             connections.add(d)
             transport.onClose ensure connections.remove(d)
-          case Throw(_) => transport.close()
+          case Throw(exc) =>
+            // If we fail to create a new session locally, we continue establishing
+            // the session but (1) reject any incoming requests; (2) close it right
+            // away. This allows protocols that support graceful shutdown to
+            // also gracefully deny new sessions.
+            val d = server.newDispatcher(
+              transport, Service.const(Future.exception(Failure.rejected(exc))))
+            connections.add(d)
+            transport.onClose ensure connections.remove(d)
+            // We give it a generous amount of time to shut down the session to
+            // improve our chances of being able to do so gracefully.
+            d.close(10.seconds)
         }
       }
 

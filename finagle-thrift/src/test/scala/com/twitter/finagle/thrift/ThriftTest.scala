@@ -57,7 +57,7 @@ trait ThriftTest { self: FunSuite =>
       .tracer(DefaultTracer)
       .build(ifaceToService(processor, protocolFactory))
 
-    val boundAddr = server.localAddress
+    val boundAddr = server.boundAddress
 
     def close() {
       server.close()

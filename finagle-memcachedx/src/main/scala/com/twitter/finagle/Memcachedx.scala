@@ -3,6 +3,7 @@ package com.twitter.finagle
 import _root_.java.net.{InetSocketAddress, SocketAddress}
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
+import com.twitter.finagle.cacheresolver.CacheNodeGroup
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.{SerialServerDispatcher, PipeliningDispatcher}
 import com.twitter.finagle.memcachedx.protocol.text.{
@@ -32,7 +33,7 @@ private[finagle] object MemcachedxTraceInitializer {
   }
 
   class Filter(tracer: Tracer) extends SimpleFilter[Command, Response] {
-    def apply(command: Command, service: Service[Command, Response]): Future[Response] = 
+    def apply(command: Command, service: Service[Command, Response]): Future[Response] =
       Trace.letTracerAndNextId(tracer) {
         val response = service(command)
         Trace.recordRpc(command.name)
@@ -82,12 +83,12 @@ trait MemcachedxKetamaClient {
     ejectFailedHost: Boolean
   ): memcachedx.Client = {
     new KetamaClient(
-      CacheNodeGroup(group),
-      keyHasher,
-      KetamaClient.DefaultNumReps,
-      faParams(ejectFailedHost),
-      None,
-      ClientStatsReceiver.scope("memcached_client")
+      initialServices       = CacheNodeGroup(group),
+      keyHasher             = keyHasher,
+      numReps               = KetamaClient.DefaultNumReps,
+      failureAccrualParams  = faParams(ejectFailedHost),
+      legacyFAClientBuilder = None,
+      statsReceiver         = ClientStatsReceiver.scope("memcached_client")
     )
   }
 
@@ -105,24 +106,25 @@ trait MemcachedxKetamaClient {
     ejectFailedHost: Boolean
   ): memcachedx.TwemcacheClient = {
     new KetamaClient(
-      CacheNodeGroup(group),
-      keyHasher,
-      KetamaClient.DefaultNumReps,
-      faParams(ejectFailedHost),
-      None,
-      ClientStatsReceiver.scope("twemcache_client")
+      initialServices       = CacheNodeGroup(group),
+      keyHasher             = keyHasher,
+      numReps               = KetamaClient.DefaultNumReps,
+      failureAccrualParams  = faParams(ejectFailedHost),
+      legacyFAClientBuilder = None,
+      statsReceiver         = ClientStatsReceiver.scope("twemcache_client")
     ) with TwemcachePartitionedClient
   }
 
   private def faParams(ejectFailedHost: Boolean) = {
     if (ejectFailedHost) MemcachedxFailureAccrualClient.DefaultFailureAccrualParams
-    else (Int.MaxValue, Duration.Zero)
+    else (Int.MaxValue, () => Duration.Zero)
   }
 }
 
 object MemcachedxTransporter extends Netty3Transporter[Command, Response](
   "memcached", MemcachedClientPipelineFactory)
 
+// deprecated, in favor of `c.t.f.memcached.Memcached`, 2015-02-22
 object MemcachedxClient extends DefaultClient[Command, Response](
   name = "memcached",
   endpointer = Bridge[Command, Response, Command, Response](
@@ -132,12 +134,12 @@ object MemcachedxClient extends DefaultClient[Command, Response](
 ) with MemcachedxRichClient with MemcachedxKetamaClient
 
 private[finagle] object MemcachedxFailureAccrualClient {
-  val DefaultFailureAccrualParams = (5, 30.seconds)
+  val DefaultFailureAccrualParams = (5, () => 30.seconds)
 
   def apply(
       key: KetamaClientKey,
       broker: Broker[NodeHealth],
-      failureAccrualParams: (Int, Duration) = DefaultFailureAccrualParams
+      failureAccrualParams: (Int, () => Duration) = DefaultFailureAccrualParams
   ): Client[Command, Response] with MemcachedxRichClient = {
     new MemcachedxFailureAccrualClient(key, broker, failureAccrualParams)
   }
@@ -145,7 +147,8 @@ private[finagle] object MemcachedxFailureAccrualClient {
 private[finagle] class MemcachedxFailureAccrualClient(
   key: KetamaClientKey,
   broker: Broker[NodeHealth],
-  failureAccrualParams: (Int, Duration)
+  failureAccrualParams: (Int, () => Duration),
+    statsReceiver: StatsReceiver = ClientStatsReceiver
 ) extends DefaultClient[Command, Response](
   name = "memcached",
   endpointer = Bridge[Command, Response, Command, Response](
@@ -154,9 +157,17 @@ private[finagle] class MemcachedxFailureAccrualClient(
   failureAccrual = {
     new KetamaFailureAccrualFactory(
       _,
-      failureAccrualParams._1,
-      failureAccrualParams._2,
-      DefaultTimer.twitter, key, broker)
+      numFailures     = failureAccrualParams._1,
+      markDeadFor     = failureAccrualParams._2,
+      timer           = DefaultTimer.twitter,
+      key             = key,
+      healthBroker    = broker,
+      // set ejection to be true by default.
+      // This is ok, since ejections is triggered only when failureAccrual
+      // is enabled. With `DefaultFailureAccrualParams`, ejections will never
+      // be triggered.
+      ejectFailedHost = true,
+      statsReceiver   = statsReceiver)
   },
   newTraceInitializer = MemcachedxTraceInitializer.Module
 ) with MemcachedxRichClient
@@ -170,6 +181,9 @@ object MemcachedxServer extends DefaultServer[Command, Response, Response, Comma
 object Memcachedx extends Client[Command, Response] with MemcachedxRichClient with MemcachedxKetamaClient with Server[Command, Response] {
   def newClient(dest: Name, label: String): ServiceFactory[Command, Response] =
     MemcachedxClient.newClient(dest, label)
+    
+  def newService(dest: Name, label: String): Service[Command, Response] =
+    MemcachedxClient.newService(dest, label)
 
   def serve(addr: SocketAddress, service: ServiceFactory[Command, Response]): ListeningServer =
     MemcachedxServer.serve(addr, service)

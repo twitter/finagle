@@ -14,7 +14,7 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.context.Contexts
 import com.twitter.io.Buf
-import com.twitter.util.{Closable, Await, Future, Promise, Return}
+import com.twitter.util.{Closable, Await, Future, Promise, Return, Time}
 import java.net.{InetAddress, SocketAddress, InetSocketAddress}
 import org.apache.thrift.protocol._
 import org.junit.runner.RunWith
@@ -29,8 +29,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
   // test package in Maven.
   case class TestContext(buf: Buf)
 
-  val testContext = new Contexts.broadcast.Key[TestContext] {
-    val marshalId = Buf.Utf8("com.twitter.finagle.mux.MuxContext")
+  val testContext = new Contexts.broadcast.Key[TestContext]("com.twitter.finagle.mux.MuxContext") {
     def marshal(tc: TestContext) = tc.buf
     def tryUnmarshal(buf: Buf) = Return(TestContext(buf))
   }
@@ -39,12 +38,17 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     val server = ThriftMux.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.FutureIface {
-        def query(x: String) = 
-          Contexts.broadcast.get(testContext) match {
-            case None => Future.value(x+x)
-            case Some(TestContext(buf)) =>
+        def query(x: String) =
+          (Contexts.broadcast.get(testContext), Dtab.local) match {
+            case (None, Dtab.empty) =>
+              Future.value(x+x)
+
+            case (Some(TestContext(buf)), _) =>
               val Buf.Utf8(str) = buf
               Future.value(str)
+
+            case (_, dtab) =>
+              Future.value(dtab.show)
           }
       })
   }
@@ -61,9 +65,22 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       val client = ThriftMux.newIface[TestService.FutureIface](server)
 
       assert(Await.result(client.query("ok")) === "okok")
-      
+
       Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
         assert(Await.result(client.query("ok")) === "hello context world")
+      }
+    }
+  }
+
+  test("end-to-end thriftmux: propagate Dtab.local") {
+    new ThriftMuxTestServer {
+      val client = ThriftMux.newIface[TestService.FutureIface](server)
+
+      assert(Await.result(client.query("ok")) === "okok")
+
+      Dtab.unwind {
+        Dtab.local = Dtab.read("/foo=>/bar")
+        assert(Await.result(client.query("ok")) === "/foo=>/bar")
       }
     }
   }
@@ -73,6 +90,31 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       val client = Thrift.newIface[TestService.FutureIface](server)
       1 to 5 foreach { _ =>
         assert(Await.result(client.query("ok")) === "okok")
+      }
+    }
+  }
+
+  test("end-to-end thriftmux server + Finagle thrift client: propagate Contexts") {
+    new ThriftMuxTestServer {
+      val client = Thrift.newIface[TestService.FutureIface](server)
+
+      assert(Await.result(client.query("ok")) === "okok")
+
+      Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
+        assert(Await.result(client.query("ok")) === "hello context world")
+      }
+    }
+  }
+
+  test("end-to-end thriftmux server + Finagle thrift client: propagate Dtab.local") {
+    new ThriftMuxTestServer {
+      val client = Thrift.newIface[TestService.FutureIface](server)
+
+      assert(Await.result(client.query("ok")) === "okok")
+
+      Dtab.unwind {
+        Dtab.local = Dtab.read("/foo=>/bar")
+        assert(Await.result(client.query("ok")) === "/foo=>/bar")
       }
     }
   }
@@ -108,8 +150,8 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       socketAddr.asInstanceOf[InetSocketAddress].getPort
 
     Seq(
-      ("ServerBuilder deprecated", builderOld, port(builderOld.localAddress)),
-      ("ServerBuilder", builder, port(builder.localAddress)),
+      ("ServerBuilder deprecated", builderOld, port(builderOld.boundAddress)),
+      ("ServerBuilder", builder, port(builder.boundAddress)),
       ("ThriftMux proto deprecated", protoOld, port(protoOld.boundAddress)),
       ("ThriftMux proto", protoOld, port(protoNew.boundAddress))
     )
@@ -179,9 +221,9 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
   test("thriftmux server + Finagle thrift client: propagate Contexts") {
     new ThriftMuxTestServer {
       val client = Thrift.newIface[TestService.FutureIface](server)
-      
+
       assert(Await.result(client.query("ok")) === "okok")
-      
+
       Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
         assert(Await.result(client.query("ok")) === "hello context world")
       }
@@ -278,10 +320,33 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
 
       assert(Await.result(client.query("ok")) == "okok")
       Await.result(server.close())
+
+      // This request fails and is not requeued because there are
+      // no Open service factories in the load balancer.
       intercept[ChannelWriteException] {
         Await.result(client.query("ok"))
       }
+
+      // Subsequent requests are failed fast since there are (still) no
+      // Open service factories in the load balancer. Again, no requeues
+      // are attempted.
+      intercept[FailedFastException] {
+        Await.result(client.query("ok"))
+      }
     }
+  }
+
+  test("thriftmux server + Finagle thrift client: session rejection") {
+    val server = ThriftMux.serve(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+      new ServiceFactory {
+        def apply(conn: ClientConnection) = Future.exception(new Exception)
+        def close(deadline: Time) = Future.Done
+      }
+    )
+
+    val client = Thrift.newIface[TestService.FutureIface](server)
+    intercept[ChannelClosedException] { Await.result(client.query("ok")) }
   }
 
   test("thriftmux server + thriftmux client: ClientId should not be overridable externally") {
@@ -323,6 +388,10 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       assert(Await.result(client.query("ok")) == "okok")
       Await.result(server.close())
       intercept[ChannelWriteException] {
+        Await.result(client.query("ok"))
+      }
+
+      intercept[FailedFastException] {
         Await.result(client.query("ok"))
       }
     }
@@ -471,6 +540,24 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     }
   }
 
+  test("downgraded pipelines are properly scoped") {
+    val sr = new InMemoryStatsReceiver
+
+    val server = ThriftMux.server
+      .configured(Stats(sr))
+      .configured(Label("myserver"))
+      .serveIface(
+        new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+        new TestService.FutureIface {
+          def query(x: String) = Future.value(x+x)
+        })
+
+    val thriftClient = Thrift.client.newIface[TestService.FutureIface](server)
+
+    assert(Await.result(thriftClient.query("ok")) === "okok")
+    assert(sr.counters(Seq("myserver", "thriftmux", "downgraded_connects")) === 1)
+  }
+
   test("ThriftMux with TCompactProtocol") {
     // ThriftMux.server API
     {
@@ -511,5 +598,80 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
         Await.result(tbinaryClient.query("ok"))
       }
     }
+  }
+
+  test("ThriftMux client to Thrift server ") {
+    val iface = new TestService.FutureIface {
+      def query(x: String) = Future.value(x + x)
+    }
+    val mem = new InMemoryStatsReceiver
+    val sr = Stats(mem)
+    val server = Thrift.server
+      .configured(sr)
+      .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
+
+    val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
+    val clientSvc = ThriftMux.client
+      .configured(sr)
+      .configured(Label("client"))
+      .newService(s"localhost:$port")
+    val client = new TestService.FinagledClient(clientSvc)
+
+    // the thrift server doesn't understand the protocol of the request,
+    // so it does its usual thing and closes the connection.
+    intercept[ChannelClosedException] {
+      Await.result(client.query("ethics"))
+    }
+
+    clientSvc.close()
+    server.close()
+  }
+
+  test("drain downgraded connections") {
+    val response = Promise[String]
+    val iface = new TestService.FutureIface {
+      def query(x: String): Future[String] = response
+    }
+
+    val inet = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
+    val server = ThriftMux.server.serveIface(inet, iface)
+    val client = Thrift.client.newIface[TestService.FutureIface](server)
+
+    val f = client.query("ok")
+    intercept[Exception] { Await.result(f, 1.second) }
+
+    val close = server.close(1.minute) // up to a minute
+    intercept[Exception] { Await.result(close, 1.second) }
+
+    response.setValue("done")
+
+    assert(Await.result(close, 1.second) === ())
+    assert(Await.result(f, 1.second) === "done")
+
+  }
+
+  test("gracefully reject sessions") {
+    @volatile var n = 0
+    val server = ThriftMux.serve(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+      new ServiceFactory {
+        def apply(conn: ClientConnection) = {
+          n += 1
+          Future.exception(new Exception)
+        }
+        def close(deadline: Time) = Future.Done
+      })
+
+    val client = ThriftMux.newIface[TestService.FutureIface](server)
+
+    val failure = intercept[Failure] {
+      Await.result(client.query("ok"))
+    }
+
+    // Failure.Restartable is stripped.
+    assert(!failure.isFlagged(Failure.Restartable))
+
+    // Tried multiple times.
+    assert(n > 1)
   }
 }

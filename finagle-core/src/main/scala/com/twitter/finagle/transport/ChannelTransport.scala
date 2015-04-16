@@ -30,13 +30,17 @@ class ChannelTransport[In, Out](ch: Channel)
     if (!failed.compareAndSet(false, true))
       return
 
-    close()
-    closep.updateIfEmpty(Return(exc))
     // Do not discard existing queue items. Doing so causes a race
     // between reading off of the transport and a peer closing it.
     // For example, in HTTP, a remote server may send its content in
     // many chunks and then promptly close its connection.
     readq.fail(exc, false)
+
+    // Note: we have to fail the readq before fail, otherwise control is
+    // returned to netty potentially allowing subsequent offers to the readq,
+    // which should be illegal after failure.
+    close()
+    closep.updateIfEmpty(Return(exc))
   }
 
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
@@ -83,7 +87,8 @@ class ChannelTransport[In, Out](ch: Channel)
   def write(msg: In): Future[Unit] = {
     val p = new Promise[Unit]
 
-    Channels.write(ch, msg).addListener(new ChannelFutureListener {
+    val op = Channels.write(ch, msg)
+    op.addListener(new ChannelFutureListener {
       def operationComplete(f: ChannelFuture) {
         if (f.isSuccess)
           p.setDone()
@@ -94,6 +99,7 @@ class ChannelTransport[In, Out](ch: Channel)
       }
     })
 
+    p.setInterruptHandler { case _ => op.cancel() }
     p
   }
 
@@ -104,12 +110,21 @@ class ChannelTransport[In, Out](ch: Channel)
     // here. For example, if a read behind another read interrupts, perhaps the
     // transport shouldn’t be failed, only the read dequeued.
     val p = new Promise[Out]
+
+    // Note: We use become instead of proxyTo here even though become is
+    // recommended when `p` has interrupt handlers. `become` merges the
+    // listeners of two promises, which continue to share state via Linked and
+    // is a gain in space-efficiency.
     p.become(readq.poll())
+
+    // Note: We don't raise on readq.poll's future, because it doesn't set an
+    // interrupt handler, but perhaps we should; and perhaps we should always
+    // raise on the "other" side of the become indiscriminately in all cases.
     p setInterruptHandler { case intr => fail(intr) }
     p
   }
 
-  def status: Status = 
+  def status: Status =
     if (failed.get || !ch.isOpen) Status.Closed
     else Status.Open
 
@@ -125,5 +140,5 @@ class ChannelTransport[In, Out](ch: Channel)
   private[this] val closep = new Promise[Throwable]
   val onClose: Future[Throwable] = closep
 
-  override def toString = "Transport<%s>".format(ch)
+  override def toString = s"Transport<channel=$ch, onClose=$closep>"
 }

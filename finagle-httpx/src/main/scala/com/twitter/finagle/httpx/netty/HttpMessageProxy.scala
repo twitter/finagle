@@ -12,46 +12,6 @@ private[finagle] trait HttpMessageProxy extends Proxy {
   protected[finagle] def getHttpMessage(): HttpMessage = httpMessage
   def self = httpMessage
 
-  @deprecated("deprecated in netty", "6.8.0")
-  protected[finagle] def getHeader(name: String): String =
-    httpMessage.getHeader(name)
-
-  @deprecated("deprecated in netty", "6.8.0")
-  protected[finagle] def getHeaders(name: String): JList[String] =
-    httpMessage.getHeaders(name)
-
-  @deprecated("deprecated in netty", "6.8.0")
-  protected[finagle] def getHeaders(): JList[JMap.Entry[String, String]] =
-    httpMessage.getHeaders()
-
-  @deprecated("deprecated in netty", "6.8.0")
-  protected[finagle] def containsHeader(name: String): Boolean =
-    httpMessage.containsHeader(name)
-
-  @deprecated("deprecated in netty", "6.8.0")
-  protected[finagle] def getHeaderNames(): JSet[String] =
-    httpMessage.getHeaderNames()
-
-  @deprecated("deprecated in netty", "6.8.0")
-  protected[finagle] def addHeader(name: String, value: Object): Unit =
-    httpMessage.addHeader(name, value)
-
-  @deprecated("deprecated in netty", "6.8.0")
-  protected[finagle] def setHeader(name: String, value: Object): Unit =
-    httpMessage.setHeader(name, value)
-
-  @deprecated("deprecated in netty", "6.8.0")
-  protected[finagle] def setHeader(name: String, values: JIterable[_]): Unit =
-    httpMessage.setHeader(name, values)
-
-  @deprecated("deprecated in netty", "6.8.0")
-  protected[finagle] def removeHeader(name: String): Unit =
-    httpMessage.removeHeader(name)
-
-  @deprecated("deprecated in netty", "6.8.0")
-  protected[finagle] def clearHeaders(): Unit =
-    httpMessage.clearHeaders()
-
   protected[finagle] def getProtocolVersion(): HttpVersion =
     httpMessage.getProtocolVersion()
 

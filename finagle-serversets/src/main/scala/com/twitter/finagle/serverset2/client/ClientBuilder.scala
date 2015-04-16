@@ -1,10 +1,10 @@
 package com.twitter.finagle.serverset2.client
 
 import com.twitter.conversions.time._
-import com.twitter.util.Duration
+import com.twitter.util.{Duration, Timer}
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.io.Buf
-import com.twitter.finagle.util.LoadService
+import com.twitter.finagle.util.{DefaultTimer, LoadService}
 import java.net.InetSocketAddress
 
 private[serverset2] sealed trait Capability
@@ -24,7 +24,8 @@ private[client] case class ClientConfig(
     val statsReceiver: StatsReceiver,
     val readOnlyOK: Boolean,
     val sessionId: Option[Long],
-    val password: Option[Buf])
+    val password: Option[Buf],
+    val timer: Timer)
 {
   def toMap = Map(
     "hosts" -> hosts,
@@ -32,7 +33,8 @@ private[client] case class ClientConfig(
     "statsReceiver" -> statsReceiver,
     "readOnlyOK" -> readOnlyOK,
     "sessionId" -> sessionId,
-    "password" -> password
+    "password" -> password,
+    "timer" -> timer
   )
 
   override def toString = {
@@ -57,6 +59,7 @@ private[client] case class ClientConfig(
  * readOnlyOK() enables read-only support from disconnected observers. [False]
  * sessionId(id) sets session ID for reconnection. [None]
  * password(pwd) sets session Password for reconnection. [None]
+ * timer(timer) sets Timer [DefaultTimer.twitter]
  *
  * Build:
  *
@@ -71,7 +74,8 @@ private[serverset2] object ClientBuilder {
     statsReceiver = DefaultStatsReceiver.scope("zkclient"),
     readOnlyOK = false,
     sessionId = None,
-    password = None
+    password = None,
+    timer = DefaultTimer.twitter
   )
 
   def apply() = new ClientBuilder(DefaultConfig)
@@ -189,4 +193,13 @@ private[client] class ClientBuilder(config: ClientConfig) {
    */
   def password(password: Buf): ClientBuilder =
     withConfig(_.copy(password = Some(password)))
+
+  /**
+   * Configure builder with a new timer.
+   *
+   * @param timer Timer to use.
+   * @return configured ClientBuilder
+   */
+  def timer(timer:Timer): ClientBuilder =
+    withConfig(_.copy(timer = timer))
 }

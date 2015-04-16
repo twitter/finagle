@@ -1,7 +1,7 @@
 package com.twitter.finagle.zookeeper
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Announcer, Resolver, Addr}
+import com.twitter.finagle.{Announcer, Addr}
 import com.twitter.util.{Await, Duration, RandomSocket, Var}
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
@@ -52,7 +52,7 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
     val va = res.bind(hostPath)
     eventually {
       Var.sample(va) match {
-        case Addr.Bound(sockaddrs) =>
+        case Addr.Bound(sockaddrs, attrs) if attrs.isEmpty =>
           assert(sockaddrs === Set(addr))
         case _ => fail()
       }

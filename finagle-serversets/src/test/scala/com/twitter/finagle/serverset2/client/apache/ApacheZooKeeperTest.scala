@@ -184,7 +184,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     intercept[KeeperException.ConnectionLoss] {
       Await.result(created)
     }
-    assert(statsReceiver.counter("write_failures")() === 1)
+    assert(statsReceiver.counter("connection_loss")() === 1)
   }
 
   "create" should "handle synchronous error" in {
@@ -253,7 +253,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     intercept[KeeperException.ConnectionLoss] {
       Await.result(deleted)
     }
-    assert(statsReceiver.counter("write_failures")() === 1)
+    assert(statsReceiver.counter("connection_loss")() === 1)
   }
 
   "exists" should "submit properly constructed exists" in {
@@ -297,7 +297,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     intercept[KeeperException.ConnectionLoss] {
       Await.result(existed)
     }
-    assert(statsReceiver.counter("read_failures")() === 1)
+    assert(statsReceiver.counter("connection_loss")() === 1)
   }
 
   "exists" should "handle synchronous error" in {
@@ -363,7 +363,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     intercept[KeeperException.ConnectionLoss] {
       Await.result(existed)
     }
-    assert(statsReceiver.counter("watch_failures")() === 1)
+    assert(statsReceiver.counter("connection_loss")() === 1)
   }
 
   "existsWatch" should "handle synchronous error" in {
@@ -428,7 +428,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     intercept[KeeperException.ConnectionLoss] {
       Await.result(nodeData)
     }
-    assert(statsReceiver.counter("read_failures")() === 1)
+    assert(statsReceiver.counter("connection_loss")() === 1)
   }
 
   "getData" should "handle synchronous error" in {
@@ -493,7 +493,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     intercept[KeeperException.ConnectionLoss] {
       Await.result(nodeDataWatch)
     }
-    assert(statsReceiver.counter("watch_failures")() === 1)
+    assert(statsReceiver.counter("connection_loss")() === 1)
   }
 
   "getDataWatch" should "handle synchronous error" in {
@@ -576,7 +576,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     intercept[KeeperException.ConnectionLoss] {
       Await.result(nodeStat)
     }
-    assert(statsReceiver.counter("write_failures")() === 1)
+    assert(statsReceiver.counter("connection_loss")() === 1)
   }
 
   "setData" should "handle synchronous error" in {
@@ -629,7 +629,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     intercept[KeeperException.ConnectionLoss] {
       Await.result(nodeACL)
     }
-    assert(statsReceiver.counter("read_failures")() === 1)
+    assert(statsReceiver.counter("connection_loss")() === 1)
   }
 
   "getACL" should "handle synchronous error" in {
@@ -697,7 +697,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     intercept[KeeperException.ConnectionLoss] {
       Await.result(nodeStat)
     }
-    assert(statsReceiver.counter("write_failures")() === 1)
+    assert(statsReceiver.counter("connection_loss")() === 1)
   }
 
   "setACL" should "handle synchronous error" in {
@@ -750,7 +750,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     intercept[KeeperException.ConnectionLoss] {
       Await.result(nodeChildren)
     }
-    assert(statsReceiver.counter("read_failures")() === 1)
+    assert(statsReceiver.counter("connection_loss")() === 1)
   }
 
   "getChildren" should "handle synchronous error" in {
@@ -801,7 +801,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     intercept[KeeperException.ConnectionLoss] {
       Await.result(nodeChildren)
     }
-    assert(statsReceiver.counter("watch_failures")() === 1)
+    assert(statsReceiver.counter("connection_loss")() === 1)
   }
 
   "getChildrenWatch" should "handle synchronous error" in {
@@ -852,7 +852,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     intercept[KeeperException.ConnectionLoss] {
       Await.result(synced)
     }
-    assert(statsReceiver.counter("read_failures")() === 1)
+    assert(statsReceiver.counter("connection_loss")() === 1)
   }
 
   "sync" should "handle synchronous error" in {

@@ -29,12 +29,14 @@ object Transporter {
   /**
    * $param a `SocketAddress` that a `Transporter` connects to.
    */
-  case class EndpointAddr(addr: SocketAddress)
-  implicit object EndpointAddr extends Stack.Param[EndpointAddr] {
-    private[this] val noAddr = new SocketAddress {
+  case class EndpointAddr(addr: SocketAddress) {
+    def mk(): (EndpointAddr, Stack.Param[EndpointAddr]) =
+      (this, EndpointAddr.param)
+  }
+  object EndpointAddr {
+    implicit val param = Stack.Param(EndpointAddr(new SocketAddress {
       override def toString = "noaddr"
-    }
-    val default = EndpointAddr(noAddr)
+    }))
   }
 
   /**
@@ -43,37 +45,49 @@ object Transporter {
    * @param howlong A maximum amount of time a transport
    * is allowed to spend connecting.
    */
-  case class ConnectTimeout(howlong: Duration)
-  implicit object ConnectTimeout extends Stack.Param[ConnectTimeout] {
-    val default = ConnectTimeout(1.second)
+  case class ConnectTimeout(howlong: Duration) {
+    def mk(): (ConnectTimeout, Stack.Param[ConnectTimeout]) =
+      (this, ConnectTimeout.param)
+  }
+  object ConnectTimeout {
+    implicit val param = Stack.Param(ConnectTimeout(1.second))
   }
 
   /**
    * $param hostname verification, if TLS is enabled.
    * @see [[com.twitter.finagle.transport.Transport#TLSEngine]]
    */
-  case class TLSHostname(hostname: Option[String])
-  implicit object TLSHostname extends Stack.Param[TLSHostname] {
-    val default = TLSHostname(None)
+  case class TLSHostname(hostname: Option[String]) {
+    def mk(): (TLSHostname, Stack.Param[TLSHostname]) =
+      (this, TLSHostname.param)
+  }
+  object TLSHostname {
+    implicit val param = Stack.Param(TLSHostname(None))
   }
 
   /**
    * $param a SocksProxy as the endpoint for a `Transporter`.
    */
-  case class SocksProxy(sa: Option[SocketAddress], credentials: Option[(String, String)])
-  implicit object SocksProxy extends Stack.Param[SocksProxy] {
-    val default = SocksProxy(
+  case class SocksProxy(sa: Option[SocketAddress], credentials: Option[(String, String)]) {
+    def mk(): (SocksProxy, Stack.Param[SocksProxy]) =
+      (this, SocksProxy.param)
+  }
+  object SocksProxy {
+    implicit val param = Stack.Param(SocksProxy(
       SocksProxyFlags.socksProxy,
       SocksProxyFlags.socksUsernameAndPassword
-    )
+    ))
   }
 
   /**
    * $param a HttpProxy as the endpoint for a `Transporter`.
    * @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#9.9
    */
-  case class HttpProxy(sa: Option[SocketAddress])
-  implicit object HttpProxy extends Stack.Param[HttpProxy] {
-    val default = HttpProxy(None)
+  case class HttpProxy(sa: Option[SocketAddress]) {
+    def mk(): (HttpProxy, Stack.Param[HttpProxy]) =
+      (this, HttpProxy.param)
+  }
+  object HttpProxy {
+    implicit val param = Stack.Param(HttpProxy(None))
   }
 }

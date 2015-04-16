@@ -1,6 +1,6 @@
 package com.twitter.finagle.integration
 
-import com.twitter.finagle.CancelledConnectionException
+import com.twitter.finagle.{Failure, CancelledConnectionException}
 import com.twitter.util.Await
 import org.jboss.netty.channel._
 import org.mockito.ArgumentCaptor
@@ -65,9 +65,11 @@ class CancellationTest extends FunSuite with IntegrationBase with MockitoSugar {
 
     f1.raise(new Exception)
     assert(f1.isDefined)
-    intercept[CancelledConnectionException] {
+    val failure = intercept[Failure] {
       Await.result(f1)
     }
+    
+    assert(failure.getCause.isInstanceOf[CancelledConnectionException])
   }
 
 }

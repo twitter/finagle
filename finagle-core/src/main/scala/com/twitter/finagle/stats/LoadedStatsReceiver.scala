@@ -19,7 +19,9 @@ object LoadedStatsReceiver extends {
  */
 object DefaultStatsReceiver extends {
   val self: StatsReceiver = LoadedStatsReceiver
-} with StatsReceiverProxy
+} with StatsReceiverProxy {
+  val get = this
+}
 
 /**
  * A client-specific StatsReceiver. All stats recorded using this receiver
@@ -43,4 +45,16 @@ object ServerStatsReceiver extends StatsReceiverProxy {
   def setRootScope(rootScope: String) {
     _self = LoadedStatsReceiver.scope(rootScope)
   }
+}
+
+/**
+ * A [[com.twitter.finagle.stats.HostStatsReceiver]] that loads
+ * all service-loadable receivers and broadcasts stats to them.
+ */
+object LoadedHostStatsReceiver extends HostStatsReceiver {
+  @volatile var _self: StatsReceiver = {
+    val receivers = LoadService[HostStatsReceiver]()
+    BroadcastStatsReceiver(receivers)
+  }
+  def self = _self
 }

@@ -1,6 +1,7 @@
 package com.twitter.finagle.pool
 
 import com.twitter.finagle._
+import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.util.{Future, Return, Throw, Time, Promise}
@@ -9,7 +10,7 @@ import scala.annotation.tailrec
 import scala.collection.immutable
 
 private[finagle] object SingletonPool {
-  val role = Stack.Role("SingletonPool")
+  val role = StackClient.Role.pool
 
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.pool.SingletonPool]].
@@ -50,7 +51,7 @@ private[finagle] object SingletonPool {
         case n if n < 0 =>
           // This is technically an API usage error.
           count.incrementAndGet()
-          Future.exception(Failure.Cause(new ServiceClosedException))
+          Future.exception(Failure(new ServiceClosedException))
         case _ =>
           Future.Done
       }
@@ -109,8 +110,8 @@ extends ServiceFactory[Req, Rep] {
         complete(Idle)
         svc.close()
         Future.exception(
-          Failure.Cause("Returned unavailable service")
-            .withSource("Role", SingletonPool.role))
+          Failure("Returned unavailable service", Failure.Restartable)
+            .withSource(Failure.Source.Role, SingletonPool.role))
 
       case Return(svc) =>
         if (!complete(Open(new RefcountedService(svc))))
@@ -152,18 +153,32 @@ extends ServiceFactory[Req, Rep] {
       awaitApply(done, conn)
 
     case Closed =>
-      Future.exception(Failure.Cause(new ServiceClosedException))
+      Future.exception(Failure(new ServiceClosedException))
   }
 
   /**
    * @inheritdoc
    *
-   * A SingletonPool is available when it is not closed and the underlying
-   * factory is also available.
+   * The status of a [[SingletonPool]] is the worse of the 
+   * the underlying status and the status of the currently
+   * cached service, if any.
    */
-  override def status: Status = 
-    if (state.get != Closed) underlying.status
-    else Status.Closed
+  override def status: Status =
+    state.get match {
+      case Closed => Status.Closed
+      case Open(svc) =>
+        // We don't account for closed services as these will
+        // be reestablished on the next request.
+        svc.status match {
+          case Status.Closed => underlying.status
+          case status => Status.worst(status, underlying.status)
+        }
+      case Idle | Awaiting(_) =>
+        // This could also be Status.worst(underlying.status, Status.Busy(p));
+        // in practice this probably won't make much of a difference, though,
+        // since pending requests are anyway queued.
+        underlying.status
+    }
 
   /**
    * @inheritdoc

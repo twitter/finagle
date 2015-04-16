@@ -1,7 +1,8 @@
-benchmark(name='scala',
+scala_library(name='scala',
   dependencies=[
-    '3rdparty:caliper',
-    '3rdparty:scala-library',
+    '3rdparty/jvm/com/google/caliper',
+    '3rdparty/jvm/org/openjdk/jmh:jmh-core',
+    '3rdparty/jvm/org/scala-lang:scala-library',
     'finagle/finagle-core',
     'finagle/finagle-memcached',
     'finagle/finagle-ostrich4',
@@ -21,7 +22,7 @@ jar_library(name='metrics-samples',
 )
 
 jvm_binary(
-  name='p2cbench',
-  main='com.twitter.finagle.benchmark.P2CBenchmark',
+  name='p2csim',
+  main='com.twitter.finagle.loadbalancer.Simulation',
   dependencies=[':scala', ':metrics-samples']
 )
