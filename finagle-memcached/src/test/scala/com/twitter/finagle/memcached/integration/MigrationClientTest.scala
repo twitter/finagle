@@ -1,10 +1,8 @@
 package com.twitter.finagle.memcached.integration
 
-import java.net.{InetAddress, InetSocketAddress}
-
 import com.twitter.common.io.FileUtils._
-import com.twitter.common.quantity.{Time, Amount}
-import com.twitter.common.zookeeper.{ZooKeeperUtils, ServerSets, ZooKeeperClient}
+import com.twitter.common.quantity.{Amount, Time}
+import com.twitter.common.zookeeper.{ServerSets, ZooKeeperClient, ZooKeeperUtils}
 import com.twitter.conversions.time._
 import com.twitter.finagle.MemcachedClient
 import com.twitter.finagle.cacheresolver.CachePoolConfig
@@ -15,10 +13,11 @@ import com.twitter.io.Charsets
 import com.twitter.util._
 import com.twitter.zk.ServerCnxnFactory
 import java.io.ByteArrayOutputStream
-import org.apache.zookeeper.server.persistence.FileTxnSnapLog
+import java.net.{InetAddress, InetSocketAddress}
 import org.apache.zookeeper.server.ZooKeeperServer
+import org.apache.zookeeper.server.persistence.FileTxnSnapLog
 import org.junit.runner.RunWith
-import org.scalatest.concurrent.{IntegrationPatience, Eventually}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach, FunSuite}
 
@@ -100,6 +99,7 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     testServers = List()
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1719
   test("not migrating yet") {
     val client1 = MemcachedClient.newKetamaClient(
       dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)

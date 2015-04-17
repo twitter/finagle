@@ -63,6 +63,7 @@ class CacheNodeGroupTest extends FunSuite with BeforeAndAfterEach {
     testServers = List()
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1735
   test("doesn't blow up") {
     val myPool = new ZookeeperCacheNodeGroup(zkPath, zookeeperClient)
     assert(waitForMemberSize(myPool, 0, 5))
@@ -208,19 +209,19 @@ class CacheNodeGroupTest extends FunSuite with BeforeAndAfterEach {
 
   private def updateCachePoolConfigData(size: Int) {
     val cachePoolConfig: CachePoolConfig = new CachePoolConfig(cachePoolSize = size)
-    var output: ByteArrayOutputStream = new ByteArrayOutputStream
+    val output: ByteArrayOutputStream = new ByteArrayOutputStream
     CachePoolConfig.jsonCodec.serialize(cachePoolConfig, output)
     zookeeperClient.get().setData(zkPath, output.toByteArray, -1)
   }
 
   // create temporary zk clients for additional cache servers since we will need to
-  private def addShards(shardIds: List[Int]) {
-    shardIds map { shardId =>
+  private def addShards(shardIds: List[Int]): Unit = {
+    shardIds.foreach { shardId =>
       TestMemcachedServer.start() match {
         case Some(server) =>
           testServers :+= (server, serverSet.join(server.address, Map[String, InetSocketAddress](), shardId))
         case None => fail("Cannot start memcached. Skipping...")
       }
-    } toList
+    }
   }
 }

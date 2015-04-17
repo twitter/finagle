@@ -1,18 +1,8 @@
 package com.twitter.finagle.memcachedx.integration
 
-import java.io.ByteArrayOutputStream
-import java.net.{InetSocketAddress, InetAddress}
-
-import org.apache.zookeeper.server.persistence.FileTxnSnapLog
-import org.apache.zookeeper.server.ZooKeeperServer
-import org.junit.runner.RunWith
-import org.scalatest.concurrent.{IntegrationPatience, Eventually}
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach, FunSuite}
-
 import com.twitter.common.io.FileUtils._
-import com.twitter.common.quantity.{Time, Amount}
-import com.twitter.common.zookeeper.{ZooKeeperUtils, ServerSets, ZooKeeperClient}
+import com.twitter.common.quantity.{Amount, Time}
+import com.twitter.common.zookeeper.{ServerSets, ZooKeeperClient, ZooKeeperUtils}
 import com.twitter.conversions.time._
 import com.twitter.finagle.MemcachedxClient
 import com.twitter.finagle.cacheresolver.CachePoolConfig
@@ -22,6 +12,14 @@ import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.io.Buf
 import com.twitter.util._
 import com.twitter.zk.ServerCnxnFactory
+import java.io.ByteArrayOutputStream
+import java.net.{InetAddress, InetSocketAddress}
+import org.apache.zookeeper.server.ZooKeeperServer
+import org.apache.zookeeper.server.persistence.FileTxnSnapLog
+import org.junit.runner.RunWith
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAndAfter with Eventually with IntegrationPatience {
@@ -102,6 +100,7 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     testServers = List()
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1719
   test("not migrating yet") {
     val client1 = MemcachedxClient.newKetamaClient(
       dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)

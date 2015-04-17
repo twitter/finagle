@@ -1,23 +1,23 @@
 package com.twitter.finagle.memcached.integration
 
-import java.io.ByteArrayOutputStream
-import java.lang.{Boolean => JBoolean, UnsupportedOperationException}
 import com.twitter.common.application.ShutdownRegistry.ShutdownRegistryImpl
 import com.twitter.common.zookeeper.testing.ZooKeeperTestServer
-import com.twitter.common.zookeeper.{ZooKeeperUtils, ServerSets, ZooKeeperClient}
+import com.twitter.common.zookeeper.{ServerSets, ZooKeeperClient, ZooKeeperUtils}
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Group, WriteException}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.cacheresolver.{CachePoolCluster, CachePoolConfig}
+import com.twitter.finagle.memcached.KetamaClientBuilder
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.replication._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.memcached.KetamaClientBuilder
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
+import com.twitter.finagle.{Group, WriteException}
 import com.twitter.util.{Await, Return, Throw}
+import java.io.ByteArrayOutputStream
+import java.lang.{Boolean => JBoolean}
 import org.junit.runner.RunWith
-import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.{BeforeAndAfterEach, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
@@ -87,6 +87,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     secondTestServerPool = List()
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1712
   test("base replication client set & getOne") {
     // create my cluster client solely based on a zk client and a path
     val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
@@ -137,6 +138,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1712
   test("base replication client set & getAll") {
     // create my cluster client solely based on a zk client and a path
     val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
@@ -193,6 +195,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     })
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1712
   test("base replication client delete") {
     // create my cluster client solely based on a zk client and a path
     val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
@@ -245,6 +248,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     })
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1712
   if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) test("base replication client getsAll & cas") {
     // create my cluster client solely based on a zk client and a path
     val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
@@ -322,6 +326,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     })
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1712
   test("base replication client add & replace") {
     // create my cluster client solely based on a zk client and a path
     val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
@@ -390,6 +395,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     })
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1712
   test("base replication client incr & decr") {
     // create my cluster client solely based on a zk client and a path
     val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
@@ -450,6 +456,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
 
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1712
   test("base replication client many keys") {
     // create my cluster client solely based on a zk client and a path
     val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
@@ -547,6 +554,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     assert(Await.result(replicatedClient.set("foo", "baz")) == ConsistentReplication(()))
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1712
   test("base replication client non supported operation") {
     // create my cluster client solely based on a zk client and a path
     val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
@@ -575,6 +583,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
 
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1712
   test("simple replication client get & set") {
     // create my cluster client solely based on a zk client and a path
     val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
@@ -631,6 +640,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1712
   if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) test("simple replication client gets & cas") {
     // create my cluster client solely based on a zk client and a path
     val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
@@ -728,6 +738,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1712
   test("simple replication client add & replace") {
     // create my cluster client solely based on a zk client and a path
     val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
@@ -910,6 +921,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     Await.result(replicatedClient.set("foo", "baz"))
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1712
   test("simple replication client non supported operation") {
     // create my cluster client solely based on a zk client and a path
     val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
