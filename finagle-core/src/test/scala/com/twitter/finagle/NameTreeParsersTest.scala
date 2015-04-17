@@ -61,6 +61,7 @@ class NameTreeParsersTest extends FunSuite with AssertionsForJUnit {
     intercept[IllegalArgumentException] { NameTreeParsers.parseNameTree("#") }
     intercept[IllegalArgumentException] { NameTreeParsers.parseNameTree("/foo &") }
     intercept[IllegalArgumentException] { NameTreeParsers.parseNameTree("/foo & 0.1.2 * /bar")}
+    intercept[IllegalArgumentException] { NameTreeParsers.parseNameTree("/foo & . * /bar")}
   }
 
   test("parseDentry") {

@@ -119,7 +119,9 @@ private class NameTreeParsers private (str: String) {
       sb += peek
       next()
     }
-
+    if (sb.length == 1 && sb.charAt(0) == '.') {
+      illegal("weight", '.')
+    }
     sb.toString.toDouble // can fail if string is too long
   }
 

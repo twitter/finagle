@@ -104,10 +104,9 @@ object Path {
    * Parse `s` as a path with concrete syntax
    *
    * {{{
-   * path       ::= '/' labels
+   * path       ::= '/' labels | '/'
    *
-   * labels     ::= label '/' label
-   *                label
+   * labels     ::= label '/' labels | label
    *
    * label      ::= (\\x[a-f0-9][a-f0-9]|[0-9A-Za-z:.#$%-_])+
    *
