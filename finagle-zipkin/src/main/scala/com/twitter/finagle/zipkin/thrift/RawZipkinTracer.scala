@@ -64,6 +64,7 @@ object RawZipkinTracer {
   // Try to flush the tracers when we shut
   // down. We give it 100ms.
   Runtime.getRuntime().addShutdownHook(new Thread {
+    setName("RawZipkinTracer-ShutdownHook")
     override def run() {
       val tracers = RawZipkinTracer.synchronized(map.values.toSeq)
       val joined = Future.join(tracers map(_.flush()))

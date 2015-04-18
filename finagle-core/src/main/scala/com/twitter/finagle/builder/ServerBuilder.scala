@@ -463,17 +463,9 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
     new Server with CloseAwaitably {
 
-      val closed = new AtomicBoolean(false)
-
       val exitGuard = if (!daemon) Some(ExitGuard.guard(s"server for '$label'")) else None
 
       override protected def closeServer(deadline: Time): Future[Unit] = closeAwaitably {
-        if (!closed.compareAndSet(false, true)) {
-          logger.log(Level.WARNING, "Server closed multiple times!",
-            new Exception /*stack trace please*/)
-          return Future.exception(new IllegalStateException)
-        }
-
         listeningServer.close(deadline) ensure {
           exitGuard.foreach(_.unguard())
         }
