@@ -3,6 +3,7 @@ package com.twitter.finagle.tracing
 import com.twitter.finagle.util.ByteArrays
 import com.twitter.util.RichU64String
 import com.twitter.util.{Try, Return, Throw}
+import com.twitter.util.NonFatal
 
 /**
  * Defines trace identifiers.  Span IDs name a particular (unique)
@@ -11,23 +12,9 @@ import com.twitter.util.{Try, Return, Throw}
  */
 
 final class SpanId(val self: Long) extends Proxy {
-  import SpanId.byteToStr
-
   def toLong = self
 
-  // This is invoked a lot, so they need to be fast.
-  override def toString: String = {
-    val b = new StringBuilder(16)
-    b.appendAll(byteToStr((self>>56 & 0xff).toByte))
-    b.appendAll(byteToStr((self>>48 & 0xff).toByte))
-    b.appendAll(byteToStr((self>>40 & 0xff).toByte))
-    b.appendAll(byteToStr((self>>32 & 0xff).toByte))
-    b.appendAll(byteToStr((self>>24 & 0xff).toByte))
-    b.appendAll(byteToStr((self>>16 & 0xff).toByte))
-    b.appendAll(byteToStr((self>>8 & 0xff).toByte))
-    b.appendAll(byteToStr((self & 0xff).toByte))
-    b.toString
-  }
+  override def toString: String = SpanId.toString(self)
 }
 
 object SpanId {
@@ -41,14 +28,29 @@ object SpanId {
     }
   ).toArray
 
-  private def byteToStr(b: Byte) = lut(b+128)
+  private def byteToChars(b: Byte): Array[Char] = lut(b+128)
 
-  def apply(spanId: Long) = new SpanId(spanId)
+  // This is invoked a lot, so they need to be fast.
+  def toString(l: Long): String = {
+    val b = new StringBuilder(16)
+    b.appendAll(byteToChars((l>>56 & 0xff).toByte))
+    b.appendAll(byteToChars((l>>48 & 0xff).toByte))
+    b.appendAll(byteToChars((l>>40 & 0xff).toByte))
+    b.appendAll(byteToChars((l>>32 & 0xff).toByte))
+    b.appendAll(byteToChars((l>>24 & 0xff).toByte))
+    b.appendAll(byteToChars((l>>16 & 0xff).toByte))
+    b.appendAll(byteToChars((l>>8 & 0xff).toByte))
+    b.appendAll(byteToChars((l & 0xff).toByte))
+    b.toString
+  }
+
+  def apply(spanId: Long): SpanId = new SpanId(spanId)
+
   def fromString(spanId: String): Option[SpanId] =
     try {
-      Some(this(new RichU64String(spanId).toU64Long))
+      Some(SpanId(new RichU64String(spanId).toU64Long))
     } catch {
-      case _: Throwable => None
+      case NonFatal(_) => None
     }
 }
 
