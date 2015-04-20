@@ -112,7 +112,7 @@ private object ClassPath {
         if !(ignoredPackages exists (n startsWith _))
         iface <- ifaceOfName(n)
       } {
-        val source = Source.fromInputStream(jarFile.getInputStream(e))
+        val source = Source.fromInputStream(jarFile.getInputStream(e), "UTF-8")
         val lines = readLines(source)
         buf += Info(n, iface, lines)
       }
@@ -177,7 +177,7 @@ object LoadService {
 
     val classNamesFromRessources = for {
       rsc <- loader.getResources("META-INF/services/" + ifaceName).asScala
-      line <- ClassPath.readLines(Source.fromURL(rsc))
+      line <- ClassPath.readLines(Source.fromURL(rsc, "UTF-8"))
     } yield line
 
     (classNames ++ classNamesFromRessources).distinct flatMap { className =>
