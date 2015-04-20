@@ -1,17 +1,16 @@
 package com.twitter.finagle.benchmark
 
-import com.twitter.finagle.exp.LatencyHistogram
+import com.twitter.finagle.exp.{LatencyHistogram, WindowedAdder}
 import com.google.caliper.SimpleBenchmark
 import com.twitter.util.Duration
 import com.twitter.conversions.time._
 
 class LatencyHistogramBenchmark extends SimpleBenchmark {
-  val N = 500
-  var durations: Array[Duration] = _
-  val histogram = new LatencyHistogram(Duration.fromMilliseconds(N), 1.second)
+  val N = 500 // in milliseconds
+  val durations: Array[Int] = Array.range(0, N)
+  val histogram = new LatencyHistogram(N, 1000, WindowedAdder.systemMs)
 
   override protected def setUp() {
-    durations = Array.range(0, N) map { i => Duration.fromMilliseconds(i) }
     for (d <- durations)
       histogram.add(d)
   }

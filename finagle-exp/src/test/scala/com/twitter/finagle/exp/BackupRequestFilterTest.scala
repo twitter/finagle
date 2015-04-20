@@ -27,7 +27,7 @@ class BackupRequestFilterTest extends FunSuite with MockitoSugar {
     val underlying = mock[Service[String, String]]
     when(underlying.close(anyObject())) thenReturn Future.Done
     val filter = new BackupRequestFilter[String, String](
-      95, range, timer, statsReceiver, Duration.Top)
+      95, range, timer, statsReceiver, Duration.Top, WindowedAdder.timeMs)
     val service = filter andThen underlying
     val cutoffGauge = statsReceiver.gauges(Seq("cutoff_ms"))
     def cutoff() = Duration.fromMilliseconds(cutoffGauge().toInt)

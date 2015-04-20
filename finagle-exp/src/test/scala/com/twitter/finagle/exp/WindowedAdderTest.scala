@@ -8,7 +8,7 @@ import com.twitter.conversions.time._
 
 @RunWith(classOf[JUnitRunner])
 class WindowedAdderTest extends FunSuite {
-  private def newAdder() = new WindowedAdder(3.seconds, 3)
+  private def newAdder() = new WindowedAdder(3 * 1000, 3, WindowedAdder.timeMs)
 
   test("sums things up when time stands still") {
     Time.withCurrentTimeFrozen { tc =>
@@ -69,7 +69,7 @@ class WindowedAdderTest extends FunSuite {
       assert(adder.sum() === 0)
     }
   }
-  
+
   test("maintains negative sums") {
     Time.withCurrentTimeFrozen { tc =>
       val adder = newAdder()

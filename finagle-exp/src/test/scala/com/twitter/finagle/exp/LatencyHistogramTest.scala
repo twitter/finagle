@@ -9,12 +9,12 @@ import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
 class LatencyHistogramTest extends FunSuite {
-  val range = 10.seconds
+  val range = 10 * 1000 // 10 seconds
 
   def testRandom(rng: Random, N: Int) {
-    val histo = new LatencyHistogram(range, Duration.Top)
+    val histo = new LatencyHistogram(range, Duration.Top.inMilliseconds, WindowedAdder.timeMs)
     val input = Array.fill(N) {
-      Duration.fromMilliseconds(rng.nextInt).abs % range
+      math.abs(rng.nextInt) % range
     }
     for (d <- input)
       histo.add(d)
@@ -46,26 +46,26 @@ class LatencyHistogramTest extends FunSuite {
   // directly.
   test("maintains sliding window by time") {
     Time.withCurrentTimeFrozen { tc =>
-    val histo = new LatencyHistogram(range=40.milliseconds,
-      history=4.seconds)
-      for (_ <- 0 until 100) histo.add(30.milliseconds)
+    val histo = new LatencyHistogram(range=40,
+      history=4000, WindowedAdder.timeMs)
+      for (_ <- 0 until 100) histo.add(30)
       tc.advance(1.second)
 
-      for (_ <- 0 until 100) histo.add(10.milliseconds)
-      assert(histo.quantile(99) === 30.milliseconds)
+      for (_ <- 0 until 100) histo.add(10)
+      assert(histo.quantile(99) == 30)
 
       tc.advance(1.second)
-      assert(histo.quantile(99) === 30.milliseconds)
+      assert(histo.quantile(99) == 30)
       tc.advance(1.second)
-      assert(histo.quantile(99) === 30.milliseconds)
+      assert(histo.quantile(99) == 30)
       tc.advance(2.seconds)
-      assert(histo.quantile(99) === 10.milliseconds)
+      assert(histo.quantile(99) == 10)
     }
   }
 
   test("handles durations longer than range by not exploding") {
-    val histo = new LatencyHistogram(range=40.milliseconds,
-      history=4.seconds)
-    histo.add(40.milliseconds)
+    val histo = new LatencyHistogram(range=40,
+      history=4 * 1000, WindowedAdder.timeMs)
+    histo.add(40)
   }
 }

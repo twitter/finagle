@@ -38,7 +38,7 @@ object TokenBucket {
    * the ones added to the bucket.
    */
   def newLeakyBucket(ttl: Duration, reserve: Int): TokenBucket = new TokenBucket {
-    private[this] val w = new WindowedAdder(ttl, 10)
+    private[this] val w = new WindowedAdder(ttl.inMilliseconds, 10, WindowedAdder.timeMs)
 
     def put(n: Int): Unit = w.add(n)
 
