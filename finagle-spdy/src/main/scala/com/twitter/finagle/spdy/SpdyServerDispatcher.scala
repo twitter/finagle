@@ -1,10 +1,10 @@
 package com.twitter.finagle.spdy
 
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
-
 import com.twitter.finagle.Service
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Closable, Time, Local}
+import com.twitter.util.{Closable, Local, Time}
+import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 class SpdyServerDispatcher(
   trans: Transport[HttpResponse, HttpRequest],
@@ -16,7 +16,12 @@ class SpdyServerDispatcher(
       service.close()
     } flatMap { req =>
       loop()
-      service(req)
+      trans.peerCertificate match {
+        case None => service(req)
+        case Some(cert) => Contexts.local.let(Transport.peerCertCtx, cert) {
+          service(req)
+        }
+      }
     } flatMap { rep =>
       trans.write(rep)
     } onFailure { _ =>

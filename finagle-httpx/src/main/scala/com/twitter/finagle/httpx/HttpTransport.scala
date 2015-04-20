@@ -41,5 +41,7 @@ class HttpTransport(self: Transport[Any, Any], manager: ConnectionManager)
 
   def remoteAddress = self.remoteAddress
 
+  private[finagle] def peerCertificate = self.peerCertificate
+
   val onClose = self.onClose
 }

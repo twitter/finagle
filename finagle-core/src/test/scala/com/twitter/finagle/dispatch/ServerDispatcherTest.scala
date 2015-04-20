@@ -1,8 +1,10 @@
 package com.twitter.finagle.dispatch
 
 import com.twitter.finagle.Service
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Future, Promise, Time, Local}
+import java.security.cert.X509Certificate
 import org.junit.runner.RunWith
 import org.mockito.Mockito.{when, never, verify, times}
 import org.mockito.Matchers.any
@@ -15,6 +17,7 @@ import scala.language.reflectiveCalls
 class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
   trait Ctx {
     val trans = mock[Transport[String, String]]
+    when(trans.peerCertificate).thenReturn(None)
     when(trans.onClose).thenReturn(Future.never)
     val readp = new Promise[String]
     when(trans.read()).thenReturn(readp)
@@ -49,6 +52,21 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     verify(trans, times(2)).read()
   })
 
+  test("Inject the transport SSLSession if present") (new Ctx {
+    val mockSesh = mock[X509Certificate]
+    when(trans.peerCertificate).thenReturn(Some(mockSesh))
+    val service = new Service[String, String] {
+      override def apply(request: String): Future[String] = Future.value {
+        if (Contexts.local.get(Transport.peerCertCtx) == Some(mockSesh)) "ok" else "not ok"
+      }
+    }
+
+    val disp = new SerialServerDispatcher(trans, service)
+
+    readp.setValue("go")
+    verify(trans).write("ok")
+  })
+
   test("Clear and delimit com.twitter.util.Local") (new Ctx {
     val l = new Local[String]
     var ncall = 0
@@ -77,6 +95,7 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     val trans = mock[Transport[String, String]]
     when(trans.onClose).thenReturn(onClose)
     when(trans.write(any[String])).thenReturn(writep)
+    when(trans.peerCertificate).thenReturn(None)
     val service = mock[Service[String, String]]
     when(service.close(any[Time])).thenReturn(Future.Done)
     val replyp = new Promise[String] {
@@ -129,6 +148,7 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     val trans = mock[Transport[String, String]]
     when(trans.onClose).thenReturn(onClose)
     when(trans.write(any[String])).thenReturn(writep)
+    when(trans.peerCertificate).thenReturn(None)
 
     val service = mock[Service[String, String]]
     when(service.close(any[Time])).thenReturn(Future.Done)

@@ -1,11 +1,13 @@
 package com.twitter.finagle.transport
 
 import com.twitter.concurrent.AsyncQueue
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.finagle.ssl
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.{Closable, Future, Promise, Time, Throw, Return, Duration}
 import java.net.SocketAddress
+import java.security.cert.Certificate
 
 // Mapped: ideally via a util-codec?
 
@@ -52,6 +54,11 @@ trait Transport[In, Out] extends Closable { self =>
   def remoteAddress: SocketAddress
 
   /**
+   * The peer certificate if a TLS session is established.
+   */
+  private[finagle] def peerCertificate: Option[Certificate]
+
+  /**
    * Cast this transport to `Transport[In1, Out1]`. Note that this is
    * generally unsafe: only do this when you know the cast is
    * guaranteed safe.
@@ -63,6 +70,7 @@ trait Transport[In, Out] extends Closable { self =>
     val onClose = self.onClose
     def localAddress = self.localAddress
     def remoteAddress = self.remoteAddress
+    private[finagle] def peerCertificate = self.peerCertificate
     def close(deadline: Time) = self.close(deadline)
     override def toString: String = self.toString
   }
@@ -75,6 +83,15 @@ trait Transport[In, Out] extends Closable { self =>
  * @define $param a [[com.twitter.finagle.Stack.Param]] used to configure
  */
 object Transport {
+
+  private[finagle] val peerCertCtx = new Contexts.local.Key[Certificate]
+
+  /**
+   * Retrieve the transport's SSLSession (if any) from
+   * [[com.twitter.finagle.context.Contexts.local]]
+   */
+  def peerCertificate: Option[Certificate] = Contexts.local.get(peerCertCtx)
+
   /**
    * $param the buffer sizes of a `Transport`.
    *
@@ -251,4 +268,5 @@ class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
   val onClose = closep
   val localAddress = new SocketAddress{}
   val remoteAddress = new SocketAddress{}
+  private[finagle] def peerCertificate: Option[Certificate] = None
 }

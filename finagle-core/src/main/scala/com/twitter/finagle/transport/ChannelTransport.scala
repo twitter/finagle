@@ -1,12 +1,13 @@
 package com.twitter.finagle.transport
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.{
-  CancelledWriteException, ChannelClosedException, ChannelException, Status}
-import com.twitter.util.{Future, Return, Promise, Time}
+import com.twitter.finagle.{CancelledWriteException, ChannelClosedException, ChannelException, Status}
+import com.twitter.util.{Future, NonFatal, Promise, Return, Time}
 import java.net.SocketAddress
+import java.security.cert.Certificate
 import java.util.concurrent.atomic.AtomicBoolean
 import org.jboss.netty.channel._
+import org.jboss.netty.handler.ssl.SslHandler
 
 class ChannelTransport[In, Out](ch: Channel)
   extends Transport[In, Out] with ChannelUpstreamHandler
@@ -136,6 +137,17 @@ class ChannelTransport[In, Out](ch: Channel)
 
   def localAddress: SocketAddress = ch.getLocalAddress()
   def remoteAddress: SocketAddress = ch.getRemoteAddress()
+
+  private[finagle] val peerCertificate: Option[Certificate] =
+    ch.getPipeline.get(classOf[SslHandler]) match {
+      case null => None
+      case handler =>
+        try {
+          handler.getEngine.getSession.getPeerCertificates.headOption
+        } catch {
+          case NonFatal(_) => None
+        }
+    }
 
   private[this] val closep = new Promise[Throwable]
   val onClose: Future[Throwable] = closep

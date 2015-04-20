@@ -69,6 +69,7 @@ class OpTransport[In, Out](_ops: List[OpTransport.Op[In, Out]]) extends Transpor
   val onClose = new Promise[Throwable]
   def localAddress = new java.net.SocketAddress{}
   def remoteAddress = new java.net.SocketAddress{}
+  val peerCertificate = None
 }
 
 @RunWith(classOf[JUnitRunner])

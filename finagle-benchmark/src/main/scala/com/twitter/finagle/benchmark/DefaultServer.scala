@@ -49,6 +49,7 @@ class FixedNumReadsTransport[In, Out](readVal: Out, nReadsAllowed: Int) extends 
   val onClose = closep
   val localAddress = new SocketAddress {}
   val remoteAddress = new SocketAddress {}
+  val peerCertificate = None
 }
 
 /**
