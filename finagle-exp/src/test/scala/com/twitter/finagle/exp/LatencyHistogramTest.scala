@@ -1,6 +1,7 @@
 package com.twitter.finagle.exp
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.util.WindowedAdder
 import com.twitter.util.{Duration, Time}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

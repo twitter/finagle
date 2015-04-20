@@ -1,4 +1,4 @@
-package com.twitter.finagle.exp
+package com.twitter.finagle.util
 
 import com.twitter.jsr166e.LongAdder
 import com.twitter.util.Time

@@ -1,8 +1,9 @@
 package com.twitter.finagle.exp
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Service, SimpleFilter, NoStacktrace, BackupRequestLost}
 import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.util.WindowedAdder
+import com.twitter.finagle.{Service, SimpleFilter, NoStacktrace, BackupRequestLost}
 import com.twitter.util.{Future, Return, Throw, Duration, Timer, Stopwatch, Time}
 
 /**

@@ -1,4 +1,4 @@
-package com.twitter.finagle.exp
+package com.twitter.finagle.util
 
 import com.twitter.util.{Duration, Time}
 import org.junit.runner.RunWith

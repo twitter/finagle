@@ -1,4 +1,4 @@
-package com.twitter.finagle.exp
+package com.twitter.finagle.util
 
 import com.twitter.util.Duration
 
@@ -11,22 +11,22 @@ private[finagle] trait TokenBucket {
    * Put `n` tokens into the bucket.
    */
   def put(n: Int): Unit
-  
-  /** 
+
+  /**
    * Try to get `n` tokens out of the bucket.
    *
    * @return true if successful
    */
   def tryGet(n: Int): Boolean
-  
+
   /**
    * The number of tokens currently in the bucket.
    */
   def count: Long
 }
 
-object TokenBucket {
-  /** 
+private[finagle] object TokenBucket {
+  /**
    * A leaky bucket expires tokens after approximately `ttl` time.
    * Thus, a bucket left alone will empty itself.
    *
@@ -34,7 +34,7 @@ object TokenBucket {
    * expire.
    *
    * @param reserve The number of reserve tokens over the TTL
-   * period. That is, every `ttl` has `reserve` tokens in addition to 
+   * period. That is, every `ttl` has `reserve` tokens in addition to
    * the ones added to the bucket.
    */
   def newLeakyBucket(ttl: Duration, reserve: Int): TokenBucket = new TokenBucket {
@@ -55,7 +55,7 @@ object TokenBucket {
         w.add(-n)
       ok
     }
-    
+
     def count: Long = w.sum() + reserve
   }
 }

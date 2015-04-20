@@ -5,7 +5,6 @@ import com.twitter.finagle._
 import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.service.FailFastFactory.FailFast
-import com.twitter.finagle.service.RequeueingFilter.MaxTries
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.StackRegistry
 import com.twitter.finagle.{param, Name}
@@ -229,17 +228,20 @@ class StackClientTest extends FunSuite
 
     val cl = client
       .withStack(stk)
-      .newClient("myclient=/$/inet/localhost/0")
+      .configured(param.Label("myclient"))
+      .newClient("/$/inet/localhost/0")
 
-    def automaticRetries = sr.stats(Seq("myclient", "automatic", "retries"))
+    def requeues = sr.counters.get(Seq("myclient", "requeue", "requeues"))
+    def budget = sr.gauges(Seq("myclient", "requeue", "budget"))()
   }
 
   test("requeue failing requests when the stack is Open")(new RequeueCtx {
-      // failing request and Open load balancer => max requeues
-      Await.ready(cl().map(_("hi")))
-
-      // expect one less retry than requeue try limit
-      assert(automaticRetries === Seq(MaxTries - 1))
+    val session = cl()
+    val b = budget
+    // failing request and Open load balancer => max requeues
+    Await.ready(session.map(_("hi")))
+    assert(requeues === Some(b))
+    assert(budget === 0)
   })
 
   for (status <- Seq(Status.Busy, Status.Closed)) {
@@ -247,17 +249,51 @@ class StackClientTest extends FunSuite
       // failing request and Busy | Closed load balancer => zero requeues
       _status = status
       Await.ready(cl().map(_("hi")))
-      assert(automaticRetries === Seq(0))
+      assert(!requeues.isDefined)
     })
   }
 
-  test("dynamically stop requeuing")( new RequeueCtx {
-      // load balancer begins Open, becomes Busy after 10 requeues => 10 requeues
-      _status = Status.Open
-      runSideEffect = _ > 10
-      sideEffect = () => _status = Status.Busy
-      Await.ready(cl().map(_("hi")))
-      assert(automaticRetries === Seq(10))
+  test("dynamically stop requeuing")(new RequeueCtx {
+    // load balancer begins Open, becomes Busy after 10 requeues => 10 requeues
+    _status = Status.Open
+    runSideEffect = _ > 10
+    sideEffect = () => _status = Status.Busy
+    Await.ready(cl().map(_("hi")))
+    assert(requeues === Some(10))
+  })
+
+  test("service acquisition requeues use a separate fixed budget")(new RequeueCtx {
+    override val stubLB = new ServiceFactory[String, String] {
+      def apply(conn: ClientConnection) = Future.exception(
+        Failure.rejected("unable to establish session")
+      )
+      def close(deadline: Time) = Future.Done
+    }
+
+    intercept[Failure] { Await.result(cl()) }
+    assert(requeues.isDefined)
+    assert(budget > 0)
+  })
+
+  test("service acquisition requeues respect Failure.Restartable")(new RequeueCtx {
+    override val stubLB = new ServiceFactory[String, String] {
+      def apply(conn: ClientConnection) = Future.exception(
+        Failure("don't restart this!")
+      )
+      def close(deadline: Time) = Future.Done
+    }
+
+    intercept[Failure] { Await.result(cl()) }
+
+    assert(!requeues.isDefined)
+    assert(budget > 0)
+  })
+
+  test("service acquisition requeues respect Status.Open")(new RequeueCtx {
+    _status = Status.Closed
+    Await.result(cl())
+    assert(!requeues.isDefined)
+    assert(budget > 0)
   })
 
   test("Requeues all go to the same cluster in a Union") {
@@ -313,19 +349,24 @@ class StackClientTest extends FunSuite
           }
         })
 
+    val sr = new InMemoryStatsReceiver
+
     val service =
       new FactoryToService(stack.make(Stack.Params.empty +
         FactoryToService.Enabled(true) +
+        param.Stats(sr) +
         BindingFactory.BaseDtab(() => dtab)))
 
     intercept[ChannelWriteException] {
       Await.result(service(()))
     }
 
+    val requeues = sr.counters(Seq("requeue", "requeues"))
+
     // all retries go to one service
     assert(
-      (fac1.count == MaxTries && fac2.count == 0) ||
-        (fac2.count == MaxTries && fac1.count == 0))
+      (fac1.count == requeues+1 && fac2.count == 0) ||
+        (fac2.count == requeues+1 && fac1.count == 0))
   }
 
   test("StackBasedClient.configured is a StackClient") {

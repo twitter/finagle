@@ -98,6 +98,10 @@ Runtime Behavior Changes
 
   * finagle-core: added transit_latency_ms and deadline_budget_ms stats.
 
+  * finagle-core: Automatic retries (requeues) are now credited as a ratio of
+    requests over a window of time, instead of a fixed limit. The stats scope
+    has also changed from "automatic" to "requeues".
+
 Deprecations
 ~~~~~~~~~~~~
 

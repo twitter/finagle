@@ -3,6 +3,7 @@ package com.twitter.finagle.exp
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.DefaultTimer
+import com.twitter.finagle.util.WindowedAdder
 import com.twitter.finagle.{Service, MockTimer, BackupRequestLost}
 import com.twitter.util.{Future, Promise, Time, Return, TimeControl, Duration}
 import org.junit.runner.RunWith

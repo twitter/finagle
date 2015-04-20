@@ -122,14 +122,15 @@ class EndToEndTest extends FunSuite {
     val requestFailures = mem.counters(Seq("client", "failures"))
     val serviceCreationFailures =
       mem.counters(Seq("client", "service_creation", "failures"))
-    val automaticRetries =
-      mem.stats(Seq("client", "automatic", "retries"))
+
+    val requeues =
+      mem.counters.get(Seq("client", "requeue", "requeues"))
 
     assert(requestFailures === 1)
 
     // initial write exception and no requeues
     assert(serviceCreationFailures === 1)
-    assert(automaticRetries === Seq(0.0f, 0.0f))
+    assert(requeues === None)
   }
 
   test("ClientBuilder should be properly instrumented on success") {

@@ -1014,8 +1014,8 @@ private object ClientBuilderClient {
         .transformed(new Stack.Transformer {
           def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]) =
             stack
-              .insertBefore(RequeueingFilter.role, new StatsFilterModule[Req, Rep])
-              .insertBefore(RequeueingFilter.role, new RetryingFilterModule[Req, Rep])
+              .insertBefore(Requeues.role, new StatsFilterModule[Req, Rep])
+              .insertBefore(Requeues.role, new RetryingFilterModule[Req, Rep])
               .prepend(new GlobalTimeoutModule[Req, Rep])
               .prepend(new ExceptionSourceFilterModule[Req, Rep])
         })

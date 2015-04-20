@@ -6,6 +6,7 @@ scala_library(name='scala',
   ),
   dependencies=[
     '3rdparty/jvm/com/google/guava',
+    '3rdparty/jvm/com/twitter:jsr166e',
     '3rdparty/jvm/io/netty',
     'finagle/finagle-core/src/main/java',
     'util/util-app',

@@ -202,7 +202,8 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-core",
     libraryDependencies ++= Seq(nettyLib, util("app"), util("core"), util("collection"),
-      util("hashing"), util("stats"), util("jvm"), util("logging"))
+      util("hashing"), util("stats"), util("jvm"), util("logging"),
+      "com.twitter" % "jsr166e" % "1.0.0")
   ).dependsOn(finagleTest % "test")
 
   lazy val finagleOstrich4 = Project(
@@ -460,7 +461,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-mux",
     libraryDependencies ++= Seq("com.twitter.common" % "stats-util" % "0.0.49")
-  ).dependsOn(finagleCore, finagleExp)
+  ).dependsOn(finagleCore)
 
   lazy val finagleThriftMux = Project(
     id = "finagle-thriftmux",

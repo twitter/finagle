@@ -1,6 +1,7 @@
 package com.twitter.finagle.benchmark
 
-import com.twitter.finagle.exp.{LatencyHistogram, WindowedAdder}
+import com.twitter.finagle.exp.LatencyHistogram
+import com.twitter.finagle.util.WindowedAdder
 import com.google.caliper.SimpleBenchmark
 import com.twitter.util.Duration
 import com.twitter.conversions.time._

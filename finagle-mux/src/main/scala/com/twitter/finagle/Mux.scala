@@ -6,7 +6,6 @@ import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
-import com.twitter.finagle.service.RequeueingFilter
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
@@ -52,7 +51,6 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackClient.newStack
       .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response])
       .replace(StackClient.Role.protoTracing, new ClientProtoTracing)
-      .replace(RequeueingFilter.role, mux.Requeue.module[mux.Request, mux.Response])
       .replace(BindingFactory.role, MuxBindingFactory)
   }
 
@@ -80,7 +78,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
   }
 
   val client = Client()
-  
+
   def newService(dest: Name, label: String): Service[mux.Request, mux.Response] =
     client.newService(dest, label)
 
@@ -102,7 +100,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     protected type In = CB
     protected type Out = CB
-    
+
     private[this] val statsReceiver = {
       val param.Stats(statsReceiver) = params[param.Stats]
       statsReceiver.scope("mux")
@@ -116,7 +114,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     ) = {
       val param.Tracer(tracer) = params[param.Tracer]
       val Lessor.Param(lessor) = params[Lessor.Param]
-      
+
       mux.ServerDispatcher.newRequestResponse(transport, service, lessor, tracer, statsReceiver)
     }
   }

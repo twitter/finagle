@@ -81,7 +81,7 @@ object StackClient {
    * @see [[com.twitter.finagle.factory.RefcountedFactory]]
    * @see [[com.twitter.finagle.factory.TimeoutFactory]]
    * @see [[com.twitter.finagle.FactoryToService]]
-   * @see [[com.twitter.finagle.service.RequeueingFilter]]
+   * @see [[com.twitter.finagle.service.Requeues]]
    * @see [[com.twitter.finagle.tracing.ClientTracingFilter]]
    * @see [[com.twitter.finagle.tracing.TraceInitializerFilter]]
    */
@@ -137,7 +137,7 @@ object StackClient {
      *    load balancer on each request (and closes it after the
      *    response completes).
      *
-     *  * `RequeuingFilter` retries `WriteException`s
+     *  * `Requeues` retries `RetryPolicy.RetryableWriteException`s
      *    automatically. It must appear above `FactoryToService` so
      *    that service acquisition failures are retried.
      */
@@ -148,7 +148,7 @@ object StackClient {
     stk.push(TimeoutFactory.module)
     stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
     stk.push(FactoryToService.module)
-    stk.push(RequeueingFilter.module)
+    stk.push(Requeues.module)
 
     /*
      * These modules deal with name resolution and request
@@ -362,11 +362,7 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
       Stats(stats.scope(clientLabel)) +
       BindingFactory.Dest(dest))
 
-    val finalStack =
-      if (!clientStack.contains(FailFastFactory.role)) clientStack.remove(RequeueingFilter.role)
-      else clientStack
-
-    finalStack.make(clientParams)
+    clientStack.make(clientParams)
   }
 
   override def newService(dest: Name, label: String): Service[Req, Rep] = {

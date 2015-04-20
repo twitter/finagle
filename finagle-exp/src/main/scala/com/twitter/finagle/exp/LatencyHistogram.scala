@@ -1,5 +1,8 @@
 package com.twitter.finagle.exp
 
+import com.twitter.finagle.util.WindowedAdder
+import com.twitter.util.Duration
+
 /**
  * A concurrent histogram implementation
  * using jsr166e striped adders underneath.
