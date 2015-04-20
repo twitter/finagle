@@ -90,7 +90,7 @@ private object ClassPath {
       if (f.isDirectory && f.canRead)
         browseDir(f, loader, prefix + f.getName + "/", buf)
       else for (iface <- ifaceOfName(prefix + f.getName)) {
-        val source = Source.fromFile(f, "ISO8859-1")
+        val source = Source.fromFile(f, "UTF-8")
         val lines = readLines(source)
         buf += Info(prefix + f.getName, iface, lines)
       }
@@ -112,7 +112,7 @@ private object ClassPath {
         if !(ignoredPackages exists (n startsWith _))
         iface <- ifaceOfName(n)
       } {
-        val source = Source.fromInputStream(jarFile.getInputStream(e), "ISO8859-1")
+        val source = Source.fromInputStream(jarFile.getInputStream(e), "UTF-8")
         val lines = readLines(source)
         buf += Info(n, iface, lines)
       }
@@ -177,7 +177,7 @@ object LoadService {
 
     val classNamesFromRessources = for {
       rsc <- loader.getResources("META-INF/services/" + ifaceName).asScala
-      line <- ClassPath.readLines(Source.fromURL(rsc, "ISO8859-1"))
+      line <- ClassPath.readLines(Source.fromURL(rsc, "UTF-8"))
     } yield line
 
     (classNames ++ classNamesFromRessources).distinct flatMap { className =>
