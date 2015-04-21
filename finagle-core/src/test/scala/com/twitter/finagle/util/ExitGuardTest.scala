@@ -17,9 +17,7 @@ class ExitGuardTest
 
   test("guard creates thread, unguard kills thread") {
     val guard = ExitGuard.guard("test")
-    val threads = Thread.getAllStackTraces.keySet.asScala.find { thread =>
-      thread.getName.contains("Finagle ExitGuard")
-    }
+    val threads = ExitGuard.guards.map { case (thread, _) => thread }
 
     assert(threads.nonEmpty)
     val thread = threads.get

@@ -12,9 +12,9 @@ object Finagle extends Build {
   val branch = Process("git" :: "rev-parse" :: "--abbrev-ref" :: "HEAD" :: Nil).!!.trim
   val suffix = if (branch == "master") "" else "-SNAPSHOT"
 
-  val libVersion = "6.24.0" + suffix
-  val utilVersion = "6.23.0" + suffix
-  val ostrichVersion = "9.7.0" + suffix
+  val libVersion = "6.25.0" + suffix
+  val utilVersion = "6.24.0" + suffix
+  val ostrichVersion = "9.8.0" + suffix
   val nettyLib = "io.netty" % "netty" % "3.10.1.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonVersion = "2.4.4"
@@ -279,14 +279,15 @@ object Finagle extends Build {
       "commons-codec" % "commons-codec" % "1.6",
       util("zk-common"),
       util("zk-test") % "test",
-      "com.twitter.common.zookeeper" % "server-set" % "1.0.83",
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.103",
       "com.google.guava" % "guava" % "16.0.1"
     ),
+
     libraryDependencies ++= jacksonLibs,
     excludeFilter in unmanagedSources := "ZkTest.scala",
     ivyXML :=
       <dependencies>
-        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.83">
+        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.103">
           <exclude org="com.google.guava" name="guava"/>
           <exclude org="com.twitter" name="finagle-core"/>
           <exclude org="com.twitter" name="finagle-thrift"/>
@@ -379,7 +380,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-cacheresolver",
     libraryDependencies ++= Seq(
-      "com.twitter.common" % "zookeeper-testing" % "0.0.46" % "test"
+      "com.twitter.common" % "zookeeper-testing" % "0.0.51" % "test"
     ),
     libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCore, finagleServersets)
@@ -395,7 +396,7 @@ object Finagle extends Build {
       util("hashing"),
       util("zk-test") % "test",
       "com.google.guava" % "guava" % "16.0.1",
-      "com.twitter.common" % "zookeeper-testing" % "0.0.46" % "test"
+      "com.twitter.common" % "zookeeper-testing" % "0.0.51" % "test"
     ),
     libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCacheResolver, finagleCore, finagleServersets)
@@ -411,7 +412,7 @@ object Finagle extends Build {
       util("hashing"),
       util("zk-test") % "test",
       "com.google.guava" % "guava" % "16.0.1",
-      "com.twitter.common" % "zookeeper-testing" % "0.0.46" % "test"
+      "com.twitter.common" % "zookeeper-testing" % "0.0.51" % "test"
     ),
     libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCacheResolver, finagleCore, finagleServersets)
