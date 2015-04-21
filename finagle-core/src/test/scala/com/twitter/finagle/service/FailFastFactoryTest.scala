@@ -1,21 +1,24 @@
 package com.twitter.finagle.service
 
-import java.util.concurrent.atomic.AtomicInteger
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.{Status, FailedFastException, MockTimer, Service, ServiceFactory, SourcedException}
+import com.twitter.finagle.{FailedFastException, MockTimer, Service, ServiceFactory, SourcedException, Status}
 import com.twitter.util._
+import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, times, verify, when}
 import org.scalatest.FunSuite
-import org.scalatest.concurrent.Conductors
+import org.scalatest.concurrent.{Conductors, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
-class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
+class FailFastFactoryTest extends FunSuite
+  with MockitoSugar
+  with Conductors
+  with IntegrationPatience {
 
   def newCtx() = new {
     val timer = new MockTimer
@@ -90,16 +93,16 @@ class FailFastFactoryTest extends FunSuite with MockitoSugar with Conductors {
       assert(stats.counters.get(Seq("marked_available")) === Some(1))
     }
   }
-  
+
   test("is Busy when failing; done when revived") {
     Time.withCurrentTimeFrozen { tc =>
       val ctx = newCtx()
       import ctx._
-      
+
       assert(failfast.status === Status.Open)
       p() = Throw(new Exception)
       assert(failfast.status == Status.Busy)
-      
+
       tc.set(timer.tasks(0).when)
       when(underlying()).thenReturn(Future.value(service))
       timer.tick()

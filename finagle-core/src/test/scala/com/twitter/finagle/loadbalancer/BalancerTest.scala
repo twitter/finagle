@@ -1,35 +1,36 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
-import com.twitter.finagle.loadbalancer._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.util.{Future, Time}
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
-import org.scalacheck.{Arbitrary, Gen}
-import org.scalactic.Tolerance
+import org.scalacheck.Gen
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.concurrent.Conductors
+import org.scalatest.concurrent.{IntegrationPatience, Conductors}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
-private class BalancerTest extends FunSuite with Conductors with GeneratorDrivenPropertyChecks {
+private class BalancerTest extends FunSuite
+  with Conductors
+  with IntegrationPatience
+  with GeneratorDrivenPropertyChecks {
 
   private class TestBalancer extends Balancer[Unit, Unit] {
     def maxEffort: Int = ???
     def emptyException: Throwable = ???
-    
+
     protected def statsReceiver: StatsReceiver = NullStatsReceiver
-    
+
     def nodes: Vector[Node] = dist.vector
     def factories: Set[ServiceFactory[Unit, Unit]] = nodes.map(_.factory).toSet
-    
+
     def nodeOf(fac: ServiceFactory[Unit, Unit]) = nodes.find(_.factory == fac).get
 
     def _dist() = dist
     def _rebuild() = rebuild()
-    
+
     def rebuildDistributor() {}
 
     case class Distributor(vector: Vector[Node], gen: Int = 1) extends DistributorT {
@@ -59,20 +60,20 @@ private class BalancerTest extends FunSuite with Conductors with GeneratorDriven
       def apply(conn: ClientConnection): Future[Service[Unit,Unit]] = ???
     }
 
-    protected def newNode(factory: ServiceFactory[Unit, Unit], 
-      weight: Double, statsReceiver: StatsReceiver): Node = 
+    protected def newNode(factory: ServiceFactory[Unit, Unit],
+      weight: Double, statsReceiver: StatsReceiver): Node =
       new Node(factory, weight)
 
     protected def failingNode(cause: Throwable): Node = ???
-    
+
     protected def initDistributor(): Distributor = Distributor(Vector.empty)
   }
-  
+
   def newFac(_status: Status = Status.Open) = new ServiceFactory[Unit, Unit] {
     def apply(conn: ClientConnection) = Future.never
 
     override def status = _status
-    
+
     @volatile var ncloses = 0
 
     def close(deadline: Time) = {
@@ -132,7 +133,7 @@ private class BalancerTest extends FunSuite with Conductors with GeneratorDriven
     assert(bal.nodes.isEmpty)
     bal.update(Seq(f1->1, f2->1, f3->1))
     assert(bal.factories === Set(f1, f2, f3))
-    
+
     for (f <- Seq(f1, f2, f3))
       assert(f.ncloses === 0)
 
@@ -142,13 +143,14 @@ private class BalancerTest extends FunSuite with Conductors with GeneratorDriven
     assert(f1.ncloses === 0)
     assert(f2.ncloses === 1)
     assert(f3.ncloses === 0)
-    
+
     // Updates weights.
     bal.update(Seq(f1->1, f3->2))
     assert(bal.nodeOf(f1).weight === 1)
     assert(bal.nodeOf(f3).weight === 2)
   }
-  
+
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1685
   test("Coalesces updates") {
     val conductor = new Conductor
     import conductor._
@@ -164,9 +166,9 @@ private class BalancerTest extends FunSuite with Conductors with GeneratorDriven
       }
     }
     val f1, f2, f3 = newFac()
-    
-    @volatile var thread1Id: Long = -1 
-    
+
+    @volatile var thread1Id: Long = -1
+
     thread("updater1") {
       thread1Id = Thread.currentThread.getId()
       bal.update(Seq.empty) // waits for 1, 2
@@ -184,10 +186,10 @@ private class BalancerTest extends FunSuite with Conductors with GeneratorDriven
       assert(beat === 1)
       waitForBeat(2)
     }
-    
+
     whenFinished {
       assert(bal.factories === Set(f3))
-      assert(bal._dist.gen === 3)
+      assert(bal._dist().gen === 3)
       assert(bal.updateThreads === Set(thread1Id))
     }
   }

@@ -125,6 +125,7 @@ class LatencyCompensationTest
     }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // TRFC-325
   test("TimeoutFilter.module still times out requests when compensating") {
     new Ctx {
       metadata = Addr.Metadata("compensation" -> 2.seconds)
@@ -154,6 +155,7 @@ class LatencyCompensationTest
     }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // TRFC-325
   test("Latency compensator doesn't always add compensation") {
     new Ctx {
       Time.withCurrentTimeFrozen { clock =>
