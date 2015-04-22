@@ -196,8 +196,13 @@ object Namer  {
     }
 }
 
+/**
+ * Abstract [[Namer]] class for Java compatibility.
+ */
+abstract class AbstractNamer extends Namer
+
 package namer {
-  class global extends Namer {
+  final class global extends Namer {
     def lookup(path: Path) = Namer.global.lookup(path)
   }
 }
