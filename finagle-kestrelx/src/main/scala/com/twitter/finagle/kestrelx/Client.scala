@@ -39,14 +39,14 @@ case class ReadMessage(
  * by invoking `Offer.foreach` on them. For example:
  * {{{
  * val readHandle: ReadHandle = ...
- * readHandle.messages foreach { msg =>
+ * readHandle.messages.foreach { msg =>
  *   try {
  *     System.out.println(msg.bytes.toString("UTF-8"))
  *   } finally {
  *     msg.ack() // if we don't do this, no more msgs will come to us
  *   }
  * }
- * readHandle.error foreach { System.error.println("zomg! got an error " + _.getMessage) }
+ * readHandle.error.foreach { System.error.println("zomg! got an error " + _.getMessage) }
  * }}}
  */
 abstract class ReadHandle {
@@ -150,9 +150,9 @@ object ReadHandle {
    * of the underlying ones.
    */
   def merged(handles: Seq[ReadHandle]): ReadHandle = new ReadHandle {
-    val messages = Offer.choose(handles map { _.messages } toSeq:_*)
-    val error = Offer.choose(handles map { _.error } toSeq:_*)
-    def close() = handles foreach { _.close() }
+    val messages = Offer.choose(handles.map { _.messages }.toSeq:_*)
+    val error = Offer.choose(handles.map { _.error }.toSeq:_*)
+    def close() = handles.foreach { _.close() }
   }
 
   /**
@@ -418,7 +418,7 @@ abstract protected[kestrelx] class ClientBase[CommandExecutor <: Closable, Reply
     offer: Offer[Buf],
     closed: Promise[Throwable]
   ) {
-    offer.sync() foreach { item =>
+    offer.sync().foreach { item =>
       set(queueName, item).unit respond {
         case Return(_) => write(queueName, offer)
         case Throw(t) => closed() = Return(t)
@@ -468,7 +468,7 @@ protected[kestrelx] class ConnectedClient(underlying: ServiceFactory[Command, Re
     underlying.toService(Set(Buf.Utf8(queueName), expiry, value))
 
   def get(queueName: String, waitUpTo: Duration = 0.seconds): Future[Option[Buf]] =
-    underlying.toService(Get(Buf.Utf8(queueName), Some(waitUpTo))) map {
+    underlying.toService(Get(Buf.Utf8(queueName), Some(waitUpTo))).map {
       case Values(Seq()) => None
       case Values(Seq(Value(key, value: Buf))) => Some(value)
       case _ => throw new IllegalArgumentException
@@ -514,7 +514,7 @@ protected[kestrelx] class FinagledClientFactory(
   underlying: ServiceFactory[ThriftClientRequest, Array[Byte]])
   extends CommandExecutorFactory[FinagledClosableClient] {
   def apply(): Future[FinagledClosableClient] =
-    underlying() map { s => new FinagledClosableClient(s) }
+    underlying().map { s => new FinagledClosableClient(s) }
 
   def close(deadline: Time): Future[Unit] = underlying.close(deadline)
 }
@@ -544,20 +544,20 @@ protected[kestrelx] class ThriftConnectedClient(underlying: FinagledClientFactor
 
   def flush(queueName: String): Future[Response] =
     withClient[Values](client =>
-      client.flushQueue(queueName) map {
+      client.flushQueue(queueName).map {
         _ => Values(Nil)
       })
 
   def delete(queueName: String): Future[Response] =
     withClient[Response](client =>
-      client.deleteQueue(queueName) map {
+      client.deleteQueue(queueName).map {
         _ => Deleted()
       })
 
   def set(queueName: String, value: Buf, expiry: Time = Time.epoch): Future[Response] = {
     val timeout = safeLongToInt(expiry.inMilliseconds)
     withClient[Response](client =>
-      client.put(queueName, List(Buf.toByteBuffer(value)), timeout) map {
+      client.put(queueName, List(Buf.toByteBuffer(value)), timeout).map {
         _ => Stored()
       })
   }
@@ -565,7 +565,7 @@ protected[kestrelx] class ThriftConnectedClient(underlying: FinagledClientFactor
   def get(queueName: String, waitUpTo: Duration = 0.seconds): Future[Option[Buf]] = {
     val waitUpToMsec = safeLongToInt(waitUpTo.inMilliseconds)
     withClient[Option[Buf]](client =>
-      client.get(queueName, 1, waitUpToMsec) map {
+      client.get(queueName, 1, waitUpToMsec).map {
         case Seq() => None
         case Seq(item: Item) => Some(Buf.ByteBuffer(item.data))
         case _ => throw new IllegalArgumentException
@@ -585,7 +585,7 @@ protected[kestrelx] class ThriftConnectedClient(underlying: FinagledClientFactor
   private def abortReadCommand(queueName: String)
                               (id: Long)
                               (client: FinagledClosableClient): Future[Seq[Item]] =
-    client.abort(queueName, collection.Set(id)) map {
+    client.abort(queueName, collection.Set(id)).map {
       _ => collection.Seq[Item]()
     }
 

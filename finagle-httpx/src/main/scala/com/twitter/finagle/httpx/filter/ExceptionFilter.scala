@@ -31,7 +31,7 @@ class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response
         // This only happens when ChannelService cancels a reply.
         log.warning("cancelled request: uri:%s", request.getUri)
         respond(request, ClientClosedRequestStatus)
-      case e =>
+      case e: Throwable =>
         try {
           log.warning(e, "exception: uri:%s exception:%s", request.getUri, e)
           respond(request, Status.InternalServerError)

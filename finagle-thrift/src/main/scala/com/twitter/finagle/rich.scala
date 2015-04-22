@@ -8,6 +8,7 @@ import com.twitter.util.NonFatal
 import java.lang.reflect.{Constructor, Method}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
+import scala.reflect.ClassTag
 
 private[twitter] object ThriftUtil {
   private type BinaryService = Service[Array[Byte], Array[Byte]]
@@ -115,10 +116,10 @@ private[twitter] object ThriftUtil {
         swiftClass <- findSwiftClass(cls)
         proxy <- findClass1("com.twitter.finagle.exp.swift.SwiftProxy")
         meth <- findMethod(proxy, "newClient",
-          classOf[Service[_, _]], classOf[ClassManifest[_]])
+          classOf[Service[_, _]], classOf[ClassTag[_]])
       } yield {
         val manifest = ClassManifest.fromClass(swiftClass)
-          .asInstanceOf[ClassManifest[Iface]]
+          .asInstanceOf[ClassTag[Iface]]
         meth.invoke(null, underlying, manifest).asInstanceOf[Iface]
       }
 
@@ -293,12 +294,12 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   }
 
   def newIface[Iface: ClassManifest](dest: String, label: String): Iface = {
-    val cls = implicitly[ClassManifest[Iface]].erasure
+    val cls = implicitly[ClassTag[Iface]].runtimeClass
     newIface[Iface](Resolver.eval(dest), label, cls)
   }
 
   def newIface[Iface: ClassManifest](dest: Name, label: String): Iface = {
-    val cls = implicitly[ClassManifest[Iface]].erasure
+    val cls = implicitly[ClassTag[Iface]].runtimeClass
     newIface[Iface](dest, label, cls)
   }
 
@@ -307,7 +308,7 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
    */
   @deprecated("Use destination names via newIface(String) or newIface(Name)", "6.7.x")
   def newIface[Iface: ClassManifest](group: Group[SocketAddress]): Iface = {
-    val cls = implicitly[ClassManifest[Iface]].erasure
+    val cls = implicitly[ClassTag[Iface]].runtimeClass
     newIface[Iface](group, cls)
   }
 

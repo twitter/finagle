@@ -75,9 +75,9 @@ object CacheNodeGroup {
         case Array(host, port, weight, key) => (host, port.toInt, weight.toInt, Some(key))
       }
 
-    newStaticGroup(hostSeq map {
+    newStaticGroup(hostSeq.map {
       case (host, port, weight, key) => new CacheNode(host, port, weight, key)
-    } toSet)
+    }.toSet)
   }
 
   def apply(group: Group[SocketAddress], useOnlyResolvedAddress: Boolean = false) = group collect {
@@ -95,7 +95,7 @@ object CacheNodeGroup {
       new CacheNode(ia.getHostName, ia.getPort, 1, None)
   }
 
-  def newStaticGroup(cacheNodeSet: Set[CacheNode]) = Group(cacheNodeSet toSeq:_*)
+  def newStaticGroup(cacheNodeSet: Set[CacheNode]) = Group(cacheNodeSet.toSeq:_*)
 
   def newZkCacheNodeGroup(
     path: String, zkClient: ZooKeeperClient, statsReceiver: StatsReceiver = NullStatsReceiver

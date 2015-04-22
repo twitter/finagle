@@ -149,9 +149,9 @@ object ReadHandle {
    * of the underlying ones.
    */
   def merged(handles: Seq[ReadHandle]): ReadHandle = new ReadHandle {
-    val messages = Offer.choose(handles map { _.messages } toSeq:_*)
-    val error = Offer.choose(handles map { _.error } toSeq:_*)
-    def close() = handles foreach { _.close() }
+    val messages = Offer.choose(handles.map { _.messages }.toSeq:_*)
+    val error = Offer.choose(handles.map { _.error }.toSeq:_*)
+    def close() = handles.foreach { _.close() }
   }
 
   /**
@@ -469,7 +469,7 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
     underlying.toService(Set(queueName, expiry, value))
 
   def get(queueName: String, waitUpTo: Duration = 0.seconds): Future[Option[ChannelBuffer]] =
-    underlying.toService(Get(queueName, Some(waitUpTo))) map {
+    underlying.toService(Get(queueName, Some(waitUpTo))).map {
       case Values(Seq()) => None
       case Values(Seq(Value(key, value))) => Some(value)
       case _ => throw new IllegalArgumentException
@@ -515,7 +515,7 @@ protected[kestrel] class FinagledClientFactory(
   underlying: ServiceFactory[ThriftClientRequest, Array[Byte]])
   extends CommandExecutorFactory[FinagledClosableClient] {
   def apply(): Future[FinagledClosableClient] =
-    underlying() map { s => new FinagledClosableClient(s) }
+    underlying().map { s => new FinagledClosableClient(s) }
 
   def close(deadline: Time): Future[Unit] = underlying.close(deadline)
 }
@@ -545,20 +545,20 @@ protected[kestrel] class ThriftConnectedClient(underlying: FinagledClientFactory
 
   def flush(queueName: String): Future[Response] =
     withClient[Values](client =>
-      client.flushQueue(queueName) map {
+      client.flushQueue(queueName).map {
         _ => Values(Nil)
       })
 
   def delete(queueName: String): Future[Response] =
     withClient[Response](client =>
-      client.deleteQueue(queueName) map {
+      client.deleteQueue(queueName).map {
         _ => Deleted()
       })
 
   def set(queueName: String, value: ChannelBuffer, expiry: Time = Time.epoch): Future[Response] = {
     val timeout = safeLongToInt(expiry.inMilliseconds)
     withClient[Response](client =>
-      client.put(queueName, List(value.toByteBuffer), timeout) map {
+      client.put(queueName, List(value.toByteBuffer), timeout).map {
         _ => Stored()
       })
   }
@@ -566,7 +566,7 @@ protected[kestrel] class ThriftConnectedClient(underlying: FinagledClientFactory
   def get(queueName: String, waitUpTo: Duration = 0.seconds): Future[Option[ChannelBuffer]] = {
     val waitUpToMsec = safeLongToInt(waitUpTo.inMilliseconds)
     withClient[Option[ChannelBuffer]](client =>
-      client.get(queueName, 1, waitUpToMsec) map {
+      client.get(queueName, 1, waitUpToMsec).map {
         case Seq() => None
         case Seq(item: Item) => Some(ChannelBuffers.wrappedBuffer(item.data))
         case _ => throw new IllegalArgumentException
@@ -586,7 +586,7 @@ protected[kestrel] class ThriftConnectedClient(underlying: FinagledClientFactory
   private def abortReadCommand(queueName: String)
                               (id: Long)
                               (client: FinagledClosableClient): Future[Seq[Item]] =
-    client.abort(queueName, collection.Set(id)) map {
+    client.abort(queueName, collection.Set(id)).map {
       _ => collection.Seq[Item]()
     }
 

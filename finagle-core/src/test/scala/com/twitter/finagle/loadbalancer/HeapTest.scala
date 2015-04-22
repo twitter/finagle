@@ -50,7 +50,7 @@ class HeapTest extends FunSuite {
         fixDown(copy, 1, N + 1 - i - j)
       }
 
-      assert(ordered.toSeq === ((input take (N - i + 1) sorted) toSeq))
+      assert(ordered.toSeq === input.take(N - i + 1).sorted)
     }
   }
 

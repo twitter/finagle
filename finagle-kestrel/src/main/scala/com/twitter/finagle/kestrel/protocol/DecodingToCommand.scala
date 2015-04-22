@@ -67,7 +67,7 @@ private[kestrel] class DecodingToCommand extends AbstractDecodingToCommand[Comma
     val splitTimeout = splitAll.filter({
       value => value.toString(Charset.defaultCharset).startsWith("t=")
     })
-    val timeout = splitTimeout.lastOption map {
+    val timeout = splitTimeout.lastOption.map {
       t => t.toString(Charset.defaultCharset).drop(2).toInt.milliseconds
     }
 

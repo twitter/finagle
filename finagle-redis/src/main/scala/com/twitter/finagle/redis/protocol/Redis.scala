@@ -81,7 +81,7 @@ private class RedisLoggingFilter(stats: StatsReceiver)
   private[this] val succ  = stats.scope("success")
 
   override def apply(command: Command, service: Service[Command, Reply]) = {
-    service(command) map { response =>
+    service(command).map { response =>
       response match {
         case StatusReply(_)
           | IntegerReply(_)

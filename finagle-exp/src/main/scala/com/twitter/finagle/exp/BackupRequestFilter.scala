@@ -81,7 +81,7 @@ class BackupRequestFilter[Req, Rep] private[exp](
       timer.doAt(Time.fromMilliseconds(howlong + start)) {
         timeouts.incr()
         service(req)
-      } flatten
+      }.flatten
     }
 
     val orig = service(req)

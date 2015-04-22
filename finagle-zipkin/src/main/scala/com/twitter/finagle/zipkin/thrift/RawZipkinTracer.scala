@@ -21,6 +21,7 @@ import org.apache.thrift.TByteArrayOutputStream
 import org.apache.thrift.protocol.TProtocol
 import org.apache.thrift.transport.TTransport
 import scala.collection.mutable.{ArrayBuffer, HashMap, SynchronizedMap}
+import scala.language.reflectiveCalls
 
 object RawZipkinTracer {
   private[this] def newClient(
@@ -188,11 +189,11 @@ private[thrift] class RawZipkinTracer(
    * Log the span data via Scribe.
    */
   def logSpans(spans: Seq[Span]): Future[Unit] = {
-    client.log(createLogEntries(spans)) respond {
+    client.log(createLogEntries(spans)).respond({
       case Return(ResultCode.Ok) => okCounter.incr()
       case Return(ResultCode.TryLater) => tryLaterCounter.incr()
       case Throw(e) => errorReceiver.counter(e.getClass.getName).incr()
-    } unit
+    }).unit
   }
 
   /**

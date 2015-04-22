@@ -199,10 +199,10 @@ class LoadBalancerFactoryTest extends FunSuite
   }
 
   test("LoadBalancerFactory#updateFactories: remove hosts immediately when probation not enabled") {
-    val pairs = Set("a", "b", "c") map { c =>
+    val pairs = Set("a", "b", "c").map { c =>
       val addr = TestAddr(c)
       addr -> mkFactory(addr)
-    } toSeq
+    }.toSeq
 
     val facs = mutable.Map[SocketAddress, WeightedFactory[Unit, Unit]](pairs:_*)
     val TestAddr(victimArg) = facs.keySet.head
@@ -220,10 +220,10 @@ class LoadBalancerFactoryTest extends FunSuite
   }
 
   test("LoadBalancerFactory#updateFactories: don't remove available hosts on probation that disappear from input") {
-    val pairs = Set("a", "b", "c") map { c =>
+    val pairs = Set("a", "b", "c").map { c =>
       val addr = TestAddr(c)
       addr -> mkFactory(addr)
-    } toSeq
+    }.toSeq
 
     val facs = mutable.Map[SocketAddress, WeightedFactory[Unit, Unit]](pairs:_*)
     val TestAddr(victimArg) = facs.keySet.head
@@ -245,12 +245,12 @@ class LoadBalancerFactoryTest extends FunSuite
       override def status = Status.Closed
     }
 
-    val pairs = Set("a", "b", "c") map {
+    val pairs = Set("a", "b", "c").map {
       case "a" => TestAddr("a") -> (closedFactory, 1D)
       case c =>
         val addr = TestAddr(c)
         addr -> mkFactory(addr)
-    } toSeq
+    }.toSeq
 
     val facs = mutable.Map[SocketAddress, WeightedFactory[Unit, Unit]](pairs:_*)
 

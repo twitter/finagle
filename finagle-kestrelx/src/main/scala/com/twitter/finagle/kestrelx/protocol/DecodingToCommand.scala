@@ -63,7 +63,7 @@ private[kestrelx] class DecodingToCommand extends AbstractDecodingToCommand[Comm
 
     val queueName = split.head
 
-    val timeout = splitTimeout.lastOption map {
+    val timeout = splitTimeout.lastOption.map {
       case Buf.Utf8(s) => s.drop(2).toInt.milliseconds
     }
 
@@ -74,7 +74,7 @@ private[kestrelx] class DecodingToCommand extends AbstractDecodingToCommand[Comm
       case Seq(CLOSE,OPEN) => CloseAndOpen(queueName, timeout)
       case Seq(ABORT)      => Abort(queueName, timeout)
       case Seq(PEEK)       => Peek(queueName, timeout)
-      case _               => throw new NonexistentCommand(tokens map { case Buf.Utf8(s) => s } mkString)
+      case _               => throw new NonexistentCommand(tokens.map { case Buf.Utf8(s) => s }.mkString)
     }
   }
 }

@@ -104,7 +104,7 @@ class BaseReplicationClient(clients: Seq[Client], statsReceiver: StatsReceiver =
         }
     }
 
-    loopGet(clientsInOrder, GetResult(Map.empty, keys toSet))
+    loopGet(clientsInOrder, GetResult(Map.empty, keys.toSet))
   }
 
   /**
@@ -372,7 +372,7 @@ class SimpleReplicationClient(underlying: BaseReplicationClient) extends Client 
           case (key, _) =>
             GetsResult(GetResult(failures = Map(key -> SimpleReplicationFailure("One or more underlying replica failed gets"))))
         }
-        GetResult.merged(getsResultSeq toSeq)
+        GetResult.merged(getsResultSeq.toSeq)
     }
 
   /**

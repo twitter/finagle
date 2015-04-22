@@ -6,12 +6,12 @@ import com.twitter.util.registry.GlobalRegistry
 import java.io.{File, IOException}
 import java.net.{URI, URISyntaxException, URLClassLoader}
 import java.nio.charset.MalformedInputException
-import java.util.jar.JarFile
 import java.util.ServiceConfigurationError
-
+import java.util.jar.JarFile
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.io.Source
+import scala.reflect.ClassTag
 
 /**
  * Inspect and load the classpath. Inspired by Guava's ClassPath
@@ -166,7 +166,7 @@ object LoadService {
   private val cache: mutable.Map[ClassLoader, Seq[ClassPath.Info]] = mutable.Map.empty
 
   def apply[T: ClassManifest](): Seq[T] = synchronized {
-    val iface = implicitly[ClassManifest[T]].erasure.asInstanceOf[Class[T]]
+    val iface = implicitly[ClassTag[T]].runtimeClass.asInstanceOf[Class[T]]
     val ifaceName = iface.getName
     val loader = iface.getClassLoader
 

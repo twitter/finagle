@@ -7,6 +7,7 @@ import com.google.common.reflect.TypeToken
 import com.twitter.util.Future
 import java.lang.reflect.Type
 import java.util.Collections
+import scala.language.existentials
 
 /**
  * A Swift ThriftCatalog modified to also

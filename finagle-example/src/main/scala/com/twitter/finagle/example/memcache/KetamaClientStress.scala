@@ -64,9 +64,9 @@ object KetamaClientStress extends App {
 
   private[this] def createCluster(hosts: String): Cluster[CacheNode] = {
     CachePoolCluster.newStaticCluster(
-      PartitionedClient.parseHostPortWeights(hosts) map {
+      PartitionedClient.parseHostPortWeights(hosts).map {
         case (host, port, weight) => new CacheNode(host, port, weight)
-      } toSet)
+      }.toSet)
   }
 
   def main() {
@@ -85,7 +85,7 @@ object KetamaClientStress extends App {
     println(builder)
 
     // the test keys/values
-    val keyValueSet: Seq[(String, ChannelBuffer)] = 1 to config.numkeys() map { _ =>
+    val keyValueSet: Seq[(String, ChannelBuffer)] = (1 to config.numkeys()).map { _ =>
       (randomString(config.keysize()), ChannelBuffers.wrappedBuffer(randomString(config.valuesize()).getBytes)) }
     def nextKeyValue: (String, ChannelBuffer) = keyValueSet((load_count.getAndIncrement()%config.numkeys()).toInt)
 
@@ -138,14 +138,14 @@ object KetamaClientStress extends App {
             ketamaClient.gets(key)
           }
         case "getsThenCas" =>
-          keyValueSet map { case (k, v) => ketamaClient.set(k, v)() }
+          keyValueSet.map { case (k, v) => ketamaClient.set(k, v)() }
           val casMap: scala.collection.mutable.Map[String, (ChannelBuffer, ChannelBuffer)] = scala.collection.mutable.Map()
 
           () => {
             val (key, value) = nextKeyValue
             casMap.remove(key) match {
               case Some((_, unique)) => ketamaClient.cas(key, value, unique)
-              case None => ketamaClient.gets(key) map {
+              case None => ketamaClient.gets(key).map {
                 case Some(r) => casMap(key) = r
                 case None => // not expecting
               }
@@ -224,7 +224,7 @@ object KetamaClientStress extends App {
             replicationClient.getsAll(key)
           }
         case "getsAllThenCas" =>
-          keyValueSet map { case (k, v) => replicationClient.set(k, v)() }
+          keyValueSet.map { case (k, v) => replicationClient.set(k, v)() }
           val casMap: scala.collection.mutable.Map[String, ReplicationStatus[Option[(ChannelBuffer, ReplicaCasUnique)]]] = scala.collection.mutable.Map()
 
           () => {
@@ -241,7 +241,7 @@ object KetamaClientStress extends App {
               case Some(FailedReplication(failureSeq)) =>
                 // not expecting this to ever happen
                 replicationClient.set(key, value)
-              case None => replicationClient.getsAll(key) map { casMap(key) = _ }
+              case None => replicationClient.getsAll(key).map { casMap(key) = _ }
             }
           }
         case "add" =>
