@@ -35,7 +35,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">Service</span><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>] with <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
+        <span class="name">Service</span><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>] with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
       </h4>
       
@@ -44,10 +44,10 @@ basic unit of an RPC interface.</p><p><b>Note:</b> this is an abstract class (vs
 compatibility, as it has implementation as well as interface.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.util.Closable">Closable</span>, (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a>, (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a href="exp/mysql/ClientDispatcher.html" class="extype" name="com.twitter.finagle.exp.mysql.ClientDispatcher">ClientDispatcher</a>, <a href="service/ConstantService.html" class="extype" name="com.twitter.finagle.service.ConstantService">ConstantService</a>, <a href="service/ExpiringService.html" class="extype" name="com.twitter.finagle.service.ExpiringService">ExpiringService</a>, <a href="FactoryToService.html" class="extype" name="com.twitter.finagle.FactoryToService">FactoryToService</a>, <a href="service/FailedService.html" class="extype" name="com.twitter.finagle.service.FailedService">FailedService</a>, <a href="zipkin/thriftscala/Scribe$$FinagledService.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.FinagledService">FinagledService</a>, <a href="exception/thriftscala/Scribe$$FinagledService.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.FinagledService">FinagledService</a>, <a href="kestrel/net/lag/kestrel/thriftscala/Kestrel$$FinagledService.html" class="extype" name="com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Kestrel.FinagledService">FinagledService</a>, <a href="dispatch/GenSerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher">GenSerialClientDispatcher</a>, <a href="httpx/codec/HttpClientDispatcher.html" class="extype" name="com.twitter.finagle.httpx.codec.HttpClientDispatcher">HttpClientDispatcher</a>, <a href="http/codec/HttpClientDispatcher.html" class="extype" name="com.twitter.finagle.http.codec.HttpClientDispatcher">HttpClientDispatcher</a>, <a href="httpx/HttpMuxHandler.html" class="extype" name="com.twitter.finagle.httpx.HttpMuxHandler">HttpMuxHandler</a>, <a href="http/HttpMuxHandler.html" class="extype" name="com.twitter.finagle.http.HttpMuxHandler">HttpMuxHandler</a>, <a href="httpx/HttpMuxer$.html" class="extype" name="com.twitter.finagle.httpx.HttpMuxer">HttpMuxer</a>, <a href="httpx/HttpMuxer.html" class="extype" name="com.twitter.finagle.httpx.HttpMuxer">HttpMuxer</a>, <a href="http/HttpMuxer$.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a>, <a href="http/HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a>, <a href="memcachedx/InterpreterService.html" class="extype" name="com.twitter.finagle.memcachedx.InterpreterService">InterpreterService</a>, <a href="memcached/InterpreterService.html" class="extype" name="com.twitter.finagle.memcached.InterpreterService">InterpreterService</a>, <a href="kestrel/InterpreterService.html" class="extype" name="com.twitter.finagle.kestrel.InterpreterService">InterpreterService</a>, <a href="stats/JsonExporter.html" class="extype" name="com.twitter.finagle.stats.JsonExporter">JsonExporter</a>, <a href="kestrel/net/lag/kestrel/thriftscala/Kestrel$FinagleService.html" class="extype" name="com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Kestrel$FinagleService">Kestrel$FinagleService</a>, <a href="stats/MetricsExporter.html" class="extype" name="com.twitter.finagle.stats.MetricsExporter">MetricsExporter</a>, <a href="service/NilService$.html" class="extype" name="com.twitter.finagle.service.NilService">NilService</a>, <a href="httpx/service/NotFoundService$.html" class="extype" name="com.twitter.finagle.httpx.service.NotFoundService">NotFoundService</a>, <a href="httpx/service/NotFoundService.html" class="extype" name="com.twitter.finagle.httpx.service.NotFoundService">NotFoundService</a>, <a href="http/service/NotFoundService$.html" class="extype" name="com.twitter.finagle.http.service.NotFoundService">NotFoundService</a>, <a href="http/service/NotFoundService.html" class="extype" name="com.twitter.finagle.http.service.NotFoundService">NotFoundService</a>, <a href="httpx/service/NullService$.html" class="extype" name="com.twitter.finagle.httpx.service.NullService">NullService</a>, <a href="httpx/service/NullService.html" class="extype" name="com.twitter.finagle.httpx.service.NullService">NullService</a>, <a href="http/service/NullService$.html" class="extype" name="com.twitter.finagle.http.service.NullService">NullService</a>, <a href="http/service/NullService.html" class="extype" name="com.twitter.finagle.http.service.NullService">NullService</a>, <a href="dispatch/PipeliningDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.PipeliningDispatcher">PipeliningDispatcher</a>, <a href="httpx/service/RoutingService.html" class="extype" name="com.twitter.finagle.httpx.service.RoutingService">RoutingService</a>, <a href="http/service/RoutingService.html" class="extype" name="com.twitter.finagle.http.service.RoutingService">RoutingService</a>, <a href="zipkin/thriftscala/Scribe$FinagleService.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe$FinagleService">Scribe$FinagleService</a>, <a href="exception/thriftscala/Scribe$FinagleService.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe$FinagleService">Scribe$FinagleService</a>, <a href="dispatch/SerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.SerialClientDispatcher">SerialClientDispatcher</a>, <a href="ServiceProxy.html" class="extype" name="com.twitter.finagle.ServiceProxy">ServiceProxy</a>, <a href="service/ShardingService.html" class="extype" name="com.twitter.finagle.service.ShardingService">ShardingService</a>, <a href="spdy/SpdyClientDispatcher.html" class="extype" name="com.twitter.finagle.spdy.SpdyClientDispatcher">SpdyClientDispatcher</a>, <a href="thrift/ValidateThriftService.html" class="extype" name="com.twitter.finagle.thrift.ValidateThriftService">ValidateThriftService</a></div>
+          <div class="subClasses hiddenContent"><a href="topo/AppService.html" class="extype" name="com.twitter.finagle.topo.AppService">AppService</a>, <a href="topo/thriftscala/Backend$FinagleService.html" class="extype" name="com.twitter.finagle.topo.thriftscala.Backend$FinagleService">Backend$FinagleService</a>, <a href="exp/mysql/ClientDispatcher.html" class="extype" name="com.twitter.finagle.exp.mysql.ClientDispatcher">ClientDispatcher</a>, <a href="service/ConstantService.html" class="extype" name="com.twitter.finagle.service.ConstantService">ConstantService</a>, <a href="stress/FrontEndServerStress$$DummyService$.html" class="extype" name="com.twitter.finagle.stress.FrontEndServerStress.DummyService">DummyService</a>, <a href="benchmark/EchoService.html" class="extype" name="com.twitter.finagle.benchmark.EchoService">EchoService</a>, <a href="service/ExpiringService.html" class="extype" name="com.twitter.finagle.service.ExpiringService">ExpiringService</a>, <a href="FactoryToService.html" class="extype" name="com.twitter.finagle.FactoryToService">FactoryToService</a>, <a href="service/FailedService.html" class="extype" name="com.twitter.finagle.service.FailedService">FailedService</a>, <a href="topo/thriftscala/Backend$$FinagledService.html" class="extype" name="com.twitter.finagle.topo.thriftscala.Backend.FinagledService">FinagledService</a>, <a href="demo/thriftscala/Tracing3$$FinagledService.html" class="extype" name="com.twitter.finagle.demo.thriftscala.Tracing3.FinagledService">FinagledService</a>, <a href="demo/thriftscala/Tracing2$$FinagledService.html" class="extype" name="com.twitter.finagle.demo.thriftscala.Tracing2.FinagledService">FinagledService</a>, <a href="demo/thriftscala/Tracing1$$FinagledService.html" class="extype" name="com.twitter.finagle.demo.thriftscala.Tracing1.FinagledService">FinagledService</a>, <a href="exception/thriftscala/Scribe$$FinagledService.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.FinagledService">FinagledService</a>, <a href="benchmark/thriftscala/Hello$$FinagledService.html" class="extype" name="com.twitter.finagle.benchmark.thriftscala.Hello.FinagledService">FinagledService</a>, <a href="zipkin/thriftscala/Scribe$$FinagledService.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.FinagledService">FinagledService</a>, <a href="kestrel/net/lag/kestrel/thriftscala/Kestrel$$FinagledService.html" class="extype" name="com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Kestrel.FinagledService">FinagledService</a>, <a href="dispatch/GenSerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher">GenSerialClientDispatcher</a>, <a href="benchmark/thriftscala/Hello$FinagleService.html" class="extype" name="com.twitter.finagle.benchmark.thriftscala.Hello$FinagleService">Hello$FinagleService</a>, <a href="stats/HostMetricsExporter.html" class="extype" name="com.twitter.finagle.stats.HostMetricsExporter">HostMetricsExporter</a>, <a href="http/codec/HttpClientDispatcher.html" class="extype" name="com.twitter.finagle.http.codec.HttpClientDispatcher">HttpClientDispatcher</a>, <a href="httpx/codec/HttpClientDispatcher.html" class="extype" name="com.twitter.finagle.httpx.codec.HttpClientDispatcher">HttpClientDispatcher</a>, <a href="http/HttpMuxHandler.html" class="extype" name="com.twitter.finagle.http.HttpMuxHandler">HttpMuxHandler</a>, <a href="httpx/HttpMuxHandler.html" class="extype" name="com.twitter.finagle.httpx.HttpMuxHandler">HttpMuxHandler</a>, <a href="http/HttpMuxer$.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a>, <a href="http/HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a>, <a href="httpx/HttpMuxer$.html" class="extype" name="com.twitter.finagle.httpx.HttpMuxer">HttpMuxer</a>, <a href="httpx/HttpMuxer.html" class="extype" name="com.twitter.finagle.httpx.HttpMuxer">HttpMuxer</a>, <a href="memcachedx/InterpreterService.html" class="extype" name="com.twitter.finagle.memcachedx.InterpreterService">InterpreterService</a>, <a href="memcached/InterpreterService.html" class="extype" name="com.twitter.finagle.memcached.InterpreterService">InterpreterService</a>, <a href="kestrel/InterpreterService.html" class="extype" name="com.twitter.finagle.kestrel.InterpreterService">InterpreterService</a>, <a href="stats/JsonExporter.html" class="extype" name="com.twitter.finagle.stats.JsonExporter">JsonExporter</a>, <a href="kestrel/net/lag/kestrel/thriftscala/Kestrel$FinagleService.html" class="extype" name="com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Kestrel$FinagleService">Kestrel$FinagleService</a>, <a href="stats/MetricsExporter.html" class="extype" name="com.twitter.finagle.stats.MetricsExporter">MetricsExporter</a>, <a href="service/NilService$.html" class="extype" name="com.twitter.finagle.service.NilService">NilService</a>, <a href="http/service/NotFoundService$.html" class="extype" name="com.twitter.finagle.http.service.NotFoundService">NotFoundService</a>, <a href="http/service/NotFoundService.html" class="extype" name="com.twitter.finagle.http.service.NotFoundService">NotFoundService</a>, <a href="httpx/service/NotFoundService$.html" class="extype" name="com.twitter.finagle.httpx.service.NotFoundService">NotFoundService</a>, <a href="httpx/service/NotFoundService.html" class="extype" name="com.twitter.finagle.httpx.service.NotFoundService">NotFoundService</a>, <a href="http/service/NullService$.html" class="extype" name="com.twitter.finagle.http.service.NullService">NullService</a>, <a href="http/service/NullService.html" class="extype" name="com.twitter.finagle.http.service.NullService">NullService</a>, <a href="httpx/service/NullService$.html" class="extype" name="com.twitter.finagle.httpx.service.NullService">NullService</a>, <a href="httpx/service/NullService.html" class="extype" name="com.twitter.finagle.httpx.service.NullService">NullService</a>, <a href="stats/OstrichExporter.html" class="extype" name="com.twitter.finagle.stats.OstrichExporter">OstrichExporter</a>, <a href="dispatch/PipeliningDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.PipeliningDispatcher">PipeliningDispatcher</a>, <a href="http/service/RoutingService.html" class="extype" name="com.twitter.finagle.http.service.RoutingService">RoutingService</a>, <a href="httpx/service/RoutingService.html" class="extype" name="com.twitter.finagle.httpx.service.RoutingService">RoutingService</a>, <a href="exception/thriftscala/Scribe$FinagleService.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe$FinagleService">Scribe$FinagleService</a>, <a href="zipkin/thriftscala/Scribe$FinagleService.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe$FinagleService">Scribe$FinagleService</a>, <a href="dispatch/SerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.SerialClientDispatcher">SerialClientDispatcher</a>, <a href="ServiceProxy.html" class="extype" name="com.twitter.finagle.ServiceProxy">ServiceProxy</a>, <a href="service/ShardingService.html" class="extype" name="com.twitter.finagle.service.ShardingService">ShardingService</a>, <a href="spdy/SpdyClientDispatcher.html" class="extype" name="com.twitter.finagle.spdy.SpdyClientDispatcher">SpdyClientDispatcher</a>, <a href="demo/thriftscala/Tracing1$FinagleService.html" class="extype" name="com.twitter.finagle.demo.thriftscala.Tracing1$FinagleService">Tracing1$FinagleService</a>, <a href="demo/thriftscala/Tracing2$FinagleService.html" class="extype" name="com.twitter.finagle.demo.thriftscala.Tracing2$FinagleService">Tracing2$FinagleService</a>, <a href="demo/thriftscala/Tracing3$FinagleService.html" class="extype" name="com.twitter.finagle.demo.thriftscala.Tracing3$FinagleService">Tracing3$FinagleService</a>, <a href="thrift/ValidateThriftService.html" class="extype" name="com.twitter.finagle.thrift.ValidateThriftService">ValidateThriftService</a></div>
         </div></div>
         
 
@@ -114,7 +114,7 @@ compatibility, as it has implementation as well as interface.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="request">request: <span class="extype" name="com.twitter.finagle.Service.Req">Req</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>]</span>
+        <span class="name">apply</span><span class="params">(<span name="request">request: <span class="extype" name="com.twitter.finagle.Service.Req">Req</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">This is the method to override/implement to create your own Service.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Service.
@@ -133,7 +133,7 @@ compatibility, as it has implementation as well as interface.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -146,7 +146,7 @@ compatibility, as it has implementation as well as interface.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -159,7 +159,7 @@ compatibility, as it has implementation as well as interface.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -172,7 +172,7 @@ compatibility, as it has implementation as well as interface.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -185,7 +185,7 @@ compatibility, as it has implementation as well as interface.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -198,7 +198,7 @@ compatibility, as it has implementation as well as interface.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>]) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>)</span><span class="result">: (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>
+        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>]) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>)</span><span class="result">: (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
@@ -227,7 +227,7 @@ compatibility, as it has implementation as well as interface.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -246,7 +246,7 @@ compatibility, as it has implementation as well as interface.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
+        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Service">Service</a> → Closable</dd></dl></div>
@@ -259,7 +259,7 @@ compatibility, as it has implementation as well as interface.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="after">after: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
+        <span class="name">close</span><span class="params">(<span name="after">after: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
@@ -272,7 +272,7 @@ compatibility, as it has implementation as well as interface.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">()</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
+        <span class="name">close</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
@@ -285,7 +285,7 @@ compatibility, as it has implementation as well as interface.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <span class="extype" name="com.twitter.finagle.Service.Req">Req</span></span>)</span><span class="result">: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>]</span>
+        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <span class="extype" name="com.twitter.finagle.Service.Req">Req</span></span>)</span><span class="result">: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
@@ -301,7 +301,7 @@ compatibility, as it has implementation as well as interface.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -314,7 +314,7 @@ compatibility, as it has implementation as well as interface.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -327,7 +327,7 @@ compatibility, as it has implementation as well as interface.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -359,7 +359,7 @@ compatibility, as it has implementation as well as interface.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -372,7 +372,7 @@ compatibility, as it has implementation as well as interface.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isAvailable</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">isAvailable</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Determines whether this service is available (can accept requests
@@ -388,7 +388,7 @@ with a reasonable likelihood of success).</p><p>TODO(CSL-1336): Finalize isAvail
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -414,7 +414,7 @@ with a reasonable likelihood of success).</p><p>TODO(CSL-1336): Finalize isAvail
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -427,7 +427,7 @@ with a reasonable likelihood of success).</p><p>TODO(CSL-1336): Finalize isAvail
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -440,7 +440,7 @@ with a reasonable likelihood of success).</p><p>TODO(CSL-1336): Finalize isAvail
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -492,7 +492,7 @@ with a reasonable likelihood of success).</p><p>TODO(CSL-1336): Finalize isAvail
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -511,7 +511,7 @@ with a reasonable likelihood of success).</p><p>TODO(CSL-1336): Finalize isAvail
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -530,7 +530,7 @@ with a reasonable likelihood of success).</p><p>TODO(CSL-1336): Finalize isAvail
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -556,7 +556,7 @@ with a reasonable likelihood of success).</p><p>TODO(CSL-1336): Finalize isAvail
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use close() instead">release</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use close() instead">release</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Relinquishes the use of this service instance.</p><div class="fullcomment"><div class="comment cmt"><p>Relinquishes the use of this service instance. Behavior is
@@ -571,13 +571,13 @@ undefined if apply() is called after resources are relinquished.
 
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.util.Closable">
-              <h3>Inherited from <span class="extype" name="com.twitter.util.Closable">Closable</span></h3>
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></h3>
             </div><div class="parent" name="scala.Function1">
-              <h3>Inherited from (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>]</h3>
+              <h3>Inherited from (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>]</h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>

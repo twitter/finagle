@@ -108,7 +108,7 @@ certain amount of idle time.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="FailedService.html"><span class="name">FailedService</span></a><span class="result"> extends <a href="ConstantService.html" class="extype" name="com.twitter.finagle.service.ConstantService">ConstantService</a>[<span class="extype" name="scala.Any">Any</span>, <span class="extype" name="scala.Nothing">Nothing</span>]</span>
+        <a href="FailedService.html"><span class="name">FailedService</span></a><span class="result"> extends <a href="ConstantService.html" class="extype" name="com.twitter.finagle.service.ConstantService">ConstantService</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>]</span>
       </span>
       </h4>
       <p class="comment cmt">A <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> that fails with a constant Throwable.</p>
@@ -148,7 +148,7 @@ itself unavailable when deemed unhealthy according to its parameterization.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="KetamaShardingServiceBuilder.html"><span class="name">KetamaShardingServiceBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="_nodes">_nodes: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.hashing.KetamaNode">KetamaNode</span>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.KetamaShardingServiceBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.KetamaShardingServiceBuilder.Rep">Rep</span>]]]] = <span class="symbol">scala.None</span></span>, <span name="_hash">_hash: <span class="extype" name="scala.Option">Option</span>[(<span class="extype" name="com.twitter.finagle.service.KetamaShardingServiceBuilder.Req">Req</span>) ⇒ <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Long">Long</span>]] = <span class="symbol">scala.None</span></span>, <span name="_numReps">_numReps: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">160</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="KetamaShardingServiceBuilder.html"><span class="name">KetamaShardingServiceBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="_nodes">_nodes: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.hashing.KetamaNode" class="extype" target="_top">KetamaNode</a>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.KetamaShardingServiceBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.KetamaShardingServiceBuilder.Rep">Rep</span>]]]] = <span class="symbol">scala.None</span></span>, <span name="_hash">_hash: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[(<span class="extype" name="com.twitter.finagle.service.KetamaShardingServiceBuilder.Req">Req</span>) ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a>]] = <span class="symbol">scala.None</span></span>, <span name="_numReps">_numReps: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">160</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -161,7 +161,7 @@ itself unavailable when deemed unhealthy according to its parameterization.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="LocalRateLimitingStrategy.html"><span class="name">LocalRateLimitingStrategy</span></a><span class="tparams">[<span name="Req">Req</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.service.LocalRateLimitingStrategy.Req">Req</span>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>
+        <a href="LocalRateLimitingStrategy.html"><span class="name">LocalRateLimitingStrategy</span></a><span class="tparams">[<span name="Req">Req</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.service.LocalRateLimitingStrategy.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
       </span>
       </h4>
       <p class="comment cmt">Strategy responsible for tracking requests and computing rate per client.</p>
@@ -202,7 +202,7 @@ rate limiting strategy.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="RetryPolicy.html"><span class="name">RetryPolicy</span></a><span class="tparams">[<span name="A">-A</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.service.RetryPolicy.A">A</span>) ⇒ <span class="extype" name="scala.Option">Option</span>[(<span class="extype" name="com.twitter.util.Duration">Duration</span>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.A">A</span>])]</span>
+        <a href="RetryPolicy.html"><span class="name">RetryPolicy</span></a><span class="tparams">[<span name="A">-A</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.service.RetryPolicy.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[(<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.A">A</span>])]</span>
       </span>
       </h4>
       <p class="comment cmt">A function defining retry behavior for a given value type <code>A</code>.</p>
@@ -242,7 +242,7 @@ rate limiting strategy.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SimpleRetryPolicy.html"><span class="name">SimpleRetryPolicy</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>] with (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>) ⇒ <span class="extype" name="scala.Option">Option</span>[(<span class="extype" name="com.twitter.util.Duration">Duration</span>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])]</span>
+        <a href="SimpleRetryPolicy.html"><span class="name">SimpleRetryPolicy</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>] with (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[(<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])]</span>
       </span>
       </h4>
       <p class="comment cmt">A retry policy abstract class.</p>
@@ -345,6 +345,19 @@ rate limiting strategy.</p>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.service.FailFastFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FailFastFactory"></a>
+      <a id="FailFastFactory:FailFastFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="FailFastFactory$.html"><span class="name">FailFastFactory</span></a>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.service.FailureAccrualFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FailureAccrualFactory"></a>
       <a id="FailureAccrualFactory:FailureAccrualFactory"></a>
@@ -380,7 +393,7 @@ rate limiting strategy.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="RetryPolicy$.html"><span class="name">RetryPolicy</span></a><span class="result"> extends <span class="extype" name="com.twitter.util.JavaSingleton">JavaSingleton</span></span>
+        <a href="RetryPolicy$.html"><span class="name">RetryPolicy</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.JavaSingleton" class="extype" target="_top">JavaSingleton</a></span>
       </span>
       </h4>
       
@@ -407,6 +420,19 @@ rate limiting strategy.</p>
       </span>
       <span class="symbol">
         <a href="RetryingService$.html"><span class="name">RetryingService</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.service.StatsFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StatsFilter"></a>
+      <a id="StatsFilter:StatsFilter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="StatsFilter$.html"><span class="name">StatsFilter</span></a>
       </span>
       </h4>
       

@@ -67,7 +67,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ClientBuilder.html"><span class="name">ClientBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="HasCluster">HasCluster</span>, <span name="HasCodec">HasCodec</span>, <span name="HasHostConnectionLimit">HasHostConnectionLimit</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="ClientBuilder.html"><span class="name">ClientBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="HasCluster">HasCluster</span>, <span name="HasCodec">HasCodec</span>, <span name="HasHostConnectionLimit">HasHostConnectionLimit</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">A builder of Finagle <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Clients</a>.</p>
@@ -85,7 +85,7 @@
       </h4>
       <p class="comment cmt">Used by builder to throw exceptions if the specification is incomplete.</p>
     </li><li name="com.twitter.finagle.builder.Server" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="ServerextendsClosable"></a>
+      <a id="ServerextendsListeningServer"></a>
       <a id="Server:Server"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -93,7 +93,7 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Server.html"><span class="name">Server</span></a><span class="result"> extends <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
+        <a href="Server.html"><span class="name">Server</span></a><span class="result"> extends <a href="../ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       </h4>
       <p class="comment cmt">A listening server.</p>
@@ -106,10 +106,23 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ServerBuilder.html"><span class="name">ServerBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="HasCodec">HasCodec</span>, <span name="HasBindTo">HasBindTo</span>, <span name="HasName">HasName</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="ServerBuilder.html"><span class="name">ServerBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="HasCodec">HasCodec</span>, <span name="HasBindTo">HasBindTo</span>, <span name="HasName">HasName</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">A handy Builder for constructing Servers (i.</p>
+    </li><li name="com.twitter.finagle.builder.ServerBuildertoTwitterService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerBuildertoTwitterService[Req,Rep]extendsService"></a>
+      <a id="ServerBuildertoTwitterService[Req,Rep]:ServerBuildertoTwitterService[Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ServerBuildertoTwitterService.html"><span class="name">ServerBuildertoTwitterService</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <span class="extype" name="com.twitter.ostrich.admin.Service">ostrich.admin.Service</span></span>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.builder.ServerConfigEvidence" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ServerConfigEvidence[HasCodec,HasBindTo,HasName]extendsAnyRef"></a>
       <a id="ServerConfigEvidence[HasCodec,HasBindTo,HasName]:ServerConfigEvidence[HasCodec,HasBindTo,HasName]"></a>
@@ -119,7 +132,7 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ServerConfigEvidence.html"><span class="name">ServerConfigEvidence</span></a><span class="tparams">[<span name="HasCodec">HasCodec</span>, <span name="HasBindTo">HasBindTo</span>, <span name="HasName">HasName</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="ServerConfigEvidence.html"><span class="name">ServerConfigEvidence</span></a><span class="tparams">[<span name="HasCodec">HasCodec</span>, <span name="HasBindTo">HasBindTo</span>, <span name="HasName">HasName</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
@@ -138,7 +151,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SourceTrackingMonitor.html"><span class="name">SourceTrackingMonitor</span></a><span class="result"> extends <span class="extype" name="com.twitter.util.Monitor">Monitor</span></span>
+        <a href="SourceTrackingMonitor.html"><span class="name">SourceTrackingMonitor</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a></span>
       </span>
       </h4>
       <p class="comment cmt">A monitor that unrolls the exception causes to report source information if any</p>
@@ -151,7 +164,7 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Cluster.html"><span class="name deprecated" title="Deprecated: (Since version 2014-11-21) Use com.twitter.finagle.Name to represent clusters instead">Cluster</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Cluster.html"><span class="name deprecated" title="Deprecated: (Since version 2014-11-21) Use com.twitter.finagle.Name to represent clusters instead">Cluster</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">Cluster is a collection of servers.</p>
@@ -191,7 +204,7 @@ to specify a Cluster to supplement the initial static set.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="StaticCluster.html"><span class="name deprecated" title="Deprecated: (Since version 2014-11-21) Use com.twitter.finagle.Name to represent clusters instead">StaticCluster</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.finagle.builder.StaticCluster.T">T</span>]</span>)</span><span class="result"> extends <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.StaticCluster.T">T</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="StaticCluster.html"><span class="name deprecated" title="Deprecated: (Since version 2014-11-21) Use com.twitter.finagle.Name to represent clusters instead">StaticCluster</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.finagle.builder.StaticCluster.T">T</span>]</span>)</span><span class="result"> extends <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.StaticCluster.T">T</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">A simple static cluster implementation.</p>

@@ -67,7 +67,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="AggregateHttpChunks.html"><span class="name">AggregateHttpChunks</span></a><span class="params">(<span name="whenDone">whenDone: <a href="../../channel/LeftFoldUpstreamHandler.html" class="extype" name="com.twitter.finagle.channel.LeftFoldUpstreamHandler">LeftFoldUpstreamHandler</a></span>, <span name="request">request: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>, <span name="bufferBudget">bufferBudget: <span class="extype" name="scala.Int">Int</span></span>, <span name="buffer">buffer: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span> = <span class="defval" name="org.jboss.netty.buffer.ChannelBuffers.EMPTY_BUFFER">...</span></span>)</span><span class="result"> extends <a href="../../channel/LeftFoldUpstreamHandler.html" class="extype" name="com.twitter.finagle.channel.LeftFoldUpstreamHandler">LeftFoldUpstreamHandler</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="AggregateHttpChunks.html"><span class="name">AggregateHttpChunks</span></a><span class="params">(<span name="whenDone">whenDone: <a href="../../channel/LeftFoldUpstreamHandler.html" class="extype" name="com.twitter.finagle.channel.LeftFoldUpstreamHandler">LeftFoldUpstreamHandler</a></span>, <span name="request">request: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>, <span name="bufferBudget">bufferBudget: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="buffer">buffer: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span> = <span class="defval" name="org.jboss.netty.buffer.ChannelBuffers.EMPTY_BUFFER">...</span></span>)</span><span class="result"> extends <a href="../../channel/LeftFoldUpstreamHandler.html" class="extype" name="com.twitter.finagle.channel.LeftFoldUpstreamHandler">LeftFoldUpstreamHandler</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -120,7 +120,7 @@ request befor sending it upstream.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ChannelBufferUsageTracker.html"><span class="name">ChannelBufferUsageTracker</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="ChannelBufferUsageTracker.html"><span class="name">ChannelBufferUsageTracker</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       
@@ -133,7 +133,7 @@ request befor sending it upstream.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ConnectionManager.html"><span class="name">ConnectionManager</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="ConnectionManager.html"><span class="name">ConnectionManager</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">The HTTP connection manager implements connection management in
@@ -147,7 +147,7 @@ accordance with RFC 2616 § 8.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="HttpClientDispatcher.html"><span class="name">HttpClientDispatcher</span></a><span class="tparams">[<span name="Req">Req &lt;: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>]</span><span class="result"> extends <a href="../../dispatch/GenSerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher">GenSerialClientDispatcher</a>[<span class="extype" name="com.twitter.finagle.http.codec.HttpClientDispatcher.Req">Req</span>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>, <span class="extype" name="scala.Any">Any</span>, <span class="extype" name="scala.Any">Any</span>]</span>
+        <a href="HttpClientDispatcher.html"><span class="name">HttpClientDispatcher</span></a><span class="tparams">[<span name="Req">Req &lt;: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>]</span><span class="result"> extends <a href="../../dispatch/GenSerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher">GenSerialClientDispatcher</a>[<span class="extype" name="com.twitter.finagle.http.codec.HttpClientDispatcher.Req">Req</span>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>
       </span>
       </h4>
       <p class="comment cmt">Client dispatcher for HTTP.</p>
@@ -160,7 +160,7 @@ accordance with RFC 2616 § 8.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="HttpServerDispatcher.html"><span class="name">HttpServerDispatcher</span></a><span class="tparams">[<span name="REQUEST">REQUEST &lt;: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>]</span><span class="result"> extends <a href="../../dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">GenSerialServerDispatcher</a>[<span class="extype" name="com.twitter.finagle.http.codec.HttpServerDispatcher.REQUEST">REQUEST</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>, <span class="extype" name="scala.Any">Any</span>, <span class="extype" name="scala.Any">Any</span>]</span>
+        <a href="HttpServerDispatcher.html"><span class="name">HttpServerDispatcher</span></a><span class="tparams">[<span name="REQUEST">REQUEST &lt;: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>]</span><span class="result"> extends <a href="../../dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">GenSerialServerDispatcher</a>[<span class="extype" name="com.twitter.finagle.http.codec.HttpServerDispatcher.REQUEST">REQUEST</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>
       </span>
       </h4>
       

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Protocols &mdash; Finagle 6.24.0 documentation</title>
+    <title>Protocols &mdash; Finagle 6.25.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.24.0',
+        VERSION:     '6.25.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.24.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.25.0 documentation" href="index.html" />
     <link rel="next" title="Extending Finagle" href="Extending.html" />
     <link rel="prev" title="Names and Naming in Finagle" href="Names.html" />
    
@@ -82,7 +82,7 @@ protocol, Thrift facilitates the development of scalable RPC systems. By
 to define schemas and expose network services that clients access using code
 generated for their preferred programming language.</p>
 <p>The IDL is the core of Thrift. IDLs provide clear service specifications that we
-can used to implement clients and servers. This means that different
+can use to implement clients and servers. This means that different
 implementations of servers can be swapped out transparently, since they all
 expose the same interface, regardless of language.</p>
 <p>Thrift was originally built at Facebook. For more details on the original design,
@@ -122,7 +122,7 @@ client.hi() onSuccess { response =&gt;
 }
 </pre></div>
 </div>
-<p>Check out the <cite>finagle-thrift</cite> <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Thrift$">API docs</a>
+<p>Check out the <cite>finagle-thrift</cite> <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Thrift$">API</a>
 for more info.</p>
 <table class="docutils footnote" frame="void" id="id2" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
@@ -181,6 +181,74 @@ session.</p>
 useful for establishing explicit queueing policies, leading the way to
 intelligent back-pressure, slow start, and GC-avoidance.</p>
 </div>
+<div class="section" id="mysql">
+<h2>Mysql<a class="headerlink" href="#mysql" title="Permalink to this headline">¶</a></h2>
+<p><em>finagle-mysql</em> is an asynchronous implementation of the MySQL protocol built on top of Finagle.
+The project provides a simple query API with support for prepared statements and
+transactions while taking advantage of Finagle&#8217;s <a class="reference internal" href="Clients.html#client-modules"><em>client stack</em></a> for
+connection pooling. The implementation supports both the MySQL binary and string protocols.</p>
+<p>A client can be constructed using the
+<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.exp.Mysql$">Mysql</a> protocol object:</p>
+<div class="highlight-text"><div class="highlight"><pre>val client = Mysql.client
+  .withCredentials(&quot;&lt;user&gt;&quot;, &quot;&lt;password&gt;&quot;)
+  .withDatabase(&quot;test&quot;)
+  .configured(DefaultPool.Param(
+    low = 0, high = 10,
+    idleTime = 5.minutes,
+    bufferSize = 0,
+    maxWaiters = Int.MaxValue))
+  .newClient(&quot;127.0.0.1:3306&quot;)
+</pre></div>
+</div>
+<p>We configure the <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.client.DefaultPool">client&#8217;s connection pool</a> to be
+compatible with our MySQL server. The constructor returns a Finagle <a class="reference internal" href="ServicesAndFilters.html#service-factory"><em>ServiceFactory</em></a>
+from <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.exp.mysql.Request">mysql.Request</a> to <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.exp.mysql.Result">mysql.Result</a>
+which we can use to query the db:</p>
+<div class="highlight-text"><div class="highlight"><pre>val product = client().flatMap { service =&gt;
+  // `service` is checked out from the pool.
+  service(QueryRequest(&quot;SELECT 5*5 AS `product`&quot;)) map {
+    case rs: ResultSet =&gt; rs.rows.map(processRow)
+    case _ =&gt; Seq.empty
+  } ensure {
+    // put `service` back into the pool.
+    service.close()
+  }
+}
+</pre></div>
+</div>
+<p>A <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.exp.mysql.ResultSet">ResultSet</a> makes it easy to extract
+<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.exp.mysql.Value">Values</a> based on column names. For example, we can
+implement the above <cite>processRow</cite> as a pattern match on expected values:</p>
+<div class="highlight-text"><div class="highlight"><pre>def processRow(row: Row): Option[Long] =
+  row(&quot;product&quot;).flatMap {
+    case LongValue(l) =&gt; Some(l)
+    case IntValue(i) =&gt; Some(i.toLong)
+    case _ =&gt; None
+  }
+</pre></div>
+</div>
+<p>The ServiceFactory API gives you more fine-grained control over the pool. This isn&#8217;t always necessary
+- to simplify <em>finagle-mysql</em> offers a rich API that wraps the ServiceFactory returned from <cite>newClient</cite>:</p>
+<div class="highlight-text"><div class="highlight"><pre>val richClient = Mysql.client
+  .withCredentials(&quot;&lt;user&gt;&quot;, &quot;&lt;password&gt;&quot;)
+  .withDatabase(&quot;test&quot;)
+  .configured(DefaultPool.Param(
+    low = 0, high = 10,
+    idleTime = 5.minutes,
+    bufferSize = 0,
+    maxWaiters = Int.MaxValue))
+  .newRichClient(&quot;127.0.0.1:3306&quot;)
+</pre></div>
+</div>
+<p>and we can select:</p>
+<div class="highlight-text"><div class="highlight"><pre>val product = richClient.select(&quot;SELECT 5*5 AS `product`&quot;)(processRow)
+</pre></div>
+</div>
+<p>Note that <cite>select</cite> takes care of checking out the service and returning it to the pool. <cite>select</cite> and
+other useful methods are available on <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.exp.mysql.Client">mysql.Client</a> which is returned
+from the call to <cite>newRichClient</cite>.</p>
+<p>For a more involved example see the Finagle <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-example/src/main/scala/com/twitter/finagle/example/mysql/Example.scala">example project</a>.</p>
+</div>
 </div>
 
 
@@ -208,6 +276,7 @@ intelligent back-pressure, slow start, and GC-avoidance.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#mux">Mux</a></li>
+<li><a class="reference internal" href="#mysql">Mysql</a></li>
 </ul>
 </li>
 </ul>

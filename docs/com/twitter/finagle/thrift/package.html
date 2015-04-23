@@ -61,7 +61,7 @@ class <code>ServiceToClient</code> is provided by the finagle thrift code
 generator.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -110,7 +110,7 @@ generator.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ClientId.html"><span class="name">ClientId</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ClientId.html"><span class="name">ClientId</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -137,7 +137,7 @@ requests specify a <a href="ClientId.html" class="extype" name="com.twitter.fina
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="InvalidThriftConnectionException.html"><span class="name">InvalidThriftConnectionException</span></a><span class="params">()</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="../ServiceException.html" class="extype" name="com.twitter.finagle.ServiceException">ServiceException</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="InvalidThriftConnectionException.html"><span class="name">InvalidThriftConnectionException</span></a><span class="params">()</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="../ServiceException.html" class="extype" name="com.twitter.finagle.ServiceException">ServiceException</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Indicates that the connection on which a Thrift request was issued
@@ -166,7 +166,7 @@ was issued to a server that requires them.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SeqIdFilter.html"><span class="name">SeqIdFilter</span></a><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]]</span>
+        <a href="SeqIdFilter.html"><span class="name">SeqIdFilter</span></a><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4>
       <p class="comment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that overrides Thrift request sequence IDs,
@@ -180,7 +180,7 @@ replacing them with our own randomly-assigned i32s.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="SeqMismatchException.html"><span class="name">SeqMismatchException</span></a><span class="params">(<span name="id">id: <span class="extype" name="scala.Int">Int</span></span>, <span name="expected">expected: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <a href="../TransportException.html" class="extype" name="com.twitter.finagle.TransportException">TransportException</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="SeqMismatchException.html"><span class="name">SeqMismatchException</span></a><span class="params">(<span name="id">id: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expected">expected: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="../TransportException.html" class="extype" name="com.twitter.finagle.TransportException">TransportException</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Indicates that a Thrift response did not have the correct sequence
@@ -195,7 +195,7 @@ on the corresponding request.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftCall.html"><span class="name">ThriftCall</span></a><span class="tparams">[<span name="A">A &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]</span>, <span name="R">R &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="ThriftCall.html"><span class="name">ThriftCall</span></a><span class="tparams">[<span name="A">A &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]</span>, <span name="R">R &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">The ThriftCall object represents a thrift dispatch on the
@@ -209,7 +209,7 @@ channel.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftCallFactory.html"><span class="name">ThriftCallFactory</span></a><span class="tparams">[<span name="A">A &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]</span>, <span name="R">R &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="ThriftCallFactory.html"><span class="name">ThriftCallFactory</span></a><span class="tparams">[<span name="A">A &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]</span>, <span name="R">R &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       
@@ -235,7 +235,7 @@ channel.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftClientBufferedCodecFactory.html"><span class="name">ThriftClientBufferedCodecFactory</span></a><span class="result"> extends (<a href="../ClientCodecConfig.html" class="extype" name="com.twitter.finagle.ClientCodecConfig">ClientCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]]</span>
+        <a href="ThriftClientBufferedCodecFactory.html"><span class="name">ThriftClientBufferedCodecFactory</span></a><span class="result"> extends (<a href="../ClientCodecConfig.html" class="extype" name="com.twitter.finagle.ClientCodecConfig">ClientCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4>
       
@@ -248,7 +248,7 @@ channel.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftClientFramedCodec.html"><span class="name">ThriftClientFramedCodec</span></a><span class="result"> extends <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]]</span>
+        <a href="ThriftClientFramedCodec.html"><span class="name">ThriftClientFramedCodec</span></a><span class="result"> extends <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4>
       
@@ -261,7 +261,7 @@ channel.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftClientFramedCodecFactory.html"><span class="name">ThriftClientFramedCodecFactory</span></a><span class="result"> extends (<a href="../ClientCodecConfig.html" class="extype" name="com.twitter.finagle.ClientCodecConfig">ClientCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]]</span>
+        <a href="ThriftClientFramedCodecFactory.html"><span class="name">ThriftClientFramedCodecFactory</span></a><span class="result"> extends (<a href="../ClientCodecConfig.html" class="extype" name="com.twitter.finagle.ClientCodecConfig">ClientCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4>
       
@@ -274,10 +274,28 @@ channel.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftClientRequest.html"><span class="name">ThriftClientRequest</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="ThriftClientRequest.html"><span class="name">ThriftClientRequest</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.thrift.ThriftDispatchBench" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ThriftDispatchBenchextendsStdBenchAnnotations"></a>
+      <a id="ThriftDispatchBench:ThriftDispatchBench"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftDispatchBench.html"><span class="name">ThriftDispatchBench</span></a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Threads</span><span class="args">()</span>
+              
+                <span class="name">@State</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.ThriftReply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ThriftReply[R&lt;:org.apache.thrift.TBase[_,_]]extendsProductwithSerializable"></a>
       <a id="ThriftReply[R&lt;:TBase[_,_]]:ThriftReply[R]"></a>
@@ -287,7 +305,7 @@ channel.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftReply.html"><span class="name">ThriftReply</span></a><span class="tparams">[<span name="R">R &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]</span>]</span><span class="params">(<span name="response">response: <span class="extype" name="com.twitter.finagle.thrift.ThriftReply.R">R</span></span>, <span name="call">call: <a href="ThriftCall.html" class="extype" name="com.twitter.finagle.thrift.ThriftCall">ThriftCall</a>[_ &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _], _ &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ThriftReply.html"><span class="name">ThriftReply</span></a><span class="tparams">[<span name="R">R &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]</span>]</span><span class="params">(<span name="response">response: <span class="extype" name="com.twitter.finagle.thrift.ThriftReply.R">R</span></span>, <span name="call">call: <a href="ThriftCall.html" class="extype" name="com.twitter.finagle.thrift.ThriftCall">ThriftCall</a>[_ &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _], _ &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Encapsulates the result of a call to a Thrift service.</p>
@@ -313,7 +331,7 @@ channel.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftServerBufferedCodecFactory.html"><span class="name">ThriftServerBufferedCodecFactory</span></a><span class="result"> extends (<a href="../ServerCodecConfig.html" class="extype" name="com.twitter.finagle.ServerCodecConfig">ServerCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>], <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]]</span>
+        <a href="ThriftServerBufferedCodecFactory.html"><span class="name">ThriftServerBufferedCodecFactory</span></a><span class="result"> extends (<a href="../ServerCodecConfig.html" class="extype" name="com.twitter.finagle.ServerCodecConfig">ServerCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4>
       
@@ -326,7 +344,7 @@ channel.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftServerFramedCodec.html"><span class="name">ThriftServerFramedCodec</span></a><span class="result"> extends <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>], <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]]</span>
+        <a href="ThriftServerFramedCodec.html"><span class="name">ThriftServerFramedCodec</span></a><span class="result"> extends <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4>
       
@@ -339,7 +357,7 @@ channel.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftServerFramedCodecFactory.html"><span class="name">ThriftServerFramedCodecFactory</span></a><span class="result"> extends (<a href="../ServerCodecConfig.html" class="extype" name="com.twitter.finagle.ServerCodecConfig">ServerCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>], <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]]</span>
+        <a href="ThriftServerFramedCodecFactory.html"><span class="name">ThriftServerFramedCodecFactory</span></a><span class="result"> extends (<a href="../ServerCodecConfig.html" class="extype" name="com.twitter.finagle.ServerCodecConfig">ServerCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4>
       
@@ -352,7 +370,7 @@ channel.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ValidateThriftService.html"><span class="name">ValidateThriftService</span></a><span class="result"> extends <a href="../ServiceProxy.html" class="extype" name="com.twitter.finagle.ServiceProxy">ServiceProxy</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]]</span>
+        <a href="ValidateThriftService.html"><span class="name">ValidateThriftService</span></a><span class="result"> extends <a href="../ServiceProxy.html" class="extype" name="com.twitter.finagle.ServiceProxy">ServiceProxy</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4>
       <p class="comment cmt">A filter that invalidates a connection if it suffers from an
@@ -373,7 +391,7 @@ irrecoverable application exception.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ClientId$.html"><span class="name">ClientId</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ClientId$.html"><span class="name">ClientId</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt"><code>ClientId</code> provides the client identification of the incoming request if available.</p>
@@ -446,6 +464,19 @@ requests.</p>
       <p class="comment cmt">ThriftClientFramedCodec implements a framed thrift transport that
 supports upgrading in order to provide TraceContexts across
 requests.</p>
+    </li><li name="com.twitter.finagle.thrift.ThriftDispatchBench" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ThriftDispatchBench"></a>
+      <a id="ThriftDispatchBench:ThriftDispatchBench"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftDispatchBench$.html"><span class="name">ThriftDispatchBench</span></a>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.thrift.ThriftServerBufferedCodec" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ThriftServerBufferedCodec"></a>
       <a id="ThriftServerBufferedCodec:ThriftServerBufferedCodec"></a>
@@ -481,7 +512,7 @@ requests.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ThriftTypes$.html"><span class="name">ThriftTypes</span></a><span class="result"> extends <span class="extype" name="scala.collection.mutable.HashMap">HashMap</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="ThriftCallFactory.html" class="extype" name="com.twitter.finagle.thrift.ThriftCallFactory">ThriftCallFactory</a>[_, _]]</span>
+        <a href="ThriftTypes$.html"><span class="name">ThriftTypes</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.collection.mutable.HashMap" class="extype" target="_top">HashMap</a>[<span class="extype" name="scala.Predef.String">String</span>, <a href="ThriftCallFactory.html" class="extype" name="com.twitter.finagle.thrift.ThriftCallFactory">ThriftCallFactory</a>[_, _]]</span>
       </span>
       </h4>
       <p class="comment cmt">A registry for Thrift types.</p>
@@ -508,9 +539,9 @@ requests.</p>
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>

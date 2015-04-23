@@ -67,7 +67,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BinaryAnnotation.html"><span class="name">BinaryAnnotation</span></a><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span></span>, <span name="annotationType">annotationType: <a href="../../thrift/thrift/AnnotationType.html" class="extype" name="com.twitter.finagle.thrift.thrift.AnnotationType">AnnotationType</a></span>, <span name="endpoint">endpoint: <a href="Endpoint.html" class="extype" name="com.twitter.finagle.zipkin.thrift.Endpoint">Endpoint</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="BinaryAnnotation.html"><span class="name">BinaryAnnotation</span></a><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span></span>, <span name="annotationType">annotationType: <a href="../../thrift/thrift/AnnotationType.html" class="extype" name="com.twitter.finagle.thrift.thrift.AnnotationType">AnnotationType</a></span>, <span name="endpoint">endpoint: <a href="Endpoint.html" class="extype" name="com.twitter.finagle.zipkin.thrift.Endpoint">Endpoint</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -80,7 +80,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Endpoint.html"><span class="name">Endpoint</span></a><span class="params">(<span name="ipv4">ipv4: <span class="extype" name="scala.Int">Int</span></span>, <span name="port">port: <span class="extype" name="scala.Short">Short</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Endpoint.html"><span class="name">Endpoint</span></a><span class="params">(<span name="ipv4">ipv4: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="port">port: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Endpoints describe a TCP endpoint that terminates RPC
@@ -94,7 +94,7 @@ communication.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Sampler.html"><span class="name">Sampler</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Sampler.html"><span class="name">Sampler</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">Decide if we should sample a particular trace or not.</p>
@@ -120,7 +120,7 @@ communication.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Span.html"><span class="name">Span</span></a><span class="params">(<span name="traceId">traceId: <a href="../../tracing/TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>, <span name="_serviceName">_serviceName: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="_name">_name: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="annotations">annotations: <span class="extype" name="scala.Seq">Seq</span>[<a href="ZipkinAnnotation.html" class="extype" name="com.twitter.finagle.zipkin.thrift.ZipkinAnnotation">ZipkinAnnotation</a>]</span>, <span name="bAnnotations">bAnnotations: <span class="extype" name="scala.Seq">Seq</span>[<a href="BinaryAnnotation.html" class="extype" name="com.twitter.finagle.zipkin.thrift.BinaryAnnotation">BinaryAnnotation</a>]</span>, <span name="endpoint">endpoint: <a href="Endpoint.html" class="extype" name="com.twitter.finagle.zipkin.thrift.Endpoint">Endpoint</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Span.html"><span class="name">Span</span></a><span class="params">(<span name="traceId">traceId: <a href="../../tracing/TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>, <span name="_serviceName">_serviceName: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="_name">_name: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="annotations">annotations: <span class="extype" name="scala.Seq">Seq</span>[<a href="ZipkinAnnotation.html" class="extype" name="com.twitter.finagle.zipkin.thrift.ZipkinAnnotation">ZipkinAnnotation</a>]</span>, <span name="bAnnotations">bAnnotations: <span class="extype" name="scala.Seq">Seq</span>[<a href="BinaryAnnotation.html" class="extype" name="com.twitter.finagle.zipkin.thrift.BinaryAnnotation">BinaryAnnotation</a>]</span>, <span name="endpoint">endpoint: <a href="Endpoint.html" class="extype" name="com.twitter.finagle.zipkin.thrift.Endpoint">Endpoint</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">The span itself is an immutable datastructure.</p>
@@ -133,7 +133,7 @@ communication.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ZipkinAnnotation.html"><span class="name">ZipkinAnnotation</span></a><span class="params">(<span name="timestamp">timestamp: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="endpoint">endpoint: <a href="Endpoint.html" class="extype" name="com.twitter.finagle.zipkin.thrift.Endpoint">Endpoint</a></span>, <span name="duration">duration: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ZipkinAnnotation.html"><span class="name">ZipkinAnnotation</span></a><span class="params">(<span name="timestamp">timestamp: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="endpoint">endpoint: <a href="Endpoint.html" class="extype" name="com.twitter.finagle.zipkin.thrift.Endpoint">Endpoint</a></span>, <span name="duration">duration: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Annotation for a span.</p>
@@ -166,7 +166,7 @@ communication.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Endpoint$.html"><span class="name">Endpoint</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Endpoint$.html"><span class="name">Endpoint</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -205,7 +205,7 @@ communication.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Span$.html"><span class="name">Span</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Span$.html"><span class="name">Span</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       

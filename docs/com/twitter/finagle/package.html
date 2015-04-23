@@ -84,13 +84,13 @@ f respond {
 }</pre><p><code>Http.newService(&quot;localhost:8080&quot;)</code> constructs a new
 <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance connected to
 localhost TCP port 8080. We then issue a HTTP/1.1 GET
-request to URI &quot;/&quot;. The service returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span>
+request to URI &quot;/&quot;. The service returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a>
 representing the result of the operation. We listen to
 this future, printing an appropriate message when the
 response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains
 useful documentation and resources for using Finagle.</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -165,7 +165,7 @@ useful documentation and resources for using Finagle.</p></div><div class="toggl
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Addr.html"><span class="name">Addr</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Addr.html"><span class="name">Addr</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">An address identifies the location of an object--it is a bound
@@ -179,7 +179,7 @@ name.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Announcement.html"><span class="name">Announcement</span></a><span class="result"> extends <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
+        <a href="Announcement.html"><span class="name">Announcement</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
       </h4>
       
@@ -192,7 +192,7 @@ name.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Announcer.html"><span class="name">Announcer</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Announcer.html"><span class="name">Announcer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       
@@ -246,7 +246,7 @@ given <code>scheme</code>.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="CanStackFrom.html"><span class="name">CanStackFrom</span></a><span class="tparams">[<span name="From">-From</span>, <span name="To">To</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="CanStackFrom.html"><span class="name">CanStackFrom</span></a><span class="tparams">[<span name="From">-From</span>, <span name="To">To</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">A typeclass for &quot;stackable&quot; items.</p>
@@ -342,7 +342,7 @@ was reset by a peer or a proxy.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ChannelWriteException.html"><span class="name">ChannelWriteException</span></a><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteException</a> with <a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ChannelWriteException.html"><span class="name">ChannelWriteException</span></a><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteException</a> with <a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Default implementation for WriteException that wraps an underlying exception.</p>
@@ -355,7 +355,7 @@ was reset by a peer or a proxy.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Client.html"><span class="name">Client</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Client.html"><span class="name">Client</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">RPC clients with <code>Req</code>-typed requests and <code>Rep</code> typed replies.</p>
@@ -368,7 +368,7 @@ was reset by a peer or a proxy.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ClientCodecConfig.html"><span class="name">ClientCodecConfig</span></a><span class="params">(<span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ClientCodecConfig.html"><span class="name">ClientCodecConfig</span></a><span class="params">(<span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Clients
@@ -382,7 +382,7 @@ was reset by a peer or a proxy.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ClientConnection.html"><span class="name">ClientConnection</span></a><span class="result"> extends <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
+        <a href="ClientConnection.html"><span class="name">ClientConnection</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Information about a client, passed to a Service factory for each new
@@ -396,7 +396,7 @@ connection.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Codec.html"><span class="name">Codec</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Codec.html"><span class="name">Codec</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">Superclass for all codecs.</p>
@@ -409,7 +409,7 @@ connection.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="CodecFactory.html"><span class="name">CodecFactory</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="CodecFactory.html"><span class="name">CodecFactory</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">A combined codec factory provides both client and server codec
@@ -436,10 +436,23 @@ factories in one (when available).</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ConnectionRefusedException.html"><span class="name">ConnectionRefusedException</span></a><span class="params">(<span name="remoteAddress">remoteAddress: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ConnectionRefusedException.html"><span class="name">ConnectionRefusedException</span></a><span class="params">(<span name="remoteAddress">remoteAddress: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Indicates that connecting to a given <code>remoteAddress</code> was refused.</p>
+    </li><li name="com.twitter.finagle.Deadline" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DeadlineextendsOrdered[com.twitter.finagle.Deadline]withProductwithSerializable"></a>
+      <a id="Deadline:Deadline"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Deadline.html"><span class="name">Deadline</span></a><span class="params">(<span name="timestamp">timestamp: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>, <span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Ordered">Ordered</span>[<a href="Deadline.html" class="extype" name="com.twitter.finagle.Deadline">Deadline</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">A deadline is the time by which some action (e.</p>
     </li><li name="com.twitter.finagle.Dentry" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DentryextendsProductwithSerializable"></a>
       <a id="Dentry:Dentry"></a>
@@ -449,7 +462,7 @@ factories in one (when available).</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Dentry.html"><span class="name">Dentry</span></a><span class="params">(<span name="prefix">prefix: <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a></span>, <span name="dst">dst: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Dentry.html"><span class="name">Dentry</span></a><span class="params">(<span name="prefix">prefix: <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a></span>, <span name="dst">dst: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Trait Dentry describes a delegation table entry.</p>
@@ -462,7 +475,7 @@ factories in one (when available).</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Dtab.html"><span class="name">Dtab</span></a><span class="params">(<span name="dentries0">dentries0: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>] with <a href="Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Dtab.html"><span class="name">Dtab</span></a><span class="params">(<span name="dentries0">dentries0: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>] with <a href="Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">A Dtab--short for delegation table--comprises a sequence
@@ -476,7 +489,7 @@ of delegation rules.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="DtabBuilder.html"><span class="name">DtabBuilder</span></a><span class="result"> extends <span class="extype" name="scala.collection.mutable.Builder">Builder</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>]</span>
+        <a href="DtabBuilder.html"><span class="name">DtabBuilder</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.collection.mutable.Builder" class="extype" target="_top">Builder</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>]</span>
       </span>
       </h4>
       
@@ -496,7 +509,7 @@ of delegation rules.</p>
 <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> which acquires a new service for
 each request.</p>
     </li><li name="com.twitter.finagle.FailedFastException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="FailedFastExceptionextendsRequestException"></a>
+      <a id="FailedFastExceptionextendsRequestExceptionwithWriteException"></a>
       <a id="FailedFastException:FailedFastException"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -504,7 +517,7 @@ each request.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="FailedFastException.html"><span class="name">FailedFastException</span></a><span class="result"> extends <a href="RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a></span>
+        <a href="FailedFastException.html"><span class="name">FailedFastException</span></a><span class="result"> extends <a href="RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a> with <a href="WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteException</a></span>
       </span>
       </h4>
       <p class="comment cmt">Used by <span class="extype" name="com.twitter.finagle.service.FailFastFactory">com.twitter.finagle.service.FailFastFactory</span> to indicate that a
@@ -532,7 +545,7 @@ connected have been marked as failed.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Filter.html"><span class="name">Filter</span></a><span class="tparams">[<span name="ReqIn">-ReqIn</span>, <span name="RepOut">+RepOut</span>, <span name="ReqOut">+ReqOut</span>, <span name="RepIn">-RepIn</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.Filter.ReqIn">ReqIn</span>, <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Filter.ReqOut">ReqOut</span>, <span class="extype" name="com.twitter.finagle.Filter.RepIn">RepIn</span>]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Filter.RepOut">RepOut</span>]</span>
+        <a href="Filter.html"><span class="name">Filter</span></a><span class="tparams">[<span name="ReqIn">-ReqIn</span>, <span name="RepOut">+RepOut</span>, <span name="ReqOut">+ReqOut</span>, <span name="RepIn">-RepIn</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.Filter.ReqIn">ReqIn</span>, <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Filter.ReqOut">ReqOut</span>, <span class="extype" name="com.twitter.finagle.Filter.RepIn">RepIn</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.Filter.RepOut">RepOut</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">A Filter acts as a decorator/transformer of a service.</p>
@@ -559,7 +572,7 @@ from the perspective of the application.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="HttpRichClient.html"><span class="name">HttpRichClient</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="HttpRichClient.html"><span class="name">HttpRichClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">A rich client with a *very* basic URL fetcher.</p>
@@ -572,7 +585,7 @@ from the perspective of the application.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="HttpxRichClient.html"><span class="name">HttpxRichClient</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="HttpxRichClient.html"><span class="name">HttpxRichClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">A rich client with a *very* basic URL fetcher.</p>
@@ -625,7 +638,7 @@ some server.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="LabelledGroup.html"><span class="name">LabelledGroup</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="underlying">underlying: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="com.twitter.finagle.LabelledGroup.T">T</span>]</span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="com.twitter.finagle.LabelledGroup.T">T</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="LabelledGroup.html"><span class="name">LabelledGroup</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="underlying">underlying: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="com.twitter.finagle.LabelledGroup.T">T</span>]</span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="com.twitter.finagle.LabelledGroup.T">T</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">A mixin trait to assign a <code><code>name</code></code> to the group.</p>
@@ -638,7 +651,7 @@ some server.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ListeningServer.html"><span class="name">ListeningServer</span></a><span class="result"> extends <span class="extype" name="com.twitter.util.Closable">Closable</span> with <span class="extype" name="com.twitter.util.Awaitable">Awaitable</span>[<span class="extype" name="scala.Unit">Unit</span>] with <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>
+        <a href="ListeningServer.html"><span class="name">ListeningServer</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Awaitable" class="extype" target="_top">Awaitable</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a>] with <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">Trait ListeningServer represents a bound and listening
@@ -652,7 +665,7 @@ server.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="MemcachedKetamaClient.html"><span class="name">MemcachedKetamaClient</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="MemcachedKetamaClient.html"><span class="name">MemcachedKetamaClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       
@@ -665,7 +678,7 @@ server.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="MemcachedRichClient.html"><span class="name">MemcachedRichClient</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="MemcachedRichClient.html"><span class="name">MemcachedRichClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       
@@ -678,7 +691,7 @@ server.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="MemcachedxKetamaClient.html"><span class="name">MemcachedxKetamaClient</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="MemcachedxKetamaClient.html"><span class="name">MemcachedxKetamaClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       
@@ -691,7 +704,7 @@ server.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="MemcachedxRichClient.html"><span class="name">MemcachedxRichClient</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="MemcachedxRichClient.html"><span class="name">MemcachedxRichClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       
@@ -704,7 +717,7 @@ server.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="MockTimer.html"><span class="name">MockTimer</span></a><span class="result"> extends <span class="extype" name="com.twitter.util.Timer">Timer</span></span>
+        <a href="MockTimer.html"><span class="name">MockTimer</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a></span>
       </span>
       </h4>
       
@@ -758,7 +771,7 @@ discovered for given <code>scheme</code>.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Name.html"><span class="name">Name</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Name.html"><span class="name">Name</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">Names identify network locations.</p>
@@ -771,7 +784,7 @@ discovered for given <code>scheme</code>.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="NameTree.html"><span class="name">NameTree</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="NameTree.html"><span class="name">NameTree</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">Name trees represent a composite T-typed name whose interpretation
@@ -785,7 +798,7 @@ is subject to evaluation rules.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Namer.html"><span class="name">Namer</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Namer.html"><span class="name">Namer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">A namer is a context in which a <span class="extype" name="com.twitter.finagle.NameTree
@@ -853,7 +866,7 @@ some sharding strategy.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Path.html"><span class="name">Path</span></a><span class="params">(<span name="elems">elems: <span class="extype" name="com.twitter.io.Buf">Buf</span>*</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Path.html"><span class="name">Path</span></a><span class="params">(<span name="elems">elems: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>*</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">A Path comprises a sequence of byte buffers naming a
@@ -871,6 +884,19 @@ hierarchically-addressed object.</p>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.RedisRichClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RedisRichClientextendsAnyRef"></a>
+      <a id="RedisRichClient:RedisRichClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="RedisRichClient.html"><span class="name">RedisRichClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.RefusedByRateLimiter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RefusedByRateLimiterextendsChannelExceptionwithProductwithSerializable"></a>
       <a id="RefusedByRateLimiter:RefusedByRateLimiter"></a>
@@ -880,7 +906,7 @@ hierarchically-addressed object.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="RefusedByRateLimiter.html"><span class="name">RefusedByRateLimiter</span></a><span class="params">()</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="RefusedByRateLimiter.html"><span class="name">RefusedByRateLimiter</span></a><span class="params">()</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Indicates that requests were failed by a rate-limiter.</p>
@@ -919,7 +945,7 @@ hierarchically-addressed object.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Resolver.html"><span class="name">Resolver</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Resolver.html"><span class="name">Resolver</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">A resolver binds a name, represented by a string, to a
@@ -962,7 +988,7 @@ given <code>scheme</code>.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Server.html"><span class="name">Server</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Server.html"><span class="name">Server</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">Servers implement RPC servers with <code>Req</code>-typed requests and
@@ -976,7 +1002,7 @@ given <code>scheme</code>.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ServerCodecConfig.html"><span class="name">ServerCodecConfig</span></a><span class="params">(<span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="boundAddress">boundAddress: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ServerCodecConfig.html"><span class="name">ServerCodecConfig</span></a><span class="params">(<span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="boundAddress">boundAddress: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Servers
@@ -990,7 +1016,7 @@ given <code>scheme</code>.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Service.html"><span class="name">Service</span></a><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>] with <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
+        <a href="Service.html"><span class="name">Service</span></a><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>] with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
       </h4>
       <p class="comment cmt">A Service is an asynchronous function from Request to Future[Response].</p>
@@ -1030,7 +1056,7 @@ that is closed (i.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ServiceFactory.html"><span class="name">ServiceFactory</span></a><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends (<a href="ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.ServiceFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceFactory.Rep">Rep</span>]] with <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
+        <a href="ServiceFactory.html"><span class="name">ServiceFactory</span></a><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends (<a href="ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.ServiceFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceFactory.Rep">Rep</span>]] with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
       </h4>
       
@@ -1057,7 +1083,7 @@ ServiceFactory.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ServiceFactoryWrapper.html"><span class="name">ServiceFactoryWrapper</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="ServiceFactoryWrapper.html"><span class="name">ServiceFactoryWrapper</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">A ServiceFactoryWrapper adds behavior to an underlying ServiceFactory.</p>
@@ -1149,7 +1175,7 @@ that is unavailable.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="SslHandshakeException.html"><span class="name">SslHandshakeException</span></a><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="remoteAddress">remoteAddress: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="SslHandshakeException.html"><span class="name">SslHandshakeException</span></a><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="remoteAddress">remoteAddress: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Indicates that an error occurred while an SSL handshake was being performed
@@ -1163,7 +1189,7 @@ with a server at a given <code>remoteAddress</code>.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="SslHostVerificationException.html"><span class="name">SslHostVerificationException</span></a><span class="params">(<span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="SslHostVerificationException.html"><span class="name">SslHostVerificationException</span></a><span class="params">(<span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Indicates that the certificate for a given session was invalidated.</p>
@@ -1176,7 +1202,7 @@ with a server at a given <code>remoteAddress</code>.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Stack.html"><span class="name">Stack</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Stack.html"><span class="name">Stack</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">Stacks represent stackable elements of type T.</p>
@@ -1189,7 +1215,7 @@ with a server at a given <code>remoteAddress</code>.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="StackBuilder.html"><span class="name">StackBuilder</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="StackBuilder.html"><span class="name">StackBuilder</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">StackBuilders are imperative-style builders for Stacks.</p>
@@ -1215,7 +1241,7 @@ with a server at a given <code>remoteAddress</code>.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Status.html"><span class="name">Status</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Status.html"><span class="name">Status</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">Status tells the condition of a networked endpoint.</p>
@@ -1267,7 +1293,7 @@ with a server at a given <code>remoteAddress</code>.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ThriftRichClient.html"><span class="name">ThriftRichClient</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="ThriftRichClient.html"><span class="name">ThriftRichClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">A mixin trait to provide a rich Thrift client API.</p>
@@ -1280,7 +1306,7 @@ with a server at a given <code>remoteAddress</code>.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ThriftRichServer.html"><span class="name">ThriftRichServer</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="ThriftRichServer.html"><span class="name">ThriftRichServer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">A mixin trait to provide a rich Thrift server API.</p>
@@ -1350,7 +1376,7 @@ become available from a client's connection pool.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="UnknownChannelException.html"><span class="name">UnknownChannelException</span></a><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="remoteAddress">remoteAddress: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="UnknownChannelException.html"><span class="name">UnknownChannelException</span></a><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="remoteAddress">remoteAddress: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">A catch-all exception class for uncategorized
@@ -1438,7 +1464,7 @@ become available from a client's connection pool.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="FailFastException.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) no longer used by com.twitter.finagle.service.FailFastFactory">FailFastException</span></a><span class="params">()</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="FailFastException.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) no longer used by com.twitter.finagle.service.FailFastFactory">FailFastException</span></a><span class="params">()</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
@@ -1454,7 +1480,7 @@ become available from a client's connection pool.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Group.html"><span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use com.twitter.finagle.Name to represent clusters instead">Group</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Group.html"><span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use com.twitter.finagle.Name to represent clusters instead">Group</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">A group is a dynamic set of <code>T</code>-typed values.</p>
@@ -1539,7 +1565,7 @@ become available from a client's connection pool.</p>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> no longer used by com.twitter.finagle.service.RetryingFilter</p></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMuxClientLike" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ThriftMuxClientLikeextendsClient[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]]withThriftRichClientwithcom.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.Client[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]]"></a>
+      <a id="ThriftMuxClientLikeextendsStackBasedClient[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]]withStack.Parameterized[com.twitter.finagle.ThriftMuxClientLike]withStack.Transformable[com.twitter.finagle.ThriftMuxClientLike]withThriftRichClient"></a>
       <a id="ThriftMuxClientLike:ThriftMuxClientLike"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1547,7 +1573,7 @@ become available from a client's connection pool.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftMuxClientLike.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use object ThriftMux">ThriftMuxClientLike</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]] with <a href="ThriftRichClient.html" class="extype" name="com.twitter.finagle.ThriftRichClient">ThriftRichClient</a> with (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]]</span>
+        <a href="ThriftMuxClientLike.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use object ThriftMux">ThriftMuxClientLike</span></a><span class="result"> extends <a href="client/StackBasedClient.html" class="extype" name="com.twitter.finagle.client.StackBasedClient">StackBasedClient</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="ThriftMuxClientLike.html" class="extype" name="com.twitter.finagle.ThriftMuxClientLike">ThriftMuxClientLike</a>] with <a href="Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a>[<a href="ThriftMuxClientLike.html" class="extype" name="com.twitter.finagle.ThriftMuxClientLike">ThriftMuxClientLike</a>] with <a href="ThriftRichClient.html" class="extype" name="com.twitter.finagle.ThriftRichClient">ThriftRichClient</a></span>
       </span>
       </h4>
       <p class="comment cmt">A <a href="Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> for the Thrift protocol served over
@@ -1561,7 +1587,7 @@ become available from a client's connection pool.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftMuxServerLike.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use object ThriftMux">ThriftMuxServerLike</span></a><span class="result"> extends <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>], <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]] with <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a> with (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>], <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]]</span>
+        <a href="ThriftMuxServerLike.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use object ThriftMux">ThriftMuxServerLike</span></a><span class="result"> extends <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a> with (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4>
       <p class="comment cmt">A server for the Thrift protocol served over <a href="mux/package.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p>
@@ -1647,7 +1673,7 @@ their corresponding initial requests succeeded in time.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ChannelException$.html"><span class="name">ChannelException</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ChannelException$.html"><span class="name">ChannelException</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -1677,6 +1703,19 @@ their corresponding initial requests succeeded in time.</p>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.Deadline" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Deadline"></a>
+      <a id="Deadline:Deadline"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Deadline$.html"><span class="name">Deadline</span></a><span class="result"> extends <a href="context/MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[<a href="Deadline.html" class="extype" name="com.twitter.finagle.Deadline">Deadline</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">A broadcast context for deadlines.</p>
     </li><li name="com.twitter.finagle.Dentry" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Dentry"></a>
       <a id="Dentry:Dentry"></a>
@@ -1686,7 +1725,7 @@ their corresponding initial requests succeeded in time.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Dentry$.html"><span class="name">Dentry</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Dentry$.html"><span class="name">Dentry</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -1699,7 +1738,7 @@ their corresponding initial requests succeeded in time.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Dtab$.html"><span class="name">Dtab</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Dtab$.html"><span class="name">Dtab</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Object Dtab manages 'base' and 'local' Dtabs.</p>
@@ -1738,10 +1777,10 @@ their corresponding initial requests succeeded in time.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Failure$.html"><span class="name">Failure</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Failure$.html"><span class="name">Failure</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
-      <p class="comment cmt">Defines convenient methods for contructing and extracting failures.</p>
+      
     </li><li name="com.twitter.finagle.Filter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Filter"></a>
       <a id="Filter:Filter"></a>
@@ -2026,7 +2065,7 @@ as binding and evaluation routines.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NoStacktrace$.html"><span class="name">NoStacktrace</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="NoStacktrace$.html"><span class="name">NoStacktrace</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -2039,7 +2078,7 @@ as binding and evaluation routines.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NullServer$.html"><span class="name">NullServer</span></a><span class="result"> extends <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a> with <span class="extype" name="com.twitter.util.CloseAwaitably">CloseAwaitably</span></span>
+        <a href="NullServer$.html"><span class="name">NullServer</span></a><span class="result"> extends <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.CloseAwaitably" class="extype" target="_top">CloseAwaitably</a></span>
       </span>
       </h4>
       <p class="comment cmt">An empty ListeningServer that can be used as a placeholder.</p>
@@ -2052,7 +2091,46 @@ as binding and evaluation routines.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Path$.html"><span class="name">Path</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Path$.html"><span class="name">Path</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.Redis" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Redis"></a>
+      <a id="Redis:Redis"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Redis$.html"><span class="name">Redis</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="redis/protocol/Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="redis/protocol/Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a>] with <a href="RedisRichClient.html" class="extype" name="com.twitter.finagle.RedisRichClient">RedisRichClient</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.RedisClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RedisClient"></a>
+      <a id="RedisClient:RedisClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RedisClient$.html"><span class="name">RedisClient</span></a><span class="result"> extends <a href="client/DefaultClient.html" class="extype" name="com.twitter.finagle.client.DefaultClient">DefaultClient</a>[<a href="redis/protocol/Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="redis/protocol/Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a>] with <a href="RedisRichClient.html" class="extype" name="com.twitter.finagle.RedisRichClient">RedisRichClient</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.RedisTransporter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RedisTransporter"></a>
+      <a id="RedisTransporter:RedisTransporter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RedisTransporter$.html"><span class="name">RedisTransporter</span></a><span class="result"> extends <a href="netty3/Netty3Transporter.html" class="extype" name="com.twitter.finagle.netty3.Netty3Transporter">Netty3Transporter</a>[<a href="redis/protocol/Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="redis/protocol/Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a>]</span>
       </span>
       </h4>
       
@@ -2117,7 +2195,7 @@ as binding and evaluation routines.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="SourcedException$.html"><span class="name">SourcedException</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="SourcedException$.html"><span class="name">SourcedException</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -2133,7 +2211,7 @@ as binding and evaluation routines.</p>
         <a href="Stack$.html"><span class="name">Stack</span></a>
       </span>
       </h4>
-      
+      <p class="comment cmt"></p>
     </li><li name="com.twitter.finagle.Status" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Status"></a>
       <a id="Status:Status"></a>
@@ -2169,7 +2247,7 @@ as binding and evaluation routines.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Thrift$.html"><span class="name">Thrift</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]] with <a href="ThriftRichClient.html" class="extype" name="com.twitter.finagle.ThriftRichClient">ThriftRichClient</a> with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>], <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]] with <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></span>
+        <a href="Thrift$.html"><span class="name">Thrift</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="ThriftRichClient.html" class="extype" name="com.twitter.finagle.ThriftRichClient">ThriftRichClient</a> with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></span>
       </span>
       </h4>
       <p class="comment cmt">Client and server for <a href="http://thrift.apache.org" target="_blank">Apache Thrift</a>.</p>
@@ -2182,7 +2260,7 @@ as binding and evaluation routines.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ThriftMux$.html"><span class="name">ThriftMux</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]] with <a href="ThriftRichClient.html" class="extype" name="com.twitter.finagle.ThriftRichClient">ThriftRichClient</a> with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>], <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]] with <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></span>
+        <a href="ThriftMux$.html"><span class="name">ThriftMux</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="ThriftRichClient.html" class="extype" name="com.twitter.finagle.ThriftRichClient">ThriftRichClient</a> with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></span>
       </span>
       </h4>
       <p class="comment cmt">The <code>ThriftMux</code> object is both a <a href="Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> and a
@@ -2223,7 +2301,7 @@ as binding and evaluation routines.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="WriteException$.html"><span class="name">WriteException</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="WriteException$.html"><span class="name">WriteException</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -2236,7 +2314,7 @@ as binding and evaluation routines.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="asyncDns$.html"><span class="name">asyncDns</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>
+        <a href="asyncDns$.html"><span class="name">asyncDns</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
       </span>
       </h4>
       
@@ -2263,6 +2341,19 @@ as binding and evaluation routines.</p>
       </span>
       <span class="symbol">
         <a href="builder/package.html"><span class="name">builder</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.cacheresolver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="cacheresolver"></a>
+      <a id="cacheresolver:cacheresolver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="cacheresolver/package.html"><span class="name">cacheresolver</span></a>
       </span>
       </h4>
       
@@ -2315,6 +2406,19 @@ as binding and evaluation routines.</p>
       </span>
       <span class="symbol">
         <a href="core/package.html"><span class="name">core</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.demo" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="demo"></a>
+      <a id="demo:demo"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="demo/package.html"><span class="name">demo</span></a>
       </span>
       </h4>
       
@@ -2585,10 +2689,10 @@ as binding and evaluation routines.</p>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">object</span>
+        <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a href="package$$param$.html"><span class="name">param</span></a>
+        <a href="param/package.html"><span class="name">param</span></a>
       </span>
       </h4>
       <p class="comment cmt">Defines common <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">com.twitter.finagle.Stack.Param</a>'s shared between
@@ -2603,6 +2707,19 @@ finagle clients and servers.</p>
       </span>
       <span class="symbol">
         <a href="pool/package.html"><span class="name">pool</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.redis" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="redis"></a>
+      <a id="redis:redis"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="redis/package.html"><span class="name">redis</span></a>
       </span>
       </h4>
       
@@ -2724,6 +2841,19 @@ finagle clients and servers.</p>
       </h4>
       <p class="comment cmt">Finagle-stream implements a rather peculiar protocol: it streams
 discrete messages delineated by HTTP chunks.</p>
+    </li><li name="com.twitter.finagle.stress" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="stress"></a>
+      <a id="stress:stress"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="stress/package.html"><span class="name">stress</span></a>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.thrift" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="thrift"></a>
       <a id="thrift:thrift"></a>
@@ -2738,6 +2868,19 @@ discrete messages delineated by HTTP chunks.</p>
       </h4>
       <p class="comment cmt">Please use the new interface, <a href="Thrift$.html" class="extype" name="com.twitter.finagle.Thrift">com.twitter.finagle.Thrift</a>,
 for constructing thrift clients and servers.</p>
+    </li><li name="com.twitter.finagle.topo" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="topo"></a>
+      <a id="topo:topo"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="topo/package.html"><span class="name">topo</span></a>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.tracing" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="tracing"></a>
       <a id="tracing:tracing"></a>
@@ -2842,9 +2985,9 @@ for constructing thrift clients and servers.</p>
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>

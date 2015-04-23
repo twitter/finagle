@@ -1,0 +1,266 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>naggati - com.twitter.finagle.redis.naggati</title>
+          <meta name="description" content="naggati - com.twitter.finagle.redis.naggati" />
+          <meta name="keywords" content="naggati com.twitter.finagle.redis.naggati" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../index.html';
+            var hash = 'com.twitter.finagle.redis.naggati.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../../../../lib/package_big.png" />
+        <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.redis">redis</a></p>
+        <h1>naggati</h1>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">naggati</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="com.twitter.finagle.redis.naggati.Codec" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Codec[A]extendsFrameDecoderwithChannelDownstreamHandler"></a>
+      <a id="Codec[A]:Codec[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Codec.html"><span class="name">Codec</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.codec.frame.FrameDecoder">FrameDecoder</span> with <span class="extype" name="org.jboss.netty.channel.ChannelDownstreamHandler">ChannelDownstreamHandler</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">A netty ChannelHandler for decoding data into protocol objects on the way in, and packing
+objects into byte arrays on the way out.</p>
+    </li><li name="com.twitter.finagle.redis.naggati.Emit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EmitextendsNextStepwithProductwithSerializable"></a>
+      <a id="Emit:Emit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Emit.html"><span class="name">Emit</span></a><span class="params">(<span name="obj">obj: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result"> extends <a href="NextStep.html" class="extype" name="com.twitter.finagle.redis.naggati.NextStep">NextStep</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.redis.naggati.Encoder" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="Encoder[A]extendsAnyRef"></a>
+      <a id="Encoder[A]:Encoder[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Encoder.html"><span class="name">Encoder</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">An Encoder turns things of type <code>A</code> into <code>ChannelBuffer</code>s, for outbound traffic (server
+responses or client requests).</p>
+    </li><li name="com.twitter.finagle.redis.naggati.GoToStage" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GoToStageextendsNextStepwithProductwithSerializable"></a>
+      <a id="GoToStage:GoToStage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="GoToStage.html"><span class="name">GoToStage</span></a><span class="params">(<span name="stage">stage: <a href="Stage.html" class="extype" name="com.twitter.finagle.redis.naggati.Stage">Stage</a></span>)</span><span class="result"> extends <a href="NextStep.html" class="extype" name="com.twitter.finagle.redis.naggati.NextStep">NextStep</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.redis.naggati.NextStep" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="NextStepextendsAnyRef"></a>
+      <a id="NextStep:NextStep"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="NextStep.html"><span class="name">NextStep</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">The next step for processing after this stage.</p>
+    </li><li name="com.twitter.finagle.redis.naggati.ProtocolError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ProtocolErrorextendsException"></a>
+      <a id="ProtocolError:ProtocolError"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ProtocolError.html"><span class="name">ProtocolError</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.redis.naggati.Stage" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="StageextendsAnyRef"></a>
+      <a id="Stage:Stage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Stage.html"><span class="name">Stage</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">A decoder stage.</p>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="com.twitter.finagle.redis.naggati.Codec" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Codec"></a>
+      <a id="Codec:Codec"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Codec$.html"><span class="name">Codec</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.redis.naggati.DontCareCounter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DontCareCounter"></a>
+      <a id="DontCareCounter:DontCareCounter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DontCareCounter$.html"><span class="name">DontCareCounter</span></a><span class="result"> extends (<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>) ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.redis.naggati.Incomplete" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Incomplete"></a>
+      <a id="Incomplete:Incomplete"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Incomplete$.html"><span class="name">Incomplete</span></a><span class="result"> extends <a href="NextStep.html" class="extype" name="com.twitter.finagle.redis.naggati.NextStep">NextStep</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.redis.naggati.Stages" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Stages"></a>
+      <a id="Stages:Stages"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Stages$.html"><span class="name">Stages</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.redis.naggati.codec" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="codec"></a>
+      <a id="codec:codec"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="codec/package.html"><span class="name">codec</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.redis.naggati.test" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="test"></a>
+      <a id="test:test"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="test/package.html"><span class="name">test</span></a>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../lib/template.js"></script>
+    </body>
+      </html>

@@ -101,3 +101,12 @@ Understanding these stats often requires deep knowledge of the protocol, or indi
 (e.g. Netty) internals.
 
 .. include:: metrics/Transport.rst
+
+Mux
+---
+
+.. _mux_stats:
+
+These stats pertain to :ref:`Mux <mux>`.
+
+.. include:: metrics/Mux.rst 

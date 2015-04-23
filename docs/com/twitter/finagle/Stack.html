@@ -35,26 +35,23 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">Stack</span><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <span class="name">Stack</span><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Stacks represent stackable elements of type T. It is assumed that
 T-typed elements can be stacked in some meaningful way; examples
-are functions (function composition) <span class="extype" name="com.twitter.finagle.Filter
-Filters">com.twitter.finagle.Filter
-Filters</span> (chaining), and <span class="extype" name="com.twitter.finagle.ServiceFactory
-ServiceFactories">com.twitter.finagle.ServiceFactory
-ServiceFactories</span> (through transformers). T-typed values are also
-meant to compose: the stack itself materializes into a T-typed
-value.</p><p>Stacks are persistent, allowing for nondestructive
+are functions (function composition) <a href="Filter.html" class="extype" name="com.twitter.finagle.Filter">Filters</a> (chaining),
+and <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactories</a> (through
+transformers). T-typed values are also meant to compose: the stack
+itself materializes into a T-typed value.</p><p>Stacks are persistent, allowing for nondestructive
 transformations; they are designed to represent 'template' stacks
 which can be configured in various ways before materializing the
 stack itself.</p><p>Note: Stacks are advanced and sometimes subtle. For expert use
 only!
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
           <div class="subClasses hiddenContent"><a href="Stack$$Leaf.html" class="extype" name="com.twitter.finagle.Stack.Leaf">Leaf</a>, <a href="Stack$$Node.html" class="extype" name="com.twitter.finagle.Stack.Node">Node</a></div>
@@ -114,7 +111,7 @@ only!
       <p class="shortcomment cmt">The head field of the Stack composes all associated metadata
 of the topmost element of the stack.</p><div class="fullcomment"><div class="comment cmt"><p>The head field of the Stack composes all associated metadata
 of the topmost element of the stack.
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p><code>head</code> does not give access to the value <code>T</code>, use <code>make</code> instead.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">com.twitter.finagle.Stack.Head</a>
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p><code>head</code> does not give access to the value <code>T</code>, use <code>make</code> instead.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">Stack.Head</a>
 </p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.Stack#make" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="make(params:com.twitter.finagle.Stack.Params):T"></a>
@@ -145,7 +142,7 @@ configuration.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -158,7 +155,7 @@ configuration.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -171,7 +168,7 @@ configuration.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -214,7 +211,7 @@ with <code>right</code>. Note that this replaces the terminating element of
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -227,7 +224,7 @@ with <code>right</code>. Note that this replaces the terminating element of
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -253,7 +250,7 @@ with <code>right</code>. Note that this replaces the terminating element of
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -263,6 +260,36 @@ with <code>right</code>. Note that this replaces the terminating element of
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.Stack#concat" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="concat(right:com.twitter.finagle.Stack[T]):com.twitter.finagle.Stack[T]"></a>
+      <a id="concat(Stack[T]):Stack[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">concat</span><span class="params">(<span name="right">right: <a href="" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Produce a new stack representing the concatenation of <code>this</code>
+with <code>right</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Produce a new stack representing the concatenation of <code>this</code>
+with <code>right</code>. Note that this replaces the terminating element of
+<code>this</code>.</p><p>Alias for <a href="#++(right:com.twitter.finagle.Stack[T]):com.twitter.finagle.Stack[T]" class="extmbr" name="com.twitter.finagle.Stack#++">Stack.++</a>.
+</p></div></div>
+    </li><li name="com.twitter.finagle.Stack#contains" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="contains(role:com.twitter.finagle.Stack.Role):Boolean"></a>
+      <a id="contains(Role):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">contains</span><span class="params">(<span name="role">role: <a href="Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns whether the stack contains a given role or not.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -272,7 +299,7 @@ with <code>right</code>. Note that this replaces the terminating element of
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -285,10 +312,28 @@ with <code>right</code>. Note that this replaces the terminating element of
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.Stack#exists" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="exists(pred:com.twitter.finagle.Stack[T]=&gt;Boolean):Boolean"></a>
+      <a id="exists((Stack[T])⇒Boolean):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">exists</span><span class="params">(<span name="pred">pred: (<a href="" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]) ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Traverse the stack, until you find that pred has been evaluated to true.</p><div class="fullcomment"><div class="comment cmt"><p>Traverse the stack, until you find that pred has been evaluated to true.
+If <code>pred</code> finds an element, return true, otherwise, false.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@tailrec</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -298,7 +343,7 @@ with <code>right</code>. Note that this replaces the terminating element of
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -308,19 +353,23 @@ with <code>right</code>. Note that this replaces the terminating element of
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.Stack#foreach" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Stack#foreach" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="foreach(fn:com.twitter.finagle.Stack[T]=&gt;Unit):Unit"></a>
       <a id="foreach((Stack[T])⇒Unit):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">foreach</span><span class="params">(<span name="fn">fn: (<a href="" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">foreach</span><span class="params">(<span name="fn">fn: (<a href="" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]) ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Traverse the stack, invoking <code>fn</code> on each element.</p>
+      <p class="shortcomment cmt">Traverse the stack, invoking <code>fn</code> on each element.</p><div class="fullcomment"><div class="comment cmt"><p>Traverse the stack, invoking <code>fn</code> on each element.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@tailrec</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -343,10 +392,80 @@ with <code>right</code>. Note that this replaces the terminating element of
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.Stack#insertAfter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="insertAfter[U](target:com.twitter.finagle.Stack.Role,insertion:U)(implicitcsf:com.twitter.finagle.CanStackFrom[U,T]):com.twitter.finagle.Stack[T]"></a>
+      <a id="insertAfter[U](Role,U)(CanStackFrom[U,T]):Stack[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">insertAfter</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="target">target: <a href="Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a></span>, <span name="insertion">insertion: <span class="extype" name="com.twitter.finagle.Stack.insertAfter.U">U</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="csf">csf: <a href="CanStackFrom.html" class="extype" name="com.twitter.finagle.CanStackFrom">CanStackFrom</a>[<span class="extype" name="com.twitter.finagle.Stack.insertAfter.U">U</span>, <span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Insert the given <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a> after the stack elements matching
+the argument role.</p><div class="fullcomment"><div class="comment cmt"><p>Insert the given <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a> after the stack elements matching
+the argument role. If no elements match the role, then an
+unmodified stack is returned.  <code>insertion</code> must conform to
+typeclass <a href="CanStackFrom.html" class="extype" name="com.twitter.finagle.CanStackFrom">CanStackFrom</a>.
+</p></div></div>
+    </li><li name="com.twitter.finagle.Stack#insertAfter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="insertAfter(target:com.twitter.finagle.Stack.Role,insertion:com.twitter.finagle.Stackable[T]):com.twitter.finagle.Stack[T]"></a>
+      <a id="insertAfter(Role,Stackable[T]):Stack[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">insertAfter</span><span class="params">(<span name="target">target: <a href="Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a></span>, <span name="insertion">insertion: <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Insert the given <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a> after the stack elements matching
+the argument role.</p><div class="fullcomment"><div class="comment cmt"><p>Insert the given <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a> after the stack elements matching
+the argument role. If no elements match the role, then an
+unmodified stack is returned.
+</p></div></div>
+    </li><li name="com.twitter.finagle.Stack#insertBefore" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="insertBefore[U](target:com.twitter.finagle.Stack.Role,insertion:U)(implicitcsf:com.twitter.finagle.CanStackFrom[U,T]):com.twitter.finagle.Stack[T]"></a>
+      <a id="insertBefore[U](Role,U)(CanStackFrom[U,T]):Stack[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">insertBefore</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="target">target: <a href="Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a></span>, <span name="insertion">insertion: <span class="extype" name="com.twitter.finagle.Stack.insertBefore.U">U</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="csf">csf: <a href="CanStackFrom.html" class="extype" name="com.twitter.finagle.CanStackFrom">CanStackFrom</a>[<span class="extype" name="com.twitter.finagle.Stack.insertBefore.U">U</span>, <span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Insert the given <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a> before the stack elements matching
+the argument role.</p><div class="fullcomment"><div class="comment cmt"><p>Insert the given <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a> before the stack elements matching
+the argument role. If no elements match the role, then an
+unmodified stack is returned.  <code>insertion</code> must conform to
+typeclass <a href="CanStackFrom.html" class="extype" name="com.twitter.finagle.CanStackFrom">CanStackFrom</a>.
+</p></div></div>
+    </li><li name="com.twitter.finagle.Stack#insertBefore" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="insertBefore(target:com.twitter.finagle.Stack.Role,insertion:com.twitter.finagle.Stackable[T]):com.twitter.finagle.Stack[T]"></a>
+      <a id="insertBefore(Role,Stackable[T]):Stack[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">insertBefore</span><span class="params">(<span name="target">target: <a href="Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a></span>, <span name="insertion">insertion: <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Insert the given <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a> before the stack elements matching
+the argument role.</p><div class="fullcomment"><div class="comment cmt"><p>Insert the given <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a> before the stack elements matching
+the argument role. If no elements match the role, then an
+unmodified stack is returned.
+</p></div></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -356,7 +475,7 @@ with <code>right</code>. Note that this replaces the terminating element of
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -369,7 +488,7 @@ with <code>right</code>. Note that this replaces the terminating element of
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -382,7 +501,7 @@ with <code>right</code>. Note that this replaces the terminating element of
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -395,10 +514,24 @@ with <code>right</code>. Note that this replaces the terminating element of
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.Stack#prepend" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="prepend(stk:com.twitter.finagle.Stackable[T]):com.twitter.finagle.Stack[T]"></a>
+      <a id="prepend(Stackable[T]):Stack[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">prepend</span><span class="params">(<span name="stk">stk: <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">A copy of this Stack with <code>stk</code> prepended.</p><div class="fullcomment"><div class="comment cmt"><p>A copy of this Stack with <code>stk</code> prepended.</p><p>An alias for <a href="#+:(stk:com.twitter.finagle.Stackable[T]):com.twitter.finagle.Stack[T]" class="extmbr" name="com.twitter.finagle.Stack#+:">Stack.+:</a>.
+</p></div></div>
     </li><li name="com.twitter.finagle.Stack#remove" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="remove(target:com.twitter.finagle.Stack.Role):com.twitter.finagle.Stack[T]"></a>
       <a id="remove(Role):Stack[T]"></a>
@@ -426,11 +559,11 @@ Leaf nodes are not removable.
         <span class="name">replace</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="target">target: <a href="Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a></span>, <span name="replacement">replacement: <span class="extype" name="com.twitter.finagle.Stack.replace.U">U</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="csf">csf: <a href="CanStackFrom.html" class="extype" name="com.twitter.finagle.CanStackFrom">CanStackFrom</a>[<span class="extype" name="com.twitter.finagle.Stack.replace.U">U</span>, <span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Replace any stack elements matching the argument role with a given
-<a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">com.twitter.finagle.Stackable</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Replace any stack elements matching the argument role with a given
-<a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">com.twitter.finagle.Stackable</a>. If no elements match the
-role, then an unmodified stack is returned. <code>replacement</code> must conform to
-typeclass <a href="CanStackFrom.html" class="extype" name="com.twitter.finagle.CanStackFrom">com.twitter.finagle.CanStackFrom</a>.
+      <p class="shortcomment cmt">Replace any stack elements matching the argument role with a
+given <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Replace any stack elements matching the argument role with a
+given <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>. If no elements match the role, then an
+unmodified stack is returned. <code>replacement</code> must conform to
+typeclass <a href="CanStackFrom.html" class="extype" name="com.twitter.finagle.CanStackFrom">CanStackFrom</a>.
 </p></div></div>
     </li><li name="com.twitter.finagle.Stack#replace" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="replace(target:com.twitter.finagle.Stack.Role,replacement:com.twitter.finagle.Stackable[T]):com.twitter.finagle.Stack[T]"></a>
@@ -444,10 +577,10 @@ typeclass <a href="CanStackFrom.html" class="extype" name="com.twitter.finagle.C
         <span class="name">replace</span><span class="params">(<span name="target">target: <a href="Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a></span>, <span name="replacement">replacement: <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Replace any stack elements matching the argument role with a given
-<a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Replace any stack elements matching the argument role with a given
-<a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>. If no elements match the
-role, then an unmodified stack is returned.
+      <p class="shortcomment cmt">Replace any stack elements matching the argument role with a
+given <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Replace any stack elements matching the argument role with a
+given <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>. If no elements match the role, then an
+unmodified stack is returned.
 </p></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
@@ -512,7 +645,7 @@ original stack.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -531,7 +664,7 @@ original stack.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -550,7 +683,7 @@ original stack.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -570,9 +703,9 @@ original stack.</p>
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>

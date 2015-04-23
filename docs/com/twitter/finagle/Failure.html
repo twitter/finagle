@@ -40,17 +40,12 @@
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Base exception for all Finagle originated failures. These are
-Exceptions, but with additional <code>sources</code> and <code>flags</code>.
-Sources describe the origins of the failure to aid in debugging
-and flags mark attributes of the Failure (e.g. Retryable).
-Failures are constructed and extracted using the Failure
-companion object.</p><pre><span class="kw">val</span> failure = Failure.InterruptedBy(cause).withRetryable(<span class="kw">true</span>)
-<span class="kw">val</span> shouldRetry = failure <span class="kw">match</span> {
- <span class="kw">case</span> Failure.Retryable(_) <span class="kw">=&gt;</span> <span class="kw">true</span>
- <span class="kw">case</span> _ <span class="kw">=&gt;</span> <span class="kw">false</span>
-}</pre></div><div class="toggleContainer block">
+Exceptions, but with additional <code>sources</code> and <code>flags</code>. Sources
+describe the origins of the failure to aid in debugging and flags
+mark attributes of the Failure (e.g. Restartable).
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -103,7 +98,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -116,7 +111,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -129,7 +124,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -142,7 +137,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -155,7 +150,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -168,7 +163,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">addSuppressed</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.lang.Throwable">Throwable</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">addSuppressed</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.lang.Throwable">Throwable</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
@@ -186,18 +181,31 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.Failure#cause" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="cause:Throwable"></a>
-      <a id="cause:Throwable"></a>
+      <a id="cause:Option[Throwable]"></a>
+      <a id="cause:Option[Throwable]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">cause</span><span class="result">: <span class="extype" name="scala.Throwable">Throwable</span></span>
+        <span class="name">cause</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.Failure#chained" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="chained:com.twitter.finagle.Failure"></a>
+      <a id="chained:Failure"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">chained</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">A new failure with the current <a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a> as cause.</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -207,7 +215,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -226,7 +234,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -239,7 +247,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="a">a: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">equals</span><span class="params">(<span name="a">a: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a> → AnyRef → Any</dd></dl></div>
@@ -265,7 +273,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -275,6 +283,20 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.Failure#flagged" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="flagged(addFlags:Long):com.twitter.finagle.Failure"></a>
+      <a id="flagged(Long):Failure"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">flagged</span><span class="params">(<span name="addFlags">addFlags: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">This failure with the given flags added.</p><div class="fullcomment"><div class="comment cmt"><p>This failure with the given flags added.</p><p>See <a href="Failure$.html" class="extype" name="com.twitter.finagle.Failure">Failure</a> for flag definitions.
+</p></div></div>
     </li><li name="com.twitter.finagle.Failure#flags" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="flags:Long"></a>
       <a id="flags:Long"></a>
@@ -284,7 +306,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">flags</span><span class="result">: <span class="extype" name="scala.Long">Long</span></span>
+        <span class="name">flags</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>
       </span>
       </h4>
       
@@ -341,15 +363,15 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
     </li><li name="com.twitter.finagle.Failure#getSource" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="getSource(key:String):Option[Object]"></a>
-      <a id="getSource(String):Option[AnyRef]"></a>
+      <a id="getSource(key:com.twitter.finagle.Failure.Source.Value):Option[Object]"></a>
+      <a id="getSource(Failure.Source.Value):Option[AnyRef]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getSource</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.AnyRef">AnyRef</span>]</span>
+        <span class="name">getSource</span><span class="params">(<span name="key">key: <a href="Failure$$Source$.html#ValueextendsOrdered[Enumeration.this.Value]withSerializable" class="extmbr" name="com.twitter.finagle.Failure.Source.Value">Failure.Source.Value</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Returns a source for a given key, if it exists.</p>
@@ -362,7 +384,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getStackTrace</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="java.lang.StackTraceElement">StackTraceElement</span>]</span>
+        <span class="name">getStackTrace</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<span class="extype" name="java.lang.StackTraceElement">StackTraceElement</span>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a> → Throwable</dd></dl></div>
@@ -375,7 +397,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getSuppressed</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="java.lang.Throwable">Throwable</span>]</span>
+        <span class="name">getSuppressed</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<span class="extype" name="java.lang.Throwable">Throwable</span>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
@@ -388,7 +410,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a> → AnyRef → Any</dd></dl></div>
@@ -405,6 +427,20 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
+    </li><li name="com.twitter.finagle.Failure#isFlagged" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isFlagged(which:Long):Boolean"></a>
+      <a id="isFlagged(Long):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isFlagged</span><span class="params">(<span name="which">which: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Test whether the given flags are set.</p><div class="fullcomment"><div class="comment cmt"><p>Test whether the given flags are set.</p><p>See <a href="Failure$.html" class="extype" name="com.twitter.finagle.Failure">Failure</a> flag definitions.
+</p></div></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -414,7 +450,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -427,10 +463,24 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">logLevel</span><span class="result">: <span class="extype" name="com.twitter.logging.Level">Level</span></span>
+        <span class="name">logLevel</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.Level" class="extype" target="_top">Level</a></span>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.Failure#masked" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="masked(mask:Long):com.twitter.finagle.Failure"></a>
+      <a id="masked(Long):Failure"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">masked</span><span class="params">(<span name="mask">mask: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Apply the given flags mask.</p><div class="fullcomment"><div class="comment cmt"><p>Apply the given flags mask.</p><p>See <a href="Failure$.html" class="extype" name="com.twitter.finagle.Failure">Failure</a> forflag definitions.
+</p></div></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -440,7 +490,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -453,7 +503,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -466,7 +516,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -479,7 +529,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">printStackTrace</span><span class="params">(<span name="p">p: <span class="extype" name="java.io.PrintWriter">PrintWriter</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">printStackTrace</span><span class="params">(<span name="p">p: <span class="extype" name="java.io.PrintWriter">PrintWriter</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a> → Throwable</dd></dl></div>
@@ -492,7 +542,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">printStackTrace</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.io.PrintStream">PrintStream</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">printStackTrace</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.io.PrintStream">PrintStream</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
@@ -505,7 +555,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">printStackTrace</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">printStackTrace</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
@@ -518,10 +568,38 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setStackTrace</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="java.lang.StackTraceElement">StackTraceElement</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">setStackTrace</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<span class="extype" name="java.lang.StackTraceElement">StackTraceElement</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
+    </li><li name="com.twitter.finagle.Failure#show" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="show:Throwable"></a>
+      <a id="show:Throwable"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">show</span><span class="result">: <span class="extype" name="scala.Throwable">Throwable</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">A <span class="extype" name="Throwable">Throwable</span> appropriate for user presentation (e.</p><div class="fullcomment"><div class="comment cmt"><p>A <span class="extype" name="Throwable">Throwable</span> appropriate for user presentation (e.g., for stats,
+or to return from a user's <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>.)</p><p>Show may return <code>this</code>.
+</p></div></div>
+    </li><li name="com.twitter.finagle.Failure#sources" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sources:Map[com.twitter.finagle.Failure.Source.Value,Object]"></a>
+      <a id="sources:Map[Failure.Source.Value,AnyRef]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sources</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<a href="Failure$$Source$.html#ValueextendsOrdered[Enumeration.this.Value]withSerializable" class="extmbr" name="com.twitter.finagle.Failure.Source.Value">Failure.Source.Value</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="com.twitter.finagle.Failure#stacktrace" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="stacktrace:Array[StackTraceElement]"></a>
       <a id="stacktrace:Array[StackTraceElement]"></a>
@@ -531,7 +609,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">stacktrace</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="java.lang.StackTraceElement">StackTraceElement</span>]</span>
+        <span class="name">stacktrace</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<span class="extype" name="java.lang.StackTraceElement">StackTraceElement</span>]</span>
       </span>
       </h4>
       
@@ -561,6 +639,20 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a> → Throwable → AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.Failure#unflagged" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="unflagged(delFlags:Long):com.twitter.finagle.Failure"></a>
+      <a id="unflagged(Long):Failure"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unflagged</span><span class="params">(<span name="delFlags">delFlags: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">This failure with the given flags removed.</p><div class="fullcomment"><div class="comment cmt"><p>This failure with the given flags removed.</p><p>See <a href="Failure$.html" class="extype" name="com.twitter.finagle.Failure">Failure</a> forflag definitions.
+</p></div></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -570,7 +662,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -589,7 +681,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -608,7 +700,7 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -627,35 +719,22 @@ companion object.</p><pre><span class="kw">val</span> failure = Failure.Interrup
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withLogLevel</span><span class="params">(<span name="level">level: <span class="extype" name="com.twitter.logging.Level">Level</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+        <span class="name">withLogLevel</span><span class="params">(<span name="level">level: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.Level" class="extype" target="_top">Level</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Creates a new Failure with the given logging Level.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new Failure with the given logging Level.</p><p>Note: it is not guaranteed that all <code>Failure</code>s are logged
 within finagle and this only applies to ones that are.
 </p></div></div>
-    </li><li name="com.twitter.finagle.Failure#withRetryable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="withRetryable(on:Boolean):com.twitter.finagle.Failure"></a>
-      <a id="withRetryable(Boolean):Failure"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">withRetryable</span><span class="params">(<span name="on">on: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Creates a new Failure that toggles retryable based on the given boolean.</p>
     </li><li name="com.twitter.finagle.Failure#withSource" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="withSource(key:String,value:Object):com.twitter.finagle.Failure"></a>
-      <a id="withSource(String,AnyRef):Failure"></a>
+      <a id="withSource(key:com.twitter.finagle.Failure.Source.Value,value:Object):com.twitter.finagle.Failure"></a>
+      <a id="withSource(Failure.Source.Value,AnyRef):Failure"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withSource</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+        <span class="name">withSource</span><span class="params">(<span name="key">key: <a href="Failure$$Source$.html#ValueextendsOrdered[Enumeration.this.Value]withSerializable" class="extmbr" name="com.twitter.finagle.Failure.Source.Value">Failure.Source.Value</a></span>, <span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Creates a new Failure with the given key value pair prepended to sources.</p>
@@ -690,9 +769,9 @@ within finagle and this only applies to ones that are.
             </div><div class="parent" name="java.io.Serializable">
               <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>

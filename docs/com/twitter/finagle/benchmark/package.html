@@ -58,7 +58,72 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.benchmark.LatencyHistogramBenchmark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.benchmark.DefaultClientBenchmark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultClientBenchmarkextendsSimpleBenchmark"></a>
+      <a id="DefaultClientBenchmark:DefaultClientBenchmark"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="DefaultClientBenchmark.html"><span class="name">DefaultClientBenchmark</span></a><span class="result"> extends <span class="extype" name="com.google.caliper.SimpleBenchmark">SimpleBenchmark</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.benchmark.DefaultServerBenchmark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultServerBenchmarkextendsSimpleBenchmark"></a>
+      <a id="DefaultServerBenchmark:DefaultServerBenchmark"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="DefaultServerBenchmark.html"><span class="name">DefaultServerBenchmark</span></a><span class="result"> extends <span class="extype" name="com.google.caliper.SimpleBenchmark">SimpleBenchmark</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.benchmark.EchoService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EchoService[T]extendsService[T,T]"></a>
+      <a id="EchoService[T]:EchoService[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="EchoService.html"><span class="name">EchoService</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.benchmark.EchoService.T">T</span>, <span class="extype" name="com.twitter.finagle.benchmark.EchoService.T">T</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.benchmark.FixedNumReadsTransport" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FixedNumReadsTransport[In,Out]extendsTransport[In,Out]"></a>
+      <a id="FixedNumReadsTransport[In,Out]:FixedNumReadsTransport[In,Out]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="FixedNumReadsTransport.html"><span class="name">FixedNumReadsTransport</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.benchmark.FixedNumReadsTransport.In">In</span>, <span class="extype" name="com.twitter.finagle.benchmark.FixedNumReadsTransport.Out">Out</span>]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A Transport that allows a fixed number of reads.</p>
+    </li><li name="com.twitter.finagle.benchmark.IsTracingBenchmark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="IsTracingBenchmarkextendsSimpleBenchmark"></a>
+      <a id="IsTracingBenchmark:IsTracingBenchmark"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="IsTracingBenchmark.html"><span class="name">IsTracingBenchmark</span></a><span class="result"> extends <span class="extype" name="com.google.caliper.SimpleBenchmark">SimpleBenchmark</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.benchmark.LatencyHistogramBenchmark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="LatencyHistogramBenchmarkextendsSimpleBenchmark"></a>
       <a id="LatencyHistogramBenchmark:LatencyHistogramBenchmark"></a>
       <h4 class="signature">
@@ -71,12 +136,117 @@
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.benchmark.LoadGeneratorListener" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LoadGeneratorListenerextendsListener[Int,Int]"></a>
+      <a id="LoadGeneratorListener:LoadGeneratorListener"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="LoadGeneratorListener.html"><span class="name">LoadGeneratorListener</span></a><span class="result"> extends <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A load generator that implements Listener.</p>
+    </li><li name="com.twitter.finagle.benchmark.ParserUtils" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParserUtilsextendsSimpleBenchmark"></a>
+      <a id="ParserUtils:ParserUtils"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ParserUtils.html"><span class="name">ParserUtils</span></a><span class="result"> extends <span class="extype" name="com.google.caliper.SimpleBenchmark">SimpleBenchmark</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.benchmark.StdBenchAnnotations" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="StdBenchAnnotationsextendsAnyRef"></a>
+      <a id="StdBenchAnnotations:StdBenchAnnotations"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="StdBenchAnnotations.html"><span class="name">StdBenchAnnotations</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Fork</span><span class="args">()</span>
+              
+                <span class="name">@OutputTimeUnit</span><span class="args">()</span>
+              
+                <span class="name">@BenchmarkMode</span><span class="args">()</span>
+              
+                <span class="name">@Warmup</span><span class="args">()</span>
+              
+                <span class="name">@Measurement</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="com.twitter.finagle.benchmark.TracingFilterBenchmark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TracingFilterBenchmarkextendsSimpleBenchmark"></a>
+      <a id="TracingFilterBenchmark:TracingFilterBenchmark"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="TracingFilterBenchmark.html"><span class="name">TracingFilterBenchmark</span></a><span class="result"> extends <span class="extype" name="com.google.caliper.SimpleBenchmark">SimpleBenchmark</span></span>
+      </span>
+      </h4>
+      
     </li></ol>
             </div>
 
         
 
-        
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="com.twitter.finagle.benchmark.EchoBridge" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EchoBridge"></a>
+      <a id="EchoBridge:EchoBridge"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="EchoBridge$.html"><span class="name">EchoBridge</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.benchmark.TestClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TestClient"></a>
+      <a id="TestClient:TestClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="TestClient$.html"><span class="name">TestClient</span></a><span class="result"> extends <a href="../client/DefaultClient.html" class="extype" name="com.twitter.finagle.client.DefaultClient">DefaultClient</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.benchmark.thriftscala" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="thriftscala"></a>
+      <a id="thriftscala:thriftscala"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="thriftscala/package.html"><span class="name">thriftscala</span></a>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
 
         
 

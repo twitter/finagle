@@ -47,7 +47,7 @@ propagate a set of bindings across a whole request
 tree.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -112,21 +112,21 @@ tree.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Context$Bound.html"><span class="name">Bound</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="next">next: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>, <span name="key">key: <a href="Context.html#Key[A]" class="extmbr" name="com.twitter.finagle.context.Context.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.Bound.A">A</span>]</span>, <span name="value">value: <span class="extype" name="com.twitter.finagle.context.Context.Bound.A">A</span></span>)</span><span class="result"> extends <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Context$Bound.html"><span class="name">Bound</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="next">next: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>, <span name="key">key: <a href="Context.html#Key[A]" class="extmbr" name="com.twitter.finagle.context.Context.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.Bound.A">A</span>]</span>, <span name="value">value: <span class="extype" name="com.twitter.finagle.context.Context.Bound.A">A</span></span>)</span><span class="result"> extends <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">An environment with <code>key</code> bound to <code>value</code>; lookups for other keys
 are forwarded to <code>next</code>.</p>
     </li><li name="com.twitter.finagle.context.Context.Cleared" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ClearedextendsContext.this.EnvwithProductwithSerializable"></a>
-      <a id="Cleared:Cleared"></a>
+      <a id="Cleared[A]extendsContext.this.EnvwithProductwithSerializable"></a>
+      <a id="Cleared[A]:Cleared[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Context$Cleared.html"><span class="name">Cleared</span></a><span class="params">(<span name="next">next: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>, <span name="key">key: <a href="Context.html#Key[A]" class="extmbr" name="com.twitter.finagle.context.Context.Key">Key</a>[_]</span>)</span><span class="result"> extends <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Context$Cleared.html"><span class="name">Cleared</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="next">next: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>, <span name="key">key: <a href="Context.html#Key[A]" class="extmbr" name="com.twitter.finagle.context.Context.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.Cleared.A">A</span>]</span>)</span><span class="result"> extends <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">An environment without <code>key</code>.</p>
@@ -135,11 +135,11 @@ are forwarded to <code>next</code>.</p>
       <a id="Env:Env"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">sealed </span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Context$Env.html"><span class="name">Env</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Context$Env.html"><span class="name">Env</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
@@ -152,11 +152,24 @@ are forwarded to <code>next</code>.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="MarshalledContext$Key.html"><span class="name">Key</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="MarshalledContext$Key.html"><span class="name">Key</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">Keys in MarshalledContext must provide a marshaller
 and unmarshaller.</p>
+    </li><li name="com.twitter.finagle.context.Context.OrElse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OrElseextendsContext.this.EnvwithProductwithSerializable"></a>
+      <a id="OrElse:OrElse"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Context$OrElse.html"><span class="name">OrElse</span></a><span class="params">(<span name="left">left: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>, <span name="right">right: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>)</span><span class="result"> extends <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Concatenate two environments with left-hand side precedence.</p>
     </li><li name="com.twitter.finagle.context.MarshalledContext.Translucent" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TranslucentextendsMarshalledContext.this.EnvwithProductwithSerializable"></a>
       <a id="Translucent:Translucent"></a>
@@ -166,7 +179,7 @@ and unmarshaller.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="MarshalledContext$Translucent.html"><span class="name">Translucent</span></a><span class="params">(<span name="next">next: <a href="#EnvextendsAnyRef" class="extmbr" name="com.twitter.finagle.context.Context.Env">MarshalledContext.Env</a></span>, <span name="marshalId">marshalId: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="marshalled">marshalled: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result"> extends <a href="#EnvextendsAnyRef" class="extmbr" name="com.twitter.finagle.context.Context.Env">Env</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="MarshalledContext$Translucent.html"><span class="name">Translucent</span></a><span class="params">(<span name="next">next: <a href="#EnvextendsAnyRef" class="extmbr" name="com.twitter.finagle.context.Context.Env">MarshalledContext.Env</a></span>, <span name="marshalId">marshalId: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="marshalled">marshalled: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="#EnvextendsAnyRef" class="extmbr" name="com.twitter.finagle.context.Context.Env">Env</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">A translucent environment is capable of storing key/value pairs
@@ -180,7 +193,7 @@ to be (possibly) unmarshalled later.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="MarshalledContext$Unmarshaller.html"><span class="name">Unmarshaller</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="MarshalledContext$Unmarshaller.html"><span class="name">Unmarshaller</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">An Unmarshaller gradually builds up an environment from
@@ -201,7 +214,7 @@ a set of (id, value) pairs.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -214,7 +227,7 @@ a set of (id, value) pairs.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -227,7 +240,7 @@ a set of (id, value) pairs.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -240,7 +253,7 @@ a set of (id, value) pairs.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -253,7 +266,7 @@ a set of (id, value) pairs.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -314,7 +327,7 @@ in the current request-local context.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -333,7 +346,7 @@ in the current request-local context.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">contains</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="key">key: <a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.contains.A">A</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">contains</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="key">key: <a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.contains.A">A</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Tells whether <code>key</code> is defined in the current request-local
@@ -349,7 +362,7 @@ context.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -362,7 +375,7 @@ context.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -375,7 +388,7 @@ context.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -394,7 +407,7 @@ context.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="key">key: <a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.get.A">A</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.finagle.context.Context.get.A">A</span>]</span>
+        <span class="name">get</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="key">key: <a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.get.A">A</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="com.twitter.finagle.context.Context.get.A">A</span>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Retrieve the current definition of a key, but only
@@ -423,7 +436,7 @@ if it is defined in the current request-local context.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -436,7 +449,7 @@ if it is defined in the current request-local context.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -491,7 +504,7 @@ if it is defined in the current request-local context.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">letUnmarshal</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="contexts">contexts: <span class="extype" name="scala.Iterable">Iterable</span>[(<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>)]</span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.MarshalledContext.letUnmarshal.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.MarshalledContext.letUnmarshal.R">R</span></span>
+        <span class="name">letUnmarshal</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="contexts">contexts: <span class="extype" name="scala.Iterable">Iterable</span>[(<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>)]</span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.MarshalledContext.letUnmarshal.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.MarshalledContext.letUnmarshal.R">R</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Store into the current environment a set of marshalled
@@ -507,7 +520,7 @@ bindings and run <code>fn</code>. Bindings are unmarshalled on demand.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">marshal</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Iterable">Iterable</span>[(<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>)]</span>
+        <span class="name">marshal</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Iterable">Iterable</span>[(<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>)]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Marshal the current environment into a set of (id, value) pairs.</p>
@@ -520,7 +533,7 @@ bindings and run <code>fn</code>. Bindings are unmarshalled on demand.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">marshal</span><span class="params">(<span name="env">env: <a href="#EnvextendsAnyRef" class="extmbr" name="com.twitter.finagle.context.Context.Env">Env</a></span>)</span><span class="result">: <span class="extype" name="scala.Iterable">Iterable</span>[(<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>)]</span>
+        <span class="name">marshal</span><span class="params">(<span name="env">env: <a href="#EnvextendsAnyRef" class="extmbr" name="com.twitter.finagle.context.Context.Env">Env</a></span>)</span><span class="result">: <span class="extype" name="scala.Iterable">Iterable</span>[(<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>)]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Marshal the <code>env</code> into a set of (id, value) pairs.</p>
@@ -533,7 +546,7 @@ bindings and run <code>fn</code>. Bindings are unmarshalled on demand.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -546,7 +559,7 @@ bindings and run <code>fn</code>. Bindings are unmarshalled on demand.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -559,7 +572,7 @@ bindings and run <code>fn</code>. Bindings are unmarshalled on demand.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -598,7 +611,7 @@ bindings and run <code>fn</code>. Bindings are unmarshalled on demand.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unmarshal</span><span class="params">(<span name="contexts">contexts: <span class="extype" name="scala.Iterable">Iterable</span>[(<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>)]</span>)</span><span class="result">: <a href="#EnvextendsAnyRef" class="extmbr" name="com.twitter.finagle.context.Context.Env">Env</a></span>
+        <span class="name">unmarshal</span><span class="params">(<span name="contexts">contexts: <span class="extype" name="scala.Iterable">Iterable</span>[(<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>)]</span>)</span><span class="result">: <a href="#EnvextendsAnyRef" class="extmbr" name="com.twitter.finagle.context.Context.Env">Env</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Produce an environment consisting of the given marshalled
@@ -614,7 +627,7 @@ bindings and run <code>fn</code>. Bindings are unmarshalled on demand.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -633,7 +646,7 @@ bindings and run <code>fn</code>. Bindings are unmarshalled on demand.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -652,7 +665,7 @@ bindings and run <code>fn</code>. Bindings are unmarshalled on demand.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -674,9 +687,9 @@ bindings and run <code>fn</code>. Bindings are unmarshalled on demand.
         <div class="parent" name="com.twitter.finagle.context.Context">
               <h3>Inherited from <a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>

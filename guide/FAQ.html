@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>FAQ &mdash; Finagle 6.24.0 documentation</title>
+    <title>FAQ &mdash; Finagle 6.25.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.24.0',
+        VERSION:     '6.25.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.24.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.25.0 documentation" href="index.html" />
     <link rel="next" title="Finagle changelog" href="changelog.html" />
     <link rel="prev" title="Metrics" href="Metrics.html" />
    
@@ -135,7 +135,7 @@ published externally, but not yet to maven central.</p>
 Where the old API used <tt class="docutils literal"><span class="pre">ServerBuilder</span></tt>/<tt class="docutils literal"><span class="pre">ClientBuilder</span></tt> with Codecs, the new APIs use
 <tt class="docutils literal"><span class="pre">Proto.newClient</span></tt> <a class="footnote-reference" href="#id4" id="id3">[2]</a>.</p>
 <p>Old APIs:</p>
-<div class="highlight-text"><div class="highlight"><pre>val client = ClientBuilder
+<div class="highlight-text"><div class="highlight"><pre>val client = ClientBuilder()
   .codec(Http)
   .hosts(&quot;localhost:10000,localhost:10001,localhost:10003&quot;)
   .hostConnectionLimit(1)
@@ -157,7 +157,7 @@ for changing the API this way.</p>
 default of 1 second.</p>
 <p>For application requirements, you can use a service normally and then use
 <cite>Future#raiseWithin</cite>.</p>
-<div class="highlight-text"><div class="highlight"><pre>val get: Future[HttpResponse] = Http.fetchUrl(&quot;https://twitter.com/&quot;)
+<div class="highlight-text"><div class="highlight"><pre>val get: Future[HttpResponse] = Http.fetchUrl(&quot;http://twitter.com/&quot;)
 get.raiseWithin(1.ms)
 </pre></div>
 </div>
@@ -172,7 +172,7 @@ they were rarely being used correctly, and usually only by very sophisticated
 users.</p>
 <p>We&#8217;re encouraging users to avoid encoding application requirements in Finagle,
 which was previously too easy to do via methods like <cite>ClientBuilder#retries</cite>, or
-<cite>ClientBuilder#timeout</cite>.  These are fundamentally application-level concerns&#8211;
+<cite>ClientBuilder#timeout</cite>.  These are fundamentally application-level concerns–
 you&#8217;re trying to meet an SLA, etc.  In general, in order to do what Finagle is
 for, which is to deliver an rpc message to a cluster, we don&#8217;t think you should
 need a lot of configuration at all.  You should need to specify your protocol,
@@ -210,6 +210,16 @@ Disabling fail fast can be done with <tt class="docutils literal"><span class="p
 </pre></div>
 </div>
 <p>Refer to the <a class="reference internal" href="Clients.html#client-fail-fast"><em>fail fast</em></a> section for further context.</p>
+</div>
+<div class="section" id="how-long-should-my-clients-live">
+<h3>How long should my Clients live?<a class="headerlink" href="#how-long-should-my-clients-live" title="Permalink to this headline">¶</a></h3>
+<p>One client should be made per set of fungible services.  You should not be reinstantiating
+your client on every request, and you should not have a different client per instance&#8211;finagle
+can handle load-balancing for you.</p>
+<p>There are a few use cases, like link shortening, or web crawling, where a service must communicate
+with many other non-fungible services, in which it makes sense to proliferate clients that are
+created, used, and thrown away, but in the vast majority of cases, clients should be persistent,
+not ephemeral.</p>
 </div>
 </div>
 <div class="section" id="mux-specific-faq">
@@ -286,6 +296,7 @@ is an implementation of the Thrift protocol built on top of Mux.</p>
 <li><a class="reference internal" href="#why-is-com-twitter-common-zookeeper-server-set-not-found">Why is com.twitter.common.zookeeper#server-set not found?</a></li>
 <li><a class="reference internal" href="#how-do-i-configure-clients-and-servers-with-finagle-6-apis">How do I configure clients and servers with Finagle 6 APIs?</a></li>
 <li><a class="reference internal" href="#why-do-clients-see-com-twitter-finagle-failedfastexception-s">Why do clients see com.twitter.finagle.FailedFastException&#8217;s?</a></li>
+<li><a class="reference internal" href="#how-long-should-my-clients-live">How long should my Clients live?</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#mux-specific-faq">Mux-specific FAQ</a><ul>

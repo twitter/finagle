@@ -67,52 +67,10 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="BaseClient.html"><span class="name">BaseClient</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="BaseClient.html"><span class="name">BaseClient</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">A friendly client to talk to a Memcached server.</p>
-    </li><li name="com.twitter.finagle.memcached.CacheNode" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="CacheNodeextendsSocketAddresswithProductwithSerializable"></a>
-      <a id="CacheNode:CacheNode"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="CacheNode.html"><span class="name">CacheNode</span></a><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="weight">weight: <span class="extype" name="scala.Int">Int</span></span>, <span name="key">key: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <span class="extype" name="java.net.SocketAddress">SocketAddress</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.memcached.CachePoolCluster" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="CachePoolClusterextendsCluster[com.twitter.finagle.memcached.CacheNode]"></a>
-      <a id="CachePoolCluster:CachePoolCluster"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="CachePoolCluster.html"><span class="name">CachePoolCluster</span></a><span class="result"> extends <a href="../builder/Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<a href="CacheNode.html" class="extype" name="com.twitter.finagle.memcached.CacheNode">CacheNode</a>]</span>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.memcached.CachePoolConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="CachePoolConfigextendsProductwithSerializable"></a>
-      <a id="CachePoolConfig:CachePoolConfig"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="CachePoolConfig.html"><span class="name">CachePoolConfig</span></a><span class="params">(<span name="cachePoolSize">cachePoolSize: <span class="extype" name="scala.Int">Int</span></span>, <span name="detectKeyRemapping">detectKeyRemapping: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
-      </span>
-      </h4>
-      <p class="comment cmt">Cache pool config data format
-Currently this data format is only used by ZookeeperCachePoolManager to read the config data
-from zookeeper serverset parent node, and the expected cache pool size is the only attribute
-we need for now.</p>
     </li><li name="com.twitter.finagle.memcached.Client" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ClientextendsBaseClient[org.jboss.netty.buffer.ChannelBuffer]"></a>
       <a id="Client:Client"></a>
@@ -161,7 +119,20 @@ we need for now.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Entry.html"><span class="name">Entry</span></a><span class="params">(<span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="expiry">expiry: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Entry.html"><span class="name">Entry</span></a><span class="params">(<span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.memcached.FailureAccrualException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FailureAccrualExceptionextendsRequestException"></a>
+      <a id="FailureAccrualException:FailureAccrualException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="FailureAccrualException.html"><span class="name">FailureAccrualException</span></a><span class="result"> extends <a href="../RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a></span>
       </span>
       </h4>
       
@@ -174,7 +145,7 @@ we need for now.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="GetResult.html"><span class="name">GetResult</span></a><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="GetResult.html"><span class="name">GetResult</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -187,7 +158,7 @@ we need for now.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="GetsResult.html"><span class="name">GetsResult</span></a><span class="params">(<span name="getResult">getResult: <a href="GetResult.html" class="extype" name="com.twitter.finagle.memcached.GetResult">GetResult</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="GetsResult.html"><span class="name">GetsResult</span></a><span class="params">(<span name="getResult">getResult: <a href="GetResult.html" class="extype" name="com.twitter.finagle.memcached.GetResult">GetResult</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -200,7 +171,7 @@ we need for now.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Interpreter.html"><span class="name">Interpreter</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Interpreter.html"><span class="name">Interpreter</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">Evalutes a given Memcached operation and returns the result.</p>
@@ -218,7 +189,7 @@ we need for now.</p>
       </h4>
       
     </li><li name="com.twitter.finagle.memcached.KetamaClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="KetamaClientextendsPartitionedClient"></a>
+      <a id="KetamaClientextendsKetamaPartitionedClient"></a>
       <a id="KetamaClient:KetamaClient"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -226,7 +197,7 @@ we need for now.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="KetamaClient.html"><span class="name">KetamaClient</span></a><span class="result"> extends <a href="PartitionedClient.html" class="extype" name="com.twitter.finagle.memcached.PartitionedClient">PartitionedClient</a></span>
+        <a href="KetamaClient.html"><span class="name">KetamaClient</span></a><span class="result"> extends <a href="KetamaPartitionedClient.html" class="extype" name="com.twitter.finagle.memcached.KetamaPartitionedClient">KetamaPartitionedClient</a></span>
       </span>
       </h4>
       
@@ -239,7 +210,7 @@ we need for now.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="KetamaClientBuilder.html"><span class="name">KetamaClientBuilder</span></a><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="KetamaClientBuilder.html"><span class="name">KetamaClientBuilder</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -252,7 +223,7 @@ we need for now.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="KetamaClientKey.html"><span class="name">KetamaClientKey</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="KetamaClientKey.html"><span class="name">KetamaClientKey</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       
@@ -269,6 +240,32 @@ we need for now.</p>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.memcached.KetamaPartitionedClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="KetamaPartitionedClientextendsPartitionedClient"></a>
+      <a id="KetamaPartitionedClient:KetamaPartitionedClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="KetamaPartitionedClient.html"><span class="name">KetamaPartitionedClient</span></a><span class="result"> extends <a href="PartitionedClient.html" class="extype" name="com.twitter.finagle.memcached.PartitionedClient">PartitionedClient</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.memcached.Memcached" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MemcachedextendsProductwithSerializable"></a>
+      <a id="Memcached:Memcached"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Memcached.html"><span class="name">Memcached</span></a><span class="params">(<span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="keyHasher">keyHasher: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.hashing.KeyHasher" class="extype" target="_top">KeyHasher</a> = <span class="defval" name="com.twitter.hashing.KeyHasher.KETAMA">...</span></span>, <span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol">Memcached.defaultParams</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Stack based Ketama Memcache builder.</p>
     </li><li name="com.twitter.finagle.memcached.MockClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MockClientextendsClient"></a>
       <a id="MockClient:MockClient"></a>
@@ -304,7 +301,7 @@ we need for now.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="PHPMemCacheClientBuilder.html"><span class="name">PHPMemCacheClientBuilder</span></a><span class="params">(<span name="_nodes">_nodes: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>)]</span>, <span name="_hashName">_hashName: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="_clientBuilder">_clientBuilder: <span class="extype" name="scala.Option">Option</span>[<a href="../builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[_, _, _, _, <a href="../builder/ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="PHPMemCacheClientBuilder.html"><span class="name">PHPMemCacheClientBuilder</span></a><span class="params">(<span name="_nodes">_nodes: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>)]</span>, <span name="_hashName">_hashName: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="_clientBuilder">_clientBuilder: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[_, _, _, _, <a href="../builder/ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Builder for memcache-client (memcache.</p>
@@ -370,23 +367,10 @@ the key value.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="RubyMemCacheClientBuilder.html"><span class="name">RubyMemCacheClientBuilder</span></a><span class="params">(<span name="_nodes">_nodes: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>)]</span>, <span name="_clientBuilder">_clientBuilder: <span class="extype" name="scala.Option">Option</span>[<a href="../builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[_, _, _, _, <a href="../builder/ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="RubyMemCacheClientBuilder.html"><span class="name">RubyMemCacheClientBuilder</span></a><span class="params">(<span name="_nodes">_nodes: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>)]</span>, <span name="_clientBuilder">_clientBuilder: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[_, _, _, _, <a href="../builder/ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Builder for memcache-client (MemCache) compatible client.</p>
-    </li><li name="com.twitter.finagle.memcached.StaticCachePoolCluster" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="StaticCachePoolClusterextendsCachePoolCluster"></a>
-      <a id="StaticCachePoolCluster:StaticCachePoolCluster"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="StaticCachePoolCluster.html"><span class="name">StaticCachePoolCluster</span></a><span class="result"> extends <a href="CachePoolCluster.html" class="extype" name="com.twitter.finagle.memcached.CachePoolCluster">CachePoolCluster</a></span>
-      </span>
-      </h4>
-      <p class="comment cmt"> Cache pool based on a static list</p>
     </li><li name="com.twitter.finagle.memcached.TwemcacheClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="TwemcacheClientextendsClient"></a>
       <a id="TwemcacheClient:TwemcacheClient"></a>
@@ -426,73 +410,6 @@ the key value.</p>
       </span>
       </h4>
       <p class="comment cmt">Twemcache commands implemenation for a partitioned client.</p>
-    </li><li name="com.twitter.finagle.memcached.TwitterCacheResolver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="TwitterCacheResolverextendsResolver"></a>
-      <a id="TwitterCacheResolver:TwitterCacheResolver"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="TwitterCacheResolver.html"><span class="name">TwitterCacheResolver</span></a><span class="result"> extends <a href="../Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></span>
-      </span>
-      </h4>
-      <p class="comment cmt">A <a href="../Resolver.html" class="extype" name="com.twitter.finagle.Resolver">com.twitter.finagle.Resolver</a> for resolving destination names associated
-with Twitter cache pools.</p>
-    </li><li name="com.twitter.finagle.memcached.TwitterCacheResolverException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="TwitterCacheResolverExceptionextendsException"></a>
-      <a id="TwitterCacheResolverException:TwitterCacheResolverException"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="TwitterCacheResolverException.html"><span class="name">TwitterCacheResolverException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
-      </span>
-      </h4>
-      <p class="comment cmt">Indicates that an error occurred while resolving a cache address.</p>
-    </li><li name="com.twitter.finagle.memcached.ZookeeperCacheNodeGroup" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ZookeeperCacheNodeGroupextendsGroup[com.twitter.finagle.memcached.CacheNode]withZookeeperStateMonitor"></a>
-      <a id="ZookeeperCacheNodeGroup:ZookeeperCacheNodeGroup"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ZookeeperCacheNodeGroup.html"><span class="name">ZookeeperCacheNodeGroup</span></a><span class="result"> extends <a href="../Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<a href="CacheNode.html" class="extype" name="com.twitter.finagle.memcached.CacheNode">CacheNode</a>] with <a href="ZookeeperStateMonitor.html" class="extype" name="com.twitter.finagle.memcached.ZookeeperStateMonitor">ZookeeperStateMonitor</a></span>
-      </span>
-      </h4>
-      <p class="comment cmt">Zookeeper based cache node group with a serverset as the underlying pool.</p>
-    </li><li name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ZookeeperCachePoolClusterextendsCachePoolClusterwithZookeeperStateMonitor"></a>
-      <a id="ZookeeperCachePoolCluster:ZookeeperCachePoolCluster"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ZookeeperCachePoolCluster.html"><span class="name">ZookeeperCachePoolCluster</span></a><span class="result"> extends <a href="CachePoolCluster.html" class="extype" name="com.twitter.finagle.memcached.CachePoolCluster">CachePoolCluster</a> with <a href="ZookeeperStateMonitor.html" class="extype" name="com.twitter.finagle.memcached.ZookeeperStateMonitor">ZookeeperStateMonitor</a></span>
-      </span>
-      </h4>
-      <p class="comment cmt">Zookeeper based cache pool cluster with a serverset as the underlying pool.</p>
-    </li><li name="com.twitter.finagle.memcached.ZookeeperStateMonitor" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="ZookeeperStateMonitorextendsAnyRef"></a>
-      <a id="ZookeeperStateMonitor:ZookeeperStateMonitor"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="ZookeeperStateMonitor.html"><span class="name">ZookeeperStateMonitor</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      </h4>
-      <p class="comment cmt">A zk monitor trait that assists with monitoring a given zk path for any node data change,
-in which the provided zk data handling implementation will be invoked.</p>
     </li><li name="com.twitter.finagle.memcached.Server" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ServerextendsAnyRef"></a>
       <a id="Server:Server"></a>
@@ -502,7 +419,7 @@ in which the provided zk data handling implementation will be invoked.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Server.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Moved into test">Server</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Server.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Moved into test">Server</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">An in-process memcached server.</p>
@@ -513,47 +430,7 @@ in which the provided zk data handling implementation will be invoked.</p>
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="com.twitter.finagle.memcached.CacheNodeGroup" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="CacheNodeGroup"></a>
-      <a id="CacheNodeGroup:CacheNodeGroup"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="CacheNodeGroup$.html"><span class="name">CacheNodeGroup</span></a>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.memcached.CachePoolCluster" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="CachePoolCluster"></a>
-      <a id="CachePoolCluster:CachePoolCluster"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="CachePoolCluster$.html"><span class="name">CachePoolCluster</span></a>
-      </span>
-      </h4>
-      <p class="comment cmt">Cache specific cluster implementation.</p>
-    </li><li name="com.twitter.finagle.memcached.CachePoolConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="CachePoolConfig"></a>
-      <a id="CachePoolConfig:CachePoolConfig"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="CachePoolConfig$.html"><span class="name">CachePoolConfig</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
-      </span>
-      </h4>
-      <p class="comment cmt">Cache pool config data object
-</p>
-    </li><li name="com.twitter.finagle.memcached.Client" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.memcached.Client" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Client"></a>
       <a id="Client:Client"></a>
       <h4 class="signature">
@@ -575,7 +452,7 @@ in which the provided zk data handling implementation will be invoked.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="GetResult$.html"><span class="name">GetResult</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="GetResult$.html"><span class="name">GetResult</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -601,7 +478,7 @@ in which the provided zk data handling implementation will be invoked.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="KetamaClientBuilder$.html"><span class="name">KetamaClientBuilder</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="KetamaClientBuilder$.html"><span class="name">KetamaClientBuilder</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -618,6 +495,19 @@ in which the provided zk data handling implementation will be invoked.</p>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.memcached.Memcached" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Memcached"></a>
+      <a id="Memcached:Memcached"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Memcached$.html"><span class="name">Memcached</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.memcached.PHPMemCacheClientBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PHPMemCacheClientBuilder"></a>
       <a id="PHPMemCacheClientBuilder:PHPMemCacheClientBuilder"></a>
@@ -627,7 +517,7 @@ in which the provided zk data handling implementation will be invoked.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="PHPMemCacheClientBuilder$.html"><span class="name">PHPMemCacheClientBuilder</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="PHPMemCacheClientBuilder$.html"><span class="name">PHPMemCacheClientBuilder</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -657,33 +547,6 @@ in which the provided zk data handling implementation will be invoked.</p>
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ZookeeperCachePoolCluster"></a>
-      <a id="ZookeeperCachePoolCluster:ZookeeperCachePoolCluster"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="ZookeeperCachePoolCluster$.html"><span class="name">ZookeeperCachePoolCluster</span></a>
-      </span>
-      </h4>
-      <p class="comment cmt">ZooKeeper based cache pool cluster companion object
-</p>
-    </li><li name="com.twitter.finagle.memcached.ZookeeperStateMonitor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ZookeeperStateMonitor"></a>
-      <a id="ZookeeperStateMonitor:ZookeeperStateMonitor"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="ZookeeperStateMonitor$.html"><span class="name">ZookeeperStateMonitor</span></a>
-      </span>
-      </h4>
-      
     </li><li name="com.twitter.finagle.memcached.java" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="java"></a>
       <a id="java:java"></a>
@@ -707,6 +570,19 @@ in which the provided zk data handling implementation will be invoked.</p>
       </span>
       <span class="symbol">
         <a href="migration/package.html"><span class="name">migration</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.memcached.param" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="param"></a>
+      <a id="param:param"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="param$.html"><span class="name">param</span></a>
       </span>
       </h4>
       

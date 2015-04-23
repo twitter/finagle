@@ -81,7 +81,7 @@ mysql binary protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ByteValue.html"><span class="name">ByteValue</span></a><span class="params">(<span name="b">b: <span class="extype" name="scala.Byte">Byte</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ByteValue.html"><span class="name">ByteValue</span></a><span class="params">(<span name="b">b: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -94,7 +94,7 @@ mysql binary protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Capability.html"><span class="name">Capability</span></a><span class="params">(<span name="mask">mask: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Capability.html"><span class="name">Capability</span></a><span class="params">(<span name="mask">mask: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -107,7 +107,7 @@ mysql binary protocol.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Client.html"><span class="name">Client</span></a><span class="result"> extends <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
+        <a href="Client.html"><span class="name">Client</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
       </h4>
       
@@ -133,7 +133,7 @@ mysql binary protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="CloseRequest.html"><span class="name">CloseRequest</span></a><span class="params">(<span name="stmtId">stmtId: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="CloseRequest.html"><span class="name">CloseRequest</span></a><span class="params">(<span name="stmtId">stmtId: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">A CloseRequest deallocates a prepared statement on the server.</p>
@@ -160,7 +160,7 @@ and has a cmd byte associated with it.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Decoder.html"><span class="name">Decoder</span></a><span class="tparams">[<span name="T">T &lt;: <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a></span>]</span><span class="result"> extends (<a href="transport/Packet.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Packet">Packet</a>) ⇒ <span class="extype" name="com.twitter.util.Try">Try</span>[<span class="extype" name="com.twitter.finagle.exp.mysql.Decoder.T">T</span>]</span>
+        <a href="Decoder.html"><span class="name">Decoder</span></a><span class="tparams">[<span name="T">T &lt;: <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a></span>]</span><span class="result"> extends (<a href="transport/Packet.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Packet">Packet</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<span class="extype" name="com.twitter.finagle.exp.mysql.Decoder.T">T</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">A decoder for Results contained in a single packet.</p>
@@ -173,7 +173,7 @@ and has a cmd byte associated with it.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="DoubleValue.html"><span class="name">DoubleValue</span></a><span class="params">(<span name="d">d: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="DoubleValue.html"><span class="name">DoubleValue</span></a><span class="params">(<span name="d">d: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Double" class="extype" target="_top">Double</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -186,7 +186,7 @@ and has a cmd byte associated with it.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="EOF.html"><span class="name">EOF</span></a><span class="params">(<span name="warnings">warnings: <span class="extype" name="scala.Short">Short</span></span>, <span name="serverStatus">serverStatus: <span class="extype" name="scala.Short">Short</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="EOF.html"><span class="name">EOF</span></a><span class="params">(<span name="warnings">warnings: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="serverStatus">serverStatus: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -199,7 +199,7 @@ and has a cmd byte associated with it.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Error.html"><span class="name">Error</span></a><span class="params">(<span name="code">code: <span class="extype" name="scala.Short">Short</span></span>, <span name="sqlState">sqlState: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Error.html"><span class="name">Error</span></a><span class="params">(<span name="code">code: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="sqlState">sqlState: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -212,7 +212,7 @@ and has a cmd byte associated with it.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ExecuteRequest.html"><span class="name">ExecuteRequest</span></a><span class="params">(<span name="stmtId">stmtId: <span class="extype" name="scala.Int">Int</span></span>, <span name="params">params: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<span class="extype" name="scala.Any">Any</span>] = <span class="defval" name="scala.`package`.IndexedSeq.empty[Nothing]">...</span></span>, <span name="hasNewParams">hasNewParams: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="flags">flags: <span class="extype" name="scala.Byte">Byte</span> = <span class="symbol">0</span></span>)</span><span class="result"> extends <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ExecuteRequest.html"><span class="name">ExecuteRequest</span></a><span class="params">(<span name="stmtId">stmtId: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="params">params: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a>] = <span class="defval" name="scala.`package`.IndexedSeq.empty[Nothing]">...</span></span>, <span name="hasNewParams">hasNewParams: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">true</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a> = <span class="symbol">0</span></span>)</span><span class="result"> extends <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Uses the binary protocol to build an execute request for
@@ -226,7 +226,7 @@ a prepared statement.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Field.html"><span class="name">Field</span></a><span class="params">(<span name="catalog">catalog: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="db">db: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="table">table: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="origTable">origTable: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="origName">origName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="charset">charset: <span class="extype" name="scala.Short">Short</span></span>, <span name="displayLength">displayLength: <span class="extype" name="scala.Int">Int</span></span>, <span name="fieldType">fieldType: <span class="extype" name="scala.Short">Short</span></span>, <span name="flags">flags: <span class="extype" name="scala.Short">Short</span></span>, <span name="decimals">decimals: <span class="extype" name="scala.Byte">Byte</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Field.html"><span class="name">Field</span></a><span class="params">(<span name="catalog">catalog: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="db">db: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="table">table: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="origTable">origTable: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="origName">origName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="displayLength">displayLength: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="fieldType">fieldType: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="decimals">decimals: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -239,7 +239,7 @@ a prepared statement.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="FloatValue.html"><span class="name">FloatValue</span></a><span class="params">(<span name="f">f: <span class="extype" name="scala.Float">Float</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="FloatValue.html"><span class="name">FloatValue</span></a><span class="params">(<span name="f">f: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -252,7 +252,7 @@ a prepared statement.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Handshake.html"><span class="name">Handshake</span></a><span class="params">(<span name="username">username: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>, <span name="password">password: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>, <span name="database">database: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a> = <span class="symbol">Capability.baseCap</span></span>, <span name="charset">charset: <span class="extype" name="scala.Short">Short</span> = <span class="defval" name="com.twitter.finagle.exp.mysql.Charset.Utf8_general_ci">...</span></span>, <span name="maxPacketSize">maxPacketSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(1).gigabyte">...</span></span>)</span><span class="result"> extends (<a href="HandshakeInit.html" class="extype" name="com.twitter.finagle.exp.mysql.HandshakeInit">HandshakeInit</a>) ⇒ <span class="extype" name="com.twitter.util.Try">Try</span>[<a href="HandshakeResponse.html" class="extype" name="com.twitter.finagle.exp.mysql.HandshakeResponse">HandshakeResponse</a>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Handshake.html"><span class="name">Handshake</span></a><span class="params">(<span name="username">username: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>, <span name="password">password: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>, <span name="database">database: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a> = <span class="symbol">Capability.baseCap</span></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a> = <span class="defval" name="com.twitter.finagle.exp.mysql.Charset.Utf8_general_ci">...</span></span>, <span name="maxPacketSize">maxPacketSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(1).gigabyte">...</span></span>)</span><span class="result"> extends (<a href="HandshakeInit.html" class="extype" name="com.twitter.finagle.exp.mysql.HandshakeInit">HandshakeInit</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="HandshakeResponse.html" class="extype" name="com.twitter.finagle.exp.mysql.HandshakeResponse">HandshakeResponse</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Bridges a server handshake (HandshakeInit) with a
@@ -267,7 +267,7 @@ parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="HandshakeInit.html"><span class="name">HandshakeInit</span></a><span class="params">(<span name="protocol">protocol: <span class="extype" name="scala.Byte">Byte</span></span>, <span name="version">version: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="threadId">threadId: <span class="extype" name="scala.Int">Int</span></span>, <span name="salt">salt: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>, <span name="serverCap">serverCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a></span>, <span name="charset">charset: <span class="extype" name="scala.Short">Short</span></span>, <span name="status">status: <span class="extype" name="scala.Short">Short</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="HandshakeInit.html"><span class="name">HandshakeInit</span></a><span class="params">(<span name="protocol">protocol: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>, <span name="version">version: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="threadId">threadId: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="salt">salt: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>, <span name="serverCap">serverCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="status">status: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -280,7 +280,7 @@ parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="HandshakeResponse.html"><span class="name">HandshakeResponse</span></a><span class="params">(<span name="username">username: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="password">password: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="database">database: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a></span>, <span name="salt">salt: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>, <span name="serverCap">serverCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a></span>, <span name="charset">charset: <span class="extype" name="scala.Short">Short</span></span>, <span name="maxPacketSize">maxPacketSize: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <a href="Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="HandshakeResponse.html"><span class="name">HandshakeResponse</span></a><span class="params">(<span name="username">username: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="password">password: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="database">database: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a></span>, <span name="salt">salt: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>, <span name="serverCap">serverCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="maxPacketSize">maxPacketSize: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Client response sent during connection phase.</p>
@@ -307,7 +307,7 @@ upstream MySQL server.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="IntValue.html"><span class="name">IntValue</span></a><span class="params">(<span name="i">i: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="IntValue.html"><span class="name">IntValue</span></a><span class="params">(<span name="i">i: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -320,7 +320,7 @@ upstream MySQL server.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="LongValue.html"><span class="name">LongValue</span></a><span class="params">(<span name="l">l: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="LongValue.html"><span class="name">LongValue</span></a><span class="params">(<span name="l">l: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -333,7 +333,7 @@ upstream MySQL server.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="LostSyncException.html"><span class="name">LostSyncException</span></a><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result"> extends <span class="extype" name="scala.RuntimeException">RuntimeException</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="LostSyncException.html"><span class="name">LostSyncException</span></a><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result"> extends <span class="extype" name="scala.RuntimeException">RuntimeException</span> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -346,7 +346,7 @@ upstream MySQL server.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="OK.html"><span class="name">OK</span></a><span class="params">(<span name="affectedRows">affectedRows: <span class="extype" name="scala.Long">Long</span></span>, <span name="insertId">insertId: <span class="extype" name="scala.Long">Long</span></span>, <span name="serverStatus">serverStatus: <span class="extype" name="scala.Int">Int</span></span>, <span name="warningCount">warningCount: <span class="extype" name="scala.Int">Int</span></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="OK.html"><span class="name">OK</span></a><span class="params">(<span name="affectedRows">affectedRows: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="insertId">insertId: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="serverStatus">serverStatus: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="warningCount">warningCount: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -359,7 +359,7 @@ upstream MySQL server.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="PrepareOK.html"><span class="name">PrepareOK</span></a><span class="params">(<span name="id">id: <span class="extype" name="scala.Int">Int</span></span>, <span name="numOfCols">numOfCols: <span class="extype" name="scala.Int">Int</span></span>, <span name="numOfParams">numOfParams: <span class="extype" name="scala.Int">Int</span></span>, <span name="warningCount">warningCount: <span class="extype" name="scala.Int">Int</span></span>, <span name="columns">columns: <span class="extype" name="scala.Seq">Seq</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>] = <span class="symbol">immutable.this.Nil</span></span>, <span name="params">params: <span class="extype" name="scala.Seq">Seq</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>] = <span class="symbol">immutable.this.Nil</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="PrepareOK.html"><span class="name">PrepareOK</span></a><span class="params">(<span name="id">id: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="numOfCols">numOfCols: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="numOfParams">numOfParams: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="warningCount">warningCount: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="columns">columns: <span class="extype" name="scala.Seq">Seq</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>] = <span class="symbol">immutable.this.Nil</span></span>, <span name="params">params: <span class="extype" name="scala.Seq">Seq</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>] = <span class="symbol">immutable.this.Nil</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -372,7 +372,7 @@ upstream MySQL server.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="PrepareRequest.html"><span class="name">PrepareRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="PrepareRequest.html"><span class="name">PrepareRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Allocates a prepared statement on the server from the
@@ -386,7 +386,7 @@ passed in query string.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="PreparedStatement.html"><span class="name">PreparedStatement</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="PreparedStatement.html"><span class="name">PreparedStatement</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">A PreparedStatement represents a parameterized
@@ -401,7 +401,7 @@ with varying parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="QueryRequest.html"><span class="name">QueryRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="QueryRequest.html"><span class="name">QueryRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">A QueryRequest is used to send the server a text-based query that
@@ -415,7 +415,7 @@ is executed immediately.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="RawValue.html"><span class="name">RawValue</span></a><span class="params">(<span name="typ">typ: <span class="extype" name="scala.Short">Short</span></span>, <span name="charset">charset: <span class="extype" name="scala.Short">Short</span></span>, <span name="isBinary">isBinary: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="bytes">bytes: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="RawValue.html"><span class="name">RawValue</span></a><span class="params">(<span name="typ">typ: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="isBinary">isBinary: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>, <span name="bytes">bytes: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">A RawValue contains the raw bytes that represent
@@ -430,7 +430,7 @@ bytes.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Request.html"><span class="name">Request</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Request.html"><span class="name">Request</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       
@@ -443,7 +443,7 @@ bytes.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Result.html"><span class="name">Result</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Result.html"><span class="name">Result</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       
@@ -456,7 +456,7 @@ bytes.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ResultSet.html"><span class="name">ResultSet</span></a><span class="params">(<span name="fields">fields: <span class="extype" name="scala.Seq">Seq</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>]</span>, <span name="rows">rows: <span class="extype" name="scala.Seq">Seq</span>[<a href="Row.html" class="extype" name="com.twitter.finagle.exp.mysql.Row">Row</a>]</span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ResultSet.html"><span class="name">ResultSet</span></a><span class="params">(<span name="fields">fields: <span class="extype" name="scala.Seq">Seq</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>]</span>, <span name="rows">rows: <span class="extype" name="scala.Seq">Seq</span>[<a href="Row.html" class="extype" name="com.twitter.finagle.exp.mysql.Row">Row</a>]</span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -469,11 +469,10 @@ bytes.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Row.html"><span class="name">Row</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Row.html"><span class="name">Row</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
-      <p class="comment cmt">Defines an interface that allows for easily
-reading the values in a mysql row.</p>
+      <p class="comment cmt">A <code>Row</code> makes it easy to extract <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a>'s from a mysql row.</p>
     </li><li name="com.twitter.finagle.exp.mysql.ServerError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ServerErrorextendsExceptionwithProductwithSerializable"></a>
       <a id="ServerError:ServerError"></a>
@@ -483,7 +482,7 @@ reading the values in a mysql row.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ServerError.html"><span class="name">ServerError</span></a><span class="params">(<span name="code">code: <span class="extype" name="scala.Short">Short</span></span>, <span name="sqlState">sqlState: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ServerError.html"><span class="name">ServerError</span></a><span class="params">(<span name="code">code: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="sqlState">sqlState: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">A catch-all exception class for errors returned from the upstream
@@ -497,7 +496,7 @@ MySQL server.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ShortValue.html"><span class="name">ShortValue</span></a><span class="params">(<span name="s">s: <span class="extype" name="scala.Short">Short</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ShortValue.html"><span class="name">ShortValue</span></a><span class="params">(<span name="s">s: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -538,7 +537,7 @@ text-based protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="StringValue.html"><span class="name">StringValue</span></a><span class="params">(<span name="s">s: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="StringValue.html"><span class="name">StringValue</span></a><span class="params">(<span name="s">s: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -555,6 +554,19 @@ text-based protocol.</p>
       </span>
       </h4>
       <p class="comment cmt">An injector/extractor of <span class="extype" name="java.sql.Timestamp">java.sql.Timestamp</span> values.</p>
+    </li><li name="com.twitter.finagle.exp.mysql.Transactions" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TransactionsextendsAnyRef"></a>
+      <a id="Transactions:Transactions"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Transactions.html"><span class="name">Transactions</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.exp.mysql.UseRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="UseRequestextendsSimpleCommandRequestwithProductwithSerializable"></a>
       <a id="UseRequest:UseRequest"></a>
@@ -564,7 +576,7 @@ text-based protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="UseRequest.html"><span class="name">UseRequest</span></a><span class="params">(<span name="dbName">dbName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="UseRequest.html"><span class="name">UseRequest</span></a><span class="params">(<span name="dbName">dbName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">A UseRequest is used to change the default schema of the connection.</p>
@@ -577,7 +589,7 @@ text-based protocol.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Value.html"><span class="name">Value</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Value.html"><span class="name">Value</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">Defines a Value ADT that represents the domain of values
@@ -611,7 +623,7 @@ received from a mysql server.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Capability$.html"><span class="name">Capability</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Capability$.html"><span class="name">Capability</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -705,7 +717,7 @@ CloseRequest
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="EOF$.html"><span class="name">EOF</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="EOF.html" class="extype" name="com.twitter.finagle.exp.mysql.EOF">EOF</a>] with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="EOF$.html"><span class="name">EOF</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="EOF.html" class="extype" name="com.twitter.finagle.exp.mysql.EOF">EOF</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Represents and EOF result received from the server which
@@ -719,7 +731,7 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="EmptyValue$.html"><span class="name">EmptyValue</span></a><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="EmptyValue$.html"><span class="name">EmptyValue</span></a><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -732,7 +744,7 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Error$.html"><span class="name">Error</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="Error.html" class="extype" name="com.twitter.finagle.exp.mysql.Error">Error</a>] with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Error$.html"><span class="name">Error</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="Error.html" class="extype" name="com.twitter.finagle.exp.mysql.Error">Error</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Represents the Error Packet received from the server and the data sent along with it.</p>
@@ -745,7 +757,7 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Field$.html"><span class="name">Field</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>] with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Field$.html"><span class="name">Field</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Represents the column meta-data associated with a query.</p>
@@ -758,7 +770,7 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Handshake$.html"><span class="name">Handshake</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Handshake$.html"><span class="name">Handshake</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -771,7 +783,7 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="HandshakeInit$.html"><span class="name">HandshakeInit</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="HandshakeInit.html" class="extype" name="com.twitter.finagle.exp.mysql.HandshakeInit">HandshakeInit</a>] with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="HandshakeInit$.html"><span class="name">HandshakeInit</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="HandshakeInit.html" class="extype" name="com.twitter.finagle.exp.mysql.HandshakeInit">HandshakeInit</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">First result received from the server as part of the connection phase.</p>
@@ -784,7 +796,7 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="IncompatibleCharset$.html"><span class="name">IncompatibleCharset</span></a><span class="result"> extends <a href="IncompatibleServerError.html" class="extype" name="com.twitter.finagle.exp.mysql.IncompatibleServerError">IncompatibleServerError</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="IncompatibleCharset$.html"><span class="name">IncompatibleCharset</span></a><span class="result"> extends <a href="IncompatibleServerError.html" class="extype" name="com.twitter.finagle.exp.mysql.IncompatibleServerError">IncompatibleServerError</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Indicates that the server to which the client is connected is configured to use
@@ -798,7 +810,7 @@ a charset that the client is incompatible with.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="IncompatibleVersion$.html"><span class="name">IncompatibleVersion</span></a><span class="result"> extends <a href="IncompatibleServerError.html" class="extype" name="com.twitter.finagle.exp.mysql.IncompatibleServerError">IncompatibleServerError</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="IncompatibleVersion$.html"><span class="name">IncompatibleVersion</span></a><span class="result"> extends <a href="IncompatibleServerError.html" class="extype" name="com.twitter.finagle.exp.mysql.IncompatibleServerError">IncompatibleServerError</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Indicates that the server to which the client is connected is running
@@ -812,7 +824,7 @@ a version of MySQL that the client is incompatible with.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NullValue$.html"><span class="name">NullValue</span></a><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="NullValue$.html"><span class="name">NullValue</span></a><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -825,7 +837,7 @@ a version of MySQL that the client is incompatible with.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="OK$.html"><span class="name">OK</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="OK.html" class="extype" name="com.twitter.finagle.exp.mysql.OK">OK</a>] with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="OK$.html"><span class="name">OK</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="OK.html" class="extype" name="com.twitter.finagle.exp.mysql.OK">OK</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Represents the OK Packet received from the server.</p>
@@ -838,7 +850,7 @@ a version of MySQL that the client is incompatible with.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="PingRequest$.html"><span class="name">PingRequest</span></a><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="PingRequest$.html"><span class="name">PingRequest</span></a><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">A request to check if the server is alive.</p>
@@ -851,7 +863,7 @@ a version of MySQL that the client is incompatible with.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="PrepareOK$.html"><span class="name">PrepareOK</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="PrepareOK.html" class="extype" name="com.twitter.finagle.exp.mysql.PrepareOK">PrepareOK</a>] with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="PrepareOK$.html"><span class="name">PrepareOK</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="PrepareOK.html" class="extype" name="com.twitter.finagle.exp.mysql.PrepareOK">PrepareOK</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Meta data returned from the server in response to
@@ -866,7 +878,7 @@ COM_STMT_PREPARE.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ResultSet$.html"><span class="name">ResultSet</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ResultSet$.html"><span class="name">ResultSet</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Resultset returned from the server containing field definitions and

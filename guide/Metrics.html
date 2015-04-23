@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.24.0 documentation</title>
+    <title>Metrics &mdash; Finagle 6.25.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.24.0',
+        VERSION:     '6.25.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.24.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.25.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -107,6 +107,12 @@ been thrown from this service</dd>
 <dt><strong>sourcedfailures</strong></dt>
 <dd>a counter of the number of times any SourcedException or sourced Failure has
 been thrown</dd>
+<dt><strong>transit_latency_ms</strong></dt>
+<dd>a stat that attempts to measure (walltime) transit times between hops, e.g.,
+from client to server. Not supported by all protocols.</dd>
+<dt><strong>deadline_budget_ms</strong></dt>
+<dd>a stat accounting for the (implied) amount of time remaining for this request,
+for example from a deadline or timeout. Not supported by all protocols.</dd>
 </dl>
 </div>
 <div class="section" id="statsfactorywrapper">
@@ -171,7 +177,7 @@ primarily to decide whether a host is available to make new connections to in th
 addresses to which sockets can be opened. A number of the moving parts
 involved in this process are cached (i.e. <cite>Dtab</cite>s, <cite>Name</cite>s, and
 <cite>NameTree</cite>s). The following stats are recorded under the
-<cite>interpreter/{dtabcache,namecache,nametreecache}</cite> scopes to provide
+<cite>namer/{dtabcache,namecache,nametreecache}</cite> scopes to provide
 visibility into this caching.</p>
 <dl class="docutils">
 <dt><strong>misses</strong></dt>
@@ -187,6 +193,8 @@ visibility into this caching.</p>
 <dd>A counter of the number of &#8220;one-off&#8221; <cite>ServiceFactory</cite>s that are
 created in the event that no idle <cite>ServiceFactory</cite>s are cached</dd>
 </dl>
+<p>The total time spent resolving Names is captured in the
+<cite>namer/bind_latency_us</cite> stat.</p>
 </div>
 <div class="section" id="address-stabilization">
 <h3>Address Stabilization<a class="headerlink" href="#address-stabilization" title="Permalink to this headline">¶</a></h3>
@@ -298,7 +306,14 @@ groups of hosts.</p>
 <dt><strong>size</strong></dt>
 <dd>A gauge of the number of nodes being balanced across</dd>
 <dt><strong>available</strong></dt>
-<dd>A gauge of the number of <em>available</em> nodes being balanced across</dd>
+<dd>A gauge of the number of <em>available</em> nodes as seen by the load balancer.
+These nodes are ready to receive traffic.</dd>
+<dt><strong>busy</strong></dt>
+<dd>A gauge of the number of <em>busy</em> nodes as seen by the load balancer.
+These nodes are current unavailable for service.</dd>
+<dt><strong>closed</strong></dt>
+<dd>A gauge of the number of <em>closed</em> nodes as seen by the load balancer.
+These nodes will never be available for service.</dd>
 <dt><strong>load</strong></dt>
 <dd>A gauge of the total load over all nodes being balanced across</dd>
 <dt><strong>meanweight</strong></dt>
@@ -361,11 +376,18 @@ in between requests</dd>
 <dd>a counter of the number of refused connections by the rate limiting filter</dd>
 </dl>
 </div>
-<div class="section" id="retryingfilter">
-<h3>RetryingFilter<a class="headerlink" href="#retryingfilter" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="requeue">
+<h3>Requeue<a class="headerlink" href="#requeue" title="Permalink to this headline">¶</a></h3>
+<p>There is a &#8220;requeues&#8221; stat that&#8217;s scoped to &#8220;requeue&#8221;, which tracks
+requests that fail (or failures to establish a session) but have been
+automatically re-enqueued when finagle detects that it&#8217;s safe.
+These re-enqueues are credited by finagle and they don&#8217;t sap your
+retry budget.</p>
 <dl class="docutils">
-<dt><strong>retries</strong></dt>
-<dd>a histogram of the number of times the service had to retry</dd>
+<dt><strong>requeues</strong></dt>
+<dd>a counter of the number of times the service had to retry</dd>
+<dt><strong>budget</strong></dt>
+<dd>a gauge representing the instantaneous requeue budget</dd>
 </dl>
 </div>
 </div>
@@ -483,6 +505,20 @@ watermark of connections full and no connections are idle.</dd>
 </dl>
 </div>
 </div>
+<div class="section" id="mux">
+<h2>Mux<a class="headerlink" href="#mux" title="Permalink to this headline">¶</a></h2>
+<p id="mux-stats">These stats pertain to <a class="reference internal" href="Protocols.html#mux"><em>Mux</em></a>.</p>
+<dl class="docutils">
+<dt><strong>draining</strong></dt>
+<dd>the number of times the server has initiated session draining</dd>
+<dt><strong>drained</strong></dt>
+<dd>the number of times the server has succesfully completed the draining protocol within its allotted time</dd>
+<dt><strong>clienthangup</strong></dt>
+<dd>the number of times sessions have been abruptly terminated by the client</dd>
+<dt><strong>serverhangup</strong></dt>
+<dd>the number of times sessions have been abruptly terminated by the server</dd>
+</dl>
+</div>
 </div>
 
 
@@ -542,7 +578,7 @@ watermark of connections full and no connections are idle.</dd>
 </li>
 <li><a class="reference internal" href="#rate-limiting">Rate Limiting</a><ul>
 <li><a class="reference internal" href="#ratelimitingfilter">RateLimitingFilter</a></li>
-<li><a class="reference internal" href="#retryingfilter">RetryingFilter</a></li>
+<li><a class="reference internal" href="#requeue">Requeue</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#pooling">Pooling</a><ul>
@@ -560,6 +596,7 @@ watermark of connections full and no connections are idle.</dd>
 <li><a class="reference internal" href="#idleconnectionfilter">IdleConnectionFilter</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#mux">Mux</a></li>
 </ul>
 </li>
 </ul>

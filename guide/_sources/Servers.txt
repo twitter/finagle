@@ -32,7 +32,7 @@ Finagle minimally furnishes servers with additional behavior. More sophisticated
 behavior lives in the :ref:`clients <finagle_clients>`. However, the server does come
 with some useful modules to help owners observe and debug their servers. This includes
 :src:`Monitoring <com/twitter/finagle/filter/MonitorFilter.scala>`,
-:src:`Tracing <com/twitter/finagle/tracing/TracingFilter.scal>`,
+:src:`Tracing <com/twitter/finagle/tracing/TraceInitializerFilter.scala>`,
 and :src:`Stats <com/twitter/finagle/service/StatsFilter.scala>`.
 Additionally, Finagle servers :ref:`propagate failure <propagate_failure>`.
 

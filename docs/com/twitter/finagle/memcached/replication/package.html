@@ -52,7 +52,7 @@ cache replicas. In a more complicate caching scenario, this simple/naive replica
 not be applicable.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -101,7 +101,7 @@ not be applicable.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="BaseReplicationClient.html"><span class="name">BaseReplicationClient</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="BaseReplicationClient.html"><span class="name">BaseReplicationClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">Base replication client.</p>
@@ -114,7 +114,7 @@ not be applicable.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ConsistentReplication.html"><span class="name">ConsistentReplication</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="result">result: <span class="extype" name="com.twitter.finagle.memcached.replication.ConsistentReplication.T">T</span></span>)</span><span class="result"> extends <a href="ReplicationStatus.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicationStatus">ReplicationStatus</a>[<span class="extype" name="com.twitter.finagle.memcached.replication.ConsistentReplication.T">T</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ConsistentReplication.html"><span class="name">ConsistentReplication</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="result">result: <span class="extype" name="com.twitter.finagle.memcached.replication.ConsistentReplication.T">T</span></span>)</span><span class="result"> extends <a href="ReplicationStatus.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicationStatus">ReplicationStatus</a>[<span class="extype" name="com.twitter.finagle.memcached.replication.ConsistentReplication.T">T</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Indicating a consistent state across all replicas, which comes with the agreed consistent result;
@@ -128,7 +128,7 @@ not be applicable.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="FailedReplication.html"><span class="name">FailedReplication</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="failureSeq">failureSeq: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.util.Throw">Throw</span>[<span class="extype" name="com.twitter.finagle.memcached.replication.FailedReplication.T">T</span>]]</span>)</span><span class="result"> extends <a href="ReplicationStatus.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicationStatus">ReplicationStatus</a>[<span class="extype" name="com.twitter.finagle.memcached.replication.FailedReplication.T">T</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="FailedReplication.html"><span class="name">FailedReplication</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="failureSeq">failureSeq: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.util.Throw">Throw</span>[<span class="extype" name="com.twitter.finagle.memcached.replication.FailedReplication.T">T</span>]]</span>)</span><span class="result"> extends <a href="ReplicationStatus.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicationStatus">ReplicationStatus</a>[<span class="extype" name="com.twitter.finagle.memcached.replication.FailedReplication.T">T</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">indicating a failed state from all replicas, which comes with a sequence of failures from
@@ -143,7 +143,7 @@ all replicas;
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="InconsistentReplication.html"><span class="name">InconsistentReplication</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="resultSeq">resultSeq: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.util.Try">Try</span>[<span class="extype" name="com.twitter.finagle.memcached.replication.InconsistentReplication.T">T</span>]]</span>)</span><span class="result"> extends <a href="ReplicationStatus.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicationStatus">ReplicationStatus</a>[<span class="extype" name="com.twitter.finagle.memcached.replication.InconsistentReplication.T">T</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="InconsistentReplication.html"><span class="name">InconsistentReplication</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="resultSeq">resultSeq: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<span class="extype" name="com.twitter.finagle.memcached.replication.InconsistentReplication.T">T</span>]]</span>)</span><span class="result"> extends <a href="ReplicationStatus.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicationStatus">ReplicationStatus</a>[<span class="extype" name="com.twitter.finagle.memcached.replication.InconsistentReplication.T">T</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Indicating an inconsistent state across all replicas, which comes with a sequence of result
@@ -158,7 +158,7 @@ from all replicas; each replica's result can be either Return[T] or Throw[T]
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="RCasUnique.html"><span class="name">RCasUnique</span></a><span class="params">(<span name="uniques">uniques: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result"> extends <a href="ReplicaCasUnique.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicaCasUnique">ReplicaCasUnique</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="RCasUnique.html"><span class="name">RCasUnique</span></a><span class="params">(<span name="uniques">uniques: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result"> extends <a href="ReplicaCasUnique.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicaCasUnique">ReplicaCasUnique</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -171,7 +171,7 @@ from all replicas; each replica's result can be either Return[T] or Throw[T]
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ReplicaCasUnique.html"><span class="name">ReplicaCasUnique</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="ReplicaCasUnique.html"><span class="name">ReplicaCasUnique</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       <p class="comment cmt">Wrapping underlying replicas cas unique values for replication purpose.</p>
@@ -184,7 +184,7 @@ from all replicas; each replica's result can be either Return[T] or Throw[T]
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ReplicationStatus.html"><span class="name">ReplicationStatus</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="ReplicationStatus.html"><span class="name">ReplicationStatus</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       
@@ -197,7 +197,7 @@ from all replicas; each replica's result can be either Return[T] or Throw[T]
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="SCasUnique.html"><span class="name">SCasUnique</span></a><span class="params">(<span name="casUnique">casUnique: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="ReplicaCasUnique.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicaCasUnique">ReplicaCasUnique</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="SCasUnique.html"><span class="name">SCasUnique</span></a><span class="params">(<span name="casUnique">casUnique: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="ReplicaCasUnique.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicaCasUnique">ReplicaCasUnique</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -223,7 +223,7 @@ from all replicas; each replica's result can be either Return[T] or Throw[T]
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="SimpleReplicationFailure.html"><span class="name">SimpleReplicationFailure</span></a><span class="params">(<span name="msg">msg: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Throwable">Throwable</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="SimpleReplicationFailure.html"><span class="name">SimpleReplicationFailure</span></a><span class="params">(<span name="msg">msg: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Throwable">Throwable</span> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Simple replication client wrapper that's compatible with base memcached client.</p>
@@ -258,9 +258,9 @@ from all replicas; each replica's result can be either Return[T] or Throw[T]
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>

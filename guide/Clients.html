@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &mdash; Finagle 6.24.0 documentation</title>
+    <title>Clients &mdash; Finagle 6.25.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.24.0',
+        VERSION:     '6.25.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.24.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.25.0 documentation" href="index.html" />
     <link rel="next" title="Names and Naming in Finagle" href="Names.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -118,7 +118,7 @@ this is how failure management modules mark entire endpoints as unavailable.</p>
 <div class="section" id="observability">
 <h3>Observability<a class="headerlink" href="#observability" title="Permalink to this headline">¶</a></h3>
 <p>The <tt class="docutils literal"><span class="pre">Observe</span></tt>, <tt class="docutils literal"><span class="pre">Monitor</span></tt>, and <tt class="docutils literal"><span class="pre">Trace</span></tt> modules export useful information about the internals and
-behavior of a Finagle client. Client metrics are exported using a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/stats/StatsReceiver">StatsReceiver</a>
+behavior of a Finagle client. Client metrics are exported using a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/stats/StatsReceiver.scala">StatsReceiver</a>
 (See the <a class="reference internal" href="Metrics.html#public-stats"><em>metrics</em></a> section for more details). Generic exception handling can
 be installed via the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/MonitorFilter.scala">MonitorFilter</a>.
 Finally, clients have built-in support for <a class="reference external" href="http://twitter.github.com/zipkin/">Zipkin</a>.</p>
@@ -187,7 +187,7 @@ The module is implemented by <a class="reference external" href="https://github.
 <h3>Pooling<a class="headerlink" href="#pooling" title="Permalink to this headline">¶</a></h3>
 <p id="watermark-pool">Finagle provides a generic pool that maintains a collection of
 service instances. Each endpoint the client connects to has an independent
-pool with high and low watermarks. The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/pool/WaterMarkPool.scala">WatermarkPool</a> keeps
+pool with high and low watermarks. The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/pool/WatermarkPool.scala">WatermarkPool</a> keeps
 persistent services up to the lower bound. It will keep making new services up
 to upper bound if you checkout more than lower bound services, but when
 you release those services above the lower bound, it immediately tries
