@@ -30,6 +30,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Reputation.com](https://www.reputation.com/)
 * [Sharethrough](https://www.sharethrough.com/)
   * ["Finagle @ Sharethrough: Twitter #Conf Presentation"][5]
+* [SoFi](https://www.sofi.com/)
 * [SoundCloud](https://soundcloud.com/)
   * ["Building Products at SoundCloud—Part III: Microservices in Scala and
     Finagle"][6]
