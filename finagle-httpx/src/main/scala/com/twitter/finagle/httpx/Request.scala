@@ -2,7 +2,6 @@ package com.twitter.finagle.httpx
 
 import com.twitter.finagle.httpx.netty.{HttpRequestProxy, Bijections}
 import com.twitter.io.{Charsets, Reader}
-import java.io.ByteArrayOutputStream
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
