@@ -66,6 +66,13 @@ Breaking API Changes
 
   * finagle-stats: Switched dependency to finagle-httpx from finagle-http.
 
+  * finagle-mysql: PreparedStatements are now more type-safe! The type signature of
+    PreparedStatements has changed from Seq[Any] => Future[Result] to Seq[Parameter] =>
+    Future[Result]. Parameter represents objects that are serializable by finagle-mysql.
+    In most cases, scalac should transparently wrap your arguments in Parameter when
+    applying a PreparedStatement. However, in cases where this doesn't happen you
+    can explicitly wrap them using `Parameter.wrap`.
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

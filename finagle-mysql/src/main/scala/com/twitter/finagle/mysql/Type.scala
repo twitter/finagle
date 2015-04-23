@@ -37,48 +37,8 @@ object Type {
   val Geometry: Short   = 0xff
 
   /**
-   * Returns the sizeof the given parameter in
-   * its MySQL binary representation. If the size
-   * is unknown or the value is null, 0 is returned.
-   */
-  private[mysql] def sizeOf(any: Any): Int = any match {
-    case b: Boolean     => 1
-    case b: Byte        => 1
-    case s: Short       => 2
-    case i: Int         => 4
-    case l: Long        => 8
-    case f: Float       => 4
-    case d: Double      => 8
-    case t: java.sql.Timestamp    => 12
-    case d: java.sql.Date         => 5
-    case d: java.util.Date        => 12
-    case s: String =>
-      val bytes = s.getBytes(Charset.defaultCharset)
-      Buffer.sizeOfLen(bytes.length) + bytes.length
-    case b: Array[Byte] =>
-      Buffer.sizeOfLen(b.length) + b.length
-    case RawValue(_, _, true, b)  =>
-      Buffer.sizeOfLen(b.length) + b.length
-    case StringValue(s) =>
-      val bytes = s.getBytes(Charset.defaultCharset)
-      Buffer.sizeOfLen(bytes.length) + bytes.length
-    case ByteValue(_) => 1
-    case ShortValue(_) => 2
-    case IntValue(_) => 4
-    case LongValue(_) => 8
-    case FloatValue(_) => 4
-    case DoubleValue(_) => 8
-    case NullValue => 0
-    case null => 0
-    // This is safe because unknown
-    // values are serialized as null.
-    case _ => 0
-  }
-
-  /**
-   * Retrieves the MySQL type code for the
-   * given parameter. If the parameter type
-   * mapping is unknown -1 is returned.
+   * Retrieves the MySQL type code for the given parameter. If the parameter
+   * type mapping is unknown -1 is returned.
    */
   private[mysql] def getCode(any: Any): Short = any match {
     // primitives

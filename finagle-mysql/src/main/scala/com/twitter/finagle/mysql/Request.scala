@@ -151,33 +151,31 @@ case class HandshakeResponse(
  * a prepared statement.
  * [[http://dev.mysql.com/doc/internals/en/com-stmt-execute.html]]
  */
-case class ExecuteRequest(
-  stmtId: Int,
-  params: IndexedSeq[Any] = IndexedSeq.empty,
-  hasNewParams: Boolean = true,
-  flags: Byte = 0
+class ExecuteRequest(
+  val stmtId: Int,
+  val params: IndexedSeq[Parameter],
+  val hasNewParams: Boolean,
+  val flags: Byte
 ) extends CommandRequest(Command.COM_STMT_EXECUTE) {
     private[this] val log = Logger.getLogger("finagle-mysql")
 
-    private[this] def isNull(param: Any): Boolean = param match {
-      case null => true
-      case _ => false
-    }
-
-    private[this] def makeNullBitmap(parameters: IndexedSeq[Any]): Array[Byte] = {
+    private[this] def makeNullBitmap(parameters: IndexedSeq[Parameter]): Array[Byte] = {
       val bitmap = new Array[Byte]((parameters.size + 7) / 8)
       val ps = parameters.zipWithIndex
-      for ((p, idx) <- ps if isNull(p)) {
-        val bytePos = idx / 8
-        val bitPos = idx % 8
-        val byte = bitmap(bytePos)
-        bitmap(bytePos) = (byte | (1 << bitPos)).toByte
+      ps foreach {
+        case (Parameter.NullParameter, idx) =>
+          val bytePos = idx / 8
+          val bitPos = idx % 8
+          val byte = bitmap(bytePos)
+          bitmap(bytePos) = (byte | (1 << bitPos)).toByte
+        case _ =>
+          ()
       }
       bitmap
     }
 
-    private[this] def writeTypeCode(param: Any, writer: BufferWriter): Unit = {
-      val typeCode = Type.getCode(param)
+    private[this] def writeTypeCode(param: Parameter, writer: BufferWriter): Unit = {
+      val typeCode = param.typeCode
       if (typeCode != -1)
         writer.writeShort(typeCode)
       else {
@@ -192,40 +190,15 @@ case class ExecuteRequest(
      * Returns sizeof all the parameters according to
      * mysql binary encoding.
      */
-    private[this] def sizeOfParameters(parameters: IndexedSeq[Any]): Int =
-      parameters.foldLeft(0) { (sum, param) =>
-        sum + Type.sizeOf(param)
-      }
+    private[this] def sizeOfParameters(parameters: IndexedSeq[Parameter]): Int =
+      parameters.foldLeft(0)(_ + _.size)
 
     /**
      * Writes the parameter into its MySQL binary representation.
      */
-    private[this] def writeParam(param: Any, writer: BufferWriter): BufferWriter = param match {
-      case s: String      => writer.writeLengthCodedString(s)
-      case b: Boolean     => writer.writeBoolean(b)
-      case b: Byte        => writer.writeByte(b)
-      case s: Short       => writer.writeShort(s)
-      case i: Int         => writer.writeInt(i)
-      case l: Long        => writer.writeLong(l)
-      case f: Float       => writer.writeFloat(f)
-      case d: Double      => writer.writeDouble(d)
-      case b: Array[Byte] => writer.writeLengthCodedBytes(b)
-      // Dates
-      case t: java.sql.Timestamp    => writeParam(TimestampValue(t), writer)
-      case d: java.sql.Date         => writeParam(DateValue(d), writer)
-      case d: java.util.Date        => writeParam(TimestampValue(new java.sql.Timestamp(d.getTime)), writer)
-      // allows for generic binary values as params to a prepared statement.
-      case RawValue(_, _, true, bytes) => writer.writeLengthCodedBytes(bytes)
-      // allows for Value types as params to prepared statements
-      case ByteValue(b) => writer.writeByte(b)
-      case ShortValue(s) => writer.writeShort(s)
-      case IntValue(i) => writer.writeInt(i)
-      case LongValue(l) => writer.writeLong(l)
-      case FloatValue(f) => writer.writeFloat(f)
-      case DoubleValue(d) => writer.writeDouble(d)
-      case StringValue(s) => writer.writeLengthCodedString(s)
-      // skip null and unknown values
-      case _  => writer
+    private[this] def writeParam(param: Parameter, writer: BufferWriter): BufferWriter = {
+      param.writeTo(writer)
+      writer
     }
 
     def toPacket = {
@@ -256,6 +229,25 @@ case class ExecuteRequest(
       }
       Packet(seq, composite)
     }
+}
+
+object ExecuteRequest {
+  def apply(
+    stmtId: Int,
+    params: IndexedSeq[Parameter] = IndexedSeq.empty,
+    hasNewParams: Boolean = true,
+    flags: Byte = 0
+  ) = {
+    val sanitizedParams = params.map {
+      case null  => Parameter.NullParameter
+      case other => other
+    }
+    new ExecuteRequest(stmtId, sanitizedParams, hasNewParams, flags)
+  }
+
+  def unapply(executeRequest: ExecuteRequest): Option[(Int, IndexedSeq[Parameter], Boolean, Byte)] = {
+    Some((executeRequest.stmtId, executeRequest.params, executeRequest.hasNewParams, executeRequest.flags))
+  }
 }
 
 /**
