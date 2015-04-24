@@ -279,7 +279,7 @@ object Finagle extends Build {
       "commons-codec" % "commons-codec" % "1.6",
       util("zk-common"),
       util("zk-test") % "test",
-      "com.twitter.common.zookeeper" % "server-set" % "1.0.103",
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.103" exclude("org.slf4j", "slf4j-log4j12"),
       "com.google.guava" % "guava" % "16.0.1"
     ),
 
