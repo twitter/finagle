@@ -1,27 +1,20 @@
 package com.twitter.finagle.util
 
 import com.twitter.jsr166e.LongAdder
-import com.twitter.util.Time
+import com.twitter.util.{Duration, Stopwatch}
 import java.util.Arrays
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * A time-windowed version of a LongAdder.
  *
- * None of the operations on this data structure entails an allocation,
- * unless invoking now does.
- *
- * `range` and `now` are expected to have the same units.
- *
- * @param range The range of time to be kept in the adder
+ * @param range The range of time to be kept in the adder.
  *
  * @param slices The number of slices that are maintained; a higher
  * number of slices means finer granularity but also more memory
  * consumption. Must be at least 1.
- *
- * @param now the current time. for testing.
  */
-private[finagle] class WindowedAdder(range: Long, slices: Int, now: () => Long) {
+private[finagle] class WindowedAdder(range: Duration, slices: Int) {
   require(slices > 1)
   private[this] val window = range/slices
   private[this] val N = slices-1
@@ -35,7 +28,7 @@ private[finagle] class WindowedAdder(range: Long, slices: Int, now: () => Long) 
   // often.
   private[this] val buf = new Array[Long](N)
   @volatile private[this] var i = 0
-  @volatile private[this] var old = now()
+  @volatile private[this] var elapsed = Stopwatch.start()
 
   private[this] def expired() {
     if (!expiredGen.compareAndSet(gen, gen+1))
@@ -48,16 +41,16 @@ private[finagle] class WindowedAdder(range: Long, slices: Int, now: () => Long) 
 
     // If it turns out we've skipped a number of
     // slices, we adjust for that here.
-    val nskip = math.min(((now() - old)/
-      window-1).toInt, N)
+    val nskip = (elapsed().inMilliseconds/
+      window.inMilliseconds-1).toInt min N
     if (nskip > 0) {
-      val r = math.min(nskip, (N-i))
+      val r = nskip min (N-i)
       Arrays.fill(buf, i, i+r, 0L)
       Arrays.fill(buf, 0, nskip - r, 0L)
       i = (i+nskip)%N
     }
 
-    old = now()
+    elapsed = Stopwatch.start()
     gen += 1
   }
 
@@ -65,7 +58,7 @@ private[finagle] class WindowedAdder(range: Long, slices: Int, now: () => Long) 
   def reset() {
     Arrays.fill(buf, 0, N, 0L)
     writer.reset()
-    old = now()
+    elapsed = Stopwatch.start()
   }
 
   /** Increment the adder by 1 */
@@ -73,14 +66,14 @@ private[finagle] class WindowedAdder(range: Long, slices: Int, now: () => Long) 
 
   /** Increment the adder by `x` */
   def add(x: Int) {
-    if ((now() - old) >= window)
+    if (elapsed() >= window)
       expired()
     writer.add(x)
   }
 
   /** Retrieve the current sum of the adder */
   def sum(): Long = {
-    if ((now() - old) >= window)
+    if (elapsed() >= window)
       expired()
     val _ = gen  // Barrier.
     var sum = writer.sum()
@@ -91,10 +84,4 @@ private[finagle] class WindowedAdder(range: Long, slices: Int, now: () => Long) 
     }
     sum
   }
-}
-
-private[finagle] object WindowedAdder {
-  // we use nanos instead of current time millis because it increases monotonically
-  val systemMs: () => Long = () => System.nanoTime() / (1000 * 1000)
-  val timeMs: () => Long = () => Time.now.inMilliseconds
 }

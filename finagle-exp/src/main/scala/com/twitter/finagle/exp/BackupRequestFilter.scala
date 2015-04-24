@@ -43,42 +43,32 @@ import com.twitter.util.{Future, Return, Throw, Duration, Timer, Stopwatch, Time
  * onto a different endpoint from the original. Eventually, this
  * should be implemented as a sort of queueing policy.
  */
-class BackupRequestFilter[Req, Rep] private[exp](
-    quantile: Int,
-    range: Duration,
-    timer: Timer,
-    statsReceiver: StatsReceiver,
-    history: Duration,
-    nowMs: () => Long)
-  extends SimpleFilter[Req, Rep] {
-
-  def this(
+class BackupRequestFilter[Req, Rep](
     quantile: Int,
     range: Duration,
     timer: Timer,
     statsReceiver: StatsReceiver,
     history: Duration
-  ) = this(quantile, range, timer, statsReceiver, history, WindowedAdder.systemMs)
-
+) extends SimpleFilter[Req, Rep] {
   require(quantile > 0 && quantile < 100)
   require(range < 1.hour)
 
   // Given that we read into the LongAdders as much as we write to
   // them, it's unclear how much their use is helping.
-  private[this] val histo = new LatencyHistogram(range.inMilliseconds, history.inMilliseconds, nowMs)
-  private[this] def cutoffMs() = histo.quantile(quantile) // in milliseconds
+  private[this] val histo = new LatencyHistogram(range, history)
+  private[this] def cutoff() = histo.quantile(quantile)
 
   private[this] val timeouts = statsReceiver.counter("timeouts")
   private[this] val won = statsReceiver.counter("won")
   private[this] val lost = statsReceiver.counter("lost")
   private[this] val cutoffGauge =
-    statsReceiver.addGauge("cutoff_ms") { cutoffMs().toFloat }
+    statsReceiver.addGauge("cutoff_ms") { cutoff().inMilliseconds.toFloat }
 
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
-    val start = nowMs()
-    val howlong = cutoffMs()
-    val backup = if (howlong == 0) Future.never else {
-      timer.doAt(Time.fromMilliseconds(howlong + start)) {
+    val elapsed = Stopwatch.start()
+    val howlong = cutoff()
+    val backup = if (howlong == Duration.Zero) Future.never else {
+      timer.doLater(howlong) {
         timeouts.incr()
         service(req)
       }.flatten
@@ -92,14 +82,12 @@ class BackupRequestFilter[Req, Rep] private[exp](
           won.incr()
           // Currently we use only latency data only from the
           // first request, since that is simplest.
-          histo.add(nowMs() - start)
+          histo.add(elapsed())
         }
 
         other.raise(BackupRequestLost)
         Future.value(res)
-      case (Throw(_), Seq(other)) =>
-        // TODO: trigger backup immediately on failure
-        other
+      case (Throw(_), Seq(other)) => other
     }
   }
 }
