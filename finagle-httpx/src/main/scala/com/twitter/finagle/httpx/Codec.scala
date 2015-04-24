@@ -187,6 +187,8 @@ case class Http(
         else TraceInitializerFilter.empty[Request, Response]
     }
   }
+
+  override val protocolLibraryName: String = "httpx"
 }
 
 object Http {

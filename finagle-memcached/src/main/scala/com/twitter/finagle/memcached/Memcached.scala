@@ -11,6 +11,7 @@ import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Tra
 import com.twitter.finagle.dispatch.PipeliningDispatcher
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.netty3.Netty3Transporter
+import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.StatsReceiver
@@ -40,7 +41,8 @@ object Memcached {
   val defaultParams: Stack.Params =
     StackClient.defaultParams +
       FailureAccrualFactory.Param(100, () => 1.second) +
-      FailFastFactory.FailFast(false)
+      FailFastFactory.FailFast(false) +
+      ProtocolLibrary("memcached")
 }
 
 /**

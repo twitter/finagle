@@ -64,7 +64,8 @@ trait IntegrationBase extends FunSuite with MockitoSugar {
 
     when(codec.newTraceInitializer) thenReturn TraceInitializerFilter.clientModule[String, String]
 
-    when(codec.failFastOk) thenReturn true
+    when(codec.failFastOk).thenReturn(true)
+    when(codec.protocolLibraryName).thenReturn("fancy")
 
     val clientAddress = new SocketAddress {}
 

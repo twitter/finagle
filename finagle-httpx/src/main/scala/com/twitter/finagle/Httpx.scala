@@ -9,7 +9,7 @@ import com.twitter.finagle.httpx.{
   Request, Response
 }
 import com.twitter.finagle.netty3._
-import com.twitter.finagle.param.Stats
+import com.twitter.finagle.param.{Stats, ProtocolLibrary}
 import com.twitter.finagle.server._
 import com.twitter.finagle.ssl.Ssl
 import com.twitter.finagle.transport.Transport
@@ -87,7 +87,7 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
   case class Client(
     stack: Stack[ServiceFactory[Request, Response]] = Client.stack.replace(
         TraceInitializerFilter.role, new HttpClientTraceInitializer[Request, Response]),
-    params: Stack.Params = StackClient.defaultParams
+    params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("httpx")
   ) extends StdStackClient[Request, Response, Client] {
     protected type In = Any
     protected type Out = Any
@@ -157,7 +157,7 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
       StackServer.newStack.replace(
         TraceInitializerFilter.role,
         new HttpServerTraceInitializer[Request, Response]),
-    params: Stack.Params = StackServer.defaultParams
+    params: Stack.Params = StackServer.defaultParams + ProtocolLibrary("httpx")
   ) extends StdStackServer[Request, Response, Server] {
     protected type In = Any
     protected type Out = Any

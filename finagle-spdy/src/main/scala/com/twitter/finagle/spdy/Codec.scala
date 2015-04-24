@@ -117,6 +117,8 @@ case class Spdy(
         transport.cast[HttpResponse, HttpRequest], service)
     }
   }
+
+  override val protocolLibraryName: String = "spdy"
 }
 
 object Spdy {

@@ -55,6 +55,8 @@ class Kestrel(failFast: Boolean) extends CodecFactory[Command, Response] {
       override def failFastOk = failFast
     }
   }
+
+  override val protocolLibraryName: String = "kestrel"
 }
 
 /**

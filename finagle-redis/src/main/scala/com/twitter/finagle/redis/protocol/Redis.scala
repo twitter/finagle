@@ -56,6 +56,7 @@ class Redis(stats: StatsReceiver) extends CodecFactory[Command, Reply] {
       }
     }
 
+  override val protocolLibraryName: String = "redis"
 }
 
 private class RedisTracingFilter extends SimpleFilter[Command, Reply] {

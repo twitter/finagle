@@ -57,6 +57,8 @@ class ThriftServerFramedCodec(
     preparer.prepare(factory)
 
   override def newTraceInitializer = TraceInitializerFilter.serverModule[Array[Byte], Array[Byte]]
+
+  override val protocolLibraryName: String = "thrift"
 }
 
 private[finagle] case class ThriftServerPreparer(

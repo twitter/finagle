@@ -8,6 +8,7 @@ import com.twitter.finagle.factory.{BindingFactory, TimeoutFactory}
 import com.twitter.finagle.filter.ExceptionSourceFilter
 import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, WeightedLoadBalancerFactory}
 import com.twitter.finagle.netty3.Netty3Transporter
+import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service._
 import com.twitter.finagle.ssl.Ssl
@@ -405,6 +406,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     codec: Codec[Req1, Rep1]
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
     this.codec(Function.const(codec)(_))
+      .configured(ProtocolLibrary(codec.protocolLibraryName))
 
   /**
    * A variation of `codec` that supports codec factories.  This is
@@ -415,6 +417,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     codecFactory: CodecFactory[Req1, Rep1]
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
     this.codec(codecFactory.client)
+      .configured(ProtocolLibrary(codecFactory.protocolLibraryName))
 
   /**
    * A variation of codec for codecs that support only client-codecs.

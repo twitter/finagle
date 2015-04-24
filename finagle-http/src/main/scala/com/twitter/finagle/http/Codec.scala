@@ -163,6 +163,8 @@ case class Http(
         else TraceInitializerFilter.empty[HttpRequest, HttpResponse]
     }
   }
+
+  override val protocolLibraryName: String = "http"
 }
 
 object Http {
@@ -405,4 +407,6 @@ case class RichHttp[REQUEST <: Request](
         else TraceInitializerFilter.empty[REQUEST, Response]
     }
   }
+
+  override val protocolLibraryName: String = "http"
 }
