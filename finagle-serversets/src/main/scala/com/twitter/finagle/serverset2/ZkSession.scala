@@ -141,34 +141,30 @@ private class ZkSession(watchedZk: Watched[ZooKeeperReader])(implicit timer: Tim
   }
 
   private val immutableDataOf_ = Memoize { path: String =>
-    Activity(Var.async[Activity.State[Option[Buf]]](Activity.Pending) { u =>
-      safeRetry(zkr.getData(path)) respond {
-        case Return(Node.Data(Some(data), _)) => u() = Activity.Ok(Some(data))
-        case Return(_) => u() = Activity.Ok(None)
-        case Throw(exc) => u() = Activity.Ok(None)
-      }
-
-      Closable.nop
-    })
+    safeRetry(zkr.getData(path)).transform {
+      case Return(Node.Data(Some(data), _)) => Future.value(Some(data))
+      case Return(_) => Future.value(None)
+      case Throw(exc) => Future.value(None)
+    }
   }
 
   /**
-   * A persistent version of getData: immutableDataOf returns an Activity
+   * A persistent version of getData: immutableDataOf returns a Future
    * representing the current (best-effort) contents of the given
    * path. Note: this only works on immutable nodes. I.e. it does not
    * leave a watch on the node to look for changes.
    */
-  def immutableDataOf(path: String): Activity[Option[Buf]] =
+  def immutableDataOf(path: String): Future[Option[Buf]] =
     immutableDataOf_(path)
 
   /**
    * Collect immutable data from a number of paths together.
    */
-  def collectImmutableDataOf(paths: Seq[String]): Activity[Seq[(String, Option[Buf])]] = {
-    def pathDataOf(path: String): Activity[(String, Option[Buf])] =
+  def collectImmutableDataOf(paths: Seq[String]): Future[Seq[(String, Option[Buf])]] = {
+    def pathDataOf(path: String): Future[(String, Option[Buf])] =
       immutableDataOf(path).map(path -> _)
 
-    Activity.collect(paths map pathDataOf)
+    Future.collect(paths map pathDataOf)
   }
 
   def addAuthInfo(scheme: String, auth: Buf): Future[Unit] = zkr.addAuthInfo(scheme, auth)
@@ -199,7 +195,7 @@ private[serverset2] object ZkSession {
    * Produce a new `ZkSession`.
    *
    * @param hosts A comma-separated "host:port" string for a ZooKeeper server.
-   * @sessionTimeout The ZooKeeper session timeout to use.
+   * @param sessionTimeout The ZooKeeper session timeout to use.
    */
   private[serverset2] def apply(
     hosts: String,

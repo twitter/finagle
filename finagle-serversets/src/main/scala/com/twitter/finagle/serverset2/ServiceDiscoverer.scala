@@ -70,7 +70,7 @@ private[serverset2] class ServiceDiscoverer(
     readStat: Stat
   ): Activity[Seq[(String, Option[Buf])]] = actZkSession flatMap { zkSession =>
     zkSession.globOf(pattern) flatMap { paths =>
-      timedOf(readStat)(zkSession.collectImmutableDataOf(paths))
+      timedOf(readStat)(Activity.future(zkSession.collectImmutableDataOf(paths)))
     }
   }
 

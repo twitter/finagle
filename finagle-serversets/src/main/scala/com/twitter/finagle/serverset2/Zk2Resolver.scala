@@ -77,6 +77,11 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
     value
   }
 
+  private[this] val serverSetOf =
+    Memoize[(ServiceDiscoverer, String), Var[Activity.State[Set[(Entry, Double)]]]] {
+      case (discoverer, path) => discoverer(path).run
+    }
+
   private[this] val addrOf_ = Memoize[(ServiceDiscoverer, String, Option[String]), Var[Addr]] {
     case (discoverer, path, endpoint) =>
       val scoped = {
@@ -98,7 +103,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
       // First, convert the Op-based serverset address to a
       // Var[Addr], filtering out only the endpoints we are
       // interested in.
-      val va: Var[Addr] = discoverer(path).run flatMap {
+      val va: Var[Addr] = serverSetOf(discoverer, path).flatMap {
         case Activity.Pending => Var.value(Addr.Pending)
         case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
         case Activity.Ok(eps) =>
