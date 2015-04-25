@@ -78,7 +78,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
   }
 
   private[this] val serverSetOf =
-    Memoize[(ServiceDiscoverer, String), Var[Activity.State[Set[(Entry, Double)]]]] {
+    Memoize[(ServiceDiscoverer, String), Var[Activity.State[Seq[(Entry, Double)]]]] {
       case (discoverer, path) => discoverer(path).run
     }
 
@@ -107,17 +107,17 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
         case Activity.Pending => Var.value(Addr.Pending)
         case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
         case Activity.Ok(eps) =>
-          val subset = eps collect {
+          val subseq = eps collect {
             case (Endpoint(`endpoint`, Some(HostPort(host, port)), _, Endpoint.Status.Alive, _), weight) =>
               (host, port, weight)
           }
 
           if (chatty()) {
-            eprintf("Received new serverset vector: %s\n", eps mkString ",")
+            eprintf("Received new serverset vector: %s\n", subseq mkString ",")
           }
 
-          if (subset.isEmpty) Var.value(Addr.Neg)
-          else inetResolver.bindWeightedHostPortsToAddr(subset.toSeq)
+          if (subseq.isEmpty) Var.value(Addr.Neg)
+          else inetResolver.bindWeightedHostPortsToAddr(subseq)
       }
 
       // The stabilizer ensures that we qualify removals by putting

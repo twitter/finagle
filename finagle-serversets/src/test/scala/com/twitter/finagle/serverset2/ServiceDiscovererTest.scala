@@ -12,7 +12,7 @@ class ServiceDiscovererTest extends FunSuite {
   test("ServiceDiscoverer.zipWithWeights") {
     val port1 = 80 // not bound
     val port2 = 53 // ditto
-    val ents = Set[Entry](ep(port1), ep(port2), ep(3), ep(4))
+    val ents = Seq[Entry](ep(port1), ep(port2), ep(3), ep(4))
     val v1 = Vector(Seq(
       Descriptor(Selector.Host(ia(port1)), 1.1, 1),
       Descriptor(Selector.Host(ia(port2)), 1.4, 1),
@@ -20,7 +20,7 @@ class ServiceDiscovererTest extends FunSuite {
     val v2 = Vector(Seq(Descriptor(Selector.Member(port2.toString), 2.0, 1)))
     val vecs = Set(v1, v2)
 
-    assert(ServiceDiscoverer.zipWithWeights(ents, vecs) === Set(
+    assert(ServiceDiscoverer.zipWithWeights(ents, vecs).toSet === Set(
       ep(port1) -> 1.1,
       ep(port2) -> 2.8,
       ep(3) -> 3.1,

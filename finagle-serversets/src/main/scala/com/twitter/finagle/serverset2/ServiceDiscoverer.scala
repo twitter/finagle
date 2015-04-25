@@ -30,7 +30,7 @@ private[serverset2] object ServiceDiscoverer {
    * Each entry in `ents` is paired with the product of all weights for that
    * entry in `vecs`.
    */
-  def zipWithWeights(ents: Set[Entry], vecs: Set[Vector]): Set[(Entry, Double)] =
+  def zipWithWeights(ents: Seq[Entry], vecs: Set[Vector]): Seq[(Entry, Double)] =
     ents map { ent =>
       val w = vecs.foldLeft(1.0) { case (w, vec) => w*vec.weightOf(ent) }
       ent -> w
@@ -77,24 +77,26 @@ private[serverset2] class ServiceDiscoverer(
   private[this] def entriesOf(
     path: String,
     cache: PathCache
-  ): Activity[Set[Entry]] = {
+  ): Activity[Seq[Entry]] = {
     dataOf(path + EndpointGlob, zkEntriesReadStat) flatMap { pathmap =>
-      timedOf[Set[Entry]](zkEntriesParseStat) {
+      timedOf[Seq[Entry]](zkEntriesParseStat) {
         val endpoints = pathmap flatMap {
           case (_, null) => None // no data
-          case (path, Some(Buf.Utf8(data))) =>
+          case (path, optionData) =>
             cache.entries.getIfPresent(path) match {
               case null =>
-                val ents = Entry.parseJson(path, data)
-                val entset = ents.toSet
-                cache.entries.put(path, entset)
-                entset
+                optionData match {
+                  case Some(Buf.Utf8(data)) =>
+                    val ents = Entry.parseJson(path, data)
+                    val entset = ents.toSet
+                    cache.entries.put(path, entset)
+                    entset
+                  case _ => None // Invalid encoding
+                }
               case ent => ent
             }
-
-          case _ => None  // Invalid encoding
         }
-        Activity.value(endpoints.toSet)
+        Activity.value(endpoints)
       }
     }
   }
@@ -111,15 +113,18 @@ private[serverset2] class ServiceDiscoverer(
               case null => None
               case vec => vec
             }
-          case (path, Some(Buf.Utf8(data))) =>
+          case (path, optionData) =>
             cache.vectors.getIfPresent(path) match {
               case null =>
-                val vec = Vector.parseJson(data)
-                cache.vectors.put(path, vec)
-                vec
+                optionData match {
+                  case Some(Buf.Utf8(data)) =>
+                    val vec = Vector.parseJson(data)
+                    cache.vectors.put(path, vec)
+                    vec
+                  case _ => None // Invalid encoding
+                }
               case vec => vec
             }
-          case _ => None // Invalid encoding
         }
         Activity.value(vectors.toSet)
       }
@@ -129,7 +134,7 @@ private[serverset2] class ServiceDiscoverer(
   /**
    * Look up the weighted ServerSet entries for a given path.
    */
-  def apply(path: String): Activity[Set[(Entry, Double)]] = {
+  def apply(path: String): Activity[Seq[(Entry, Double)]] = {
     val cache = new PathCache(16000)
     val es = entriesOf(path, cache).run
     val vs = vectorsOf(path, cache).run
