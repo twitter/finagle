@@ -34,7 +34,7 @@ junit_tests(name='scala',
     'util/util-hashing',
     'util/util-zk-test'
   ],
-  sources=rglobs('*.scala') - EXTERNAL_SOURCES,
+  sources=rglobs('*.scala', exclude=[EXTERNAL_SOURCES]),
   resources=[
     'finagle/finagle-memcachedx/src/test/resources'
   ]
