@@ -6,11 +6,12 @@ import org.jboss.netty.handler.codec.http._
 object Client extends App {
 //#builder
   val client: Service[HttpRequest, HttpResponse] =
-    Http.newService("www.google.com:80")
+    Http.newService("www.scala-lang.org:80")
 //#builder
 //#dispatch
   val request =  new DefaultHttpRequest(
     HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
+  request.setHeader("Host", "www.scala-lang.org")
   val response: Future[HttpResponse] = client(request)
 //#dispatch
 //#callback
