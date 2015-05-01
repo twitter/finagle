@@ -71,6 +71,27 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
     }
   }
 
+  /*
+   * Issue a single, prepared arbitrary query without an expected result set, and provide the affected row count
+   */
+  def prepareAndExecute(sql: String, params: Any*):Future[Int] = {
+    val preparedStatement = factory.apply().flatMap {
+      service =>
+        parse(sql, Some(service)).map { name =>
+	  new PreparedStatementImpl(name, service)
+	}
+    }
+
+    preparedStatement.flatMap {
+      statement =>
+        statement.exec(params: _*).ensure {
+	  statement.closeService
+	}
+    } map {
+      case OK(count) => count
+    }
+  }
+
   private[this] def sendQuery[T](sql: String)(handler: PartialFunction[PgResponse, Future[T]]) = {
     send(PgRequest(new Query(sql)))(handler)
   }

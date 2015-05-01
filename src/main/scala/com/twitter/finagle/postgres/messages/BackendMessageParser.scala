@@ -228,6 +228,10 @@ class BackendMessageParser {
         case "INSERT" => Insert(parts(2).toInt)
         case "DELETE" => Delete(parts(1).toInt)
         case "UPDATE" => Update(parts(1).toInt)
+	case "BEGIN"  => Begin
+	case "SAVEPOINT" => Savepoint
+	case "ROLLBACK"  => RollBack
+	case "COMMIT" => Commit
         case _ => throw new IllegalStateException("Unknown command complete response tag " + tag)
       }
     }

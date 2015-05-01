@@ -61,6 +61,14 @@ case class Delete(count : Int) extends CommandCompleteStatus
 
 case class Select(count: Int) extends CommandCompleteStatus
 
+case object Begin extends CommandCompleteStatus
+
+case object Savepoint extends CommandCompleteStatus
+
+case object RollBack extends CommandCompleteStatus
+
+case object Commit extends CommandCompleteStatus
+
 case class CommandComplete(status: CommandCompleteStatus) extends BackendMessage
 
 case class ReadyForQuery(status: Char) extends BackendMessage
