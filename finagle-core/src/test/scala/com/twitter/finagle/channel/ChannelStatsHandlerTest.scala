@@ -69,5 +69,25 @@ class ChannelStatsHandlerTest extends FunSpec with MockitoSugar {
         }
       }
     }
+
+    it("should count written bytes") {
+      val sr = new InMemoryStatsReceiver
+
+      val handler = new ChannelStatsHandler(sr)
+
+      val ctx = mock[ChannelHandlerContext]
+      val al = new AtomicLong
+
+      val counters = (al, al).asInstanceOf[Object]
+      when(ctx.getAttachment()).thenReturn(counters, counters)
+
+      val evt = mock[WriteCompletionEvent]
+      when(evt.getWrittenAmount).thenReturn(42)
+
+      handler.writeComplete(ctx, evt)
+
+      assert(sr.counter("sent_bytes")() == 42)
+      assert(al.get == 42)
+    }
   }
 }
