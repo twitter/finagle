@@ -244,7 +244,7 @@ trait PreparedStatement {
 
   def select[T](params: Any*)(f: Row => T): Future[Seq[T]] = fire(params: _*) map {
     case ResultSet(rows) => rows.map(f)
-    case OK(_) => throw Errors.client("Select query expected")
+    case OK(_) => Seq.empty[Row].map(f)
   }
 
   def selectFirst[T](params: Any*)(f: Row => T): Future[Option[T]] =
