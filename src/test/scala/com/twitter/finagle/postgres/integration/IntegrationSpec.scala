@@ -199,7 +199,7 @@ class IntegrationSpec extends Spec {
         }
       }
     }
-	
+  
     "execute an update via a prepared statement" in {
       if (postgresAvailable) {
         val client = getClient
@@ -209,14 +209,88 @@ class IntegrationSpec extends Spec {
 
         val preparedQuery = client.prepareAndExecute(
           "UPDATE %s SET str_field = $1 where int_field = 4567".format(IntegrationSpec.pgTestTable),
-		  "hello_updated"
+          "hello_updated"
         )
-		
-		val numRows = Await.result(preparedQuery)
-		
-		val resultRows = Await.result(client.select("SELECT * from %s WHERE str_field = 'hello_updated' AND int_field = 4567")(identity))
+    
+        val numRows = Await.result(preparedQuery)
+    
+        val resultRows = Await.result(client.select("SELECT * from %s WHERE str_field = 'hello_updated' AND int_field = 4567")(identity))
 
         resultRows.size must equal(numRows)
+      }
+    }
+  
+    "return rows from UPDATE...RETURNING" in {
+      if (postgresAvailable) {
+        val client = getClient
+        cleanDb(client)
+        insertSampleData(client)
+
+
+        val preparedQuery = client.prepareAndQuery(
+          "UPDATE %s SET str_field = $1 where int_field = 4567 RETURNING *".format(IntegrationSpec.pgTestTable),
+          "hello_updated"
+        )(identity)
+    
+        val resultRows = Await.result(preparedQuery)
+
+        resultRows.size must equal(1)
+        resultRows(0).get[String]("str_field") must equal("hello_updated")
+      }
+    }
+  
+    "return rows from DELETE...RETURNING" in {
+      if (postgresAvailable) {
+        val client = getClient
+        cleanDb(client)
+        insertSampleData(client)
+
+
+        val preparedQuery = client.prepareAndQuery(
+          "DELETE FROM %s where int_field = 4567 RETURNING *".format(IntegrationSpec.pgTestTable)
+        )(identity)
+    
+        val resultRows = Await.result(preparedQuery)
+
+        resultRows.size must equal(1)
+        resultRows(0).get[String]("str_field") must equal("hello")
+      }
+    }
+  
+    "execute an UPDATE...RETURNING that updates nothing" in {
+      if (postgresAvailable) {
+        val client = getClient
+        cleanDb(client)
+        insertSampleData(client)
+
+
+        val preparedQuery = client.prepareAndQuery(
+          "UPDATE %s SET str_field = $1 where str_field = $2 RETURNING *".format(IntegrationSpec.pgTestTable),
+          "hello_updated",
+          "xxxx"
+        )(identity)
+    
+        val resultRows = Await.result(preparedQuery)
+
+        resultRows.size must equal(0)
+      }
+    }
+  
+    "execute a DELETE...RETURNING that deletes nothing" in {
+      if (postgresAvailable) {
+        val client = getClient
+        cleanDb(client)
+        insertSampleData(client)
+
+
+        val preparedQuery = client.prepareAndQuery(
+          "DELETE FROM %s WHERE str_field=$1".format(IntegrationSpec.pgTestTable),
+          "xxxx"
+        )(identity)
+    
+        val resultRows = Await.result(preparedQuery)
+
+        resultRows.size must equal(0)
       }
     }
 
