@@ -136,17 +136,23 @@ Under the \`zkclient\` scope
 **multi_latency_ms**
   A histogram of the latency, in milliseconds, of transactional operations
 
-**session_connects**
-  A counter of the number of successful session connection operations
+**session_sync_connected**
+  A counter of the number of read-write session transitions
 
-**session_connects_readonly**
-  A counter of the number of successful read-only session connection operations
+**session_connected_read_only**
+  A counter of the number of read-only session transitions
 
-**session_auth_failures**
+**session_no_sync_connected**
+  Unused (should always be 0)
+
+**session_sasl_authenticated**
+  A counter of the number of sessions upgraded to SASL
+
+**session_auth_failed**
   A counter of the number of session authentication failures
 
-**session_disconnects**
-  A counter of the number of session disconnections
+**session_disconnected**
+  A counter of the number of temporary session disconnects
 
-**session_expirations**
+**session_expired**
   A counter of the number of session expirations
