@@ -199,6 +199,26 @@ class IntegrationSpec extends Spec {
         }
       }
     }
+	
+    "execute an update via a prepared statement" in {
+      if (postgresAvailable) {
+        val client = getClient
+        cleanDb(client)
+        insertSampleData(client)
+
+
+        val preparedQuery = client.prepareAndExecute(
+          "UPDATE %s SET str_field = $1 where int_field = 4567".format(IntegrationSpec.pgTestTable),
+		  "hello_updated"
+        )
+		
+		val numRows = Await.result(preparedQuery)
+		
+		val resultRows = Await.result(client.select("SELECT * from %s WHERE str_field = 'hello_updated' AND int_field = 4567")(identity))
+
+        resultRows.size must equal(numRows)
+      }
+    }
 
     "throw a ServerError" when {
       "query has error" in {
