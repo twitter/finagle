@@ -39,7 +39,11 @@ object Name {
    *
    * Equality of two Names is delegated to `id`. Two Bound instances
    * are equal whenever their `id`s are. `id` identifies the `addr`
-   * and not the `path`.
+   * and not the `path`.  If the `id` is a [[com.twitter.finagle.Name.Path
+   * Path]], it should only contain *bound*--not residual--path components.
+   *
+   * The `path` contains unbound residual path components that were not
+   * processed duing name resolution.
    */
   class Bound private(
     val addr: Var[Addr],
