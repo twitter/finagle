@@ -1,4 +1,4 @@
-package com.twitter.finagle.benchmark.loadbalancer
+package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._

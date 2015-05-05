@@ -6,14 +6,14 @@ import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.{Rng, Ring, Ema, DefaultTimer}
 import com.twitter.finagle.{
-  ClientConnection, NoBrokersAvailableException, ServiceFactory, ServiceFactoryProxy, 
+  ClientConnection, NoBrokersAvailableException, ServiceFactory, ServiceFactoryProxy,
   ServiceProxy, Status}
 import com.twitter.util.{Activity, Return, Future, Throw, Time, Var, Duration, Timer}
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Logger
 
 object apertureParams extends GlobalFlag(
-  "5.seconds:0.5:2.0:1", 
+  "5.seconds:0.5:2.0:1",
   "Aperture parameters: smoothWin:lowLoad:highLoad:minAperture")
 
 object ApertureBalancerFactory extends WeightedLoadBalancerFactory {
@@ -66,8 +66,6 @@ object ApertureBalancerFactory extends WeightedLoadBalancerFactory {
   def get(): ApertureBalancerFactory.type = this
 }
 
-
-
 /**
  * The aperture load-band balancer balances load to the smallest
  * subset ("aperture") of services so that:
@@ -75,7 +73,7 @@ object ApertureBalancerFactory extends WeightedLoadBalancerFactory {
  *  1. The concurrent load, measured over a window specified by
  *     `smoothWin`, to each service stays within the load band, delimited
  *     by `lowLoad` and `highLoad`.
- *  1. Services receive load proportional to the ratio of their
+ *  2. Services receive load proportional to the ratio of their
  *     weights.
  *
  * Unavailable services are not counted--the aperture expands as
@@ -83,7 +81,7 @@ object ApertureBalancerFactory extends WeightedLoadBalancerFactory {
  *
  * For example, if the load band is [0.5, 2], the aperture will be
  * adjusted so that no service inside the aperture has a load less
- * than 0.5 or more then 2, so long as offered load permits it.
+ * than 0.5 or more than 2, so long as offered load permits it.
  *
  * The default load band, [0.5, 2], matches closely the load distribution
  * given by least-loaded without any aperturing.
@@ -94,10 +92,10 @@ object ApertureBalancerFactory extends WeightedLoadBalancerFactory {
  *     it does not have to open sessions with every service in a large cluster.
  *     This is especially important when offered load and cluster capacity
  *     are mismatched.
- *  1. It balances over fewer, and thus warmer, services. This enhances the
+ *  2. It balances over fewer, and thus warmer, services. This enhances the
  *     efficacy of the fail-fast mechanisms, etc. This also means that clients pay
  *     the penalty of session establishment less frequently.
- *  1. It increases the efficacy of least-loaded balancing which, in order to
+ *  3. It increases the efficacy of least-loaded balancing which, in order to
  *     work well, requires concurrent load. The load-band balancer effectively
  *     arranges load in a manner that ensures a higher level of per-service
  *     concurrency.
@@ -119,7 +117,10 @@ private class ApertureLoadBandBalancer[Req, Rep](
   with Updating[Req, Rep]
 
 object Aperture {
-  private val W = Int.MaxValue
+  private val RingWidth = Int.MaxValue
+
+  // Ring that maps to 0 for every value.
+  private val ZeroRing = Ring.fromWeights(Seq(1), RingWidth)
 }
 
 /**
@@ -147,7 +148,7 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
   import Aperture._
 
   protected def rng: Rng
-  
+
   /**
    * The minimum allowable aperture. Must be positive.
    */
@@ -169,30 +170,30 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
       case updown => updown
     }
 
-    private[this] val (ring, width, max) =
+    private[this] val (ring, unitWidth, maxAperture) =
       if (up.isEmpty) {
-        (Ring.fromWeights(Seq(1), W), W, W)
+        (ZeroRing, RingWidth, RingWidth)
       } else {
         val N = up.size
         val weights = up.map(_.weight)
+        // We know `sum` can never be zero because
+        // up nodes have a non-zero weight.
         val sum = weights.sum
-        val ring =
-          if (sum == 0)
-            Ring.fromWeights(Seq.fill(N)(1), W)
-          else
-            Ring.fromWeights(weights, W)
-        val width = (W/sum).toInt
-        (ring, width, W/width)
+        val ring = Ring.fromWeights(weights, RingWidth)
+        val unit = (RingWidth/sum).toInt
+        val max = RingWidth/unit
+        (ring, unit, max)
       }
 
-    private[this] val minAperture = math.min(Aperture.this.minAperture, max)
+    private[this] val minAperture = math.min(Aperture.this.minAperture, maxAperture)
 
     @volatile private[Aperture] var aperture = initAperture
-    // Make sure the aperture is within bounds [1, max].
+
+    // Make sure the aperture is within bounds [1, maxAperture].
     adjust(0)
 
     protected[Aperture] def adjust(n: Int) {
-      aperture = math.max(minAperture, math.min(max, aperture+n))
+      aperture = math.max(minAperture, math.min(maxAperture, aperture+n))
     }
 
     def rebuild() =
@@ -204,7 +205,7 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
     /**
      * The number of available serving units.
      */
-    def units = max
+    def units = maxAperture
 
     // We use power of two choices to pick nodes. This keeps things
     // simple, but we could reasonably use a heap here, too.
@@ -218,7 +219,7 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
       // TODO(marius): return fractional contribution,
       // so that we can multiply this with the node's
       // weight.
-      val (i, j) = ring.pick2(rng, 0, aperture*width)
+      val (i, j) = ring.pick2(rng, 0, aperture*unitWidth)
       val a = up(i)
       val b = up(j)
 
@@ -300,7 +301,7 @@ private trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, R
   private[this] val ema = new Ema(smoothWin.inNanoseconds)
 
   /**
-   * Adjust `node`'s load by `n`.
+   * Adjust `node`'s load by `delta`.
    */
   private[this] def adjustNode(node: Node, delta: Int) = {
     node.counter.addAndGet(delta)
