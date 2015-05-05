@@ -224,7 +224,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-stats",
     libraryDependencies ++= Seq(
-      "com.twitter.common" % "metrics" % "0.0.29",
+      "com.twitter.common" % "metrics" % "0.0.36",
       util("events"),
       util("logging")
     ),
@@ -264,7 +264,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-commons-stats",
-    libraryDependencies ++= Seq("com.twitter.common" % "stats" % "0.0.98")
+    libraryDependencies ++= Seq("com.twitter.common" % "stats" % "0.0.113")
   ).dependsOn(finagleCore)
 
   lazy val finagleServersets = Project(
@@ -461,7 +461,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-mux",
-    libraryDependencies ++= Seq("com.twitter.common" % "stats-util" % "0.0.49")
+    libraryDependencies ++= Seq("com.twitter.common" % "stats-util" % "0.0.57")
   ).dependsOn(finagleCore)
 
   lazy val finagleThriftMux = Project(
@@ -534,7 +534,6 @@ object Finagle extends Build {
     crossScalaVersions ~= { versions => versions filter (_ != "2.11.4") },
     libraryDependencies ++= Seq(
       util("codec"),
-      "com.twitter.common" % "flags" % "0.0.1" exclude("com.twitter", "util-core"),
       "org.slf4j" %  "slf4j-nop" % "1.5.8" % "provided"
     ) ++ scroogeLibs
   ).dependsOn(
