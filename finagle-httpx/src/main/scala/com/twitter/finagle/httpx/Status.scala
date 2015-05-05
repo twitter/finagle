@@ -39,11 +39,14 @@ object Status {
   val UnsupportedMediaType = Status(415)
   val RequestedRangeNotSatisfiable = Status(416)
   val ExpectationFailed = Status(417)
+  val EnhanceYourCalm = Status(420)
   val UnprocessableEntity = Status(422)
   val Locked = Status(423)
   val FailedDependency = Status(424)
   val UnorderedCollection = Status(425)
   val UpgradeRequired = Status(426)
+  val PreconditionRequired = Status(428)
+  val TooManyRequests = Status(429)
   val RequestHeaderFieldsTooLarge = Status(431)
   val ClientClosedRequest = Status(499)
   val InternalServerError = Status(500)
@@ -55,6 +58,7 @@ object Status {
   val VariantAlsoNegotiates = Status(506)
   val InsufficientStorage = Status(507)
   val NotExtended = Status(510)
+  val NetworkAuthenticationRequired = Status(511)
 
   def fromCode(n: Int) = n match {
     case 100 => Continue
@@ -93,11 +97,14 @@ object Status {
     case 415 => UnsupportedMediaType
     case 416 => RequestedRangeNotSatisfiable
     case 417 => ExpectationFailed
+    case 420 => EnhanceYourCalm
     case 422 => UnprocessableEntity
     case 423 => Locked
     case 424 => FailedDependency
     case 425 => UnorderedCollection
     case 426 => UpgradeRequired
+    case 428 => PreconditionRequired
+    case 429 => TooManyRequests
     case 431 => RequestHeaderFieldsTooLarge
     case 499 => ClientClosedRequest
     case 500 => InternalServerError
@@ -109,6 +116,7 @@ object Status {
     case 506 => VariantAlsoNegotiates
     case 507 => InsufficientStorage
     case 510 => NotExtended
+    case 511 => NetworkAuthenticationRequired
     case _ => Status(n)
   }
 }
