@@ -15,6 +15,7 @@ class ExitGuardTest
   with Eventually
   with IntegrationPatience {
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("guard creates thread, unguard kills thread") {
     val guard = ExitGuard.guard("test")
     val threads = ExitGuard.guards.map { case (thread, _) => thread }
