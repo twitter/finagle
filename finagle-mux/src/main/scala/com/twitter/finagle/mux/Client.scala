@@ -143,6 +143,8 @@ private[twitter] class ClientDispatcher (
     }
   }
   private[this] val leaseCounter = sr.counter("leased")
+  private[this] val drainingCounter = sr.counter("draining")
+  private[this] val drainedCounter = sr.counter("drained")
 
   // We're extra paranoid about logging. The log handler is,
   // after all, outside of our control.
@@ -159,6 +161,7 @@ private[twitter] class ClientDispatcher (
       case some =>
         readLk.lock()
         if (state == Draining && tags.isEmpty) {
+          drainedCounter.incr()
           safeLog(s"Finished draining a connection to $name", Level.FINE)
           readLk.unlock()
 
@@ -208,12 +211,14 @@ private[twitter] class ClientDispatcher (
     case Tping(tag) =>
       trans.write(encode(Rping(tag)))
     case Tdrain(tag) =>
-      // must be synchronized to avoid writing after Rdrain has been sent
       safeLog(s"Started draining a connection to $name", Level.FINE)
+      drainingCounter.incr()
+      // must be synchronized to avoid writing after Rdrain has been sent
       writeLk.lockInterruptibly()
       try {
         state = if (tags.nonEmpty) Draining else {
           safeLog(s"Finished draining a connection to $name", Level.FINE)
+          drainedCounter.incr()
           Drained
         }
         trans.write(encode(Rdrain(tag)))

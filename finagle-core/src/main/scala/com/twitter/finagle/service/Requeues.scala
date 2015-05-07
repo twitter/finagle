@@ -2,7 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.stats.Counter
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.TokenBucket
 import com.twitter.util.Future
 
@@ -32,7 +32,7 @@ private[finagle] object Requeues {
         // The filter manages the tokens in the bucket: it credits a token per request and
         // debits `Cost` per reqeueue. Thus, with the current parameters, reissue can never
         // exceed the greater of 10/s and ~15% of total issue.
-        val requeueFilter = new RequeueFilter[Req, Rep](bucket, Cost, requeues, () => next.status)
+        val requeueFilter = new RequeueFilter[Req, Rep](bucket, Cost, sr, () => next.status)
 
         new ServiceFactoryProxy(next) {
           // We define the gauge inside of the ServiceFactory so that their lifetimes
@@ -89,7 +89,7 @@ private[finagle] object Requeues {
   *
   * @param requeueCost How much to debit from `bucket` per each requeue.
   *
-  * @param counter The counter to increment per each requeue.
+  * @param statsReceiver for stats reporting.
   *
   * @param stackStatus Represents the status of the stack which generated the
   * underlying service. Requeues are only dispatched when this status reports
@@ -98,19 +98,25 @@ private[finagle] object Requeues {
 private[finagle] class RequeueFilter[Req, Rep](
     bucket: TokenBucket,
     requeueCost: Int,
-    requeueCounter: Counter,
+    statsReceiver: StatsReceiver,
     stackStatus: () => Status)
   extends SimpleFilter[Req, Rep] {
+
+  private[this] val requeueCounter = statsReceiver.counter("requeues")
+  private[this] val budgetExhaustCounter = statsReceiver.counter("budget_exhausted")
 
   private[this] def applyService(req: Req, service: Service[Req, Rep]): Future[Rep] = {
     service(req).rescue {
       case exc@RetryPolicy.RetryableWriteException(_) =>
         // TODO: If we ensure that the stack doesn't return restartable
         // failures when it isn't Open, we wouldn't need to gate on status.
-        if (stackStatus() == Status.Open && bucket.tryGet(requeueCost)) {
+        if (stackStatus() != Status.Open) {
+          Future.exception(exc)
+        } else if (bucket.tryGet(requeueCost)) {
           requeueCounter.incr()
           applyService(req, service)
         } else {
+          budgetExhaustCounter.incr()
           Future.exception(exc)
         }
     }
