@@ -139,13 +139,21 @@ private[serverset2] class ServiceDiscoverer(
     val es = entriesOf(path, cache).run
     val vs = vectorsOf(path, cache).run
 
-    Activity((es join vs) map {
+    val raw = (es join vs) map {
       case (Activity.Pending, _) => Activity.Pending
       case (f@Activity.Failed(_), _) => f
       case (Activity.Ok(ents), Activity.Ok(vecs)) =>
         Activity.Ok(ServiceDiscoverer.zipWithWeights(ents, vecs))
       case (Activity.Ok(ents), _) =>
         Activity.Ok(ents map (_ -> 1D))
-    })
+    }
+
+    // Squash duplicate updates
+    val dedupe = raw.changes.sliding(2) collect {
+      case Seq(current) => current
+      case Seq(last, next) if last != next => next
+    }
+
+    Activity(Var(Activity.Pending, dedupe))
   }
 }
