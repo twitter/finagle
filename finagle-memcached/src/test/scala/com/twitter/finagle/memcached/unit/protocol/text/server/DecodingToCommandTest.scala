@@ -28,24 +28,29 @@ class DecodingToCommandTest extends FunSuite {
     val key = "testKey"
     val flags = "0"
     val data = "Hello World"
-    val dataSize = data.size.toString
+    val dataSize = data.length.toString
 
-    val expireTimeTableData =
-      Table(
-        "expectedTime"                                                        -> "allowedDelta",
-        ExpectedTimeTable(0, Time.epoch)                                      -> 0.seconds,
-        ExpectedTimeTable(200.seconds.fromNow.inSeconds, 200.seconds.fromNow) -> 1.seconds,
-        ExpectedTimeTable(200, 200.seconds.fromNow)                           -> 1.seconds
-      )
+    Time.withCurrentTimeFrozen { _ =>
+      val expireTimeTableData =
+        Table(
+          "expectedTime" -> "allowedDelta",
+          ExpectedTimeTable(0, Time.epoch) -> 0.seconds,
+          ExpectedTimeTable(200.seconds.fromNow.inSeconds, 200.seconds.fromNow) -> 1.seconds,
+          ExpectedTimeTable(200, 200.seconds.fromNow) -> 1.seconds
+        )
 
-    forAll (expireTimeTableData) { (expectedTime: ExpectedTimeTable, allowedDelta: Duration) =>
-      val buffer = TokensWithData(Seq[ChannelBuffer]("set", key, flags, expectedTime.expireTime.toString, dataSize), data, None)
-      val command = decodingToCommand.decode(null, null, buffer)
-      assert(command.getClass === classOf[Set])
-      val set = command.asInstanceOf[Set]
-      assert(set.key.toString(Charsets.Utf8) === key)
-      assert(set.value.toString(Charsets.Utf8) === data)
-      assert(set.expiry.moreOrLessEquals(expectedTime.expirationTime, allowedDelta))
+      forAll(expireTimeTableData) { (expectedTime: ExpectedTimeTable, allowedDelta: Duration) =>
+        val buffer = TokensWithData(
+          Seq[ChannelBuffer]("set", key, flags, expectedTime.expireTime.toString, dataSize),
+          data,
+          None)
+        val command = decodingToCommand.decode(null, null, buffer)
+        assert(command.getClass === classOf[Set])
+        val set = command.asInstanceOf[Set]
+        assert(set.key.toString(Charsets.Utf8) === key)
+        assert(set.value.toString(Charsets.Utf8) === data)
+        assert(set.expiry.moreOrLessEquals(expectedTime.expirationTime, allowedDelta))
+      }
     }
   }
 
