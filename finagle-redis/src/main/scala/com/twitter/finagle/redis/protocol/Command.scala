@@ -135,6 +135,16 @@ object Commands {
   val UNWATCH           = "UNWATCH"
   val WATCH             = "WATCH"
 
+  // Scripts
+  val EVAL              = "EVAL"
+  val EVALSHA           = "EVALSHA"
+  val SCRIPT            = "SCRIPT"
+  val SCRIPTEXISTS      = SCRIPT + " EXISTS"
+  val FLUSH             = "FLUSH"
+  val SCRIPTFLUSH       = SCRIPT + " FLUSH"
+  val LOAD              = "LOAD"
+  val SCRIPTLOAD        = SCRIPT + " LOAD"
+
   val commandMap: Map[String, Function1[List[Array[Byte]],Command]] = Map(
     // key commands
     DEL               -> {Del(_)},
@@ -254,6 +264,8 @@ object Commands {
     MULTI             -> {_ => Multi},
     UNWATCH           -> {_ => UnWatch},
     WATCH             -> {Watch(_)}
+
+    // TODO: add Scripts command map
 
   )
 
@@ -392,6 +404,13 @@ object CommandBytes {
   val MULTI             = StringToChannelBuffer("MULTI")
   val UNWATCH           = StringToChannelBuffer("UNWATCH")
   val WATCH             = StringToChannelBuffer("WATCH")
+
+  // Scripts
+  val EVAL              = StringToChannelBuffer("EVAL")
+  val EVALSHA           = StringToChannelBuffer("EVALSHA")
+  val SCRIPT            = StringToChannelBuffer("SCRIPT")
+  val FLUSH             = StringToChannelBuffer("FLUSH")
+  val LOAD              = StringToChannelBuffer("LOAD")
 }
 
 
