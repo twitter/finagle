@@ -153,7 +153,7 @@ Power of Two Choices (P2C) + Least Loaded
 The P2C distributor solves many of the limitations that are inherent with the Heap distributor.
 By employing an elegant (and surprising) mathematical phenomenon [#p2c]_, the algorithm randomly picks two
 nodes from the collection of endpoints and selects the least loaded of the two. By repeatedly using
-this strategy, we can expect a manageable upper bound on the maximum load of any server[#p2c_bounds]_.
+this strategy, we can expect a manageable upper bound on the maximum load of any server [#p2c_bounds]_.
 The default load metric for the P2C balancer is least loaded, however, because P2C is fully concurrent [#p2c_jmh]_, it
 allows us to efficiently implement weighted nodes [#weights_api]_ or different load metrics with minimal
 per-request costs. Because of this, P2C is slated to become the default balancer in the client
