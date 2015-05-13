@@ -40,3 +40,12 @@ trait StrictMemberCommand extends MemberCommand {
   RequireClientProtocol(member != null && member.readableBytes > 0,
     "Found unexpected empty set member")
 }
+
+trait ScriptCommand extends Command {
+  val script: ChannelBuffer
+}
+
+// for use with EvalSHA
+trait ScriptDigestCommand extends Command {
+  val digest: ChannelBuffer
+}
