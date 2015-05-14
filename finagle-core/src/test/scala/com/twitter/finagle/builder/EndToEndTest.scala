@@ -47,6 +47,10 @@ class EndToEndTest extends FunSuite {
     assert(!response.isDefined)
     constRes.setValue("foo")
     assert(Await.result(response, 1.second) === "foo")
+
+    // NOTE by timxzl: need to properly close the server
+    // otherwise it will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(server.close(), 1.second)
   }
 
   test("Finagle client should queue requests while waiting for cluster to initialize") {
@@ -88,6 +92,10 @@ class EndToEndTest extends FunSuite {
     }
     thread.start()
     thread.join()
+
+    // NOTE by timxzl: need to properly close the server
+    // otherwise it will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(server.close(), 1.second)
   }
 
   test("ClientBuilder should be properly instrumented on failure") {
@@ -163,6 +171,10 @@ class EndToEndTest extends FunSuite {
 
     assert(requests === 1)
     assert(triesRequests === 1)
+
+    // NOTE by timxzl: need to properly close the client
+    // otherwise it will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(client.close(), 1.second)
   }
 
   test("ClientBuilderClient.ofCodec should be properly instrumented on success") {
@@ -196,5 +208,9 @@ class EndToEndTest extends FunSuite {
 
     assert(requests === 1)
     assert(triesRequests === 1)
+
+    // NOTE by timxzl: need to properly close the client
+    // otherwise it will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(client.close(), 1.second)
   }
 }

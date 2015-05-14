@@ -40,8 +40,10 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
   /**
    * Ensure all annotations have the same TraceId (unique to server and client though)
    * Ensure core annotations are present and properly ordered
+   * NOTE by timxzl: f must also return a finalizer: () => Unit that properly closes the services built by f
+   * otherwise the tests here will prevent ExitGuard from exiting and interfere with ExitGuardTest
    */
-  def testCoreTraces(f: (Tracer, Tracer) => (Service[String, String])) {
+  def testCoreTraces(f: (Tracer, Tracer) => (Service[String, String], () => Unit)) {
     val combinedTracer = new BufferingTracer
     class MultiTracer extends BufferingTracer {
       override def record(rec: Record) {
@@ -52,7 +54,8 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
     val serverTracer = new MultiTracer
     val clientTracer = new MultiTracer
 
-    Await.result(f(serverTracer, clientTracer)("foo"), 1.second)
+    val (svc, finalizer) = f(serverTracer, clientTracer)
+    Await.result(svc("foo"), 1.second)
 
     assert(serverTracer.map(_.traceId).toSet.size === 1)
     assert(clientTracer.map(_.traceId).toSet.size === 1)
@@ -64,6 +67,10 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
       Annotation.ServerRecv(),
       Annotation.ServerSend(),
       Annotation.ClientRecv()))
+
+    // NOTE by timxzl: need to call finalizer to properly close the client and the server
+    // otherwise they will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    finalizer()
   }
 
   test("core events are traced in the stack client/server") {
@@ -73,10 +80,19 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
         .configured(fparam.Label("theServer"))
         .serve("localhost:*", Svc)
 
-      stringClient
+      val client = stringClient
         .configured(fparam.Tracer(clientTracer))
         .configured(fparam.Label("theClient"))
         .newService(svc)
+
+      // NOTE by timxzl: need to provide finalizer to properly close the client and the server
+      // otherwise they will prevent ExitGuard from exiting and interfere with ExitGuardTest
+      def finalizer() = {
+        Await.result(client.close(), 1.second)
+        Await.result(svc.close(), 1.second)
+      }
+
+      (client, finalizer)
     }
   }
 
@@ -95,7 +111,16 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
         tracer = clientTracer)
 
       val svc = server.serve("localhost:*", Svc)
-      client.newService(svc)
+      val clientSvc = client.newService(svc)
+
+      // NOTE by timxzl: need to provide finalizer to properly close the client and the server
+      // otherwise they will prevent ExitGuard from exiting and interfere with ExitGuardTest
+      def finalizer() = {
+        Await.result(clientSvc.close(), 1.second)
+        Await.result(svc.close(), 1.second)
+      }
+
+      (clientSvc, finalizer)
     }
   }
 
@@ -108,13 +133,22 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
         .tracer(serverTracer)
         .build(Svc)
 
-      ClientBuilder()
+      val client = ClientBuilder()
         .name("theClient")
         .hosts(svc.boundAddress)
         .codec(StringClientCodec)
         .hostConnectionLimit(1)
         .tracer(clientTracer)
         .build()
+
+      // NOTE by timxzl: need to provide finalizer to properly close the client and the server
+      // otherwise they will prevent ExitGuard from exiting and interfere with ExitGuardTest
+      def finalizer() = {
+        Await.result(client.close(), 1.second)
+        Await.result(svc.close(), 1.second)
+      }
+
+      (client, finalizer)
     }
   }
 }

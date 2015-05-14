@@ -13,6 +13,7 @@ import com.twitter.util._
 import java.util.logging.{Level, StreamHandler, Logger}
 import java.net.{InetAddress, InetSocketAddress}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.conversions.time._
 
 @RunWith(classOf[JUnitRunner])
 class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase {
@@ -109,6 +110,11 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase 
       Matchers.eq(Level.SEVERE),
       Matchers.eq("A server service FakeService2 on behalf of FakeService1 threw an exception"),
       Matchers.eq(outer))
+
+    // NOTE by timxzl: need to properly close the client and the server
+    // otherwise they will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(client.close(), 1.second)
+    Await.ready(server.close(), 1.second)
   }
 
   test("MonitorFilter should when attached to a client, report source for sourced exceptions") {

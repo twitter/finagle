@@ -110,5 +110,9 @@ class ClusterTest extends FunSuite {
     intercept[com.twitter.util.TimeoutException] {
       Await.result(client("hello2"), 10.milliseconds)
     }
+
+    // NOTE by timxzl: need to properly close the client
+    // otherwise it will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(client.close(), 1.second)
   }
 }
