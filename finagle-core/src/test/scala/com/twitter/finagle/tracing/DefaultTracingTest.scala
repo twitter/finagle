@@ -1,20 +1,14 @@
 package com.twitter.finagle.tracing
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.Stack
-import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch._
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.server._
-import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{param => fparam}
-import com.twitter.io.Charsets
+import com.twitter.finagle.{param => fparam, _}
 import com.twitter.util._
-import java.net.{InetAddress, SocketAddress, InetSocketAddress}
-import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
-import org.jboss.netty.handler.codec.string.{StringEncoder, StringDecoder}
+import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -40,8 +34,13 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
   /**
    * Ensure all annotations have the same TraceId (unique to server and client though)
    * Ensure core annotations are present and properly ordered
+   *
+   * @param f returns a [[Service]] and a [[Closable]] finalizer.
+   *          The finalizer properly closes the services built by f,
+   *          otherwise the tests here will prevent [[com.twitter.finagle.util.ExitGuard]] from exiting,
+   *          and interfere with [[com.twitter.finagle.util.ExitGuardTest]]
    */
-  def testCoreTraces(f: (Tracer, Tracer) => (Service[String, String])) {
+  def testCoreTraces(f: (Tracer, Tracer) => (Service[String, String], Closable)) {
     val combinedTracer = new BufferingTracer
     class MultiTracer extends BufferingTracer {
       override def record(rec: Record) {
@@ -52,7 +51,8 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
     val serverTracer = new MultiTracer
     val clientTracer = new MultiTracer
 
-    Await.result(f(serverTracer, clientTracer)("foo"), 1.second)
+    val (svc, finalizer) = f(serverTracer, clientTracer)
+    Await.result(svc("foo"), 1.second)
 
     assert(serverTracer.map(_.traceId).toSet.size === 1)
     assert(clientTracer.map(_.traceId).toSet.size === 1)
@@ -64,6 +64,9 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
       Annotation.ServerRecv(),
       Annotation.ServerSend(),
       Annotation.ClientRecv()))
+
+    // need to call finalizer to properly close the client and the server
+    Await.ready(finalizer.close(), 1.second)
   }
 
   test("core events are traced in the stack client/server") {
@@ -73,10 +76,17 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
         .configured(fparam.Label("theServer"))
         .serve("localhost:*", Svc)
 
-      stringClient
+      val client = stringClient
         .configured(fparam.Tracer(clientTracer))
         .configured(fparam.Label("theClient"))
         .newService(svc)
+
+      val finalizer = new Closable {
+        override def close(deadline: Time): Future[Unit] =
+          client.close(deadline) before svc.close(deadline)
+      }
+
+      (client, finalizer)
     }
   }
 
@@ -95,7 +105,14 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
         tracer = clientTracer)
 
       val svc = server.serve("localhost:*", Svc)
-      client.newService(svc)
+      val clientSvc = client.newService(svc)
+
+      val finalizer = new Closable {
+        override def close(deadline: Time): Future[Unit] =
+          clientSvc.close(deadline) before svc.close(deadline)
+      }
+
+      (clientSvc, finalizer)
     }
   }
 
@@ -108,13 +125,20 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
         .tracer(serverTracer)
         .build(Svc)
 
-      ClientBuilder()
+      val client = ClientBuilder()
         .name("theClient")
         .hosts(svc.boundAddress)
         .codec(StringClientCodec)
         .hostConnectionLimit(1)
         .tracer(clientTracer)
         .build()
+
+      val finalizer = new Closable {
+        override def close(deadline: Time): Future[Unit] =
+          client.close(deadline) before svc.close(deadline)
+      }
+
+      (client, finalizer)
     }
   }
 }

@@ -1,14 +1,14 @@
 package com.twitter.finagle.builder
 
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
-import com.twitter.finagle.integration.{StringCodec, DynamicCluster}
-import scala.collection.mutable
-import java.net.SocketAddress
-import com.twitter.util.Await
 import com.twitter.conversions.time._
 import com.twitter.finagle.GlobalRequestTimeoutException
+import com.twitter.finagle.integration.{DynamicCluster, StringCodec}
+import com.twitter.util.Await
+import java.net.SocketAddress
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
 class ClusterTest extends FunSuite {
@@ -110,5 +110,8 @@ class ClusterTest extends FunSuite {
     intercept[com.twitter.util.TimeoutException] {
       Await.result(client("hello2"), 10.milliseconds)
     }
+
+    // need to properly close the client, otherwise it will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(client.close(), 1.second)
   }
 }
