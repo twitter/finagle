@@ -140,14 +140,6 @@ private class ZkSession(watchedZk: Watched[ZooKeeperReader])(implicit timer: Tim
     }
   }
 
-  private val immutableDataOf_ = Memoize { path: String =>
-    safeRetry(zkr.getData(path)).transform {
-      case Return(Node.Data(Some(data), _)) => Future.value(Some(data))
-      case Return(_) => Future.value(None)
-      case Throw(exc) => Future.value(None)
-    }
-  }
-
   /**
    * A persistent version of getData: immutableDataOf returns a Future
    * representing the current (best-effort) contents of the given
@@ -155,7 +147,11 @@ private class ZkSession(watchedZk: Watched[ZooKeeperReader])(implicit timer: Tim
    * leave a watch on the node to look for changes.
    */
   def immutableDataOf(path: String): Future[Option[Buf]] =
-    immutableDataOf_(path)
+    safeRetry(zkr.getData(path)).transform {
+      case Return(Node.Data(Some(data), _)) => Future.value(Some(data))
+      case Return(_) => Future.value(None)
+      case Throw(exc) => Future.value(None)
+    }
 
   /**
    * Collect immutable data from a number of paths together.

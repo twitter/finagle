@@ -83,13 +83,13 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
     }
 
   private[this] val addrOf_ = Memoize[(ServiceDiscoverer, String, Option[String]), Var[Addr]] {
-    case (discoverer, path, endpoint) =>
+    case (discoverer, path, endpointOption) =>
       val scoped = {
         val sr =
           path.split("/").filter(_.nonEmpty).foldLeft(statsReceiver) {
             case (sr, ns) => sr.scope(ns)
           }
-        sr.scope(s"endpoint=${endpoint.getOrElse("default")}")
+        sr.scope(s"endpoint=${endpointOption.getOrElse("default")}")
       }
 
       @volatile var nlimbo = 0
@@ -107,8 +107,10 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
         case Activity.Pending => Var.value(Addr.Pending)
         case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
         case Activity.Ok(eps) =>
+          val endpoint = endpointOption.getOrElse(null)
           val subseq = eps collect {
-            case (Endpoint(`endpoint`, Some(HostPort(host, port)), _, Endpoint.Status.Alive, _), weight) =>
+            case (Endpoint(names, host, port, _, Endpoint.Status.Alive, _), weight)
+                if names.contains(endpoint) && host != null =>
               (host, port, weight)
           }
 
@@ -144,7 +146,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
         val reg = states.register(Witness { state: State =>
           if (chatty()) {
             eprintf("New state for %s!%s: %s\n",
-              path, endpoint getOrElse "default", state)
+              path, endpointOption getOrElse "default", state)
           }
 
           synchronized {

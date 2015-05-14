@@ -3,20 +3,10 @@ package com.twitter.finagle.serverset2
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{Stat, StatsReceiver}
 import com.twitter.io.Buf
-import com.twitter.util.{Activity, Stopwatch, Var}
+import com.twitter.util.{Activity, Memoize, Stopwatch, Var}
 import java.nio.charset.Charset
-import com.google.common.cache.{Cache, CacheBuilder}
 
 private[serverset2] object ServiceDiscoverer {
-  class PathCache(maxSize: Int) {
-    val entries: Cache[String, Set[Entry]] = CacheBuilder.newBuilder()
-      .maximumSize(maxSize)
-      .build()
-
-    val vectors: Cache[String, Option[Vector]] = CacheBuilder.newBuilder()
-      .maximumSize(maxSize)
-      .build()
-  }
 
   val DefaultRetrying = 5.seconds
   val Utf8 = Charset.forName("UTF-8")
@@ -55,7 +45,28 @@ private[serverset2] class ServiceDiscoverer(
   private[this] val zkVectorsReadStat = statsReceiver.scope("vectors").stat("read_ms")
   private[this] val zkVectorsParseStat = statsReceiver.scope("vectors").stat("parse_ms")
 
-  private[this] val actZkSession = Activity(varZkSession.map(Activity.Ok(_)))
+  def entriesOfNode(zkSession: ZkSession) =
+    Memoize { path: String =>
+      Activity.future(
+        zkSession.immutableDataOf(path) map {
+          case Some(Buf.Utf8(data)) => Entry.parseJson(path, data)
+          case None => Seq()
+        })
+    }
+
+  def vectorOfNode(zkSession: ZkSession) =
+    Memoize { path: String =>
+      Activity.future(
+        zkSession.immutableDataOf(path) map {
+          case Some(Buf.Utf8(data)) => Vector.parseJson(data)
+          case None => None
+        })
+    }
+
+  private[this] val actZkSession =
+    Activity(varZkSession.map { zkSession =>
+      Activity.Ok(zkSession, entriesOfNode(zkSession), vectorOfNode(zkSession))
+    })
 
   private[this] def timedOf[T](stat: Stat)(f: => Activity[T]): Activity[T] = {
     val elapsed = Stopwatch.start()
@@ -65,79 +76,30 @@ private[serverset2] class ServiceDiscoverer(
     }
   }
 
-  private[this] def dataOf(
-    pattern: String,
-    readStat: Stat
-  ): Activity[Seq[(String, Option[Buf])]] = actZkSession flatMap { zkSession =>
-    zkSession.globOf(pattern) flatMap { paths =>
-      timedOf(readStat)(Activity.future(zkSession.collectImmutableDataOf(paths)))
-    }
-  }
-
-  private[this] def entriesOf(
-    path: String,
-    cache: PathCache
-  ): Activity[Seq[Entry]] = {
-    dataOf(path + EndpointGlob, zkEntriesReadStat) flatMap { pathmap =>
-      timedOf[Seq[Entry]](zkEntriesParseStat) {
-        val endpoints = pathmap flatMap {
-          case (_, null) => None // no data
-          case (path, optionData) =>
-            cache.entries.getIfPresent(path) match {
-              case null =>
-                optionData match {
-                  case Some(Buf.Utf8(data)) =>
-                    val ents = Entry.parseJson(path, data)
-                    val entset = ents.toSet
-                    cache.entries.put(path, entset)
-                    entset
-                  case _ => None // Invalid encoding
-                }
-              case ent => ent
-            }
+  private[this] def entriesOf(path: String): Activity[Seq[Entry]] =
+    actZkSession flatMap { case (zkSession, entriesOfNode, _) =>
+      zkSession.globOf(path + EndpointGlob) flatMap { paths =>
+        timedOf(zkEntriesReadStat) {
+          Activity.collect(paths.map(entriesOfNode)).map(_.flatten)
         }
-        Activity.value(endpoints)
       }
     }
-  }
 
-  private[this] def vectorsOf(
-    path: String,
-    cache: PathCache
-  ): Activity[Set[Vector]] = {
-    dataOf(path + VectorGlob, zkVectorsReadStat) flatMap { pathmap =>
-      timedOf[Set[Vector]](zkVectorsParseStat) {
-        val vectors = pathmap flatMap {
-          case (path, None) =>
-            cache.vectors.getIfPresent(path) match {
-              case null => None
-              case vec => vec
-            }
-          case (path, optionData) =>
-            cache.vectors.getIfPresent(path) match {
-              case null =>
-                optionData match {
-                  case Some(Buf.Utf8(data)) =>
-                    val vec = Vector.parseJson(data)
-                    cache.vectors.put(path, vec)
-                    vec
-                  case _ => None // Invalid encoding
-                }
-              case vec => vec
-            }
+  private[this] def vectorsOf(path: String): Activity[Set[Vector]] =
+    actZkSession flatMap { case (zkSession, _, vectorOfNode) =>
+      zkSession.globOf(path + VectorGlob) flatMap { paths =>
+        timedOf(zkVectorsReadStat) {
+          Activity.collect(paths.map(vectorOfNode)).map(_.flatten.toSet)
         }
-        Activity.value(vectors.toSet)
       }
     }
-  }
 
   /**
    * Look up the weighted ServerSet entries for a given path.
    */
   def apply(path: String): Activity[Seq[(Entry, Double)]] = {
-    val cache = new PathCache(16000)
-    val es = entriesOf(path, cache).run
-    val vs = vectorsOf(path, cache).run
+    val es = entriesOf(path).run
+    val vs = vectorsOf(path).run
 
     val raw = (es join vs) map {
       case (Activity.Pending, _) => Activity.Pending
