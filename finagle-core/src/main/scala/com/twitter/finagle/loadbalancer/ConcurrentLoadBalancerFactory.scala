@@ -1,9 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
-import com.twitter.util.Activity
 import java.net.SocketAddress
-import java.util.logging.Level
 
 /**
  * A load balancer that balances among multiple connections,
@@ -13,7 +11,7 @@ import java.util.logging.Level
  * each opens M connections, load balancer balances among N*M
  * options. Thus, it increases concurrency of each endpoint.
  */
-private[finagle] object ConcurrentLoadBalancerFactory {
+object ConcurrentLoadBalancerFactory {
   import LoadBalancerFactory._
 
   /**
@@ -27,7 +25,7 @@ private[finagle] object ConcurrentLoadBalancerFactory {
     implicit val param = Stack.Param(Param(4))
   }
 
-  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+  private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new BalancerStackModule[Req, Rep] {
       val description = "Balance requests across multiple connections on a single endpoint, used for pipelining protocols"
       val parameters = Seq(
