@@ -5,8 +5,17 @@
 6.x
 -----
 
+6.26.0
+------
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: Define `WeightedSocketAddress` as a case class. Add 
+    `WeightedSocketAddress.extract` method to extract weight.
+
 6.25.0
-~~~~~~~
+------
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
