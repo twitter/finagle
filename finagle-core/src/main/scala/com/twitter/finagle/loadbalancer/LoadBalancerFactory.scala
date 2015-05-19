@@ -155,38 +155,11 @@ package exp {
     "Metric used to measure load across endpoints (leastReq | ewma)")
 }
 
-object apertureParams extends GlobalFlag("5.seconds:0.5:2.0:1",
-  "Aperture parameters: smoothWin:lowLoad:highLoad:minAperture")
-
 object DefaultBalancerFactory extends LoadBalancerFactory {
   import com.twitter.finagle.util.parsers._
   import com.twitter.conversions.time._
 
   private val log = Logger.getLogger(getClass.getName)
-
-  /**
-   * Instantiate the aperture balancer with parameters read from the
-   * `apertureParams` flag. If they are malformed, use the defaults.
-   */
-  private def aperture(): LoadBalancerFactory =
-    apertureParams() match {
-      case list(duration(smoothWin), double(lowLoad), double(highLoad), int(minAperture)) =>
-        log.info("Instantiating aperture balancer with params "+
-          s"smoothWin=$smoothWin; lowLoad=$lowLoad; "+
-          s"highLoad=$highLoad; minAperture=$minAperture")
-        require(lowLoad > 0, "lowLoad <= 0")
-        require(lowLoad <= highLoad, "highLoad < lowLoad")
-        require(smoothWin > 0.seconds, "smoothWin <= 0.seconds")
-        require(minAperture > 0, "minAperture <= 0")
-        Balancers.aperture(
-          smoothWin=smoothWin,
-          lowLoad=lowLoad,
-          highLoad=highLoad,
-          minAperture=minAperture)
-      case bad =>
-        log.warning(s"Bad aperture parameters $bad; using system defaults.")
-        Balancers.aperture()
-    }
 
   /**
    * Instantiate P2C with a load metric read from the `exp.loadMetric` flag.
@@ -205,7 +178,6 @@ object DefaultBalancerFactory extends LoadBalancerFactory {
     defaultBalancer() match {
       case "heap" => Balancers.heap()
       case "choice" => p2c()
-      case "aperture" => aperture()
       case x =>
         log.warning(s"""Invalid load balancer ${x}, using "heap" balancer.""")
         Balancers.heap()
