@@ -156,11 +156,8 @@ object Finagle extends Build {
     settings = Project.defaultSettings ++
       sharedSettings ++
       unidocSettings ++ Seq(
-        // NB: KestrelX defines thrift structs which collide with Kestrel.
-        // We can remove this exception after the -x modules are deleted
-        // post netty4 migration.
         unidocProjectFilter in (ScalaUnidoc, unidoc) :=
-          inAnyProject -- inProjects(finagleExample, finagleKestrelX)
+          inAnyProject -- inProjects(finagleExample)
       )
   ) aggregate(
     // Core, support.
@@ -172,7 +169,7 @@ object Finagle extends Build {
     // Protocols
     finagleHttp, finagleHttpX, finagleHttpXCompat, finagleStream, finagleNative,
     finagleThrift, finagleMemcached, finagleMemcachedX, finagleKestrel,
-    finagleKestrelX, finagleMux, finagleThriftMux, finagleMySQL,
+    finagleMux, finagleThriftMux, finagleMySQL,
     finagleSpdy, finagleRedis,
 
     // Use and integration
@@ -427,17 +424,6 @@ object Finagle extends Build {
     name := "finagle-kestrel",
     libraryDependencies ++= scroogeLibs
   ).dependsOn(finagleCore, finagleMemcached, finagleThrift)
-
-  lazy val finagleKestrelX = Project(
-    id = "finagle-kestrelx",
-    base = file("finagle-kestrelx"),
-    settings = Project.defaultSettings ++
-      ScroogeSBT.newSettings ++
-      sharedSettings
-  ).settings(
-    name := "finagle-kestrelx",
-    libraryDependencies ++= scroogeLibs
-  ).dependsOn(finagleCore, finagleMemcachedX, finagleThrift)
 
   lazy val finagleRedis = Project(
     id = "finagle-redis",

@@ -1,27 +1,27 @@
 package com.twitter.finagle.kestrel.protocol
 
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
-import com.twitter.finagle.memcached.protocol.text.{Decoding, Tokens, TokensWithData, ValueLines}
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.util.Duration
+
+import com.twitter.finagle.memcachedx.protocol.text.{Decoding, Tokens, TokensWithData, ValueLines}
+import com.twitter.io.Buf
+import com.twitter.util.{Time, Duration}
 
 object ResponseToEncoding {
   private val ZERO          = "0"
   private val VALUE         = "VALUE"
-  private val ZeroCb: ChannelBuffer  = ChannelBuffers.unmodifiableBuffer(ZERO)
-  private val ValueCb: ChannelBuffer = ChannelBuffers.unmodifiableBuffer(VALUE)
+  private val ZeroCb        = Buf.Utf8(ZERO)
+  private val ValueCb       = Buf.Utf8(VALUE)
 
   private val STORED        = "STORED"
   private val NOT_FOUND     = "NOT_FOUND"
   private val DELETED       = "DELETED"
   private val ERROR         = "ERROR"
 
-  private val StoredTokens   = Tokens(Seq(ChannelBuffers.unmodifiableBuffer(STORED)))
-  private val NotFoundTokens = Tokens(Seq(ChannelBuffers.unmodifiableBuffer(NOT_FOUND)))
-  private val DeletedTokens  = Tokens(Seq(ChannelBuffers.unmodifiableBuffer(DELETED)))
-  private val ErrorTokens    = Tokens(Seq(ChannelBuffers.unmodifiableBuffer(ERROR)))
+  private val StoredTokens   = Tokens(Seq(Buf.Utf8(STORED)))
+  private val NotFoundTokens = Tokens(Seq(Buf.Utf8(NOT_FOUND)))
+  private val DeletedTokens  = Tokens(Seq(Buf.Utf8(DELETED)))
+  private val ErrorTokens    = Tokens(Seq(Buf.Utf8(ERROR)))
 }
 
 private[kestrel] class ResponseToEncoding extends OneToOneEncoder {
@@ -43,20 +43,20 @@ private[kestrel] class ResponseToEncoding extends OneToOneEncoder {
 }
 
 object CommandToEncoding {
-  private val ZERO: ChannelBuffer = ChannelBuffers.unmodifiableBuffer("0")
+  private val ZERO       = Buf.Utf8("0")
 
-  private val OPEN: ChannelBuffer  = ChannelBuffers.unmodifiableBuffer("/open")
-  private val CLOSE: ChannelBuffer = ChannelBuffers.unmodifiableBuffer("/close")
-  private val CLOSE_OPEN: ChannelBuffer = ChannelBuffers.unmodifiableBuffer("/close/open")
-  private val ABORT: ChannelBuffer = ChannelBuffers.unmodifiableBuffer("/abort")
-  private val PEEK: ChannelBuffer  = ChannelBuffers.unmodifiableBuffer("/peek")
-  private val TIMEOUT: ChannelBuffer = ChannelBuffers.unmodifiableBuffer("/t=")
+  private val OPEN       = Buf.Utf8("/open")
+  private val CLOSE      = Buf.Utf8("/close")
+  private val CLOSE_OPEN = Buf.Utf8("/close/open")
+  private val ABORT      = Buf.Utf8("/abort")
+  private val PEEK       = Buf.Utf8("/peek")
+  private val TIMEOUT    = Buf.Utf8("/t=")
 
-  private val GET: ChannelBuffer    = ChannelBuffers.unmodifiableBuffer("get")
-  private val DELETE: ChannelBuffer = ChannelBuffers.unmodifiableBuffer("delete")
-  private val FLUSH: ChannelBuffer  = ChannelBuffers.unmodifiableBuffer("flush")
+  private val GET        = Buf.Utf8("get")
+  private val DELETE     = Buf.Utf8("delete")
+  private val FLUSH      = Buf.Utf8("flush")
 
-  private val SET: ChannelBuffer    = ChannelBuffers.unmodifiableBuffer("set")
+  private val SET        = Buf.Utf8("set")
 
 
 }
@@ -65,29 +65,29 @@ private[kestrel] class CommandToEncoding extends OneToOneEncoder {
   import CommandToEncoding._
 
   // kestrel supports only 32-bit timeouts
-  private[this] def encodeTimeout(timeout: Duration): ChannelBuffer = {
+  private[this] def encodeTimeout(timeout: Duration): Buf = {
     val timeInMillis = math.min(timeout.inMilliseconds, Int.MaxValue)
-    ChannelBuffers.wrappedBuffer(TIMEOUT, timeInMillis.toString)
+    TIMEOUT.concat(Buf.Utf8(timeInMillis.toString))
   }
 
   private[this] def keyWithSuffix(
-    queueName: ChannelBuffer,
-    suffix: ChannelBuffer,
+    queueName: Buf,
+    suffix: Buf,
     timeout: Option[Duration]
-  ): ChannelBuffer = {
+  ): Buf = {
     timeout match {
-      case Some(t) => ChannelBuffers.wrappedBuffer(queueName, suffix, encodeTimeout(t))
-      case None => ChannelBuffers.wrappedBuffer(queueName, suffix)
+      case Some(t) => queueName.concat(suffix).concat(encodeTimeout(t))
+      case None    => queueName.concat(suffix)
     }
   }
 
   def encode(ctx: ChannelHandlerContext, ch: Channel, message: AnyRef): Decoding = {
     message match {
       case Set(key, expiry, value) =>
-        TokensWithData(Seq(SET, key, ZERO, expiry.inSeconds.toString), value)
+        TokensWithData(Seq(SET, key, ZERO, Buf.Utf8(expiry.inSeconds.toString)), value)
       case Get(queueName, timeout) =>
         val key = timeout match {
-          case Some(t) => ChannelBuffers.wrappedBuffer(queueName, encodeTimeout(t))
+          case Some(t) => queueName.concat(encodeTimeout(t))
           case None => queueName
         }
         Tokens(Seq(GET, key))

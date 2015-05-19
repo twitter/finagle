@@ -5,17 +5,17 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.kestrel.Server
 import com.twitter.finagle.kestrel.protocol._
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import java.net.{InetSocketAddress, InetAddress}
+import com.twitter.io.Buf
 import com.twitter.util.{Await, Time}
+import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class InterpreterServiceTest extends FunSuite {
-  val queueName = "name"
-  val value = "value"
+  val queueName = Buf.Utf8("name")
+  val value = Buf.Utf8("value")
 
   def exec(fn: Service[Command, Response] => Unit) {
     val server: Server = new Server(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))

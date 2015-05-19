@@ -1,10 +1,10 @@
-package com.twitter.finagle.kestrelx.integration
+package com.twitter.finagle.kestrel.integration
 
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-import com.twitter.finagle.kestrelx.protocol._
+import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcachedx.protocol.text.{Decoding, Tokens, TokensWithData}
 import com.twitter.io.Buf
 import com.twitter.util.{Duration, Time}

@@ -11,6 +11,8 @@
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-kestrel: Replace deprecated finagle-kestrel package with finagle-kestrelx.
+
   * finagle-core: Define `WeightedSocketAddress` as a case class. Add
     `WeightedSocketAddress.extract` method to extract weight.
 

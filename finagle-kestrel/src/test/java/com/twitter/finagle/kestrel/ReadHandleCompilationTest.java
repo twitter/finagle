@@ -4,13 +4,13 @@ import java.util.Arrays;
 
 import scala.runtime.BoxedUnit;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.concurrent.Broker;
 import com.twitter.concurrent.Offer;
+import com.twitter.io.Buf;
+import com.twitter.io.Bufs;
 
 public class ReadHandleCompilationTest {
   static final Broker<ReadMessage> MESSAGES = new Broker<ReadMessage>();
@@ -18,15 +18,15 @@ public class ReadHandleCompilationTest {
   static final Broker<BoxedUnit> CLOSER = new Broker<BoxedUnit>();
 
   /**
-   * Tests read message.
+   * Tests read message construction.
    */
   @Test
   public void testReadMessage() {
-    ChannelBuffer buffer = ChannelBuffers.wrappedBuffer("abc".getBytes());
+    Buf buffer = Bufs.ownedBuf(new byte[]{0x1, 0x2, 0x3});
     Broker<BoxedUnit> ack = new Broker<BoxedUnit>();
     Broker<BoxedUnit> abort = new Broker<BoxedUnit>();
-    ReadMessage message =
-      new ReadMessage(buffer, ack.send(BoxedUnit.UNIT), abort.send(BoxedUnit.UNIT));
+    ReadMessage message = new ReadMessage(buffer, ack.send(BoxedUnit.UNIT),
+        abort.send(BoxedUnit.UNIT));
 
     Assert.assertNotNull(message);
   }
@@ -65,7 +65,7 @@ public class ReadHandleCompilationTest {
   }
 
   /**
-   * Tests {@code ReadHandle} merging.
+   * Tests {@link com.twitter.finagle.kestrel.ReadHandle#merge}.
    */
   @Test
   public void testReadHandleMerge() {
