@@ -11,8 +11,14 @@
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
-  * finagle-core: Define `WeightedSocketAddress` as a case class. Add 
+  * finagle-core: Define `WeightedSocketAddress` as a case class. Add
     `WeightedSocketAddress.extract` method to extract weight.
+
+  * finagle-core: Constructing a new Balancer that can be injected into a Finagle client
+    was unnecessarily complex and non-uniform. We removed the legacy constructors around
+    defining the collection of endpoints and simplified the interface to `LoadBalancerFactory`.
+    Now, `com.twitter.finagle.loadbalancer.Balancers` defines the collection of balancer
+    constructors.
 
 6.25.0
 ------

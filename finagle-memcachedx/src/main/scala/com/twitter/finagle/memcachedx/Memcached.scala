@@ -9,7 +9,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.cacheresolver.{CacheNode, CacheNodeGroup}
 import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.PipeliningDispatcher
-import com.twitter.finagle.loadbalancer.exp.P2CBalancerPeakEwmaFactory
+import com.twitter.finagle.loadbalancer.Balancers
 import com.twitter.finagle.loadbalancer.{ConcurrentLoadBalancerFactory, LoadBalancerFactory}
 import com.twitter.finagle.memcachedx.protocol._
 import com.twitter.finagle.netty3.Netty3Transporter
@@ -44,7 +44,7 @@ object Memcached {
     StackClient.defaultParams +
       FailureAccrualFactory.Param(100, () => 1.second) +
       FailFastFactory.FailFast(false) +
-      LoadBalancerFactory.Param(new P2CBalancerPeakEwmaFactory) +
+      LoadBalancerFactory.Param(Balancers.p2cPeakEwma()) +
       ProtocolLibrary("memcachedx")
 }
 

@@ -8,7 +8,6 @@ import java.net.SocketAddress
 import java.util.logging.{Level, Logger}
 import scala.collection.mutable
 
-object defaultBalancer extends GlobalFlag("heap", "Default load balancer")
 object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n" +
   "\tWhen enabled,the configured stats receiver will be used,\n" +
   "\tor the loaded stats receiver if none given.\n" +
@@ -77,7 +76,7 @@ object LoadBalancerFactory {
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]].
    */
-  case class Param(loadBalancerFactory: WeightedLoadBalancerFactory) {
+  case class Param(loadBalancerFactory: LoadBalancerFactory) {
     def mk(): (Param, Stack.Param[Param]) =
       (this, Param.param)
   }
@@ -107,98 +106,116 @@ object LoadBalancerFactory {
     }
 }
 
-trait WeightedLoadBalancerFactory {
-
-  /** Build a load balancer from a set of endpoint-weight pairs. */
-  @deprecated("Use newWeightedLoadbalancer.", "6.21.0")
-  def newLoadBalancer[Req, Rep](
-    weighted: Var[Set[(ServiceFactory[Req, Rep], Double)]],
-    statsReceiver: StatsReceiver,
-    emptyException: NoBrokersAvailableException): ServiceFactory[Req, Rep]
-
-  /**
-   * Build a load balancer from an Activity that updates with
-   */
-  def newWeightedLoadBalancer[Req, Rep](
-    weighted: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
-    statsReceiver: StatsReceiver,
-    emptyException: NoBrokersAvailableException): ServiceFactory[Req, Rep]
-}
-
+/**
+ * A thin interface around a Balancer's contructor that allows Finagle to pass in
+ * context from the stack to the balancers at construction time.
+ *
+ * @see [[Balancers]] for a collection of available balancers.
+ */
 abstract class LoadBalancerFactory {
-
-  /** Build a load balancer from a Group of endpoints. */
-  @deprecated("Use the newLoadbalancer that takes an Activity.", "6.21.0")
-  def newLoadBalancer[Req, Rep](
-    group: Group[ServiceFactory[Req, Rep]],
-    statsReceiver: StatsReceiver,
-    emptyException: NoBrokersAvailableException): ServiceFactory[Req, Rep]
-
   /**
-   * Asychronously build a load balancer.
+   * Returns a new balancer which is represented by a [[com.twitter.finagle.ServiceFactory]].
    *
-   * The returned Future is not satisfied until the load balancer has observed a non-pending
-   * set of endpoints from the provided Activity.
+   * @param endpoints The load balancer's collection is usually populated concurrently.
+   * So the interface to build a balancer is wrapped in an [[com.twitter.util.Activity]]
+   * which allows us to observe this process for changes. Note, the given weights are
+   * maintained relative to load assignments not QPS. For example, a weight of 2.0 means
+   * that the endpoint will receive twice the amount of load w.r.t the other endpoints
+   * in the balancer.
+   *
+   * @param statsReceiver The StatsReceiver which balancers report stats to. See
+   * [[com.twitter.finagle.loadbalancer.Balancer]] to see which stats are exported
+   * across implementations.
+   *
+   * @param emptyException The exception returned when a balancer's collection is empty.
    */
-  def newLoadBalancer[Req, Rep](
-    factories: Activity[Set[ServiceFactory[Req, Rep]]],
+  def newBalancer[Req, Rep](
+    endpoints: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
     statsReceiver: StatsReceiver,
-    emptyException: NoBrokersAvailableException): ServiceFactory[Req, Rep]
-
-  /**
-   * Coerce this LoadBalancerFactory to be a WeightedLoadBalancerFactory (that ignores weights).
-   */
-  def toWeighted: WeightedLoadBalancerFactory = new WeightedLoadBalancerFactory {
-    def newLoadBalancer[Req, Rep](
-      weighted: Var[Set[(ServiceFactory[Req, Rep], Double)]],
-      statsReceiver: StatsReceiver,
-      emptyException: NoBrokersAvailableException
-    ): ServiceFactory[Req, Rep] = {
-      val unweighted = weighted map { set =>
-        set map { case (f, _) => f }
-      }
-      LoadBalancerFactory.this.newLoadBalancer(
-        Group.fromVar(unweighted), statsReceiver, emptyException)
-    }
-
-    def newWeightedLoadBalancer[Req, Rep](
-      weighted: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
-      statsReceiver: StatsReceiver,
-      emptyException: NoBrokersAvailableException
-    ): ServiceFactory[Req, Rep] = {
-      val unweighted = weighted map { set =>
-        set map { case (f, _) => f }
-      }
-      LoadBalancerFactory.this.newLoadBalancer(unweighted, statsReceiver, emptyException)
-    }
-  }
+    emptyException: NoBrokersAvailableException
+  ): ServiceFactory[Req, Rep]
 }
 
-object DefaultBalancerFactory extends WeightedLoadBalancerFactory {
-  val underlying =
-    defaultBalancer() match {
-      case "choice" => P2CBalancerFactory
-      case "heap" => HeapBalancerFactory
-      case "aperture" => ApertureBalancerFactory
-      case x =>
-        Logger.getLogger("finagle").log(Level.WARNING,
-          "Invalid load balancer %s, using balancer \"heap\"".format(x))
-        HeapBalancerFactory
+/**
+ * We expose the ability to configure balancers per-process via flags. However,
+ * this is generally not a good idea as Finagle processes usually contain many clients.
+ * This will likely go away in the future or be no-op and, therfore, should not be
+ * depended on. Instead, configure your balancers via the `configured` method on
+ * clients:
+ *
+ * {{
+ *    val balancer = Balancers.newAperture(...)
+ *    Protocol.configured(LoadBalancerFactory.Param(balancer))
+ * }}
+ */
+object defaultBalancer extends GlobalFlag("heap", "Default load balancer")
+
+package exp {
+  object loadMetric extends GlobalFlag("leastReq",
+    "Metric used to measure load across endpoints (leastReq | ewma)")
+}
+
+object apertureParams extends GlobalFlag("5.seconds:0.5:2.0:1",
+  "Aperture parameters: smoothWin:lowLoad:highLoad:minAperture")
+
+object DefaultBalancerFactory extends LoadBalancerFactory {
+  import com.twitter.finagle.util.parsers._
+  import com.twitter.conversions.time._
+
+  private val log = Logger.getLogger(getClass.getName)
+
+  /**
+   * Instantiate the aperture balancer with parameters read from the
+   * `apertureParams` flag. If they are malformed, use the defaults.
+   */
+  private def aperture(): LoadBalancerFactory =
+    apertureParams() match {
+      case list(duration(smoothWin), double(lowLoad), double(highLoad), int(minAperture)) =>
+        log.info("Instantiating aperture balancer with params "+
+          s"smoothWin=$smoothWin; lowLoad=$lowLoad; "+
+          s"highLoad=$highLoad; minAperture=$minAperture")
+        require(lowLoad > 0, "lowLoad <= 0")
+        require(lowLoad <= highLoad, "highLoad < lowLoad")
+        require(smoothWin > 0.seconds, "smoothWin <= 0.seconds")
+        require(minAperture > 0, "minAperture <= 0")
+        Balancers.aperture(
+          smoothWin=smoothWin,
+          lowLoad=lowLoad,
+          highLoad=highLoad,
+          minAperture=minAperture)
+      case bad =>
+        log.warning(s"Bad aperture parameters $bad; using system defaults.")
+        Balancers.aperture()
     }
 
-  def newLoadBalancer[Req, Rep](
-    weighted: Var[Set[(ServiceFactory[Req, Rep], Double)]],
+  /**
+   * Instantiate P2C with a load metric read from the `exp.loadMetric` flag.
+   */
+  private def p2c(): LoadBalancerFactory =
+    exp.loadMetric() match {
+      case "ewma" =>
+        log.info("Using load metric ewma")
+        Balancers.p2cPeakEwma()
+      case _ =>
+        log.info("Using load metric leastReq")
+        Balancers.p2c()
+    }
+
+  private val underlying =
+    defaultBalancer() match {
+      case "heap" => Balancers.heap()
+      case "choice" => p2c()
+      case "aperture" => aperture()
+      case x =>
+        log.warning(s"""Invalid load balancer ${x}, using "heap" balancer.""")
+        Balancers.heap()
+    }
+
+  def newBalancer[Req, Rep](
+    endpoints: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
     statsReceiver: StatsReceiver,
     emptyException: NoBrokersAvailableException
-  ): ServiceFactory[Req, Rep] =
-    underlying.newLoadBalancer(weighted, statsReceiver, emptyException)
-
-  def newWeightedLoadBalancer[Req, Rep](
-    weighted: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
-    statsReceiver: StatsReceiver,
-    emptyException: NoBrokersAvailableException
-  ): ServiceFactory[Req, Rep] =
-    underlying.newWeightedLoadBalancer(weighted, statsReceiver, emptyException)
-
-  val get = this
+  ): ServiceFactory[Req, Rep] = {
+    underlying.newBalancer(endpoints, statsReceiver, emptyException)
+  }
 }

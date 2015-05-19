@@ -1,6 +1,5 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
@@ -11,60 +10,6 @@ import com.twitter.finagle.{
 import com.twitter.util.{Activity, Return, Future, Throw, Time, Var, Duration, Timer}
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Logger
-
-object apertureParams extends GlobalFlag(
-  "5.seconds:0.5:2.0:1",
-  "Aperture parameters: smoothWin:lowLoad:highLoad:minAperture")
-
-object ApertureBalancerFactory extends WeightedLoadBalancerFactory {
-  private val log = Logger.getLogger(getClass.getName)
-
-  def newLoadBalancer[Req, Rep](
-    factories: Var[Set[(ServiceFactory[Req, Rep], Double)]],
-    statsReceiver: StatsReceiver,
-    emptyException: NoBrokersAvailableException
-  ): ServiceFactory[Req, Rep] =
-    newWeightedLoadBalancer(
-      Activity(factories map(Activity.Ok(_))),
-      statsReceiver, emptyException)
-
-  def newWeightedLoadBalancer[Req, Rep](
-    activity: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
-    statsReceiver: StatsReceiver,
-    emptyException: NoBrokersAvailableException
-  ): ServiceFactory[Req, Rep] = {
-    import com.twitter.finagle.util.parsers._
-
-    apertureParams() match {
-      case list(duration(smoothWin), double(lowLoad), double(highLoad), int(minAperture)) =>
-        log.info("Instantiating aperture balancer with params "+
-          s"smoothWin=$smoothWin; lowLoad=$lowLoad; "+
-          s"highLoad=$highLoad; minAperture=$minAperture")
-        require(lowLoad > 0, "lowLoad <= 0")
-        require(lowLoad <= highLoad, "highLoad < lowLoad")
-        require(smoothWin > 0.seconds, "smoothWin <= 0.seconds")
-        require(minAperture > 0, "minAperture <= 0")
-
-        new ApertureLoadBandBalancer(activity,
-          smoothWin=smoothWin,
-          lowLoad=lowLoad,
-          highLoad=highLoad,
-          minAperture=minAperture,
-          statsReceiver=statsReceiver,
-          emptyException=emptyException)
-      case bad =>
-        log.warning(s"Bad aperture parameters $bad; using system defaults.")
-        new ApertureLoadBandBalancer(activity,
-          statsReceiver = statsReceiver,
-          emptyException = emptyException)
-    }
-  }
-
-  /**
-   * Used for Java access.
-   */
-  def get(): ApertureBalancerFactory.type = this
-}
 
 /**
  * The aperture load-band balancer balances load to the smallest
@@ -102,15 +47,15 @@ object ApertureBalancerFactory extends WeightedLoadBalancerFactory {
  */
 private class ApertureLoadBandBalancer[Req, Rep](
     protected val activity: Activity[Traversable[(ServiceFactory[Req, Rep], Double)]],
-    protected val smoothWin: Duration = 5.seconds,
-    protected val lowLoad: Double = 0.5,
-    protected val highLoad: Double = 2,
-    protected val minAperture: Int = 1,
-    protected val maxEffort: Int = 5,
-    protected val rng: Rng = Rng.threadLocal,
-    protected implicit val timer: Timer = DefaultTimer.twitter,
-    protected val statsReceiver: StatsReceiver = NullStatsReceiver,
-    protected val emptyException: NoBrokersAvailableException = new NoBrokersAvailableException)
+    protected val smoothWin: Duration,
+    protected val lowLoad: Double,
+    protected val highLoad: Double,
+    protected val minAperture: Int,
+    protected val maxEffort: Int,
+    protected val rng: Rng,
+    protected implicit val timer: Timer,
+    protected val statsReceiver: StatsReceiver,
+    protected val emptyException: NoBrokersAvailableException)
   extends Balancer[Req, Rep]
   with Aperture[Req, Rep]
   with LoadBand[Req, Rep]

@@ -178,7 +178,7 @@ private[loadbalancer] trait BalancerStackModule[Req, Rep]
       case sr => sr
     }
 
-    val lb = loadBalancerFactory.newWeightedLoadBalancer(
+    val lb = loadBalancerFactory.newBalancer(
       endpoints,
       rawStatsReceiver.scope(role.toString),
       noBrokersException)

@@ -6,7 +6,7 @@ import com.twitter.finagle.client.{DefaultPool, StackBasedClient, StackClient, S
 import com.twitter.finagle.client.{StackBasedClient, Transporter}
 import com.twitter.finagle.factory.{BindingFactory, TimeoutFactory}
 import com.twitter.finagle.filter.ExceptionSourceFilter
-import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, WeightedLoadBalancerFactory}
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.service.FailFastFactory.FailFast
@@ -387,14 +387,11 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
     dest(Name.fromGroup(group))
 
-  def loadBalancer(lbf: LoadBalancerFactory): This =
-    loadBalancer(lbf.toWeighted)
-
   /**
    * Specify a load balancer.  The load balancer implements
    * a strategy for choosing one from a set of hosts to service a request
    */
-  def loadBalancer(loadBalancer: WeightedLoadBalancerFactory): This =
+  def loadBalancer(loadBalancer: LoadBalancerFactory): This =
     configured(LoadBalancerFactory.Param(loadBalancer))
 
   /**

@@ -4,8 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.filter.{ExceptionSourceFilter, MonitorFilter}
-import com.twitter.finagle.loadbalancer.{
-  DefaultBalancerFactory, LoadBalancerFactory, WeightedLoadBalancerFactory}
+import com.twitter.finagle.loadbalancer.{DefaultBalancerFactory, LoadBalancerFactory}
 import com.twitter.finagle.service.{
   ExpiringService, FailFastFactory, FailureAccrualFactory, TimeoutFilter}
 import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
@@ -74,7 +73,7 @@ case class DefaultClient[Req, Rep](
   tracer: Tracer  = DefaultTracer,
   monitor: Monitor = DefaultMonitor,
   reporter: ReporterFactory = LoadedReporterFactory,
-  loadBalancer: WeightedLoadBalancerFactory = DefaultBalancerFactory,
+  loadBalancer: LoadBalancerFactory = DefaultBalancerFactory,
   newTraceInitializer: Stackable[ServiceFactory[Req, Rep]] = TraceInitializerFilter.clientModule[Req, Rep]
 ) extends Client[Req, Rep] { outer =>
 
@@ -140,7 +139,7 @@ case class DefaultClient[Req, Rep](
   }
 
   private[this] val underlying = Client()
-  
+
   def newService(dest: Name, label: String) =
     underlying.newService(dest, label)
 
