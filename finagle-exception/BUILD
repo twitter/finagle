@@ -1,12 +1,12 @@
 maven_layout()
 
-jar_library(name='finagle-exception',
+target(name='finagle-exception',
   dependencies=[
     'finagle/finagle-exception/src/main/scala'
   ]
 )
 
-jar_library(name='tests',
+target(name='tests',
   dependencies=[
     'finagle/finagle-exception/src/test/scala'
   ]
