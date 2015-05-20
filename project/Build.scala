@@ -210,7 +210,11 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-ostrich4",
-    libraryDependencies ++= Seq(ostrichLib)
+    libraryDependencies ++= Seq(
+      ostrichLib,
+      util("registry"),
+      util("stats")
+    )
   ).dependsOn(finagleCore, finagleHttpX)
 
   lazy val finagleStats = Project(
@@ -223,7 +227,9 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       "com.twitter.common" % "metrics" % "0.0.36",
       util("events"),
-      util("logging")
+      util("logging"),
+      util("registry"),
+      util("stats")
     ),
     libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCore, finagleHttpX)
@@ -261,7 +267,11 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-commons-stats",
-    libraryDependencies ++= Seq("com.twitter.common" % "stats" % "0.0.113")
+    libraryDependencies ++= Seq(
+      "com.twitter.common" % "stats" % "0.0.113",
+      util("registry"),
+      util("stats")
+    )
   ).dependsOn(finagleCore)
 
   lazy val finagleServersets = Project(
