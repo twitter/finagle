@@ -602,7 +602,7 @@ object Finagle extends Build {
 
     // Make the "test" command run both, test and doctest:test
     test <<= Seq(test in Test, test in DocTest).dependOn
-    ).dependsOn(finagleCore, finagleHttp, finagleMySQL)
+    ).dependsOn(finagleCore, finagleHttpX, finagleMySQL)
 
   /* Test Configuration for running tests on doc sources */
   lazy val DocTest = config("doctest") extend(Test)

@@ -17,7 +17,7 @@ variants that allow for serving a simple `Service` as well. Typical usage takes 
 
 ::
 
-  val server = Http.serve(":8080", myService)
+  val server = Httpx.serve(":8080", myService)
   Await.ready(server) // waits until the server resources are released
 
 However, `finagle-thrift` servers expose a rich API because their interfaces are defined
