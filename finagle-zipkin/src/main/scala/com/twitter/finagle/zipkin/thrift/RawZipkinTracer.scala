@@ -1,11 +1,10 @@
 package com.twitter.finagle.zipkin.thrift
 
 import com.google.common.io.BaseEncoding
-import com.twitter.conversions.time._
 import com.twitter.conversions.storage._
+import com.twitter.conversions.time._
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.service.TimeoutFilter
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.{Protocols, ThriftClientFramedCodec, thrift}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.DefaultTimer
@@ -18,8 +17,6 @@ import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.util.concurrent.{ArrayBlockingQueue, TimeoutException}
 import org.apache.thrift.TByteArrayOutputStream
-import org.apache.thrift.protocol.TProtocol
-import org.apache.thrift.transport.TTransport
 import scala.collection.mutable.{ArrayBuffer, HashMap, SynchronizedMap}
 import scala.language.reflectiveCalls
 
@@ -32,7 +29,12 @@ object RawZipkinTracer {
       .name("zipkin-tracer")
       .hosts(new InetSocketAddress(scribeHost, scribePort))
       .codec(ThriftClientFramedCodec())
+      .reportTo(ClientStatsReceiver)
       .hostConnectionLimit(5)
+      // using an arbitrary, but bounded number of waiters to avoid memory leaks
+      .hostConnectionMaxWaiters(250)
+      // somewhat arbitrary, but bounded timeouts
+      .timeout(1.second)
       .daemon(true)
       .build()
 
