@@ -11,8 +11,6 @@
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
-  * finagle-kestrel: Replace deprecated finagle-kestrel package with finagle-kestrelx.
-
   * finagle-core: Define `WeightedSocketAddress` as a case class. Add
     `WeightedSocketAddress.extract` method to extract weight.
 
@@ -26,6 +24,11 @@ Breaking API Changes
     per-client settings globally is generally not a good idea and we're working to remove
     these flags from Finagle. Use the constructors in `com.twitter.finagle.loadbalancer.Balancers`
     to create an instance that can be injected into a client.
+
+  * finagle-exception: `com.twitter.finagle.exception.ExceptionReporter` is no longer used
+    as the default `com.twitter.finagle.util.ReporterFactory`.
+
+  * finagle-kestrel: Replace deprecated finagle-kestrel package with finagle-kestrelx.
 
 6.25.0
 ------
