@@ -16,5 +16,4 @@ scala_library(name='scala',
     'finagle/finagle-exception/src/main/thrift:thrift-scala',
   ],
   sources=rglobs('*.scala'),
-  resources=['finagle/finagle-exception/src/main/resources'],
 )

@@ -49,14 +49,14 @@ class StackRegistryTest extends FunSuite {
   test("StackRegistry should register stacks and params properly") {
     val reg = new StackRegistry { def registryName: String = "test" }
     val stk = newStack()
-    val params = Stack.Params.empty + param1 + param.Label("foo")
+    val params = Stack.Params.empty + param1 + param.Label("foo") + param.ProtocolLibrary("qux")
     val simple = new SimpleRegistry()
     GlobalRegistry.withRegistry(simple) {
       reg.register("bar", stk, params)
       val expected = {
         Set(
-          Entry(Seq("test", "foo", "bar", "name", "p1"), "999"),
-          Entry(Seq("test", "foo", "bar", "head", "p2"), "1")
+          Entry(Seq("test", "qux", "foo", "bar", "name", "p1"), "999"),
+          Entry(Seq("test", "qux", "foo", "bar", "head", "p2"), "1")
         )
       }
       assert(GlobalRegistry.get.toSet == expected)
@@ -66,14 +66,14 @@ class StackRegistryTest extends FunSuite {
   test("StackRegistry should unregister stacks and params properly") {
     val reg = new StackRegistry { def registryName: String = "test" }
     val stk = newStack()
-    val params = Stack.Params.empty + param1 + param.Label("foo")
+    val params = Stack.Params.empty + param1 + param.Label("foo") + param.ProtocolLibrary("qux")
     val simple = new SimpleRegistry()
     GlobalRegistry.withRegistry(simple) {
       reg.register("bar", stk, params)
       val expected = {
         Set(
-          Entry(Seq("test", "foo", "bar", "name", "p1"), "999"),
-          Entry(Seq("test", "foo", "bar", "head", "p2"), "1")
+          Entry(Seq("test", "qux", "foo", "bar", "name", "p1"), "999"),
+          Entry(Seq("test", "qux", "foo", "bar", "head", "p2"), "1")
         )
       }
       assert(GlobalRegistry.get.toSet == expected)
@@ -86,7 +86,7 @@ class StackRegistryTest extends FunSuite {
   test("StackRegistry keeps track of the number of GlobalRegistry entries it enters") {
     val reg = new StackRegistry { def registryName: String = "test" }
     val stk = newStack()
-    val params = Stack.Params.empty + param1 + param.Label("foo")
+    val params = Stack.Params.empty + param1 + param.Label("foo") + param.ProtocolLibrary("qux")
     val simple = new SimpleRegistry()
     GlobalRegistry.withRegistry(simple) {
       reg.register("bar", stk, params)

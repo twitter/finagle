@@ -4,18 +4,16 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.serverset2.client._
 import com.twitter.finagle.util.DefaultTimer
+import com.twitter.util.Await
 import org.apache.zookeeper.WatchedEvent
 import org.apache.zookeeper.Watcher.Event.{EventType, KeeperState}
 import org.junit.runner.RunWith
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FlatSpec, OneInstancePerTest}
 
 @RunWith(classOf[JUnitRunner])
 class ApacheWatcherTest extends FlatSpec
-  with OneInstancePerTest
-  with Eventually
-  with IntegrationPatience {
+  with OneInstancePerTest {
 
   val statsReceiver = new InMemoryStatsReceiver
   val watcher = new ApacheWatcher(statsReceiver)
@@ -42,45 +40,32 @@ class ApacheWatcherTest extends FlatSpec
     assert(watcher.state() === WatchState.Pending)
   }
 
-  if(!sys.props.contains("SKIP_FLAKY")) {
-    "ApacheWatcher" should "handle session events" in {
-      for (ks <- KeeperState.values) {
-        watcher.process(new WatchedEvent(EventType.None, ks, path))
-        eventually {
-          assert(watcher.state() === WatchState.SessionState(sessionEvents(ks)))
-        }
+  "ApacheWatcher" should "handle session events" in {
+    for (ks <- KeeperState.values) {
+      val satisfied = watcher.state.changes.filter(_ == WatchState.SessionState(sessionEvents(ks))).toFuture
+      watcher.process(new WatchedEvent(EventType.None, ks, path))
+      assert(Await.result(satisfied) === WatchState.SessionState(sessionEvents(ks)))
     }
-  }
   }
 
   "ApacheWatcher" should "handle and count node events" in {
     for (ev <- EventType.values) {
-      watcher.process(new WatchedEvent(ev, KeeperState.SyncConnected, path))
-      if (ev == EventType.None) {
-        eventually {
-          assert(watcher.state() === WatchState.SessionState(SessionState.SyncConnected))
-        }
-      }
-      else {
-        eventually {
-          assert(watcher.state() === WatchState.Determined(nodeEvents(ev)))
-        }
-        assert(statsReceiver.counter(ApacheNodeEvent(ev).name)() === 1)
-      }
+      if (ev != EventType.None) {
+        val determined = watcher.state.changes.filter(_ == WatchState.Determined(nodeEvents(ev))).toFuture
+        watcher.process(new WatchedEvent(ev, KeeperState.SyncConnected, path))
+        assert(Await.result(determined) === WatchState.Determined(nodeEvents(ev)))
+        assert(statsReceiver.counter(ApacheNodeEvent(ev).name)() === 1)      }
     }
   }
 
   "StatsWatcher" should "count session events" in {
     val statsWatcher = SessionStats.watcher(watcher.state, statsReceiver, 5.seconds, DefaultTimer.twitter)
+    // Set a constant witness so the Var doesn't reset state
+    statsWatcher.changes.respond(_ => ())
     for (ks <- KeeperState.values) {
+      val satisfied = statsWatcher.changes.filter(_ == WatchState.SessionState(sessionEvents(ks))).toFuture
       watcher.process(new WatchedEvent(EventType.None, ks, path))
-      var currentState: WatchState = WatchState.Pending
-      statsWatcher.changes respond { s: WatchState =>
-        currentState = s
-      }
-      eventually {
-        assert(currentState === WatchState.SessionState(sessionEvents(ks)))
-      }
+      assert(Await.result(satisfied) === WatchState.SessionState(sessionEvents(ks)))
       assert(statsReceiver.counter(ApacheSessionState(ks).name)() === 1)
     }
   }

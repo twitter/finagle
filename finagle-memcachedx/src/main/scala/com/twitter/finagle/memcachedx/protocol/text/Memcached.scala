@@ -72,6 +72,8 @@ class Memcached(stats: StatsReceiver) extends CodecFactory[Command, Response] {
       override def newTraceInitializer = MemcachedxTraceInitializer.Module
     }
   }
+
+  override val protocolLibraryName: String = "memcached"
 }
 
 /**

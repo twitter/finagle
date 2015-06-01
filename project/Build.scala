@@ -156,11 +156,8 @@ object Finagle extends Build {
     settings = Project.defaultSettings ++
       sharedSettings ++
       unidocSettings ++ Seq(
-        // NB: KestrelX defines thrift structs which collide with Kestrel.
-        // We can remove this exception after the -x modules are deleted
-        // post netty4 migration.
         unidocProjectFilter in (ScalaUnidoc, unidoc) :=
-          inAnyProject -- inProjects(finagleExample, finagleKestrelX)
+          inAnyProject -- inProjects(finagleExample)
       )
   ) aggregate(
     // Core, support.
@@ -172,7 +169,7 @@ object Finagle extends Build {
     // Protocols
     finagleHttp, finagleHttpX, finagleHttpXCompat, finagleStream, finagleNative,
     finagleThrift, finagleMemcached, finagleMemcachedX, finagleKestrel,
-    finagleKestrelX, finagleMux, finagleThriftMux, finagleMySQL,
+    finagleMux, finagleThriftMux, finagleMySQL,
     finagleSpdy, finagleRedis,
 
     // Use and integration
@@ -213,7 +210,11 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-ostrich4",
-    libraryDependencies ++= Seq(ostrichLib)
+    libraryDependencies ++= Seq(
+      ostrichLib,
+      util("registry"),
+      util("stats")
+    )
   ).dependsOn(finagleCore, finagleHttpX)
 
   lazy val finagleStats = Project(
@@ -224,9 +225,11 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-stats",
     libraryDependencies ++= Seq(
-      "com.twitter.common" % "metrics" % "0.0.29",
+      "com.twitter.common" % "metrics" % "0.0.36",
       util("events"),
-      util("logging")
+      util("logging"),
+      util("registry"),
+      util("stats")
     ),
     libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCore, finagleHttpX)
@@ -264,7 +267,11 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-commons-stats",
-    libraryDependencies ++= Seq("com.twitter.common" % "stats" % "0.0.98")
+    libraryDependencies ++= Seq(
+      "com.twitter.common" % "stats" % "0.0.113",
+      util("registry"),
+      util("stats")
+    )
   ).dependsOn(finagleCore)
 
   lazy val finagleServersets = Project(
@@ -279,7 +286,7 @@ object Finagle extends Build {
       "commons-codec" % "commons-codec" % "1.6",
       util("zk-common"),
       util("zk-test") % "test",
-      "com.twitter.common.zookeeper" % "server-set" % "1.0.103",
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.103" exclude("org.slf4j", "slf4j-log4j12"),
       "com.google.guava" % "guava" % "16.0.1"
     ),
 
@@ -428,17 +435,6 @@ object Finagle extends Build {
     libraryDependencies ++= scroogeLibs
   ).dependsOn(finagleCore, finagleMemcached, finagleThrift)
 
-  lazy val finagleKestrelX = Project(
-    id = "finagle-kestrelx",
-    base = file("finagle-kestrelx"),
-    settings = Project.defaultSettings ++
-      ScroogeSBT.newSettings ++
-      sharedSettings
-  ).settings(
-    name := "finagle-kestrelx",
-    libraryDependencies ++= scroogeLibs
-  ).dependsOn(finagleCore, finagleMemcachedX, finagleThrift)
-
   lazy val finagleRedis = Project(
     id = "finagle-redis",
     base = file("finagle-redis"),
@@ -461,7 +457,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-mux",
-    libraryDependencies ++= Seq("com.twitter.common" % "stats-util" % "0.0.49")
+    libraryDependencies ++= Seq("com.twitter.common" % "stats-util" % "0.0.57")
   ).dependsOn(finagleCore)
 
   lazy val finagleThriftMux = Project(
@@ -534,7 +530,6 @@ object Finagle extends Build {
     crossScalaVersions ~= { versions => versions filter (_ != "2.11.4") },
     libraryDependencies ++= Seq(
       util("codec"),
-      "com.twitter.common" % "flags" % "0.0.1" exclude("com.twitter", "util-core"),
       "org.slf4j" %  "slf4j-nop" % "1.5.8" % "provided"
     ) ++ scroogeLibs
   ).dependsOn(
@@ -607,7 +602,7 @@ object Finagle extends Build {
 
     // Make the "test" command run both, test and doctest:test
     test <<= Seq(test in Test, test in DocTest).dependOn
-    ).dependsOn(finagleCore, finagleHttp, finagleMySQL)
+    ).dependsOn(finagleCore, finagleHttpX, finagleMySQL)
 
   /* Test Configuration for running tests on doc sources */
   lazy val DocTest = config("doctest") extend(Test)

@@ -44,6 +44,7 @@ class ClientRegistryTest extends FunSuite
     val sr = new InMemoryStatsReceiver
     val stackClient = stringClient
       .configured(param.Stats(sr))
+      .configured(param.ProtocolLibrary("fancy"))
   }
 
   before {
@@ -132,7 +133,7 @@ class ClientRegistryTest extends FunSuite
     val simple = new SimpleRegistry
     GlobalRegistry.withRegistry(simple) {
       val c = stackClient.newClient(Name.Path(path), "foo")
-      val prefix = Seq("client", "foo", "/$/com.twitter.finagle.client.crtnamer/foo", "Pool")
+      val prefix = Seq("client", "fancy", "foo", "/$/com.twitter.finagle.client.crtnamer/foo", "Pool")
       val filtered = GlobalRegistry.get.toSet.filter { e =>
         e.key.startsWith(prefix)
       }
@@ -180,14 +181,14 @@ class ClientRegistryTest extends FunSuite
 
   test("RegistryEntryLifecycle module registers a Stack and then deregisters it") {
     val stk = newStack()
-    val params = Stack.Params.empty + param1 + param.Label("foo")
+    val params = Stack.Params.empty + param1 + param.Label("foo") + param.ProtocolLibrary("fancy")
     val simple = new SimpleRegistry()
     GlobalRegistry.withRegistry(simple) {
       val factory = (RegistryEntryLifecycle.module[Int, Int] +: stk).make(params)
       val expected = {
         Set(
-          Entry(Seq("client", "foo", "/$/fail", "name", "p1"), "999"),
-          Entry(Seq("client", "foo", "/$/fail", "head", "p2"), "1")
+          Entry(Seq("client", "fancy", "foo", "/$/fail", "name", "p1"), "999"),
+          Entry(Seq("client", "fancy", "foo", "/$/fail", "head", "p2"), "1")
         )
       }
       assert(GlobalRegistry.get.toSet == expected)

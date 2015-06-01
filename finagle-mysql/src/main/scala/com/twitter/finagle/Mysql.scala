@@ -4,6 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.{StackClient, StdStackClient, DefaultPool}
 import com.twitter.finagle.exp.mysql._
 import com.twitter.finagle.exp.mysql.transport.{MysqlTransporter, Packet}
+import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
@@ -84,7 +85,8 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     params: Stack.Params = StackClient.defaultParams + DefaultPool.Param(
         low = 0, high = 1, bufferSize = 0,
         idleTime = Duration.Top,
-        maxWaiters = Int.MaxValue)
+        maxWaiters = Int.MaxValue) +
+      ProtocolLibrary("mysql")
   ) extends StdStackClient[Request, Result, Client] with MysqlRichClient {
     protected def copy1(
       stack: Stack[ServiceFactory[Request, Result]] = this.stack,

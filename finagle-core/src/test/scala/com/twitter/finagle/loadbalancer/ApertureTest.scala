@@ -14,9 +14,9 @@ import scala.collection.mutable
 
 private trait ApertureTesting {
   val N = 100000
-  
+
   class Empty extends Exception
-  
+
   protected trait TestBal extends Balancer[Unit, Unit] with Aperture[Unit, Unit] {
     protected val rng = Rng(12345L)
     protected val emptyException = new Empty
@@ -38,7 +38,7 @@ private trait ApertureTesting {
   class Factory(val i: Int) extends ServiceFactory[Unit, Unit] {
     var n = 0
     var p = 0
-    
+
     def clear() { n = 0 }
 
     def apply(conn: ClientConnection) = {
@@ -52,20 +52,20 @@ private trait ApertureTesting {
         }
       })
     }
-    
+
     @volatile var _status: Status = Status.Open
-    
+
     override def status = _status
     def status_=(v: Status) { _status = v }
-    
+
     def close(deadline: Time) = ???
   }
 
   class Counts extends Iterable[Factory] {
     val factories = new mutable.HashMap[Int, Factory]
-    
+
     def iterator = factories.values.iterator
-    
+
     def clear() {
       factories.values.foreach(_.clear())
     }
@@ -78,7 +78,7 @@ private trait ApertureTesting {
 
 
     def apply(i: Int) = factories.getOrElseUpdate(i, new Factory(i))
-    
+
     def range(n: Int): Traversable[(ServiceFactory[Unit, Unit], Double)] =
       Traversable.tabulate(n) { i => (apply(i) -> 1) }
   }
@@ -98,41 +98,41 @@ private class ApertureTest extends FunSuite with ApertureTesting {
     assert(bal.unitsx === 10)
     bal.applyn(100)
     assert(counts.aperture === 1)
-    
+
     bal.adjustx(1)
     bal.applyn(100)
     assert(counts.aperture === 2)
-    
+
     counts.clear()
     bal.adjustx(-1)
     bal.applyn(100)
     assert(counts.aperture === 1)
   }
-  
+
   test("Don't operate outside of aperture range") {
     val counts = new Counts
     val bal = new Bal
-    
+
     bal.update(counts.range(10))
     bal.adjustx(10000)
     bal.applyn(1000)
     assert(counts.aperture === 10)
-    
+
     counts.clear()
     bal.adjustx(-100000)
     bal.applyn(1000)
     assert(counts.aperture === 1)
   }
-  
+
   test("Increase aperture to match available hosts") {
     val counts = new Counts
     val bal = new Bal
-    
+
     bal.update(counts.range(10))
     bal.adjustx(1)
     bal.applyn(100)
     assert(counts.aperture === 2)
-    
+
     // Since tokens are assigned, we don't know apriori what's in the
     // aperture*, so figure it out by observation.
     //
@@ -145,7 +145,7 @@ private class ApertureTest extends FunSuite with ApertureTesting {
     assert(counts.aperture === 3)
     // Apertures are additive.
     assert(keys2.forall(counts.nonzero.contains))
-    
+
     // When we shrink again, we should use the same keyset.
     counts(keys2.head).status = Status.Open
     counts.clear()
@@ -156,16 +156,16 @@ private class ApertureTest extends FunSuite with ApertureTesting {
   test("Distributes according to weights") {
     val counts = new Counts
     val bal = new Bal
-    
+
     bal.update(Traversable(
       counts(0) -> 2,
       counts(1) -> 1,
       counts(2) -> 2,
       counts(3) -> 1
     ))
-    
+
     assert(bal.unitsx === 6)
-    
+
     bal.adjustx(5)
     bal.applyn(N)
 
@@ -174,19 +174,19 @@ private class ApertureTest extends FunSuite with ApertureTesting {
     assert(counts(2).n.toDouble/N === 0.333 +- 0.05)
     assert(counts(3).n.toDouble/N === 0.166 +- 0.05)
   }
-  
+
   test("Empty vectors") {
     val bal = new Bal
 
     intercept[Empty] { Await.result(bal.apply()) }
   }
-  
+
   test("Nonavailable vectors") {
     val counts = new Counts
     val bal = new Bal
-    
+
     bal.update(counts.range(10))
-    for (f <- counts) 
+    for (f <- counts)
       f.status = Status.Closed
 
     bal.applyn(1000)
@@ -195,7 +195,7 @@ private class ApertureTest extends FunSuite with ApertureTesting {
     val Seq(badkey) = counts.nonzero.toSeq
     val goodkey = (badkey + 1) % 10
     counts(goodkey).status = Status.Open
-    
+
     counts.clear()
     bal.applyn(1000)
     assert(counts.nonzero === Set(goodkey))
@@ -207,55 +207,67 @@ private class ApertureTest extends FunSuite with ApertureTesting {
 private class LoadBandTest extends FunSuite with ApertureTesting {
   import Tolerance._
 
-  protected class Bal(protected val lowLoad: Double, protected val highLoad: Double) 
+  val rng = Rng()
+
+  class Bal(protected val lowLoad: Double, protected val highLoad: Double)
       extends TestBal with LoadBand[Unit, Unit] {
     def this() = this(0.5, 2.0)
     protected def smoothWin = Duration.Zero
   }
-  
+
   class Avg {
     var n = 0
     var sum = 0
-    
+
     def update(v: Int) {
       n += 1
       sum += v
     }
-    
+
     def apply(): Double = sum.toDouble/n
   }
 
-
   test("Aperture tracks concurrency") {
     val counts = new Counts
-    val bal = new Bal
+    val low = 0.5
+    val high = 2.0
+    val bal = new Bal(lowLoad = low, highLoad = high)
 
-    bal.update(counts.range(10))
-    
-    for (c <- (1 to 10) ++ (9 to 1 by -1)) {
+    val numNodes = rng.nextInt(100)
+    bal.update(counts.range(numNodes))
 
-      // P2C forces us to take a statistical view of things.
-      val ps = new mutable.HashMap[Int, Avg]
-      val load = new Avg
-      val ap = new Avg
+    val start = (high+1).toInt
+    val concurrency = (start to numNodes) ++ ((numNodes-1) to start by -1)
 
-      for (n <- 0 until 10000) {
+    for (c <- concurrency) {
+      var ap = 0
+
+      // We load the balancer with `c` outstanding requests each
+      // run and sample the load. However, because the aperture
+      // distributor employs P2C we are forced to take a
+      // statistical view of things.
+      val avgLoad = new Avg
+
+      for (i <- 0 to 1000) {
         counts.clear()
         val factories = Seq.fill(c) { Await.result(bal.apply()) }
-        for (f <- counts if f.n > 0) {
-          ps.getOrElseUpdate(f.i, new Avg).update(f.p)
-          load.update(f.p)
-        }
-        ap.update(bal.aperturex)
+        for (f <- counts if f.n > 0) { avgLoad.update(f.p) }
+        // no need to avg ap, it's independent of the load distribution
+        ap = bal.aperturex
         Await.result(Closable.all(factories:_*).close())
       }
-      
-      // These are two ways of testing the same thing.
-      assert(ap() > 0.5*c)
-      assert(ap() < 2.0*c)
 
-      assert(load() > 0.4)
-      assert(load() < 2.5)
+      // The controller tracks the avg concurrency over
+      // the aperture. For every `high` we detect, we widen
+      // the aperture.
+      // TODO: We should test this with a smoothWin to get a more
+      // accurate picture of the lag in our adjustments.
+      assert(math.abs(c/high - ap) <= 1)
+
+      // The changes to the aperture should correlate to
+      // the avg load per node but note that the distributor
+      // and controller work independently.
+      assert(math.abs(avgLoad() - high) <= 1)
 
       assert(counts.forall(_.p == 0))
     }

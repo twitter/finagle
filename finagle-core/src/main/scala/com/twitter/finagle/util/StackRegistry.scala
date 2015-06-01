@@ -1,7 +1,7 @@
 package com.twitter.finagle.util
 
 import com.twitter.finagle.Stack
-import com.twitter.finagle.param.Label
+import com.twitter.finagle.param.{Label, ProtocolLibrary}
 import com.twitter.util.registry.GlobalRegistry
 import java.util.concurrent.atomic.AtomicInteger
 import scala.language.existentials
@@ -30,6 +30,7 @@ object StackRegistry {
     }.toSeq
 
     val name: String = params[Label].label
+    val protocolLibrary: String = params[ProtocolLibrary].name
   }
 
   /**
@@ -71,7 +72,7 @@ trait StackRegistry {
     val gRegistry = GlobalRegistry.get
     entry.modules.foreach { case Module(paramName, _, reflected) =>
       reflected.foreach { case (field, value) =>
-        val key = Seq(registryName, entry.name, entry.addr, paramName, field)
+        val key = Seq(registryName, entry.protocolLibrary, entry.name, entry.addr, paramName, field)
         if (gRegistry.put(key, value).isEmpty)
           numEntries.incrementAndGet()
       }
@@ -83,7 +84,7 @@ trait StackRegistry {
     val name = entry.name
     entry.modules.foreach { case Module(paramName, _, reflected) =>
       reflected.foreach { case (field, value) =>
-        val key = Seq(registryName, name, entry.addr, paramName, field)
+        val key = Seq(registryName, entry.protocolLibrary, name, entry.addr, paramName, field)
         if (gRegistry.remove(key).isDefined)
           numEntries.decrementAndGet()
       }

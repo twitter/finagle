@@ -42,6 +42,7 @@ private[loadbalancer] trait P2CSuite {
     clock: (() => Long) = System.nanoTime
   ): ServiceFactory[Unit, Int] = new P2CBalancer(
     Activity(fs map { fs => Activity.Ok(fs.map(_.tup)) }),
+    maxEffort = 5,
     rng = Rng(12345L),
     statsReceiver = sr,
     emptyException = noBrokers
@@ -309,6 +310,7 @@ class P2CBalancerEwmaTest extends FunSuite with App with P2CSuite {
     clock: (() => Long) = System.nanoTime
   ): ServiceFactory[Unit, Int] = new P2CBalancerPeakEwma(
     Activity(fs map { fs => Activity.Ok(fs.map(_.tup)) }),
+    maxEffort = 5,
     decayTime = 150.nanoseconds,
     rng = Rng(12345L),
     statsReceiver = sr,

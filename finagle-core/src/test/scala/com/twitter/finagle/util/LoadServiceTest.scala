@@ -1,5 +1,6 @@
 package com.twitter.finagle.util
 
+import com.google.common.io.ByteStreams
 import com.twitter.finagle.{Announcement, Announcer, Resolver}
 import com.twitter.util.Future
 import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry, Entry}
@@ -122,18 +123,19 @@ class LoadServiceCallable extends Callable[Seq[Any]] {
 }
 
 class MetaInfCodedClassloader(parent: ClassLoader) extends ClassLoader(parent) {
-  override def loadClass(p1: String): Class[_] = {
-    if (p1.startsWith("com.twitter.finagle" )) {
+  override def loadClass(name: String): Class[_] = {
+    if (name.startsWith("com.twitter.finagle" )) {
       try {
-        val is: InputStream = getClass.getClassLoader.getResourceAsStream(p1.replaceAll("\\.", "/") + ".class")
-        val buf = new Array[Byte](2*is.available())
-        val len = is.read(buf)
-        defineClass(p1, buf, 0, len)
+        val path = name.replaceAll("\\.", "/") + ".class"
+        val is: InputStream = getClass.getClassLoader.getResourceAsStream(path)
+        val buf = ByteStreams.toByteArray(is)
+
+        defineClass(name, buf, 0, buf.length)
       } catch {
-        case e: Exception => throw new ClassNotFoundException("Couldn't load class " + p1, e)
+        case e: Exception => throw new ClassNotFoundException("Couldn't load class " + name, e)
       }
     } else {
-      parent.loadClass(p1)
+      parent.loadClass(name)
     }
   }
 

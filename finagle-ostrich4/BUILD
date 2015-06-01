@@ -1,12 +1,12 @@
 maven_layout()
 
-jar_library(name='finagle-ostrich4',
+target(name='finagle-ostrich4',
   dependencies=[
     'finagle/finagle-ostrich4/src/main/scala'
   ]
 )
 
-jar_library(name='tests',
+target(name='tests',
   dependencies=[
     'finagle/finagle-ostrich4/src/test/scala'
   ]

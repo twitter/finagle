@@ -109,8 +109,8 @@ private[mysql] class StdClient(factory: ServiceFactory[Request, Result])
     }
 
   def prepare(sql: String): PreparedStatement = new PreparedStatement {
-    def apply(ps: Any*): Future[Result] = factory() flatMap { svc =>
-      svc(PrepareRequest(sql)) flatMap {
+    def apply(ps: Parameter*): Future[Result] = factory() flatMap { svc =>
+      svc(PrepareRequest(sql)).flatMap {
         case ok: PrepareOK => svc(ExecuteRequest(ok.id, ps.toIndexedSeq))
         case r => Future.exception(new Exception("Unexpected result %s when preparing %s"
           .format(r, sql)))

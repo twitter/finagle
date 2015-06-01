@@ -78,10 +78,10 @@ class BackupRequestFilter[Req, Rep] private[exp](
     val start = nowMs()
     val howlong = cutoffMs()
     val backup = if (howlong == 0) Future.never else {
-      timer.doAt(Time.fromMilliseconds(howlong + start)) {
+      timer.doLater(Duration.fromMilliseconds(howlong)) {
         timeouts.incr()
         service(req)
-      } flatten
+      }.flatten
     }
 
     val orig = service(req)

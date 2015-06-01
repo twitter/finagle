@@ -26,7 +26,7 @@ import java.util.Arrays.binarySearch
 class Ring(positions: Array[Int]) {
   require(positions.nonEmpty)
   private[this] val N = positions.length
-  
+
   // An internal array, of size 2N, which is extended to repeat each
   // position: it is positions concatenated with itself, with
   // values adjusted in the second half.
@@ -60,7 +60,7 @@ class Ring(positions: Array[Int]) {
     // select the first one. This is to support zero weights.
     while (i > 0 && nodes(i) == nodes(i-1))
       i -= 1
-    
+
     i
   }
 
@@ -86,7 +86,7 @@ class Ring(positions: Array[Int]) {
   /**
    * Compute the index of the given position.
    */
-  def apply(pos: Int): Int = 
+  def apply(pos: Int): Int =
     index(pos)%N
 
   /**
@@ -100,7 +100,7 @@ class Ring(positions: Array[Int]) {
    */
   def pick(rng: Rng, off: Int, wid: Int): Int =
     index(off.toLong + rng.nextLong(wid))%N
-  
+
   /**
    * Pick two elements. They are picked without replacement as long as
    * the offset and width admits it. Zero-width nodes cannot be picked
@@ -121,11 +121,24 @@ class Ring(positions: Array[Int]) {
     val wid1 = wid - discount
     if (wid1 == 0)
       return (a, a)
-      
+
     // Instead of actually splitting the range into two, we offset
-    // any pick that takes place in the second range.
+    // any pick that takes place in the second range if there is a
+    // possibility that our second choice falls within [ab, ae].
+    //
+    // There are three cases which we need to consider:
+    // 1. [ab, ae] is a proper subset of [off, off+wid1]
+    // 2. ab is outside of [off, off+wid1] but ae is inside of it.
+    // 3. ab is inside of [off, off+wid1] but ae falls outside of it.
+    //
+    // To handle #1, #2, we verify that our random selection is
+    // greater than or equal to the start of our intersection
+    // and bump it by our overlap.
+    //
+    // #3 is taken care of by the fact that we've discounted any
+    // possible tail overlap from `wid` in `wid1`.
     var pos = off.toLong + rng.nextLong(wid1)
-    if (pos >= nodes(a)-discount)
+    if (pos >= ae-discount)
       pos += discount
 
     (a%N, index(pos)%N)
@@ -135,7 +148,7 @@ class Ring(positions: Array[Int]) {
 private[finagle] object Ring {
   /**
    * Construct a ring from a sequence of weights.
-   * The positions in the ring are chosen so that each 
+   * The positions in the ring are chosen so that each
    * element has space in the ring proportional to its weight.
    *
    * @param weights The sequence of weights from which

@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 import java.util.logging.{Level, Logger}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{ChannelHandlerContext, ChannelStateEvent,
-  ExceptionEvent, MessageEvent, SimpleChannelHandler}
+  ExceptionEvent, MessageEvent, WriteCompletionEvent, SimpleChannelHandler}
 
 /**
  * A [[org.jboss.netty.channel.ChannelHandler]] that tracks channel/connection
@@ -57,19 +57,13 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
     }
   }
 
-  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+  override def writeComplete(ctx: ChannelHandlerContext, e: WriteCompletionEvent) {
     val (_, channelWriteCount) = ctx.getAttachment().asInstanceOf[(AtomicLong, AtomicLong)]
 
-    e.getMessage match {
-      case buffer: ChannelBuffer =>
-        val readableBytes = buffer.readableBytes
-        channelWriteCount.getAndAdd(readableBytes)
-        sentBytes.incr(readableBytes)
-      case _ =>
-        log.warning("ChannelStatsHandler received non-channelbuffer write")
-    }
+    channelWriteCount.getAndAdd(e.getWrittenAmount)
+    sentBytes.incr(e.getWrittenAmount.toInt)
 
-    super.writeRequested(ctx, e)
+    super.writeComplete(ctx, e)
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {

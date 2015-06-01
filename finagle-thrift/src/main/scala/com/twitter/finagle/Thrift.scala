@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.client.{StdStackClient, StackClient, Transporter}
 import com.twitter.finagle.dispatch.{SerialClientDispatcher, SerialServerDispatcher}
 import com.twitter.finagle.netty3.{Netty3Transporter, Netty3Listener}
-import com.twitter.finagle.param.{Label, Stats}
+import com.twitter.finagle.param.{Label, Stats, ProtocolLibrary}
 import com.twitter.finagle.server.{StdStackServer, StackServer, Listener}
 import com.twitter.finagle.thrift.{ClientId => _, _}
 import com.twitter.finagle.transport.Transport
@@ -125,7 +125,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
   case class Client(
     stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = Client.stack,
-    params: Stack.Params = StackClient.defaultParams,
+    params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("thrift"),
     framed: Boolean = true
   ) extends StdStackClient[ThriftClientRequest, Array[Byte], Client] with ThriftRichClient {
     protected def copy1(
@@ -207,7 +207,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
   case class Server(
     stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = Server.stack,
-    params: Stack.Params = StackServer.defaultParams,
+    params: Stack.Params = StackServer.defaultParams + ProtocolLibrary("thrift"),
     framed: Boolean = true
   ) extends StdStackServer[Array[Byte], Array[Byte], Server] with ThriftRichServer {
     protected def copy1(

@@ -1,16 +1,17 @@
 package com.twitter.finagle.thrift
 
+import com.twitter.finagle.Service
+import com.twitter.test._
 import com.twitter.util.{Await, Future}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import com.twitter.finagle.Service
-import com.twitter.test._
+import scala.reflect.ClassTag
 
 @RunWith(classOf[JUnitRunner])
 class ClientIdEndToEndTest extends FunSuite with ThriftTest {
   type Iface = B.ServiceIface
-  def ifaceManifest = implicitly[ClassManifest[B.ServiceIface]]
+  def ifaceManifest = implicitly[ClassTag[B.ServiceIface]]
 
   val processor = new B.ServiceIface {
     def add(a: Int, b: Int) = Future.exception(new AnException)

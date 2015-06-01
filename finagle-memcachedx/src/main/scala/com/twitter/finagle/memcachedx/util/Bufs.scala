@@ -1,8 +1,8 @@
 package com.twitter.finagle.memcachedx.util
 
 import com.google.common.base.Strings
-
 import com.twitter.io.Buf
+import scala.language.implicitConversions
 
 private[finagle] object Bufs {
 
@@ -27,7 +27,7 @@ private[finagle] object Bufs {
       null
     }
     else {
-      strings map nonEmptyStringToBuf toSeq
+      strings.map(nonEmptyStringToBuf).toSeq
     }
   }
 
@@ -40,7 +40,7 @@ private[finagle] object Bufs {
      */
     def split(delimiter: Char): Seq[Buf] = {
       val Buf.Utf8(decoded) = buffer
-      decoded.split(delimiter) map { Buf.Utf8(_) }
+      decoded.split(delimiter).map { Buf.Utf8(_) }
     }
 
     /**

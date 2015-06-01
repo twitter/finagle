@@ -77,6 +77,11 @@ trait Codec[Req, Rep] {
    * Client/Server Builders rather than stacks.
    */
   def newTraceInitializer: Stackable[ServiceFactory[Req, Rep]] = TraceInitializerFilter.clientModule[Req, Rep]
+
+  /**
+   * A protocol library name to use for displaying which protocol library this client or server is using.
+   */
+  def protocolLibraryName: String = "not-specified"
 }
 
 /**
@@ -128,4 +133,9 @@ trait CodecFactory[Req, Rep] {
 
   def client: Client
   def server: Server
+
+  /**
+   * A protocol library name to use for displaying which protocol library this client or server is using.
+   */
+  def protocolLibraryName: String = "not-specified"
 }

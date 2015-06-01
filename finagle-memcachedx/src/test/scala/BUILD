@@ -4,6 +4,11 @@ EXTERNAL_SOURCES = [
 ]
 
 scala_library(name='external',
+  provides = scala_artifact(
+    org = 'com.twitter',
+    name = 'finagle-memcachedx-testutils',
+    repo = artifactory,
+  ),
   dependencies=[
     '3rdparty/jvm/io/netty',
     'finagle/finagle-core',
@@ -34,7 +39,7 @@ junit_tests(name='scala',
     'util/util-hashing',
     'util/util-zk-test'
   ],
-  sources=rglobs('*.scala') - EXTERNAL_SOURCES,
+  sources=rglobs('*.scala', exclude=[EXTERNAL_SOURCES]),
   resources=[
     'finagle/finagle-memcachedx/src/test/resources'
   ]

@@ -29,7 +29,7 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[Request, Resp
   def this() = this(Seq[(String, Service[Request, Response])]())
 
   private[this] val sorted: Seq[(String, Service[Request, Response])] =
-    handlers.sortBy { case (pattern, _) => pattern.length } reverse
+    handlers.sortBy { case (pattern, _) => pattern.length }.reverse
 
   def patterns: Seq[String] = sorted map { case(p, _) => p }
 

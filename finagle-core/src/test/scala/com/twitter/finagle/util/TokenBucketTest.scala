@@ -10,7 +10,7 @@ import com.twitter.conversions.time._
 class TokenBucketTest extends FunSuite {
   test("a leaky bucket is leaky") {
     Time.withCurrentTimeFrozen { tc =>
-      val b = TokenBucket.newLeakyBucket(3.seconds, 0)
+      val b = TokenBucket.newLeakyBucket(3.seconds, 0, WindowedAdder.timeMs)
       b.put(100)
       assert(b.tryGet(1))
 
@@ -21,7 +21,7 @@ class TokenBucketTest extends FunSuite {
 
   test("tryGet fails when empty") {
     Time.withCurrentTimeFrozen { tc =>
-      val b = TokenBucket.newLeakyBucket(3.seconds, 0)
+      val b = TokenBucket.newLeakyBucket(3.seconds, 0, WindowedAdder.timeMs)
       b.put(100)
       assert(b.tryGet(50))
       assert(b.tryGet(49))
@@ -37,7 +37,7 @@ class TokenBucketTest extends FunSuite {
 
   test("provisions reserves") {
     Time.withCurrentTimeFrozen { tc =>
-      val b = TokenBucket.newLeakyBucket(3.seconds, 100)
+      val b = TokenBucket.newLeakyBucket(3.seconds, 100, WindowedAdder.timeMs)
 
       assert(b.tryGet(50))
       assert(b.tryGet(50))

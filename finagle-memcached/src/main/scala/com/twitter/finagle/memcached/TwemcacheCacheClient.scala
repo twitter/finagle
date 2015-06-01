@@ -19,7 +19,7 @@ trait TwemcacheClient extends Client {
    * keys the server had, together with their "version" token
    */
   def getv(key: String): Future[Option[(ChannelBuffer, ChannelBuffer)]] =
-    getv(Seq(key)) map { _.values.headOption }
+    getv(Seq(key)).map { _.values.headOption }
 
   def getv(keys: Iterable[String]): Future[Map[String, (ChannelBuffer, ChannelBuffer)]] = {
     getvResult(keys) flatMap { result =>
@@ -58,7 +58,7 @@ trait TwemcacheConnectedClient extends TwemcacheClient { self: ConnectedClient =
   def getvResult(keys: Iterable[String]): Future[GetsResult] = {
     try {
       if (keys==null) throw new IllegalArgumentException("Invalid keys: keys cannot be null")
-      rawGet(Getv(keys.toSeq)) map { GetsResult(_) } // map to GetsResult as the response format are the same
+      rawGet(Getv(keys.toSeq)).map { GetsResult(_) } // map to GetsResult as the response format are the same
     }  catch {
       case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
@@ -66,7 +66,7 @@ trait TwemcacheConnectedClient extends TwemcacheClient { self: ConnectedClient =
 
   def upsert(key: String, flags: Int, expiry: Time, value: ChannelBuffer, version: ChannelBuffer): Future[JBoolean] = {
     try {
-      service(Upsert(key, flags, expiry, value, version)) map {
+      service(Upsert(key, flags, expiry, value, version)).map {
         case Stored() => true
         case Exists() => false
         case Error(e) => throw e
@@ -101,7 +101,7 @@ trait TwemcachePartitionedClient extends TwemcacheClient { self: PartitionedClie
     if (keys.nonEmpty) {
       withKeysGroupedByClient(keys) {
         _.getvResult(_)
-      } map { GetResult.merged(_) }
+      }.map { GetResult.merged(_) }
     } else {
       Future.value(GetsResult(GetResult()))
     }
@@ -114,7 +114,7 @@ trait TwemcachePartitionedClient extends TwemcacheClient { self: PartitionedClie
       keys: Iterable[String])(f: (TwemcacheClient, Iterable[String]) => Future[A]
       ): Future[Seq[A]] = {
     Future.collect(
-      keys groupBy(twemcacheClientOf(_)) map Function.tupled(f) toSeq
+      keys.groupBy(twemcacheClientOf).map(Function.tupled(f)).toSeq
     )
   }
 }

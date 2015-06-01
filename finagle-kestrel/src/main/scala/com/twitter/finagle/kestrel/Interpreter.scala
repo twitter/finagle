@@ -1,18 +1,19 @@
 package com.twitter.finagle.kestrel
 
-import com.twitter.finagle.kestrel.protocol._
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffers._
-import com.twitter.conversions.time._
 import _root_.java.util.concurrent.{TimeUnit, BlockingDeque}
-import com.twitter.finagle.Service
-import com.twitter.util.{StateMachine, Future}
-import com.twitter.util.StateMachine.InvalidStateTransition
+
 import com.google.common.cache.LoadingCache
 
-class Interpreter(queues: LoadingCache[ChannelBuffer, BlockingDeque[ChannelBuffer]]) extends StateMachine {
+import com.twitter.conversions.time._
+import com.twitter.finagle.Service
+import com.twitter.finagle.kestrel.protocol._
+import com.twitter.io.Buf
+import com.twitter.util.{StateMachine, Future}
+import com.twitter.util.StateMachine.InvalidStateTransition
+
+class Interpreter(queues: LoadingCache[Buf, BlockingDeque[Buf]]) extends StateMachine {
   case class NoTransaction() extends State
-  case class OpenTransaction(queueName: ChannelBuffer, item: ChannelBuffer) extends State
+  case class OpenTransaction(queueName: Buf, item: Buf) extends State
   state = NoTransaction()
 
   def apply(command: Command): Response = {
@@ -25,7 +26,7 @@ class Interpreter(queues: LoadingCache[ChannelBuffer, BlockingDeque[ChannelBuffe
             if (item eq null)
               Values(Seq.empty)
             else
-              Values(Seq(Value(wrappedBuffer(queueName), wrappedBuffer(item))))
+              Values(Seq(Value(queueName, item)))
           case OpenTransaction(txnQueueName, item) =>
             throw new InvalidStateTransition("Transaction", "get")
         }
@@ -38,7 +39,7 @@ class Interpreter(queues: LoadingCache[ChannelBuffer, BlockingDeque[ChannelBuffe
             if (item eq null)
               Values(Seq.empty)
             else
-              Values(Seq(Value(wrappedBuffer(queueName), wrappedBuffer(item))))
+              Values(Seq(Value(queueName, item)))
           case OpenTransaction(txnQueueName, item) =>
             throw new InvalidStateTransition("Transaction", "get/open")
         }
@@ -80,8 +81,8 @@ class Interpreter(queues: LoadingCache[ChannelBuffer, BlockingDeque[ChannelBuffe
         if (item eq null)
           Values(Seq.empty)
         else
-          Values(Seq(Value(wrappedBuffer(queueName), wrappedBuffer(item))))
-      case Set(queueName, expiry, value) =>
+          Values(Seq(Value(queueName, item)))
+      case Set(queueName, _, value) =>
         queues.get(queueName).add(value)
         Stored()
       case Delete(queueName) =>

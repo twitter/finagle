@@ -4,6 +4,7 @@ import com.twitter.finagle.client._
 import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.netty3._
+import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
@@ -56,7 +57,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
   case class Client(
     stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Client.stack,
-    params: Stack.Params = StackClient.defaultParams
+    params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("mux")
   ) extends StdStackClient[mux.Request, mux.Response, Client] {
     protected def copy1(
       stack: Stack[ServiceFactory[mux.Request, mux.Response]] = this.stack,
@@ -73,7 +74,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     ): Service[mux.Request, mux.Response] = {
       val param.Stats(sr) = params[param.Stats]
       val param.Label(name) = params[param.Label]
-      new mux.ClientDispatcher(name, transport, sr)
+      new mux.ClientDispatcher(name, transport, sr.scope("mux"))
     }
   }
 
@@ -91,7 +92,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackServer.newStack
       .remove(TraceInitializerFilter.role)
       .replace(StackServer.Role.protoTracing, new ServerProtoTracing),
-    params: Stack.Params = StackServer.defaultParams
+    params: Stack.Params = StackServer.defaultParams + ProtocolLibrary("mux")
   ) extends StdStackServer[mux.Request, mux.Response, Server] {
     protected def copy1(
       stack: Stack[ServiceFactory[mux.Request, mux.Response]] = this.stack,

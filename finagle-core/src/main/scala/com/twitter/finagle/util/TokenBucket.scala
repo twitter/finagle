@@ -36,9 +36,11 @@ private[finagle] object TokenBucket {
    * @param reserve The number of reserve tokens over the TTL
    * period. That is, every `ttl` has `reserve` tokens in addition to
    * the ones added to the bucket.
+
+   * @param nowMs The current time in milliseconds
    */
-  def newLeakyBucket(ttl: Duration, reserve: Int): TokenBucket = new TokenBucket {
-    private[this] val w = new WindowedAdder(ttl.inMilliseconds, 10, WindowedAdder.timeMs)
+  def newLeakyBucket(ttl: Duration, reserve: Int, nowMs: () => Long): TokenBucket = new TokenBucket {
+    private[this] val w = new WindowedAdder(ttl.inMilliseconds, 10, nowMs)
 
     def put(n: Int): Unit = w.add(n)
 
@@ -58,4 +60,18 @@ private[finagle] object TokenBucket {
 
     def count: Long = w.sum() + reserve
   }
+
+  /**
+   * A leaky bucket expires tokens after approximately `ttl` time.
+   * Thus, a bucket left alone will empty itself.
+   *
+   * @param ttl The (approximate) time after which a token will
+   * expire.
+   *
+   * @param reserve The number of reserve tokens over the TTL
+   * period. That is, every `ttl` has `reserve` tokens in addition to
+   * the ones added to the bucket.
+   */
+  def newLeakyBucket(ttl: Duration, reserve: Int): TokenBucket =
+    newLeakyBucket(ttl, reserve, WindowedAdder.systemMs)
 }

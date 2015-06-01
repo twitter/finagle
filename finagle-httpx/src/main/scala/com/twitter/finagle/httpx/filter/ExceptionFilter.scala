@@ -3,7 +3,7 @@ package com.twitter.finagle.httpx.filter
 import com.twitter.finagle.{CancelledRequestException, Service, SimpleFilter}
 import com.twitter.finagle.httpx.{Request, Response, Status}
 import com.twitter.logging.Logger
-import com.twitter.util.Future
+import com.twitter.util.{Future, NonFatal}
 
 /**
  * General purpose exception filter.
@@ -24,14 +24,14 @@ class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response
         service(request)
       } catch {
         // apply() threw an exception - convert to Future
-        case e => Future.exception(e)
+        case NonFatal(e) => Future.exception(e)
       }
     } rescue {
       case e: CancelledRequestException =>
         // This only happens when ChannelService cancels a reply.
         log.warning("cancelled request: uri:%s", request.getUri)
         respond(request, ClientClosedRequestStatus)
-      case e =>
+      case e: Throwable =>
         try {
           log.warning(e, "exception: uri:%s exception:%s", request.getUri, e)
           respond(request, Status.InternalServerError)

@@ -16,6 +16,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Green Man Gaming](http://www.greenmangaming.com/)
 * [Gutefrage.net](http://www.gutefrage.net/)
   * ["Introducing Gutefrage.net's Service-Oriented Architecture"][2]
+* [Hopper](https://www.hopper.com/)
 * [JusBrasil](http://www.jusbrasil.com.br)
 * [Magine TV](https://magine.com/)
 * [National Center for Biotechnology Information (NCBI)](https://www.ncbi.nlm.nih.gov/)
@@ -36,6 +37,7 @@ URLs if possible) and [submit a pull request][1]!
   * ["Finagle @ Sharethrough: Twitter #Conf Presentation"][5]
 * [SmartNews](https://www.smartnews.com/en/)
   * ["Scala (Finagle) @ SmartNews"][12]
+* [SoFi](https://www.sofi.com/)
 * [SoundCloud](https://soundcloud.com/)
   * ["Building Products at SoundCloud—Part III: Microservices in Scala and
     Finagle"][6]

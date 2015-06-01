@@ -3,9 +3,8 @@ package com.twitter.finagle.kestrel.integration
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.kestrel.Client
 import com.twitter.finagle.kestrel.protocol.Kestrel
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.thrift.{ClientId, ThriftClientFramedCodec}
-import com.twitter.io.Charsets
+import com.twitter.io.Buf
 import com.twitter.util.Await
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -25,9 +24,9 @@ class ClientTest extends FunSuite {
     Await.result(client.delete("foo"))
 
     assert(Await.result(client.get("foo")) === None)
-    Await.result(client.set("foo", "bar"))
+    Await.result(client.set("foo", Buf.Utf8("bar")))
     val rep = Await.result(client.get("foo")) map {
-      _.toString(Charsets.Utf8)
+      case Buf.Utf8(s) => s
     }
     assert(rep === Some("bar"))
   }
@@ -44,9 +43,9 @@ class ClientTest extends FunSuite {
     Await.result(client.delete("foo"))
 
     assert(Await.result(client.get("foo")) === None)
-    Await.result(client.set("foo", "bar"))
+    Await.result(client.set("foo", Buf.Utf8("bar")))
     val rep = Await.result(client.get("foo")) map {
-      _.toString(Charsets.Utf8)
+      case Buf.Utf8(s) => s
     }
     assert(rep === Some("bar"))
   }

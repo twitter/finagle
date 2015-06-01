@@ -107,12 +107,11 @@ private[serverset2] object Stabilizer {
    * preferring weights from `next` over `prev`.
    */
   private def merge(prev: Set[SocketAddress], next: Set[SocketAddress]): Set[SocketAddress] = {
-    val nextStripped = next map {
-      case WeightedSocketAddress(sa, w) => sa
-    }
+    val nextStripped = next.map(WeightedSocketAddress.extract(_)._1)
 
-    val legacy = prev filter {
-      case WeightedSocketAddress(sa, w) => !nextStripped.contains(sa)
+    val legacy = prev.filter { addr =>
+      val (sa, _) = WeightedSocketAddress.extract(addr)
+      !nextStripped.contains(sa)
     }
 
     legacy ++ next

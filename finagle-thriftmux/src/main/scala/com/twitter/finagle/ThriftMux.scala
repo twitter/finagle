@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.Stack.Param
 import com.twitter.finagle.client.{StackClient, StackBasedClient}
 import com.twitter.finagle.netty3.Netty3Listener
-import com.twitter.finagle.param.{Label, Stats}
+import com.twitter.finagle.param.{Label, Stats, ProtocolLibrary}
 import com.twitter.finagle.server.{StackBasedServer, Listener, StackServer, StdStackServer}
 import com.twitter.finagle.stats.{ClientStatsReceiver, ServerStatsReceiver}
 import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest, UncaughtAppExceptionFilter}
@@ -94,7 +94,8 @@ object ThriftMux
   }
 
   case class Client(
-      muxer: StackClient[mux.Request, mux.Response] = Mux.client.copy(stack = BaseClientStack))
+      muxer: StackClient[mux.Request, mux.Response] = Mux.client.copy(stack = BaseClientStack)
+        .configured(ProtocolLibrary("thriftmux")))
     extends StackBasedClient[ThriftClientRequest, Array[Byte]]
     with Stack.Parameterized[Client]
     with Stack.Transformable[Client]
@@ -210,7 +211,7 @@ object ThriftMux
 
   case class ServerMuxer(
     stack: Stack[ServiceFactory[mux.Request, mux.Response]] = BaseServerStack,
-    params: Stack.Params = Mux.server.params
+    params: Stack.Params = Mux.server.params + ProtocolLibrary("thriftmux")
   ) extends StdStackServer[mux.Request, mux.Response, ServerMuxer] {
     protected type In = CB
     protected type Out = CB

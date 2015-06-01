@@ -28,7 +28,7 @@ object StreamServer {
       remBroker.recv { b => tee(receivers - b) },
       if (receivers.isEmpty) Offer.never else {
         messages.recv { m =>
-          Future.join(receivers map { _ ! m } toSeq) ensure tee(receivers)
+          Future.join(receivers.map { _ ! m }.toSeq) ensure tee(receivers)
         }
       }
     )

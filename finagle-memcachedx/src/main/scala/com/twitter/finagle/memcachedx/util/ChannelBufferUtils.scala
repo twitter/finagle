@@ -4,6 +4,7 @@ import collection.mutable.ArrayBuffer
 import com.google.common.base.Strings
 import com.twitter.io.Charsets
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers, ChannelBufferIndexFinder}
+import scala.language.implicitConversions
 
 private[finagle] object ChannelBufferUtils {
   private val FIND_SPACE = new ChannelBufferIndexFinder() {

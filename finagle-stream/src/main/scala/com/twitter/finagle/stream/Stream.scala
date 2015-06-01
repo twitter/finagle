@@ -90,4 +90,6 @@ class Stream extends CodecFactory[HttpRequest, StreamResponse] {
 
     }
   }
+
+  override val protocolLibraryName: String = "http-stream"
 }

@@ -131,7 +131,7 @@ class EndToEndTest extends FunSuite
       Annotation.ClientRecv()
     ))
   }
-  
+
   test("requeue nacks") {
     val n = new AtomicInteger(0)
 
@@ -146,7 +146,7 @@ class EndToEndTest extends FunSuite
 
     val a, b = Mux.serve("localhost:*", service)
     val client = Mux.newService(Name.bound(a.boundAddress, b.boundAddress), "client")
-    
+
     assert(n.get == 0)
     assert(Await.result(client(Request.empty), 30.seconds).body.isEmpty)
     assert(n.get == 2)
@@ -157,20 +157,20 @@ class EndToEndTest extends FunSuite
     val factory = new ServiceFactory[Request, Response] {
       def apply(conn: ClientConnection): Future[Service[Request, Response]] =
         Future.exception(new Exception)
-        
+
       def close(deadline: Time): Future[Unit] = Future.Done
     }
-    
+
     val server = Mux.serve("localhost:*", factory)
     val client = Mux.newService(server)
-    
+
     // This will try until it exhausts its budget. That's o.k.
     val failure = intercept[Failure] { Await.result(client(Request.empty)) }
 
     // Failure.Restartable is stripped.
     assert(!failure.isFlagged(Failure.Restartable))
   }
-  
+
   private[this] def nextPort(): Int = {
     val s = new Socket()
     s.setReuseAddress(true)
@@ -184,7 +184,7 @@ class EndToEndTest extends FunSuite
 
   // This is marked FLAKY because it allocates a nonephemeral port;
   // this is unfortunately required for this type of testing (since we're
-  // interested in completely shutting down, and then restarting a 
+  // interested in completely shutting down, and then restarting a
   // server on the same port).
   //
   // Note also that, in the case of a single endpoint, the loadbalancer's
@@ -193,7 +193,7 @@ class EndToEndTest extends FunSuite
   // reverts its down list, and attempts to establish a session regardless
   // of reported status.
   //
-  // The following script patches up the load balancer to avoid this 
+  // The following script patches up the load balancer to avoid this
   // behavior.
   /*
 ed - ../../../../../../../../finagle-core/src/main/scala/com/twitter/finagle/loadbalancer/HeapBalancer.scala <<EOF
@@ -203,7 +203,7 @@ ed - ../../../../../../../../finagle-core/src/main/scala/com/twitter/finagle/loa
 .
 216c
     if (n.load >= 0) null
-    else if (n.factory.status == Status.Open) n 
+    else if (n.factory.status == Status.Open) n
     else {
 .
 201c
@@ -228,13 +228,13 @@ EOF
     val port = nextPort()
     val client = Mux.newService(s"localhost:$port")
     var server = Mux.serve(s"localhost:$port", echo)
-    
+
     // Activate the client; this establishes a session.
     Await.result(client(req))
-    
+
     // This will stop listening, drain, and then close the session.
     Await.result(server.close())
-    
+
     // Thus the next request should fail at session establishment.
     intercept[Throwable/*ChannelWriteException*/] { Await.result(client(req)) }
 
@@ -281,13 +281,13 @@ EOF
       }
 
       val Some((_, leaseDuration)) = sr.gauges.find {
-        case (_ +: Seq("current_lease_ms"), value) => true
+        case (_ +: Seq("mux", "current_lease_ms"), value) => true
         case _ => false
       }
 
       val leaseCtr: () => Int = { () =>
         val Some((_, ctr)) = sr.counters.find {
-          case (_ +: Seq("leased"), value) => true
+          case (_ +: Seq("mux", "leased"), value) => true
           case _ => false
         }
         ctr

@@ -103,9 +103,12 @@ class CookieMapTest extends FunSuite {
     val request = Request()
     request.headers.add("Cookie", "name=value")
     request.headers.add("Cookie", "name=value2") // same name - gets removed too
+    request.headers.add("Cookie", "othername=othervalue")
+    
     request.cookies -= "name"
 
-    assert(request.cookies.size === 0)
+    assert(request.cookies.size === 1)
+    assert(request.headers.get("Cookie") === "othername=othervalue")
   }
 
   test("invalid cookies are ignored") {

@@ -14,6 +14,7 @@ import org.apache.thrift.protocol.{TProtocolFactory, TCompactProtocol}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FunSuite}
+import scala.reflect.ClassTag
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
@@ -28,7 +29,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   }
 
   type Iface = B.ServiceIface
-  def ifaceManifest = implicitly[ClassManifest[B.ServiceIface]]
+  def ifaceManifest = implicitly[ClassTag[B.ServiceIface]]
 
   class BServiceImpl extends B.ServiceIface {
     def add(a: Int, b: Int) = Future.exception(new AnException)

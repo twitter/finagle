@@ -1,5 +1,6 @@
 package com.twitter.finagle.ssl
 
+import com.google.common.io.{Files => GuavaFiles, Resources}
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.http.Http
@@ -7,6 +8,7 @@ import com.twitter.io.TempFile
 import com.twitter.util.{Await, Future, NonFatal}
 import java.io.File
 import java.net.{InetAddress, InetSocketAddress}
+import java.nio.file.{Path, Files}
 import org.jboss.netty.buffer._
 import org.jboss.netty.handler.codec.http._
 import org.junit.runner.RunWith
@@ -38,7 +40,7 @@ class SslTest extends FunSuite {
         certChainInput.openSSLRootConfPath
       ), // command
       null, // null == inherit the environment of the current process
-      certChainInput.setupCADir // working dir
+      certChainInput.setupCADirPath.toFile // working dir
     )
     process.waitFor()
     assert(process.exitValue === 0)
@@ -58,7 +60,7 @@ class SslTest extends FunSuite {
     "test.example.com.cert",
     "test.example.com.key",
     "cacert.pem",
-    certChainInput.setupCADirPath
+    certChainInput.setupCADirPath.toString
   )
 
   // now let's run some tests
@@ -229,20 +231,23 @@ class CertChainInput(
   openSSLIntConfFilename: String,
   openSSLRootConfFilename: String
 ) {
-  val root = File.separator + setupCADirName
-  def fileInRoot(file: String) = root + File.separator + file
-  val setupCADir                  =
-    TempFile.fromResourcePath(getClass, root).getParentFile()
-  val setupCAFile                 =
-    TempFile.fromResourcePath(getClass, fileInRoot(setupCAFilename))
-  val makeCertFile                =
-    TempFile.fromResourcePath(getClass, fileInRoot(makeCertFilename))
-  val openSSLIntConfFile          =
-    TempFile.fromResourcePath(getClass, fileInRoot(openSSLIntConfFilename))
-  val openSSLRootConfFile         =
-    TempFile.fromResourcePath(getClass, fileInRoot(openSSLRootConfFilename))
+  val setupCADirPath: Path = Files.createTempDirectory(setupCADirName)
+  def writeResourceToDir(klass: Class[_], name: String, directory: Path): File = {
+    val fullName = File.separator + setupCADirName + File.separator + name
+    val url = Resources.getResource(klass, fullName)
+    val newFile = new File(setupCADirPath.toFile, name)
+    Resources.asByteSource(url).copyTo(GuavaFiles.asByteSink(newFile))
+    newFile
+  }
+  val setupCAFile =
+    writeResourceToDir(getClass, setupCAFilename, setupCADirPath)
+  val makeCertFile =
+    writeResourceToDir(getClass, makeCertFilename, setupCADirPath)
+  val openSSLIntConfFile =
+    writeResourceToDir(getClass, openSSLIntConfFilename, setupCADirPath)
+  val openSSLRootConfFile =
+    writeResourceToDir(getClass, openSSLRootConfFilename, setupCADirPath)
 
-  val setupCADirPath: String      = setupCADir.getAbsolutePath
   val setupCAPath: String         = setupCAFile.getAbsolutePath
   val makeCertPath: String        = makeCertFile.getAbsolutePath
   val openSSLIntConfPath: String  = openSSLIntConfFile.getAbsolutePath

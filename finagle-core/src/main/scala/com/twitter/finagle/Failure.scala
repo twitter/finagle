@@ -216,6 +216,21 @@ object Failure {
   def unapply(exc: Failure): Option[Option[Throwable]] = Some(exc.cause)
 
   /**
+   * Expose flags as strings, used for stats reporting
+   */
+  def flagsOf(exc: Throwable): Set[String] =
+    exc match {
+      case f: Failure =>
+        var flags: Set[String] = Set.empty
+        if (f.isFlagged(Interrupted)) flags += "interrupted"
+        if (f.isFlagged(Restartable)) flags += "restartable"
+        if (f.isFlagged(Wrapped))     flags += "wrapped"
+        if (f.isFlagged(Naming))      flags += "naming"
+        flags
+      case _ => Set.empty
+    }
+
+  /**
    * Adapt an exception. If the passed-in exception is already a failure,
    * this returns a chained failure with the assigned flags. If it is not, 
    * it returns a new failure with the given flags.

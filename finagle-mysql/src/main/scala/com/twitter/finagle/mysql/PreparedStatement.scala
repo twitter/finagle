@@ -12,7 +12,7 @@ trait PreparedStatement {
    * Executes the prepared statement with the
    * given `params`.
    */
-  def apply(params: Any*): Future[Result]
+  def apply(params: Parameter*): Future[Result]
 
   /**
    * Executes the prepared statement with the
@@ -20,8 +20,8 @@ trait PreparedStatement {
    * of the returned ResultSet. If no ResultSet
    * is returned, the function returns an empty Seq.
    */
-  def select[T](params: Any*)(f: Row => T): Future[Seq[T]] =
-    apply(params:_*) map {
+  def select[T](params: Parameter*)(f: Row => T): Future[Seq[T]] =
+    apply(params: _*) map {
       case rs: ResultSet => rs.rows.map(f)
       case _ => Nil
     }

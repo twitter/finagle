@@ -214,7 +214,10 @@ object Dtab {
    * defined for the entire request graph, so that a local dtab
    * defined here will apply to downstream services as well.
    */
-  def local: Dtab = l() getOrElse Dtab.empty
+  def local: Dtab = l() match {
+    case Some(dtab) => dtab
+    case None => Dtab.empty
+  }
   def local_=(dtab: Dtab) { l() = dtab }
 
   /**

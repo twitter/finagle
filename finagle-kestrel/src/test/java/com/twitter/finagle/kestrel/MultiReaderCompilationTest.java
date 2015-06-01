@@ -3,7 +3,6 @@ package com.twitter.finagle.kestrel;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -21,16 +20,14 @@ import com.twitter.util.Vars;
  * A compilation test for using MultiReader in Java.
  */
 public class MultiReaderCompilationTest {
-
   /**
-   * Tests whether the {@code MultiReader} is compilable or not.
+   * make a MultiReader ReadHandle
    */
   @Test
   public void make() {
     ArrayList<SocketAddress> clusterMembers = new ArrayList<SocketAddress>();
     clusterMembers.add(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0));
     Var<Addr> cluster = Vars.newVar(Addrs.newBoundAddr(clusterMembers));
-
     MultiReader.apply(cluster, "the-queue")
       .clientBuilder(
         ClientBuilder.get()

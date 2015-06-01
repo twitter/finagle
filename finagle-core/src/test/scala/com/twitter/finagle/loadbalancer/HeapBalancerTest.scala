@@ -46,9 +46,14 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
       private[this] val i = new AtomicInteger(0)
       override def nextInt(n: Int) = i.incrementAndGet() % n
     }
+
+    val exc = new NoBrokersAvailableException
+
     val b = new HeapBalancer[Unit, LoadedFactory](
       Activity(group.set map(Activity.Ok(_))),
-      statsReceiver, rng = nonRng)
+      statsReceiver,
+      exc,
+      nonRng)
     val newFactory = new LoadedFactory("new")
 
     def assertGauge(name: String, value: Int) =
@@ -57,10 +62,13 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
       assert(statsReceiver.counters(Seq(name)) === value.toFloat)
   }
 
-  test("balancer with empty cluster has Closed status"){
+  test("balancer with empty cluster has Closed status") {
     val emptyCluster = Group.empty[ServiceFactory[Unit, LoadedFactory]]
     val b = new HeapBalancer[Unit, LoadedFactory](
-      Activity(emptyCluster.set map(Activity.Ok(_)))
+      Activity(emptyCluster.set.map(Activity.Ok(_))),
+      NullStatsReceiver,
+      new NoBrokersAvailableException,
+      new Random
     )
     assert(b.status === Status.Closed)
   }
@@ -73,7 +81,10 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
       val cluster = Group.mutable[ServiceFactory[Unit, LoadedFactory]](node)
 
       val b = new HeapBalancer[Unit, LoadedFactory](
-        Activity(cluster.set map (Activity.Ok(_)))
+        Activity(cluster.set map (Activity.Ok(_))),
+        NullStatsReceiver,
+        new NoBrokersAvailableException,
+        new Random
       )
       assert(b.status === status)
     }
@@ -200,15 +211,14 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
   test("return NoBrokersAvailableException when empty") {
     val ctx = new Ctx
 
-    val b = new HeapBalancer[Unit, LoadedFactory](Activity.value(Set.empty))
-    intercept[NoBrokersAvailableException] { Await.result(b()) }
     val heapBalancerEmptyGroup = "HeapBalancerEmptyGroup"
-    val c = new HeapBalancer[Unit, LoadedFactory](
+    val b = new HeapBalancer[Unit, LoadedFactory](
       Activity.value(Set.empty),
       NullStatsReceiver,
-      new NoBrokersAvailableException(heapBalancerEmptyGroup)
+      new NoBrokersAvailableException(heapBalancerEmptyGroup),
+      new Random
     )
-    val exc = intercept[NoBrokersAvailableException] { Await.result(c()) }
+    val exc = intercept[NoBrokersAvailableException] { Await.result(b()) }
     assert(exc.getMessage.contains(heapBalancerEmptyGroup))
   }
 
@@ -314,7 +324,10 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
 
     val b = new HeapBalancer[Unit, LoadedFactory](
       Activity(group.set map(Activity.Ok(_))),
-      statsReceiver)
+      statsReceiver,
+      new NoBrokersAvailableException,
+      new Random
+    )
 
     b(); b(); b(); b()
 

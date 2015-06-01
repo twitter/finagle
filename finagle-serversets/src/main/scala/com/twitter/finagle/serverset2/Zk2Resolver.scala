@@ -77,14 +77,19 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
     value
   }
 
+  private[this] val serverSetOf =
+    Memoize[(ServiceDiscoverer, String), Var[Activity.State[Seq[(Entry, Double)]]]] {
+      case (discoverer, path) => discoverer(path).run
+    }
+
   private[this] val addrOf_ = Memoize[(ServiceDiscoverer, String, Option[String]), Var[Addr]] {
-    case (discoverer, path, endpoint) =>
+    case (discoverer, path, endpointOption) =>
       val scoped = {
         val sr =
           path.split("/").filter(_.nonEmpty).foldLeft(statsReceiver) {
             case (sr, ns) => sr.scope(ns)
           }
-        sr.scope(s"endpoint=${endpoint.getOrElse("default")}")
+        sr.scope(s"endpoint=${endpointOption.getOrElse("default")}")
       }
 
       @volatile var nlimbo = 0
@@ -98,21 +103,23 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
       // First, convert the Op-based serverset address to a
       // Var[Addr], filtering out only the endpoints we are
       // interested in.
-      val va: Var[Addr] = discoverer(path).run flatMap {
+      val va: Var[Addr] = serverSetOf(discoverer, path).flatMap {
         case Activity.Pending => Var.value(Addr.Pending)
         case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
         case Activity.Ok(eps) =>
-          val subset = eps collect {
-            case (Endpoint(`endpoint`, Some(HostPort(host, port)), _, Endpoint.Status.Alive, _), weight) =>
+          val endpoint = endpointOption.getOrElse(null)
+          val subseq = eps collect {
+            case (Endpoint(names, host, port, _, Endpoint.Status.Alive, _), weight)
+                if names.contains(endpoint) && host != null =>
               (host, port, weight)
           }
 
           if (chatty()) {
-            eprintf("Received new serverset vector: %s\n", eps mkString ",")
+            eprintf("Received new serverset vector: %s\n", subseq mkString ",")
           }
 
-          if (subset.isEmpty) Var.value(Addr.Neg)
-          else inetResolver.bindWeightedHostPortsToAddr(subset.toSeq)
+          if (subseq.isEmpty) Var.value(Addr.Neg)
+          else inetResolver.bindWeightedHostPortsToAddr(subseq)
       }
 
       // The stabilizer ensures that we qualify removals by putting
@@ -139,7 +146,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
         val reg = states.register(Witness { state: State =>
           if (chatty()) {
             eprintf("New state for %s!%s: %s\n",
-              path, endpoint getOrElse "default", state)
+              path, endpointOption getOrElse "default", state)
           }
 
           synchronized {

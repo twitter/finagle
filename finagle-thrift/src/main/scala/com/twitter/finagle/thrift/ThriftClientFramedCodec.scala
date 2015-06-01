@@ -74,6 +74,8 @@ class ThriftClientFramedCodec(
   override def prepareConnFactory(
     underlying: ServiceFactory[ThriftClientRequest, Array[Byte]]
   ) = preparer.prepare(underlying)
+
+  override val protocolLibraryName: String = "thrift"
 }
 
 

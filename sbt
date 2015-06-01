@@ -8,7 +8,7 @@ sbtrepo=http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch
 
 if [ ! -f $sbtjar ]; then
   echo "downloading $sbtjar" 1>&2
-  if ! curl --silent --fail --remote-name $sbtrepo/$sbtver/$sbtjar; then
+  if ! curl --location --silent --fail --remote-name $sbtrepo/$sbtver/$sbtjar; then
     exit 1
   fi
 fi

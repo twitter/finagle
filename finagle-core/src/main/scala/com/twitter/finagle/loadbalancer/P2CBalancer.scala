@@ -13,68 +13,6 @@ import java.util.logging.{Logger, Level}
 import scala.annotation.tailrec
 import scala.collection.immutable
 
-package exp {
-  object loadMetric extends GlobalFlag("leastReq", "Metric used to measure load across endpoints (leastReq | ewma)")
-  object decayTime extends GlobalFlag(10.seconds, "The window of latency observations")
-
-  class P2CBalancerPeakEwmaFactory(decayTime: Duration = exp.decayTime()) extends WeightedLoadBalancerFactory {
-    private val log = Logger.getLogger(getClass.getName)
-
-    def newLoadBalancer[Req, Rep](
-      factories: Var[Set[(ServiceFactory[Req, Rep], Double)]],
-      statsReceiver: StatsReceiver,
-      emptyException: NoBrokersAvailableException
-    ): ServiceFactory[Req, Rep] =
-      newWeightedLoadBalancer(
-        Activity(factories map(Activity.Ok(_))),
-        statsReceiver, emptyException)
-
-    def newWeightedLoadBalancer[Req, Rep](
-      activity: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
-      statsReceiver: StatsReceiver,
-      emptyException: NoBrokersAvailableException
-    ): ServiceFactory[Req, Rep] = {
-        log.info("Using load metric ewma")
-        new P2CBalancerPeakEwma[Req, Rep](activity,
-          decayTime = decayTime,
-          statsReceiver = statsReceiver,
-          emptyException = emptyException)
-      }
-  }
-}
-
-object P2CBalancerFactory extends WeightedLoadBalancerFactory {
-  private val log = Logger.getLogger("com.twitter.finagle.loadbalancer.P2CBalancer")
-
-  def newLoadBalancer[Req, Rep](
-    factories: Var[Set[(ServiceFactory[Req, Rep], Double)]],
-    statsReceiver: StatsReceiver,
-    emptyException: NoBrokersAvailableException
-  ): ServiceFactory[Req, Rep] =
-    newWeightedLoadBalancer(
-      Activity(factories map(Activity.Ok(_))),
-      statsReceiver, emptyException)
-
-  def newWeightedLoadBalancer[Req, Rep](
-    activity: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
-    statsReceiver: StatsReceiver,
-    emptyException: NoBrokersAvailableException
-  ): ServiceFactory[Req, Rep] =
-    exp.loadMetric() match {
-      case "ewma" =>
-        log.info("Using load metric ewma")
-        new P2CBalancerPeakEwma[Req, Rep](activity,
-          decayTime = exp.decayTime(),
-          statsReceiver = statsReceiver,
-          emptyException = emptyException)
-      case _ =>
-        log.info("Using load metric leastReq")
-        new P2CBalancer[Req, Rep](activity,
-          statsReceiver = statsReceiver,
-          emptyException = emptyException)
-    }
-}
-
 /**
  * An O(1), concurrent, weighted least-loaded fair load balancer.
  * This uses the ideas behind "power of 2 choices" [1] combined with
@@ -99,10 +37,10 @@ object P2CBalancerFactory extends WeightedLoadBalancerFactory {
  */
 private class P2CBalancer[Req, Rep](
     protected val activity: Activity[Traversable[(ServiceFactory[Req, Rep], Double)]],
-    protected val maxEffort: Int = 5,
-    protected val rng: Rng = Rng.threadLocal,
-    protected val statsReceiver: StatsReceiver = NullStatsReceiver,
-    protected val emptyException: NoBrokersAvailableException = new NoBrokersAvailableException)
+    protected val maxEffort: Int,
+    protected val rng: Rng,
+    protected val statsReceiver: StatsReceiver,
+    protected val emptyException: NoBrokersAvailableException)
   extends Balancer[Req, Rep]
   with LeastLoaded[Req, Rep]
   with P2C[Req, Rep]
@@ -138,10 +76,10 @@ private class P2CBalancer[Req, Rep](
 private class P2CBalancerPeakEwma[Req, Rep](
     protected val activity: Activity[Traversable[(ServiceFactory[Req, Rep], Double)]],
     protected val decayTime: Duration,
-    protected val maxEffort: Int = 5,
-    protected val rng: Rng = Rng.threadLocal,
-    protected val statsReceiver: StatsReceiver = NullStatsReceiver,
-    protected val emptyException: NoBrokersAvailableException = new NoBrokersAvailableException)
+    protected val maxEffort: Int,
+    protected val rng: Rng,
+    protected val statsReceiver: StatsReceiver,
+    protected val emptyException: NoBrokersAvailableException)
   extends Balancer[Req, Rep]
   with PeakEwma[Req, Rep]
   with P2C[Req, Rep]
@@ -153,7 +91,7 @@ private object PeakEwma {
 
 private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
   import PeakEwma.log
-  
+
   protected def rng: Rng
 
   protected def decayTime: Duration
@@ -170,7 +108,7 @@ private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
     // these are all guarded by synchronization on `this`
     private[this] var stamp: Long = epoch   // last timestamp in nanos we observed an rtt
     private[this] var pending: Int = 0      // instantaneous rate
-    private[this] var cost: Double = 0D     // ewma of rtt, sensitive to peaks.
+    private[this] var cost: Double = 0.0    // ewma of rtt, sensitive to peaks.
 
     def rate(): Int = synchronized { pending }
 
@@ -247,7 +185,7 @@ private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
     Node(factory, weight, new Metric(statsReceiver, factory.toString), rng.nextInt())
 
   protected def failingNode(cause: Throwable) = Node(
-    new FailingFactory(cause), 0D, 
+    new FailingFactory(cause), 0.0,
     new Metric(NullStatsReceiver, "failing"),
     0)
 }

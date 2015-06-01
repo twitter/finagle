@@ -3,7 +3,7 @@ package com.twitter.finagle.service
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.{
-  CategorizingExceptionStatsHandler, ExceptionStatsHandler, StatsReceiver}
+  MultiCategorizingExceptionStatsHandler, ExceptionStatsHandler, StatsReceiver}
 import com.twitter.util.{Future, Stopwatch, Throw, Return, Time, Duration}
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -26,8 +26,9 @@ object StatsFilter {
     }
 
   /** Basic categorizer with all exceptions under 'failures'. */
-  val DefaultExceptions = new CategorizingExceptionStatsHandler(
-    sourceFunction = SourcedException.unapply(_))
+  val DefaultExceptions = new MultiCategorizingExceptionStatsHandler(
+    mkFlags = Failure.flagsOf,
+    mkSource = SourcedException.unapply)
 }
 
 /**

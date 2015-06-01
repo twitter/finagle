@@ -2,8 +2,8 @@ package com.twitter.finagle.kestrel.protocol
 
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.ChannelBuffer
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.memcached.protocol.text.{Encoder, server, client}
+import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
+import com.twitter.finagle.memcachedx.protocol.text.{Encoder, server, client}
 import server.{Decoder => ServerDecoder}
 import client.{Decoder => ClientDecoder}
 import com.twitter.finagle.{ServiceFactory, Codec, CodecFactory}
@@ -55,6 +55,8 @@ class Kestrel(failFast: Boolean) extends CodecFactory[Command, Response] {
       override def failFastOk = failFast
     }
   }
+
+  override val protocolLibraryName: String = "kestrel"
 }
 
 /**
