@@ -140,11 +140,16 @@ private class ServiceFactoryCache[Key, Req, Rep](
       writeLock.unlock()
     }
 
-    svc onSuccess { _ =>
-      val d = watch()
+    Trace.record(s"Interpreter cache miss with key $key")
+
+    svc.respond {
+      case Return(_) =>
+        val d = watch()
         // generalize message
-      Trace.record("Interpreter cache miss with key "+key+": "+d, d)
-      misstime.add(d.inMilliseconds)
+        Trace.record(s"Interpreter resolved: $d", d)
+        misstime.add(d.inMilliseconds)
+      case Throw(error) =>
+        Trace.record(s"Interpreter failed to resolve (${error.getClass().getName()}: ${error.getMessage()}). Aborting request.")
     }
   }
 
@@ -176,7 +181,7 @@ private class ServiceFactoryCache[Key, Req, Rep](
     } finally {
       readLock.unlock()
     }
-    
+
     // This is somewhat dubious, as the status is outdated
     // pretty much right after we query it.
     val factory = newFactory(key)
