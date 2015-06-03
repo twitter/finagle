@@ -35,6 +35,7 @@ Breaking API Changes
 
 New Features
 ~~~~~~~~~~~~
+
   * finagle-httpx: Support nacks between Finagle Http clients and servers. When a server fails 
     with retryable exceptions (exceptions wrapped by `Failure.rejected`), it sends back a "Nack" 
     response, i.e. 503 Response code with a new "finagle-http-nack" header. This allows clients 

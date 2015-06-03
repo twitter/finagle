@@ -1,18 +1,19 @@
 package com.twitter.finagle.httpx
 
 import com.twitter.conversions.time._
+import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.param.Stats
+import com.twitter.finagle.service.Requeues
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
-import com.twitter.finagle.{
-  CancelledRequestException, ChannelClosedException, Dtab, Service, ServiceProxy}
 import com.twitter.io.{Buf, Reader, Writer}
-import com.twitter.util.{
-  Await, Closable, Future, Promise, Time, JavaTimer, Return, Throw}
-import java.io.{StringWriter, PrintWriter}
+import com.twitter.util.{Await, Closable, Future, JavaTimer, Promise, Return, Throw, Time}
+import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite with BeforeAndAfter {
@@ -465,6 +466,58 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
         .hostConnectionLimit(1)
         .name("client")
         .build()
+
+      new ServiceProxy(client) {
+        override def close(deadline: Time) =
+          Closable.all(client, server).close(deadline)
+      }
+  }
+
+  def status(name: String)(connect: (HttpService, StatsReceiver, String) => (HttpService)): Unit = {
+    test(name + ": Status.busy propagates along the Stack") {
+      val st = new InMemoryStatsReceiver
+      val clientName = "httpx"
+      val failService = new HttpService {
+        def apply(req: Request): Future[Response] =
+          Future.exception(Failure.rejected("unhappy"))
+      }
+
+      val client = connect(failService, st, clientName)
+      intercept[Exception](Await.result(client(Request())))
+
+      assert(st.counters(Seq(clientName, "failure_accrual", "removals")) == 1)
+      assert(st.counters(Seq(clientName, "requeue", "requeues")) == Requeues.Cost - 1)
+      assert(st.counters(Seq(clientName, "failures", "restartable")) == Requeues.Cost)
+      client.close()
+    }
+  }
+
+  status("ClientBuilder") {
+    (service, st, name) =>
+      val server = ServerBuilder()
+        .codec(Http())
+        .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
+        .name("server")
+        .build(service)
+
+      val client = ClientBuilder()
+        .codec(Http())
+        .hosts(Seq(server.boundAddress))
+        .hostConnectionLimit(1)
+        .name(name)
+        .reportTo(st)
+        .build()
+
+      new ServiceProxy(client) {
+        override def close(deadline: Time) =
+          Closable.all(client, server).close(deadline)
+      }
+  }
+
+  status("Client/Server") {
+    (service, st, name) =>
+      val server = Httpx.serve(new InetSocketAddress(0), service)
+      val client = Httpx.client.configured(Stats(st)).newService(Name.bound(server.boundAddress), name)
 
       new ServiceProxy(client) {
         override def close(deadline: Time) =
